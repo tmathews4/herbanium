@@ -138,6 +138,26 @@ This posture also excludes certain features: no dose calculators, no
 "treat X condition" flows, no symptom-input recommendation. Those
 would imply clinical authority the app doesn't have.
 
+### The blend-level temp/time slider is where the algorithm shows its value
+Single-ingredient extraction exploration (ExtractionExplorer) is
+educational — it teaches users how a plant responds to brewing
+conditions. Blend-level exploration (BlendExtractionExplorer) is the
+product — it's where users see that brewing choices involve real
+trade-offs between ingredients, and where algorithmic recommendations
+have something to actually recommend.
+
+This UI slot is the permanent home of the blending algorithm. Today:
+grams-weighted linear average of constituent extraction profiles, via
+resolveBlendAtBrew() in src/algo/compose.js. Tomorrow: a proper
+confidence-tier-aware algorithm with synergy bonuses and conflict
+penalties. Same interface, same call site, increasingly smart backend.
+The sliders never change; the thing computing behind them does.
+
+Per-ingredient range indicators (sage dot = in range, terra dot =
+outside) make the trade-offs legible: when you push a blend outside
+sencha's preferred temp to accommodate cinnamon, sencha's dot goes
+terra and a warning appears. The algorithm shows its work.
+
 ---
 
 ## Pending Work
@@ -410,13 +430,16 @@ mistake, but worth remembering that the "fast path" has a specific failure
 mode when changes can fail at build time.
 
 **Built extraction profile UI BEFORE collecting research data.** Mock data
-for one ingredient (chamomile) powers a temp/time slider UI on IngredientDetail
-→ Brewing tab. Purpose: validate the interaction and discover what the data
-model actually needs to carry before committing to a full research pass.
-Prevents research-phase from collecting the wrong shape of information.
-Worked as intended — exposed that flavor tag interpolation should probably
-blend (not union) and that time/temp have real interaction effects that
-linear interpolation may miss.
+for all 30 ingredients powers a temp/time slider UI on IngredientDetail
+→ Brewing tab. Purpose: validate the interaction and discover what the
+data model actually needs to carry before committing to a full research
+pass. Prevents research-phase from collecting the wrong shape of
+information. Worked as intended — exposed that flavor tag interpolation
+should probably blend (not union) and that time/temp have real interaction
+effects that linear interpolation may miss. All 30 ingredients now have
+3-point mock profiles so the UI is consistently populated for anyone
+exploring the app, but these values are best-guess approximations and
+WILL need verification/replacement during the real research phase.
 
 **Production-as-test-environment workflow.** No local dev server
 testing during current phase; deploy to Vercel, test on live site,
