@@ -2383,28 +2383,22 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
   const ingsForProfile = reverseIngs.map(id => ({ id, g: 1.0 }));
   const profile = computeBrewProfile(ingsForProfile);
 
-  // For the picker: would adding this ingredient disagree with the current pot's
-  // brewing window? Used to flag cautionary picks the same way flavor conflicts
-  // are flagged on the flavor chip row. Only meaningful once the pot has at
-  // least one ingredient to disagree with.
+  // For the picker: would adding this ingredient conflict with ANY ingredient
+  // already in the pot? The rule: flag the candidate if there exists at least
+  // one pot member whose temp range has zero overlap with the candidate's.
+  // This is stricter as the pot grows — more pairs to check, more chances
+  // of a conflict — which matches user intuition ("more stuff in = more risk").
   const tempConflictsWithPot = (candidateId) => {
     if (reverseIngs.length === 0) return false;
     const candidate = INGREDIENTS[candidateId];
     if (!candidate) return false;
     const [cLo, cHi] = candidate.tempC;
-    // Current pot's effective range: the intersection of all existing ranges.
-    const potLo = Math.max(...reverseIngs.map(id => INGREDIENTS[id].tempC[0]));
-    const potHi = Math.min(...reverseIngs.map(id => INGREDIENTS[id].tempC[1]));
-    // If the pot is already in compromise (potLo > potHi), any add is noisy;
-    // compare against the loosest extremes instead.
-    if (potLo > potHi) {
-      const allLo = Math.min(...reverseIngs.map(id => INGREDIENTS[id].tempC[0]));
-      const allHi = Math.max(...reverseIngs.map(id => INGREDIENTS[id].tempC[1]));
-      // If the candidate sits entirely outside the existing spread, flag it.
-      return cHi < allLo || cLo > allHi;
-    }
-    // Pot is compatible. Flag candidate if it has no overlap with the pot's window.
-    return cHi < potLo || cLo > potHi;
+    return reverseIngs.some(id => {
+      const [pLo, pHi] = INGREDIENTS[id].tempC;
+      // Ranges [cLo,cHi] and [pLo,pHi] overlap iff max(cLo,pLo) <= min(cHi,pHi).
+      // So they fail to overlap when max(cLo,pLo) > min(cHi,pHi).
+      return Math.max(cLo, pLo) > Math.min(cHi, pHi);
+    });
   };
 
   return (
@@ -2653,11 +2647,19 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
+const SteepScreen = ({ blend, intent, setIntent, targetMoods, sessions, onDone, onCancel, pantryIds, togglePantry }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
+  const [notesOpen, setNotesOpen] = useState(false);
+
+  // Past brews of this blend — only meaningful if the blend has an id (saved
+  // or previously-logged). Freshly-composed blends won't have prior sessions.
+  const pastSessions = React.useMemo(() => {
+    if (!sessions || !blend.id) return [];
+    return sessions.filter(s => s.who === "you" && s.blendId === blend.id);
+  }, [sessions, blend.id]);
 
   // Build the "while you wait" pool once per brew. Memoized to avoid
   // rebuilding (and re-shuffling) on every render.
@@ -2735,7 +2737,7 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
   }, [waitCards.length, lastAdvance]);
 
   const pct = 1 - remaining / total;
-  const R = 92;
+  const R = 74;
   const C = 2 * Math.PI * R;
 
   // brewing landmarks
@@ -2759,18 +2761,23 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
-        <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-          Steeping
-        </div>
-        <button style={{
-          background: "transparent", border: "none", color: theme.ash,
-          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
-        }}>notes</button>
+        <button
+          onClick={() => pastSessions.length > 0 && setNotesOpen(true)}
+          disabled={pastSessions.length === 0}
+          style={{
+            background: "transparent", border: "none",
+            color: pastSessions.length === 0 ? theme.ruleSoft : theme.ash,
+            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
+            cursor: pastSessions.length === 0 ? "not-allowed" : "pointer",
+          }}
+        >
+          notes{pastSessions.length > 0 && ` (${pastSessions.length})`}
+        </button>
       </div>
 
       {/* countdown ring */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, position: "relative" }}>
-        <svg width="240" height="240" viewBox="-120 -120 240 240" style={{
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 12, position: "relative" }}>
+        <svg width="200" height="200" viewBox="-100 -100 200 200" style={{
           animation: paused ? "none" : "breathe 4.5s ease-in-out infinite",
         }}>
           <circle cx="0" cy="0" r={R} stroke={theme.ruleSoft} strokeWidth="1.5" fill="none" />
@@ -2795,11 +2802,11 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
           position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", pointerEvents: "none",
         }}>
-          <div style={{ fontFamily: ff.serif, fontSize: 11, fontStyle: "italic", color: theme.ash }}>remaining</div>
-          <div style={{ fontFamily: ff.serif, fontSize: 48, fontWeight: 400, color: theme.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
+          <div style={{ fontFamily: ff.serif, fontSize: 10.5, fontStyle: "italic", color: theme.ash }}>remaining</div>
+          <div style={{ fontFamily: ff.serif, fontSize: 36, fontWeight: 400, color: theme.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
             {mmss(remaining)}
           </div>
-          <div style={{ marginTop: 4, fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+          <div style={{ marginTop: 3, fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
             of {mmss(total)}
           </div>
         </div>
@@ -2863,9 +2870,11 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
       <div
         onClick={advanceWaitCard}
         style={{
-          marginTop: 18, padding: 14, border: `1px dashed ${theme.rule}`, borderRadius: 10,
-          background: "rgba(255,255,255,0.35)",
-          minHeight: 90,
+          marginTop: 18, padding: "16px 18px",
+          border: `1px solid ${theme.rule}`, borderRadius: 12,
+          background: theme.cream,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+          minHeight: 100,
           cursor: waitCards.length > 1 ? "pointer" : "default",
           position: "relative",
         }}
@@ -2900,7 +2909,7 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
         </div>
         <div style={{
           fontFamily: ff.serif, fontStyle: waitCards[waitIdx]?.type === "poem" ? "normal" : "italic",
-          fontSize: 13.5, color: theme.inkSoft, marginTop: 6, lineHeight: 1.55,
+          fontSize: 14.5, color: theme.ink, marginTop: 8, lineHeight: 1.6,
           opacity: waitFading ? 0 : 1,
           transition: "opacity 0.4s ease",
           whiteSpace: waitCards[waitIdx]?.type === "poem" ? "pre-line" : "normal",
@@ -2967,6 +2976,92 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
           inPantry={pantryIds?.has(activeIngredient)}
           onTogglePantry={() => togglePantry && togglePantry(activeIngredient)}
         />
+      )}
+
+      {/* Notes panel — past brews of this blend, viewable without leaving the steep */}
+      {notesOpen && (
+        <div
+          onClick={() => setNotesOpen(false)}
+          style={{
+            position: "absolute", inset: 0, zIndex: 40,
+            background: "rgba(42, 36, 28, 0.35)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%", maxHeight: "75%",
+              background: theme.ivory,
+              borderRadius: "16px 16px 0 0",
+              padding: "16px 20px 22px",
+              display: "flex", flexDirection: "column",
+              boxShadow: "0 -4px 16px rgba(0,0,0,0.12)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div>
+                <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+                  Past brews
+                </div>
+                <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ink, marginTop: 2 }}>
+                  {blend.name}
+                </div>
+              </div>
+              <button
+                onClick={() => setNotesOpen(false)}
+                style={{
+                  background: "transparent", border: "none",
+                  fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+                  textTransform: "uppercase", color: theme.ash, cursor: "pointer",
+                }}
+              >close</button>
+            </div>
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {pastSessions.length === 0 ? (
+                <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, padding: "20px 0", textAlign: "center" }}>
+                  No past brews logged yet.
+                </div>
+              ) : (
+                pastSessions.map((s, i) => (
+                  <div key={s.id} style={{
+                    padding: "12px 0",
+                    borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                      <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft }}>
+                        {s.intent ? <em>{s.intent}</em> : <span style={{ color: theme.ash }}>—</span>}
+                        {" → "}
+                        <em style={{ color: theme.terra }}>{s.actual}</em>
+                      </div>
+                      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash }}>
+                        {s.ago}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                      <div style={{ display: "flex", gap: 2 }}>
+                        {[1,2,3,4,5].map(n => (
+                          <span key={n} style={{
+                            width: 5, height: 5, borderRadius: "50%",
+                            background: n <= (s.taste || 0) ? theme.terra : theme.ruleSoft,
+                          }} />
+                        ))}
+                      </div>
+                      {s.note && (
+                        <div style={{
+                          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.inkSoft,
+                          textAlign: "right", marginLeft: 12, flex: 1,
+                        }}>
+                          {s.note}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -4749,6 +4844,7 @@ export default function App() {
           intent={session.intent}
           setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
           targetMoods={session.targetMoods}
+          sessions={sessions}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
           onDone={() => setOverlay("log")}
