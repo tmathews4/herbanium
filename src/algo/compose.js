@@ -319,3 +319,111 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
 
   return candidates.slice(0, 3);
 }
+
+/* ──────────────────────────────────────────────────────────────
+   resolveBlendAtBrew — live blend profile at given brew conditions
+
+   Given a blend's ingredients and a specific (tempC, timeS) the user
+   has dialed in via sliders, compute the combined effect/flavor
+   profile of the blend AT THOSE CONDITIONS.
+
+   For each ingredient:
+     1. Look up its extraction profile at the given temp/time
+        (via resolveExtractionProfile from data/extractionProfiles).
+        If no mock profile exists, fall back to the ingredient's
+        flat effects list.
+     2. Check whether the ingredient is "in its range" at this temp
+        (flag for per-ingredient indicator in the UI).
+
+   Combine across ingredients:
+     - Effects: grams-weighted average. Each ingredient contributes
+       its effects vector weighted by its share of total grams. Bitterness
+       is summed (not averaged) since multiple astringent ingredients
+       compound their bitterness in the cup.
+     - Flavors: union across all ingredients (with gram-weighted
+       prominence left to v2).
+     - Compatibility: list of ingredients outside their preferred
+       temp range at this setting. Empty list = fully compatible.
+
+   This function is the hot path of the blend explorer UI — called
+   on every slider change, needs to stay fast. It's also the slot
+   where the eventual real algorithm lives: today it's linear
+   weighted-averaging, later it may incorporate confidence tiers,
+   synergy bonuses, conflict penalties. Same interface, same call
+   site; internals evolve.
+   ────────────────────────────────────────────────────────────── */
+
+import { resolveExtractionProfile } from "../data/extractionProfiles";
+
+export function resolveBlendAtBrew(ingredients, tempC, timeS) {
+  if (!ingredients || !ingredients.length) {
+    return {
+      effects: [],
+      flavors: [],
+      outsiders: [],
+      character: "",
+    };
+  }
+
+  const totalG = ingredients.reduce((s, { g }) => s + g, 0);
+
+  // Per-ingredient contributions
+  const contributions = ingredients.map(({ id, g }) => {
+    const meta = INGREDIENTS[id];
+    const weight = g / totalG;
+
+    // Get ingredient's profile at the given brew conditions.
+    // Falls back to the ingredient's flat flavors/effects if no
+    // mock profile exists.
+    const profile = resolveExtractionProfile(id, tempC, timeS) || {
+      flavors: meta.flavors || [],
+      effects: meta.effects || [],
+      character: "",
+    };
+
+    // Range check: is this ingredient happy at this temp?
+    const [tMin, tMax] = meta.tempC;
+    const inRange = tempC >= tMin && tempC <= tMax;
+
+    return { id, name: meta.name, weight, profile, inRange };
+  });
+
+  // Combine effects via grams-weighted average (bitterness summed)
+  const effectTotals = {};
+  for (const { weight, profile } of contributions) {
+    for (const [tag, strength] of profile.effects) {
+      if (tag === "bitterness") {
+        // Bitterness compounds — sum weighted contributions, don't average
+        effectTotals[tag] = (effectTotals[tag] || 0) + strength * weight;
+      } else {
+        effectTotals[tag] = (effectTotals[tag] || 0) + strength * weight;
+      }
+    }
+  }
+
+  // Convert to array, round to 1 decimal, sort (bitterness last)
+  const effects = Object.entries(effectTotals)
+    .map(([tag, value]) => [tag, Math.round(Math.min(5, value) * 10) / 10])
+    .sort((a, b) => {
+      if (a[0] === "bitterness") return 1;
+      if (b[0] === "bitterness") return -1;
+      return b[1] - a[1];
+    });
+
+  // Union flavors across ingredients
+  const flavors = Array.from(new Set(
+    contributions.flatMap(c => c.profile.flavors)
+  ));
+
+  // Ingredients outside their preferred range
+  const outsiders = contributions
+    .filter(c => !c.inRange)
+    .map(c => c.name);
+
+  return {
+    effects,
+    flavors,
+    outsiders,
+    perIngredient: contributions, // for UI indicators
+  };
+}

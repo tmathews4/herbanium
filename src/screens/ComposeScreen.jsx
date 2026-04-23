@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   computeBrewProfile, resolveCandidates,
 } from "../algo/compose";
-import { EffectBar } from "../components/EffectBar";
+import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
   Flower, Kettle,
 } from "../components/icons";
@@ -19,7 +19,7 @@ import {
 import {
   FLAVORS, INGREDIENTS, MOODS,
 } from "../data/ingredients";
-import { iconBtn, mmss } from "../helpers/misc";;
+import { iconBtn } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -437,42 +437,13 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
 
             <div style={{ margin: "14px 0", height: 1, background: theme.ruleSoft }} />
 
-            <div style={{ display: "flex", gap: 16, fontFamily: ff.sans, fontSize: 11, color: theme.inkSoft }}>
-              <div>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>Water</div>
-                <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ink }}>{formatTemp(blend.tempC, unit)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>Steep</div>
-                <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ink }}>{mmss(blend.timeS)}</div>
-              </div>
-              <div style={{ flex: 1 }} />
-              <button style={{
-                fontFamily: ff.sans, fontSize: 11, color: theme.ash,
-                background: "transparent", border: `1px solid ${theme.rule}`,
-                borderRadius: 999, padding: "4px 10px", cursor: "pointer",
-              }}>why this temp?</button>
-            </div>
-
-            {blend.effects.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <SectionLabel>Predicted effect</SectionLabel>
-                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
-                  {blend.effects.map(([tag, n], i) => (
-                    <EffectBar
-                      key={tag}
-                      label={tag}
-                      value={n}
-                      color={
-                        tag === "bitterness" ? theme.terra
-                        : i === 0           ? theme.sage
-                        : i === 1           ? theme.ochre
-                        : theme.sky
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
+            {blend.ingredients.length > 0 && (
+              <BlendExtractionExplorer
+                ingredients={blend.ingredients}
+                defaultTempC={blend.tempC}
+                defaultTimeS={blend.timeS}
+                compact
+              />
             )}
           </div>
 
@@ -531,13 +502,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
       return true;
     })
     .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name));
-  // derive predicted effects as weighted sum
-  const totals = {};
-  reverseIngs.forEach(id => {
-    INGREDIENTS[id].effects.forEach(([tag, n]) => { totals[tag] = (totals[tag] || 0) + n; });
-  });
-  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]).slice(0,3);
-  const maxT = Math.max(1, ...sorted.map(x => x[1]));
 
   // Derive temperature and time from the actual ingredients rather than hardcoding.
   // Uses range intersection when possible, weighted-grams dominance when not.
@@ -750,47 +714,24 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
       </div>
 
       <div style={{ marginTop: 20 }}><SectionLabel n="ii">This will likely be…</SectionLabel></div>
-      <div style={{
-        marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
-        background: theme.cream,
-      }}>
-        {sorted.length === 0 ? (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, padding: "6px 0" }}>
-            Add a few ingredients to see a prediction.
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {sorted.map(([tag, n], i) => (
-              <EffectBar key={tag} label={tag} value={Math.round((n / maxT) * 5)} color={i === 0 ? theme.sage : i === 1 ? theme.ochre : theme.terra} />
-            ))}
-          </div>
-        )}
-        <Rule soft />
-        <div style={{ marginTop: 10, display: "flex", gap: 14, fontFamily: ff.sans, fontSize: 11, color: theme.inkSoft, alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>Water</div>
-            <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink }}>
-              {formatTemp(profile.tempC, unit)}
-              {profile.tempRange && profile.tempRange[0] !== profile.tempRange[1] && (
-                <span style={{ fontSize: 11, fontStyle: "italic", color: theme.ash, marginLeft: 4 }}>
-                  (range {formatTempRange(profile.tempRange[0], profile.tempRange[1], unit)})
-                </span>
-              )}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>Steep</div>
-            <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink }}>{mmss(profile.timeS)}</div>
-          </div>
-          <div style={{ flex: 1 }} />
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase",
-            color: profile.compatible ? theme.sageDeep : theme.ochre,
-          }}>
-            {reverseIngs.length <= 1 ? "" : profile.compatible ? "✓ compatible" : "⚠ compromise"}
-          </div>
+      {ingsForProfile.length === 0 ? (
+        <div style={{
+          marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
+          background: theme.cream,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash,
+        }}>
+          Add a few ingredients to see a prediction.
         </div>
-      </div>
+      ) : (
+        <div style={{ marginTop: 10 }}>
+          <BlendExtractionExplorer
+            ingredients={ingsForProfile}
+            defaultTempC={profile.tempC}
+            defaultTimeS={profile.timeS}
+            compact
+          />
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
         <button style={iconBtn()}>save as recipe</button>

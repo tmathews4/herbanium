@@ -3,20 +3,20 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
-import { EffectBar } from "../components/EffectBar";
+import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
   Flower, Kettle,
 } from "../components/icons";
 import {
-  SectionLabel, StatCard,
+  SectionLabel,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
-import { getBlend, mmss } from "../helpers/misc";
+import { getBlend } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
 import {
-  formatAmount, formatTemp, formatTempRange, useUnit,
+  formatAmount, formatTempRange, useUnit,
 } from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
@@ -162,47 +162,28 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           })}
         </div>
 
-        {/* Brewing */}
+        {/* Brewing — interactive explorer */}
         <div style={{ margin: "22px 0 10px" }}>
           <SectionLabel n="ii">Brewing</SectionLabel>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <StatCard label="Water" value={formatTemp(b.tempC, unit)} />
-          <StatCard label="Steep" value={mmss(b.timeS)} />
-          {b.ml && <StatCard label="Volume" value={`${b.ml} ml`} />}
-        </div>
-
-        {/* Effects */}
-        {b.effects && b.effects.length > 0 && (
-          <>
-            <div style={{ margin: "22px 0 10px" }}>
-              <SectionLabel n="iii">Predicted effect</SectionLabel>
-            </div>
-            <div style={{
-              padding: 14, borderRadius: 10,
-              background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-              display: "flex", flexDirection: "column", gap: 8,
-            }}>
-              {b.effects.map(([tag, n], i) => (
-                <EffectBar
-                  key={tag}
-                  label={tag}
-                  value={n}
-                  color={
-                    tag === "bitterness" ? theme.terra
-                    : i === 0           ? theme.sage
-                    : i === 1           ? theme.ochre
-                    : theme.sky
-                  }
-                />
-              ))}
-            </div>
-          </>
+        <BlendExtractionExplorer
+          ingredients={b.ingredients}
+          defaultTempC={b.tempC}
+          defaultTimeS={b.timeS}
+        />
+        {b.ml && (
+          <div style={{
+            marginTop: 8,
+            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: theme.ash, textAlign: "right",
+          }}>
+            Volume · {b.ml} ml
+          </div>
         )}
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>
-          <SectionLabel n="iv">Your log with this blend</SectionLabel>
+          <SectionLabel n="iii">Your log with this blend</SectionLabel>
         </div>
         {brewCount === 0 ? (
           <div style={{
