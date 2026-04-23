@@ -1230,10 +1230,7 @@ const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) =
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash }}>
-            {isEmpty ? "a fresh start" : "Tuesday evening"}
-          </div>
-          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05, marginTop: 2 }}>
+          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
             {isEmpty
               ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
               : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
