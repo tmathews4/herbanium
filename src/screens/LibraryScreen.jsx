@@ -88,7 +88,7 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
               />
             </div>
           )}
-          <LibraryList blends={savedBlends} compact go={go} startBrew={startBrew} />
+          <LibraryList blends={savedBlends} compact go={go} startBrew={startBrew} openBlend={openBlend} />
         </>
       )}
 
@@ -262,7 +262,7 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
    Screen: LIBRARY
    ────────────────────────────────────────────────────────────── */
 
-export const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => {
+export const LibraryList = ({ blends, compact, go, startBrew, openBlend, highlightId }) => {
   if (!blends || blends.length === 0) {
     return (
       <EmptyState
@@ -281,7 +281,7 @@ export const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => 
           <BlendListRow
             key={b.id} b={b} first={i === 0}
             highlighted={highlightId === b.id}
-            go={go} startBrew={startBrew}
+            go={go} startBrew={startBrew} openBlend={openBlend}
           />
         ))}
       </div>
@@ -289,10 +289,17 @@ export const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => 
   );
 };
 
-export const BlendListRow = ({ b, first, author, go, startBrew, highlighted }) => {
+export const BlendListRow = ({ b, first, author, go, startBrew, openBlend, highlighted }) => {
   const { unit, weightUnit } = useUnit();
+  // Primary tap → open the blend detail page (not auto-brew).
+  // Users can see recipe, ingredients, effects, then brew if they want.
+  // openBlend falls back to startBrew behavior if not provided (defensive).
+  const handleTap = () => {
+    if (openBlend) openBlend(b.id);
+    else startBrew(b, "", [b.mood]);
+  };
   return (
-  <button onClick={() => startBrew(b, "", [b.mood])} style={{
+  <button onClick={handleTap} style={{
     width: "100%", textAlign: "left",
     background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
     border: "none",

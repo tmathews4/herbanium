@@ -491,7 +491,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         <LibraryList
           blends={BLENDS.filter(b => savedBlendIds.has(b.id))}
           highlightId={composePreselect?.blendId}
-          compact go={go} startBrew={startBrew}
+          compact go={go} startBrew={startBrew} openBlend={openBlend}
         />
       )}
 
