@@ -1021,6 +1021,56 @@ const SectionLabel = ({ n, children, color = theme.ash }) => (
   </div>
 );
 
+// FitText — renders children in one line; if the line overflows its container,
+// the text scales down (via transform) until it fits. Keeps the font crisp
+// (integer sizes would cause visible steps) and never reflows the layout.
+// Pass `style` for the text's intrinsic styling (fontFamily, fontSize, etc.)
+// and `minScale` if you want a floor below which it should stop shrinking.
+const FitText = ({ children, style, minScale = 0.55 }) => {
+  const outerRef = React.useRef(null);
+  const innerRef = React.useRef(null);
+  const [scale, setScale] = React.useState(1);
+
+  React.useLayoutEffect(() => {
+    const fit = () => {
+      const outer = outerRef.current;
+      const inner = innerRef.current;
+      if (!outer || !inner) return;
+      // Reset to 1 before measuring so we read natural width.
+      inner.style.transform = "scale(1)";
+      const outerW = outer.clientWidth;
+      const innerW = inner.scrollWidth;
+      if (outerW === 0 || innerW === 0) return;
+      const next = innerW > outerW ? Math.max(minScale, outerW / innerW) : 1;
+      setScale(next);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (outerRef.current) ro.observe(outerRef.current);
+    return () => ro.disconnect();
+  }, [children, minScale]);
+
+  return (
+    <div
+      ref={outerRef}
+      style={{ width: "100%", overflow: "hidden" }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          ...style,
+          whiteSpace: "nowrap",
+          transform: `scale(${scale})`,
+          transformOrigin: "left center",
+          display: "inline-block",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const Chip = ({ active, onClick, children, tone = "default", caution = false }) => {
   const toneMap = {
     default:  { bg: active ? theme.ink : "transparent",     fg: active ? theme.cream : theme.inkSoft, bd: active ? theme.ink : theme.rule },
@@ -1136,17 +1186,17 @@ const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) =
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-        <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash }}>
             {isEmpty ? "a fresh start" : "Tuesday evening"}
           </div>
-          <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
+          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05, marginTop: 2 }}>
             {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>Juno</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>Juno</em>?</>
+              ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
             }
-          </h1>
+          </FitText>
         </div>
         <Flower size={24} c={theme.ochre} />
       </div>
@@ -4087,7 +4137,7 @@ const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSe
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
               {isEmptyUser ? "a new keeper" : "Keeper of the shelf"}
             </div>
-            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Juno M.</div>
+            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Tommy M.</div>
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
               {isEmptyUser
                 ? "private · journal is still empty"
@@ -4503,6 +4553,125 @@ export default function App() {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [tab]);
 
+  // Detect narrow (mobile-width) viewport so we can skip the desktop-preview
+  // masthead/demo-hints/footer and render just the app at viewport size.
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 500
+  );
+  React.useEffect(() => {
+    const onResize = () => setIsNarrow(window.innerWidth < 500);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Extract the actual app tree (scroll region + tab bar + overlays) so we can
+  // render it directly on mobile or wrap it in the desktop-preview chrome.
+  const appContent = (
+    <div style={{
+      width: "100%", height: "100%",
+      display: "flex", flexDirection: "column",
+      position: "relative",
+    }}>
+      <div ref={scrollRef} style={{
+        flex: "1 1 auto", minHeight: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
+        position: "relative",
+      }}>
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
+        {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
+      </div>
+
+      <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
+
+      {overlay === "steep" && session && (
+        <SteepScreen
+          blend={session.blend}
+          intent={session.intent}
+          targetMoods={session.targetMoods}
+          pantryIds={pantryIds}
+          togglePantry={togglePantry}
+          onDone={() => setOverlay("log")}
+          onCancel={() => { setOverlay(null); setSession(null); }}
+        />
+      )}
+      {overlay === "log" && session && (
+        <LogScreen
+          blend={session.blend}
+          intent={session.intent}
+          targetMoods={session.targetMoods}
+          onSubmit={(logData) => {
+            addSession({
+              blend: session.blend,
+              intent: session.intent,
+              targetMoods: session.targetMoods,
+              ...logData,
+            });
+            setOverlay(null);
+            setSession(null);
+            setTab("home");
+          }}
+          onCancel={() => setOverlay(null)}
+        />
+      )}
+      {overlay === "ingredient" && (
+        <IngredientDetail
+          id={ingredientId}
+          onClose={() => setOverlay(null)}
+          pantryIds={pantryIds}
+          togglePantry={togglePantry}
+          onOpenIngredient={(newId) => setIngredientId(newId)}
+        />
+      )}
+      {overlay === "blend" && blendOverlayId && (
+        <BlendDetail
+          blendId={blendOverlayId}
+          isFavorite={savedBlendIds.has(blendOverlayId)}
+          onToggleFavorite={() => toggleFavorite(blendOverlayId)}
+          sessions={sessions}
+          go={go}
+          onClose={() => setOverlay(null)}
+          onOpenIngredient={(ingId) => {
+            setIngredientId(ingId);
+            setOverlay("ingredient");
+          }}
+          onBrew={() => {
+            const b = getBlend(blendOverlayId);
+            if (!b) return;
+            startBrew(b, "curious", [b.mood]);
+          }}
+        />
+      )}
+    </div>
+  );
+
+  // Mobile: render app full-screen with no masthead/demo-hints/footer chrome.
+  if (isNarrow) {
+    return (
+      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+        <div style={{
+          position: "fixed", inset: 0,
+          background: theme.ivory,
+          display: "flex", flexDirection: "column",
+          height: "100dvh", width: "100vw",
+          overflow: "hidden",
+          fontFamily: ff.sans,
+        }}>
+          {/* Google Fonts */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+          />
+          {appContent}
+        </div>
+      </UnitContext.Provider>
+    );
+  }
+
   return (
     <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
     <div style={{
@@ -4539,7 +4708,7 @@ export default function App() {
           fontFamily: ff.serif, fontSize: 54, fontWeight: 300, color: theme.ink,
           letterSpacing: "-0.02em", margin: "6px 0 4px", lineHeight: 1,
         }}>
-          Herb<em style={{ fontStyle: "italic", color: theme.terra, fontWeight: 400 }}>anium</em>
+          Herbanium
         </h1>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 15, color: theme.inkSoft,
@@ -4567,85 +4736,7 @@ export default function App() {
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
         <PhoneFrame label="the app">
-          {/* Flex column: scroll area grows to fill, tab bar sits below it, overlays cover everything */}
-          <div style={{
-            width: "100%", height: "100%",
-            display: "flex", flexDirection: "column",
-            position: "relative",
-          }}>
-            <div ref={scrollRef} style={{
-              flex: "1 1 auto", minHeight: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              position: "relative",
-            }}>
-              {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
-              {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
-              {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
-              {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
-            </div>
-
-            <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
-
-            {overlay === "steep" && session && (
-              <SteepScreen
-                blend={session.blend}
-                intent={session.intent}
-                targetMoods={session.targetMoods}
-                pantryIds={pantryIds}
-                togglePantry={togglePantry}
-                onDone={() => setOverlay("log")}
-                onCancel={() => { setOverlay(null); setSession(null); }}
-              />
-            )}
-            {overlay === "log" && session && (
-              <LogScreen
-                blend={session.blend}
-                intent={session.intent}
-                targetMoods={session.targetMoods}
-                onSubmit={(logData) => {
-                  addSession({
-                    blend: session.blend,
-                    intent: session.intent,
-                    targetMoods: session.targetMoods,
-                    ...logData,
-                  });
-                  setOverlay(null);
-                  setSession(null);
-                  setTab("home");
-                }}
-                onCancel={() => setOverlay(null)}
-              />
-            )}
-            {overlay === "ingredient" && (
-              <IngredientDetail
-                id={ingredientId}
-                onClose={() => setOverlay(null)}
-                pantryIds={pantryIds}
-                togglePantry={togglePantry}
-                onOpenIngredient={(newId) => setIngredientId(newId)}
-              />
-            )}
-            {overlay === "blend" && blendOverlayId && (
-              <BlendDetail
-                blendId={blendOverlayId}
-                isFavorite={savedBlendIds.has(blendOverlayId)}
-                onToggleFavorite={() => toggleFavorite(blendOverlayId)}
-                sessions={sessions}
-                go={go}
-                onClose={() => setOverlay(null)}
-                onOpenIngredient={(ingId) => {
-                  setIngredientId(ingId);
-                  setOverlay("ingredient");
-                }}
-                onBrew={() => {
-                  const b = getBlend(blendOverlayId);
-                  if (!b) return;
-                  startBrew(b, "curious", [b.mood]);
-                }}
-              />
-            )}
-          </div>
+          {appContent}
         </PhoneFrame>
       </div>
 
