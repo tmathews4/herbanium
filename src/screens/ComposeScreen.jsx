@@ -404,18 +404,30 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             ) : (
               blend.ingredients.map(({ id, g }) => {
                 const ing = INGREDIENTS[id];
+                const topFlavors = (ing.flavors || []).slice(0, 2).join(", ");
+                const topEffect = (ing.effects || []).filter(([t]) => t !== "bitterness")[0];
+                const metaParts = [
+                  formatTempRange(ing.tempC, unit),
+                  topFlavors,
+                  topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
+                ].filter(Boolean);
                 return (
                   <div key={id} onClick={() => go("ingredient", id)} style={{
                     display: "flex", justifyContent: "space-between", alignItems: "baseline",
                     padding: "6px 0", cursor: "pointer",
                   }}>
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
                         {ing.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                       </div>
-                      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5, color: theme.ash }}>{ing.latin}</div>
+                      <div style={{
+                        fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                        marginTop: 2, letterSpacing: "0.02em",
+                      }}>
+                        {metaParts.join(" · ")}
+                      </div>
                     </div>
-                    <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft }}>
+                    <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
                       {formatAmount(g, ing.category, weightUnit)}
                     </div>
                   </div>

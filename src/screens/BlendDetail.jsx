@@ -9,14 +9,14 @@ import {
 } from "../components/icons";
 import {
   SectionLabel, StatCard,
-} from "../components/layout";;
+} from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
-import { getBlend, mmss } from "../helpers/misc";;
+import { getBlend, mmss } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
 import {
-  formatAmount, formatTemp, useUnit,
+  formatAmount, formatTemp, formatTempRange, useUnit,
 } from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
@@ -128,6 +128,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           {b.ingredients.map((ing, i) => {
             const meta = INGREDIENTS[ing.id];
             if (!meta) return null;
+            // Compact metadata line: temp range, top 2 flavors, top effect
+            const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
+            const topEffect = (meta.effects || []).filter(([t]) => t !== "bitterness")[0];
+            const metaParts = [
+              formatTempRange(meta.tempC, unit),
+              topFlavors,
+              topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
+            ].filter(Boolean);
             return (
               <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
                 width: "100%", textAlign: "left", background: "transparent",
@@ -135,15 +143,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 padding: "10px 0", cursor: "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "baseline",
               }}>
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
                     {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                   </div>
-                  <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5, color: theme.ash }}>
-                    {meta.latin}
+                  <div style={{
+                    fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                    marginTop: 2, letterSpacing: "0.02em",
+                  }}>
+                    {metaParts.join(" · ")}
                   </div>
                 </div>
-                <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft }}>
+                <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
                   {formatAmount(ing.g, meta.category, weightUnit)}
                 </div>
               </button>
