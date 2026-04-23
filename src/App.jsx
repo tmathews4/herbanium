@@ -1,88 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { theme, ff } from "./theme";
+import {
+  UnitContext, useUnit,
+  cToF, formatTemp, formatTempRange, formatTempShort,
+  TSP_BY_CATEGORY, gramsToTsp, prettyFraction, formatTsp, formatAmount,
+} from "./units/units";
 
 /* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
-
-/* ──────────────────────────────────────────────────────────────
-   Unit system (Celsius / Fahrenheit)
-   ────────────────────────────────────────────────────────────── */
-
-const UnitContext = React.createContext({
-  unit: "C", setUnit: () => {},          // temperature — "C" | "F"
-  weightUnit: "tsp", setWeightUnit: () => {}, // weight — "tsp" | "g"
-});
-const useUnit = () => React.useContext(UnitContext);
-
-const cToF = (c) => Math.round(c * 9 / 5 + 32);
-
-const formatTemp = (c, unit = "C") => unit === "F" ? `${cToF(c)}°F` : `${c}°C`;
-
-const formatTempRange = (minC, maxC, unit = "C") => {
-  if (minC === maxC) return formatTemp(minC, unit);
-  if (unit === "F") return `${cToF(minC)}–${cToF(maxC)}°F`;
-  return `${minC}–${maxC}°C`;
-};
-
-// short form for compact chips (no °F/°C suffix, just the numbers and a degree)
-const formatTempShort = (minC, maxC, unit = "C") => {
-  if (unit === "F") {
-    return minC === maxC ? `${cToF(minC)}°` : `${cToF(minC)}–${cToF(maxC)}°`;
-  }
-  return minC === maxC ? `${minC}°` : `${minC}–${maxC}°`;
-};
-
-// Grams-per-teaspoon by ingredient category. Folk-tea convention, not lab-precise —
-// densities vary wildly by how packed the spoon is, but this gets "1 tsp per cup"
-// feeling right for the common cases.
-const TSP_BY_CATEGORY = {
-  "flower":     1.0,  // chamomile, lavender, rose — light and fluffy
-  "herbal":     1.2,  // lemon balm, mint, nettle — leafy but denser than flowers
-  "true tea":   2.0,  // sencha, assam, darjeeling, oolong — standard tea-leaf convention
-  "spice":      2.5,  // ginger, cinnamon, cardamom — dense chips/pieces
-  "adaptogen":  3.0,  // ashwagandha, reishi, turmeric — typically powdered
-};
-
-const gramsToTsp = (g, category) => {
-  const perTsp = TSP_BY_CATEGORY[category] || 1.5;
-  return g / perTsp;
-};
-
-// Format a tsp amount with ¼-tsp rounding, rolling up to tablespoons at 3+ tsp.
-// Small amounts fall back to "pinch."
-const formatTsp = (tsp) => {
-  if (tsp < 0.15) return "pinch";
-  // Round to nearest quarter
-  const q = Math.round(tsp * 4) / 4;
-  if (q >= 3) {
-    // Roll up to tablespoons (1 tbsp = 3 tsp)
-    const tbsp = q / 3;
-    const tbspQ = Math.round(tbsp * 4) / 4;
-    return `${prettyFraction(tbspQ)} tbsp`;
-  }
-  return `${prettyFraction(q)} tsp`;
-};
-
-// Turn a quarter-rounded decimal into "1½", "¼", "2¾" etc. using unicode fractions.
-const prettyFraction = (n) => {
-  const whole = Math.floor(n);
-  const frac = n - whole;
-  const fracStr = frac === 0.25 ? "¼" : frac === 0.5 ? "½" : frac === 0.75 ? "¾" : "";
-  if (whole === 0 && fracStr) return fracStr;
-  if (fracStr) return `${whole}${fracStr}`;
-  return `${whole}`;
-};
-
-// The one-stop formatter that respects user weightUnit preference.
-// Category is required because tsp conversion is density-aware.
-const formatAmount = (g, category, weightUnit = "tsp") => {
-  if (weightUnit === "g") {
-    return `${g.toFixed(1)} g`;
-  }
-  return formatTsp(gramsToTsp(g, category));
-};
 
 /* ──────────────────────────────────────────────────────────────
    Seed data
@@ -1384,48 +1311,6 @@ const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 /* ──────────────────────────────────────────────────────────────
    Screen: HOME
    ────────────────────────────────────────────────────────────── */
-
-const TempToggle = () => {
-  const { unit, setUnit } = useUnit();
-  return (
-    <div style={{
-      display: "inline-flex", alignItems: "center",
-      border: `1px solid ${theme.rule}`, borderRadius: 999,
-      padding: 2, background: theme.cream,
-    }}>
-      {["C", "F"].map(u => (
-        <button key={u} onClick={() => setUnit(u)} style={{
-          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.08em",
-          padding: "3px 9px", borderRadius: 999, border: "none",
-          background: unit === u ? theme.ink : "transparent",
-          color: unit === u ? theme.cream : theme.ash,
-          cursor: "pointer",
-        }}>°{u}</button>
-      ))}
-    </div>
-  );
-};
-
-const WeightToggle = () => {
-  const { weightUnit, setWeightUnit } = useUnit();
-  return (
-    <div style={{
-      display: "inline-flex", alignItems: "center",
-      border: `1px solid ${theme.rule}`, borderRadius: 999,
-      padding: 2, background: theme.cream,
-    }}>
-      {["tsp", "g"].map(u => (
-        <button key={u} onClick={() => setWeightUnit(u)} style={{
-          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.08em",
-          padding: "3px 9px", borderRadius: 999, border: "none",
-          background: weightUnit === u ? theme.ink : "transparent",
-          color: weightUnit === u ? theme.cream : theme.ash,
-          cursor: "pointer",
-        }}>{u}</button>
-      ))}
-    </div>
-  );
-};
 
 const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
