@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 /* ──────────────────────────────────────────────────────────────
-   TeaPothecary — interactive mock
+   Herbanium — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
 
@@ -613,7 +613,7 @@ const SEED_MODES = {
 const SESSIONS = SEED_MODES.power.sessions;
 
 const MOODS  = ["calm", "focus", "energy", "sleepy", "comfort", "settle"];
-const FLAVORS= ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet"];
+const FLAVORS= ["sweet", "fruity", "citrus", "floral", "minty", "spiced", "earthy"];
 
 /* ──────────────────────────────────────────────────────────────
    "While you wait" content — facts, traditions, and poems that
@@ -1016,10 +1016,102 @@ const SectionLabel = ({ n, children, color = theme.ash }) => (
   <div style={{
     fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
     textTransform: "uppercase", color, fontWeight: 600,
+    textAlign: "left",
   }}>
     {children}
   </div>
 );
+
+// FitText — renders children in one line; if the line overflows its container,
+// the text scales down (via transform) until it fits. Keeps the font crisp
+// (integer sizes would cause visible steps) and never reflows the layout.
+// Pass `style` for the text's intrinsic styling (fontFamily, fontSize, etc.)
+// and `minScale` if you want a floor below which it should stop shrinking.
+const FitText = ({ children, style, minScale = 0.55 }) => {
+  const outerRef = React.useRef(null);
+  const innerRef = React.useRef(null);
+  const [scale, setScale] = React.useState(1);
+
+  React.useLayoutEffect(() => {
+    const fit = () => {
+      const outer = outerRef.current;
+      const inner = innerRef.current;
+      if (!outer || !inner) return;
+      // Reset to 1 before measuring so we read natural width.
+      inner.style.transform = "scale(1)";
+      const outerW = outer.clientWidth;
+      const innerW = inner.scrollWidth;
+      if (outerW === 0 || innerW === 0) return;
+      const next = innerW > outerW ? Math.max(minScale, outerW / innerW) : 1;
+      setScale(next);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (outerRef.current) ro.observe(outerRef.current);
+    return () => ro.disconnect();
+  }, [children, minScale]);
+
+  return (
+    <div
+      ref={outerRef}
+      style={{ width: "100%", overflow: "hidden" }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          ...style,
+          whiteSpace: "nowrap",
+          transform: `scale(${scale})`,
+          transformOrigin: "left center",
+          display: "inline-block",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// Balance N items into rows so each row has roughly equal count, with the
+// top row being equal to or one greater than the row below it (4+3, not 3+4).
+// Caps at `maxPerRow` wide items per row — anything wider gets split across
+// more rows. Used by ChipRows below.
+function balanceIntoRows(items, maxPerRow = 4) {
+  const n = items.length;
+  if (n === 0) return [];
+  if (n <= maxPerRow) return [items];
+  // Pick a row count such that each row has at most maxPerRow, and rows are
+  // as balanced as possible (ceil(n / rows) on top, floor(n / rows) below).
+  const rows = Math.ceil(n / maxPerRow);
+  const base = Math.floor(n / rows);
+  const extras = n % rows; // this many rows get one extra at the top
+  const sizes = Array.from({ length: rows }, (_, i) => base + (i < extras ? 1 : 0));
+  const out = [];
+  let cursor = 0;
+  for (const size of sizes) {
+    out.push(items.slice(cursor, cursor + size));
+    cursor += size;
+  }
+  return out;
+}
+
+// ChipRows — renders a list of items as balanced, left-aligned rows of chips.
+// Each row is a flex container that shares row structure (4+3 for 7 items,
+// 3+3 for 6, etc.) but aligns left to match the section label above it.
+const ChipRows = ({ items, renderItem, gap = 6, rowGap = 6, maxPerRow = 4 }) => {
+  const rows = balanceIntoRows(items, maxPerRow);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: rowGap }}>
+      {rows.map((row, i) => (
+        <div key={i} style={{
+          display: "flex", justifyContent: "flex-start", flexWrap: "nowrap", gap,
+        }}>
+          {row.map((item, j) => renderItem(item, i * maxPerRow + j))}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Chip = ({ active, onClick, children, tone = "default", caution = false }) => {
   const toneMap = {
@@ -1136,19 +1228,18 @@ const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) =
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-        <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash }}>
             {isEmpty ? "a fresh start" : "Tuesday evening"}
           </div>
-          <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
+          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05, marginTop: 2 }}>
             {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>Juno</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>Juno</em>?</>
+              ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
             }
-          </h1>
+          </FitText>
         </div>
-        <Flower size={24} c={theme.ochre} />
       </div>
 
       {/* CTA */}
@@ -1608,6 +1699,20 @@ function resolveBlend(moods, flavor) {
     };
   }
 
+  // Attach temperature-compatibility metadata. computeBrewProfile returns
+  // `compatible: false` + an `outsiders` list when the ingredients don't share
+  // a brewing window — useful for surfacing a gentle warning downstream.
+  // Note: we keep base.tempC and base.timeS (curated) rather than overwriting
+  // with the profile's computed values — the curated ones reflect intent.
+  if (base.ingredients.length > 0) {
+    const profile = computeBrewProfile(base.ingredients);
+    base = {
+      ...base,
+      compatible: profile.compatible,
+      outsiders: profile.outsiders,
+    };
+  }
+
   return base;
 }
 
@@ -1774,7 +1879,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
-  const [intent, setIntent] = useState("");   // current feeling ("how you feel right now")
   const [reverseIngs, setReverseIngs] = useState(["chamomile", "lemonbalm"]);
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
@@ -1906,26 +2010,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             ))}
           </div>
 
-          <SectionLabel>Current feeling</SectionLabel>
-          <div style={{ position: "relative", marginTop: 8 }}>
-            <input
-              value={intent}
-              onChange={(e) => setIntent(e.target.value)}
-              placeholder="wound up · scattered · tired…"
-              style={{
-                width: "100%", background: theme.cream,
-                border: `1px solid ${theme.rule}`, borderRadius: 8,
-                fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
-                fontSize: 17, color: intent ? theme.ink : theme.ash,
-                padding: "10px 34px 10px 14px", outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-            <span style={{
-              position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-              color: theme.ash, fontSize: 13, pointerEvents: "none",
-            }}>✎</span>
-          </div>
           {(() => {
             const moodRow = (
               <div key="mood-row" style={{ opacity: primaryAxis === "feel" ? 1 : 0.72 }}>
@@ -1943,16 +2027,19 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                      "3 selected · at the limit"}
                   </span>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  {MOODS.map(m => (
-                    <Chip
-                      key={m}
-                      active={moods.includes(m)}
-                      caution={moodInTension(m)}
-                      onClick={() => toggleMood(m)}
-                      tone="sage"
-                    >{m}</Chip>
-                  ))}
+                <div style={{ marginTop: 10 }}>
+                  <ChipRows
+                    items={MOODS}
+                    renderItem={(m) => (
+                      <Chip
+                        key={m}
+                        active={moods.includes(m)}
+                        caution={moodInTension(m)}
+                        onClick={() => toggleMood(m)}
+                        tone="sage"
+                      >{m}</Chip>
+                    )}
+                  />
                 </div>
 
                 {blend.conflict && (
@@ -1979,20 +2066,23 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                     {primaryAxis === "taste" ? "Flavor you're after" : "Flavor direction"}
                   </SectionLabel>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  {FLAVORS.map(f => {
-                    const active = flavors.includes(f);
-                    const tension = !active && flavorInTension(f);
-                    return (
-                      <Chip
-                        key={f}
-                        active={active}
-                        onClick={() => toggleFlavor(f)}
-                        tone="terra"
-                        caution={tension}
-                      >{f}</Chip>
-                    );
-                  })}
+                <div style={{ marginTop: 10 }}>
+                  <ChipRows
+                    items={FLAVORS}
+                    renderItem={(f) => {
+                      const active = flavors.includes(f);
+                      const tension = !active && flavorInTension(f);
+                      return (
+                        <Chip
+                          key={f}
+                          active={active}
+                          onClick={() => toggleFlavor(f)}
+                          tone="terra"
+                          caution={tension}
+                        >{f}</Chip>
+                      );
+                    }}
+                  />
                 </div>
                 {/* Soft warning when user has selected flavors that typically fight each other */}
                 {flavors.length >= 2 && (() => {
@@ -2020,6 +2110,53 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             // Render the primary axis first (gets "ii"), secondary second (gets "iii")
             return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
           })()}
+
+          {/* Temperature-compromise warning — fires when the resolved blend's
+              ingredients don't share a brewing window. Currently rare (curated
+              mood blends were designed to agree), but reserved for future
+              blends that mix ingredients with disjoint temp ranges. */}
+          {!blend.empty && blend.compatible === false && blend.outsiders?.length > 0 && (
+            <div style={{
+              marginTop: 14, padding: "8px 10px", borderRadius: 6,
+              background: "rgba(165, 120, 54, 0.08)",
+              border: `1px solid rgba(165, 120, 54, 0.22)`,
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+              color: theme.inkSoft, lineHeight: 1.45,
+            }}>
+              <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
+              these ingredients don't all share a brewing window.{" "}
+              <em>
+                {blend.outsiders.map((id, i) => (
+                  <React.Fragment key={id}>
+                    {i > 0 && (i === blend.outsiders.length - 1 ? " and " : ", ")}
+                    {INGREDIENTS[id]?.name || id}
+                  </React.Fragment>
+                ))}
+              </em>
+              {" "}will extract lightly at this temp — fine as accents, worth rethinking if they carry the blend.
+            </div>
+          )}
+
+          {/* Primary action: brew the current blend. Placed here, right after
+              mood/flavor selection, so the decision-to-action path is reachable
+              without scrolling. Pantry toggle, candidate selector, and blend
+              card detail all live below for users who want to refine. */}
+          <button
+            disabled={blend.empty}
+            onClick={() => startBrew(blend, "", moods)}
+            style={{
+              width: "100%", marginTop: 20,
+              fontFamily: ff.serif, fontSize: 16,
+              padding: "14px 16px", borderRadius: 10,
+              background: blend.empty ? theme.rule : theme.terra,
+              color: theme.cream, border: "none",
+              cursor: blend.empty ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            <Kettle size={18} c={theme.cream} />
+            start brewing
+          </button>
 
           <label style={{
             display: "flex", alignItems: "center", gap: 10, marginTop: 18,
@@ -2178,20 +2315,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button style={iconBtn()}>↻ shuffle</button>
             <button style={iconBtn()}>✎ tweak</button>
-            <button
-              disabled={blend.empty}
-              onClick={() => startBrew(blend, intent, moods)}
-              style={{
-                flex: 1, fontFamily: ff.serif, fontSize: 16,
-                padding: "14px 16px", borderRadius: 10,
-                background: blend.empty ? theme.rule : theme.terra,
-                color: theme.cream, border: "none",
-                cursor: blend.empty ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}>
-              <Kettle size={18} c={theme.cream} />
-              start brewing
-            </button>
           </div>
         </>
       )}
@@ -2237,17 +2360,19 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
-  const filteredAvailable = available.filter(id => {
-    const ing = INGREDIENTS[id];
-    if (filter !== "all" && ing.category !== filter) return false;
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-        .join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  const filteredAvailable = available
+    .filter(id => {
+      const ing = INGREDIENTS[id];
+      if (filter !== "all" && ing.category !== filter) return false;
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+          .join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name));
   // derive predicted effects as weighted sum
   const totals = {};
   reverseIngs.forEach(id => {
@@ -2260,6 +2385,30 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
   // Uses range intersection when possible, weighted-grams dominance when not.
   const ingsForProfile = reverseIngs.map(id => ({ id, g: 1.0 }));
   const profile = computeBrewProfile(ingsForProfile);
+
+  // For the picker: would adding this ingredient disagree with the current pot's
+  // brewing window? Used to flag cautionary picks the same way flavor conflicts
+  // are flagged on the flavor chip row. Only meaningful once the pot has at
+  // least one ingredient to disagree with.
+  const tempConflictsWithPot = (candidateId) => {
+    if (reverseIngs.length === 0) return false;
+    const candidate = INGREDIENTS[candidateId];
+    if (!candidate) return false;
+    const [cLo, cHi] = candidate.tempC;
+    // Current pot's effective range: the intersection of all existing ranges.
+    const potLo = Math.max(...reverseIngs.map(id => INGREDIENTS[id].tempC[0]));
+    const potHi = Math.min(...reverseIngs.map(id => INGREDIENTS[id].tempC[1]));
+    // If the pot is already in compromise (potLo > potHi), any add is noisy;
+    // compare against the loosest extremes instead.
+    if (potLo > potHi) {
+      const allLo = Math.min(...reverseIngs.map(id => INGREDIENTS[id].tempC[0]));
+      const allHi = Math.max(...reverseIngs.map(id => INGREDIENTS[id].tempC[1]));
+      // If the candidate sits entirely outside the existing spread, flag it.
+      return cHi < allLo || cLo > allHi;
+    }
+    // Pot is compatible. Flag candidate if it has no overlap with the pot's window.
+    return cHi < potLo || cLo > potHi;
+  };
 
   return (
     <>
@@ -2293,6 +2442,45 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
             }}>×</button>
           </div>
         ))}
+
+        {/* Temperature-compatibility notice — inline with the pot so users see
+            it while looking at the ingredient list, not buried below the adder. */}
+        {reverseIngs.length > 1 && !profile.compatible && (
+          <div style={{
+            marginTop: 10, padding: "8px 10px", borderRadius: 6,
+            background: "rgba(165, 120, 54, 0.08)",
+            border: `1px solid rgba(165, 120, 54, 0.22)`,
+            display: "flex", gap: 8, alignItems: "flex-start",
+          }}>
+            <Kettle size={14} c={theme.ochre} />
+            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.inkSoft, lineHeight: 1.45 }}>
+              <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
+              these don't share a brewing window.
+              {profile.outsiders.length > 0 && (
+                <> at <em style={{ fontStyle: "normal" }}>{formatTemp(profile.tempC, unit)}</em>,{" "}
+                  <em>
+                    {profile.outsiders.map((id, i) => (
+                      <React.Fragment key={id}>
+                        {i > 0 && (i === profile.outsiders.length - 1 ? " and " : ", ")}
+                        <button
+                          onClick={() => go("ingredient", id)}
+                          style={{
+                            background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                            color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
+                            textDecorationStyle: "dotted", textUnderlineOffset: 3,
+                            fontFamily: "inherit", fontSize: "inherit",
+                          }}
+                        >{INGREDIENTS[id].name}</button>
+                      </React.Fragment>
+                    ))}
+                  </em>
+                  {" "}will extract lightly.
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         <Rule soft />
         <div style={{
           marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -2330,24 +2518,29 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
         </div>
 
         {/* Category filter pills */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-          {[
-            ["all",       "all"],
-            ["true tea",  "teas"],
-            ["herbal",    "herbals"],
-            ["flower",    "flowers"],
-            ["spice",     "spices"],
-            ["adaptogen", "adaptogens"],
-          ].map(([key, label]) => (
-            <button key={key} onClick={() => setFilter(key)} style={{
-              fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-              padding: "3px 9px", borderRadius: 999,
-              border: `1px solid ${filter === key ? theme.ink : theme.ruleSoft}`,
-              background: filter === key ? theme.ink : "transparent",
-              color: filter === key ? theme.cream : theme.ash,
-              cursor: "pointer",
-            }}>{label}</button>
-          ))}
+        <div style={{ marginTop: 8 }}>
+          <ChipRows
+            items={[
+              ["all",       "all"],
+              ["true tea",  "teas"],
+              ["herbal",    "herbals"],
+              ["flower",    "flowers"],
+              ["spice",     "spices"],
+              ["adaptogen", "adaptogens"],
+            ]}
+            gap={4}
+            rowGap={4}
+            renderItem={([key, label]) => (
+              <button key={key} onClick={() => setFilter(key)} style={{
+                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                padding: "3px 9px", borderRadius: 999,
+                border: `1px solid ${filter === key ? theme.ink : theme.ruleSoft}`,
+                background: filter === key ? theme.ink : "transparent",
+                color: filter === key ? theme.cream : theme.ash,
+                cursor: "pointer",
+              }}>{label}</button>
+            )}
+          />
         </div>
 
         {/* Scrollable results */}
@@ -2373,15 +2566,24 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
                   : ing.category === "spice"    ? theme.terra
                   : ing.category === "adaptogen" ? theme.plum
                   : theme.ash;
+                const isCaution = tempConflictsWithPot(id);
                 return (
-                  <button key={id} onClick={() => setReverseIngs([...reverseIngs, id])} style={{
-                    fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.02em",
-                    padding: "5px 10px 5px 8px", borderRadius: 999,
-                    border: `1px solid ${theme.rule}`,
-                    background: "transparent", color: theme.inkSoft,
-                    cursor: "pointer",
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                  }}>
+                  <button
+                    key={id}
+                    onClick={() => setReverseIngs([...reverseIngs, id])}
+                    title={isCaution ? "Brewing temp doesn't overlap with the current pot" : undefined}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.02em",
+                      padding: "5px 10px 5px 8px", borderRadius: 999,
+                      border: isCaution ? `1px dashed ${theme.ochre}` : `1px solid ${theme.rule}`,
+                      background: "transparent",
+                      color: isCaution ? theme.ochre : theme.inkSoft,
+                      opacity: isCaution ? 0.75 : 1,
+                      cursor: "pointer",
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      transition: "all .15s ease",
+                    }}
+                  >
                     <span style={{
                       width: 6, height: 6, borderRadius: "50%",
                       background: catColor, flexShrink: 0,
@@ -2394,43 +2596,6 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
           )}
         </div>
       </div>
-
-      {/* Temperature-compatibility banner — only shows when ingredients disagree */}
-      {reverseIngs.length > 1 && !profile.compatible && (
-        <div style={{
-          marginTop: 12, padding: "10px 12px", borderRadius: 8,
-          background: "rgba(165, 120, 54, 0.08)",
-          border: `1px solid rgba(165, 120, 54, 0.28)`,
-          display: "flex", gap: 10, alignItems: "flex-start",
-        }}>
-          <Kettle size={16} c={theme.ochre} />
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.45 }}>
-            <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
-            These ingredients don't share a brewing window.
-            {profile.outsiders.length > 0 && (
-              <> At <em style={{ fontStyle: "normal" }}>{formatTemp(profile.tempC, unit)}</em>,{" "}
-                <em>
-                  {profile.outsiders.map((id, i) => (
-                    <React.Fragment key={id}>
-                      {i > 0 && " and "}
-                      <button
-                        onClick={() => go("ingredient", id)}
-                        style={{
-                          background: "transparent", border: "none", padding: 0, cursor: "pointer",
-                          color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
-                          textDecorationStyle: "dotted", textUnderlineOffset: 3,
-                          fontFamily: "inherit", fontSize: "inherit",
-                        }}
-                      >{INGREDIENTS[id].name}</button>
-                    </React.Fragment>
-                  ))}
-                </em>
-                {" "}will extract weakly — fine if they're accents, worth rethinking if they're the point.
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       <div style={{ marginTop: 20 }}><SectionLabel n="ii">This will likely be…</SectionLabel></div>
       <div style={{
@@ -2477,7 +2642,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
         <button style={iconBtn()}>save as recipe</button>
-        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "curious", ["calm"])} style={{
+        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "", ["calm"])} style={{
           flex: 1, fontFamily: ff.serif, fontSize: 16,
           padding: "12px 16px", borderRadius: 10,
           background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
@@ -2491,7 +2656,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
+const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -2670,6 +2835,32 @@ const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, 
         </div>
       </div>
 
+      {/* current feeling — optional one-line reflection while you wait.
+          Captured into the session so the log retrospective has the "where
+          you came from" alongside where the cup took you. */}
+      <div style={{ marginTop: 18 }}>
+        <div style={{ position: "relative" }}>
+          <input
+            value={intent || ""}
+            onChange={(e) => setIntent && setIntent(e.target.value)}
+            placeholder="How are you feeling?"
+            className="steep-intent-input"
+            style={{
+              width: "100%", background: "rgba(255,255,255,0.35)",
+              border: `1px dashed ${theme.rule}`, borderRadius: 10,
+              fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
+              fontSize: 14, color: intent ? theme.ink : theme.ruleSoft,
+              padding: "10px 34px 10px 14px", outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          <span style={{
+            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+            color: theme.ash, fontSize: 12, pointerEvents: "none",
+          }}>✎</span>
+        </div>
+      </div>
+
       {/* while you wait — cycling fact/tradition/poem pool keyed to this blend
           Tap the card to advance to the next one; the auto-cycle interval resets. */}
       <div
@@ -2763,6 +2954,11 @@ const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, 
         @keyframes breathe {
           0%, 100% { transform: scale(1); }
           50%      { transform: scale(1.012); }
+        }
+        .steep-intent-input::placeholder {
+          color: ${theme.ash};
+          opacity: 0.55;
+          font-style: italic;
         }
       `}</style>
 
@@ -3060,10 +3256,13 @@ const LogScreen = ({ blend, intent, targetMoods, onSubmit, onCancel }) => {
             unexpected moods from the cup
           </div>
         )}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-          {MOODS.filter(m => !safeMoods.includes(m)).map(m => (
-            <Chip key={m} active={extra.includes(m)} onClick={() => toggleExtra(m)} tone="sage">{m}</Chip>
-          ))}
+        <div style={{ marginTop: 10 }}>
+          <ChipRows
+            items={MOODS.filter(m => !safeMoods.includes(m))}
+            renderItem={(m) => (
+              <Chip key={m} active={extra.includes(m)} onClick={() => toggleExtra(m)} tone="sage">{m}</Chip>
+            )}
+          />
         </div>
       </div>
 
@@ -3200,7 +3399,7 @@ const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => {
 const BlendListRow = ({ b, first, author, go, startBrew, highlighted }) => {
   const { unit, weightUnit } = useUnit();
   return (
-  <button onClick={() => startBrew(b, "curious", [b.mood])} style={{
+  <button onClick={() => startBrew(b, "", [b.mood])} style={{
     width: "100%", textAlign: "left",
     background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
     border: "none",
@@ -3285,18 +3484,21 @@ const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pant
   const savedBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
   const yourSessions = sessions.filter(s => s.who === "you");
 
-  // All ingredients, filtered by search / category / pantry-toggle.
-  const shelfItems = Object.entries(INGREDIENTS).filter(([id, ing]) => {
-    if (pantryOnly && !pantryIds.has(id)) return false;
-    if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
-    if (shelfSearch.trim()) {
-      const q = shelfSearch.trim().toLowerCase();
-      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-        .join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  // All ingredients, filtered by search / category / pantry-toggle, then
+  // sorted alphabetically by display name so the catalog is browsable.
+  const shelfItems = Object.entries(INGREDIENTS)
+    .filter(([id, ing]) => {
+      if (pantryOnly && !pantryIds.has(id)) return false;
+      if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
+      if (shelfSearch.trim()) {
+        const q = shelfSearch.trim().toLowerCase();
+        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+          .join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort(([, a], [, b]) => a.name.localeCompare(b.name));
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -3328,10 +3530,13 @@ const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pant
       {tab === "blends" && (
         <>
           {savedBlends.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-              {["all", "calm", "focus", "energy", "comfort", "what worked"].map(f => (
-                <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{f}</Chip>
-              ))}
+            <div style={{ marginBottom: 10 }}>
+              <ChipRows
+                items={["all", "calm", "focus", "energy", "comfort", "what worked"]}
+                renderItem={(f) => (
+                  <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{f}</Chip>
+                )}
+              />
             </div>
           )}
           <LibraryList blends={savedBlends} compact go={go} startBrew={startBrew} />
@@ -3389,24 +3594,29 @@ const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pant
           </div>
 
           {/* Category filter pills */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-            {[
-              ["all",       "all"],
-              ["true tea",  "teas"],
-              ["herbal",    "herbals"],
-              ["flower",    "flowers"],
-              ["spice",     "spices"],
-              ["adaptogen", "adaptogens"],
-            ].map(([key, label]) => (
-              <button key={key} onClick={() => setShelfCategory(key)} style={{
-                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                padding: "3px 9px", borderRadius: 999,
-                border: `1px solid ${shelfCategory === key ? theme.ink : theme.ruleSoft}`,
-                background: shelfCategory === key ? theme.ink : "transparent",
-                color: shelfCategory === key ? theme.cream : theme.ash,
-                cursor: "pointer",
-              }}>{label}</button>
-            ))}
+          <div style={{ marginBottom: 10 }}>
+            <ChipRows
+              items={[
+                ["all",       "all"],
+                ["true tea",  "teas"],
+                ["herbal",    "herbals"],
+                ["flower",    "flowers"],
+                ["spice",     "spices"],
+                ["adaptogen", "adaptogens"],
+              ]}
+              gap={4}
+              rowGap={4}
+              renderItem={([key, label]) => (
+                <button key={key} onClick={() => setShelfCategory(key)} style={{
+                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                  padding: "3px 9px", borderRadius: 999,
+                  border: `1px solid ${shelfCategory === key ? theme.ink : theme.ruleSoft}`,
+                  background: shelfCategory === key ? theme.ink : "transparent",
+                  color: shelfCategory === key ? theme.cream : theme.ash,
+                  cursor: "pointer",
+                }}>{label}</button>
+              )}
+            />
           </div>
 
           {/* Pantry-only toggle + count */}
@@ -4087,7 +4297,7 @@ const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSe
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
               {isEmptyUser ? "a new keeper" : "Keeper of the shelf"}
             </div>
-            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Juno M.</div>
+            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Tommy M.</div>
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
               {isEmptyUser
                 ? "private · journal is still empty"
@@ -4292,7 +4502,37 @@ const TabBar = ({ tab, setTab }) => {
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
-const PhoneFrame = ({ children, label }) => (
+const PhoneFrame = ({ children, label }) => {
+  // On narrow screens (real mobile devices), skip the fake-phone frame
+  // and render the app full-screen. Otherwise, show the frame (desktop preview).
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 500
+  );
+  React.useEffect(() => {
+    const onResize = () => setIsNarrow(window.innerWidth < 500);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (isNarrow) {
+    return (
+      <div style={{
+        position: "fixed", inset: 0,
+        background: theme.ivory,
+        overflowX: "hidden",
+        overflowY: "hidden",
+        display: "flex", flexDirection: "column",
+        // Use dynamic viewport height on modern browsers to handle mobile
+        // browser chrome (address bar) gracefully; falls back to 100vh.
+        height: "100dvh",
+        width: "100vw",
+      }}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
     <div style={{
       width: 380, height: 780,
@@ -4340,7 +4580,8 @@ const PhoneFrame = ({ children, label }) => (
       }}>{label}</div>
     )}
   </div>
-);
+  );
+};
 
 /* ──────────────────────────────────────────────────────────────
    Root app
@@ -4433,7 +4674,7 @@ export default function App() {
       who: "you",
       blendId,
       ago: "just now",
-      intent: intent || "curious",
+      intent: intent || "",
       actual,
       taste: taste ?? 4,
       note: note || "",
@@ -4472,6 +4713,126 @@ export default function App() {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [tab]);
 
+  // Detect narrow (mobile-width) viewport so we can skip the desktop-preview
+  // masthead/demo-hints/footer and render just the app at viewport size.
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 500
+  );
+  React.useEffect(() => {
+    const onResize = () => setIsNarrow(window.innerWidth < 500);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Extract the actual app tree (scroll region + tab bar + overlays) so we can
+  // render it directly on mobile or wrap it in the desktop-preview chrome.
+  const appContent = (
+    <div style={{
+      width: "100%", height: "100%",
+      display: "flex", flexDirection: "column",
+      position: "relative",
+    }}>
+      <div ref={scrollRef} style={{
+        flex: "1 1 auto", minHeight: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
+        position: "relative",
+      }}>
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
+        {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
+      </div>
+
+      <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
+
+      {overlay === "steep" && session && (
+        <SteepScreen
+          blend={session.blend}
+          intent={session.intent}
+          setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
+          targetMoods={session.targetMoods}
+          pantryIds={pantryIds}
+          togglePantry={togglePantry}
+          onDone={() => setOverlay("log")}
+          onCancel={() => { setOverlay(null); setSession(null); }}
+        />
+      )}
+      {overlay === "log" && session && (
+        <LogScreen
+          blend={session.blend}
+          intent={session.intent}
+          targetMoods={session.targetMoods}
+          onSubmit={(logData) => {
+            addSession({
+              blend: session.blend,
+              intent: session.intent,
+              targetMoods: session.targetMoods,
+              ...logData,
+            });
+            setOverlay(null);
+            setSession(null);
+            setTab("home");
+          }}
+          onCancel={() => setOverlay(null)}
+        />
+      )}
+      {overlay === "ingredient" && (
+        <IngredientDetail
+          id={ingredientId}
+          onClose={() => setOverlay(null)}
+          pantryIds={pantryIds}
+          togglePantry={togglePantry}
+          onOpenIngredient={(newId) => setIngredientId(newId)}
+        />
+      )}
+      {overlay === "blend" && blendOverlayId && (
+        <BlendDetail
+          blendId={blendOverlayId}
+          isFavorite={savedBlendIds.has(blendOverlayId)}
+          onToggleFavorite={() => toggleFavorite(blendOverlayId)}
+          sessions={sessions}
+          go={go}
+          onClose={() => setOverlay(null)}
+          onOpenIngredient={(ingId) => {
+            setIngredientId(ingId);
+            setOverlay("ingredient");
+          }}
+          onBrew={() => {
+            const b = getBlend(blendOverlayId);
+            if (!b) return;
+            startBrew(b, "", [b.mood]);
+          }}
+        />
+      )}
+    </div>
+  );
+
+  // Mobile: render app full-screen with no masthead/demo-hints/footer chrome.
+  if (isNarrow) {
+    return (
+      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+        <div style={{
+          position: "fixed", inset: 0,
+          background: theme.ivory,
+          display: "flex", flexDirection: "column",
+          height: "100dvh", width: "100vw",
+          overflow: "hidden",
+          fontFamily: ff.sans,
+        }}>
+          {/* Google Fonts */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+          />
+          {appContent}
+        </div>
+      </UnitContext.Provider>
+    );
+  }
+
   return (
     <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
     <div style={{
@@ -4508,7 +4869,7 @@ export default function App() {
           fontFamily: ff.serif, fontSize: 54, fontWeight: 300, color: theme.ink,
           letterSpacing: "-0.02em", margin: "6px 0 4px", lineHeight: 1,
         }}>
-          Tea<em style={{ fontStyle: "italic", color: theme.terra, fontWeight: 400 }}>Pothecary</em>
+          Herbanium
         </h1>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 15, color: theme.inkSoft,
@@ -4536,84 +4897,7 @@ export default function App() {
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
         <PhoneFrame label="the app">
-          {/* Flex column: scroll area grows to fill, tab bar sits below it, overlays cover everything */}
-          <div style={{
-            width: "100%", height: "100%",
-            display: "flex", flexDirection: "column",
-            position: "relative",
-          }}>
-            <div ref={scrollRef} style={{
-              flex: "1 1 auto", minHeight: 0,
-              overflowY: "auto",
-              position: "relative",
-            }}>
-              {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
-              {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
-              {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
-              {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
-            </div>
-
-            <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
-
-            {overlay === "steep" && session && (
-              <SteepScreen
-                blend={session.blend}
-                intent={session.intent}
-                targetMoods={session.targetMoods}
-                pantryIds={pantryIds}
-                togglePantry={togglePantry}
-                onDone={() => setOverlay("log")}
-                onCancel={() => { setOverlay(null); setSession(null); }}
-              />
-            )}
-            {overlay === "log" && session && (
-              <LogScreen
-                blend={session.blend}
-                intent={session.intent}
-                targetMoods={session.targetMoods}
-                onSubmit={(logData) => {
-                  addSession({
-                    blend: session.blend,
-                    intent: session.intent,
-                    targetMoods: session.targetMoods,
-                    ...logData,
-                  });
-                  setOverlay(null);
-                  setSession(null);
-                  setTab("home");
-                }}
-                onCancel={() => setOverlay(null)}
-              />
-            )}
-            {overlay === "ingredient" && (
-              <IngredientDetail
-                id={ingredientId}
-                onClose={() => setOverlay(null)}
-                pantryIds={pantryIds}
-                togglePantry={togglePantry}
-                onOpenIngredient={(newId) => setIngredientId(newId)}
-              />
-            )}
-            {overlay === "blend" && blendOverlayId && (
-              <BlendDetail
-                blendId={blendOverlayId}
-                isFavorite={savedBlendIds.has(blendOverlayId)}
-                onToggleFavorite={() => toggleFavorite(blendOverlayId)}
-                sessions={sessions}
-                go={go}
-                onClose={() => setOverlay(null)}
-                onOpenIngredient={(ingId) => {
-                  setIngredientId(ingId);
-                  setOverlay("ingredient");
-                }}
-                onBrew={() => {
-                  const b = getBlend(blendOverlayId);
-                  if (!b) return;
-                  startBrew(b, "curious", [b.mood]);
-                }}
-              />
-            )}
-          </div>
+          {appContent}
         </PhoneFrame>
       </div>
 
