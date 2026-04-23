@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, createContext, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 /* ──────────────────────────────────────────────────────────────
-   TeaPothecary — interactive mock
+   Herbanium — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
 
@@ -1143,8 +1143,8 @@ const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) =
           </div>
           <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
             {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>Tom</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>Tom</em>?</>
+              ? <>Welcome, <em style={{ color: theme.terra }}>Juno</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>Juno</em>?</>
             }
           </h1>
         </div>
@@ -4292,7 +4292,32 @@ const TabBar = ({ tab, setTab }) => {
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
-const PhoneFrame = ({ children, label }) => (
+const PhoneFrame = ({ children, label }) => {
+  // On narrow screens (real mobile devices), skip the fake-phone frame
+  // and render the app full-screen. Otherwise, show the frame (desktop preview).
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 500
+  );
+  React.useEffect(() => {
+    const onResize = () => setIsNarrow(window.innerWidth < 500);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (isNarrow) {
+    return (
+      <div style={{
+        position: "fixed", inset: 0,
+        background: theme.ivory,
+        overflow: "hidden",
+        display: "flex", flexDirection: "column",
+      }}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
     <div style={{
       width: 380, height: 780,
@@ -4340,7 +4365,8 @@ const PhoneFrame = ({ children, label }) => (
       }}>{label}</div>
     )}
   </div>
-);
+  );
+};
 
 /* ──────────────────────────────────────────────────────────────
    Root app
@@ -4508,7 +4534,7 @@ export default function App() {
           fontFamily: ff.serif, fontSize: 54, fontWeight: 300, color: theme.ink,
           letterSpacing: "-0.02em", margin: "6px 0 4px", lineHeight: 1,
         }}>
-          Tea<em style={{ fontStyle: "italic", color: theme.terra, fontWeight: 400 }}>Pothecary</em>
+          Herb<em style={{ fontStyle: "italic", color: theme.terra, fontWeight: 400 }}>anium</em>
         </h1>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 15, color: theme.inkSoft,
