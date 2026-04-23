@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 /* ──────────────────────────────────────────────────────────────
-   Herbanium — interactive mock
+   TeaPothecary — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
 
@@ -613,7 +613,7 @@ const SEED_MODES = {
 const SESSIONS = SEED_MODES.power.sessions;
 
 const MOODS  = ["calm", "focus", "energy", "sleepy", "comfort", "settle"];
-const FLAVORS= ["sweet", "fruity", "citrus", "floral", "minty", "spiced", "earthy"];
+const FLAVORS= ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet"];
 
 /* ──────────────────────────────────────────────────────────────
    "While you wait" content — facts, traditions, and poems that
@@ -1016,102 +1016,10 @@ const SectionLabel = ({ n, children, color = theme.ash }) => (
   <div style={{
     fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
     textTransform: "uppercase", color, fontWeight: 600,
-    textAlign: "left",
   }}>
     {children}
   </div>
 );
-
-// FitText — renders children in one line; if the line overflows its container,
-// the text scales down (via transform) until it fits. Keeps the font crisp
-// (integer sizes would cause visible steps) and never reflows the layout.
-// Pass `style` for the text's intrinsic styling (fontFamily, fontSize, etc.)
-// and `minScale` if you want a floor below which it should stop shrinking.
-const FitText = ({ children, style, minScale = 0.55 }) => {
-  const outerRef = React.useRef(null);
-  const innerRef = React.useRef(null);
-  const [scale, setScale] = React.useState(1);
-
-  React.useLayoutEffect(() => {
-    const fit = () => {
-      const outer = outerRef.current;
-      const inner = innerRef.current;
-      if (!outer || !inner) return;
-      // Reset to 1 before measuring so we read natural width.
-      inner.style.transform = "scale(1)";
-      const outerW = outer.clientWidth;
-      const innerW = inner.scrollWidth;
-      if (outerW === 0 || innerW === 0) return;
-      const next = innerW > outerW ? Math.max(minScale, outerW / innerW) : 1;
-      setScale(next);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    if (outerRef.current) ro.observe(outerRef.current);
-    return () => ro.disconnect();
-  }, [children, minScale]);
-
-  return (
-    <div
-      ref={outerRef}
-      style={{ width: "100%", overflow: "hidden" }}
-    >
-      <div
-        ref={innerRef}
-        style={{
-          ...style,
-          whiteSpace: "nowrap",
-          transform: `scale(${scale})`,
-          transformOrigin: "left center",
-          display: "inline-block",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
-
-// Balance N items into rows so each row has roughly equal count, with the
-// top row being equal to or one greater than the row below it (4+3, not 3+4).
-// Caps at `maxPerRow` wide items per row — anything wider gets split across
-// more rows. Used by ChipRows below.
-function balanceIntoRows(items, maxPerRow = 4) {
-  const n = items.length;
-  if (n === 0) return [];
-  if (n <= maxPerRow) return [items];
-  // Pick a row count such that each row has at most maxPerRow, and rows are
-  // as balanced as possible (ceil(n / rows) on top, floor(n / rows) below).
-  const rows = Math.ceil(n / maxPerRow);
-  const base = Math.floor(n / rows);
-  const extras = n % rows; // this many rows get one extra at the top
-  const sizes = Array.from({ length: rows }, (_, i) => base + (i < extras ? 1 : 0));
-  const out = [];
-  let cursor = 0;
-  for (const size of sizes) {
-    out.push(items.slice(cursor, cursor + size));
-    cursor += size;
-  }
-  return out;
-}
-
-// ChipRows — renders a list of items as balanced, left-aligned rows of chips.
-// Each row is a flex container that shares row structure (4+3 for 7 items,
-// 3+3 for 6, etc.) but aligns left to match the section label above it.
-const ChipRows = ({ items, renderItem, gap = 6, rowGap = 6, maxPerRow = 4 }) => {
-  const rows = balanceIntoRows(items, maxPerRow);
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: rowGap }}>
-      {rows.map((row, i) => (
-        <div key={i} style={{
-          display: "flex", justifyContent: "flex-start", flexWrap: "nowrap", gap,
-        }}>
-          {row.map((item, j) => renderItem(item, i * maxPerRow + j))}
-        </div>
-      ))}
-    </div>
-  );
-};
 
 const Chip = ({ active, onClick, children, tone = "default", caution = false }) => {
   const toneMap = {
@@ -1228,17 +1136,17 @@ const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) =
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div>
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash }}>
             {isEmpty ? "a fresh start" : "Tuesday evening"}
           </div>
-          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05, marginTop: 2 }}>
+          <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
             {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
+              ? <>Welcome, <em style={{ color: theme.terra }}>Juno</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>Juno</em>?</>
             }
-          </FitText>
+          </h1>
         </div>
         <Flower size={24} c={theme.ochre} />
       </div>
@@ -1866,6 +1774,7 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
+  const [intent, setIntent] = useState("");   // current feeling ("how you feel right now")
   const [reverseIngs, setReverseIngs] = useState(["chamomile", "lemonbalm"]);
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
@@ -1997,6 +1906,26 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             ))}
           </div>
 
+          <SectionLabel>Current feeling</SectionLabel>
+          <div style={{ position: "relative", marginTop: 8 }}>
+            <input
+              value={intent}
+              onChange={(e) => setIntent(e.target.value)}
+              placeholder="wound up · scattered · tired…"
+              style={{
+                width: "100%", background: theme.cream,
+                border: `1px solid ${theme.rule}`, borderRadius: 8,
+                fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
+                fontSize: 17, color: intent ? theme.ink : theme.ash,
+                padding: "10px 34px 10px 14px", outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <span style={{
+              position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+              color: theme.ash, fontSize: 13, pointerEvents: "none",
+            }}>✎</span>
+          </div>
           {(() => {
             const moodRow = (
               <div key="mood-row" style={{ opacity: primaryAxis === "feel" ? 1 : 0.72 }}>
@@ -2014,19 +1943,16 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                      "3 selected · at the limit"}
                   </span>
                 </div>
-                <div style={{ marginTop: 10 }}>
-                  <ChipRows
-                    items={MOODS}
-                    renderItem={(m) => (
-                      <Chip
-                        key={m}
-                        active={moods.includes(m)}
-                        caution={moodInTension(m)}
-                        onClick={() => toggleMood(m)}
-                        tone="sage"
-                      >{m}</Chip>
-                    )}
-                  />
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                  {MOODS.map(m => (
+                    <Chip
+                      key={m}
+                      active={moods.includes(m)}
+                      caution={moodInTension(m)}
+                      onClick={() => toggleMood(m)}
+                      tone="sage"
+                    >{m}</Chip>
+                  ))}
                 </div>
 
                 {blend.conflict && (
@@ -2053,23 +1979,20 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                     {primaryAxis === "taste" ? "Flavor you're after" : "Flavor direction"}
                   </SectionLabel>
                 </div>
-                <div style={{ marginTop: 10 }}>
-                  <ChipRows
-                    items={FLAVORS}
-                    renderItem={(f) => {
-                      const active = flavors.includes(f);
-                      const tension = !active && flavorInTension(f);
-                      return (
-                        <Chip
-                          key={f}
-                          active={active}
-                          onClick={() => toggleFlavor(f)}
-                          tone="terra"
-                          caution={tension}
-                        >{f}</Chip>
-                      );
-                    }}
-                  />
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                  {FLAVORS.map(f => {
+                    const active = flavors.includes(f);
+                    const tension = !active && flavorInTension(f);
+                    return (
+                      <Chip
+                        key={f}
+                        active={active}
+                        onClick={() => toggleFlavor(f)}
+                        tone="terra"
+                        caution={tension}
+                      >{f}</Chip>
+                    );
+                  })}
                 </div>
                 {/* Soft warning when user has selected flavors that typically fight each other */}
                 {flavors.length >= 2 && (() => {
@@ -2097,27 +2020,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             // Render the primary axis first (gets "ii"), secondary second (gets "iii")
             return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
           })()}
-
-          {/* Primary action: brew the current blend. Placed here, right after
-              mood/flavor selection, so the decision-to-action path is reachable
-              without scrolling. Pantry toggle, candidate selector, and blend
-              card detail all live below for users who want to refine. */}
-          <button
-            disabled={blend.empty}
-            onClick={() => startBrew(blend, "", moods)}
-            style={{
-              width: "100%", marginTop: 20,
-              fontFamily: ff.serif, fontSize: 16,
-              padding: "14px 16px", borderRadius: 10,
-              background: blend.empty ? theme.rule : theme.terra,
-              color: theme.cream, border: "none",
-              cursor: blend.empty ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}
-          >
-            <Kettle size={18} c={theme.cream} />
-            start brewing
-          </button>
 
           <label style={{
             display: "flex", alignItems: "center", gap: 10, marginTop: 18,
@@ -2276,6 +2178,20 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button style={iconBtn()}>↻ shuffle</button>
             <button style={iconBtn()}>✎ tweak</button>
+            <button
+              disabled={blend.empty}
+              onClick={() => startBrew(blend, intent, moods)}
+              style={{
+                flex: 1, fontFamily: ff.serif, fontSize: 16,
+                padding: "14px 16px", borderRadius: 10,
+                background: blend.empty ? theme.rule : theme.terra,
+                color: theme.cream, border: "none",
+                cursor: blend.empty ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}>
+              <Kettle size={18} c={theme.cream} />
+              start brewing
+            </button>
           </div>
         </>
       )}
@@ -2321,19 +2237,17 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
-  const filteredAvailable = available
-    .filter(id => {
-      const ing = INGREDIENTS[id];
-      if (filter !== "all" && ing.category !== filter) return false;
-      if (search.trim()) {
-        const q = search.trim().toLowerCase();
-        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-          .join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name));
+  const filteredAvailable = available.filter(id => {
+    const ing = INGREDIENTS[id];
+    if (filter !== "all" && ing.category !== filter) return false;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+        .join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
   // derive predicted effects as weighted sum
   const totals = {};
   reverseIngs.forEach(id => {
@@ -2563,7 +2477,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
         <button style={iconBtn()}>save as recipe</button>
-        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "", ["calm"])} style={{
+        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "curious", ["calm"])} style={{
           flex: 1, fontFamily: ff.serif, fontSize: 16,
           padding: "12px 16px", borderRadius: 10,
           background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
@@ -2577,7 +2491,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
+const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -2756,32 +2670,6 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
         </div>
       </div>
 
-      {/* current feeling — optional one-line reflection while you wait.
-          Captured into the session so the log retrospective has the "where
-          you came from" alongside where the cup took you. */}
-      <div style={{ marginTop: 18 }}>
-        <div style={{ position: "relative" }}>
-          <input
-            value={intent || ""}
-            onChange={(e) => setIntent && setIntent(e.target.value)}
-            placeholder="How are you feeling?"
-            className="steep-intent-input"
-            style={{
-              width: "100%", background: "rgba(255,255,255,0.35)",
-              border: `1px dashed ${theme.rule}`, borderRadius: 10,
-              fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
-              fontSize: 14, color: intent ? theme.ink : theme.ruleSoft,
-              padding: "10px 34px 10px 14px", outline: "none",
-              boxSizing: "border-box",
-            }}
-          />
-          <span style={{
-            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-            color: theme.ash, fontSize: 12, pointerEvents: "none",
-          }}>✎</span>
-        </div>
-      </div>
-
       {/* while you wait — cycling fact/tradition/poem pool keyed to this blend
           Tap the card to advance to the next one; the auto-cycle interval resets. */}
       <div
@@ -2875,11 +2763,6 @@ const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, 
         @keyframes breathe {
           0%, 100% { transform: scale(1); }
           50%      { transform: scale(1.012); }
-        }
-        .steep-intent-input::placeholder {
-          color: ${theme.ash};
-          opacity: 0.55;
-          font-style: italic;
         }
       `}</style>
 
@@ -3317,7 +3200,7 @@ const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => {
 const BlendListRow = ({ b, first, author, go, startBrew, highlighted }) => {
   const { unit, weightUnit } = useUnit();
   return (
-  <button onClick={() => startBrew(b, "", [b.mood])} style={{
+  <button onClick={() => startBrew(b, "curious", [b.mood])} style={{
     width: "100%", textAlign: "left",
     background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
     border: "none",
@@ -3402,21 +3285,18 @@ const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pant
   const savedBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
   const yourSessions = sessions.filter(s => s.who === "you");
 
-  // All ingredients, filtered by search / category / pantry-toggle, then
-  // sorted alphabetically by display name so the catalog is browsable.
-  const shelfItems = Object.entries(INGREDIENTS)
-    .filter(([id, ing]) => {
-      if (pantryOnly && !pantryIds.has(id)) return false;
-      if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
-      if (shelfSearch.trim()) {
-        const q = shelfSearch.trim().toLowerCase();
-        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-          .join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    })
-    .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+  // All ingredients, filtered by search / category / pantry-toggle.
+  const shelfItems = Object.entries(INGREDIENTS).filter(([id, ing]) => {
+    if (pantryOnly && !pantryIds.has(id)) return false;
+    if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
+    if (shelfSearch.trim()) {
+      const q = shelfSearch.trim().toLowerCase();
+      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+        .join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -4207,7 +4087,7 @@ const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSe
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
               {isEmptyUser ? "a new keeper" : "Keeper of the shelf"}
             </div>
-            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Tommy M.</div>
+            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Juno M.</div>
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
               {isEmptyUser
                 ? "private · journal is still empty"
@@ -4412,37 +4292,7 @@ const TabBar = ({ tab, setTab }) => {
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
-const PhoneFrame = ({ children, label }) => {
-  // On narrow screens (real mobile devices), skip the fake-phone frame
-  // and render the app full-screen. Otherwise, show the frame (desktop preview).
-  const [isNarrow, setIsNarrow] = React.useState(
-    typeof window !== "undefined" && window.innerWidth < 500
-  );
-  React.useEffect(() => {
-    const onResize = () => setIsNarrow(window.innerWidth < 500);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  if (isNarrow) {
-    return (
-      <div style={{
-        position: "fixed", inset: 0,
-        background: theme.ivory,
-        overflowX: "hidden",
-        overflowY: "hidden",
-        display: "flex", flexDirection: "column",
-        // Use dynamic viewport height on modern browsers to handle mobile
-        // browser chrome (address bar) gracefully; falls back to 100vh.
-        height: "100dvh",
-        width: "100vw",
-      }}>
-        {children}
-      </div>
-    );
-  }
-
-  return (
+const PhoneFrame = ({ children, label }) => (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
     <div style={{
       width: 380, height: 780,
@@ -4490,8 +4340,7 @@ const PhoneFrame = ({ children, label }) => {
       }}>{label}</div>
     )}
   </div>
-  );
-};
+);
 
 /* ──────────────────────────────────────────────────────────────
    Root app
@@ -4584,7 +4433,7 @@ export default function App() {
       who: "you",
       blendId,
       ago: "just now",
-      intent: intent || "",
+      intent: intent || "curious",
       actual,
       taste: taste ?? 4,
       note: note || "",
@@ -4623,126 +4472,6 @@ export default function App() {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [tab]);
 
-  // Detect narrow (mobile-width) viewport so we can skip the desktop-preview
-  // masthead/demo-hints/footer and render just the app at viewport size.
-  const [isNarrow, setIsNarrow] = React.useState(
-    typeof window !== "undefined" && window.innerWidth < 500
-  );
-  React.useEffect(() => {
-    const onResize = () => setIsNarrow(window.innerWidth < 500);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Extract the actual app tree (scroll region + tab bar + overlays) so we can
-  // render it directly on mobile or wrap it in the desktop-preview chrome.
-  const appContent = (
-    <div style={{
-      width: "100%", height: "100%",
-      display: "flex", flexDirection: "column",
-      position: "relative",
-    }}>
-      <div ref={scrollRef} style={{
-        flex: "1 1 auto", minHeight: 0,
-        overflowY: "auto",
-        overflowX: "hidden",
-        position: "relative",
-      }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
-        {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
-      </div>
-
-      <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
-
-      {overlay === "steep" && session && (
-        <SteepScreen
-          blend={session.blend}
-          intent={session.intent}
-          setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
-          targetMoods={session.targetMoods}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
-          onDone={() => setOverlay("log")}
-          onCancel={() => { setOverlay(null); setSession(null); }}
-        />
-      )}
-      {overlay === "log" && session && (
-        <LogScreen
-          blend={session.blend}
-          intent={session.intent}
-          targetMoods={session.targetMoods}
-          onSubmit={(logData) => {
-            addSession({
-              blend: session.blend,
-              intent: session.intent,
-              targetMoods: session.targetMoods,
-              ...logData,
-            });
-            setOverlay(null);
-            setSession(null);
-            setTab("home");
-          }}
-          onCancel={() => setOverlay(null)}
-        />
-      )}
-      {overlay === "ingredient" && (
-        <IngredientDetail
-          id={ingredientId}
-          onClose={() => setOverlay(null)}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
-          onOpenIngredient={(newId) => setIngredientId(newId)}
-        />
-      )}
-      {overlay === "blend" && blendOverlayId && (
-        <BlendDetail
-          blendId={blendOverlayId}
-          isFavorite={savedBlendIds.has(blendOverlayId)}
-          onToggleFavorite={() => toggleFavorite(blendOverlayId)}
-          sessions={sessions}
-          go={go}
-          onClose={() => setOverlay(null)}
-          onOpenIngredient={(ingId) => {
-            setIngredientId(ingId);
-            setOverlay("ingredient");
-          }}
-          onBrew={() => {
-            const b = getBlend(blendOverlayId);
-            if (!b) return;
-            startBrew(b, "", [b.mood]);
-          }}
-        />
-      )}
-    </div>
-  );
-
-  // Mobile: render app full-screen with no masthead/demo-hints/footer chrome.
-  if (isNarrow) {
-    return (
-      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
-        <div style={{
-          position: "fixed", inset: 0,
-          background: theme.ivory,
-          display: "flex", flexDirection: "column",
-          height: "100dvh", width: "100vw",
-          overflow: "hidden",
-          fontFamily: ff.sans,
-        }}>
-          {/* Google Fonts */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-          />
-          {appContent}
-        </div>
-      </UnitContext.Provider>
-    );
-  }
-
   return (
     <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
     <div style={{
@@ -4779,7 +4508,7 @@ export default function App() {
           fontFamily: ff.serif, fontSize: 54, fontWeight: 300, color: theme.ink,
           letterSpacing: "-0.02em", margin: "6px 0 4px", lineHeight: 1,
         }}>
-          Herbanium
+          Tea<em style={{ fontStyle: "italic", color: theme.terra, fontWeight: 400 }}>Pothecary</em>
         </h1>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 15, color: theme.inkSoft,
@@ -4807,7 +4536,84 @@ export default function App() {
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
         <PhoneFrame label="the app">
-          {appContent}
+          {/* Flex column: scroll area grows to fill, tab bar sits below it, overlays cover everything */}
+          <div style={{
+            width: "100%", height: "100%",
+            display: "flex", flexDirection: "column",
+            position: "relative",
+          }}>
+            <div ref={scrollRef} style={{
+              flex: "1 1 auto", minHeight: 0,
+              overflowY: "auto",
+              position: "relative",
+            }}>
+              {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
+              {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
+              {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
+              {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
+            </div>
+
+            <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
+
+            {overlay === "steep" && session && (
+              <SteepScreen
+                blend={session.blend}
+                intent={session.intent}
+                targetMoods={session.targetMoods}
+                pantryIds={pantryIds}
+                togglePantry={togglePantry}
+                onDone={() => setOverlay("log")}
+                onCancel={() => { setOverlay(null); setSession(null); }}
+              />
+            )}
+            {overlay === "log" && session && (
+              <LogScreen
+                blend={session.blend}
+                intent={session.intent}
+                targetMoods={session.targetMoods}
+                onSubmit={(logData) => {
+                  addSession({
+                    blend: session.blend,
+                    intent: session.intent,
+                    targetMoods: session.targetMoods,
+                    ...logData,
+                  });
+                  setOverlay(null);
+                  setSession(null);
+                  setTab("home");
+                }}
+                onCancel={() => setOverlay(null)}
+              />
+            )}
+            {overlay === "ingredient" && (
+              <IngredientDetail
+                id={ingredientId}
+                onClose={() => setOverlay(null)}
+                pantryIds={pantryIds}
+                togglePantry={togglePantry}
+                onOpenIngredient={(newId) => setIngredientId(newId)}
+              />
+            )}
+            {overlay === "blend" && blendOverlayId && (
+              <BlendDetail
+                blendId={blendOverlayId}
+                isFavorite={savedBlendIds.has(blendOverlayId)}
+                onToggleFavorite={() => toggleFavorite(blendOverlayId)}
+                sessions={sessions}
+                go={go}
+                onClose={() => setOverlay(null)}
+                onOpenIngredient={(ingId) => {
+                  setIngredientId(ingId);
+                  setOverlay("ingredient");
+                }}
+                onBrew={() => {
+                  const b = getBlend(blendOverlayId);
+                  if (!b) return;
+                  startBrew(b, "curious", [b.mood]);
+                }}
+              />
+            )}
+          </div>
         </PhoneFrame>
       </div>
 
