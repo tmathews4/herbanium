@@ -11,6 +11,7 @@ import { INGREDIENTS } from "../data/ingredients";
 import {
   ff, theme,
 } from "../theme";
+import { formatTempRange, useUnit } from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
    Component: INGREDIENT SHEET
@@ -21,6 +22,7 @@ import {
    ────────────────────────────────────────────────────────────── */
 
 export const IngredientSheet = ({ id, onClose, inPantry, onTogglePantry }) => {
+  const { unit } = useUnit();
   const ing = INGREDIENTS[id];
   if (!ing) return null;
 
@@ -87,8 +89,8 @@ export const IngredientSheet = ({ id, onClose, inPantry, onTogglePantry }) => {
             <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink, lineHeight: 1.1, marginTop: 1 }}>
               {ing.name}
             </div>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash, marginTop: 1 }}>
-              {ing.latin}
+            <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.ash, marginTop: 3 }}>
+              {formatTempRange(ing.tempC[0], ing.tempC[1], unit)}
             </div>
           </div>
         </div>
