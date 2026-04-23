@@ -116,6 +116,28 @@ of later at deploy time. The noisier output is worth the safety net.
 Pattern applies broadly: any manual check that's documented but optional
 will eventually be forgotten — build it into the automation instead.
 
+### Science-informed, not scientific advice
+Herbanium draws on real botanical and pharmacological knowledge, but
+operates in the register of "here's what people who know tea say this
+tends to feel like" — not "here's a clinical recommendation." Neither
+wellness pseudoscience nor medical guidance. The middle position is a
+deliberate choice and carries real consequences:
+
+- Content says "may help you wind down," not "treats insomnia"
+- Data model uses felt effects (calm, sleepy, focus) not clinical
+  endpoints or pharmacological doses
+- Safety warnings focus on interactions and cautions users can act on,
+  not dosage recommendations
+- Source citations during research signal "this claim comes from
+  somewhere credible" — not "this claim is clinically proven"
+- When a user has a medical question ("is this safe with my SSRI?"),
+  the app's answer should be "consult a pharmacist" — never a
+  confident yes/no
+
+This posture also excludes certain features: no dose calculators, no
+"treat X condition" flows, no symptom-input recommendation. Those
+would imply clinical authority the app doesn't have.
+
 ---
 
 ## Pending Work
@@ -154,6 +176,29 @@ SOURCES bibliography. Each ingredient carries `sources: ["ref-id-1", ...]`
 pointing to a top-level constant with full citations (title, authors,
 publisher/journal, year, url, doi). Display as a Sources section at the
 bottom of each ingredient's Overview tab.
+
+**[PENDING — during research]** Per-profile source tracking. Each extraction
+profile data point may reference different sources (a paper on apigenin
+extraction might inform chamomile's high-temp profile; a flavor guide
+might inform the low-temp character). Each profile carries its own
+`sources` array referencing the central bibliography. Enables honest
+per-data-point confidence and targeted verification later.
+
+**[PENDING — during research, optional] `characterizedPct` per ingredient.**
+Honest label of how much of the ingredient's chemistry is represented
+in the app's data. Shown as "~65% characterized" with tooltip explaining
+what compounds aren't documented. Integrity move: tells the user what
+the app doesn't know. Only populated for ingredients where compound data
+was collected — ingredients without compound research leave the field
+unset rather than defaulting to a number.
+
+**[PENDING — during research, opportunistic] Compound annotations.**
+Optional `compounds` array per ingredient with `{name, approxMg,
+effects, confidence}`. Added only for ingredients where compound data
+is readily available and well-sourced. Not a blanket requirement; skip
+for ingredients where data is thin. Displayed to users as explanation
+layer ("why this cup is calming: ~0.5mg apigenin from chamomile") —
+not used by the blending algorithm in v1.
 
 ### Algorithm
 
@@ -294,6 +339,35 @@ recommends blends it simultaneously warns about.
 **Default temperature unit: F (American).** Weight default: tsp.
 Users can change in Profile → Preferences.
 
+**3 extraction profile data points per ingredient as the starting target.**
+Covers most cases well; add a 4th-5th point to specific ingredients
+(likely true teas with dramatic profile shifts) during research if linear
+interpolation between 3 points misses meaningful character shifts.
+Don't over-collect speculatively — adjust per-ingredient based on what
+the data shape actually needs.
+
+**Algorithm blends by grams-weighted average of temp-adjusted profiles.**
+For each ingredient in a blend, the algorithm looks up its profile at the
+blend's chosen compromise temp (not its ideal temp), then averages those
+temp-adjusted profiles weighted by grams. Simple enough to explain; honest
+about the limitation that interaction effects (peppermint sharpening
+chamomile, ginger amplifying cardamom) aren't captured at this level.
+
+**Research model: effects-first with optional compound annotations.**
+Primary data for each ingredient is the 3-point extraction profile
+(flavors, effects, character). A `compounds` field is optional — added
+opportunistically during research when well-documented data exists,
+skipped when not. Algorithm blends effects directly (simpler, reliable).
+Compounds exist as user-facing transparency and explanation, not as
+algorithm inputs in v1. Door remains open for a compound-level algorithm
+later if data becomes complete enough to warrant it.
+
+**Research workflow: depth-first, one ingredient at a time.** Complete
+each ingredient fully before starting the next; plug into the UI explorer
+immediately as validation. Finds problems after 1 ingredient instead
+of after 7. Start with one category (e.g., herbals) to develop the
+template before expanding.
+
 ### Product scope & structure
 
 **No tradition-aware warning suppression.** All temp warnings fire when
@@ -396,6 +470,28 @@ design → algorithm implementation.
 **Application to W2 jobs as comparison during indie pivot decision.**
 Interviewing at companies you don't want to work for just to confirm
 is a time sink and psychological drain. Skip.
+
+**Compound-level primary data model.** Considered making ingredient data
+compound-first (chamomile contains apigenin, bisabolol, etc. with
+extraction curves per compound) with effects derived from compound
+presence. Rejected for v1 because: (1) compound data quality varies
+enormously across ingredients — well-studied ones have good data,
+obscure ones have almost none; (2) compound-to-effect mapping is itself
+speculative in many cases, so you're pushing approximation down one
+layer not removing it; (3) research burden is multiplicative and would
+bog down the entire project. Effect-first with optional compound
+annotations captures the transparency value without taking on the
+complexity cost. Revisit for v3+ if data coverage ever becomes complete
+enough to warrant it.
+
+**Clinical or medical-advice framing.** Rejected on the "science-informed,
+not scientific advice" principle. No symptom-input recommendations, no
+dose calculators, no "treat X condition" flows, no authoritative claims
+about specific drug interactions. When users have medical questions,
+the app should direct them to pharmacists or doctors — never give a
+confident answer. The app occupies the honest middle ground between
+wellness pseudoscience and medical guidance, and that requires
+deliberately NOT building features that would imply clinical authority.
 
 ---
 
