@@ -2098,6 +2098,27 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
           })()}
 
+          {/* Primary action: brew the current blend. Placed here, right after
+              mood/flavor selection, so the decision-to-action path is reachable
+              without scrolling. Pantry toggle, candidate selector, and blend
+              card detail all live below for users who want to refine. */}
+          <button
+            disabled={blend.empty}
+            onClick={() => startBrew(blend, "", moods)}
+            style={{
+              width: "100%", marginTop: 20,
+              fontFamily: ff.serif, fontSize: 16,
+              padding: "14px 16px", borderRadius: 10,
+              background: blend.empty ? theme.rule : theme.terra,
+              color: theme.cream, border: "none",
+              cursor: blend.empty ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            <Kettle size={18} c={theme.cream} />
+            start brewing
+          </button>
+
           <label style={{
             display: "flex", alignItems: "center", gap: 10, marginTop: 18,
             fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
@@ -2255,20 +2276,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button style={iconBtn()}>↻ shuffle</button>
             <button style={iconBtn()}>✎ tweak</button>
-            <button
-              disabled={blend.empty}
-              onClick={() => startBrew(blend, "", moods)}
-              style={{
-                flex: 1, fontFamily: ff.serif, fontSize: 16,
-                padding: "14px 16px", borderRadius: 10,
-                background: blend.empty ? theme.rule : theme.terra,
-                color: theme.cream, border: "none",
-                cursor: blend.empty ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}>
-              <Kettle size={18} c={theme.cream} />
-              start brewing
-            </button>
           </div>
         </>
       )}
