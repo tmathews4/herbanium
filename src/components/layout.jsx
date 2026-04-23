@@ -23,6 +23,15 @@
      "this would create tension" states.
 
    - Rule: horizontal divider, solid or dashed, soft or standard tone.
+
+   - Toggle: label + pill on/off switch for preferences.
+
+   - EmptyState: shared "nothing here yet" block used across library
+     sub-tabs, profile stats, anywhere content may be absent. Voice:
+     quiet, inviting, never scolding.
+
+   - StatCard / Stat: small fact blocks (with/without card chrome) for
+     detail screens and profile summaries.
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
