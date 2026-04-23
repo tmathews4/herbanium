@@ -1016,6 +1016,7 @@ const SectionLabel = ({ n, children, color = theme.ash }) => (
   <div style={{
     fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
     textTransform: "uppercase", color, fontWeight: 600,
+    textAlign: "left",
   }}>
     {children}
   </div>
@@ -1865,7 +1866,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
-  const [intent, setIntent] = useState("");   // current feeling ("how you feel right now")
   const [reverseIngs, setReverseIngs] = useState(["chamomile", "lemonbalm"]);
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
@@ -1997,26 +1997,6 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             ))}
           </div>
 
-          <SectionLabel>Current feeling</SectionLabel>
-          <div style={{ position: "relative", marginTop: 8 }}>
-            <input
-              value={intent}
-              onChange={(e) => setIntent(e.target.value)}
-              placeholder="wound up · scattered · tired…"
-              style={{
-                width: "100%", background: theme.cream,
-                border: `1px solid ${theme.rule}`, borderRadius: 8,
-                fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
-                fontSize: 17, color: intent ? theme.ink : theme.ash,
-                padding: "10px 34px 10px 14px", outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-            <span style={{
-              position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-              color: theme.ash, fontSize: 13, pointerEvents: "none",
-            }}>✎</span>
-          </div>
           {(() => {
             const moodRow = (
               <div key="mood-row" style={{ opacity: primaryAxis === "feel" ? 1 : 0.72 }}>
@@ -2277,7 +2257,7 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
             <button style={iconBtn()}>✎ tweak</button>
             <button
               disabled={blend.empty}
-              onClick={() => startBrew(blend, intent, moods)}
+              onClick={() => startBrew(blend, "", moods)}
               style={{
                 flex: 1, fontFamily: ff.serif, fontSize: 16,
                 padding: "14px 16px", borderRadius: 10,
@@ -2576,7 +2556,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
         <button style={iconBtn()}>save as recipe</button>
-        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "curious", ["calm"])} style={{
+        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "", ["calm"])} style={{
           flex: 1, fontFamily: ff.serif, fontSize: 16,
           padding: "12px 16px", borderRadius: 10,
           background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
@@ -2590,7 +2570,7 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
+const SteepScreen = ({ blend, intent, setIntent, targetMoods, onDone, onCancel, pantryIds, togglePantry }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -2769,6 +2749,32 @@ const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, 
         </div>
       </div>
 
+      {/* current feeling — optional one-line reflection while you wait.
+          Captured into the session so the log retrospective has the "where
+          you came from" alongside where the cup took you. */}
+      <div style={{ marginTop: 18 }}>
+        <div style={{ position: "relative" }}>
+          <input
+            value={intent || ""}
+            onChange={(e) => setIntent && setIntent(e.target.value)}
+            placeholder="How are you feeling?"
+            className="steep-intent-input"
+            style={{
+              width: "100%", background: "rgba(255,255,255,0.35)",
+              border: `1px dashed ${theme.rule}`, borderRadius: 10,
+              fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
+              fontSize: 14, color: intent ? theme.ink : theme.ruleSoft,
+              padding: "10px 34px 10px 14px", outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          <span style={{
+            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+            color: theme.ash, fontSize: 12, pointerEvents: "none",
+          }}>✎</span>
+        </div>
+      </div>
+
       {/* while you wait — cycling fact/tradition/poem pool keyed to this blend
           Tap the card to advance to the next one; the auto-cycle interval resets. */}
       <div
@@ -2862,6 +2868,11 @@ const SteepScreen = ({ blend, intent, targetMoods, onDone, onCancel, pantryIds, 
         @keyframes breathe {
           0%, 100% { transform: scale(1); }
           50%      { transform: scale(1.012); }
+        }
+        .steep-intent-input::placeholder {
+          color: ${theme.ash};
+          opacity: 0.55;
+          font-style: italic;
         }
       `}</style>
 
@@ -3299,7 +3310,7 @@ const LibraryList = ({ blends, compact, go, startBrew, highlightId }) => {
 const BlendListRow = ({ b, first, author, go, startBrew, highlighted }) => {
   const { unit, weightUnit } = useUnit();
   return (
-  <button onClick={() => startBrew(b, "curious", [b.mood])} style={{
+  <button onClick={() => startBrew(b, "", [b.mood])} style={{
     width: "100%", textAlign: "left",
     background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
     border: "none",
@@ -4566,7 +4577,7 @@ export default function App() {
       who: "you",
       blendId,
       ago: "just now",
-      intent: intent || "curious",
+      intent: intent || "",
       actual,
       taste: taste ?? 4,
       note: note || "",
@@ -4642,6 +4653,7 @@ export default function App() {
         <SteepScreen
           blend={session.blend}
           intent={session.intent}
+          setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
           targetMoods={session.targetMoods}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
@@ -4692,7 +4704,7 @@ export default function App() {
           onBrew={() => {
             const b = getBlend(blendOverlayId);
             if (!b) return;
-            startBrew(b, "curious", [b.mood]);
+            startBrew(b, "", [b.mood]);
           }}
         />
       )}
