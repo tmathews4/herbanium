@@ -4309,8 +4309,13 @@ const PhoneFrame = ({ children, label }) => {
       <div style={{
         position: "fixed", inset: 0,
         background: theme.ivory,
-        overflow: "hidden",
+        overflowX: "hidden",
+        overflowY: "hidden",
         display: "flex", flexDirection: "column",
+        // Use dynamic viewport height on modern browsers to handle mobile
+        // browser chrome (address bar) gracefully; falls back to 100vh.
+        height: "100dvh",
+        width: "100vw",
       }}>
         {children}
       </div>
@@ -4571,6 +4576,7 @@ export default function App() {
             <div ref={scrollRef} style={{
               flex: "1 1 auto", minHeight: 0,
               overflowY: "auto",
+              overflowX: "hidden",
               position: "relative",
             }}>
               {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
