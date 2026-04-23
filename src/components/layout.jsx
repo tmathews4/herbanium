@@ -165,3 +165,75 @@ export const Rule = ({ dashed, soft }) => (
     borderTop: dashed ? `1px dashed ${theme.rule}` : "none",
   }} />
 );
+
+// Toggle — label + pill-style on/off switch. Used on Profile preferences
+// and Log screen's notify options.
+export const Toggle = ({ label, value, onChange }) => (
+  <label style={{
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
+    fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft, cursor: "pointer",
+  }}>
+    <span>{label}</span>
+    <span onClick={() => onChange(!value)} style={{
+      width: 34, height: 20, borderRadius: 999,
+      background: value ? theme.sageDeep : theme.rule,
+      position: "relative", transition: "background .2s",
+    }}>
+      <span style={{
+        position: "absolute", top: 2, left: value ? 16 : 2,
+        width: 16, height: 16, borderRadius: "50%", background: theme.cream,
+        transition: "left .2s",
+      }} />
+    </span>
+  </label>
+);
+
+// EmptyState — shared "nothing here yet" component used across library
+// sub-tabs, profile stats, and anywhere content might be genuinely absent.
+// Voice: quiet, inviting, never scolding.
+export const EmptyState = ({ icon, title, body, cta }) => (
+  <div style={{
+    padding: "22px 20px", borderRadius: 12,
+    background: theme.cream, border: `1px dashed ${theme.rule}`,
+    textAlign: "center",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+  }}>
+    {icon && <div style={{ marginBottom: 2 }}>{icon}</div>}
+    <div style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink, lineHeight: 1.2 }}>
+      {title}
+    </div>
+    {body && (
+      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, lineHeight: 1.5, maxWidth: 280 }}>
+        {body}
+      </div>
+    )}
+    {cta && (
+      <button onClick={cta.onClick} style={{
+        marginTop: 6,
+        fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.04em",
+        padding: "8px 14px", borderRadius: 999,
+        background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
+      }}>{cta.label}</button>
+    )}
+  </div>
+);
+
+// StatCard — flexible "small fact" block used on detail screens.
+export const StatCard = ({ label, value }) => (
+  <div style={{
+    flex: 1, padding: 12, borderRadius: 10,
+    background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+  }}>
+    <div style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>{label}</div>
+    <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, marginTop: 3 }}>{value}</div>
+  </div>
+);
+
+// Stat — bare label+value, no card chrome. Used on Profile summary.
+export const Stat = ({ label, value }) => (
+  <div>
+    <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink, lineHeight: 1 }}>{value}</div>
+    <div style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash, marginTop: 3 }}>{label}</div>
+  </div>
+);

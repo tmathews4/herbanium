@@ -1,0 +1,238 @@
+/* ──────────────────────────────────────────────────────────────
+   screens/HomeScreen.jsx — Home screen plus its row components (FavoriteCard, CompactSessionRow, SessionRow).
+   ────────────────────────────────────────────────────────────── */
+
+import React from "react";
+import {
+  Flower, Kettle, Leaf, Ornament, Sprig,
+} from "../components/icons";
+import {
+  FitText, SectionLabel,
+} from "../components/layout";
+import { BLENDS } from "../data/blends";
+import { getBlend, mmss } from "../helpers/misc";;
+import {
+  ff, theme,
+} from "../theme";
+import {
+  formatTempShort, useUnit,
+} from "../units/units";
+
+/* ──────────────────────────────────────────────────────────────
+   Screen: HOME
+   ────────────────────────────────────────────────────────────── */
+
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) => {
+  const yourSessions = sessions.filter(s => s.who === "you");
+  const favoriteBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
+  const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;
+
+  return (
+    <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
+            {isEmpty
+              ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
+            }
+          </FitText>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <button onClick={() => go("compose")} style={{
+        width: "100%", textAlign: "left",
+        background: theme.ink, color: theme.cream,
+        border: "none", borderRadius: 14, padding: "14px 18px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        cursor: "pointer", marginBottom: 24,
+        boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
+      }}>
+        <div>
+          {isEmpty && (
+            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, opacity: 0.7 }}>
+              to begin your journal
+            </div>
+          )}
+          <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
+            {isEmpty ? "Brew your first cup →" : "Brew a cup →"}
+          </div>
+        </div>
+        <Kettle size={24} c={theme.cream} />
+      </button>
+
+      {/* New-user onboarding card */}
+      {isEmpty && (
+        <div style={{
+          padding: "18px 20px", borderRadius: 12,
+          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+          marginBottom: 22, textAlign: "center",
+        }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+            <Ornament w={120} c={theme.ochre} />
+          </div>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: theme.ash,
+            marginBottom: 6,
+          }}>
+            your journal begins here
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 14.5,
+            color: theme.inkSoft, lineHeight: 1.55,
+          }}>
+            Set a cup out. Brew it with intent. Log how it landed.<br />
+            The app learns you cup by cup.
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+            <Ornament w={120} c={theme.ochre} />
+          </div>
+        </div>
+      )}
+
+      {/* Favorites — horizontal scrollable row */}
+      {favoriteBlends.length > 0 && (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+            <SectionLabel n="i">Favorites</SectionLabel>
+            <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash }}>
+              {favoriteBlends.length} saved
+            </span>
+          </div>
+          <div style={{
+            display: "flex", gap: 10, overflowX: "auto", marginBottom: 22,
+            paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
+          }}>
+            {favoriteBlends.map(b => (
+              <FavoriteCard key={b.id} b={b} onTap={() => openInCompose(b.id)} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Your recent cups */}
+      {yourSessions.length > 0 && (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+            <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
+            <button onClick={() => go("library")} style={{
+              background: "transparent", border: "none",
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+              cursor: "pointer",
+            }}>see all →</button>
+          </div>
+          <div>
+            {yourSessions.slice(0, 5).map((s, i) => (
+              <CompactSessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// Favorite cards — compact snapshots of saved blends in the Home's favorites row.
+// One tap opens Compose with the blend pre-selected so intent capture happens.
+export const FavoriteCard = ({ b, onTap }) => {
+  const { unit, weightUnit } = useUnit();
+  return (
+    <button onClick={onTap} style={{
+      flex: "0 0 auto", width: 150,
+      textAlign: "left",
+      background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+      borderRadius: 10, padding: "10px 12px", cursor: "pointer",
+      display: "flex", flexDirection: "column", gap: 6,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {b.mood === "calm"    && <Flower size={16} c={theme.plum} />}
+        {b.mood === "energy"  && <Leaf   size={16} c={theme.sageDeep} />}
+        {b.mood === "comfort" && <Sprig  size={16} c={theme.ochre} />}
+        {b.mood === "focus"   && <Leaf   size={16} c={theme.sage} />}
+        {b.mood === "sleepy"  && <Flower size={16} c={theme.plum} />}
+        {b.mood === "settle"  && <Sprig  size={16} c={theme.sage} />}
+        <span style={{
+          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+          color: theme.ash,
+        }}>{b.mood}</span>
+      </div>
+      <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, lineHeight: 1.15 }}>
+        {b.name}
+      </div>
+      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, lineHeight: 1.3 }}>
+        {b.subtitle}
+      </div>
+      <div style={{ fontFamily: ff.mono, fontSize: 10, color: theme.inkSoft, marginTop: 2 }}>
+        {formatTempShort(b.tempC, b.tempC, unit)} · {mmss(b.timeS)}
+      </div>
+    </button>
+  );
+};
+
+export const CompactSessionRow = ({ s, openBlend, first }) => {
+  const b = getBlend(s.blendId);
+  if (!b) return null;
+  return (
+    <button onClick={() => openBlend(s.blendId, s)} style={{
+      width: "100%", textAlign: "left", background: "transparent",
+      border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+      padding: "10px 2px", cursor: "pointer",
+      display: "grid", gridTemplateColumns: "1fr auto auto", gap: 12, alignItems: "center",
+    }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
+        <span style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {b.name}
+        </span>
+        <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, whiteSpace: "nowrap" }}>
+          {s.intent} → {s.actual}
+        </span>
+      </div>
+      <span style={{ fontSize: 11, color: theme.terra, letterSpacing: "0.1em" }}>
+        {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
+      </span>
+      <span style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em" }}>{s.ago}</span>
+    </button>
+  );
+};
+
+// Legacy SessionRow — still used in Library history tab.
+export const SessionRow = ({ s, openBlend, first }) => {
+  const b = getBlend(s.blendId);
+  if (!b) return null;
+  return (
+    <button onClick={() => openBlend(s.blendId, s)} style={{
+      width: "100%", textAlign: "left", background: "transparent",
+      border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+      padding: "14px 2px", cursor: "pointer",
+      display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 12, alignItems: "start",
+    }}>
+      <div style={{ marginTop: 2 }}>
+        {b.mood === "calm"    && <Flower size={22} c={theme.plum} />}
+        {b.mood === "energy"  && <Leaf   size={22} c={theme.sageDeep} />}
+        {b.mood === "comfort" && <Sprig  size={22} c={theme.ochre} />}
+        {b.mood === "focus"   && <Leaf   size={22} c={theme.sage} />}
+      </div>
+      <div>
+        <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2 }}>
+          {b.name}
+          {s.who !== "you" && <span style={{ fontStyle: "italic", fontSize: 12, color: theme.ash, marginLeft: 6 }}>· {s.who}</span>}
+        </div>
+        <div style={{ fontSize: 11.5, color: theme.ash, marginTop: 3, letterSpacing: "0.03em" }}>
+          <span style={{ fontStyle: "italic", fontFamily: ff.serif }}>{s.intent}</span>
+          <span style={{ margin: "0 6px", color: theme.rule }}>→</span>
+          <span style={{ color: theme.sageDeep }}>{s.actual}</span>
+          <span style={{ margin: "0 8px", color: theme.rule }}>·</span>
+          <span>{"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span></span>
+        </div>
+        {s.note && (
+          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft, marginTop: 5 }}>
+            "{s.note}"
+          </div>
+        )}
+      </div>
+      <div style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em", marginTop: 4 }}>{s.ago}</div>
+    </button>
+  );
+};
