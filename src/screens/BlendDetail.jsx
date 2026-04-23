@@ -132,7 +132,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
             const topEffect = (meta.effects || []).filter(([t]) => t !== "bitterness")[0];
             const metaParts = [
-              formatTempRange(meta.tempC, unit),
+              formatTempRange(meta.tempC[0], meta.tempC[1], unit),
               topFlavors,
               topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
             ].filter(Boolean);
@@ -143,7 +143,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 padding: "10px 0", cursor: "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "baseline",
               }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
                     {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                   </div>
