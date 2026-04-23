@@ -87,6 +87,35 @@ three rounds of missing-file debugging; three sub-stages would have
 produced three clean test cycles. Not a mistake, but worth remembering:
 the "fast path" has a specific failure mode.
 
+### Ingredients as temperature-dependent functions, not fixed properties
+A plant's flavor and effect profile varies with how you extract it.
+Chamomile at 75°C for 2 min is not chamomile at 95°C for 7 min — different
+compounds extract at different rates, producing different characters and
+different effect intensities. Data model and UI should reflect this — no
+"chamomile is X" statements, instead "chamomile brewed at X°C for Y min
+gives Z." Honors the humility-of-knowledge principle and teaches real tea.
+Current flat `effects` and `flavors` lists are the v1 approximation;
+v2 is extraction profiles (2-3 per ingredient) with UI interpolation.
+
+### Build UI before collecting research data
+When the data model is uncertain, build the UI with mock data first.
+Playing with the interaction exposes what the data actually needs to carry,
+so the research phase collects the right shape on the first pass instead
+of discovering gaps later. Applied to extraction profiles: built temp/time
+slider UI with chamomile mock data before doing any ingredient research.
+Revealed specific questions about interpolation, flavor blending, and
+temp/time interaction that would have been invisible from the data side.
+
+### Self-verifying scripts beat manual verification steps
+When there's a "make sure you also do X" dependency, automating X as
+part of the main action is better than documenting that you should do X.
+Applied to pullall: the file-coverage check (check_pullall_deep.sh) runs
+automatically at the end of every pullall, so the class of bug "I added
+a file and forgot to update pullall" gets caught at copy time instead
+of later at deploy time. The noisier output is worth the safety net.
+Pattern applies broadly: any manual check that's documented but optional
+will eventually be forgotten — build it into the automation instead.
+
 ---
 
 ## Pending Work
@@ -100,14 +129,19 @@ content with properly-sourced entries. Maintain per-ingredient citation
 list referencing a central bibliography in SOURCES constant.
 
 **[PENDING — during research]** Add extraction profiles to ingredient
-data: temp/time ranges → effect yields. Data shape sketch:
+data. Each ingredient carries 2-3 profiles spanning its temp range,
+each with its own flavor and effect vectors. Data shape:
 ```
-ingredient.extractionProfile = [
-  { tempC: [lo, hi], timeS: [lo, hi], yields: { effect: strength } },
-  ...
+ingredient.extractionProfiles = [
+  { tempC: 75, timeS: 180, flavors: [...], effects: [...], character: "..." },
+  { tempC: 90, timeS: 300, flavors: [...], effects: [...], character: "..." },
+  { tempC: 100, timeS: 420, flavors: [...], effects: [...], character: "..." },
 ]
 ```
-Replaces or augments the current flat `effects` field.
+Replaces the current flat `flavors` and `effects` fields. UI interpolates
+between data points for intermediate temp slider positions. Minimum 3
+points per ingredient (low/mid/high); some may need 4-5 if profiles shift
+unevenly. Research effort gets deeper but produces a much richer product.
 
 **[PENDING — during research]** Ingredient-level measurement overrides.
 Add optional `tspGrams` field to ingredient records where the category
@@ -161,6 +195,27 @@ recommendations.
 **[PENDING — post-algorithm] Tradition toggle V2+V3.** Algorithm tier
 switch (experimental vs traditional generation modes). UI confidence
 messaging that changes with the mode.
+
+**[PENDING — post-research, V2 ingredient page] Temp slider on ingredient
+pages.** Interactive horizontal control that remaps flavor tags, effect
+bars, brew time, and character description as the user drags across the
+ingredient's temp range. Primary discoverable feature for understanding
+how extraction works. Requires extraction profile data model. Teaches
+real tea through interaction instead of static content — no existing
+tea app does this to our knowledge.
+
+**[PENDING — post-research, V2 blend page] Temp slider on blend pages.**
+Same mechanism as ingredient version, applied to composite blend profile.
+Shows which ingredients "work" at which temp within a multi-ingredient
+blend (since blend temps are often compromises). Makes temperature
+trade-offs visible and educational rather than arbitrary.
+
+**[PENDING — V3 brew flow] Slider-driven brew.** Once extraction profiles
+are understood, Compose/Steep might let users explicitly choose
+"gentle / standard / strong" before brewing. Algorithm picks a default;
+slider lets user override. Empowers users who know what they want
+(lower caffeine via cooler sencha, stronger sleep aid via hotter
+chamomile) without requiring ingredient-level expertise.
 
 ### Infrastructure
 
@@ -262,9 +317,10 @@ app). Architecture allows future upgrade to Level 3 if desired.
 App.jsx went from ~5,320 lines to 481. Structure now:
 - `src/theme.js` — design tokens
 - `src/units/units.js` — unit system + conversion helpers
-- `src/data/` — ingredients.js, blends.js, seeds.js, waitContent.js
+- `src/data/` — ingredients.js, blends.js, seeds.js, waitContent.js,
+  extractionProfiles.js (mock data for temp/time slider UI)
 - `src/components/` — icons.jsx, layout.jsx (includes Toggle/EmptyState/StatCard/Stat),
-  EffectBar.jsx, FactsCard.jsx, DemoHint.jsx
+  EffectBar.jsx, FactsCard.jsx, DemoHint.jsx, ExtractionExplorer.jsx
 - `src/screens/` — one file per screen (HomeScreen, ComposeScreen including
   ReverseCompose, SteepScreen, LogScreen, LibraryScreen including LibraryList
   and BlendListRow, IngredientSheet, IngredientDetail, BlendDetail, ProfileScreen)
@@ -278,6 +334,15 @@ when failed. Three `git revert`-worthy sub-stages would have produced three
 clean test cycles instead of three rounds of missing-file debugging. Not a
 mistake, but worth remembering that the "fast path" has a specific failure
 mode when changes can fail at build time.
+
+**Built extraction profile UI BEFORE collecting research data.** Mock data
+for one ingredient (chamomile) powers a temp/time slider UI on IngredientDetail
+→ Brewing tab. Purpose: validate the interaction and discover what the data
+model actually needs to carry before committing to a full research pass.
+Prevents research-phase from collecting the wrong shape of information.
+Worked as intended — exposed that flavor tag interpolation should probably
+blend (not union) and that time/temp have real interaction effects that
+linear interpolation may miss.
 
 **Production-as-test-environment workflow.** No local dev server
 testing during current phase; deploy to Vercel, test on live site,

@@ -6,13 +6,16 @@ import React, { useState } from "react";
 import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
 import {
+  ExtractionExplorer, hasExtractionProfile,
+} from "../components/ExtractionExplorer";
+import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
   SectionLabel, StatCard,
-} from "../components/layout";;
+} from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
-import { iconBtn, mmss } from "../helpers/misc";;
+import { iconBtn, mmss } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -170,6 +173,15 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
 
         {tab === "brewing" && (
           <>
+            {/* Interactive explorer — only for ingredients with mock data yet */}
+            {hasExtractionProfile(id) && (
+              <ExtractionExplorer
+                ingredientId={id}
+                tempCRange={ing.tempC}
+                timeSRange={ing.timeS}
+              />
+            )}
+
             <div style={{ display: "flex", gap: 14, marginBottom: 20 }}>
               <StatCard label="Water" value={formatTempRange(ing.tempC[0], ing.tempC[1], unit)} />
               <StatCard label="Steep" value={`${Math.round(ing.timeS[0]/60)}–${Math.round(ing.timeS[1]/60)} min`} />
