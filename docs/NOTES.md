@@ -410,13 +410,16 @@ mistake, but worth remembering that the "fast path" has a specific failure
 mode when changes can fail at build time.
 
 **Built extraction profile UI BEFORE collecting research data.** Mock data
-for one ingredient (chamomile) powers a temp/time slider UI on IngredientDetail
-→ Brewing tab. Purpose: validate the interaction and discover what the data
-model actually needs to carry before committing to a full research pass.
-Prevents research-phase from collecting the wrong shape of information.
-Worked as intended — exposed that flavor tag interpolation should probably
-blend (not union) and that time/temp have real interaction effects that
-linear interpolation may miss.
+for all 30 ingredients powers a temp/time slider UI on IngredientDetail
+→ Brewing tab. Purpose: validate the interaction and discover what the
+data model actually needs to carry before committing to a full research
+pass. Prevents research-phase from collecting the wrong shape of
+information. Worked as intended — exposed that flavor tag interpolation
+should probably blend (not union) and that time/temp have real interaction
+effects that linear interpolation may miss. All 30 ingredients now have
+3-point mock profiles so the UI is consistently populated for anyone
+exploring the app, but these values are best-guess approximations and
+WILL need verification/replacement during the real research phase.
 
 **Production-as-test-environment workflow.** No local dev server
 testing during current phase; deploy to Vercel, test on live site,
