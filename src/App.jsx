@@ -613,7 +613,7 @@ const SEED_MODES = {
 const SESSIONS = SEED_MODES.power.sessions;
 
 const MOODS  = ["calm", "focus", "energy", "sleepy", "comfort", "settle"];
-const FLAVORS= ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet"];
+const FLAVORS= ["sweet", "fruity", "citrus", "floral", "minty", "spiced", "earthy"];
 
 /* ──────────────────────────────────────────────────────────────
    "While you wait" content — facts, traditions, and poems that
@@ -1067,6 +1067,47 @@ const FitText = ({ children, style, minScale = 0.55 }) => {
       >
         {children}
       </div>
+    </div>
+  );
+};
+
+// Balance N items into rows so each row has roughly equal count, with the
+// top row being equal to or one greater than the row below it (4+3, not 3+4).
+// Caps at `maxPerRow` wide items per row — anything wider gets split across
+// more rows. Used by ChipRows below.
+function balanceIntoRows(items, maxPerRow = 4) {
+  const n = items.length;
+  if (n === 0) return [];
+  if (n <= maxPerRow) return [items];
+  // Pick a row count such that each row has at most maxPerRow, and rows are
+  // as balanced as possible (ceil(n / rows) on top, floor(n / rows) below).
+  const rows = Math.ceil(n / maxPerRow);
+  const base = Math.floor(n / rows);
+  const extras = n % rows; // this many rows get one extra at the top
+  const sizes = Array.from({ length: rows }, (_, i) => base + (i < extras ? 1 : 0));
+  const out = [];
+  let cursor = 0;
+  for (const size of sizes) {
+    out.push(items.slice(cursor, cursor + size));
+    cursor += size;
+  }
+  return out;
+}
+
+// ChipRows — renders a list of items as balanced, left-aligned rows of chips.
+// Each row is a flex container that shares row structure (4+3 for 7 items,
+// 3+3 for 6, etc.) but aligns left to match the section label above it.
+const ChipRows = ({ items, renderItem, gap = 6, rowGap = 6, maxPerRow = 4 }) => {
+  const rows = balanceIntoRows(items, maxPerRow);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: rowGap }}>
+      {rows.map((row, i) => (
+        <div key={i} style={{
+          display: "flex", justifyContent: "flex-start", flexWrap: "nowrap", gap,
+        }}>
+          {row.map((item, j) => renderItem(item, i * maxPerRow + j))}
+        </div>
+      ))}
     </div>
   );
 };
@@ -1993,16 +2034,19 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                      "3 selected · at the limit"}
                   </span>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  {MOODS.map(m => (
-                    <Chip
-                      key={m}
-                      active={moods.includes(m)}
-                      caution={moodInTension(m)}
-                      onClick={() => toggleMood(m)}
-                      tone="sage"
-                    >{m}</Chip>
-                  ))}
+                <div style={{ marginTop: 10 }}>
+                  <ChipRows
+                    items={MOODS}
+                    renderItem={(m) => (
+                      <Chip
+                        key={m}
+                        active={moods.includes(m)}
+                        caution={moodInTension(m)}
+                        onClick={() => toggleMood(m)}
+                        tone="sage"
+                      >{m}</Chip>
+                    )}
+                  />
                 </div>
 
                 {blend.conflict && (
@@ -2029,20 +2073,23 @@ const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePresele
                     {primaryAxis === "taste" ? "Flavor you're after" : "Flavor direction"}
                   </SectionLabel>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  {FLAVORS.map(f => {
-                    const active = flavors.includes(f);
-                    const tension = !active && flavorInTension(f);
-                    return (
-                      <Chip
-                        key={f}
-                        active={active}
-                        onClick={() => toggleFlavor(f)}
-                        tone="terra"
-                        caution={tension}
-                      >{f}</Chip>
-                    );
-                  })}
+                <div style={{ marginTop: 10 }}>
+                  <ChipRows
+                    items={FLAVORS}
+                    renderItem={(f) => {
+                      const active = flavors.includes(f);
+                      const tension = !active && flavorInTension(f);
+                      return (
+                        <Chip
+                          key={f}
+                          active={active}
+                          onClick={() => toggleFlavor(f)}
+                          tone="terra"
+                          caution={tension}
+                        >{f}</Chip>
+                      );
+                    }}
+                  />
                 </div>
                 {/* Soft warning when user has selected flavors that typically fight each other */}
                 {flavors.length >= 2 && (() => {
@@ -2287,17 +2334,19 @@ const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
-  const filteredAvailable = available.filter(id => {
-    const ing = INGREDIENTS[id];
-    if (filter !== "all" && ing.category !== filter) return false;
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-        .join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  const filteredAvailable = available
+    .filter(id => {
+      const ing = INGREDIENTS[id];
+      if (filter !== "all" && ing.category !== filter) return false;
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+          .join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name));
   // derive predicted effects as weighted sum
   const totals = {};
   reverseIngs.forEach(id => {
@@ -3335,18 +3384,21 @@ const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pant
   const savedBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
   const yourSessions = sessions.filter(s => s.who === "you");
 
-  // All ingredients, filtered by search / category / pantry-toggle.
-  const shelfItems = Object.entries(INGREDIENTS).filter(([id, ing]) => {
-    if (pantryOnly && !pantryIds.has(id)) return false;
-    if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
-    if (shelfSearch.trim()) {
-      const q = shelfSearch.trim().toLowerCase();
-      const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
-        .join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  // All ingredients, filtered by search / category / pantry-toggle, then
+  // sorted alphabetically by display name so the catalog is browsable.
+  const shelfItems = Object.entries(INGREDIENTS)
+    .filter(([id, ing]) => {
+      if (pantryOnly && !pantryIds.has(id)) return false;
+      if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
+      if (shelfSearch.trim()) {
+        const q = shelfSearch.trim().toLowerCase();
+        const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
+          .join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort(([, a], [, b]) => a.name.localeCompare(b.name));
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
