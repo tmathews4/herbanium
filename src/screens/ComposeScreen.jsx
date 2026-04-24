@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  computeBrewProfile, resolveCandidates,
+  computeBrewProfile, resolveCandidates, resolveBlendAtBrew,
 } from "../algo/compose";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
@@ -114,6 +114,25 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
     ingredients: [], tempC: 95, timeS: 300, effects: [],
     empty: true, conflict: null, moods: [],
   };
+
+  // Live brew state — lifted up from BlendExtractionExplorer so the warning
+  // block above the "start brewing" button can react to slider changes.
+  // Reset to the blend's algorithmic defaults whenever the blend changes
+  // (user picks a different suggestion, or moods/flavors change).
+  const [brewTempC, setBrewTempC] = useState(blend.tempC);
+  const [brewTimeS, setBrewTimeS] = useState(blend.timeS);
+  React.useEffect(() => {
+    setBrewTempC(blend.tempC);
+    setBrewTimeS(blend.timeS);
+  }, [blend.name, blend.tempC, blend.timeS]);
+
+  // Live compatibility check — uses the user's current slider values, not
+  // the static algorithmic defaults. `outsiders` is an array of ingredient
+  // NAMES (not ids) at the live temp.
+  const liveBrew = blend.ingredients?.length > 0
+    ? resolveBlendAtBrew(blend.ingredients, brewTempC, brewTimeS)
+    : { outsiders: [], perIngredient: [] };
+  const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -263,11 +282,11 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
           })()}
 
-          {/* Temperature-compromise warning — fires when the resolved blend's
-              ingredients don't share a brewing window. Currently rare (curated
-              mood blends were designed to agree), but reserved for future
-              blends that mix ingredients with disjoint temp ranges. */}
-          {!blend.empty && blend.compatible === false && blend.outsiders?.length > 0 && (
+          {/* Temperature-compromise warning — reactive to the user's current
+              temp/steep slider values from BlendExtractionExplorer below.
+              Disappears when the user adjusts the temp into a range where
+              every ingredient is within its preferred window. */}
+          {!blend.empty && liveOutsiders.length > 0 && (
             <div style={{
               marginTop: 14, padding: "8px 10px", borderRadius: 6,
               background: "rgba(165, 120, 54, 0.08)",
@@ -276,12 +295,13 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               color: theme.inkSoft, lineHeight: 1.45,
             }}>
               <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
-              these ingredients don't all share a brewing window.{" "}
+              these ingredients don't all share a brewing window at{" "}
+              <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>.{" "}
               <em>
-                {blend.outsiders.map((id, i) => (
-                  <React.Fragment key={id}>
-                    {i > 0 && (i === blend.outsiders.length - 1 ? " and " : ", ")}
-                    {INGREDIENTS[id]?.name || id}
+                {liveOutsiders.map((c, i) => (
+                  <React.Fragment key={c.id}>
+                    {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
+                    {c.name}
                   </React.Fragment>
                 ))}
               </em>
@@ -295,7 +315,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               card detail all live below for users who want to refine. */}
           <button
             disabled={blend.empty}
-            onClick={() => startBrew(blend, "", moods)}
+            onClick={() => startBrew({ ...blend, tempC: brewTempC, timeS: brewTimeS }, "", moods)}
             style={{
               width: "100%", marginTop: 20,
               fontFamily: ff.serif, fontSize: 16,
@@ -442,6 +462,10 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                 ingredients={blend.ingredients}
                 defaultTempC={blend.tempC}
                 defaultTimeS={blend.timeS}
+                tempC={brewTempC}
+                setTempC={setBrewTempC}
+                timeS={brewTimeS}
+                setTimeS={setBrewTimeS}
                 compact
               />
             )}
@@ -508,6 +532,20 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
   const ingsForProfile = reverseIngs.map(id => ({ id, g: 1.0 }));
   const profile = computeBrewProfile(ingsForProfile);
 
+  // Live brew state — lifted up so the compatibility warning reacts to the
+  // user's slider movements in the BlendExtractionExplorer below.
+  const [brewTempC, setBrewTempC] = useState(profile.tempC);
+  const [brewTimeS, setBrewTimeS] = useState(profile.timeS);
+  useEffect(() => {
+    setBrewTempC(profile.tempC);
+    setBrewTimeS(profile.timeS);
+  }, [profile.tempC, profile.timeS]);
+
+  const liveBrew = ingsForProfile.length > 0
+    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS)
+    : { outsiders: [], perIngredient: [] };
+  const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
+
   // For the picker: would adding this ingredient conflict with ANY ingredient
   // already in the pot? The rule: flag the candidate if there exists at least
   // one pot member whose temp range has zero overlap with the candidate's.
@@ -559,9 +597,10 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
           </div>
         ))}
 
-        {/* Temperature-compatibility notice — inline with the pot so users see
-            it while looking at the ingredient list, not buried below the adder. */}
-        {reverseIngs.length > 1 && !profile.compatible && (
+        {/* Temperature-compatibility notice — reactive to the user's current
+            slider values in the explorer below. Disappears when the user moves
+            the temp into a range where every ingredient fits. */}
+        {reverseIngs.length > 1 && liveOutsiders.length > 0 && (
           <div style={{
             marginTop: 10, padding: "8px 10px", borderRadius: 6,
             background: "rgba(165, 120, 54, 0.08)",
@@ -571,28 +610,24 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
             <Kettle size={14} c={theme.ochre} />
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.inkSoft, lineHeight: 1.45 }}>
               <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
-              these don't share a brewing window.
-              {profile.outsiders.length > 0 && (
-                <> at <em style={{ fontStyle: "normal" }}>{formatTemp(profile.tempC, unit)}</em>,{" "}
-                  <em>
-                    {profile.outsiders.map((id, i) => (
-                      <React.Fragment key={id}>
-                        {i > 0 && (i === profile.outsiders.length - 1 ? " and " : ", ")}
-                        <button
-                          onClick={() => go("ingredient", id)}
-                          style={{
-                            background: "transparent", border: "none", padding: 0, cursor: "pointer",
-                            color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
-                            textDecorationStyle: "dotted", textUnderlineOffset: 3,
-                            fontFamily: "inherit", fontSize: "inherit",
-                          }}
-                        >{INGREDIENTS[id].name}</button>
-                      </React.Fragment>
-                    ))}
-                  </em>
-                  {" "}will extract lightly.
-                </>
-              )}
+              at <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>,{" "}
+              <em>
+                {liveOutsiders.map((c, i) => (
+                  <React.Fragment key={c.id}>
+                    {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
+                    <button
+                      onClick={() => go("ingredient", c.id)}
+                      style={{
+                        background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                        color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
+                        textDecorationStyle: "dotted", textUnderlineOffset: 3,
+                        fontFamily: "inherit", fontSize: "inherit",
+                      }}
+                    >{c.name}</button>
+                  </React.Fragment>
+                ))}
+              </em>
+              {" "}will extract lightly.
             </div>
           </div>
         )}
@@ -728,6 +763,10 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
             ingredients={ingsForProfile}
             defaultTempC={profile.tempC}
             defaultTimeS={profile.timeS}
+            tempC={brewTempC}
+            setTempC={setBrewTempC}
+            timeS={brewTimeS}
+            setTimeS={setBrewTimeS}
             compact
           />
         </div>
@@ -735,7 +774,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
         <button style={iconBtn()}>save as recipe</button>
-        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: profile.tempC, timeS: profile.timeS }, "", ["calm"])} style={{
+        <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS }, "", ["calm"])} style={{
           flex: 1, fontFamily: ff.serif, fontSize: 16,
           padding: "12px 16px", borderRadius: 10,
           background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",

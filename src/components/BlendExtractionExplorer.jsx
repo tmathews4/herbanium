@@ -25,7 +25,7 @@
    and the per-ingredient range indicator.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
 import { resolveBlendAtBrew } from "../algo/compose";
@@ -59,27 +59,61 @@ function unionTimeRange(ingredients) {
 }
 
 /**
- * Sensible starting values given the ingredients. Uses the current
- * computeBrewProfile result from the blend, passed in as defaultTempC
- * and defaultTimeS. Falls back to range midpoints if not provided.
+ * Blend-level temp/time explorer with live effect recomputation.
+ *
+ * Supports two modes:
+ *   - Uncontrolled (default, used by BlendDetail): manages its own
+ *     tempC/timeS state internally.
+ *   - Controlled (used by ComposeScreen): parent passes tempC/setTempC
+ *     and timeS/setTimeS, so the parent can read live values for
+ *     reactive warnings above the explorer.
+ *
+ * Ingredient prop is reactive — if it changes (e.g. user picks a
+ * different suggestion), the slider ranges recompute via useMemo,
+ * and a safety useEffect clamps any current values into the new range.
  */
 export const BlendExtractionExplorer = ({
   ingredients,              // [{id, g}, ...]
   defaultTempC,             // from computeBrewProfile (algorithm's recommendation)
   defaultTimeS,             // from computeBrewProfile
+  tempC: tempCProp,         // optional controlled
+  setTempC: setTempCProp,   // optional controlled
+  timeS: timeSProp,         // optional controlled
+  setTimeS: setTimeSProp,   // optional controlled
   compact = false,          // smaller layout for Compose context
 }) => {
   const { unit } = useUnit();
 
-  const [tempCRange] = useState(() => unionTempRange(ingredients));
-  const [timeSRange] = useState(() => unionTimeRange(ingredients));
+  const tempCRange = useMemo(() => unionTempRange(ingredients), [ingredients]);
+  const timeSRange = useMemo(() => unionTimeRange(ingredients), [ingredients]);
 
-  const [tempC, setTempC] = useState(() =>
+  // Internal state — only used when parent hasn't supplied controlled values.
+  const [tempCInternal, setTempCInternal] = useState(() =>
     defaultTempC ?? Math.round((tempCRange[0] + tempCRange[1]) / 2)
   );
-  const [timeS, setTimeS] = useState(() =>
+  const [timeSInternal, setTimeSInternal] = useState(() =>
     defaultTimeS ?? Math.round((timeSRange[0] + timeSRange[1]) / 2)
   );
+
+  const isControlled = tempCProp !== undefined && setTempCProp !== undefined;
+  const tempC = isControlled ? tempCProp : tempCInternal;
+  const setTempC = isControlled ? setTempCProp : setTempCInternal;
+  const timeS = (timeSProp !== undefined && setTimeSProp) ? timeSProp : timeSInternal;
+  const setTimeS = (timeSProp !== undefined && setTimeSProp) ? setTimeSProp : setTimeSInternal;
+
+  // Safety: if ingredients change and the slider values are now out of
+  // range, clamp them. Only applies in uncontrolled mode — parent-controlled
+  // mode is responsible for its own reset logic.
+  useEffect(() => {
+    if (isControlled) return;
+    if (tempC < tempCRange[0] || tempC > tempCRange[1]) {
+      setTempC(defaultTempC ?? Math.round((tempCRange[0] + tempCRange[1]) / 2));
+    }
+    if (timeS < timeSRange[0] || timeS > timeSRange[1]) {
+      setTimeS(defaultTimeS ?? Math.round((timeSRange[0] + timeSRange[1]) / 2));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tempCRange, timeSRange]);
 
   // Live blend computation at current slider values
   const brew = resolveBlendAtBrew(ingredients, tempC, timeS);
