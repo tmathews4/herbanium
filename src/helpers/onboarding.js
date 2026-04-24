@@ -1,12 +1,13 @@
 /* ──────────────────────────────────────────────────────────────
    helpers/onboarding.js — preference-to-seed mapping
 
-   Given a user's onboarding answers (time-of-day + what-draws-them),
-   pick 2-3 curated blends to seed as their starting favorites.
+   Given a user's onboarding answers (time-of-day array + what-draws
+   array, both multi-select), pick 2-3 curated blends to seed as
+   their starting favorites.
 
-   Design: union of candidates from both answers, deduplicated,
-   capped at 3. If the union is small, pad from generally-popular
-   default set.
+   Design: union of candidates from every selected answer,
+   deduplicated, capped at 3. If the union is small, pad from
+   generally-popular default set.
 
    These seeded blends appear in the user's "saved blends" list as
    if they favorited them. They can unfavorite any of them if they
@@ -21,7 +22,6 @@ const TIME_OF_DAY_SEEDS = {
   morning:    ["morning"],                  // Morning Vestment
   afternoon:  ["study", "hearth"],          // Scriptorium, Hearth & Quiet
   evening:    ["dusk"],                     // Dusk Lullaby
-  throughout: ["morning", "hearth", "dusk"], // one per period
 };
 
 // Blends associated with each "what draws you" choice
@@ -37,13 +37,18 @@ const DEFAULT_FALLBACK = ["dusk", "morning", "hearth"];
 
 /**
  * Pick seed blend IDs based on onboarding answers.
+ * timeOfDay and draw are arrays (multi-select) — iterate each and union.
  * Returns array of blend IDs (not objects).
  */
 export function pickSeedBlends({ timeOfDay, draw }) {
   const pool = new Set();
 
-  (TIME_OF_DAY_SEEDS[timeOfDay] || []).forEach(id => pool.add(id));
-  (DRAW_SEEDS[draw] || []).forEach(id => pool.add(id));
+  // Normalize: accept both arrays (current) and strings (legacy/defensive)
+  const times = Array.isArray(timeOfDay) ? timeOfDay : timeOfDay ? [timeOfDay] : [];
+  const draws = Array.isArray(draw) ? draw : draw ? [draw] : [];
+
+  times.forEach(t => (TIME_OF_DAY_SEEDS[t] || []).forEach(id => pool.add(id)));
+  draws.forEach(d => (DRAW_SEEDS[d] || []).forEach(id => pool.add(id)));
 
   // If we got fewer than 2, pad from defaults until we have 2-3
   const defaults = DEFAULT_FALLBACK.slice();

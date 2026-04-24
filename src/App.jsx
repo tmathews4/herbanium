@@ -171,8 +171,8 @@ export default function App() {
     if (isDev && !profile) {
       setProfile({
         name: "Tommy",
-        timeOfDay: "throughout",
-        draw: "calm",
+        timeOfDay: ["morning", "afternoon", "evening"],
+        draw: ["calm", "focus", "energy", "comfort"],
         createdAt: Date.now(),
         isDev: true,
       });

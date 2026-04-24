@@ -29,13 +29,13 @@ const STEPS = 3;
 export const OnboardingScreen = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [timeOfDay, setTimeOfDay] = useState(null);
-  const [draw, setDraw] = useState(null);
+  const [timeOfDay, setTimeOfDay] = useState([]);
+  const [draw, setDraw] = useState([]);
 
   const canAdvance =
     step === 0 ? true  // name is soft-required; blank → "friend"
-    : step === 1 ? Boolean(timeOfDay)
-    : step === 2 ? Boolean(draw)
+    : step === 1 ? timeOfDay.length > 0
+    : step === 2 ? draw.length > 0
     : false;
 
   const finish = () => {
@@ -103,6 +103,27 @@ export const OnboardingScreen = ({ onComplete }) => {
           <StepDraw value={draw} setValue={setDraw} />
         )}
       </div>
+
+      {/* Selection count hint (multi-select steps only) */}
+      {(step === 1 || step === 2) && (
+        <div style={{
+          padding: "0 24px 4px", textAlign: "center",
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: theme.ash, lineHeight: 1.4,
+          minHeight: 18,
+        }}>
+          {step === 1 && (
+            timeOfDay.length === 0
+              ? "pick one or more"
+              : `${timeOfDay.length} selected`
+          )}
+          {step === 2 && (
+            draw.length === 0
+              ? "pick one or more"
+              : `${draw.length} selected`
+          )}
+        </div>
+      )}
 
       {/* Bottom: nav */}
       <div style={{
@@ -205,33 +226,39 @@ const StepName = ({ name, setName }) => (
    ────────────────────────────────────────────────────────────── */
 
 const TIME_OPTIONS = [
-  { key: "morning",    label: "Morning",    note: "waking, the first cup of the day" },
-  { key: "afternoon",  label: "Afternoon",  note: "midday pause, the long desk" },
-  { key: "evening",    label: "Evening",    note: "winding down, toward sleep" },
-  { key: "throughout", label: "Throughout", note: "a cup for every hour" },
+  { key: "morning",   label: "Morning",   note: "waking, the first cup of the day" },
+  { key: "afternoon", label: "Afternoon", note: "midday pause, the long desk" },
+  { key: "evening",   label: "Evening",   note: "winding down, toward sleep" },
 ];
 
-const StepTimeOfDay = ({ value, setValue }) => (
-  <>
-    <div style={{
-      fontFamily: ff.serif, fontSize: 30, color: theme.ink,
-      lineHeight: 1.15, marginBottom: 10,
-    }}>
-      When do you reach for tea?
-    </div>
-    <div style={{
-      fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-      color: theme.ash, marginBottom: 24, lineHeight: 1.5,
-    }}>
-      Pick what's closest — you can change this later.
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {TIME_OPTIONS.map(opt => (
-        <OnboardOption key={opt.key} opt={opt} selected={value === opt.key} onSelect={() => setValue(opt.key)} />
-      ))}
-    </div>
-  </>
-);
+const StepTimeOfDay = ({ value, setValue }) => {
+  const toggle = (key) => {
+    setValue(value.includes(key)
+      ? value.filter(k => k !== key)
+      : [...value, key]);
+  };
+  return (
+    <>
+      <div style={{
+        fontFamily: ff.serif, fontSize: 30, color: theme.ink,
+        lineHeight: 1.15, marginBottom: 10,
+      }}>
+        When do you reach for tea?
+      </div>
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+        color: theme.ash, marginBottom: 24, lineHeight: 1.5,
+      }}>
+        Pick any that feel right — you can change this later.
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {TIME_OPTIONS.map(opt => (
+          <OnboardOption key={opt.key} opt={opt} selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
+        ))}
+      </div>
+    </>
+  );
+};
 
 /* ──────────────────────────────────────────────────────────────
    Step 3: What draws you
@@ -244,27 +271,34 @@ const DRAW_OPTIONS = [
   { key: "energy",  label: "Energy",  note: "lift, the spark to begin" },
 ];
 
-const StepDraw = ({ value, setValue }) => (
-  <>
-    <div style={{
-      fontFamily: ff.serif, fontSize: 30, color: theme.ink,
-      lineHeight: 1.15, marginBottom: 10,
-    }}>
-      What pulls you to a cup?
-    </div>
-    <div style={{
-      fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-      color: theme.ash, marginBottom: 24, lineHeight: 1.5,
-    }}>
-      Your usual reason — not the only one.
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {DRAW_OPTIONS.map(opt => (
-        <OnboardOption key={opt.key} opt={opt} selected={value === opt.key} onSelect={() => setValue(opt.key)} />
-      ))}
-    </div>
-  </>
-);
+const StepDraw = ({ value, setValue }) => {
+  const toggle = (key) => {
+    setValue(value.includes(key)
+      ? value.filter(k => k !== key)
+      : [...value, key]);
+  };
+  return (
+    <>
+      <div style={{
+        fontFamily: ff.serif, fontSize: 30, color: theme.ink,
+        lineHeight: 1.15, marginBottom: 10,
+      }}>
+        What pulls you to a cup?
+      </div>
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+        color: theme.ash, marginBottom: 24, lineHeight: 1.5,
+      }}>
+        Pick any that resonate — no wrong answers.
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {DRAW_OPTIONS.map(opt => (
+          <OnboardOption key={opt.key} opt={opt} selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
+        ))}
+      </div>
+    </>
+  );
+};
 
 /* ──────────────────────────────────────────────────────────────
    Shared option row
