@@ -4,13 +4,14 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 24, 2026. Covers all 26 ingredients
-> researched to date (including turmeric as a new catalog addition).
+> **Status at creation:** April 24, 2026. Covers all 29 ingredients
+> researched to date (including turmeric and ashwagandha as new
+> catalog additions).
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
-> vocabulary migration (v0 → v1 conversion). Section 3 is a new
-> ingredient that needs a full object added.
+> vocabulary migration (v0 → v1 conversion). Section 3 is new
+> ingredients that need full objects added.
 
 ---
 
@@ -130,6 +131,21 @@ dragonwell: {
 rooibos: {
   // ...
   effects: [["soothing", 4], ["digestive", 2], ["grounding", 2]],
+},
+
+tulsi: {
+  // ...
+  effects: [["calm", 3], ["soothing", 3], ["grounding", 3], ["uplifting", 2], ["digestive", 2], ["warming", 2]],
+  // NOTE: Adaptogen profile — broad coverage (6 effects at 2-3
+  // strength) rather than focused peak. Pattern matches ashwagandha.
+  // GABAergic mechanism via ursolic acid (shared with lemon balm).
+},
+
+"lemon-balm": {  // verify exact key name in app
+  // ...
+  effects: [["calm", 4], ["sleepy", 3], ["cooling", 2], ["uplifting", 2], ["soothing", 2]],
+  // NOTE: First herbal at calm=4 (joins gyokuro and chamomile).
+  // GABA-T inhibitor mechanism well-evidenced (Awad 2007, 2009).
 },
 ```
 
@@ -267,7 +283,7 @@ sencha: {
 
 ---
 
-## Section 3 — New ingredient addition
+## Section 3 — New ingredient additions
 
 ### 3.1 Turmeric
 
@@ -317,11 +333,71 @@ turmeric: {
 },
 ```
 
-**Schema caveat:** The structure above is my best guess at what
-the live app's ingredient schema looks like. Will need to reconcile
-with actual `src/data/ingredients.js` schema before applying.
-The research file itself (`docs/research/ingredients/turmeric.md`)
-is schema-agnostic and captures everything that matters.
+### 3.2 Ashwagandha
+
+**Decision required:** Add to catalog? Recommended yes, with
+strong caveats documented in `docs/research/ingredients/ashwagandha.md`
+Section 11.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+ashwagandha: {
+  id: "ashwagandha",
+  displayName: "Ashwagandha",
+  latin: "Withania somnifera",
+  category: "herbal",  // possibly "adaptogen" if subcategory exists
+  subcategory: "root",
+  aliases: ["asgandh", "asvagandha", "Indian ginseng (deprecated, misleading)", "winter cherry"],
+
+  // Sensory
+  flavors: ["earthy", "musty", "bitter", "woody"],
+  basicTastes: {
+    bitter: 3,
+    astringent: 3,
+    earthy: 5,
+    sweet: 1,
+    umami: 1,
+  },
+
+  // Brewing
+  tempRange: [95, 100],
+  timeRange: [600, 1200], // 10-20 min; root extracts slowly
+  caffeine: 0,
+  doseGuidance: "1/2 - 1 tsp dried powdered root per 250ml (challenging flavor; less is often better)",
+
+  // Effects (vocabulary v1)
+  effects: [["grounding", 4], ["calm", 3], ["sleepy", 3], ["soothing", 3], ["warming", 2]],
+  // NOTE: First non-tea ingredient at grounding=4 in STANDARD profile.
+  // Calibration test passed — exceeds previous tea ceiling of 3.
+
+  // Pairing notes
+  idealPairings: ["cinnamon", "cardamom", "ginger", "rooibos", "milk-preparation"],
+  canonicalPreparation: "ashwagandha kshir — milk + spices + sweetener; tea is modern Western adaptation",
+
+  // Safety flags (CRITICAL)
+  safetyFlags: {
+    pregnancy: "avoid", // conservative consensus
+    thyroidMedication: "interaction", // documented antithyrotropic effects
+    sedativeMedication: "additive",
+    autoimmune: "caution", // immune-stimulating; consult provider
+  },
+
+  // Flags
+  confidenceMarkers: {
+    stress: "established",
+    sleep: "established",
+    cortisolModulation: "established",
+    grounding: "verified",
+  },
+},
+```
+
+**Schema caveat:** Both turmeric and ashwagandha entries above
+are best-guess schemas. Will need to reconcile with actual
+`src/data/ingredients.js` schema before applying. The research
+files themselves are schema-agnostic and capture everything that
+matters.
 
 ---
 
@@ -338,6 +414,8 @@ is schema-agnostic and captures everything that matters.
 | sencha | green tea | migrate | `focus 4, energy 3, calm 3, cooling 2` |
 | passionflower | herbal | migrate | `calm 3, sleepy 3, soothing 2` |
 | rooibos | herbal | swap | `soothing 4, digestive 2, grounding 2` |
+| tulsi | herbal | swap | `calm 3, soothing 3, grounding 3, uplifting 2, digestive 2, warming 2` |
+| lemon-balm | herbal | swap | `calm 4, sleepy 3, cooling 2, uplifting 2, soothing 2` |
 | assam | black | swap (verify unchanged) | `energy 5, focus 3, warming 4` |
 | white | white | swap | `calm 3, uplifting 3, focus 3, cooling 2` |
 | darjeeling | black | swap | `uplifting 4, energy 3, focus 3, warming 3, calm 2` |
@@ -355,6 +433,7 @@ is schema-agnostic and captures everything that matters.
 | cloves | spice | swap | `warming 4, digestive 3, grounding 2, soothing 2` |
 | vanilla | spice | swap | `soothing 3, calm 2, uplifting 2, warming 1, sleepy 1` |
 | **turmeric** | **spice (NEW)** | **add** | `warming 3, soothing 2, grounding 2, digestive 2` |
+| **ashwagandha** | **herbal (NEW)** | **add** | `grounding 4, calm 3, sleepy 3, soothing 3, warming 2` |
 
 **Status legend:**
 - `swap`: replace `effects` array directly (already vocab v1)
