@@ -397,3 +397,14 @@ const INGREDIENTS = {
 
 export default INGREDIENTS;
 export { INGREDIENTS };
+
+/* ── User-facing mood and flavor chips ─────────────────────── */
+
+// The user-facing chip labels on the Compose screen.
+// Distinct from internal effect names — effect keys in blends use
+// the vocabulary per docs/vocabulary.md (calm, soothing, digestive,
+// uplifting, warming, etc.). These stay warm-sounding for UI.
+const MOODS   = ["calm", "focus", "energy", "sleepy", "comfort", "settle"];
+const FLAVORS = ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet"];
+
+export { MOODS, FLAVORS };

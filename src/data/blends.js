@@ -283,4 +283,72 @@ const PAIR_BLENDS = {
   },
 };
 
-export { MOODS, FLAVORS, BLENDS, MOOD_BLENDS, PAIR_BLENDS };
+/* ── Mood and flavor relationships ─────────────────────────── */
+
+// Moods that work against each other. Selected anyway? We render
+// a blend but flag the tension with a gentle note.
+const MOOD_CONFLICTS = [
+  ["energy", "sleepy"],
+  ["focus",  "sleepy"],
+];
+
+// Flavor pairs that don't typically play well in a single cup. Won't
+// block the user — the app is permissive — but surfaces a soft warning
+// when both are selected. Not exhaustive; these are the most reliably-
+// fighting ones.
+const FLAVOR_CONFLICTS = [
+  ["minty",  "spiced"],  // menthol cold vs warming spices cancel each other
+  ["earthy", "citrus"],  // bright acid muddies deep grounding notes
+];
+
+// Names used when a single mood is selected — each mood has a canonical
+// "signature" blend name/subtitle pair.
+const MOOD_SINGLE_NAMES = {
+  calm:    ["Dusk Lullaby",        "for wound evenings"],
+  focus:   ["Scriptorium",         "for the hour before dinner"],
+  energy:  ["Morning Vestment",    "a quiet start with teeth"],
+  comfort: ["Hearth & Quiet",      "rainy-afternoon default"],
+  sleepy:  ["Threshold of Sleep",  "for very late nights"],
+  settle:  ["The Settling",        "a long exhale"],
+};
+
+// Simple complementary-flavor map: each flavor has a short list of
+// flavors that pair well as accents. Drives axis-aware candidate
+// generation in the blend resolver.
+const FLAVOR_COMPLEMENTS = {
+  floral:  ["citrus", "honeyed", "grassy"],
+  earthy:  ["spiced", "smoky", "mineral"],
+  citrus:  ["floral", "spiced", "grassy"],
+  spiced:  ["earthy", "sweet", "citrus"],
+  minty:   ["citrus", "floral", "sweet"],
+  fruity:  ["floral", "spiced", "honeyed"],
+  sweet:   ["spiced", "floral", "earthy"],
+  grassy:  ["citrus", "floral", "mineral"],
+  smoky:   ["earthy", "spiced", "sweet"],
+  mineral: ["earthy", "grassy"],
+  honeyed: ["floral", "fruity"],
+};
+
+// Simple mood-neighbor map: when flavor is primary, we can suggest an
+// alternate mood that shares a natural affinity with the user's pick.
+const MOOD_NEIGHBORS = {
+  calm:    ["sleepy", "settle"],
+  focus:   ["energy", "calm"],
+  energy:  ["focus"],
+  sleepy:  ["calm", "settle"],
+  comfort: ["settle", "calm"],
+  settle:  ["comfort", "calm"],
+};
+
+export {
+  MOODS,
+  FLAVORS,
+  BLENDS,
+  MOOD_BLENDS,
+  PAIR_BLENDS,
+  MOOD_CONFLICTS,
+  FLAVOR_CONFLICTS,
+  MOOD_SINGLE_NAMES,
+  FLAVOR_COMPLEMENTS,
+  MOOD_NEIGHBORS,
+};
