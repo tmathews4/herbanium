@@ -36,7 +36,27 @@ right default. If we don't know what the user wanted, we say so (or show "—").
 
 ### Order of the fold
 Primary action reachable without scrolling. Optional refinement lives
-below. Brew button goes above the blend card, not below it.
+below. Later refinement (see "Warning placement" below): order-of-the-fold
+is about making the primary action *reachable*, not about jamming it
+above everything else. When context matters to the decision, the
+action earns its place after the context, inside the same card.
+
+### Warning placement: after context, not before
+The temperature-compromise warning originally sat between the mood
+chips and the "start brewing" button — demanding a decision about
+ingredients the user hadn't yet seen. Moving it to the bottom of the
+blend card, under the ingredient list and extraction explorer, changed
+the read: the warning became commentary on what the user had set
+rather than an alarm about something unseen. Decision-to-action
+should follow context, not precede it.
+
+### Tap-to-detail, not tap-to-action
+Users expect a tap on a list item to open the thing, not commit to
+the thing. Browsing ≠ acting. Every list row should route to a detail
+view; actions live on the detail view as explicit buttons. Reinforced
+twice now — first on Library rows, then on Apothecary's traditional
+filter rows (which regressed via a missing prop, see "Loud failures"
+below).
 
 ### Integrity as political practice
 Shaping one corner of the product landscape against the cultural slide
@@ -116,6 +136,26 @@ of later at deploy time. The noisier output is worth the safety net.
 Pattern applies broadly: any manual check that's documented but optional
 will eventually be forgotten — build it into the automation instead.
 
+### Verify what you shipped, not what you meant to ship
+A correct-sounding commit message against a stale file deploys a stale
+file. Three commits claimed "onboarding added" before one actually
+contained it — the download from Claude silently never hit disk; pullall
+happily copied the stale file; git happily committed it; Vercel happily
+deployed it. Every layer trusted the previous. Self-verifying scripts
+must check *contents* (line count, key strings) — existence isn't enough.
+When something should be present and isn't, suspect the transport before
+the logic.
+
+### Loud failures beat silent wrong behavior
+A defensive fallback — "if X is missing, do the slightly-wrong-but-
+plausible thing instead" — can mask a missing prop for months. Example:
+BlendListRow had `if (openBlend) openBlend(b.id); else startBrew(...)`.
+When the Apothecary's traditional-filter branch forgot to pass openBlend,
+taps silently kicked users into auto-brewing instead of opening the
+recipe card. The code never errored. The bug was invisible until a user
+reported it. When a prop is conceptually required, let missing it throw.
+An error in dev is cheap; a wrong behavior in production is expensive.
+
 ### Science-informed, not scientific advice
 Herbanium draws on real botanical and pharmacological knowledge, but
 operates in the register of "here's what people who know tea say this
@@ -157,6 +197,15 @@ Per-ingredient range indicators (sage dot = in range, terra dot =
 outside) make the trade-offs legible: when you push a blend outside
 sencha's preferred temp to accommodate cinnamon, sencha's dot goes
 terra and a warning appears. The algorithm shows its work.
+
+### Charts are garnish; the loop is the meal
+Considered a mood-over-time chart for the journal section. Declined.
+With 3-10 logged sessions any chart looks sparse, and building it
+would delay work on the algorithm and real ingredient data — the
+things that actually make the app smart instead of just pretty.
+Nice-to-haves get deferred until the core loop earns them. Charts
+of three sessions look silly; charts of three months look meaningful.
+Wait for the data.
 
 ---
 
@@ -388,6 +437,16 @@ immediately as validation. Finds problems after 1 ingredient instead
 of after 7. Start with one category (e.g., herbals) to develop the
 template before expanding.
 
+**Lift state only when a consumer above needs to react.**
+BlendExtractionExplorer originally owned its own tempC/timeS state.
+When we needed the warning block above it to react live to slider
+movements, we lifted the state up to ComposeScreen and passed it back
+as controlled props. To preserve backward compat with BlendDetail
+(which has no consumer above), the explorer accepts optional
+controlled props — uses them if present, falls back to internal state
+otherwise. Don't lift state speculatively; lift when a real reader
+asks for it.
+
 ### Product scope & structure
 
 **No tradition-aware warning suppression.** All temp warnings fire when
@@ -404,6 +463,40 @@ whether or not we chose the composition.
 referencing central bibliography). Not Level 1 (bibliographic footer,
 too vague) and not Level 3 (per-claim citation, overkill for journaling
 app). Architecture allows future upgrade to Level 3 if desired.
+
+**The traditions catalog is a teaching tool.** Expanded from 4
+traditional preparations to 36. Deliberate spread across temperature
+(60°C Gyokuro through 100°C Pu'erh) because the pedagogical point is
+*don't just blast everything at 212°F*. A beginner scrolling the
+Apothecary should encounter Sencha at 75°C next to Silver Needle at
+80°C next to Dragonwell at 80°C and absorb, without reading a tutorial,
+that not every tea wants the same water. Breadth matters more than
+depth here — a wide catalog of examples teaches a principle that a
+narrow catalog can't.
+
+**Filters earn their space as data grows.** Mood chips on Shelf and
+Apothecary were visually present but non-functional. Wired them up
+rather than removing, on the bet that as user-composed blends and
+traditions grow, filtering becomes more useful. "what worked" filters
+to blends with ≥4 star taste ratings in logged sessions — a signal
+that works today (sparse) and gets better with use. Build the plumbing
+early; it costs little and the feature improves as the library does.
+
+**User additions are first-class citizens of a suggestion.** "+ add
+an ingredient" on the blend card lets users augment a mood suggestion
+with their own pantry items. Added ingredients flow into the same
+effectiveIngredients list that the extraction explorer, warning, and
+start-brewing all read from — so the augmented blend behaves as a
+single coherent thing, not a suggestion-plus-extras hack. The
+algorithm sees one blend and treats it as one. Marked visually with
+an "added" label so the user remembers which came from the suggestion
+and which they chose.
+
+**Apothecary merges saved blends and traditions into one view.**
+Previously two separate sub-tabs under Compose. Now a single filterable
+list with chips: all / calm / focus / energy / comfort / traditional /
+what worked. Same mental model as the Shelf's Check-ins filter row,
+so the app doesn't make users learn two filter languages.
 
 ### Technical
 
@@ -451,6 +544,13 @@ File naming errors (case mismatches, missing extensions from
 `present_files` downloads) fail the build before the app ever runs.
 This is a feature, not a bug — saves us from issues that would appear
 later in unexpected contexts.
+
+**Unified pullall workflow; retired pullapp alias.** App.jsx now copies
+through the same self-verifying pullall script as every other file, with
+line-count printouts after each copy. The old pullapp alias was a fast
+path with no safety net — and that's exactly what let a stale App.jsx
+ship with a correct-sounding commit message. One script, one check,
+one source of truth.
 
 ---
 
@@ -515,6 +615,24 @@ the app should direct them to pharmacists or doctors — never give a
 confident answer. The app occupies the honest middle ground between
 wellness pseudoscience and medical guidance, and that requires
 deliberately NOT building features that would imply clinical authority.
+
+**Defensive prop fallback in BlendListRow.** Originally `handleTap`
+was `if (openBlend) openBlend(b.id); else startBrew(...)`. The
+fallback was meant as safety, but in practice hid a missing-prop bug
+long enough for auto-brew behavior to ship as if intentional. Removed;
+`openBlend` is now required. See "Loud failures beat silent wrong
+behavior" in Design Principles.
+
+**Mood-over-time chart in a journal section.** Considered. Declined.
+Would delay the algorithm and real-ingredient-data work for a visual
+that looks sparse at 3-10 sessions anyway. Reconsider once there's
+real usage data and the core loop feels finished. See "Charts are
+garnish" in Design Principles.
+
+**Shuffle and tweak placeholder buttons on the blend card.** Removed.
+They looked functional but did nothing. Replaced with a single "+ add
+an ingredient" adder that actually does what users would want from
+those buttons — customize the suggestion.
 
 ---
 
