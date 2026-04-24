@@ -72,6 +72,23 @@ seen this combination before." False humility: abdication of designer
 responsibility. "Who are we to say?" The first is useful to users;
 the second is cowardice dressed as virtue.
 
+### Counterpoints beside claims, not buried below
+When the app makes a scientific or mechanistic claim — how an ingredient
+works, why it calms, what effect it has — the best-known counter-evidence
+or disagreement in the literature appears alongside the claim, not in a
+footnote or a separate "caveats" section. This is stronger than simple
+humility: it's structural. The format forces every sourced claim to be
+paired with "and here's what complicates it." If no counterpoint exists
+(caffeine in true tea, pH of hibiscus), the claim stands alone honestly;
+if one exists and we hide it, that's a choice to project false
+confidence. The apigenin/GABA story is the canonical example — Viola
+1995 found benzodiazepine-receptor binding, Avallone 2000 and Zanoli
+2000 couldn't reproduce the behavioral effect, and current consensus
+says "mechanism unclear." All three live in the same paragraph in
+Herbanium's chamomile copy, not split between "what it does" and a
+footnoted caveat. Users can't be calibrated if we hide the calibration
+from them.
+
 ### Store in canonical units, convert at render
 Data persists in Celsius and grams. Display layer converts to the
 user's preferred unit (F, tsp). New units can be added without data

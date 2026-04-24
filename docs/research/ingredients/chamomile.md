@@ -30,9 +30,9 @@
 
 **Short description** (2-3 sentences for ingredient page):
 
-> Chamomile is one of the oldest medicinal plants in Western herbal tradition, valued since antiquity as a gentle calmative and sleep aid. The flower heads contain apigenin, a flavonoid that binds weakly to the same brain receptors as benzodiazepines — the likely mechanism behind its reliable calming effect. Nearly all "chamomile tea" is made from German chamomile (*Matricaria chamomilla*), an annual; Roman chamomile (*Chamaemelum nobile*) is a different, more bitter species used more often in perfumery than cups.
+> Chamomile is one of the oldest medicinal plants in Western herbal tradition, valued since antiquity as a gentle calmative and sleep aid. The flower heads contain apigenin, a flavonoid that interacts with the brain's inhibitory neurotransmitter pathways — the exact mechanism is still being worked out, but clinical trials consistently show chamomile tea reduces mild anxiety and promotes sleep. Nearly all "chamomile tea" is made from German chamomile (*Matricaria chamomilla*), an annual; Roman chamomile (*Chamaemelum nobile*) is a different, more bitter species used more often in perfumery than cups.
 
-> **[RESEARCH]** Verify the apigenin / GABA-receptor mechanism claim. This is widely repeated in popular sources and appears in multiple peer-reviewed studies, but the specific wording ("binds weakly to the same brain receptors as benzodiazepines") should be checked against a primary source.
+> **Mechanism note (resolved):** The popular claim that "apigenin binds to the same brain receptors as benzodiazepines" traces to Viola et al. (1995), who found apigenin competitively inhibited flunitrazepam binding at the central benzodiazepine site (Ki = 4 μM) and produced anxiolytic effects in mice. Subsequent work complicated this picture: Avallone et al. (2000) and Zanoli et al. (2000) showed the sedative effect was NOT reversed by flumazenil (the benzodiazepine-site antagonist), and found apigenin's affinity for the BZ site too low (EC50 ~10⁻⁴ M) to explain behavioral effects. Apigenin also *reduces* GABA-evoked currents rather than enhancing them as benzodiazepines do. Losi et al. (2004) suggest sedation may come from effects on NMDA channels instead. Current consensus (e.g. Saadatmand et al. 2024 systematic review): clinical anxiolytic effect is well-established across 9 of 10 RCTs, but mechanism remains "not well understood" — possibly HPA axis modulation, possibly multiple neurotransmitter systems, not a clean benzodiazepine-site story. See refs `ref-viola-1995`, `ref-avallone-2000`, `ref-zanoli-2000`, `ref-losi-2004`, `ref-saadatmand-2024` in section 9.
 
 ---
 
@@ -73,7 +73,7 @@
 
 | Effect | Strength (0-5) | Notes |
 |--------|---------------|-------|
-| calm | 4 | Well-established; apigenin mechanism |
+| calm | 4 | Well-established in clinical trials; mechanism debated (see section 2). Anxiolytic effect confirmed in 9/10 RCTs per Saadatmand 2024 review |
 | sleepy | 3 | Present but secondary to calm; stronger at longer steeps (high-temp apigenin extraction) |
 | settle | 3 | Traditional digestive use; mild carminative effect |
 | comfort | | [RESEARCH] — possibly 2, consider how users describe a chamomile cup |
@@ -83,9 +83,12 @@
 | bitterness | 1 | Low at standard brew; can rise to 2 at long hot steeps |
 
 > Existing ratings preserved: [["calm", 4], ["sleepy", 3], ["settle", 3]].
-> These feel reasonable. Verify during research that intensity scales match
-> documented traditional use — particularly `sleepy`, where some sources
-> claim stronger, others more modest, sedation.
+> The `calm` rating has strong clinical trial support. The `sleepy` rating
+> is reasonable given traditional use and the sedation observed in animal
+> studies at higher apigenin doses (though Avallone 2000 found no
+> anxiolytic-only effect — only dose-dependent sedation). `settle` should
+> be verified against primary sources during a later digestive-focused
+> research pass.
 
 ---
 
@@ -174,7 +177,7 @@
 
 | Compound | Approx mg per cup | Effects contributed | Confidence |
 |----------|------------------|--------------------|------------|
-| apigenin | [RESEARCH] — often cited 0.5-1.2 mg | calm, sleepy | [RESEARCH] |
+| apigenin | [RESEARCH] — often cited 0.5-1.2 mg | calm (mechanism under investigation — possibly via GABA / NMDA / HPA axis, see section 2); ~65% of chamomile's total flavonoid content per McKay & Blumberg 2006 | high for presence and anxiolytic role, medium for mechanism |
 | bisabolol | [RESEARCH] | settle, anti-inflammatory | [RESEARCH] |
 | chamazulene | [RESEARCH] | anti-inflammatory (topical more than internal) | [RESEARCH] |
 | matricin | [RESEARCH] — precursor to chamazulene | | |
@@ -195,17 +198,24 @@
 
 | Ref ID | Citation | Source type |
 |--------|----------|-------------|
-| ref-1 | [RESEARCH] — likely German Commission E monograph on *Matricariae flos* | monograph |
-| ref-2 | [RESEARCH] — probable apigenin / GABA receptor paper (Viola et al., 1995 or similar) | journal |
-| ref-3 | [RESEARCH] — Hobbs, *Chamomile: Medicinal, Cosmetic, and Agricultural Uses* or similar reference | book |
+| ref-viola-1995 | Viola H, Wasowski C, Levi de Stein M, Wolfman C, Silveira R, Dajas F, Medina JH, Paladini AC. (1995). Apigenin, a component of *Matricaria recutita* flowers, is a central benzodiazepine receptors-ligand with anxiolytic effects. *Planta Medica*, 61(3):213-216. PMID: 7617761. | journal (primary, mechanism) |
+| ref-avallone-2000 | Avallone R, Zanoli P, Puia G, Kleinschnitz M, Schreier P, Baraldi M. (2000). Pharmacological profile of apigenin, a flavonoid isolated from *Matricaria chamomilla*. *Biochemical Pharmacology*, 59(11):1387-1394. PMID: 10751547. | journal (primary, mechanism — contests Viola) |
+| ref-zanoli-2000 | Zanoli P, Avallone R, Baraldi M. (2000). Behavioural characterisation of the flavonoids apigenin and chrysin. *Fitoterapia*, 71 Suppl 1:S117-S123. PMID: 10930722. | journal (behavior, mechanism) |
+| ref-losi-2004 | Losi G, Puia G, Garzon G, de Vuono MC, Baraldi M. (2004). Apigenin modulates GABAergic and glutamatergic transmission in cultured cortical neurons. *European Journal of Pharmacology*, 502:41-46. | journal (mechanism — NMDA hypothesis) |
+| ref-saadatmand-2024 | Saadatmand S, et al. (2024). The effect of oral chamomile on anxiety: A systematic review of clinical trials. *Clinical Nutrition Research*, 13(2):139-147. DOI: 10.7762/cnr.2024.13.2.139. | systematic review (clinical) |
+| ref-mao-2016 | Mao JJ, Xie SX, Keefe JR, Soeller I, Li QS, Amsterdam JD. (2016). Long-term chamomile (*Matricaria chamomilla* L.) treatment for generalized anxiety disorder: a randomized clinical trial. *Phytomedicine*, 23:1735-1742. | clinical RCT (long-term GAD) |
+| ref-mckay-2006 | McKay DL, Blumberg JB. (2006). A review of the bioactivity and potential health benefits of chamomile tea. *Phytotherapy Research*, 20(7):519-530. | review (apigenin content, flavonoid profile) |
+| ref-msk-chamomile | Memorial Sloan Kettering "About Herbs" — Chamomile entry. Available at mskcc.org/cancer-care/integrative-medicine/herbs/chamomile | monograph (clinical, safety) |
+| ref-1 | [RESEARCH] — German Commission E monograph on *Matricariae flos* | monograph (traditional use) |
+| ref-2 | [RESEARCH] — Hobbs, *Chamomile: Medicinal, Cosmetic, and Agricultural Uses* or similar reference | book |
 
-**Starting points to investigate:**
+**Starting points for additional research:**
 
-- Google Scholar search: "apigenin GABA chamomile" — the mechanism literature
-- PubMed: *Matricaria chamomilla* clinical trials (anxiety, GAD, insomnia)
-- German Commission E monograph on *Matricariae flos* (flower) — authoritative for traditional medicinal use
+- PubMed: *Matricaria chamomilla* clinical trials (anxiety, GAD, insomnia) — many more RCTs exist beyond Mao 2016
+- German Commission E monograph on *Matricariae flos* (flower) — authoritative for traditional medicinal use and safety
 - WHO monograph on medicinal plants, volume 1 (if chamomile is included)
 - Culpeper's *Complete Herbal* for historical use (freely available)
+- NIH HerbList entry on chamomile — a well-curated summary of the evidence at nccih.nih.gov
 
 ---
 
@@ -219,7 +229,9 @@
 | 2 | history | Ancient Egyptians dedicated chamomile to Ra and used it in the embalming process. | [RESEARCH] verify — this is widely repeated but check primary source |
 | 3 | culture | Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine. | Beatrix Potter, *The Tale of Peter Rabbit*, 1902 |
 | 4 | fact | There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter). | well-established botanical fact |
-| 5 | fact | Apigenin, the calm-producing compound in chamomile, extracts better at higher temperatures — why sleep-blends want a full boil. | [RESEARCH] — confirm apigenin solubility-by-temp curve |
+| 5 | fact | Chamomile tea reduces anxiety in clinical trials, but the exact brain mechanism is still being worked out — early papers thought it acted like a mild benzodiazepine, later research found the picture more complicated. | ref-saadatmand-2024, ref-avallone-2000 |
+
+> Fact #5 replaces the earlier "apigenin extracts better at higher temperatures" claim, which is plausible but unsourced. The mechanism-ambiguity fact is honestly more interesting AND properly sourced — it illustrates the "humility of knowledge" principle better than a fake precision claim would.
 
 > Candidate additions to explore during research:
 > - Chamomile's use as a "companion plant" in gardens (reportedly improves neighbor plant health; "the plant's physician")
@@ -256,11 +268,11 @@
 
 | Area | Confidence | Note |
 |------|-----------|------|
-| Brewing parameters (temp/time) | | existing values are app defaults, not independently verified |
-| Effects ratings | | existing values are reasoned but unsourced |
-| Extraction profiles (3 points) | | current data is MOCK |
-| Safety notes | | partial — ragweed allergy is solid, others need checking |
-| Facts | | mixed — some well-known, others ("embalming") widely repeated without clear source |
+| Brewing parameters (temp/time) | 1 | app defaults, not independently verified against monograph |
+| Effects ratings | 2 (calm, sleepy); 1 (settle) | `calm` and `sleepy` now supported by clinical literature via Saadatmand 2024 review and Viola/Avallone primary sources; `settle` still resting on traditional-use sourcing |
+| Extraction profiles (3 points) | 0 | still MOCK |
+| Safety notes | 1 | ragweed cross-allergy is solid; blood-thinner and pregnancy notes still need verification |
+| Facts | 2 (botanical distinction, Peter Rabbit); 0-1 (Matricaria etymology, Egyptian); 2 (mechanism fact) | mixed — the new mechanism fact is well-sourced, others still need check |
 
 **Overall status:**
 - [x] Draft — needs verification pass
@@ -269,10 +281,10 @@
 
 ---
 
-## Notes for this starting scaffold
+## Notes for this scaffold
 
-- **What's confident here:** Identity (latin, category, alt names), caffeine content, the ragweed cross-allergy note, basic flavor tags, the general shape of the brewing window, the two-species fact, and the Peter Rabbit reference.
-- **What's plausible but unsourced:** The specific temp/time values, the exact effect magnitudes, the Egyptian embalming claim, the compound-level chemistry numbers, the blood-thinner warning.
-- **What's outright missing:** Primary sources. Every `[RESEARCH]` tag marks something that needs citation before it's ship-ready.
+- **What's confident now (post-mechanism-research):** Identity, caffeine = 0, ragweed cross-allergy, basic flavor tags, the clinical anxiolytic effect (backed by Saadatmand 2024 systematic review of 10 RCTs), the mechanism-is-debated narrative (backed by Viola 1995, Avallone 2000, Zanoli 2000, Losi 2004), the German/Roman species distinction, the Peter Rabbit reference.
+- **What's plausible but still unsourced:** Specific temp/time values, the exact effect magnitudes (directionally right, numerically unverified), compound-level chemistry mg/cup numbers, Egyptian embalming claim, Matricaria/womb etymology.
+- **What's outright missing:** Primary sources for the monograph-level claims (German Commission E, WHO), the historical facts beyond Peter Rabbit, the extraction-profile data points at 75/95/100°C.
 
-The goal of this scaffold is to save you 30-45 minutes of typing the boilerplate and let the research time go toward actual sourcing. Don't treat any of the `[RESEARCH]`-flagged numbers as committed — they're placeholders to be verified or replaced.
+**Generalizable lesson for other ingredients:** The apigenin research showed that when a popular claim is widely repeated with a single well-known source (Viola 1995), it often has a more complicated story hiding in the follow-up literature. Worth repeating this "find the follow-up papers" step for any other mechanism claim during research — especially lavender (linalool / GABA), passionflower (GABA-related), and lemon balm (GABA transaminase). A primary source being real doesn't mean the simple story it tells is still current consensus.
