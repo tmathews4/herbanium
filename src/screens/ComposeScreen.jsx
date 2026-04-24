@@ -121,16 +121,36 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   // (user picks a different suggestion, or moods/flavors change).
   const [brewTempC, setBrewTempC] = useState(blend.tempC);
   const [brewTimeS, setBrewTimeS] = useState(blend.timeS);
+
+  // User-augmented ingredients — things they add to a suggestion to make
+  // it their own. Kept separate from blend.ingredients (which is the
+  // algorithm's base suggestion) so we can reset cleanly when the blend
+  // identity changes and the user picks something new.
+  const [addedIngIds, setAddedIngIds] = useState([]);
+  const [showAdder, setShowAdder] = useState(false);
+  const [adderSearch, setAdderSearch] = useState("");
+
   React.useEffect(() => {
     setBrewTempC(blend.tempC);
     setBrewTimeS(blend.timeS);
+    setAddedIngIds([]);        // drop user additions on blend change
+    setShowAdder(false);
+    setAdderSearch("");
   }, [blend.name, blend.tempC, blend.timeS]);
+
+  // Effective ingredient list = algorithmic base + user additions (as
+  // light accents at 0.5g). Used for the explorer, the warning, and
+  // start-brewing. Base ingredients preserve their original grams.
+  const effectiveIngredients = [
+    ...blend.ingredients,
+    ...addedIngIds.map(id => ({ id, g: 0.5 })),
+  ];
 
   // Live compatibility check — uses the user's current slider values, not
   // the static algorithmic defaults. `outsiders` is an array of ingredient
   // NAMES (not ids) at the live temp.
-  const liveBrew = blend.ingredients?.length > 0
-    ? resolveBlendAtBrew(blend.ingredients, brewTempC, brewTimeS)
+  const liveBrew = effectiveIngredients.length > 0
+    ? resolveBlendAtBrew(effectiveIngredients, brewTempC, brewTimeS)
     : { outsiders: [], perIngredient: [] };
   const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
@@ -374,44 +394,210 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                 Tap a mood chip above to compose a cup.
               </div>
             ) : (
-              blend.ingredients.map(({ id, g }) => {
-                const ing = INGREDIENTS[id];
-                const topFlavors = (ing.flavors || []).slice(0, 2).join(", ");
-                const topEffect = (ing.effects || []).filter(([t]) => t !== "bitterness")[0];
-                const metaParts = [
-                  formatTempRange(ing.tempC[0], ing.tempC[1], unit),
-                  topFlavors,
-                  topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
-                ].filter(Boolean);
-                return (
-                  <div key={id} onClick={() => go("ingredient", id)} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                    padding: "6px 0", cursor: "pointer", textAlign: "left",
-                  }}>
-                    <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                      <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
-                        {ing.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+              <>
+                {blend.ingredients.map(({ id, g }) => {
+                  const ing = INGREDIENTS[id];
+                  const topFlavors = (ing.flavors || []).slice(0, 2).join(", ");
+                  const topEffect = (ing.effects || []).filter(([t]) => t !== "bitterness")[0];
+                  const metaParts = [
+                    formatTempRange(ing.tempC[0], ing.tempC[1], unit),
+                    topFlavors,
+                    topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
+                  ].filter(Boolean);
+                  return (
+                    <div key={id} onClick={() => go("ingredient", id)} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                      padding: "6px 0", cursor: "pointer", textAlign: "left",
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                          {ing.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        </div>
+                        <div style={{
+                          fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                          marginTop: 2, letterSpacing: "0.02em",
+                        }}>
+                          {metaParts.join(" · ")}
+                        </div>
                       </div>
-                      <div style={{
-                        fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
-                        marginTop: 2, letterSpacing: "0.02em",
-                      }}>
-                        {metaParts.join(" · ")}
+                      <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
+                        {formatAmount(g, ing.category, weightUnit)}
                       </div>
                     </div>
-                    <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
-                      {formatAmount(g, ing.category, weightUnit)}
+                  );
+                })}
+
+                {/* User-added ingredients — shown inline with the suggested ones
+                    but distinguishable via italic "added" marker and a remove
+                    affordance. */}
+                {addedIngIds.map(id => {
+                  const ing = INGREDIENTS[id];
+                  if (!ing) return null;
+                  const topFlavors = (ing.flavors || []).slice(0, 2).join(", ");
+                  const metaParts = [
+                    formatTempRange(ing.tempC[0], ing.tempC[1], unit),
+                    topFlavors,
+                  ].filter(Boolean);
+                  return (
+                    <div key={`added-${id}`} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                      padding: "6px 0",
+                    }}>
+                      <div
+                        onClick={() => go("ingredient", id)}
+                        style={{ flex: 1, minWidth: 0, textAlign: "left", cursor: "pointer" }}
+                      >
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                          {ing.name}{" "}
+                          <span style={{ fontStyle: "italic", fontSize: 10.5, color: theme.sageDeep, letterSpacing: "0.04em" }}>
+                            added
+                          </span>{" "}
+                          <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        </div>
+                        <div style={{
+                          fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                          marginTop: 2, letterSpacing: "0.02em",
+                        }}>
+                          {metaParts.join(" · ")}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setAddedIngIds(addedIngIds.filter(x => x !== id))}
+                        style={{
+                          background: "transparent", border: "none", cursor: "pointer",
+                          color: theme.ash, fontSize: 16, lineHeight: 1,
+                          padding: "2px 8px", marginLeft: 8,
+                        }}
+                        aria-label={`Remove ${ing.name}`}
+                      >×</button>
+                    </div>
+                  );
+                })}
+
+                {/* Adder toggle + inline picker panel */}
+                <button
+                  onClick={() => setShowAdder(!showAdder)}
+                  style={{
+                    width: "100%", marginTop: 8,
+                    padding: "8px 10px", borderRadius: 8,
+                    background: "transparent",
+                    border: `1px dashed ${theme.rule}`,
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                    color: theme.inkSoft, cursor: "pointer",
+                    textAlign: "center",
+                  }}
+                >
+                  {showAdder ? "× close" : "+ add an ingredient"}
+                </button>
+
+                {showAdder && (
+                  <div style={{
+                    marginTop: 10, padding: "10px 12px", borderRadius: 8,
+                    background: "rgba(0,0,0,0.02)",
+                    border: `1px solid ${theme.ruleSoft}`,
+                  }}>
+                    <input
+                      type="text"
+                      value={adderSearch}
+                      onChange={e => setAdderSearch(e.target.value)}
+                      placeholder="search ingredients…"
+                      style={{
+                        width: "100%", boxSizing: "border-box",
+                        padding: "6px 8px", marginBottom: 8,
+                        border: `1px solid ${theme.rule}`, borderRadius: 6,
+                        background: theme.cream,
+                        fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+                        outline: "none",
+                      }}
+                    />
+                    <div style={{
+                      maxHeight: 220, overflowY: "auto",
+                      display: "flex", flexDirection: "column", gap: 2,
+                    }}>
+                      {(() => {
+                        const excluded = new Set([
+                          ...blend.ingredients.map(i => i.id),
+                          ...addedIngIds,
+                        ]);
+                        const q = adderSearch.trim().toLowerCase();
+                        const matches = Object.keys(INGREDIENTS)
+                          .filter(id => !excluded.has(id))
+                          .filter(id => {
+                            if (!q) return true;
+                            const ing = INGREDIENTS[id];
+                            const hay = [
+                              ing.name, ing.latin || "",
+                              ...(ing.flavors || []),
+                              ing.category || "",
+                            ].join(" ").toLowerCase();
+                            return hay.includes(q);
+                          })
+                          .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name))
+                          .slice(0, 30);
+
+                        if (matches.length === 0) {
+                          return (
+                            <div style={{
+                              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+                              color: theme.ash, padding: "8px 4px", textAlign: "center",
+                            }}>
+                              nothing matches — try another word
+                            </div>
+                          );
+                        }
+
+                        return matches.map(id => {
+                          const ing = INGREDIENTS[id];
+                          const topFlavors = (ing.flavors || []).slice(0, 2).join(", ");
+                          return (
+                            <button
+                              key={id}
+                              onClick={() => {
+                                setAddedIngIds([...addedIngIds, id]);
+                                setAdderSearch("");
+                              }}
+                              style={{
+                                textAlign: "left",
+                                padding: "6px 8px", borderRadius: 4,
+                                background: "transparent", border: "none",
+                                cursor: "pointer",
+                                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                                gap: 10,
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.background = "rgba(109,126,85,0.08)"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontFamily: ff.serif, fontSize: 13.5, color: theme.ink }}>
+                                  {ing.name}
+                                </div>
+                                <div style={{
+                                  fontFamily: ff.sans, fontSize: 10, color: theme.ash,
+                                  marginTop: 1, letterSpacing: "0.02em",
+                                }}>
+                                  {formatTempRange(ing.tempC[0], ing.tempC[1], unit)}
+                                  {topFlavors && ` · ${topFlavors}`}
+                                </div>
+                              </div>
+                              <span style={{
+                                fontFamily: ff.sans, fontSize: 11, color: theme.sageDeep,
+                                flexShrink: 0,
+                              }}>+ add</span>
+                            </button>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
-                );
-              })
+                )}
+              </>
             )}
 
             <div style={{ margin: "14px 0", height: 1, background: theme.ruleSoft }} />
 
-            {blend.ingredients.length > 0 && (
+            {effectiveIngredients.length > 0 && (
               <BlendExtractionExplorer
-                ingredients={blend.ingredients}
+                ingredients={effectiveIngredients}
                 defaultTempC={blend.tempC}
                 defaultTimeS={blend.timeS}
                 tempC={brewTempC}
@@ -451,10 +637,15 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             {/* Primary action: brew the current blend. Placed at the
                 bottom of the card, after the user has seen ingredients,
                 stats, and any compromise warning. Decision-to-action
-                follows, rather than precedes, the context. */}
+                follows, rather than precedes, the context. Uses the
+                effective ingredient list so user additions carry through. */}
             <button
               disabled={blend.empty}
-              onClick={() => startBrew({ ...blend, tempC: brewTempC, timeS: brewTimeS }, "", moods)}
+              onClick={() => startBrew(
+                { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS },
+                "",
+                moods
+              )}
               style={{
                 width: "100%", marginTop: 16,
                 fontFamily: ff.serif, fontSize: 16,
@@ -468,11 +659,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               <Kettle size={18} c={theme.cream} />
               start brewing
             </button>
-          </div>
-
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button style={iconBtn()}>↻ shuffle</button>
-            <button style={iconBtn()}>✎ tweak</button>
           </div>
         </>
       )}
