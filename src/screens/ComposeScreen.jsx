@@ -741,7 +741,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                 {emptyMsg}
               </div>
             ) : apothecaryFilter === "traditional" ? (
-              // Traditions get their author-attribution row treatment
+              // Traditions get their author-attribution row treatment.
+              // openBlend is passed so taps go to the recipe card, not auto-brew.
               visible.map((b, i) => (
                 <BlendListRow
                   key={b.id}
@@ -750,6 +751,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                   first={i === 0}
                   go={go}
                   startBrew={startBrew}
+                  openBlend={openBlend}
                 />
               ))
             ) : (
