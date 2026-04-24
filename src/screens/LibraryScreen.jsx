@@ -88,7 +88,37 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
               />
             </div>
           )}
-          <LibraryList blends={savedBlends} compact go={go} startBrew={startBrew} openBlend={openBlend} />
+          {(() => {
+            // Filter the saved blends. Moods match against the blend's `mood`
+            // field. "what worked" pulls blends the user rated ≥4 in any
+            // logged session. Unknown filter defaults to all.
+            let filtered = savedBlends;
+            if (filter === "what worked") {
+              const wonIds = new Set(
+                yourSessions.filter(s => (s.taste ?? 0) >= 4).map(s => s.blendId)
+              );
+              filtered = savedBlends.filter(b => wonIds.has(b.id));
+            } else if (filter !== "all") {
+              filtered = savedBlends.filter(b => b.mood === filter);
+            }
+
+            if (filtered.length === 0) {
+              const msg = filter === "what worked"
+                ? "No blends have earned four stars yet — once you rate a cup 4 or higher in your log, it'll surface here."
+                : `None of your saved blends match ${filter} yet. Try composing one.`;
+              return (
+                <div style={{
+                  marginTop: 18, padding: "14px 16px",
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
+                }}>
+                  {msg}
+                </div>
+              );
+            }
+
+            return <LibraryList blends={filtered} compact go={go} startBrew={startBrew} openBlend={openBlend} />;
+          })()}
         </>
       )}
 
