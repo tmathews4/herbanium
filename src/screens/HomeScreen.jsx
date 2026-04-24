@@ -23,6 +23,19 @@ import {
    Screen: HOME
    ────────────────────────────────────────────────────────────── */
 
+// Contextual line based on the hour. Returns { label, note }.
+// Kept quiet and observational — not commanding, not whimsical.
+const getTimeOfDay = (h) => {
+  if (h >= 5  && h <  8) return { label: "Early morning",  note: "the kettle is the first voice" };
+  if (h >= 8  && h < 11) return { label: "Morning",        note: "something awake, something bright" };
+  if (h >= 11 && h < 13) return { label: "Late morning",   note: "the light is clear, the day still open" };
+  if (h >= 13 && h < 16) return { label: "Afternoon",      note: "a cup between the hours" };
+  if (h >= 16 && h < 19) return { label: "Late afternoon", note: "slow the hand, steep the thought" };
+  if (h >= 19 && h < 22) return { label: "Evening",        note: "the kettle softens the room" };
+  if (h >= 22 || h <  2) return { label: "Late evening",   note: "a cup to lower the lights" };
+  return                         { label: "Small hours",   note: "when the kettle is a companion" };
+};
+
 export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, profile, welcomeShown, dismissWelcome }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   const favoriteBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
@@ -47,6 +60,37 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </FitText>
         </div>
       </div>
+
+      {/* Time-of-day contextual card (returning users only) */}
+      {!isEmpty && (() => {
+        const tod = getTimeOfDay(new Date().getHours());
+        return (
+          <div style={{
+            marginBottom: 16,
+            padding: "14px 22px 16px",
+            borderRadius: 12,
+            background: theme.cream,
+            border: `1px solid ${theme.ruleSoft}`,
+            textAlign: "center",
+          }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
+              <Ornament w={80} c={theme.ochre} />
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontSize: 17, color: theme.ink,
+              lineHeight: 1.25, marginBottom: 3,
+            }}>
+              {tod.label}.
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+              color: theme.ash, lineHeight: 1.5,
+            }}>
+              {tod.note}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* CTA */}
       <button onClick={() => go("compose")} style={{
