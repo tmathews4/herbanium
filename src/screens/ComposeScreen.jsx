@@ -32,9 +32,10 @@ import { LibraryList, BlendListRow } from "./LibraryScreen";
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePreselect, openInCompose, pantryIds }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
   const { unit, weightUnit } = useUnit();
-  const [mode, setMode] = useState("forward"); // forward | reverse | library | traditions
+  const [mode, setMode] = useState("forward"); // forward | reverse | apothecary
+  const [apothecaryFilter, setApothecaryFilter] = useState("all");
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
@@ -49,7 +50,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   // user sees their saved recipe highlighted, ready to set intent and brew.
   React.useEffect(() => {
     if (!composePreselect) return;
-    setMode("library");
+    setMode("apothecary");
+    setApothecaryFilter("all");
   }, [composePreselect?.at]);
 
   const toggleMood = (m) => {
@@ -158,15 +160,14 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Segmented control */}
       <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
+        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
         border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
         marginBottom: 14, background: theme.cream,
       }}>
         {[
           ["forward",    "Compose"],
           ["reverse",    "Blend"],
-          ["library",    "Apothecary"],
-          ["traditions", "Traditions"],
+          ["apothecary", "Apothecary"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => setMode(k)} style={{
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
@@ -667,28 +668,103 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} />
       )}
 
-      {mode === "library" && (
-        <LibraryList
-          blends={BLENDS.filter(b => savedBlendIds.has(b.id))}
-          highlightId={composePreselect?.blendId}
-          compact go={go} startBrew={startBrew} openBlend={openBlend}
-        />
-      )}
+      {mode === "apothecary" && (() => {
+        // The Apothecary unifies what used to be two tabs (saved blends + traditional
+        // preparations). One filter row covers both. The filter values match the
+        // Shelf screen so the mental model is consistent across the app.
+        const saved = BLENDS.filter(b => savedBlendIds.has(b.id));
+        const traditional = BLENDS.filter(b => b.tradition);
 
-      {mode === "traditions" && (
-        <div style={{ marginTop: 4 }}>
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-            color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-          }}>
-            Classic preparations, taught the way they're traditionally made.
-            Tap any to open its recipe or start brewing.
+        let visible;
+        let emptyMsg;
+        if (apothecaryFilter === "all") {
+          // Union, deduped (a blend could be both saved and traditional).
+          const seen = new Set();
+          visible = [...saved, ...traditional].filter(b => {
+            if (seen.has(b.id)) return false;
+            seen.add(b.id);
+            return true;
+          });
+          emptyMsg = "Your Apothecary is empty. Save blends from Compose to see them here.";
+        } else if (apothecaryFilter === "traditional") {
+          visible = traditional;
+          emptyMsg = "No traditional blends to show.";
+        } else if (apothecaryFilter === "what worked") {
+          const wonIds = new Set(
+            sessions
+              .filter(s => s.who === "you" && (s.taste ?? 0) >= 4)
+              .map(s => s.blendId)
+          );
+          visible = [...saved, ...traditional]
+            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
+            .filter(b => wonIds.has(b.id));
+          emptyMsg = "No blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
+        } else {
+          // mood filter
+          visible = [...saved, ...traditional]
+            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
+            .filter(b => b.mood === apothecaryFilter);
+          emptyMsg = `Nothing saved matches ${apothecaryFilter} yet. Try composing one.`;
+        }
+
+        return (
+          <div style={{ marginTop: 4 }}>
+            <div style={{ marginBottom: 10 }}>
+              <ChipRows
+                items={["all", "calm", "focus", "energy", "comfort", "traditional", "what worked"]}
+                renderItem={(f) => (
+                  <Chip
+                    key={f}
+                    active={apothecaryFilter === f}
+                    onClick={() => setApothecaryFilter(f)}
+                  >{f}</Chip>
+                )}
+              />
+            </div>
+
+            {apothecaryFilter === "traditional" && (
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+              }}>
+                Classic preparations, taught the way they're traditionally made.
+                Tap any to open its recipe or start brewing.
+              </div>
+            )}
+
+            {visible.length === 0 ? (
+              <div style={{
+                marginTop: 18, padding: "14px 16px",
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, textAlign: "center", lineHeight: 1.5,
+              }}>
+                {emptyMsg}
+              </div>
+            ) : apothecaryFilter === "traditional" ? (
+              // Traditions get their author-attribution row treatment
+              visible.map((b, i) => (
+                <BlendListRow
+                  key={b.id}
+                  b={b}
+                  author={b.tradition}
+                  first={i === 0}
+                  go={go}
+                  startBrew={startBrew}
+                />
+              ))
+            ) : (
+              <LibraryList
+                blends={visible}
+                highlightId={composePreselect?.blendId}
+                compact
+                go={go}
+                startBrew={startBrew}
+                openBlend={openBlend}
+              />
+            )}
           </div>
-          {BLENDS.filter(b => b.tradition).map((b, i) => (
-            <BlendListRow key={b.id} b={b} author={b.tradition} first={i === 0} go={go} startBrew={startBrew} />
-          ))}
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
