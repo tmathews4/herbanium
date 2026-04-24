@@ -69,10 +69,10 @@
 **Aroma notes:**
 
 > The defining feature. Intensely sweet-floral, with an animalic
-> depth from indole (the same compound that smells like feces at
-> high concentrations — at jasmine's natural dilution it reads as
-> "heady" and "sensual"). The contrast between bright florality and
-> indolic depth is what makes jasmine unmistakable.
+> depth from the compound indole (at high concentrations it smells
+> like feces — at jasmine's natural dilution the same molecule reads
+> as heady and sensual). The contrast between bright florality and
+> heady depth is what makes jasmine unmistakable.
 
 **Mouthfeel:**
 
@@ -111,7 +111,12 @@
 | focus | 2 | Unusual among florals — EEG evidence suggests jasmine supports alpha (relaxed wakefulness) rather than theta (drowsy) |
 | energy | 2 | **Kept** — unlike rose's energy bug, jasmine's biphasic effect is real. Hongratanaworakit 2008 documented autonomic arousal from topical jasmine oil |
 | cooling | | |
-| bitterness | | Low, unless scented onto oversteeped green tea |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect. Per `docs/vocabulary.md`, bitterness is a flavor not an
+> effect. Pure jasmine flower is low/zero bitter; when scented onto
+> over-steeped green tea, any bitterness comes from the green tea
+> base, not the jasmine.
 
 > **Note on the calm + energy combination:** Unlike rose (where the
 > energy rating was a data-entry bug contradicted by all available
@@ -157,9 +162,9 @@
 |-------|-------|
 | tempC | 85 |
 | timeS | 240 |
-| flavors | [floral, heady, deep, indolic] |
+| flavors | [floral, heady, deep, perfumed] |
 | effects | [["calm", 3], ["energy", 2], ["sleepy", 2]] |
-| character | Fuller extraction — the indolic depth comes forward, the cup reads more "perfume" than "floral." Some drinkers love this; others find it overpowering. |
+| character | Fuller extraction — the heady-perfumed depth comes forward, the cup reads more "perfume" than "floral." Some drinkers love this; others find it overpowering. |
 | sources | ref-bera-2017 |
 
 ### 6d. Time-axis behavior (STANDARD 80°C held constant, time varied)
@@ -214,7 +219,7 @@ Sources: ref-ahmed-2016, ref-hongratanaworakit-2010, traditional.
 
 **Dosage cautions:**
 
-> The sensory ceiling (too heady, too indolic) is self-limiting well
+> The sensory ceiling (too heady, too perfumed) is self-limiting well
 > before any pharmacological concern. Unlike lavender where the
 > failure mode is "soapy/medicinal," jasmine's failure mode is
 > "overwhelming perfume" — unmistakable as "too much."

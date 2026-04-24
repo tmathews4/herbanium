@@ -89,6 +89,75 @@ Herbanium's chamomile copy, not split between "what it does" and a
 footnoted caveat. Users can't be calibrated if we hide the calibration
 from them.
 
+### Label folk, don't hide it
+Every ingredient has cultural baggage — the Roman gynecological use of
+chamomile, the Egyptian dedication to Ra, the "plant's physician"
+gardening lore. These claims are part of what makes an ingredient
+interesting, but most don't have verifiable primary sources.
+Two wrong responses: (1) exclude all folk content to be "scientific,"
+which makes ingredient pages feel clinical and thin; (2) present folk
+as fact, which violates the integrity posture and misleads users.
+The right response is to label. Every claim in the research files
+carries a confidence marker: `verified` (primary source exists),
+`attested` (widely documented in secondary sources, primary hard to
+trace), `folk` (folk belief, culturally real, not verifiable),
+`established` (scientific fact needing no attribution). The app UI
+then frames each appropriately — "Beatrix Potter wrote..." for
+verified, "Traditionally..." for attested, "Folk tradition holds..."
+for folk. Users get the cultural richness without being misled.
+If a folk claim later gets verified to a primary source, it promotes
+to `verified`; if a verified claim later gets contested, the
+counterpoint rule applies. The labels are the scaffolding; the
+classification is the ongoing work.
+
+### Tea-community-standard vocabulary
+We describe flavor and effect using the vocabulary that serious tea
+people use — sommeliers, tea journalists, cha qi practitioners, and
+the established flavor-wheel traditions (International Tea Masters
+Association, Taiwanese Tea Flavor Wheel, Twinings). This matters
+because the ingredients themselves came from centuries-old traditions
+with their own vocabularies, and using those vocabularies respects
+how the material is actually discussed. Inventing our own terms
+would make the app feel idiosyncratic in a way that undermines the
+authority-through-humility posture the rest of the design is building.
+
+Key choices that come from this posture:
+
+1. **TCM warming/cooling is a core effect axis.** We treat `cooling`
+   (Yin: green tea, hibiscus, mint, white tea) and `warming` (Yang:
+   black tea, ginger, cinnamon, roasted oolongs, chai, ripe pu-erh)
+   as paired effects, not optional. This is one of the most
+   fundamental concepts in global tea culture; any app that calls
+   itself a tea app needs to represent it.
+
+2. **Bitterness is a flavor, not an effect.** The five tongue tastes
+   (sweet, salty, sour, bitter, umami) are flavor attributes. What
+   the drink does to your body (calm, warming, focus) is effect.
+   Herbanium's earlier data model conflated them; the audit
+   corrected this.
+
+3. **Three dimensions exist even if we only use two.** Real tea
+   sommeliers separate flavor (what it tastes like), mouthfeel (how
+   it feels — body, astringency, finish), and effect (what it
+   does). We currently collapse mouthfeel into flavor for data-model
+   simplicity. This is a known simplification; v2 may split them.
+
+4. **Prefer community terms to perfumery or academic terms.**
+   `heady` over `indolic`. `bright` over `acidic`. `malty` over
+   `grain-like`. Accessibility and accuracy converge when we stay
+   in the vocabulary the ingredient's tradition uses.
+
+5. **Effects are body experiences, not emotions.** `cooling` yes;
+   `happy` no. The app tracks felt physiological-emotional states,
+   not mood attributions.
+
+The canonical vocabulary lives in `docs/vocabulary.md` — that's the
+lookup reference for what words are allowed and what they mean. When
+new ingredients are researched, their flavor and effect descriptors
+should match that file. When new words are genuinely needed (because
+a tea flavor wheel has a standard term we haven't captured yet), add
+them to `vocabulary.md` first, then use them in the research.
+
 ### Store in canonical units, convert at render
 Data persists in Celsius and grams. Display layer converts to the
 user's preferred unit (F, tsp). New units can be added without data

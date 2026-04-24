@@ -45,10 +45,11 @@ What does a reasonable person need to know about this ingredient?
 - tag 2
 - tag 3
 
-> Prefer existing vocabulary from other ingredients when possible
-> (grep `flavors:` in src/data/ingredients.js for what's already used).
-> If a new flavor tag is genuinely needed, note it here so it can be
-> added to the FLAVORS catalog.
+> Use vocabulary from `docs/vocabulary.md`. Core families: floral,
+> fruity, vegetal, nutty, sweet, roasted, earthy, spicy, herbaceous,
+> umami. Prefer specific descriptors (`chestnut`, `jasmine`) to
+> generic ones (`nutty`, `floral`) when accurate. If a new term is
+> genuinely needed, add it to the vocabulary doc first.
 
 **Aroma notes** (optional, if distinct from flavor):
 
@@ -56,7 +57,18 @@ What does a reasonable person need to know about this ingredient?
 
 **Mouthfeel** (optional):
 
-> e.g. astringent, cooling, warming, coating, clean
+> Body (light/medium/full), astringency, texture, finish. See
+> `docs/vocabulary.md` → Mouthfeel section for the full list.
+> Common descriptors: astringent, brisk, smooth, creamy, buttery,
+> crisp, cooling, oily, thick.
+
+**Basic tastes** (optional, for ingredients where these matter):
+
+> The five tongue tastes: sweet, salty, sour, bitter, umami.
+> Rate 0-5 if notable. Important for:
+> - `bitter` — catechins in green tea, over-steeped herbs
+> - `umami` — Japanese greens
+> - `tart` / `bright` — hibiscus, rosehip, citrus-forward teas
 
 ---
 
@@ -75,21 +87,34 @@ What does a reasonable person need to know about this ingredient?
 
 The app uses the following effect vocabulary. Rate each relevant effect
 on a 0-5 scale for the **standard** brew. Leave blank if not applicable.
+See `docs/vocabulary.md` for full definitions of each term.
 
 | Effect | Strength (0-5) | Notes |
 |--------|---------------|-------|
 | calm | | mental calm, anxiolytic |
 | sleepy | | sedative, sleep-promoting |
-| settle | | digestive / grounding |
-| comfort | | warming, body-feel, cozy |
 | focus | | mental clarity, attention |
 | energy | | stimulant, lifting, alert |
-| cooling | | menthol-like, temperature-feel |
-| bitterness | | astringency / tannic bite (not always "bad") |
+| cooling | | TCM Yin — clears internal heat (green tea, hibiscus, mint) |
+| warming | | TCM Yang — nourishes digestion, generates heat (black tea, ginger, cinnamon, chai) |
+| grounding | | settling, earthy, centering (pu-erh, aged oolongs, ashwagandha) |
+| uplifting | | lightening, mood-lifting (jasmine, bergamot, light oolongs) |
+| digestive | | settles stomach, aids digestion (peppermint, ginger, fennel). Formerly called `settle` |
+| soothing | | general comfort, warmth-of-spirit (chamomile, chai). Formerly called `comfort` |
 
 > Effects should be what a reasonable person brewing this ingredient
 > would actually feel. If an effect is commonly attributed but
 > poorly-sourced, flag it in Notes and rate conservatively.
+>
+> **Note:** `bitterness` is NOT an effect — it's a flavor (one of
+> the five tongue tastes). Track it in Section 3 (Sensory). This
+> was a data-model correction per `docs/vocabulary.md`.
+>
+> **Note on TCM axis:** `cooling` and `warming` are paired effects
+> and most ingredients have one or the other (rarely both or
+> neither). Green tea, hibiscus, mint → cooling. Black tea, ginger,
+> cinnamon, roasted oolongs → warming. This is one of the most
+> fundamental concepts in tea culture and should not be skipped.
 
 ---
 
@@ -265,13 +290,22 @@ List every source that informed this research. Use short ref-ids
 brewing. Aim for things a tea-drinker would find pleasantly surprising
 rather than textbook-dry.
 
-| # | Type | Fact | Source |
-|---|------|------|--------|
-| 1 | fact | Scientific / chemistry — "X compound extracts at Y°C" | ref-? |
-| 2 | tradition | Traditional or ceremonial use | ref-? |
-| 3 | history | Historical note — origin, famous user, old practice | ref-? |
-| 4 | culture | Cultural — how it's drunk somewhere, what it means | ref-? |
-| 5 | fact | Weird delightful detail | ref-? |
+Each fact gets a **confidence** marker that tells the app how to frame
+it in the UI — we don't hide folk, we label it.
+
+**Confidence markers:**
+- **verified** — primary source exists and we have it. App states plainly.
+- **attested** — widely documented in credible secondary sources, primary hard to trace but tradition is real. App prefixes with "Traditionally..."
+- **folk** — folk belief or symbolic attribution; interesting, culturally real, but not verifiable. App prefixes with "Folk tradition holds..."
+- **established** — scientific or botanical fact that doesn't need source attribution (taxonomy, caffeine content, etc.)
+
+| # | Type | Confidence | Fact | Source |
+|---|------|------------|------|--------|
+| 1 | fact | | Scientific / chemistry — "X compound extracts at Y°C" | ref-? |
+| 2 | tradition | | Traditional or ceremonial use | ref-? |
+| 3 | history | | Historical note — origin, famous user, old practice | ref-? |
+| 4 | culture | | Cultural — how it's drunk somewhere, what it means | ref-? |
+| 5 | fact | | Weird delightful detail | ref-? |
 
 > Types: `fact` (scientific/chemistry), `tradition` (how it's used),
 > `history` (origin/old use), `culture` (how it appears in life).
@@ -279,13 +313,40 @@ rather than textbook-dry.
 
 ---
 
+## 10b. Folk & cultural attributions
+
+Additional traditional / cultural claims that aren't in the Steep screen
+rotation but may appear in deeper ingredient-detail content,
+cultural-context tabs, or educational material. Use the same confidence
+markers as Section 10.
+
+This section is where claims live that are part of the ingredient's
+cultural story but don't have clean primary sources. Rather than
+excluding them (which would make ingredient pages feel thin) or pretending
+they're fact (which would violate the integrity posture), we surface
+them honestly with confidence markers so the UI can present them with
+appropriate framing.
+
+| Claim | Confidence | Notes | Source or status |
+|-------|-----------|-------|------------------|
+| | | | |
+| | | | |
+| | | | |
+
+**Design note for the app:** When surfacing `folk` or `attested` content,
+the UI should use framing that makes the epistemic status obvious
+without being condescending. "Folk tradition holds..." is better than
+"Some people claim..." — the first respects the tradition, the second
+dismisses it. Similarly, `attested` content uses "Traditionally..." or
+"Long held to..." rather than "Some sources say..."
+
+If a claim in this section eventually gets verified to a primary
+source during later research, promote it to Section 10 and update
+the confidence to `verified`.
+
+---
+
 ## 11. Miscellaneous & uncaptured
-
-**Interesting things that didn't fit other sections:**
-
-> e.g. etymology of the name, notable cultivars, famous people who drank
-> it, literary references, synesthetic associations, pairs well with
-> seasonal moments, reminds you of X.
 
 **Personal notes** (your own tasting experience if you have it):
 

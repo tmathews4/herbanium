@@ -80,6 +80,13 @@
 > tea being hot. Light body, minimal astringency, long cooling
 > aftertaste.
 
+**Basic tastes:**
+
+> `bitter` (1) — low at standard brew. Menthol itself is cooling,
+> not bitter. Prolonged steeping can produce mild menthone bitterness
+> as the cooler menthol fraction continues extracting into a more
+> oxidized profile.
+
 ---
 
 ## 4. Brewing — baseline parameters
@@ -104,7 +111,10 @@
 | focus | 2 | Some aromatherapy studies suggest menthol enhances alertness; the cool sensation is genuinely activating |
 | energy | 2 | Mild — peppermint is refreshing without being stimulating; can feel energizing through its aromatic-sensory effect |
 | cooling | 4 | **Primary effect** — definitional. TRPM8 activation is a real physiological cooling, not just a metaphor |
-| bitterness | 1 | Low — menthol is cooling, not bitter; prolonged steeping can produce mild menthone bitterness |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect with strength 1. Per `docs/vocabulary.md`, bitterness is a
+> flavor not an effect — moved to section 3.
 
 ---
 

@@ -87,6 +87,12 @@
 > in blends (traditionally combined with valerian, lemon balm,
 > or chamomile in sleep preparations).
 
+**Basic tastes:**
+
+> `bitter` (1) — mild. The flavonoid content contributes a faint
+> bitter edge, particularly at longer steep times, but passionflower
+> is not a notably bitter herb.
+
 ---
 
 ## 4. Brewing — baseline parameters
@@ -118,7 +124,10 @@
 | focus | | Not a focus herb |
 | energy | | |
 | cooling | | |
-| bitterness | 1 | Mild |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect with strength 1. Per `docs/vocabulary.md`, bitterness is a
+> flavor not an effect — mild bitter note described in section 3.
 
 ---
 

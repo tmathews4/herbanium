@@ -56,6 +56,13 @@
 > Clean, slightly coating. Not astringent at normal brewing strengths.
 > At very long steeps, develops a mild tannic bite.
 
+**Basic tastes:**
+
+> `bitter` (1) — low at standard brew; can rise to 2 at long hot
+> steeps. Chamomile's bitterness is mild and comes from the
+> sesquiterpene lactones rather than tannins. Most drinkers don't
+> register it as bitter until the cup is quite strong.
+
 ---
 
 ## 4. Brewing — baseline parameters
@@ -80,7 +87,12 @@
 | focus | | Not applicable |
 | energy | | Not applicable (caffeine-free) |
 | cooling | | Not applicable |
-| bitterness | 1 | Low at standard brew; can rise to 2 at long hot steeps |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect with strength 1 (low at standard brew, rises to 2 at long
+> hot steeps). Per `docs/vocabulary.md`, bitterness is a flavor not
+> an effect — moved to section 3. See vocabulary doc for the
+> flavor/mouthfeel/effect distinction.
 
 > Existing ratings preserved: [["calm", 4], ["sleepy", 3], ["settle", 3]].
 > The `calm` rating has strong clinical trial support. The `sleepy` rating
@@ -339,33 +351,61 @@ claim (Steep App brewtea.app, widely corroborated).
 
 ## 10. Facts for the Steep screen
 
-*(Existing facts preserved; these are pleasant and mostly well-sourced — verify attribution during research.)*
+Each fact carries a **confidence** marker that tells the app how to frame
+it in the UI. This is the same epistemic-status principle as
+counterpoints-beside-claims: we don't hide the folk, we label it.
 
-| # | Type | Fact | Source |
-|---|------|------|--------|
-| 1 | history | The Latin name *Matricaria* comes from *matrix*, meaning womb — the Romans used it as a gynecological remedy. | [RESEARCH] verify |
-| 2 | history | Ancient Egyptians dedicated chamomile to Ra and used it in the embalming process. | [RESEARCH] verify — this is widely repeated but check primary source |
-| 3 | culture | Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine. | Beatrix Potter, *The Tale of Peter Rabbit*, 1902 |
-| 4 | fact | There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter). | well-established botanical fact |
-| 5 | fact | Chamomile tea reduces anxiety in clinical trials, but the exact brain mechanism is still being worked out — early papers thought it acted like a mild benzodiazepine, later research found the picture more complicated. | ref-saadatmand-2024, ref-avallone-2000 |
+**Confidence markers:**
+- **verified** — primary source exists and we have it. App states plainly ("Beatrix Potter wrote...")
+- **attested** — widely documented in credible secondary sources, primary hard to trace but tradition is real. App prefixes with "Traditionally..."
+- **folk** — folk belief or symbolic attribution; interesting, culturally real, but not verifiable. App prefixes with "Folk tradition holds..."
+- **established** — scientific or botanical fact that doesn't need source attribution (taxonomy, caffeine content, etc.)
 
-> Fact #5 replaces the earlier "apigenin extracts better at higher temperatures" claim, which is plausible but unsourced. The mechanism-ambiguity fact is honestly more interesting AND properly sourced — it illustrates the "humility of knowledge" principle better than a fake precision claim would.
+| # | Type | Confidence | Fact | Source |
+|---|------|------------|------|--------|
+| 1 | culture | verified | Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine. | Beatrix Potter, *The Tale of Peter Rabbit*, 1902 |
+| 2 | fact | established | There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter). | botanical taxonomy |
+| 3 | fact | verified | Chamomile tea reduces anxiety in clinical trials, but the exact brain mechanism is still being worked out — early papers thought it acted like a mild benzodiazepine, later research found the picture more complicated. | ref-saadatmand-2024, ref-avallone-2000 |
+| 4 | history | attested | The Latin name *Matricaria* comes from *matrix*, meaning womb — the Romans used it as a gynecological remedy. | widely documented etymology; Latin root verifiable, specific Roman medical use attested in herbal histories but primary classical source untraced |
+| 5 | fact | verified | Chamomile's extraction follows first-order kinetics — the longer you steep, the more apigenin you get, but with diminishing returns past about 10 minutes. | ref-harbourne-2008 |
 
-> Candidate additions to explore during research:
-> - Chamomile's use as a "companion plant" in gardens (reportedly improves neighbor plant health; "the plant's physician")
-> - Specific placement in European folk medicine for teething infants
-> - The *chamaemelon* Greek etymology — "earth apple," for the scent of the crushed leaves
+> Fact-selection rationale for the Steep screen: the 5 selected facts cover
+> culture (Peter Rabbit), science (mechanism), botany (species distinction),
+> history (etymology), and extraction chemistry (kinetics). The `attested`
+> one (Matricaria etymology) is kept because the Latin root is provably
+> correct even if the specific-use claim is harder to trace — the app
+> surfaces it with "Traditionally..." framing to be honest about that.
+
+---
+
+## 10b. Folk & cultural attributions
+
+Additional traditional / cultural claims about chamomile that aren't in
+the Steep screen rotation but may appear in deeper ingredient-detail
+content, cultural-context tabs, or educational material. Each is tagged
+with the same confidence markers as Section 10, so the UI knows how to
+present them honestly.
+
+| Claim | Confidence | Notes | Source or status |
+|-------|-----------|-------|------------------|
+| Ancient Egyptians dedicated chamomile to the sun god Ra | folk | Widely repeated across herbal-history sources; no verifiable primary text. Symbolic link is plausible (yellow-center flower → solar deity) but the specific dedication claim is uncited. | primary source not located |
+| Ancient Egyptians used chamomile in embalming | attested | Archaeological presence in Egyptian tomb contexts is documented; the specific "used in embalming" framing is the popular version of a more general "present in ritual use" reality. | archaeological record exists, exact ritual role debated |
+| The Greek name *chamaemelon* means "earth apple," reflecting the scent of crushed leaves | attested | Greek root verifiable (χαμαίμηλον, khamaimēlon, from *khamai* "on the ground" + *mēlon* "apple"). The scent connection is perceptually true. | etymology verifiable; scent association is common descriptive usage |
+| Chamomile is "the plant's physician" — improves health of neighboring plants when grown together | folk | European gardening lore. Some companion-planting effects are documented in agronomy (scent-based pest deterrence, soil microbiome effects) but the specific "chamomile heals other plants" claim is mystical rather than empirical. | folk belief, unlikely to be verifiable |
+| Chamomile has been cultivated since the Bronze Age | attested | Archaeological records show *Matricaria* pollen in European sites from the Bronze Age forward, though distinguishing cultivation from wild gathering is harder. | archaeobotanical record |
+| Traditional European use for teething infants | attested | Documented across multiple European folk-medicine traditions; clinical evidence for this specific use is limited but the cultural practice is well-attested. | traditional use, clinical efficacy separate question |
+| Chamomile was sacred to Apollo or other sun gods in Greek tradition | folk | Popular claim; the solar-flower symbolic link is real in Greek botanical thinking but the specific "sacred to Apollo" attribution is harder to pin down. | primary source not located; may be modern herbalist embellishment |
+
+**Design note for the app:** When surfacing `folk` or `attested` content,
+the UI should use framing that makes the epistemic status obvious
+without being condescending. "Folk tradition holds..." is better than
+"Some people claim..." — the first respects the tradition, the second
+dismisses it. Similarly, `attested` content uses "Traditionally..." or
+"Long held to..." rather than "Some sources say..."
 
 ---
 
 ## 11. Miscellaneous & uncaptured
-
-**Interesting things that didn't fit other sections:**
-
-> - Chamomile was sacred to the sun gods in several ancient pantheons (Ra in Egypt, possibly associated with Apollo-like figures in Greece via the solar-yellow center of the flower).
-> - The name *chamaemelon* is Greek for "earth apple" — the scent of crushed chamomile leaves is genuinely apple-like, which is where the name comes from.
-> - Traditional folk name "the plant's physician" in European gardening lore — reputed to improve the health of neighboring plants. [RESEARCH] verify; may be folk belief without empirical backing.
-> - Chamomile has been found in archaeological sites dating back to the Bronze Age; cultivation is ancient.
 
 **Personal notes** (add your own tasting experience if/when you brew):
 

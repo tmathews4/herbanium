@@ -100,7 +100,13 @@
 | focus | | Not a focus herb |
 | energy | | **Not an energizing herb** — see bug fix note below |
 | cooling | 2 | Mild cooling from the geraniol fraction |
-| bitterness | | Low — petal astringency is tannic, not bitter |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect (rated low; what people perceive as "bitter" in rose is
+> actually tannic astringency from petal polyphenols, not bitterness).
+> Per `docs/vocabulary.md`, bitterness is a flavor not an effect —
+> and for rose, the more accurate mouthfeel term is `astringent`,
+> not `bitter`. See section 3 for the distinction.
 
 > **Bug fix note:** The existing app data had `[["calm", 3], ["energy", 3]]`.
 > Rose is consistently described in the clinical literature as

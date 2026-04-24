@@ -105,7 +105,11 @@
 | focus | | Not a focus herb — direction is opposite |
 | energy | | |
 | cooling | 2 | The camphor edge reads cooling |
-| bitterness | | Low — lavender is floral-herbaceous, not bitter |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect (rated low — lavender is floral-herbaceous, not bitter). Per
+> `docs/vocabulary.md`, bitterness is a flavor not an effect. For
+> lavender it's effectively zero at normal brews anyway.
 
 ---
 

@@ -81,6 +81,19 @@
 > (savory-sweet) from L-theanine and glutamic acid. Poor brewing
 > introduces grassy astringency and catechin bitterness.
 
+**Basic tastes:**
+
+> - `bitter` — ranges from **1** (well-brewed gyokuro or sencha at
+>   70°C for 1 min) to **4** (boiling water or 5+ minute steep).
+>   Bitterness comes from catechins, primarily EGCG. Brewing
+>   precision is almost entirely about managing this attribute.
+> - `umami` — **3-4** in high-grade Japanese greens; almost the
+>   defining characteristic of gyokuro and good sencha. Comes from
+>   the L-theanine + glutamic acid profile.
+> - `astringent` (mouthfeel, not taste) — **2-3**. Catechin binding
+>   to mouth proteins; distinct from bitter. Well-brewed green tea
+>   is slightly astringent; over-brewed is heavily so.
+
 ---
 
 ## 4. Brewing — baseline parameters
@@ -112,7 +125,14 @@
 | focus | 4 | **Primary effect** — caffeine + L-theanine combination demonstrated to improve attention, alertness, and task performance (Haskell et al. 2008) |
 | energy | 3 | Moderate, smoother than coffee due to L-theanine's moderating effect |
 | cooling | 2 | Cultural "cooling" (especially in traditional Chinese medicine framing); mild cooling sensation from catechins |
-| bitterness | 2 | Catechins are genuinely bitter; character ranges from 1 (well-brewed gyokuro) to 4 (over-steeped, over-heated) |
+
+> **Vocabulary note:** `bitterness` previously appeared here as an
+> effect with strength 2. Per `docs/vocabulary.md`, bitterness is a
+> flavor not an effect — moved to section 3. For green tea
+> specifically this distinction matters, since catechin bitterness
+> is a real and variable flavor attribute (1 for well-brewed gyokuro,
+> 4 for over-steeped or boiled green tea) that the cup's quality
+> often hinges on.
 
 ---
 
