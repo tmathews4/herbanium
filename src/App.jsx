@@ -13,8 +13,12 @@ import { LibraryScreen } from "./screens/LibraryScreen";
 import { IngredientDetail } from "./screens/IngredientDetail";
 import { BlendDetail } from "./screens/BlendDetail";
 import { ProfileScreen } from "./screens/ProfileScreen";
+import { OnboardingScreen } from "./screens/OnboardingScreen";
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
+import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+// Hooks
+import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 
 /* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
@@ -151,35 +155,94 @@ const PhoneFrame = ({ children, label }) => {
    ────────────────────────────────────────────────────────────── */
 
 export default function App() {
+  // URL flag: ?dev skips onboarding, loads SEED_MODES.power as starting state.
+  // Useful for testing without going through onboarding every time localStorage
+  // gets cleared. Must read synchronously at module level so initial state is
+  // correct on first render.
+  const isDev = typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).has("dev");
+
+  // Profile: null until onboarded. { name, timeOfDay, draw, createdAt }
+  const [profile, setProfile] = usePersistedState("profile", null);
+
+  // If dev flag, bypass onboarding by synthesizing a stub profile on first render.
+  // Only runs if no profile exists yet — doesn't override a real user's profile.
+  useEffect(() => {
+    if (isDev && !profile) {
+      setProfile({
+        name: "Tommy",
+        timeOfDay: "throughout",
+        draw: "calm",
+        createdAt: Date.now(),
+        isDev: true,
+      });
+    }
+  }, [isDev, profile, setProfile]);
+
+  // Transient UI state (not persisted — should reset on reload)
   const [tab, setTab] = useState("home");
   const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend"
   const [ingredientId, setIngredientId] = useState("chamomile");
   const [blendOverlayId, setBlendOverlayId] = useState(null);
   const [session, setSession] = useState(null);
-  const [unit, setUnit] = useState("F");
-  const [weightUnit, setWeightUnit] = useState("tsp");
-
-  // Seed-mode system: swap between "new" / "mid" / "power" snapshots for
-  // evaluating the UI at different stages of use.
-  const [seedMode, setSeedMode] = useState("power");
-
-  const [sessions, setSessions] = useState(SEED_MODES.power.sessions);
-  const [savedBlendIds, setSavedBlendIds] = useState(new Set(SEED_MODES.power.savedBlendIds));
-  const [pantryIds, setPantryIds] = useState(new Set(SEED_MODES.power.pantryIds));
-
-  // When a saved blend is tapped from Home or elsewhere, we route through
-  // Compose so the user can set intent before brewing. composePreselect tells
-  // Compose which blend to show and which sub-tab to land on.
   const [composePreselect, setComposePreselect] = useState(null);
 
-  // When seed mode changes, reset the varying state to that mode's snapshot.
-  React.useEffect(() => {
+  // Persisted preferences
+  const [unit, setUnit] = usePersistedState("unit", "F");
+  const [weightUnit, setWeightUnit] = usePersistedState("weightUnit", "tsp");
+
+  // Persisted user data
+  // For dev mode: default to SEED_MODES.power so the app looks populated.
+  // For normal users: default to empty; onboarding will populate with seeds.
+  const [sessions, setSessions] = usePersistedState(
+    "sessions",
+    isDev ? SEED_MODES.power.sessions : []
+  );
+  const [savedBlendIds, setSavedBlendIds] = usePersistedState(
+    "savedBlendIds",
+    isDev ? new Set(SEED_MODES.power.savedBlendIds) : new Set()
+  );
+  const [pantryIds, setPantryIds] = usePersistedState(
+    "pantryIds",
+    isDev ? new Set(SEED_MODES.power.pantryIds) : new Set()
+  );
+
+  // Seed mode: dev-only toggle. Hidden from normal users. Only functional
+  // when ?dev is set. Flipping it resets state to that seed's snapshot.
+  const [seedMode, setSeedMode] = useState("power");
+
+  // When seed mode changes (dev only), reset the varying state to snapshot
+  useEffect(() => {
+    if (!isDev) return;
     const mode = SEED_MODES[seedMode];
     if (!mode) return;
     setSessions(mode.sessions);
     setSavedBlendIds(new Set(mode.savedBlendIds));
     setPantryIds(new Set(mode.pantryIds));
-  }, [seedMode]);
+  }, [seedMode, isDev]);
+
+  // Welcome card visibility — shown once after onboarding, then dismissed
+  const [welcomeShown, setWelcomeShown] = usePersistedState("welcomeShown", false);
+
+  // Onboarding completion handler
+  const handleOnboardingComplete = ({ name, timeOfDay, draw }) => {
+    const seedBlendIds = pickSeedBlends({ timeOfDay, draw });
+    setProfile({
+      name,
+      timeOfDay,
+      draw,
+      createdAt: Date.now(),
+    });
+    setSavedBlendIds(new Set(seedBlendIds));
+    setPantryIds(new Set(ONBOARDING_PANTRY));
+    setWelcomeShown(false); // ensure welcome card shows on next Home render
+  };
+
+  // Full reset — wipes localStorage and reloads to restart from onboarding
+  const resetEverything = () => {
+    resetAllPersistedState();
+    window.location.href = window.location.pathname; // strip any ?dev, reload clean
+  };
 
   const go = (to, arg) => {
     if (to === "ingredient") {
@@ -301,10 +364,10 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
         {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
       </div>
 
       <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
@@ -371,6 +434,33 @@ export default function App() {
       )}
     </div>
   );
+
+  // Onboarding gate: if no profile exists and we're not in dev mode, take
+  // over with the onboarding screen. Wrap in UnitContext so the onboarding
+  // can respect existing unit preferences if any exist in localStorage.
+  if (!profile && !isDev) {
+    return (
+      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+        <div style={{
+          position: "fixed", inset: 0,
+          background: theme.ivory,
+          display: "flex", flexDirection: "column",
+          height: "100dvh", width: "100vw",
+          overflow: "hidden",
+          fontFamily: ff.sans,
+        }}>
+          {/* Google Fonts */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+          />
+          <OnboardingScreen onComplete={handleOnboardingComplete} />
+        </div>
+      </UnitContext.Provider>
+    );
+  }
 
   // Mobile: render app full-screen with no masthead/demo-hints/footer chrome.
   if (isNarrow) {
