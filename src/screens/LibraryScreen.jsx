@@ -319,15 +319,14 @@ export const LibraryList = ({ blends, compact, go, startBrew, openBlend, highlig
   );
 };
 
-export const BlendListRow = ({ b, first, author, go, startBrew, openBlend, highlighted }) => {
+export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) => {
   const { unit, weightUnit } = useUnit();
-  // Primary tap → open the blend detail page (not auto-brew).
-  // Users can see recipe, ingredients, effects, then brew if they want.
-  // openBlend falls back to startBrew behavior if not provided (defensive).
-  const handleTap = () => {
-    if (openBlend) openBlend(b.id);
-    else startBrew(b, "", [b.mood]);
-  };
+  // Primary tap → open the blend detail page. openBlend is required; callers
+  // that forget to pass it will see a runtime error on tap, which is what
+  // we want — silent fallbacks hide bugs. (We learned this from the
+  // traditional-rows-auto-brewing incident: a missing prop quietly routed
+  // to startBrew and the wrong behavior shipped.)
+  const handleTap = () => openBlend(b.id);
   return (
   <button onClick={handleTap} style={{
     width: "100%", textAlign: "left",
