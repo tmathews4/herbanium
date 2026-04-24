@@ -155,7 +155,7 @@ export const OnboardingScreen = ({ onComplete }) => {
    ────────────────────────────────────────────────────────────── */
 
 const StepName = ({ name, setName }) => (
-  <>
+  <div style={{ textAlign: "center" }}>
     <div style={{
       fontFamily: ff.serif, fontSize: 32, color: theme.ink,
       lineHeight: 1.15, marginBottom: 10,
@@ -175,14 +175,20 @@ const StepName = ({ name, setName }) => (
       placeholder="your name"
       maxLength={30}
       autoFocus
+      size={1}
       style={{
+        display: "block",
         width: "100%",
+        maxWidth: 280,
+        margin: "0 auto",
+        boxSizing: "border-box",
         fontFamily: ff.serif, fontSize: 22, color: theme.ink,
         background: "transparent",
         border: "none",
         borderBottom: `1px solid ${theme.rule}`,
-        padding: "8px 0",
+        padding: "8px 4px",
         outline: "none",
+        textAlign: "center",
       }}
     />
     <div style={{
@@ -191,7 +197,7 @@ const StepName = ({ name, setName }) => (
     }}>
       or leave blank and we'll call you "friend"
     </div>
-  </>
+  </div>
 );
 
 /* ──────────────────────────────────────────────────────────────
