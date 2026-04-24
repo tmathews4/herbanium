@@ -134,6 +134,22 @@ gives Z." Honors the humility-of-knowledge principle and teaches real tea.
 Current flat `effects` and `flavors` lists are the v1 approximation;
 v2 is extraction profiles (2-3 per ingredient) with UI interpolation.
 
+### Time as direction-of-shift, not a second data axis
+The extraction profile structure pairs one tempC with one timeS per
+data point, which means three primary profiles cover the temperature
+axis but leave the time axis ambiguous. Rather than add three more
+profiles per ingredient to form a full 2D temp×time grid (which would
+triple the research burden), time is captured as a fourth structured
+section (6d in the research template) describing how the cup shifts
+when only time varies at a fixed temp. Most ingredients follow pseudo-
+first-order kinetics (Harbourne 2008 for chamomile, similar papers for
+other teas), so a time-as-scalar-modifier model is mathematically
+reasonable and computationally simple. The cost of the simplification
+is that mid-temp/mid-time combinations aren't directly sampled; the
+benefit is that the research for 30 ingredients stays tractable.
+Revisit if the algorithm ever needs sub-minute precision in its
+interpolation.
+
 ### Build UI before collecting research data
 When the data model is uncertain, build the UI with mock data first.
 Playing with the interaction exposes what the data actually needs to carry,

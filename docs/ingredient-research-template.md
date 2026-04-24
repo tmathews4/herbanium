@@ -93,11 +93,15 @@ on a 0-5 scale for the **standard** brew. Leave blank if not applicable.
 
 ---
 
-## 6. Extraction profiles — the three data points
+## 6. Extraction profiles — three temp anchors + time behavior
 
-This is the most important section. It feeds the temp/time slider UI
-and the blending algorithm. We need three data points spanning the
-ingredient's brewing window.
+This section feeds the temp/time slider UI and the blending algorithm.
+We use three **primary profiles** spanning the ingredient's brewing
+window (each pairs a specific temp with a specific time), plus a
+**time-axis behavior** section that describes how the cup shifts when
+only time varies at a fixed temp. The four-part structure captures
+both dimensions without requiring a full 2D temp×time grid per
+ingredient.
 
 ### 6a. GENTLE (low temp / short time)
 
@@ -126,7 +130,8 @@ ingredient's brewing window.
 | sources | |
 
 > Goal: the canonical cup. The one most tea-drinkers recognize as
-> "the way this ingredient is supposed to taste."
+> "the way this ingredient is supposed to taste." Time-axis behavior
+> in 6d is measured as shifts from this profile.
 
 ### 6c. STRONG (high temp / long time)
 
@@ -144,8 +149,49 @@ ingredient's brewing window.
 > some ingredients (rooibos) there's no real "bad" strong version;
 > say so.
 
-**Do you need a 4th or 5th data point?** If the profile shifts
+**Do you need a 4th or 5th primary profile?** If the profile shifts
 dramatically between two of your points, add more here. Document why.
+
+### 6d. Time-axis behavior (STANDARD temp held constant, time varied)
+
+This section describes what happens when the user holds temperature at
+the STANDARD value (from 6b) and varies time only. It captures the
+time axis as a direction-of-shift from the canonical cup, rather than
+adding three more primary profile points (which would force a full
+2D grid for every ingredient).
+
+Answer two questions:
+1. **Is time monotonic for this ingredient?** (more time = more effect,
+   no character inversion — true for chamomile, rooibos, hibiscus)
+   Or does it invert? (green tea gets bitter past a point; lavender
+   turns soapy.)
+2. **Does extraction follow first-order kinetics?** (exponential
+   approach to asymptote — true for most ingredients with published
+   data). If no published data, make a conservative assumption and
+   flag it.
+
+| timeS | % of asymptote (approx) | character shift from STANDARD | effect shift from STANDARD |
+|-------|------------------------|-------------------------------|---------------------------|
+| [short timeS]  | ~35% | | calm ?, sleepy ? |
+| [STANDARD timeS]  | ~70% | **Baseline — the STANDARD profile as in 6b** | baseline |
+| [long timeS] | ~85% | | |
+| [very long timeS]| ~95% | | |
+
+**Algorithm note:** Describe whether time is monotonic (just scales
+magnitude) or inverting (flips character past a threshold). This
+matters for how the blending algorithm handles user-chosen long/short
+steeps.
+
+**Cross-temperature note:** Does the time asymptote shift meaningfully
+at GENTLE or STRONG temps? First-order kinetics say yes — the rate
+constant changes with temp. If relevant, describe how. Often the
+three primary profiles already bake this in (GENTLE has a longer time
+than STANDARD to compensate for lower temp), in which case just note
+that the primary profiles are temperature-compensated anchors and
+time shifts should apply relative to each anchor's timeS rather than
+a global value.
+
+sources: [ref-id-1, ref-id-2]
 
 ---
 

@@ -92,9 +92,7 @@
 
 ---
 
-## 6. Extraction profiles — the three data points
-
-## 6. Extraction profiles — the three data points
+## 6. Extraction profiles — three temp anchors + time behavior
 
 > Research status: **sourced** (was MOCK). Numbers synthesized from
 > Harbourne et al. 2008 (extraction kinetics 57-100°C) and Cvetanović
@@ -189,6 +187,57 @@ slider should acknowledge this. Something like *"Effect ratings
 interpolated from extraction-kinetics studies; direct sensory comparison
 at these temps not available in the peer-reviewed literature."*
 Counterpoints-beside-claims principle applied.
+
+### 6d. Time-axis behavior (STANDARD 90°C held constant, time varied)
+
+> **Why this section exists:** The three profiles above (6a, 6b, 6c)
+> pair a specific temp with a specific time. But users will drag the
+> time slider at a fixed temp, and the algorithm needs to know how the
+> cup shifts when only time varies. Rather than add three more
+> primary profile points (which would force a full 2D temp×time grid
+> for every ingredient), this section captures time as a direction-of-
+> shift from the STANDARD profile. The algorithm can combine this with
+> the temp curve to handle arbitrary user choices.
+
+Chamomile follows pseudo-first-order extraction kinetics per
+Harbourne 2008: effect intensity approaches an asymptote exponentially
+over time. Unlike true teas, chamomile **does not develop bitterness
+with long steeping** — only turbidity (cloudiness), and only above
+90°C. This is an important character note for the algorithm: time is
+monotonic for chamomile, unlike temperature which causes character
+inversions (aromatic-forward at low temp vs. phenolic-forward at high).
+
+| timeS | % of asymptote (approx) | character shift from STANDARD | effect shift from STANDARD |
+|-------|------------------------|-------------------------------|---------------------------|
+| 120 (2 min)  | ~35% | Aromatic only — honey/apple top notes present, minimal body, thin | calm −2, sleepy −2, settle −2 |
+| 300 (5 min)  | ~70% | **Baseline — the STANDARD profile as written in 6b** | baseline |
+| 600 (10 min) | ~85% | Stronger, fuller body, approaches sedative territory | calm +0, sleepy +1 |
+| 1200 (20 min)| ~95% | Functional maximum — decoction territory, fuller body | calm +0, sleepy +1, bitterness +1 |
+
+**Algorithm note:** Time dimension for chamomile is *monotonic and
+non-inverting* — more time means more effect, with no character
+reversal. The exponential asymptote means diminishing returns past
+~10 min. Unlike temperature (where moving from 75°C → 100°C swaps
+aromatic character for phenolic character), time primarily controls
+magnitude at a given temperature. For the algorithm this simplifies
+the time dimension to a scalar modifier on the temp-specific profile,
+rather than a second independent axis.
+
+**Cross-temperature note:** The % asymptote figures above assume
+90°C. At 75°C, first-order kinetics still apply but with a lower rate
+constant — meaning the same timeS values land lower on the extraction
+curve (perhaps 25%/55%/75%/85% instead of 35%/70%/85%/95%). The
+GENTLE profile (6a) at 75°C/360s already accounts for this by using
+a longer time than STANDARD. At 100°C extraction is faster, so
+shorter times reach similar asymptote percentages. The algorithm
+should scale time-axis shifts by the ratio of rate constants between
+temperatures — or, simpler, treat the three primary profiles as
+already temperature-compensated anchors and apply time shifts
+relative to each anchor's timeS rather than globally.
+
+Sources: ref-harbourne-2008 (first-order kinetics, 57-100°C range);
+lay-sourced for the "doesn't get bitter with long steeping" character
+claim (Steep App brewtea.app, widely corroborated).
 
 ---
 
