@@ -158,6 +158,54 @@ outside) make the trade-offs legible: when you push a blend outside
 sencha's preferred temp to accommodate cinnamon, sencha's dot goes
 terra and a warning appears. The algorithm shows its work.
 
+### Your data stays yours; the app is a lens not a vault
+Herbanium's data lives on the user's device via localStorage. No
+accounts required, no data on our servers, no privacy considerations,
+no risk of breach exposure. Matches the integrity posture: the app is
+something you use, not something that uses you.
+
+Trade-off: no cross-device sync. A phone and a laptop are separate
+journals. For a personal journaling tool this is the correct default —
+the alternative (accounts + backend) introduces costs the app doesn't
+need at this phase. Accounts become a V2+ question only if the app
+ever wants a user base that expects multi-device.
+
+Transient state (current tab, overlays, slider positions, extraction
+explorer positions) stays in useState and resets on reload. Persistent
+state (profile, sessions, saved blends, pantry, unit preferences) goes
+through usePersistedState, a localStorage-backed useState wrapper.
+Schema version check clears on mismatch during portfolio phase;
+migration logic comes later when there are real users whose data
+shouldn't be lost.
+
+### The onboarding ceremony matters more than the data it collects
+What makes a product feel personal isn't the richness of the profile —
+it's the moment where the user says "yes, this is mine." The onboarding
+flow is that moment.
+
+Herbanium's onboarding is three steps: name, time-of-day, what-draws-
+them. That's it. The answers do two things: personalize greetings
+(Home uses the name), and seed 2-3 starting favorite blends from a
+lookup table so the user lands on a populated app, not an empty one.
+Nothing more.
+
+Keep onboarding short. Keep it light. Keep it non-required beyond
+"enter a name, or don't." Don't use it to extract training data for
+the algorithm; use it to give the user a place to stand.
+
+Full-screen takeover (not a modal) because it's a moment, not a task.
+Footer note — "your journal lives on this device" — sets honest
+expectations about persistence without making it feel like a legal
+notice.
+
+Profile-like feel without real accounts. First-visit onboarding
+creates a profile stored in localStorage. The app feels account-based
+to the user — personalized greetings, their sessions accumulate — but
+there's no server, no login, no cross-device sync. Each browser on
+each device is a separate self-contained instance. The illusion of
+private accounts is worth more than real multi-device sync at this
+phase, without the complexity cost.
+
 ---
 
 ## Pending Work

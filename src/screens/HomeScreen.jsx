@@ -9,8 +9,9 @@ import {
 import {
   FitText, SectionLabel,
 } from "../components/layout";
+import { WelcomeCard } from "../components/WelcomeCard";
 import { BLENDS } from "../data/blends";
-import { getBlend, mmss } from "../helpers/misc";;
+import { getBlend, mmss } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -22,20 +23,26 @@ import {
    Screen: HOME
    ────────────────────────────────────────────────────────────── */
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, profile, welcomeShown, dismissWelcome }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   const favoriteBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
   const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;
+  const name = profile?.name || "friend";
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {/* Welcome card — shown once on first visit after onboarding */}
+      {!welcomeShown && profile && (
+        <WelcomeCard name={name} onDismiss={dismissWelcome} />
+      )}
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
             {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>Tommy</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>Tommy</em>?</>
+              ? <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
+              : <>What's the tea, <em style={{ color: theme.terra }}>{name}</em>?</>
             }
           </FitText>
         </div>

@@ -2,11 +2,11 @@
    screens/ProfileScreen.jsx — user profile: stats, badges, preferences, dev toolbar.
    ────────────────────────────────────────────────────────────── */
 
-import React from "react";
+import React, { useState } from "react";
 import { Flower } from "../components/icons";
 import {
   SectionLabel, Stat, Toggle,
-} from "../components/layout";;
+} from "../components/layout";
 import { MOODS } from "../data/ingredients";
 import { SEED_MODES } from "../data/seeds";
 import { getBlend } from "../helpers/misc";
@@ -19,8 +19,22 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
+
+  // Name edit mode
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(profile?.name || "");
+
+  const saveName = () => {
+    const clean = nameDraft.trim() || "friend";
+    setProfile({ ...profile, name: clean });
+    setNameDraft(clean);
+    setEditingName(false);
+  };
+
+  // Reset confirm
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const yourSessions = sessions.filter(s => s.who === "you");
   const cupCount = yourSessions.length;
@@ -82,12 +96,44 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             background: theme.ivory, border: `1px solid ${theme.rule}`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: ff.serif, fontSize: 26, color: theme.terra,
-          }}>J</div>
-          <div>
+          }}>{(profile?.name || "F").charAt(0).toUpperCase()}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
               {isEmptyUser ? "a new keeper" : "Keeper of the shelf"}
             </div>
-            <div style={{ fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1 }}>Tommy M.</div>
+            {editingName ? (
+              <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 2 }}>
+                <input
+                  type="text"
+                  value={nameDraft}
+                  onChange={e => setNameDraft(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") saveName(); }}
+                  autoFocus
+                  maxLength={30}
+                  style={{
+                    fontFamily: ff.serif, fontSize: 20, color: theme.ink,
+                    background: "transparent",
+                    border: "none", borderBottom: `1px solid ${theme.terra}`,
+                    padding: "2px 0", outline: "none",
+                    flex: 1, minWidth: 0,
+                  }}
+                />
+                <button onClick={saveName} style={{
+                  fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                  background: "transparent", border: "none", cursor: "pointer",
+                }}>save</button>
+              </div>
+            ) : (
+              <div
+                onClick={() => { setNameDraft(profile?.name || ""); setEditingName(true); }}
+                style={{
+                  fontFamily: ff.serif, fontSize: 24, color: theme.ink, lineHeight: 1.1,
+                  cursor: "pointer",
+                }}
+              >
+                {profile?.name || "friend"}
+              </div>
+            )}
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
               {isEmptyUser
                 ? "private · journal is still empty"
@@ -202,41 +248,101 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         <Toggle label="Quiet hours (10pm–7am)" value={true} onChange={() => {}} />
       </div>
 
-      {/* Dev toolbar — seed-mode selector for testing empty/mid/power states */}
+      {/* Reset — available to all users */}
       <div style={{ margin: "26px 0 10px" }}>
-        <SectionLabel n="iv">Dev — seed data</SectionLabel>
+        <SectionLabel n="iv">Your journal</SectionLabel>
       </div>
       <div style={{
-        padding: 12, borderRadius: 10,
-        border: `1px dashed ${theme.rule}`, background: "rgba(181,130,89,0.04)",
+        padding: 14, borderRadius: 10,
+        border: `1px solid ${theme.rule}`, background: theme.cream,
       }}>
         <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
-          marginBottom: 10, lineHeight: 1.45,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft,
+          marginBottom: 12, lineHeight: 1.5,
         }}>
-          Swap the app's state between snapshots to test empty-user,
-          mid-journey, and power-user flows. Real app removes this.
+          Your journal lives on this device. No account, no cloud sync.
+          Clearing your browser data will clear your journal.
         </div>
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-          {Object.entries(SEED_MODES).map(([key, m]) => (
-            <button key={key} onClick={() => setSeedMode(key)} style={{
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.03em",
-              padding: "6px 12px", borderRadius: 999,
-              border: `1px solid ${seedMode === key ? theme.ink : theme.rule}`,
-              background: seedMode === key ? theme.ink : "transparent",
-              color: seedMode === key ? theme.cream : theme.inkSoft,
+        {confirmingReset ? (
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => setConfirmingReset(false)}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft,
+                padding: "8px 14px", borderRadius: 999,
+                background: "transparent", border: `1px solid ${theme.rule}`,
+                cursor: "pointer",
+              }}
+            >
+              cancel
+            </button>
+            <button
+              onClick={resetEverything}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.04em",
+                padding: "8px 14px", borderRadius: 999,
+                background: theme.terra, color: theme.cream,
+                border: "none", cursor: "pointer",
+                flex: 1,
+              }}
+            >
+              yes, reset everything
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmingReset(true)}
+            style={{
+              fontFamily: ff.sans, fontSize: 12, color: theme.terra,
+              padding: "8px 14px", borderRadius: 999,
+              background: "transparent", border: `1px solid ${theme.terra}`,
               cursor: "pointer",
-              flex: 1, minWidth: 80,
-            }}>{m.label}</button>
-          ))}
-        </div>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.ash,
-          marginTop: 10, lineHeight: 1.45,
-        }}>
-          {SEED_MODES[seedMode].description}
-        </div>
+            }}
+          >
+            start over
+          </button>
+        )}
       </div>
+
+      {/* Dev toolbar — only visible in ?dev mode */}
+      {isDev && (
+        <>
+          <div style={{ margin: "26px 0 10px" }}>
+            <SectionLabel n="v">Dev — seed data</SectionLabel>
+          </div>
+          <div style={{
+            padding: 12, borderRadius: 10,
+            border: `1px dashed ${theme.rule}`, background: "rgba(181,130,89,0.04)",
+          }}>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+              marginBottom: 10, lineHeight: 1.45,
+            }}>
+              Swap the app's state between snapshots to test empty-user,
+              mid-journey, and power-user flows. Only visible in ?dev mode.
+            </div>
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+              {Object.entries(SEED_MODES).map(([key, m]) => (
+                <button key={key} onClick={() => setSeedMode(key)} style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.03em",
+                  padding: "6px 12px", borderRadius: 999,
+                  border: `1px solid ${seedMode === key ? theme.ink : theme.rule}`,
+                  background: seedMode === key ? theme.ink : "transparent",
+                  color: seedMode === key ? theme.cream : theme.inkSoft,
+                  cursor: "pointer",
+                  flex: 1, minWidth: 80,
+                }}>{m.label}</button>
+              ))}
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.ash,
+              marginTop: 10, lineHeight: 1.45,
+            }}>
+              {SEED_MODES[seedMode].description}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
