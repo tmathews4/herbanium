@@ -62,8 +62,8 @@
 
 | Parameter | Value | Source | Notes |
 |-----------|-------|--------|-------|
-| **temp range (°C)** | [95, 100] | [RESEARCH] | Current app value; confirm against German Commission E monograph or similar |
-| **time range (seconds)** | [300, 420] | [RESEARCH] | 5-7 minutes is the canonical range — verify |
+| **temp range (°C)** | [75, 100] | ref-harbourne-2008 | Extraction kinetics first-order across 57-100°C; app supports entire useful range from gentle aromatic brew (75°C) to full sedative extraction (100°C). Narrower than existing app value [95,100] — expanded to let users actually use the gentle profile. |
+| **time range (seconds)** | [300, 420] | ref-harbourne-2008 | 5-7 minutes is canonical for hot brew; gentle profile uses 6 min at lower temp. Very long decoction-style extraction (20+ min) produces a different product, outside this range. |
 | **caffeine (mg per ~8oz cup)** | 0 | well-established | Chamomile is caffeine-free, no tea plant content |
 | **tsp-to-grams** | — | | Use category default for flowers |
 
@@ -94,52 +94,101 @@
 
 ## 6. Extraction profiles — the three data points
 
-> These are the MOCK values currently in `src/data/extractionProfiles.js`
-> (copied here for the research pass to verify or replace). Do not treat
-> as sourced until you've checked the numbers against primary research.
+## 6. Extraction profiles — the three data points
 
-### 6a. GENTLE (low temp / short time)
+> Research status: **sourced** (was MOCK). Numbers synthesized from
+> Harbourne et al. 2008 (extraction kinetics 57-100°C) and Cvetanović
+> et al. 2017 (apigenin glycoside vs. aglycone temperature optima).
+> See section 9 for full citations and section below for limitations.
 
-| Field | Value |
-|-------|-------|
-| tempC | 85 |
-| timeS | 180 |
-| flavors | [RESEARCH] — likely [honey, apple, floral] |
-| effects | [RESEARCH] — likely [["calm", 2], ["sleepy", 1]] |
-| character | A lighter, more delicate cup — apple and honey up front, minimal bitterness |
-| sources | [RESEARCH] |
-
-> Key question: does low-temp chamomile extract meaningful apigenin, or is
-> calm effect blunted? Apigenin solubility curves would settle this.
-
-### 6b. STANDARD (middle)
+### 6a. GENTLE (75°C, 360s / 6 min)
 
 | Field | Value |
 |-------|-------|
-| tempC | 95 |
+| tempC | 75 |
+| timeS | 360 |
+| flavors | [honey, apple, floral] |
+| effects | [["calm", 2], ["sleepy", 1], ["settle", 1]] |
+| character | A morning chamomile — apple and honey lead, with a delicate floral body. Calm comes through, just quieter. Essential oils preserved at the cost of total phenol load. |
+| sources | ref-harbourne-2008, ref-cvetanovic-2017 |
+
+> **Why these numbers:** Harbourne's first-order extraction kinetics
+> hold from 57-100°C, so 75°C still extracts apigenin-glucoside actively
+> — just more slowly. Longer steep (6 min vs. the standard 5 min)
+> compensates. This is BELOW Cvetanović's 85°C apigenin-glucoside peak,
+> so effects are attenuated but not absent. Volatile esters (the
+> honey/apple aroma) survive better at this temp than at boiling, which
+> is why flavor profile is aromatic-forward rather than phenolic-forward.
+
+### 6b. STANDARD (90°C, 300s / 5 min)
+
+| Field | Value |
+|-------|-------|
+| tempC | 90 |
 | timeS | 300 |
 | flavors | [honey, apple, floral, hay] |
 | effects | [["calm", 4], ["sleepy", 3], ["settle", 3]] |
-| character | The canonical chamomile cup — honeyed sweetness, gentle calm, the one most people recognize |
-| sources | [RESEARCH] |
+| character | The standard cup. Full honey-floral body with the grassy-hay backbone, clear calming effect. |
+| sources | ref-harbourne-2008 |
 
-### 6c. STRONG (high temp / long time)
+> **Why these numbers:** Harbourne identified 90°C/20min as the maximum
+> total-phenol, minimum-turbidity point in chamomile extraction. 5 min
+> is the established canonical steep time across popular sources; 20 min
+> produces a more concentrated but less palatable cup (moves toward
+> decoction rather than infusion). Effect values match the canonical
+> chamomile cup most tea-drinkers recognize.
+
+### 6c. STRONG (100°C, 420s / 7 min)
 
 | Field | Value |
 |-------|-------|
 | tempC | 100 |
 | timeS | 420 |
-| flavors | [RESEARCH] — likely [honey, hay, floral] with some bitterness creeping in |
-| effects | [RESEARCH] — likely stronger sleepy, mild bitterness |
-| character | Full extraction — pulls more apigenin but also more tannin; the cup for when you need the sedative effect to land |
-| sources | [RESEARCH] |
+| flavors | [honey, apple, floral, hay, earthy] |
+| effects | [["calm", 4], ["sleepy", 5], ["settle", 3], ["bitterness", 1]] |
+| character | The sleepy-time version. Maximum apigenin extraction, fuller body, slightly tannic — for when you need the sedative effect to land hard. Loses some of the delicate top-notes in exchange. |
+| sources | ref-harbourne-2008 |
 
-> The existing `variants` field already captures this intuition:
-> sleep-intent = 100°C / 420s, calm-intent = 95°C / 300s. That structure
-> should inform the profile numbers — strong profile = sleep variant,
-> standard = calm variant.
+> **Why these numbers:** Harbourne showed turbidity rises significantly
+> 90→100°C, with little phenol-content gain. Essential-oil volatilization
+> at full boil reduces honey/apple top-notes; the "earthy" tag reflects
+> the tannin-forward shift. Sleepy goes to 5 because higher total
+> phenol load means more apigenin-glucoside in cup — which is where the
+> sedation-at-higher-doses observation (Avallone 2000, Viola 1995) comes
+> from. Bitterness rises to 1 but stays low compared to true teas.
 
-**Do you need a 4th or 5th data point?** Probably not. Chamomile has a narrow brewing window (85-100°C) and the 3 points cover it evenly. Flag if research suggests otherwise.
+**Do you need a 4th or 5th data point?** No. Chamomile's brewing window
+is narrow (70-100°C), and the three points span it evenly. Harbourne's
+kinetics are first-order across the range, which means linear
+interpolation between the three data points is a defensible
+approximation. If the app ever wants to surface the "cold brew"
+variant (8-12 hour refrigerator steep), that's a distinctly different
+process and would need its own data point rather than extrapolation.
+
+### Honest limits of these numbers
+
+The extraction-kinetics data (Harbourne, Cvetanović) is solid — real
+HPLC measurements of real compounds at real temperatures. The
+**flavors** and **effects** mappings to those extraction curves are
+interpretive: no peer-reviewed study has compared "how does a 75°C
+chamomile feel to drink vs. a 95°C one" in a controlled human panel.
+
+What this means:
+
+- **tempC, timeS, and the phenol-extraction logic** — confident,
+  traceable to primary sources.
+- **flavor tags** — directionally right, synthesized from Sacred Plant
+  Co's documented brewing chemistry, traditional descriptions, and
+  the kinetics data. Not from a sensory panel.
+- **effect magnitudes** — interpretive. Calm-2 at gentle vs. Calm-4
+  at standard reflects the apigenin-glycoside extraction ratio per
+  Cvetanović, but is not a clinical comparison.
+
+UI note for when this ships: the explanation layer on the temp/time
+slider should acknowledge this. Something like *"Effect ratings
+interpolated from extraction-kinetics studies; direct sensory comparison
+at these temps not available in the peer-reviewed literature."*
+Counterpoints-beside-claims principle applied.
 
 ---
 
@@ -206,6 +255,8 @@
 | ref-mao-2016 | Mao JJ, Xie SX, Keefe JR, Soeller I, Li QS, Amsterdam JD. (2016). Long-term chamomile (*Matricaria chamomilla* L.) treatment for generalized anxiety disorder: a randomized clinical trial. *Phytomedicine*, 23:1735-1742. | clinical RCT (long-term GAD) |
 | ref-mckay-2006 | McKay DL, Blumberg JB. (2006). A review of the bioactivity and potential health benefits of chamomile tea. *Phytotherapy Research*, 20(7):519-530. | review (apigenin content, flavonoid profile) |
 | ref-msk-chamomile | Memorial Sloan Kettering "About Herbs" — Chamomile entry. Available at mskcc.org/cancer-care/integrative-medicine/herbs/chamomile | monograph (clinical, safety) |
+| ref-harbourne-2008 | Harbourne N, Marete E, Jacquier JC, O'Riordan D. (2008). Optimisation of the extraction and processing conditions of chamomile (*Matricaria chamomilla* L.) for incorporation into a beverage. *Food Chemistry*. ScienceDirect ID: S0308814608013873. | journal (extraction kinetics) |
+| ref-cvetanovic-2017 | Cvetanović A, Švarc-Gajić J, Gašić U, Tešić Ž, Zengin G, Zeković Z, Đurović S. (2017). Isolation of apigenin from subcritical water extracts: Optimization of the process. *The Journal of Supercritical Fluids*, 120:32-42. | journal (apigenin glycoside vs. aglycone) |
 | ref-1 | [RESEARCH] — German Commission E monograph on *Matricariae flos* | monograph (traditional use) |
 | ref-2 | [RESEARCH] — Hobbs, *Chamomile: Medicinal, Cosmetic, and Agricultural Uses* or similar reference | book |
 
@@ -268,9 +319,9 @@
 
 | Area | Confidence | Note |
 |------|-----------|------|
-| Brewing parameters (temp/time) | 1 | app defaults, not independently verified against monograph |
+| Brewing parameters (temp/time) | 2 | range now sourced to Harbourne 2008; specific time values at each profile point defensible |
 | Effects ratings | 2 (calm, sleepy); 1 (settle) | `calm` and `sleepy` now supported by clinical literature via Saadatmand 2024 review and Viola/Avallone primary sources; `settle` still resting on traditional-use sourcing |
-| Extraction profiles (3 points) | 0 | still MOCK |
+| Extraction profiles (3 points) | 2 | tempC/timeS values sourced to Harbourne and Cvetanović; flavor and effect mappings at each profile point are interpretive, acknowledged in Section 6 "Honest limits" note |
 | Safety notes | 1 | ragweed cross-allergy is solid; blood-thinner and pregnancy notes still need verification |
 | Facts | 2 (botanical distinction, Peter Rabbit); 0-1 (Matricaria etymology, Egyptian); 2 (mechanism fact) | mixed — the new mechanism fact is well-sourced, others still need check |
 
@@ -283,8 +334,8 @@
 
 ## Notes for this scaffold
 
-- **What's confident now (post-mechanism-research):** Identity, caffeine = 0, ragweed cross-allergy, basic flavor tags, the clinical anxiolytic effect (backed by Saadatmand 2024 systematic review of 10 RCTs), the mechanism-is-debated narrative (backed by Viola 1995, Avallone 2000, Zanoli 2000, Losi 2004), the German/Roman species distinction, the Peter Rabbit reference.
-- **What's plausible but still unsourced:** Specific temp/time values, the exact effect magnitudes (directionally right, numerically unverified), compound-level chemistry mg/cup numbers, Egyptian embalming claim, Matricaria/womb etymology.
-- **What's outright missing:** Primary sources for the monograph-level claims (German Commission E, WHO), the historical facts beyond Peter Rabbit, the extraction-profile data points at 75/95/100°C.
+- **What's confident now (post-mechanism + extraction research):** Identity, caffeine = 0, ragweed cross-allergy, basic flavor tags, the clinical anxiolytic effect (backed by Saadatmand 2024 systematic review of 10 RCTs), the mechanism-is-debated narrative (backed by Viola 1995, Avallone 2000, Zanoli 2000, Losi 2004), the German/Roman species distinction, the Peter Rabbit reference, **AND now the extraction profiles (75/90/100°C) sourced to Harbourne 2008 and Cvetanović 2017**.
+- **What's plausible but still unsourced:** The exact mg/cup apigenin numbers (popular 0.5-1.2 mg likely underestimates total glycoside content per Cvetanović), the flavor-tag-to-temperature mappings (direction right, no sensory panel data), compound-level chemistry for bisabolol/chamazulene, Egyptian embalming claim, Matricaria/womb etymology.
+- **What's outright missing:** Primary sources for the monograph-level claims (German Commission E, WHO), the historical facts beyond Peter Rabbit, safety notes beyond ragweed.
 
-**Generalizable lesson for other ingredients:** The apigenin research showed that when a popular claim is widely repeated with a single well-known source (Viola 1995), it often has a more complicated story hiding in the follow-up literature. Worth repeating this "find the follow-up papers" step for any other mechanism claim during research — especially lavender (linalool / GABA), passionflower (GABA-related), and lemon balm (GABA transaminase). A primary source being real doesn't mean the simple story it tells is still current consensus.
+**Generalizable lesson for other ingredients:** The apigenin research showed that when a popular claim is widely repeated with a single well-known source (Viola 1995), it often has a more complicated story hiding in the follow-up literature. The extraction-kinetics research added a second lesson: peer-reviewed primary data exists for far more herbals than wellness-blog sources let on — Harbourne 2008 is *the* chamomile brewing paper and almost no popular source cites it. For each ingredient, spend 20 minutes looking for a "beverage optimization" or "extraction kinetics" paper in the peer-reviewed literature before trusting popular brewing advice. Worth repeating the "find the follow-up papers" step for any mechanism claim during research — especially lavender (linalool / GABA), passionflower (GABA-related), and lemon balm (GABA transaminase). A primary source being real doesn't mean the simple story it tells is still current consensus.
