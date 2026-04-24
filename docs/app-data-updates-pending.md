@@ -4,9 +4,9 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 24, 2026. Covers all 29 ingredients
-> researched to date (including turmeric and ashwagandha as new
-> catalog additions).
+> **Status at creation:** April 24, 2026. **Original 30-ingredient
+> catalog now fully researched.** Plus 2 new candidate additions
+> (turmeric and ashwagandha) for a total of 32 ingredients.
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
@@ -146,6 +146,30 @@ tulsi: {
   effects: [["calm", 4], ["sleepy", 3], ["cooling", 2], ["uplifting", 2], ["soothing", 2]],
   // NOTE: First herbal at calm=4 (joins gyokuro and chamomile).
   // GABA-T inhibitor mechanism well-evidenced (Awad 2007, 2009).
+},
+
+lemongrass: {
+  // ...
+  effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2], ["calm", 2]],
+  // NOTE: Joins spearmint, gunpowder, hibiscus at cooling=3.
+  // Citral mechanism distinct from menthol/carvone/anthocyanin.
+},
+
+fennel: {
+  // ...
+  effects: [["digestive", 4], ["cooling", 2], ["soothing", 2], ["calm", 1]],
+  // NOTE: Joins ginger, peppermint, puerh at digestive=4.
+  // Anethole-GABA gut receptor mechanism documented.
+},
+
+spearmint: {
+  // ...
+  effects: [["cooling", 3], ["digestive", 3], ["uplifting", 2], ["calm", 2]],
+  // NOTE: Sits intentionally below peppermint (4) — carvone
+  // produces gentler cooling than menthol. Has uniquely strong
+  // RCT evidence for anti-androgenic effect in PCOS (Akdogan 2007,
+  // Grant 2010), worth surfacing in user-facing copy though
+  // doesn't map to vocabulary effect.
 },
 ```
 
@@ -406,16 +430,19 @@ matters.
 | Ingredient | Category | Status | Effects (v1) |
 |-----------|----------|--------|--------------|
 | chamomile | herbal | migrate | `calm 4, sleepy 3, soothing 3` |
+| fennel | herbal | swap | `digestive 4, cooling 2, soothing 2, calm 1` |
 | hibiscus | herbal | migrate | `energy 2, cooling 3, digestive 2` |
 | lavender | herbal | migrate | `calm 3, sleepy 2, soothing 2` |
+| lemon-balm | herbal | swap | `calm 4, sleepy 3, cooling 2, uplifting 2, soothing 2` |
+| lemongrass | herbal | swap | `cooling 3, uplifting 3, digestive 2, calm 2` |
 | rose | floral | migrate | `calm 3, sleepy 2, soothing 3` |
 | jasmine | floral | verify | `calm 3, energy 2, focus 2` |
-| peppermint | herbal | migrate | `cooling 4, digestive 4, calm 2, focus 2` |
-| sencha | green tea | migrate | `focus 4, energy 3, calm 3, cooling 2` |
 | passionflower | herbal | migrate | `calm 3, sleepy 3, soothing 2` |
+| peppermint | herbal | migrate | `cooling 4, digestive 4, calm 2, focus 2` |
 | rooibos | herbal | swap | `soothing 4, digestive 2, grounding 2` |
+| sencha | green tea | migrate | `focus 4, energy 3, calm 3, cooling 2` |
+| spearmint | herbal | swap | `cooling 3, digestive 3, uplifting 2, calm 2` |
 | tulsi | herbal | swap | `calm 3, soothing 3, grounding 3, uplifting 2, digestive 2, warming 2` |
-| lemon-balm | herbal | swap | `calm 4, sleepy 3, cooling 2, uplifting 2, soothing 2` |
 | assam | black | swap (verify unchanged) | `energy 5, focus 3, warming 4` |
 | white | white | swap | `calm 3, uplifting 3, focus 3, cooling 2` |
 | darjeeling | black | swap | `uplifting 4, energy 3, focus 3, warming 3, calm 2` |
