@@ -76,7 +76,7 @@
 | calm | 4 | Well-established in clinical trials; mechanism debated (see section 2). Anxiolytic effect confirmed in 9/10 RCTs per Saadatmand 2024 review |
 | sleepy | 3 | Present but secondary to calm; stronger at longer steeps (high-temp apigenin extraction) |
 | settle | 3 | Traditional digestive use; mild carminative effect |
-| comfort | | [RESEARCH] — possibly 2, consider how users describe a chamomile cup |
+| comfort | 2 | Traditional association with evening/cozy contexts across cultures — the "wind-down" cup. Judgment rating from cultural use, not a clinical study |
 | focus | | Not applicable |
 | energy | | Not applicable (caffeine-free) |
 | cooling | | Not applicable |
@@ -252,9 +252,15 @@ claim (Steep App brewtea.app, widely corroborated).
 > - **Blood thinners (warfarin, etc.)** — coumarin content, possible mild
 >   additive effect. [RESEARCH] confirm magnitude from primary source;
 >   this is widely claimed but often overstated in popular sources.
-> - **Pregnancy** — [RESEARCH] mixed evidence; some sources flag higher
->   doses as emmenagogue risk. Traditional use during pregnancy is common
->   in some cultures. Err toward "consult a pharmacist" framing.
+> - **Pregnancy** — Real documented concern, not folk caution. A case
+>   report (cited in MSK "About Herbs") observed premature constriction
+>   of the fetal ductus arteriosus following maternal chamomile tea
+>   consumption. Traditional use during pregnancy is common in some
+>   cultures but carries genuine risk. "Consult a pharmacist"
+>   framing warranted, specifically flagging the cardiovascular-
+>   development mechanism rather than a generic "avoid" recommendation.
+>   Source: ref-msk-chamomile; original case report not located from
+>   PubMed in this research pass.
 > - **Ragweed-family allergy** — genuine cross-reactivity (*Asteraceae*
 >   family includes ragweed, daisy, marigold). Most users unaffected;
 >   worth naming for the minority who are.
@@ -265,9 +271,15 @@ claim (Steep App brewtea.app, widely corroborated).
 
 **NOT a concern but sometimes claimed:**
 
-> [RESEARCH] Check for overstated claims (e.g., any antibiotic
-> interaction warnings that don't hold up, "causes drowsiness so don't
-> drive" when the effect is mild). Document what to exclude.
+> - **"Causes daytime drowsiness or impaired function"** — Commonly
+>   stated on generic wellness sites; not supported. MSK About Herbs
+>   and other clinical sources note that tea-strength chamomile
+>   produces mild sedation without impairing daytime function. Worth
+>   explicitly excluding from headsUp so it doesn't get added
+>   reactively by a future contributor.
+> - **[RESEARCH]** Check for any other overstated medication
+>   interaction claims (the blood thinner warning above may fall
+>   in this category at tea doses — confirm via monograph research).
 
 ---
 
@@ -275,10 +287,11 @@ claim (Steep App brewtea.app, widely corroborated).
 
 | Compound | Approx mg per cup | Effects contributed | Confidence |
 |----------|------------------|--------------------|------------|
-| apigenin | [RESEARCH] — often cited 0.5-1.2 mg | calm (mechanism under investigation — possibly via GABA / NMDA / HPA axis, see section 2); ~65% of chamomile's total flavonoid content per McKay & Blumberg 2006 | high for presence and anxiolytic role, medium for mechanism |
-| bisabolol | [RESEARCH] | settle, anti-inflammatory | [RESEARCH] |
-| chamazulene | [RESEARCH] | anti-inflammatory (topical more than internal) | [RESEARCH] |
-| matricin | [RESEARCH] — precursor to chamazulene | | |
+| apigenin (total, as glycosides) | ~8-12 mg per 1g dried flowers at full extraction (Cvetanović: 0.8-1.2% of dry weight) | calm (mechanism under investigation — possibly via GABA / NMDA / HPA axis, see section 2); ~65% of chamomile's total flavonoid content per McKay & Blumberg 2006 | high for presence and anxiolytic role, medium for mechanism |
+| apigenin (free aglycone only) | ~0.5-1.2 mg (popular figure) | calm, same as above but bioavailability differs | medium — the popular "0.5-1.2 mg" figure widely cited, appears to measure free aglycone not total glucosides |
+| α-bisabolol + bisabolol oxides | [RESEARCH] — essential oil fraction, mg/cup very low | settle, anti-inflammatory (documented), anti-spasmodic | medium — presence well-documented per ref-pmc-chamomile, mg/cup not determined |
+| chamazulene | [RESEARCH] | anti-inflammatory (primarily topical effect); blue color in concentrated extracts | medium — presence confirmed, mg/cup not determined |
+| matricin | [RESEARCH] — precursor to chamazulene, heat-labile | converts to chamazulene during heating/storage | medium — chemistry well-characterized |
 
 > Chamomile is one of the better-studied herbals — compound data should
 > be obtainable. Good candidate for populating all these fields with real
@@ -286,9 +299,14 @@ claim (Steep App brewtea.app, widely corroborated).
 
 **characterizedPct estimate:**
 
-> [RESEARCH] — likely 60-75% once primary flavonoids and essential oil
-> components are documented. The essential oil alone has ~120 identified
-> compounds; most at trace levels.
+> ~60-70%. Primary flavonoids documented (apigenin + glycosides = 65%
+> of total flavonoid content per McKay & Blumberg 2006; quercetin,
+> patuletin, luteolin also identified). Major essential oil compounds
+> identified (α-bisabolol, bisabolol oxides, chamazulene, matricin).
+> Essential oil has ~120 identified compounds total, most at trace
+> levels — their individual contributions to felt effects are not
+> documented in Herbanium's data. What's missing: exact mg/cup for
+> most essential oil components, minor flavonoids, trace coumarins.
 
 ---
 
@@ -355,10 +373,19 @@ claim (Steep App brewtea.app, widely corroborated).
 
 **Questions that weren't resolvable from sources:**
 
-> [RESEARCH] Document gaps here as they emerge. Expected candidates:
-> - Precise apigenin mg/cup (varies by flower quality and extraction; may need a range rather than a point estimate)
-> - Whether the "blood thinner interaction" warning is supported at normal tea-consumption doses or only at high supplement doses
-> - Historical accuracy of the Egyptian embalming claim (widely repeated but primary source unclear)
+> Documented gaps after mechanism + extraction research:
+> - Precise mg/cup for essential oil components (bisabolol, chamazulene
+>   et al.) — not found in the accessible literature; likely requires
+>   German Commission E monograph or similar
+> - Whether the blood-thinner warning is clinically significant at
+>   normal tea-consumption doses or only at high supplement doses
+> - Primary source for the Egyptian embalming claim (widely repeated,
+>   untraced) and Matricaria-from-matrix etymology (widely cited but
+>   primary source not located)
+> - Whether "plant's physician" gardening folklore has any empirical
+>   basis or is pure folk belief
+> - The original pregnancy case report citation (known via MSK About
+>   Herbs, but the original cardiology paper not located)
 
 ---
 
