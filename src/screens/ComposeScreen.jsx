@@ -282,54 +282,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
           })()}
 
-          {/* Temperature-compromise warning — reactive to the user's current
-              temp/steep slider values from BlendExtractionExplorer below.
-              Disappears when the user adjusts the temp into a range where
-              every ingredient is within its preferred window. */}
-          {!blend.empty && liveOutsiders.length > 0 && (
-            <div style={{
-              marginTop: 14, padding: "8px 10px", borderRadius: 6,
-              background: "rgba(165, 120, 54, 0.08)",
-              border: `1px solid rgba(165, 120, 54, 0.22)`,
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.inkSoft, lineHeight: 1.45,
-            }}>
-              <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
-              these ingredients don't all share a brewing window at{" "}
-              <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>.{" "}
-              <em>
-                {liveOutsiders.map((c, i) => (
-                  <React.Fragment key={c.id}>
-                    {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
-                    {c.name}
-                  </React.Fragment>
-                ))}
-              </em>
-              {" "}will extract lightly at this temp — fine as accents, worth rethinking if they carry the blend.
-            </div>
-          )}
-
-          {/* Primary action: brew the current blend. Placed here, right after
-              mood/flavor selection, so the decision-to-action path is reachable
-              without scrolling. Pantry toggle, candidate selector, and blend
-              card detail all live below for users who want to refine. */}
-          <button
-            disabled={blend.empty}
-            onClick={() => startBrew({ ...blend, tempC: brewTempC, timeS: brewTimeS }, "", moods)}
-            style={{
-              width: "100%", marginTop: 20,
-              fontFamily: ff.serif, fontSize: 16,
-              padding: "14px 16px", borderRadius: 10,
-              background: blend.empty ? theme.rule : theme.terra,
-              color: theme.cream, border: "none",
-              cursor: blend.empty ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}
-          >
-            <Kettle size={18} c={theme.cream} />
-            start brewing
-          </button>
-
           <label style={{
             display: "flex", alignItems: "center", gap: 10, marginTop: 18,
             fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
@@ -469,6 +421,53 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                 compact
               />
             )}
+
+            {/* Temperature-compromise warning — reactive to slider values
+                in the explorer above. Sits under the stats so the user
+                sees the consequence in the context of what they've set. */}
+            {!blend.empty && liveOutsiders.length > 0 && (
+              <div style={{
+                marginTop: 14, padding: "8px 10px", borderRadius: 6,
+                background: "rgba(165, 120, 54, 0.08)",
+                border: `1px solid rgba(165, 120, 54, 0.22)`,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: theme.inkSoft, lineHeight: 1.45,
+              }}>
+                <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
+                these ingredients don't all share a brewing window at{" "}
+                <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>.{" "}
+                <em>
+                  {liveOutsiders.map((c, i) => (
+                    <React.Fragment key={c.id}>
+                      {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
+                      {c.name}
+                    </React.Fragment>
+                  ))}
+                </em>
+                {" "}will extract lightly at this temp — fine as accents, worth rethinking if they carry the blend.
+              </div>
+            )}
+
+            {/* Primary action: brew the current blend. Placed at the
+                bottom of the card, after the user has seen ingredients,
+                stats, and any compromise warning. Decision-to-action
+                follows, rather than precedes, the context. */}
+            <button
+              disabled={blend.empty}
+              onClick={() => startBrew({ ...blend, tempC: brewTempC, timeS: brewTimeS }, "", moods)}
+              style={{
+                width: "100%", marginTop: 16,
+                fontFamily: ff.serif, fontSize: 16,
+                padding: "14px 16px", borderRadius: 10,
+                background: blend.empty ? theme.rule : theme.terra,
+                color: theme.cream, border: "none",
+                cursor: blend.empty ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              }}
+            >
+              <Kettle size={18} c={theme.cream} />
+              start brewing
+            </button>
           </div>
 
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
