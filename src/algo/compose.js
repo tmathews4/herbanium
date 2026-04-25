@@ -63,15 +63,20 @@ export function computeBrewProfile(ingredients, opts = {}) {
   const tempIntersects = tIntMin <= tIntMax;
   const timeIntersects = sIntMin <= sIntMax;
 
+  // Round to 1°C precision (matches the slider step). Earlier code
+  // snapped to 5°C "for cleaner numbers" — but on a tight range like
+  // Ceylon Black's [95, 100] that pushes the midpoint (97.5) up to 100,
+  // which is exactly the over-extracted anchor. Round to integers so
+  // the recommendation lands at 98°C — inside the standard-cup window.
   let tempC;
   if (tempIntersects) {
-    tempC = Math.round((tIntMin + tIntMax) / 2 / 5) * 5;
+    tempC = Math.round((tIntMin + tIntMax) / 2);
   } else {
     const wTemp = pool.reduce((s, { id, g }) => {
       const [t1, t2] = INGREDIENTS[id].tempC;
       return s + ((t1 + t2) / 2) * (g / totalG);
     }, 0);
-    tempC = Math.round(wTemp / 5) * 5;
+    tempC = Math.round(wTemp);
   }
 
   let timeS;
