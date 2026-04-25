@@ -354,76 +354,135 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
    ────────────────────────────────────────────────────────────── */
 
 import { resolveExtractionProfile } from "../data/extractionProfiles";
+import {
+  applyMasking, applyEffectSynergies, buildWarnings,
+} from "./perception";
 
+/**
+ * resolveBlendAtBrew — full perception pipeline.
+ *
+ *   ingredients ──► (1) per-ingredient extraction profile lookup
+ *                ──► (2) grams-weighted sum into raw flavor + effect maps
+ *                ──► (3) applyMasking → perceived flavors + masking notes
+ *                ──► (4) applyEffectSynergies → synergyTags + paradoxTags
+ *                                              + soft-ceilinged effects
+ *                ──► (5) buildWarnings (outsiders, masking, ceiling, paradox)
+ *                ──► return felt cup
+ *
+ * Output shape:
+ *   {
+ *     effects:        [[tag, 0–5], ...] sorted strong → weak, bitterness last
+ *     flavors:        [[name, 0–5], ...] sorted strong → weak (perceived)
+ *     rawFlavors:     same shape as flavors but pre-masking (debug/UI)
+ *     synergyTags:    ["calm focus", "warming digestive", ...]
+ *     paradoxTags:    [["warming","cooling"], ...]
+ *     warnings:       [{kind, text}, ...]
+ *     outsiders:      [name, ...] kept for backward compatibility
+ *     perIngredient:  [{id, name, weight, profile, inRange}, ...]
+ *   }
+ */
 export function resolveBlendAtBrew(ingredients, tempC, timeS) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
       flavors: [],
+      rawFlavors: [],
+      synergyTags: [],
+      paradoxTags: [],
+      warnings: [],
       outsiders: [],
+      perIngredient: [],
       character: "",
     };
   }
 
   const totalG = ingredients.reduce((s, { g }) => s + g, 0);
 
-  // Per-ingredient contributions
+  // (1) Per-ingredient contributions. Falls back to flat ingredient
+  // flavors/effects if no extraction profile exists for that id.
   const contributions = ingredients.map(({ id, g }) => {
     const meta = INGREDIENTS[id];
     const weight = g / totalG;
 
-    // Get ingredient's profile at the given brew conditions.
-    // Falls back to the ingredient's flat flavors/effects if no
-    // mock profile exists.
     const profile = resolveExtractionProfile(id, tempC, timeS) || {
-      flavors: meta.flavors || [],
+      flavors: normalizeFlavors(meta.flavors || []),
       effects: meta.effects || [],
       character: "",
     };
 
-    // Range check: is this ingredient happy at this temp?
     const [tMin, tMax] = meta.tempC;
     const inRange = tempC >= tMin && tempC <= tMax;
 
     return { id, name: meta.name, weight, profile, inRange };
   });
 
-  // Combine effects via grams-weighted average (bitterness summed)
-  const effectTotals = {};
+  // (2) Grams-weighted accumulation into raw flavor + effect maps.
+  const rawFlavors = {};
+  const rawEffects = {};
   for (const { weight, profile } of contributions) {
+    for (const [name, strength] of profile.flavors) {
+      rawFlavors[name] = (rawFlavors[name] || 0) + strength * weight;
+    }
     for (const [tag, strength] of profile.effects) {
-      if (tag === "bitterness") {
-        // Bitterness compounds — sum weighted contributions, don't average
-        effectTotals[tag] = (effectTotals[tag] || 0) + strength * weight;
-      } else {
-        effectTotals[tag] = (effectTotals[tag] || 0) + strength * weight;
-      }
+      rawEffects[tag] = (rawEffects[tag] || 0) + strength * weight;
     }
   }
 
-  // Convert to array, round to 1 decimal, sort (bitterness last)
-  const effects = Object.entries(effectTotals)
-    .map(([tag, value]) => [tag, Math.round(Math.min(5, value) * 10) / 10])
+  // (3) Masking pass — bitter, smoky, astringent suppress gentler notes.
+  const { perceived: perceivedFlavorMap, maskingNotes } = applyMasking(rawFlavors);
+
+  // (4) Synergy + soft-ceiling pass.
+  const { effects: perceivedEffectMap, synergyTags, paradoxTags } =
+    applyEffectSynergies(rawEffects);
+
+  // Convert maps to sorted tuple arrays for the UI layer.
+  // Drop sub-threshold flavors (< 0.5) — they're noise.
+  const flavors = Object.entries(perceivedFlavorMap)
+    .filter(([, v]) => v >= 0.5)
+    .map(([name, v]) => [name, Math.round(v * 10) / 10])
+    .sort((a, b) => b[1] - a[1]);
+
+  const effects = Object.entries(perceivedEffectMap)
+    .map(([tag, v]) => [tag, Math.round(v * 10) / 10])
     .sort((a, b) => {
       if (a[0] === "bitterness") return 1;
       if (b[0] === "bitterness") return -1;
       return b[1] - a[1];
     });
 
-  // Union flavors across ingredients
-  const flavors = Array.from(new Set(
-    contributions.flatMap(c => c.profile.flavors)
-  ));
+  const rawFlavorTuples = Object.entries(rawFlavors)
+    .map(([name, v]) => [name, Math.round(v * 10) / 10])
+    .sort((a, b) => b[1] - a[1]);
 
-  // Ingredients outside their preferred range
-  const outsiders = contributions
-    .filter(c => !c.inRange)
-    .map(c => c.name);
+  const outsiders = contributions.filter(c => !c.inRange).map(c => c.name);
+
+  // (5) Build user-facing warnings.
+  const warnings = buildWarnings({
+    outsiders,
+    maskingNotes,
+    perceivedEffects: perceivedEffectMap,
+    paradoxTags,
+  });
 
   return {
     effects,
     flavors,
+    rawFlavors: rawFlavorTuples,
+    synergyTags,
+    paradoxTags,
+    warnings,
     outsiders,
-    perIngredient: contributions, // for UI indicators
+    perIngredient: contributions,
   };
+}
+
+/**
+ * Convert a string-array of flavors (legacy fallback path) into
+ * [name, strength] tuples for ingredients without extraction profiles.
+ * Position-based descent: top note 4, accents stepping down.
+ */
+function normalizeFlavors(flavorList) {
+  if (!flavorList || flavorList.length === 0) return [];
+  if (Array.isArray(flavorList[0])) return flavorList; // already tuples
+  return flavorList.map((f, i) => [f, Math.max(1, 4 - i)]);
 }

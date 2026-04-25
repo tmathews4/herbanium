@@ -171,9 +171,14 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {profile.flavors.map(f => {
+            {profile.flavors.map(entry => {
+              // Profile flavors are [name, strength] tuples after the
+              // perception refactor. Older callers passed bare strings —
+              // tolerate both for safety.
+              const [f, strength] = Array.isArray(entry) ? entry : [entry, 3];
               const known = !!FLAVOR_DESCRIPTIONS[f];
               const active = openFlavor === f;
+              const intensity = Math.max(0.4, Math.min(1, strength / 5));
               return (
                 <button
                   key={f}
@@ -185,7 +190,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
                     padding: "3px 9px",
                     border: `1px solid ${theme.terra}`, borderRadius: 999,
                     background: active ? theme.terra : "transparent",
-                    opacity: 0.95,
+                    opacity: active ? 1 : intensity,
                     cursor: known ? "pointer" : "default",
                     transition: "all 0.15s ease",
                   }}

@@ -248,9 +248,35 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
+      {/* Predicted flavor strip — strength drives both sort and opacity. */}
+      {brew.flavors && brew.flavors.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
+            textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+          }}>
+            predicted flavor
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {brew.flavors.slice(0, 8).map(([name, strength]) => {
+              const intensity = Math.max(0.35, Math.min(1, strength / 5));
+              return (
+                <span key={name} style={{
+                  fontFamily: ff.sans, fontSize: 10.5,
+                  color: theme.terra, letterSpacing: "0.04em",
+                  padding: "3px 9px",
+                  border: `1px solid ${theme.terra}`, borderRadius: 999,
+                  opacity: intensity,
+                }}>{name}</span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Effect bars — live computed blend profile */}
       {brew.effects.length > 0 && (
-        <div>
+        <div style={{ marginBottom: brew.synergyTags?.length || brew.warnings?.length ? 14 : 0 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
             textTransform: "uppercase", color: theme.ash, marginBottom: 6,
@@ -274,6 +300,48 @@ export const BlendExtractionExplorer = ({
           </div>
         </div>
       )}
+
+      {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
+      {brew.synergyTags && brew.synergyTags.length > 0 && (
+        <div style={{ marginBottom: brew.warnings?.length ? 12 : 0 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {brew.synergyTags.map(tag => (
+              <span key={tag} style={{
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+                textTransform: "uppercase", color: theme.sageDeep,
+                padding: "3px 9px",
+                background: "rgba(98, 124, 92, 0.10)",
+                border: `1px solid ${theme.sageDeep}`, borderRadius: 999,
+              }}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Warnings — masking, ceiling, paradox. Outsiders are shown
+          inline above next to the per-ingredient pills, so filter
+          them here to avoid double-rendering. */}
+      {(() => {
+        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
+        if (filtered.length === 0) return null;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {filtered.map((w, i) => {
+              const accent = w.kind === "ceiling" ? theme.terra
+                : w.kind === "paradox" ? theme.sageDeep
+                : theme.ash;
+              return (
+                <div key={i} style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: accent, lineHeight: 1.4,
+                }}>
+                  {w.text}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 };

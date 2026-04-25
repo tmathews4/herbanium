@@ -652,6 +652,50 @@ function blendEffects(lower, upper, t) {
   });
 }
 
+// Annotate a string-array of flavors with strengths in [1, 4].
+//   - profileIndex 0 (light) caps at 3; 1+ caps at 4.
+//   - bitter / bitterness / astringent are diagnostic — strength rises
+//     with profile index regardless of array position.
+//   - other flavors descend from the cap by array position (top note
+//     leads, accents follow).
+// Pure function so the result is stable per (flavors, profileIndex).
+function annotateFlavorStrengths(flavors, profileIndex) {
+  const peakStrength = profileIndex === 0 ? 3 : 4;
+  return flavors.map((f, i) => {
+    if (f === "bitter" || f === "bitterness" || f === "astringent") {
+      return [f, Math.min(3, profileIndex + 1)];
+    }
+    return [f, Math.max(1, peakStrength - i)];
+  });
+}
+
+// Augment EXTRACTION_PROFILES with flavorStrengths once at module load.
+// Each point gains a `flavorStrengths: [[name, strength], ...]` field.
+for (const id in EXTRACTION_PROFILES) {
+  EXTRACTION_PROFILES[id].forEach((point, idx) => {
+    point.flavorStrengths = annotateFlavorStrengths(point.flavors, idx);
+  });
+}
+
+// Blend two profile points' flavor-strength tuples by lerp factor t.
+// Flavors present in only one point lerp from 0; the result drops any
+// final strength below 0.5 (effectively absent).
+function blendFlavorsWithStrength(lower, upper, t) {
+  const all = new Set([
+    ...lower.flavorStrengths.map(([n]) => n),
+    ...upper.flavorStrengths.map(([n]) => n),
+  ]);
+  const out = [];
+  for (const name of all) {
+    const lo = lower.flavorStrengths.find(([n]) => n === name)?.[1] ?? 0;
+    const hi = upper.flavorStrengths.find(([n]) => n === name)?.[1] ?? 0;
+    const v = lo * (1 - t) + hi * t;
+    if (v >= 0.5) out.push([name, Math.round(v * 10) / 10]);
+  }
+  return out.sort((a, b) => b[1] - a[1]);
+}
+
+// Legacy string-array helper, retained for any callers not yet migrated.
 function blendFlavors(lower, upper) {
   return Array.from(new Set([...lower.flavors, ...upper.flavors]));
 }
@@ -669,14 +713,14 @@ export function resolveExtractionProfile(ingredientId, tempC, timeS) {
 
   if (tLo === tHi && sLo === sHi && tLo === sLo) {
     return {
-      flavors: tLo.flavors,
+      flavors: tLo.flavorStrengths,
       effects: tLo.effects,
       character: tLo.character,
     };
   }
 
   return {
-    flavors: blendFlavors(tLo, tHi),
+    flavors: blendFlavorsWithStrength(tLo, tHi, tempT),
     effects: blendEffects(tLo, tHi, tempT),
     character: blendCharacter(tLo, tHi, tempT),
   };
