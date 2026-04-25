@@ -20,17 +20,37 @@ import {
   formatTempShort, useUnit,
 } from "../units/units";
 
+// Tea sub-styles, used for the conditional sub-pill row when category=teas.
+const TEA_SUBCATEGORIES = ["green", "black", "white", "oolong", "puerh"];
+
+// Effects offered as filter chips. Subset of MOODS; matches an ingredient
+// when it lists the effect at strength ≥ 3.
+const EFFECT_FILTERS = [
+  "calm", "focus", "energy", "sleepy", "comfort",
+  "soothing", "warming", "cooling", "digestive",
+];
+
 export const LibraryScreen = ({ go, pantryIds }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(false);
+  const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
+  const [effectFilter, setEffectFilter] = useState("any");
+  const [teaSubcategory, setTeaSubcategory] = useState("all");
 
-  // All ingredients, filtered by search / category / pantry-toggle, then
-  // sorted alphabetically by display name so the catalog is browsable.
+  // All ingredients, filtered then sorted alphabetically by display name.
   const shelfItems = Object.entries(INGREDIENTS)
     .filter(([id, ing]) => {
       if (pantryOnly && !pantryIds.has(id)) return false;
       if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
+      if (shelfCategory === "true tea" && teaSubcategory !== "all"
+          && ing.subcategory !== teaSubcategory) return false;
+      if (caffeineFilter === "free" && (ing.caffeine || 0) > 0) return false;
+      if (caffeineFilter === "has"  && (ing.caffeine || 0) === 0) return false;
+      if (effectFilter !== "any") {
+        const eff = (ing.effects || []).find(([t]) => t === effectFilter);
+        if (!eff || eff[1] < 3) return false;
+      }
       if (shelfSearch.trim()) {
         const q = shelfSearch.trim().toLowerCase();
         const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
@@ -81,7 +101,7 @@ export const LibraryScreen = ({ go, pantryIds }) => {
           </div>
 
           {/* Category filter pills */}
-          <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 8 }}>
             <ChipRows
               items={[
                 ["all",       "all"],
@@ -102,6 +122,63 @@ export const LibraryScreen = ({ go, pantryIds }) => {
                   color: shelfCategory === key ? theme.cream : theme.ash,
                   cursor: "pointer",
                 }}>{label}</button>
+              )}
+            />
+          </div>
+
+          {/* Tea sub-style pills — only when teas selected */}
+          {shelfCategory === "true tea" && (
+            <div style={{ marginBottom: 8, marginLeft: 8 }}>
+              <ChipRows
+                items={["all", ...TEA_SUBCATEGORIES]}
+                gap={4}
+                rowGap={4}
+                renderItem={(key) => (
+                  <button key={key} onClick={() => setTeaSubcategory(key)} style={{
+                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.02em",
+                    padding: "2px 8px", borderRadius: 999,
+                    border: `1px solid ${teaSubcategory === key ? theme.terra : theme.ruleSoft}`,
+                    background: teaSubcategory === key ? theme.terra : "transparent",
+                    color: teaSubcategory === key ? theme.cream : theme.ash,
+                    cursor: "pointer",
+                  }}>{key === "puerh" ? "pu-erh" : key}</button>
+                )}
+              />
+            </div>
+          )}
+
+          {/* Caffeine + effect filters */}
+          <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <span style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.ash, marginRight: 2,
+            }}>caffeine</span>
+            {[["any", "any"], ["free", "free"], ["has", "with"]].map(([key, label]) => (
+              <button key={key} onClick={() => setCaffeineFilter(key)} style={{
+                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                padding: "3px 9px", borderRadius: 999,
+                border: `1px solid ${caffeineFilter === key ? theme.ink : theme.ruleSoft}`,
+                background: caffeineFilter === key ? theme.ink : "transparent",
+                color: caffeineFilter === key ? theme.cream : theme.ash,
+                cursor: "pointer",
+              }}>{label}</button>
+            ))}
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <ChipRows
+              items={["any", ...EFFECT_FILTERS]}
+              gap={4}
+              rowGap={4}
+              renderItem={(key) => (
+                <button key={key} onClick={() => setEffectFilter(key)} style={{
+                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                  padding: "3px 9px", borderRadius: 999,
+                  border: `1px solid ${effectFilter === key ? theme.sageDeep : theme.ruleSoft}`,
+                  background: effectFilter === key ? theme.sageDeep : "transparent",
+                  color: effectFilter === key ? theme.cream : theme.ash,
+                  cursor: "pointer",
+                }}>{key === "any" ? "any effect" : key}</button>
               )}
             />
           </div>
@@ -150,6 +227,7 @@ export const LibraryScreen = ({ go, pantryIds }) => {
             }}>
               {shelfItems.map(([id, ing]) => {
                 const inPantry = pantryIds.has(id);
+                const hasCaffeine = (ing.caffeine || 0) > 0;
                 return (
                   <button key={id} onClick={() => go("ingredient", id)} style={{
                     background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
@@ -168,8 +246,18 @@ export const LibraryScreen = ({ go, pantryIds }) => {
                         color: theme.cream, fontSize: 10, fontWeight: "bold",
                       }}>✓</div>
                     )}
+                    {/* Caffeine badge — top-left when applicable */}
+                    {hasCaffeine && (
+                      <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
+                        position: "absolute", top: 8, left: 8,
+                        padding: "1px 6px", borderRadius: 999,
+                        background: theme.terra, color: theme.cream,
+                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
+                        textTransform: "uppercase", fontWeight: "bold",
+                      }}>caf</div>
+                    )}
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: inPantry ? 22 : 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: inPantry ? 22 : 0, paddingLeft: hasCaffeine ? 32 : 0 }}>
                       {ing.category === "flower" && <Flower size={18} c={theme.ochre} />}
                       {ing.category === "herbal" && <Sprig size={18} c={theme.sage} />}
                       {ing.category === "true tea" && <Leaf size={18} c={theme.sageDeep} />}
@@ -234,6 +322,14 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
   // traditional-rows-auto-brewing incident: a missing prop quietly routed
   // to startBrew and the wrong behavior shipped.)
   const handleTap = () => openBlend(b.id);
+  // Caffeine summary — total estimated mg in the cup, weighted by gram amount.
+  // Used to render a small "caf ~Xmg" badge alongside the blend name when > 0.
+  const caffeineMg = (b.ingredients || []).reduce((sum, ing) => {
+    const meta = INGREDIENTS[ing.id];
+    if (!meta || !meta.caffeine) return sum;
+    return sum + meta.caffeine * (ing.g || 0);
+  }, 0);
+  const caffeineDisplay = caffeineMg > 0 ? Math.round(caffeineMg) : 0;
   return (
   <button onClick={handleTap} style={{
     width: "100%", textAlign: "left",
@@ -245,9 +341,17 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
     display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center",
   }}>
     <div>
-      <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2 }}>
-        {b.name}
-        {author && <span style={{ fontStyle: "italic", fontSize: 12, color: theme.ash, marginLeft: 6 }}>· {author}</span>}
+      <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span>{b.name}</span>
+        {caffeineDisplay > 0 && (
+          <span title={`~${caffeineDisplay}mg caffeine per cup`} style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
+            textTransform: "uppercase", fontWeight: "bold",
+            padding: "1px 6px", borderRadius: 999,
+            background: theme.terra, color: theme.cream,
+          }}>caf</span>
+        )}
+        {author && <span style={{ fontStyle: "italic", fontSize: 12, color: theme.ash }}>· {author}</span>}
       </div>
       <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.ash, marginTop: 2 }}>
         {b.subtitle}
