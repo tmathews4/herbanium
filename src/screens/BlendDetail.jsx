@@ -340,13 +340,19 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             : "simple steep";
           return (
             <div style={{ margin: "22px 0 10px" }}>
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setDirectionsOpen(o => !o)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setDirectionsOpen(o => !o);
+                  }
+                }}
                 style={{
-                  width: "100%", textAlign: "left",
-                  background: "transparent", border: "none", padding: 0,
-                  cursor: "pointer",
                   display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8,
+                  cursor: "pointer", userSelect: "none",
                 }}
               >
                 <SectionLabel n="ii">Directions</SectionLabel>
@@ -362,7 +368,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
                     display: "inline-block",
                   }}>▸</span>
                 </span>
-              </button>
+              </div>
               {directionsOpen && (
                 <ol style={{
                   marginTop: 10, padding: "12px 16px 12px 32px", borderRadius: 8,
