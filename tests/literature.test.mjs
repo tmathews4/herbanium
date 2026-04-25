@@ -556,6 +556,39 @@ test("reishi at full decoction triggers tannin warning (deeply bitter)", () => {
     `expected tannin warning at strong reishi`);
 });
 
+// ─── GENTLE-HERB OVER-PULL WARNINGS ─────────────────────────────
+
+test("chamomile at long+hot triggers tannin warning (apigenin tannins)", () => {
+  assert(hasWarning(warningsFor(strong("chamomile")), "tannin"),
+    `expected tannin warning at strong chamomile (100°C × 7min)`);
+});
+
+test("chamomile at standard does NOT trigger any over-pull warning", () => {
+  const w = warningsFor(standard("chamomile"));
+  assert(!hasWarning(w, "tannin") && !hasWarning(w, "aromatic"),
+    `unexpected over-pull warning at standard chamomile`);
+});
+
+test("lavender at over-extraction triggers aromatic warning (soapy/camphor)", () => {
+  assert(hasWarning(warningsFor(strong("lavender")), "aromatic"),
+    `expected aromatic warning at strong lavender`);
+});
+
+test("lavender at standard culinary cup does NOT trigger aromatic warning", () => {
+  assert(!hasWarning(warningsFor(standard("lavender")), "aromatic"),
+    `unexpected aromatic warning at standard lavender`);
+});
+
+test("lemon balm at long+hot triggers tannin warning (grass turns hay-bitter)", () => {
+  assert(hasWarning(warningsFor(strong("lemonbalm")), "tannin"),
+    `expected tannin warning at strong lemonbalm`);
+});
+
+test("rose at over-steep triggers tannin warning (musky-tannic edge)", () => {
+  assert(hasWarning(warningsFor(strong("rose")), "tannin"),
+    `expected tannin warning at strong rose`);
+});
+
 test("time slider moves the cup at constant temp (bracketByIntensity 2D)", () => {
   // This is the regression we just fixed. Pick a few ingredients with
   // long time ranges and verify the cup actually changes when only

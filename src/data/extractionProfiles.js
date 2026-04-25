@@ -42,9 +42,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 95,  timeS: 300, flavors: ["honey", "apple", "floral", "hay"],
       effects: [["calm", 4], ["sleepy", 3], ["settle", 3]],
       character: "The standard cup. Full honey-floral body, clear calming effect." },
-    { tempC: 100, timeS: 420, flavors: ["honey", "apple", "floral", "hay", "earthy"],
-      effects: [["calm", 4], ["sleepy", 5], ["settle", 3], ["bitterness", 1]],
-      character: "The sleepy-time version. Maximum apigenin, fuller and slightly tannic." },
+    { tempC: 100, timeS: 420, flavors: ["honey", "apple", "floral", "hay", "earthy", "astringent"],
+      effects: [["calm", 4], ["sleepy", 5], ["settle", 3], ["bitterness", 2]],
+      character: "Past the sleepy-time mark. Apigenin maxes out but tannins follow — the cup turns astringent." },
   ],
 
   lavender: [
@@ -55,8 +55,8 @@ export const EXTRACTION_PROFILES = {
       effects: [["calm", 4], ["sleepy", 2]],
       character: "The culinary cup. Floral and balanced, solid calm." },
     { tempC: 95,  timeS: 240, flavors: ["floral", "pine", "camphor", "soapy"],
-      effects: [["calm", 4], ["sleepy", 3], ["bitterness", 1]],
-      character: "Over-extracted — camphor and soap notes emerge. Use with care." },
+      effects: [["calm", 4], ["sleepy", 3], ["bitterness", 2]],
+      character: "Over-extracted — camphor and soap notes take the perfume's place. Pull back." },
   ],
 
   hibiscus: [
@@ -78,9 +78,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 92,  timeS: 270, flavors: ["floral", "sweet", "fruity"],
       effects: [["calm", 3], ["energy", 3]],
       character: "The standard cup. Full rose perfume with a honeyed lift." },
-    { tempC: 95,  timeS: 300, flavors: ["floral", "sweet", "fruity", "earthy"],
-      effects: [["calm", 3], ["energy", 3], ["bitterness", 1]],
-      character: "Over-steeped — rose picks up a muskiness, slight astringency." },
+    { tempC: 95,  timeS: 300, flavors: ["floral", "sweet", "fruity", "earthy", "astringent"],
+      effects: [["calm", 3], ["energy", 3], ["bitterness", 2]],
+      character: "Over-steeped — rose picks up muskiness and a tannic edge. Pull back." },
   ],
 
   jasmine: [
@@ -103,9 +103,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy"],
       effects: [["calm", 3], ["focus", 2], ["energy", 3]],
       character: "The standard cup. Lemon-mint with gentle lift and focus." },
-    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "herbal"],
-      effects: [["calm", 3], ["focus", 2], ["energy", 3], ["bitterness", 1]],
-      character: "Full extraction — citrus stays, herbal notes firm up." },
+    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "astringent"],
+      effects: [["calm", 3], ["focus", 2], ["energy", 3], ["bitterness", 2]],
+      character: "Pushed past the sweet spot — citrus dulls, grass turns hay-bitter." },
   ],
 
   peppermint: [

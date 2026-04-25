@@ -280,7 +280,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
       {warnings.length > 0 && (
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
           {warnings.map((w, i) => {
-            const accent = w.kind === "tannin" || w.kind === "ceiling"
+            const accent = w.kind === "tannin" || w.kind === "ceiling" || w.kind === "aromatic"
               ? theme.terra
               : w.kind === "paradox" ? theme.sageDeep
               : theme.ash;

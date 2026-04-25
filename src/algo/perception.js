@@ -226,6 +226,19 @@ export function buildWarnings({
     });
   }
 
+  // Aromatic over-pull — gentle florals (lavender especially) tip into
+  // soapy / camphor / muddy register when brewed too long or too hot.
+  // Different mechanism than tannins; same fix (pull back).
+  const soapy   = perceivedFlavors.soapy   || 0;
+  const camphor = perceivedFlavors.camphor || 0;
+  const muddy   = perceivedFlavors.muddy   || 0;
+  if (soapy >= 0.5 || camphor >= 1.5 || muddy >= 1) {
+    warnings.push({
+      kind: "aromatic",
+      text: "The aromatic register is tipping into soap and camphor — pull back the steep.",
+    });
+  }
+
   // Sedative ceiling — calm + sleepy summed pressure
   const sedativePressure = (perceivedEffects.sleepy || 0) + (perceivedEffects.calm || 0) * 0.5;
   if (sedativePressure >= 6) {
