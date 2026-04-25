@@ -355,7 +355,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
                   cursor: "pointer", userSelect: "none",
                 }}
               >
-                <SectionLabel n="ii">Directions</SectionLabel>
+                <SectionLabel n="ii">Recommended Preparations</SectionLabel>
                 <span style={{
                   display: "flex", alignItems: "baseline", gap: 6,
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
