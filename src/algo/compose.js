@@ -79,15 +79,19 @@ export function computeBrewProfile(ingredients, opts = {}) {
     tempC = Math.round(wTemp);
   }
 
+  // Time fallback differs from temp because the warning model is
+  // asymmetric: pulling past an ingredient's time max fires an
+  // over-pull warning, but steeping below its min is silent (just
+  // weak extraction). So when the time ranges don't intersect, pick
+  // the lowest max — `sIntMax` is min(all sMax) — so no ingredient
+  // is over-pulled. Ingredients with longer windows (reishi, valerian,
+  // mushroom decoctions) simply under-extract; the user can push the
+  // slider longer if they want them fully drawn.
   let timeS;
   if (timeIntersects) {
     timeS = Math.round((sIntMin + sIntMax) / 2 / 30) * 30;
   } else {
-    const wTime = pool.reduce((s, { id, g }) => {
-      const [t1, t2] = INGREDIENTS[id].timeS;
-      return s + ((t1 + t2) / 2) * (g / totalG);
-    }, 0);
-    timeS = Math.round(wTime / 30) * 30;
+    timeS = Math.round(sIntMax / 30) * 30;
   }
 
   // Outsiders: ingredients whose temp range doesn't include the chosen
