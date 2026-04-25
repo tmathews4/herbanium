@@ -13,6 +13,7 @@ import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
 } from "../hooks/usePersistedState";
+import { FeedbackModal } from "./FeedbackModal";
 import {
   ff, theme,
 } from "../theme";
@@ -42,6 +43,9 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // Export/import data
   const importInputRef = useRef(null);
   const [importMessage, setImportMessage] = useState(null);
+
+  // Feedback modal
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const handleExport = () => {
     const payload = exportAllPersistedState();
@@ -306,7 +310,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           Clearing your browser data will clear your journal.
         </div>
 
-        {/* Export / Import data */}
+        {/* Export / Import / Feedback */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           <button
             onClick={handleExport}
@@ -330,6 +334,17 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           >
             import data
           </button>
+          <button
+            onClick={() => setFeedbackOpen(true)}
+            style={{
+              fontFamily: ff.sans, fontSize: 12, color: theme.terra,
+              padding: "8px 14px", borderRadius: 999,
+              background: "transparent", border: `1px solid ${theme.terra}`,
+              cursor: "pointer",
+            }}
+          >
+            send feedback
+          </button>
           <input
             ref={importInputRef}
             type="file"
@@ -341,6 +356,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             style={{ display: "none" }}
           />
         </div>
+        {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
         {importMessage && (
           <div style={{
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
