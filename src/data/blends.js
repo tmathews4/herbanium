@@ -14,8 +14,19 @@
    for the science behind each claim.
    ────────────────────────────────────────────────────────────── */
 
-const MOODS   = ["calm", "focus", "energy", "sleepy", "comfort", "settle"];
-const FLAVORS = ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet"];
+const MOODS = [
+  "calm", "focus", "energy", "sleepy", "comfort", "settle",
+  // Effect-axis moods — these don't have hand-curated PAIR_BLENDS, but
+  // MOOD_BLENDS gives each a signature single-mood recipe and the
+  // candidate resolver also matches blends whose effects contain them.
+  "soothing", "warming", "cooling", "digestive", "grounding", "uplifting",
+];
+const FLAVORS = [
+  "floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet",
+  // Sensory-register flavors — blends opt in via blend.flavor, and the
+  // candidate resolver also matches when an ingredient lists the flavor.
+  "grassy", "smoky", "mineral", "honeyed", "umami", "woody", "roasted",
+];
 
 /* ── Curated named blends ──────────────────────────────────── */
 
@@ -591,6 +602,44 @@ const MOOD_BLENDS = {
     temp: 95, time: 300,
     effects: [["digestive", 4], ["calm", 3]],
   },
+
+  // Effect-axis moods. Each is a single-mood signature recipe; the
+  // resolver uses these when the user picks one of the new moods alone.
+  soothing: {
+    ings: [["rooibos", 1.8], ["chamomile", 0.6]],
+    temp: 100, time: 360,
+    effects: [["soothing", 5], ["calm", 3]],
+  },
+  warming: {
+    ings: [
+      { id: "ginger", g: 0.5 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
+      { id: "cardamom", g: 0.2, role: "accent" },
+    ],
+    temp: 100, time: 420,
+    style: "decoction",
+    effects: [["warming", 5], ["digestive", 3]],
+  },
+  cooling: {
+    ings: [["peppermint", 1.0], ["spearmint", 0.5], ["lemongrass", 0.5]],
+    temp: 95, time: 300,
+    effects: [["cooling", 4], ["digestive", 3], ["uplifting", 2]],
+  },
+  digestive: {
+    ings: [["fennel", 0.8], ["peppermint", 0.5], ["chamomile", 0.5]],
+    temp: 95, time: 360,
+    effects: [["digestive", 5], ["calm", 3], ["soothing", 2]],
+  },
+  grounding: {
+    ings: [["puerh", 3.0]],
+    temp: 100, time: 90,
+    effects: [["grounding", 4], ["digestive", 3], ["warming", 3]],
+  },
+  uplifting: {
+    ings: [["lemongrass", 1.0], ["lemonbalm", 0.8], ["rose", 0.3]],
+    temp: 95, time: 240,
+    effects: [["uplifting", 4], ["calm", 3], ["cooling", 2]],
+  },
 };
 
 /* ── Curated mood-pair recipes ─────────────────────────────── */
@@ -712,24 +761,41 @@ const PAIR_BLENDS = {
 const MOOD_CONFLICTS = [
   ["energy", "sleepy"],
   ["focus",  "sleepy"],
+  // Warming and cooling pull opposite directions thermally; the cup
+  // would walk both sides, but it's a tension worth flagging.
+  ["warming", "cooling"],
+  // Grounding is a settled-down register; uplifting is a gentle lift.
+  ["grounding", "uplifting"],
+  // Energy directly contradicts soothing's quiet-down character.
+  ["energy", "soothing"],
 ];
 
 // Flavor pairs that don't typically play well in a single cup.
 const FLAVOR_CONFLICTS = [
-  ["minty",  "spiced"],   // menthol cold vs warming spice cancel
-  ["earthy", "citrus"],   // bright acid muddies deep grounding
-  ["smoky",  "floral"],   // Lapsang's signature buries delicate aromatics
+  ["minty",  "spiced"],    // menthol cold vs warming spice cancel
+  ["earthy", "citrus"],    // bright acid muddies deep grounding
+  ["smoky",  "floral"],    // Lapsang's signature buries delicate aromatics
+  ["smoky",  "citrus"],    // smoke buries bright/citrus the same way
+  ["umami",  "sweet"],     // savory broth and dessert sweet pull apart
+  ["roasted", "floral"],   // toasted depth covers delicate florals
 ];
 
 // Names used when a single mood is selected — each mood has a canonical
 // "signature" blend name/subtitle pair. Voice: apothecary-poet.
 const MOOD_SINGLE_NAMES = {
-  calm:    ["Stillwater",          "GABA-tuned, the exhale cluster"],
-  focus:   ["Scriptorium",         "L-theanine plus caffeine — alert without jitter"],
-  energy:  ["Morning Vestment",    "Silk-Road spice on a British black"],
-  comfort: ["Hearth Cup",          "Cederberg red, Persian petals — no leaf to over-steep"],
-  sleepy:  ["Threshold of Sleep",  "apigenin and linalool, covered cup"],
-  settle:  ["The Settling",        "anethole-GABA, the post-meal cup"],
+  calm:      ["Stillwater",         "GABA-tuned, the exhale cluster"],
+  focus:     ["Scriptorium",        "L-theanine plus caffeine — alert without jitter"],
+  energy:    ["Morning Vestment",   "Silk-Road spice on a British black"],
+  comfort:   ["Hearth Cup",         "Cederberg red, Persian petals — no leaf to over-steep"],
+  sleepy:    ["Threshold of Sleep", "apigenin and linalool, covered cup"],
+  settle:    ["The Settling",       "anethole-GABA, the post-meal cup"],
+  // Effect-axis signatures
+  soothing:  ["The Quiet Hour",     "Cederberg honey under chamomile — nothing to argue with"],
+  warming:   ["Hearth Spice",       "ginger and cinnamon, the kettle's slow heat"],
+  cooling:   ["Cool Hour",          "peppermint and spearmint, summer's exhale"],
+  digestive: ["Anethole Settle",    "fennel and peppermint, the post-meal cup"],
+  grounding: ["Anchor",             "Yunnan road tea — short pours, deep root"],
+  uplifting: ["Brightness",         "citral and Melissa, no caffeine to crash"],
 };
 
 // Dead exports kept for API stability — the live copies live in
@@ -752,12 +818,18 @@ const FLAVOR_COMPLEMENTS = {
 };
 
 const MOOD_NEIGHBORS = {
-  calm:    ["sleepy", "settle"],
-  focus:   ["energy", "calm"],
-  energy:  ["focus"],
-  sleepy:  ["calm", "settle"],
-  comfort: ["settle", "calm"],
-  settle:  ["comfort", "calm"],
+  calm:      ["sleepy", "settle", "soothing"],
+  focus:     ["energy", "calm", "uplifting"],
+  energy:    ["focus", "warming", "uplifting"],
+  sleepy:    ["calm", "settle", "soothing"],
+  comfort:   ["settle", "calm", "soothing", "warming"],
+  settle:    ["comfort", "calm", "digestive"],
+  soothing:  ["comfort", "calm", "settle"],
+  warming:   ["comfort", "energy", "grounding"],
+  cooling:   ["digestive", "uplifting", "focus"],
+  digestive: ["settle", "cooling", "comfort"],
+  grounding: ["comfort", "warming", "calm"],
+  uplifting: ["energy", "focus", "cooling"],
 };
 
 export {

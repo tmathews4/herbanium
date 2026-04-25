@@ -304,7 +304,31 @@ export function buildAccentVariantByMood(primaryMood, neighborMood, flavor) {
   };
 }
 
-// Multi-candidate resolver, axis-aware. Returns 1–3 blends.
+// A blend "matches" a mood when its primary mood tag is the user's
+// pick OR when the mood appears as a meaningfully present effect
+// (strength >= 2). This lets effect-axis moods (soothing, warming,
+// cooling, digestive, grounding, uplifting) find candidates without
+// re-tagging every blend's `mood` field.
+function blendMatchesMood(b, mood) {
+  if (b.mood === mood) return true;
+  return (b.effects || []).some(([k, v]) => k === mood && v >= 2);
+}
+
+// A blend matches a flavor when its primary flavor tag is the user's
+// pick OR when at least one ingredient lists that flavor in its
+// `flavors` array. Lets sensory-register flavors (grassy, smoky,
+// honeyed, umami, woody, roasted, mineral) match blends whose
+// constituents express them even if the blend's top-level
+// `flavor` field uses a coarser label.
+function blendMatchesFlavor(b, flavor) {
+  if (b.flavor === flavor) return true;
+  return (b.ingredients || []).some(ing => {
+    const meta = INGREDIENTS[ing.id];
+    return meta && (meta.flavors || []).includes(flavor);
+  });
+}
+
+// Multi-candidate resolver, axis-aware. Returns 1–4 blends.
 // Always leads with the primary match. Accent candidates vary along the
 // NON-primary axis: when primaryAxis is "feel", accents explore flavor
 // variations; when "taste", accents explore mood variations.
@@ -339,7 +363,7 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     // Hojicha at Dusk) wins over a multi-ingredient blend at the same
     // mood. Pure teas are the truest expression of a tradition.
     const tradition = BLENDS
-      .filter(b => b.tradition && moods.includes(b.mood) &&
+      .filter(b => b.tradition && moods.some(m => blendMatchesMood(b, m)) &&
         !candidates.some(c => c.name === b.name))
       .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
     if (tradition) {
@@ -353,7 +377,7 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     // recipes like Tom Foolery so the suggestion row isn't limited to
     // legacy traditions. The UI marks these with a blue outline.
     const experimental = BLENDS
-      .filter(b => b.experimental && moods.includes(b.mood) &&
+      .filter(b => b.experimental && moods.some(m => blendMatchesMood(b, m)) &&
         !candidates.some(c => c.name === b.name))
       .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
     if (experimental) {
@@ -380,7 +404,7 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     // shortest match wins so a pure tea surfaces over a blend.
     if (flavor) {
       const flavorTradition = BLENDS
-        .filter(b => b.tradition && b.flavor === flavor &&
+        .filter(b => b.tradition && blendMatchesFlavor(b, flavor) &&
           !candidates.some(c => c.name === b.name))
         .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
       if (flavorTradition) {
@@ -391,7 +415,7 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
       }
       // Experimental flavor matches for the taste-led view.
       const flavorExperimental = BLENDS
-        .filter(b => b.experimental && b.flavor === flavor &&
+        .filter(b => b.experimental && blendMatchesFlavor(b, flavor) &&
           !candidates.some(c => c.name === b.name))
         .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
       if (flavorExperimental) {
