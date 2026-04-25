@@ -371,10 +371,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
               </div>
               {directionsOpen && (
                 <ol style={{
-                  marginTop: 10, padding: "12px 16px 12px 32px", borderRadius: 8,
+                  marginTop: 10, marginLeft: "auto", marginRight: "auto",
+                  maxWidth: 360,
+                  padding: "12px 16px 12px 32px", borderRadius: 8,
                   background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
                   fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
-                  lineHeight: 1.55,
+                  lineHeight: 1.55, textAlign: "left",
                 }}>
                   {steps.map((step, i) => (
                     <li key={i} style={{ marginBottom: i === steps.length - 1 ? 0 : 6 }}>
