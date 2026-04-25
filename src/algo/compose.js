@@ -392,9 +392,24 @@ function pickFromBank(bank, seed) {
 }
 
 // Compose a poetic name from one word per selected mood and one per
-// selected flavor. Stays terse — 2-3 words usually, never longer than
-// a typical curated subtitle would be.
-function generateBlendName(moods, flavors) {
+// selected flavor. The primary axis (mood on by-feel, flavor on
+// by-taste) leads the name; the secondary axis goes in parentheses
+// when both axes have multiple selections.
+//
+// Templates by selection size:
+//   0 + 0     → Untitled
+//   1 P       → P                       e.g. "Compass"
+//   2+ P      → P₁ & P₂                 e.g. "Compass & Ease"
+//   1 S       → S                       e.g. "Woody"
+//   2+ S      → S₁ & S₂                 e.g. "Woody & Roasted"
+//   1 P + 1 S → P S                     e.g. "Compass Woody"
+//   1 P + 2+S → P (S₁/S₂)               e.g. "Compass (Woody/Roasted)"
+//   2+P + 1 S → P₁ & P₂ (S)             e.g. "Compass & Ease (Woody)"
+//   2+P + 2+S → P₁ & P₂ (S₁/S₂)         e.g. "Compass & Ease (Woody/Roasted)"
+//
+// Past two words on either axis the additional selections are dropped —
+// the name stays a name, not a manifest.
+function generateBlendName(moods, flavors, primaryAxis = "feel") {
   const moodWords = moods
     .map(m => pickFromBank(MOOD_WORDS[m], hashOf(m + "|" + flavors.join(","))))
     .filter(Boolean);
@@ -402,30 +417,35 @@ function generateBlendName(moods, flavors) {
     .map(f => pickFromBank(FLAVOR_WORDS[f], hashOf(f + "|" + moods.join(","))))
     .filter(Boolean);
 
-  if (moodWords.length === 0 && flavorWords.length === 0) return "Untitled";
-  if (moodWords.length === 1 && flavorWords.length === 0) return moodWords[0];
-  if (moodWords.length === 0 && flavorWords.length === 1) return flavorWords[0];
-  if (moodWords.length === 1 && flavorWords.length === 1) {
-    return `${moodWords[0]} ${flavorWords[0]}`;
+  const isFeel = primaryAxis === "feel";
+  const primary = (isFeel ? moodWords : flavorWords).slice(0, 2);
+  const secondary = (isFeel ? flavorWords : moodWords).slice(0, 2);
+
+  if (primary.length === 0 && secondary.length === 0) return "Untitled";
+
+  // Single-axis cases — no parenthetical needed.
+  if (primary.length === 0) {
+    return secondary.length === 1
+      ? secondary[0]
+      : `${secondary[0]} & ${secondary[1]}`;
   }
-  if (moodWords.length === 2 && flavorWords.length === 0) {
-    return `${moodWords[0]} & ${moodWords[1]}`;
+  if (secondary.length === 0) {
+    return primary.length === 1
+      ? primary[0]
+      : `${primary[0]} & ${primary[1]}`;
   }
-  if (moodWords.length === 0 && flavorWords.length === 2) {
-    return `${flavorWords[0]} & ${flavorWords[1]}`;
+
+  // 1 + 1 — simple pairing reads better without parens.
+  if (primary.length === 1 && secondary.length === 1) {
+    return `${primary[0]} ${secondary[0]}`;
   }
-  if (moodWords.length === 2 && flavorWords.length === 1) {
-    return `${moodWords[0]} & ${moodWords[1]}, ${flavorWords[0]}`;
-  }
-  if (moodWords.length === 1 && flavorWords.length === 2) {
-    return `${moodWords[0]}: ${flavorWords[0]} & ${flavorWords[1]}`;
-  }
-  // Anything bigger — 2+ on at least one axis. Trim each side to two
-  // words and only include the dot-separator when both sides have words.
-  const head = moodWords.slice(0, 2).join(" & ");
-  const tail = flavorWords.slice(0, 2).join(" & ");
-  if (head && tail) return `${head} · ${tail}`;
-  return head || tail;
+
+  // 1+ primary, 1+ secondary with at least one side > 1: parenthetical
+  // frame. Primary uses "&", secondary uses "/" so the two registers
+  // visually distinguish.
+  const head = primary.length === 1 ? primary[0] : `${primary[0]} & ${primary[1]}`;
+  const tail = secondary.join("/");
+  return `${head} (${tail})`;
 }
 
 // Pick the strongest ingredient expressing a given mood, with a tea
@@ -552,7 +572,8 @@ function bestPartialPrimaryTradition(moods, flavors, primaryAxis) {
 }
 
 // Build a synthetic candidate when no curated blend embodies the
-// user's selections. For each selected mood, we pull the strongest
+// user's selections. Takes primaryAxis so the generated name leads
+// with the right axis (mood for by-feel, flavor for by-taste). For each selected mood, we pull the strongest
 // ingredient expressing that effect (tea-first, herbal fallback);
 // for each flavor, we pull a flavor-matching ingredient as an accent.
 // computeBrewProfile resolves the 2D sweet spot if the leads' brewing
@@ -561,7 +582,7 @@ function bestPartialPrimaryTradition(moods, flavors, primaryAxis) {
 // Names are composed from MOOD_WORDS + FLAVOR_WORDS — one word per
 // selection, deterministic so the same query always produces the
 // same name.
-function buildSyntheticForSelections(moods, flavors) {
+function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel") {
   const picks = [];
   const usedIds = new Set();
 
@@ -603,7 +624,7 @@ function buildSyntheticForSelections(moods, flavors) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4);
 
-  const name = generateBlendName(moods, flavors);
+  const name = generateBlendName(moods, flavors, primaryAxis);
   const subtitle = isCleanSweet
     ? "a synthesized cup at a clean brewing window for these selections"
     : "the catalog's closest balance for these selections";
@@ -766,7 +787,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   // windows intersect, closest-point compromise if they don't.
   const hasFullPrimary = candidates.some(c => c._score?.fullPrimary);
   if (!hasFullPrimary) {
-    const synth = buildSyntheticForSelections(moods, flavors);
+    const synth = buildSyntheticForSelections(moods, flavors, primaryAxis);
     if (synth) {
       const synthScore = scoreSelections(synth, moods, flavors, primaryAxis);
       const label = synth.sweetSpot
