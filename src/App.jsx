@@ -177,9 +177,17 @@ export default function App() {
   // when ?dev is set. Flipping it resets state to that seed's snapshot.
   const [seedMode, setSeedMode] = useState("power");
 
+  // Dev-seed version — bump when the power seed shape changes so users
+  // with stale persisted data get refreshed. Without this, an existing
+  // dev session keeps its old "y1"-"y9" sessions even after we ship a
+  // richer seed, because usePersistedState rehydrates from localStorage.
+  const SEED_VERSION = "3";
+  const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
+
   // When seed mode changes (dev only), reset the varying state to snapshot.
   // Includes generatedBlends + favorites + profile so the new richer power
-  // seed populates everything that drives titles.
+  // seed populates everything that drives titles. Also force-resets if the
+  // persisted seedVersion doesn't match the current code version.
   useEffect(() => {
     if (!isDev) return;
     const mode = SEED_MODES[seedMode];
@@ -192,7 +200,26 @@ export default function App() {
     if (mode.profile) {
       setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
     }
+    setSeedVersion(SEED_VERSION);
   }, [seedMode, isDev]);
+
+  // First-mount stale-data guard: if dev and persisted seedVersion is
+  // older than the code's, reapply the current seed mode immediately.
+  useEffect(() => {
+    if (!isDev) return;
+    if (seedVersion === SEED_VERSION) return;
+    const mode = SEED_MODES[seedMode];
+    if (!mode) return;
+    setSessions(materializeSeedSessions(mode.sessions));
+    setSavedBlendIds(new Set(mode.savedBlendIds || []));
+    setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
+    setPantryIds(new Set(mode.pantryIds || []));
+    setGeneratedBlends(mode.generatedBlends || []);
+    if (mode.profile) {
+      setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
+    }
+    setSeedVersion(SEED_VERSION);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Welcome card visibility — shown once after onboarding, then dismissed
   const [welcomeShown, setWelcomeShown] = usePersistedState("welcomeShown", false);
