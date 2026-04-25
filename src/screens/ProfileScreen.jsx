@@ -105,7 +105,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
   const attrEvaluation = evaluateAttributes(
-    buildAttributeContext({ sessions, savedBlendIds, pantryIds })
+    buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile })
   );
   const earnedAttrs = attrEvaluation.filter(a => a.earned);
   // Sort earned by rarity desc — rarest finds bubble up.
@@ -456,137 +456,78 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 };
 
 /* ──────────────────────────────────────────────────────────────
-   AttributeShelf — earned-only attribute tiles, color-coded by
-   rarity, click to expand. No total counter is shown by design;
-   the locked set is meant to stay a mystery.
+   AttributeShelf — earned-only name cards, border colored by rarity.
+   Tap any card to expand its description. No icons, no totals —
+   the locked set stays a mystery.
    ────────────────────────────────────────────────────────────── */
 
 const RARITY_TONE = {
-  common:    { color: theme.ash,      label: "common",    bg: "rgba(140,140,140,0.06)" },
-  uncommon:  { color: theme.sageDeep, label: "uncommon",  bg: "rgba(98,124,92,0.08)" },
+  common:    { color: theme.ash,      label: "common",    bg: "rgba(140,140,140,0.05)" },
+  uncommon:  { color: theme.sageDeep, label: "uncommon",  bg: "rgba(98,124,92,0.07)" },
   rare:      { color: theme.ochre,    label: "rare",      bg: "rgba(165,120,54,0.10)" },
   legendary: { color: theme.terra,    label: "legendary", bg: "rgba(176,84,47,0.10)" },
   mythic:    { color: theme.plum,     label: "mythic",    bg: "rgba(120,72,140,0.12)" },
 };
 
-const TINT_TO_THEME = {
-  sage: theme.sage, sageDeep: theme.sageDeep,
-  ochre: theme.ochre, terra: theme.terra,
-  plum: theme.plum, sky: theme.sky || theme.sageDeep,
-  ash: theme.ash,
-};
-
-function attrFrameStyle(frame, color) {
-  const base = {
-    width: 38, height: 38,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    background: `${color}14`,
-    border: `1.5px solid ${color}`,
-    transition: "all 0.15s ease",
-  };
-  if (frame === "circle")  return { ...base, borderRadius: "50%" };
-  if (frame === "square")  return { ...base, borderRadius: 6 };
-  if (frame === "hex")     return { ...base, borderRadius: 6, clipPath: "polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%)" };
-  if (frame === "diamond") return { ...base, borderRadius: 4, transform: "rotate(45deg)" };
-  return { ...base, borderRadius: 6 };
-}
-
-function AccentMark({ accent, color }) {
-  if (!accent || accent === "none") return null;
-  const baseStyle = {
-    position: "absolute", top: -2, right: -2,
-    width: 9, height: 9, fontSize: 8.5, lineHeight: "9px",
-    textAlign: "center", color, fontWeight: "bold",
-    pointerEvents: "none",
-  };
-  if (accent === "dot")      return <span style={{ ...baseStyle, background: color, borderRadius: "50%" }} />;
-  if (accent === "star")     return <span style={baseStyle}>★</span>;
-  if (accent === "crescent") return <span style={baseStyle}>☾</span>;
-  if (accent === "rays")     return <span style={{ ...baseStyle, fontSize: 11 }}>✦</span>;
-  return null;
-}
-
-const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => {
-  return (
-    <>
-      {/* Detail card — appears above the tiles when one is open */}
-      {openAttr && (() => {
-        const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
-        return (
-          <div style={{
-            marginBottom: 12, padding: "12px 14px", borderRadius: 10,
-            background: tone.bg,
-            border: `1.5px solid ${tone.color}`,
-            position: "relative",
-          }}>
-            <button onClick={() => setOpenId(null)} aria-label="close" style={{
-              position: "absolute", top: 4, right: 8,
-              background: "transparent", border: "none", cursor: "pointer",
-              color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
-            }}>×</button>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
-              <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
-                {openAttr.name}
-              </span>
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-                textTransform: "uppercase", color: tone.color, fontWeight: 600,
-              }}>
-                {tone.label}
-              </span>
-            </div>
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-              color: theme.inkSoft, lineHeight: 1.5,
+const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => (
+  <>
+    {/* Detail card — sits above the grid when one is open */}
+    {openAttr && (() => {
+      const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
+      return (
+        <div style={{
+          marginBottom: 12, padding: "12px 14px", borderRadius: 10,
+          background: tone.bg,
+          border: `2px solid ${tone.color}`,
+          position: "relative",
+        }}>
+          <button onClick={() => setOpenId(null)} aria-label="close" style={{
+            position: "absolute", top: 4, right: 8,
+            background: "transparent", border: "none", cursor: "pointer",
+            color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
+          }}>×</button>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
+            <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
+              {openAttr.name}
+            </span>
+            <span style={{
+              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: tone.color, fontWeight: 600,
             }}>
-              {openAttr.desc}
-            </div>
+              {tone.label}
+            </span>
           </div>
-        );
-      })()}
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.inkSoft, lineHeight: 1.5,
+          }}>
+            {openAttr.desc}
+          </div>
+        </div>
+      );
+    })()}
 
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(54px, 1fr))",
-        gap: 10,
-      }}>
-        {attrs.map(a => {
-          const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
-          const tint = TINT_TO_THEME[a.tint] || tone.color;
-          const Glyph = ATTRIBUTE_GLYPHS[a.glyph] || Flower;
-          const isOpen = openId === a.id;
-          return (
-            <button
-              key={a.id}
-              onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
-              title={a.name}
-              style={{
-                background: "transparent", border: "none", padding: 0, cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                position: "relative",
-                outline: isOpen ? `2px solid ${tone.color}` : "none", outlineOffset: 3,
-                borderRadius: 6,
-              }}
-            >
-              <div style={{ position: "relative" }}>
-                <div style={attrFrameStyle(a.frame, tint)}>
-                  <div style={{ transform: a.frame === "diamond" ? "rotate(-45deg)" : "none" }}>
-                    <Glyph size={20} c={tint} />
-                  </div>
-                </div>
-                <AccentMark accent={a.accent} color={tint} />
-              </div>
-              <span style={{
-                fontFamily: ff.sans, fontSize: 7.5, letterSpacing: "0.06em",
-                textTransform: "uppercase", color: tone.color,
-                textAlign: "center", lineHeight: 1, maxWidth: 60,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              }}>
-                {a.name.replace(/^The /, "")}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
-};
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      {attrs.map(a => {
+        const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
+        const isOpen = openId === a.id;
+        return (
+          <button
+            key={a.id}
+            onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
+            style={{
+              fontFamily: ff.serif, fontSize: 13,
+              padding: "6px 12px", borderRadius: 6,
+              background: isOpen ? tone.bg : "transparent",
+              color: theme.ink,
+              border: `2px solid ${tone.color}`,
+              cursor: "pointer",
+              transition: "background 0.15s ease",
+              whiteSpace: "nowrap",
+            }}
+          >{a.name}</button>
+        );
+      })}
+    </div>
+  </>
+);

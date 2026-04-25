@@ -95,12 +95,22 @@ function buildWindow(sessions) {
   return ctx;
 }
 
-export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds }) {
+export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile }) {
   const yourSessions = (sessions || []).filter(s => s.who === "you");
   const recentSessions = yourSessions.slice(0, RECENT_WINDOW);
 
   const lifetime = buildWindow(yourSessions);
   const recent = buildWindow(recentSessions);
+
+  // Onboarding signals — used by archetype attributes that fire from
+  // the user's first day. Normalize defaults so predicates stay terse.
+  const onboarding = {
+    moods:    new Set(profile?.draw    || []),
+    flavors:  new Set(profile?.flavors || []),
+    times:    new Set(profile?.timeOfDay || []),
+    moodCount:   (profile?.draw    || []).length,
+    flavorCount: (profile?.flavors || []).length,
+  };
 
   // Earliest session → "lifelong" predicates compute days-since.
   let earliestTs = null;
@@ -122,7 +132,7 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     .filter(b => String(b.id || "").startsWith("local-")).length;
 
   return {
-    lifetime, recent, daysSinceFirst,
+    lifetime, recent, onboarding, daysSinceFirst,
     flowerIngsAll, teaIngsAll, allIngs,
     composedCount,
     favoriteBlendIds: favoriteBlendIds || new Set(),
@@ -130,6 +140,12 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     pantryIds:       pantryIds       || new Set(),
   };
 }
+
+// Onboarding helper — predicate that fires when the user picked the
+// given mood AND any of the given flavors during onboarding.
+const onPick = (ctx, mood, flavors) =>
+  ctx.onboarding.moods.has(mood) &&
+  flavors.some(f => ctx.onboarding.flavors.has(f));
 
 // Predicate helpers — terse access to window data
 const moodCount       = (w, m) => w.byMood.get(m) || 0;
@@ -581,6 +597,123 @@ export const ATTRIBUTES = [
     glyph: "heart", tint: "plum", frame: "hex", accent: "star",
     desc: "Twenty favorited blends. A library of yes.",
     earned: ctx => ctx.favoriteBlendIds.size >= 20 },
+  // ─── Onboarding archetypes — fire from the user's very first day,
+  //     based on what mood/flavor combinations they picked. Each user
+  //     should land 1-2 of these. Color-coordinated by rarity. ─────
+  { id: "the-druid",         name: "The Druid",          rarity: "uncommon", window: "onboarding",
+    glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
+    desc: "You came in for calm and reached for earthy cups. Rooted, slow, deep — the forest is your kettle.",
+    earned: ctx => onPick(ctx, "calm", ["earthy", "smoky"]) },
+  { id: "garden-walker",     name: "The Garden Walker",  rarity: "common", window: "onboarding",
+    glyph: "flower", tint: "ochre", frame: "circle", accent: "dot",
+    desc: "Calm and floral — petals and quiet, the cup as a slow afternoon in the garden.",
+    earned: ctx => onPick(ctx, "calm", ["floral", "fruity"]) },
+  { id: "cooling-hand",      name: "The Cooling Hand",   rarity: "uncommon", window: "onboarding",
+    glyph: "cooling", tint: "sky", frame: "circle", accent: "crescent",
+    desc: "Calm and minty — cool exhale, soft mind. Yin energy, taken as tea.",
+    earned: ctx => onPick(ctx, "calm", ["minty"]) },
+  { id: "mountain-scribe",   name: "The Mountain Scribe", rarity: "uncommon", window: "onboarding",
+    glyph: "grounding", tint: "ash", frame: "diamond", accent: "none",
+    desc: "Focus and earthy — grounded attention. The desk steady, the leaves dark.",
+    earned: ctx => onPick(ctx, "focus", ["earthy"]) },
+  { id: "smoke-sage",        name: "The Smoke Sage",     rarity: "rare", window: "onboarding",
+    glyph: "warming", tint: "ash", frame: "diamond", accent: "rays",
+    desc: "Focus and smoky — pine fire and concentration. Rare and contemplative.",
+    earned: ctx => onPick(ctx, "focus", ["smoky"]) },
+  { id: "the-sharpener",     name: "The Sharpener",      rarity: "uncommon", window: "onboarding",
+    glyph: "focus", tint: "sageDeep", frame: "square", accent: "rays",
+    desc: "Focus and minty — clean cut, clarity through cold. The mind as a knife.",
+    earned: ctx => onPick(ctx, "focus", ["minty"]) },
+  { id: "bright-mind",       name: "The Bright Mind",    rarity: "common", window: "onboarding",
+    glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Focus and citrus — clean cognition, the morning of the mind.",
+    earned: ctx => onPick(ctx, "focus", ["citrus", "fruity"]) },
+  { id: "sun-sailor",        name: "The Sun Sailor",     rarity: "common", window: "onboarding",
+    glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Energy and citrus — bright lift. You take the cup like a sail takes wind.",
+    earned: ctx => onPick(ctx, "energy", ["citrus", "fruity"]) },
+  { id: "forge-hand",        name: "The Forge-Hand",     rarity: "rare", window: "onboarding",
+    glyph: "warming", tint: "terra", frame: "hex", accent: "star",
+    desc: "Energy and smoky — hot iron, steady force. The cup is a hammer.",
+    earned: ctx => onPick(ctx, "energy", ["smoky"]) },
+  { id: "the-caravan",       name: "The Caravan",        rarity: "uncommon", window: "onboarding",
+    glyph: "warming", tint: "terra", frame: "circle", accent: "dot",
+    desc: "Energy and spiced — chai and movement. Your cup smells of roads.",
+    earned: ctx => onPick(ctx, "energy", ["spiced"]) },
+  { id: "frost-runner",      name: "The Frost Runner",   rarity: "rare", window: "onboarding",
+    glyph: "cooling", tint: "sky", frame: "diamond", accent: "rays",
+    desc: "Energy and minty — cool kinetic. Lift without heat, motion without sweat.",
+    earned: ctx => onPick(ctx, "energy", ["minty"]) },
+  { id: "the-moonflower",    name: "The Moonflower",     rarity: "uncommon", window: "onboarding",
+    glyph: "sleepy", tint: "plum", frame: "circle", accent: "crescent",
+    desc: "Sleepy and floral — bedside petals. The cup is your lullaby.",
+    earned: ctx => onPick(ctx, "sleepy", ["floral"]) },
+  { id: "the-lullaby",       name: "The Lullaby",        rarity: "common", window: "onboarding",
+    glyph: "sleepy", tint: "plum", frame: "circle", accent: "dot",
+    desc: "Sleepy and sweet — sugared dusk. The cup is your bedtime story.",
+    earned: ctx => onPick(ctx, "sleepy", ["sweet"]) },
+  { id: "the-rootbed",       name: "The Rootbed",        rarity: "rare", window: "onboarding",
+    glyph: "grounding", tint: "plum", frame: "diamond", accent: "none",
+    desc: "Sleepy and earthy — the soil at night. You go down to rise.",
+    earned: ctx => onPick(ctx, "sleepy", ["earthy"]) },
+  { id: "hearth-witch",      name: "The Hearth Witch",   rarity: "uncommon", window: "onboarding",
+    glyph: "warming", tint: "terra", frame: "square", accent: "dot",
+    desc: "Comfort and spiced — kitchen warmth, the cup as a slow embrace.",
+    earned: ctx => onPick(ctx, "comfort", ["spiced"]) },
+  { id: "the-honeycake",     name: "The Honeycake",      rarity: "common", window: "onboarding",
+    glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
+    desc: "Comfort and sweet — the cup as a soft seat. Honey in everything.",
+    earned: ctx => onPick(ctx, "comfort", ["sweet"]) },
+  { id: "the-wood-stove",    name: "The Wood Stove",     rarity: "rare", window: "onboarding",
+    glyph: "warming", tint: "terra", frame: "hex", accent: "rays",
+    desc: "Comfort and smoky — smoldering ease. The cup smells like home in winter.",
+    earned: ctx => onPick(ctx, "comfort", ["smoky"]) },
+  { id: "the-bittersmith",   name: "The Bittersmith",    rarity: "uncommon", window: "onboarding",
+    glyph: "digestive", tint: "ochre", frame: "hex", accent: "dot",
+    desc: "Digestive and spiced — chai-after-meal, fennel-and-pepper. You know what bitters do.",
+    earned: ctx => onPick(ctx, "digestive", ["spiced"]) },
+  { id: "the-apothecary-self", name: "The Apothecary",   rarity: "rare", window: "onboarding",
+    glyph: "mortar", tint: "terra", frame: "hex", accent: "star",
+    desc: "Digestive and earthy — bitter roots, dandelion café. You take the cup like medicine.",
+    earned: ctx => onPick(ctx, "digestive", ["earthy"]) },
+  { id: "after-supper",      name: "The After-Supper",   rarity: "common", window: "onboarding",
+    glyph: "digestive", tint: "sage", frame: "circle", accent: "dot",
+    desc: "Digestive and minty — fennel-and-mint clarity. The cup as the meal's last sentence.",
+    earned: ctx => onPick(ctx, "digestive", ["minty"]) },
+  { id: "the-polyglot-mouth", name: "The Polyglot Mouth", rarity: "rare", window: "onboarding",
+    glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
+    desc: "You picked five or more flavors at onboarding. A wide palate, hungry for range.",
+    earned: ctx => ctx.onboarding.flavorCount >= 5 },
+  { id: "the-specialist",    name: "The Specialist",     rarity: "uncommon", window: "onboarding",
+    glyph: "focus", tint: "sageDeep", frame: "square", accent: "dot",
+    desc: "One or two flavors — you know what you like. Narrow and deep beats wide and thin.",
+    earned: ctx => ctx.onboarding.flavorCount > 0 && ctx.onboarding.flavorCount <= 2 },
+  { id: "the-mood-reader",   name: "The Mood-Reader",    rarity: "uncommon", window: "onboarding",
+    glyph: "compass", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "You came in led by feeling, not flavor — three or more moods, no flavor picks.",
+    earned: ctx => ctx.onboarding.moodCount >= 3 && ctx.onboarding.flavorCount === 0 },
+  { id: "the-single-note",   name: "The Single Note",    rarity: "uncommon", window: "onboarding",
+    glyph: "key", tint: "sageDeep", frame: "diamond", accent: "none",
+    desc: "One mood, one flavor — the cup is for one thing, and that thing exactly.",
+    earned: ctx => ctx.onboarding.moodCount === 1 && ctx.onboarding.flavorCount === 1 },
+  { id: "dawn-voyager",      name: "The Dawn Voyager",   rarity: "common", window: "onboarding",
+    glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Mornings and energy. You meet the day with the kettle.",
+    earned: ctx => ctx.onboarding.times.has("morning") &&
+      (ctx.onboarding.moods.has("energy") || ctx.onboarding.moods.has("focus")) },
+  { id: "lamp-watcher",      name: "The Lamp-Watcher",   rarity: "common", window: "onboarding",
+    glyph: "sleepy", tint: "plum", frame: "circle", accent: "crescent",
+    desc: "Evenings and calm. The cup is the lowering light.",
+    earned: ctx => ctx.onboarding.times.has("evening") &&
+      (ctx.onboarding.moods.has("calm") || ctx.onboarding.moods.has("sleepy")) },
+  { id: "afternoon-scholar", name: "The Afternoon Scholar", rarity: "uncommon", window: "onboarding",
+    glyph: "scroll", tint: "ochre", frame: "square", accent: "none",
+    desc: "Afternoons and focus. The cup keeps the page open past three.",
+    earned: ctx => ctx.onboarding.times.has("afternoon") && ctx.onboarding.moods.has("focus") },
+  { id: "the-all-hours",     name: "The All-Hours",      rarity: "rare", window: "onboarding",
+    glyph: "compass", tint: "plum", frame: "diamond", accent: "star",
+    desc: "Morning, afternoon, and evening all picked. You don't keep the kettle in one drawer.",
+    earned: ctx => ctx.onboarding.times.size >= 3 },
 ];
 
 export function evaluateAttributes(ctx) {
