@@ -437,17 +437,7 @@ export const BlendExtractionExplorer = ({
                           outline: "none",
                         }}
                       >
-                        <EffectBar
-                          label={tag}
-                          value={n}
-                          color={color}
-                          // The bitterness bar represents total tannin pressure
-                          // (bitter + bitterness + astringent), and perception.js
-                          // fires "tannins are taking over" at the combined
-                          // threshold of 4. Marking that line on the bar gives
-                          // the user a direct read on when the warning trips.
-                          thresholdValue={tag === "bitterness" ? 4 : undefined}
-                        />
+                        <EffectBar label={tag} value={n} color={color} />
                       </div>
                     );
                   })}
