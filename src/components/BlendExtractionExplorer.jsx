@@ -136,6 +136,20 @@ export const BlendExtractionExplorer = ({
     ? resolveBlendAtBrew(ingredients, tempC, timeS)
     : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
 
+  // Max-settings brew — what each effect reaches at the slider's
+  // upper bound on both axes. Used to render a tick mark on each
+  // EffectBar so the user can see "this is as strong as this blend
+  // gets" without hunting for it via the slider.
+  const maxBrew = useMemo(
+    () => resolveBlendAtBrew(ingredients, tempCRange[1], timeSRange[1]),
+    [ingredients, tempCRange, timeSRange],
+  );
+  const maxByTag = useMemo(() => {
+    const m = {};
+    for (const [tag, n] of (maxBrew.effects || [])) m[tag] = n;
+    return m;
+  }, [maxBrew]);
+
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.
   // Restricts to lead-role ingredients so accents and catalysts (which
@@ -437,7 +451,7 @@ export const BlendExtractionExplorer = ({
                           outline: "none",
                         }}
                       >
-                        <EffectBar label={tag} value={n} color={color} />
+                        <EffectBar label={tag} value={n} maxValue={maxByTag[tag]} color={color} />
                       </div>
                     );
                   })}

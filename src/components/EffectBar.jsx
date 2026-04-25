@@ -17,18 +17,31 @@ import { theme, ff } from "../theme";
 // — so mild but real strengths (0.4, 1.2, 2.2) read more present
 // in the bar without changing the displayed number. A "moderate"
 // blend feels moderate visually instead of looking nearly empty,
-// while max strength still reaches the right edge. The numeric
-// label stays absolute so cross-blend comparison still works.
+// while max strength still reaches the right edge.
+//
+// maxValue (optional) renders a thin vertical tick on the bar at
+// the strongest level this blend reaches at maximum slider settings.
+// Lets the user see the cup's ceiling without hunting for it.
 const VISUAL_GAMMA = 0.7;
 
-export const EffectBar = ({ label, value, color = theme.sage }) => {
+const visualPosition = (v) =>
+  5 * Math.pow(Math.max(0, v) / 5, VISUAL_GAMMA);
+
+export const EffectBar = ({ label, value, maxValue, color = theme.sage }) => {
   const v = Number(value) || 0;
   const display = Math.round(v * 10) / 10;
-  const visualV = 5 * Math.pow(Math.max(0, v) / 5, VISUAL_GAMMA);
+  const visualV = visualPosition(v);
+
+  // Tick only renders when maxValue is meaningfully greater than
+  // the current value — otherwise the slider's already at the
+  // ceiling and the tick would just sit on the right edge of fill.
+  const showTick = typeof maxValue === "number" && maxValue > v + 0.05;
+  const tickV = showTick ? visualPosition(maxValue) : null;
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: ff.sans }}>
       <div style={{ fontSize: 11.5, color: theme.inkSoft, width: 72, letterSpacing: "0.04em" }}>{label}</div>
-      <div style={{ display: "flex", gap: 3, flex: 1 }}>
+      <div style={{ display: "flex", gap: 3, flex: 1, position: "relative" }}>
         {[1,2,3,4,5].map(i => {
           const fill = Math.max(0, Math.min(1, visualV - (i - 1)));
           return (
@@ -45,6 +58,22 @@ export const EffectBar = ({ label, value, color = theme.sage }) => {
             </div>
           );
         })}
+        {showTick && (
+          <div
+            title={`Max: ${Math.round(maxValue * 10) / 10}`}
+            style={{
+              position: "absolute",
+              left: `${(tickV / 5) * 100}%`,
+              top: -2,
+              transform: "translateX(-50%)",
+              width: 2, height: 9,
+              background: theme.inkSoft,
+              borderRadius: 1,
+              opacity: 0.55,
+              pointerEvents: "none",
+            }}
+          />
+        )}
       </div>
       <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.ink, width: 28, textAlign: "right" }}>
         {Number.isInteger(display) ? display : display.toFixed(1)}
