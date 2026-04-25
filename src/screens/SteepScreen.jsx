@@ -16,15 +16,24 @@ import { IngredientSheet } from "./IngredientSheet";
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-// Same condensed mood vocabulary as onboarding — keeps the brewing UI
-// approachable without forcing users back into the full 11-mood list.
-const STEEP_MOOD_CHIPS = [
+// Two chip rows on the Steep screen. The "right now" row includes the
+// rough-edged states a tea ritual is often addressing (anxious, stressed,
+// tired, restless); the "I'd like to feel" row stays positive-only since
+// no one aspires to feel anxious.
+const DESIRED_MOOD_CHIPS = [
   { key: "calm",      label: "Calm" },
   { key: "focus",     label: "Focus" },
   { key: "energy",    label: "Energy" },
   { key: "sleepy",    label: "Sleepy" },
   { key: "comfort",   label: "Comfort" },
   { key: "digestive", label: "Digestive" },
+];
+const CURRENT_MOOD_CHIPS = [
+  ...DESIRED_MOOD_CHIPS,
+  { key: "anxious",   label: "Anxious" },
+  { key: "stressed",  label: "Stressed" },
+  { key: "tired",     label: "Tired" },
+  { key: "restless",  label: "Restless" },
 ];
 
 export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry }) => {
@@ -222,11 +231,13 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           label="Right now I feel…"
           value={currentMoods || []}
           setValue={setCurrentMoods}
+          chips={CURRENT_MOOD_CHIPS}
         />
         <MoodChipRow
           label="I'd like to feel…"
           value={targetMoods || []}
           setValue={setTargetMoods}
+          chips={DESIRED_MOOD_CHIPS}
         />
       </div>
 
@@ -457,7 +468,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   );
 };
 
-const MoodChipRow = ({ label, value, setValue }) => {
+const MoodChipRow = ({ label, value, setValue, chips }) => {
   const selected = new Set(value || []);
   const toggle = (key) => {
     if (!setValue) return;
@@ -471,7 +482,7 @@ const MoodChipRow = ({ label, value, setValue }) => {
         textTransform: "uppercase", color: theme.ash, marginBottom: 6,
       }}>{label}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-        {STEEP_MOOD_CHIPS.map(c => {
+        {(chips || DESIRED_MOOD_CHIPS).map(c => {
           const isOn = selected.has(c.key);
           return (
             <button
