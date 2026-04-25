@@ -33,6 +33,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
   const [openMood, setOpenMood] = React.useState(null);
+  const [openTag, setOpenTag] = React.useState(null);
   if (!b) return null;
 
   // Filter the user's sessions for this specific blend. These become
@@ -152,72 +153,107 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           if (caffeineMg > 0) {
             tags.push({
               label: "caffeinated",
-              title: `~${Math.round(caffeineMg)}mg caffeine per cup`,
+              summary: `Contains caffeine — about ${Math.round(caffeineMg)}mg per cup.`,
+              body: "Tea-leaf caffeine releases more slowly than coffee thanks to L-theanine, but it still adds up. Avoid late evening if you're caffeine-sensitive.",
+              tone: "terra",
               fg: theme.cream, bg: theme.terra, border: theme.terra,
             });
           }
           if (b.style === "low-temp") {
             tags.push({
               label: "low-temp",
-              title: "Brewed cooler than a Western steep — Japanese green-tea or yerba-mate tradition.",
+              summary: "Brewed cooler than a Western steep.",
+              body: "Japanese green-tea and yerba-mate traditions — the lower temperature is what keeps the cup from going bitter and lets umami / sweetness lead.",
+              tone: "sage",
               fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
             });
           } else if (b.style === "decoction") {
             tags.push({
               label: "decoction",
-              title: "Long active simmer (15-30 min). The recipe accepts that supporting spices steep past their delicate window.",
+              summary: "Long active simmer (15–30 minutes).",
+              body: "Roots and bark need a sustained boil to release their character. The recipe knowingly accepts that lighter supporting spices steep past their delicate window.",
+              tone: "sage",
               fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
             });
           } else if (b.style) {
             tags.push({
-              label: b.style, title: "",
+              label: b.style,
+              summary: `Brew style: ${b.style}.`,
+              body: "",
+              tone: "sage",
               fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
             });
           }
           if (b.tradition) {
             tags.push({
               label: b.tradition,
-              title: "Curated tradition.",
+              summary: `${b.tradition} tradition.`,
+              body: "A curated preparation — taught the way it's traditionally made, with brewing parameters and ratios drawn from the source culture.",
+              tone: "terra",
               fg: theme.ochre, bg: "transparent", border: theme.ochre,
             });
           }
           if (b.experimental) {
+            const isHouse = b.id === "exp-tom-foolery";
             tags.push({
-              label: b.id === "exp-tom-foolery" ? "house staple" : "experiment",
-              title: b.id === "exp-tom-foolery"
-                ? "Herbanium house signature — undeletable from the catalogue."
-                : "Recipe the catalog's chemistry suggests but no tradition has codified.",
+              label: isHouse ? "house staple" : "experiment",
+              summary: isHouse ? "Herbanium house signature." : "Algorithmic experiment.",
+              body: isHouse
+                ? "The one experimental treated as a permanent catalogue staple — undeletable, always present."
+                : "The catalog's chemistry suggests this combination but no tradition has codified it. Try, log, judge for yourself.",
+              tone: "terra",
               fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
             });
           }
           if (flagged) {
             tags.push({
               label: "heads-up",
-              title: "One or more ingredients carry a heads-up note (drug interaction, pregnancy, sedative, etc.). Open the ingredient for details.",
+              summary: "Caution — at least one ingredient has a heads-up note.",
+              body: "Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open any ingredient with a flagged badge to read its specific note.",
+              tone: "terra",
               fg: theme.terra, bg: "transparent", border: theme.terra, dashed: true,
             });
           }
           if (tags.length === 0) return null;
+          const open = openTag != null ? tags[openTag] : null;
           return (
-            <div style={{
-              display: "flex", flexWrap: "wrap", gap: 5,
-              justifyContent: "center", marginTop: 10,
-            }}>
-              {tags.map((t, i) => (
-                <span
-                  key={i}
-                  title={t.title}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    color: t.fg, background: t.bg,
-                    border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
-                    borderRadius: 3,
-                    padding: "3px 8px",
-                  }}
-                >{t.label}</span>
-              ))}
-            </div>
+            <>
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: 5,
+                justifyContent: "center", marginTop: 10,
+              }}>
+                {tags.map((t, i) => {
+                  const active = openTag === i;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setOpenTag(prev => prev === i ? null : i)}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: t.fg, background: t.bg,
+                        border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
+                        borderRadius: 3,
+                        padding: "3px 8px",
+                        cursor: "pointer",
+                        boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",
+                      }}
+                    >{t.label}</button>
+                  );
+                })}
+              </div>
+              {open && (
+                <div style={{ textAlign: "left", marginTop: 4 }}>
+                  <VocabInfoCard
+                    term={open.label}
+                    summary={open.summary}
+                    body={open.body}
+                    tone={open.tone}
+                    onClose={() => setOpenTag(null)}
+                  />
+                </div>
+              )}
+            </>
           );
             })()}
           </div>
