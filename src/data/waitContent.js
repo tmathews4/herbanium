@@ -4,8 +4,9 @@
    Content shown on rotating cards during a brew's wait timer.
 
    - WAIT_FACTS: ingredient-specific facts and traditional-use notes,
-     keyed by ingredient id. During the research phase, PLACEHOLDER
-     entries get replaced with properly-sourced content.
+     keyed by ingredient id. Sourced against the research files in
+     docs/research/ingredients/; claims that didn't hold up have been
+     either rewritten or removed.
 
    - WAIT_POEMS: public-domain poems and fragments tagged by
      ingredient/mood/theme so they can surface in relevant brews.
@@ -24,59 +25,59 @@ export const WAIT_FACTS = {
   chamomile: [
     { type: "fact",      text: "Chamomile's calming compound, apigenin, releases most in the final two minutes. The last minutes of the steep are where most of it arrives." },
     { type: "tradition", text: "In parts of Eastern Europe, chamomile was strewn across floors before gatherings — walking on it released the scent, perfuming the room." },
-    { type: "fact",      text: "PLACEHOLDER · Chamomile has been cultivated for at least 2,000 years, with records of its use in ancient Egyptian temple rituals." },
+    { type: "fact",      text: "Chamomile has been cultivated for at least 2,000 years — Bronze Age pollen turns up in European archaeological sites, and the plant was widely traded across the ancient Mediterranean." },
   ],
   lavender: [
     { type: "fact",      text: "The word lavender comes from the Latin lavare — to wash. Romans added it to bathwater." },
-    { type: "fact",      text: "PLACEHOLDER · Lavender's essential oil contains linalool, a compound studies have linked to reduced cortisol levels." },
-    { type: "tradition", text: "PLACEHOLDER · In Provence, lavender harvest begins at dawn, when the oils are most concentrated and the heat hasn't yet driven them off." },
+    { type: "fact",      text: "Lavender's essential oil contains linalool, the compound clinical trials credit with the herb's measurable anxiolytic effect — Germany's Silexan preparation runs on it." },
+    { type: "tradition", text: "In Provence, lavender harvest begins at dawn, when the oils are most concentrated and the heat hasn't yet driven them off." },
   ],
   lemonbalm: [
     { type: "fact",      text: "Lemon balm (Melissa officinalis) takes its botanical name from the Greek melissa — honeybee. Bees are drawn to it reliably." },
-    { type: "tradition", text: "PLACEHOLDER · Medieval monks brewed lemon balm for what they called 'gladness of spirit' — an early recognition of its mild mood-lifting effect." },
+    { type: "tradition", text: "Medieval monks brewed lemon balm for what they called 'gladness of spirit' — an early recognition of its mild mood-lifting effect. Carmelite Water, a 17th-century French nun's recipe, made the use famous." },
   ],
   peppermint: [
     { type: "fact",      text: "Peppermint is a natural hybrid of spearmint and water mint. Most of what sells as 'mint' in tea is actually peppermint." },
-    { type: "fact",      text: "PLACEHOLDER · Menthol, peppermint's cooling compound, triggers the same cold-receptors that respond to actual cold — your mouth 'feels' the chill that isn't there." },
+    { type: "fact",      text: "Menthol, peppermint's cooling compound, triggers the same TRPM8 cold-receptors that respond to actual cold — your mouth 'feels' the chill that isn't there." },
   ],
   spearmint: [
     { type: "tradition", text: "Moroccan tea service traditionally uses three pours: the first bitter as life, the second sweet as love, the third gentle as death." },
-    { type: "fact",      text: "PLACEHOLDER · Spearmint has less menthol than peppermint — which is why it reads 'softer' and pairs better with green tea." },
+    { type: "fact",      text: "Spearmint has carvone where peppermint has menthol — a different cooling compound entirely, which is why it reads softer and pairs better with green tea." },
   ],
   rooibos: [
-    { type: "fact",      text: "PLACEHOLDER · Rooibos grows only in the Cederberg region of South Africa. Attempts to cultivate it elsewhere have largely failed." },
-    { type: "tradition", text: "PLACEHOLDER · The Khoi people of the Cederberg have used rooibos for centuries; it entered European consciousness only in the early 1900s." },
+    { type: "fact",      text: "Rooibos grows only in the Cederberg region of South Africa. Attempts to cultivate it elsewhere have largely failed." },
+    { type: "tradition", text: "The Khoi people of the Cederberg have used rooibos for centuries; it entered European consciousness only in the early 1900s." },
   ],
   sencha: [
-    { type: "fact",      text: "PLACEHOLDER · Sencha is made by steaming fresh tea leaves within hours of harvest — a Japanese innovation that preserves grassy green notes Chinese methods don't." },
-    { type: "tradition", text: "PLACEHOLDER · Japanese tea masters consider the first pour of sencha almost ceremonial — water at the wrong temperature can ruin months of the farmer's work." },
+    { type: "fact",      text: "Sencha is made by steaming fresh tea leaves within hours of harvest — a Japanese innovation, introduced by Soen Nagatani in 1738, that preserves the grassy green notes Chinese pan-firing doesn't." },
+    { type: "tradition", text: "Japanese tea masters consider the first pour of sencha almost ceremonial — water at the wrong temperature can ruin months of the farmer's work." },
   ],
   assam: [
-    { type: "fact",      text: "PLACEHOLDER · Assam was discovered growing wild by British botanists in 1823, disproving the assumption that tea was exclusively Chinese." },
+    { type: "fact",      text: "Assam was discovered growing wild by British botanist Robert Bruce in 1823, disproving the assumption that tea was exclusively Chinese — and breaking the empire's monopoly on the trade." },
   ],
   darjeeling: [
-    { type: "fact",      text: "PLACEHOLDER · Darjeeling's character comes from elevation — gardens sit at 600-2000m in the Himalayan foothills, producing slow-growing, intensely flavored leaves." },
-    { type: "tradition", text: "PLACEHOLDER · The 'first flush' — leaves picked in spring after dormancy — is considered Darjeeling's finest, sometimes called the 'champagne of teas.'" },
+    { type: "fact",      text: "Darjeeling's character comes from elevation — gardens sit at 600-2000m in the Himalayan foothills, producing slow-growing, intensely flavored leaves." },
+    { type: "tradition", text: "The 'first flush' — Darjeeling leaves picked in spring after dormancy — is considered the estate's finest, sometimes called the 'champagne of teas.'" },
   ],
   ginger: [
-    { type: "fact",      text: "PLACEHOLDER · Ginger's heat comes from gingerol, which converts to shogaol when heated — shogaol is nearly twice as pungent." },
-    { type: "tradition", text: "PLACEHOLDER · In Ayurvedic tradition, ginger is considered a universal medicine — warming to the digestive fire and circulation both." },
+    { type: "fact",      text: "Ginger's heat comes from gingerol, which converts to shogaol when dried or heated — shogaol is sharper, more warming, and a different molecule than the fresh root carries." },
+    { type: "tradition", text: "In Ayurvedic tradition, ginger is considered a universal medicine — warming to the digestive fire and circulation both." },
   ],
   hibiscus: [
-    { type: "fact",      text: "PLACEHOLDER · Hibiscus's ruby color comes from anthocyanins, the same family of pigments that make blueberries blue and red cabbage red." },
-    { type: "tradition", text: "PLACEHOLDER · Known as karkadé in Egypt and agua de jamaica in Mexico, hibiscus tea has traveled widely with different names and almost identical preparations." },
+    { type: "fact",      text: "Hibiscus's ruby color comes from anthocyanins, the same family of pigments that make blueberries blue and red cabbage red." },
+    { type: "tradition", text: "Known as karkadé in Egypt and agua de jamaica in Mexico, hibiscus tea has traveled widely with different names and almost identical preparations." },
   ],
   rose: [
-    { type: "fact",      text: "PLACEHOLDER · Rose petals used in tea are typically Rosa × damascena, cultivated for oil and aroma rather than for the rose gardens most people imagine." },
+    { type: "fact",      text: "Rose petals used in tea are typically Rosa × damascena, cultivated for oil and aroma rather than for the rose gardens most people imagine." },
   ],
   cinnamon: [
-    { type: "fact",      text: "PLACEHOLDER · What most Western markets sell as 'cinnamon' is usually cassia — a close relative. True cinnamon (Ceylon) is lighter in color and more delicate in flavor." },
+    { type: "fact",      text: "What most Western markets sell as 'cinnamon' is usually cassia — a close relative. True cinnamon (Ceylon) is lighter in color and more delicate in flavor — and lower in coumarin, which the cassia version carries enough of to stress the liver at heavy daily doses." },
   ],
   cardamom: [
-    { type: "fact",      text: "PLACEHOLDER · Green cardamom pods keep their aromatic oils far longer than the seeds alone. Opening a pod releases the scent, but cracks the preservation." },
+    { type: "fact",      text: "Green cardamom pods keep their aromatic oils far longer than the seeds alone. Opening a pod releases the scent, but cracks the preservation." },
   ],
   ashwagandha: [
-    { type: "fact",      text: "PLACEHOLDER · Ashwagandha's Sanskrit name means 'smell of horse' — referring both to the root's earthy scent and, traditionally, the strength it was said to convey." },
+    { type: "fact",      text: "Ashwagandha's Sanskrit name means 'smell of horse' — referring both to the root's musky scent and, traditionally, the strength it was said to convey." },
   ],
 };
 

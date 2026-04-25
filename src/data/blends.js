@@ -374,10 +374,10 @@ const BLENDS = [
   {
     id: "exp-tom-foolery",
     name: "Tom Foolery",
-    subtitle: "the maker's sneaky cup",
+    subtitle: "The maker's sneaky cup",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
-      { id: "peppermint", g: 0.5, role: "accent" },
+      { id: "spearmint", g: 0.5, role: "accent" },
       { id: "tulsi", g: 0.8, role: "accent" },
     ],
     tempC: 80, timeS: 150, ml: 250,
