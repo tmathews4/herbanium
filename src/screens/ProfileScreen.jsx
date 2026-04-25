@@ -117,20 +117,19 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const sortedEarned = [...earnedAttrs].sort((a, b) =>
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
-  // Prepend the unique creation title as a pinned first card. It's not
-  // a normal attribute (it's granted once, at signup, and never re-evaluates),
-  // but we want users to be able to tap it for the description like the others.
-  const creationTitleName = profile?.title || generateCreationTitle(profile);
-  const allCards = creationTitleName ? [
-    {
-      id: "_creation",
-      name: creationTitleName,
-      displayName: creationTitleName,
-      rarity: "legendary",
-      desc: "Granted at your kettle's first lighting. Drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
-    },
-    ...sortedEarned,
-  ] : sortedEarned;
+  // The unique creation title — granted at signup, never re-evaluates.
+  // Rendered explicitly (not via AttributeShelf) so it always shows
+  // when a profile exists, regardless of whether any use-based titles
+  // have been earned yet.
+  const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
+  const creationCard = creationTitleName ? {
+    id: "_creation",
+    name: creationTitleName,
+    displayName: creationTitleName,
+    rarity: "legendary",
+    desc: "Granted at your kettle's first lighting. Drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
+  } : null;
+  const allCards = creationCard ? [creationCard, ...sortedEarned] : sortedEarned;
   const [openAttrId, setOpenAttrId] = useState(null);
   const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
 
@@ -237,14 +236,15 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             and patterns about what lands for you will start to emerge.
           </div>
         )}
-        {allCards.length > 0 ? (
+        {creationCard && (
           <AttributeShelf attrs={allCards} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />
-        ) : cupCount === 0 ? (
+        )}
+        {!creationCard && cupCount === 0 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
             Self-knowledge grows from a few cups in. Log three or four
             brews with real intent and the patterns start showing up here.
           </div>
-        ) : null}
+        )}
       </div>
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
