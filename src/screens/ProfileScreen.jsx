@@ -351,11 +351,12 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       </div>
       <div style={{
         padding: "14px 16px", borderRadius: 10,
-        background: "transparent", border: `1px dashed ${theme.ruleSoft}`,
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
-        lineHeight: 1.55,
+        background: "rgba(176, 84, 47, 0.05)",
+        border: `2px solid ${theme.terra}`,
+        fontFamily: ff.serif, fontSize: 12.5, fontWeight: 600,
+        color: theme.terra, lineHeight: 1.55,
       }}>
-        Herbanium is a brewing companion and journal — not medical advice. Effects, traditional uses, and ingredient warnings reflect common literature and should never replace a clinician. If you're pregnant, nursing, taking prescription medication, or managing a health condition, verify any herb with a qualified professional before use. Trust your body; trust the cup; verify the science.
+        Herbanium is a brewing companion and journal — <em>not</em> medical advice. Effects, traditional uses, and ingredient warnings reflect common literature and should never replace a clinician. If you're pregnant, nursing, taking prescription medication, or managing a health condition, verify any herb with a qualified professional before use. Trust your body; trust the cup; verify the science.
       </div>
     </div>
   );
