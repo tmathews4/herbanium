@@ -26,18 +26,12 @@ import {
 } from "../units/units";
 import { LibraryList, BlendListRow } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
-import { BadgesPanel } from "./BadgesPanel";
-import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
 export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
-  // Pre-compute attribute count for the sub-tab header chip.
-  const earnedBadgeCount = evaluateAttributes(
-    buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds })
-  ).filter(b => b.earned).length;
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
@@ -743,12 +737,11 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         }
 
         const subTabHeader = (
-          <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}`, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
             {[
               ["blends",    "Blends",    saved.length],
               ["catalogue", "Catalogue", traditional.length + experimental.length],
               ["journal",   "Journal",   yourSessions.length],
-              ["badges",    "Badges",    earnedBadgeCount],
             ].map(([k, label, count]) => (
               <button key={k} onClick={() => setShelfTab(k)} style={{
                 background: "transparent", border: "none",
@@ -768,21 +761,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             ))}
           </div>
         );
-
-        if (shelfTab === "badges") {
-          return (
-            <div style={{ marginTop: 4 }}>
-              {subTabHeader}
-              <BadgesPanel
-                sessions={sessions}
-                savedBlendIds={savedBlendIds}
-                favoriteBlendIds={favoriteBlendIds}
-                generatedBlends={generatedBlends}
-                pantryIds={pantryIds}
-              />
-            </div>
-          );
-        }
 
         if (shelfTab === "journal") {
           return (
