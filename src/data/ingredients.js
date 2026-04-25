@@ -47,7 +47,7 @@ const INGREDIENTS = {
     pairs: ["lavender", "lemonbalm", "rose", "passionflower", "fennel", "linden"],
     dose: "1 tsp · 200ml",
     headsUp: "Ragweed family — uncommon cross-allergy.",
-    blurb: "A small daisy that closes its petals at dusk — and asks the cup to do the same. The apigenin in its honey-apple flowers slips into the same receptors as evening's first long breath.",
+    blurb: "Egyptian priests dedicated it to Ra and used it in embalming oils; medieval European households kept it as the first remedy for restless children. The active compound, apigenin, binds the same GABA receptors as benzodiazepines — the cup quiets you the way the prescription would, gentler and slower. Folk knew the effect long before chemistry named the molecule.",
     facts: [
       "Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine.",
       "There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter).",
@@ -76,7 +76,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "rose", "lemonbalm", "passionflower", "linden"],
     dose: "½ tsp · 200ml",
     headsUp: null,
-    blurb: "Named for the Latin lavare — to wash. Linen chests, sleep pillows, and now your cup. The linalool inside reaches the brain through breath as much as through liquid; pour the kettle and the perfume is already half the work.",
+    blurb: "The Latin lavare means 'to wash' — Romans bathed in it, medieval housewives tucked it into linen chests, and Provençal harvesters still cut it by hand. The active calmer is linalool, which reaches the brain through scent as efficiently as through liquid. By the time you sip, the perfume has already done half the work.",
     facts: [
       "In Germany, a standardized lavender oil preparation (Silexan) is approved as a prescription anxiolytic — clinical trials show effects comparable to a low dose of lorazepam.",
       "Lavender's calming work likely runs through voltage-dependent calcium channels, not GABA — which fits its mild, wakeful calm rather than sedation.",
@@ -100,7 +100,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lavender", "hibiscus", "cardamom", "tulsi", "vanilla", "white", "oolong", "linden", "elderflower"],
     dose: "1 tsp · 200ml",
     headsUp: "Source food-grade petals — ornamental roses may carry pesticide residue.",
-    blurb: "Persian distillers chasing the soul of the flower invented attar of rose; what's left in the petal is gentler — a quiet calming and a memory of the garden. Pour gently; the cup forgives nothing about hard water.",
+    blurb: "Tenth-century Persian distillers invented attar of rose chasing the soul of the flower; the petals you brew today are the gentler form. Modern trials confirm what Unani physicians have prescribed for a thousand years — rose modestly modulates cortisol and eases mild anxiety without sedation. The cup forgives nothing about hard water; use filtered if you can.",
     facts: [
       "In Iran, the Damask rose is called Gole Mohammadi — 'Flower of the Prophet Muhammad' — and the annual rose harvest in Kashan draws pilgrims and distillers from across the region.",
       "More than a dozen clinical trials have shown that Damask rose aromatherapy reduces anxiety and improves sleep — in burn patients, cardiac patients, operating-room staff, and women in labor.",
@@ -124,7 +124,7 @@ const INGREDIENTS = {
     pairs: ["sencha", "white", "rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Picked at dusk and laid against tea leaves through the night — the flower opens after dark, and its perfume opens with it. The same scent that quiets the nerves can also wake the mind; both are real, both at once. Boiling water erases either gift.",
+    blurb: "Picked at dusk in southern China and pressed against tea leaves overnight — the flower opens after dark and gives up its perfume to whatever's waiting. Indole-rich aromatics in the petal can both calm and stimulate at low doses; tradition calls jasmine both, and the chemistry agrees. Boiling water destroys the volatiles — keep the brew below ninety.",
     facts: [
       "Traditional Chinese jasmine tea is made by layering fresh jasmine blossoms over green tea leaves at night — when jasmine's fragrance peaks — and removing them by morning. The tea absorbs the aroma; the flowers leave.",
       "Jasmine is one of the only plants the scientific literature describes as 'simultaneously uplifting and calming' — studies find both stress-reducing effects and autonomic arousal from the same oil.",
@@ -148,7 +148,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
     dose: "1 tsp · 200ml",
     headsUp: "Sedative — avoid combining with other sedatives or alcohol, and don't drive after. Not for pregnancy.",
-    blurb: "Spanish missionaries read the Passion in its anatomy — the corona for the crown of thorns, the three styles for the nails. The cup is quieter than the imagery: a slow drift toward sleep, GABA-tuned, reliably drowsy.",
+    blurb: "Spanish missionaries read the Passion of Christ in its anatomy — the corona for the crown of thorns, the three styles for the nails. The cup is quieter than the imagery: chrysin and apigenin in the leaves bind GABA receptors and reliably ease anxiety. The folk drowsiness is real and replicated in trials.",
     facts: [
       "Passionflower is indigenous to the southeastern United States — used by Cherokee, Houma, and Seminole peoples long before European contact.",
       "Passionflower — the name was given by 16th-century Spanish missionaries who saw the flower's structure as a depiction of Christ's crucifixion — the radial corona for the crown of thorns, the three styles for the nails, the five anthers for the wounds.",
@@ -172,7 +172,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "peppermint", "rose", "spearmint", "lemongrass", "tulsi", "valerian", "linden", "nettle", "dandelion-leaf"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "The Greeks named her Melissa — honeybee — for the way the plant draws hives to the garden. Paracelsus called her the elixir of life. The lemon comes through clean, the lift quiet — the kind that doesn't need caffeine to find.",
+    blurb: "The Greeks named her Melissa — honeybee — for the way the plant draws hives to the garden. Paracelsus called her the elixir of life and wore a tincture in his belt. Modern trials show rosmarinic acid raises GABA in the brain, exactly as the herbalists promised: a quiet lift, no caffeine required.",
     facts: [
       "The Greeks called lemon balm Melissa — honeybee — for the way the plant draws hives. Paracelsus called her the elixir of life.",
       "Lemon balm is one of the few herbs whose calming effect has been replicated in randomized trials — measurable reductions in stress and anxiety at standard tea doses.",
@@ -199,7 +199,7 @@ const INGREDIENTS = {
     pairs: ["lemonbalm", "ginger", "rooibos", "fennel", "lemongrass", "yerba-mate", "elderflower", "linden", "nettle", "dandelion-leaf", "licorice-root"],
     dose: "1 tsp · 200ml",
     headsUp: "Can worsen acid reflux for some.",
-    blurb: "Greek and Roman tables ended with mint long before anyone knew about TRPM8 — the cold-sensing receptor that menthol hijacks. The cool isn't temperature; it's a lie the tongue happily believes. The gut, separately, is grateful.",
+    blurb: "Greek and Roman tables ended with mint long before anyone knew about TRPM8 — the cold-sensing receptor that menthol hijacks. The cool isn't temperature; it's a lie the tongue happily believes. The gut, separately, gets real antispasmodic relief, which is why folk medicine prescribed mint after meals across two thousand years.",
     facts: [
       "Peppermint isn't an ancient species — it's a natural hybrid of water mint and spearmint, first formally identified in an English mint field in 1696.",
       "Peppermint oil has one of the strongest clinical evidence bases of any herbal medicine — meta-analyses of 12 trials in 835 patients show it reduces irritable bowel syndrome symptoms more than placebo, with a number-needed-to-treat of 4.",
@@ -223,7 +223,7 @@ const INGREDIENTS = {
     pairs: ["lemonbalm", "sencha", "rose", "chamomile", "gunpowder"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Where peppermint borrows menthol, spearmint goes with carvone — softer, sweeter, the cool pulled back a step. Mediterranean kitchens have always treated it as the more polite cousin: the one you serve to anyone, anytime.",
+    blurb: "Where peppermint borrows menthol, spearmint goes with carvone — softer, sweeter, the cool pulled back a step. Mediterranean kitchens treat it as the polite cousin, the one you serve to anyone, anytime. Recent studies show it modestly lowers androgens — folk wisdom about 'cooling the blood' meeting endocrinology.",
     facts: [
       "Where peppermint borrows menthol, spearmint goes with carvone — softer, sweeter, the cool pulled back a step.",
       "Spearmint is older than peppermint by millennia. Egyptian medical papyri list it; peppermint, the hybrid, didn't exist yet.",
@@ -247,7 +247,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "peppermint", "lemonbalm", "rose", "rooibos", "hibiscus", "yerba-mate"],
     dose: "1–2 tsp · 200ml",
     headsUp: null,
-    blurb: "Thai cooks crush the stalk before they cut it — the bruising releases citral, the same molecule that lifts the cup and keeps the mosquitoes down. Lemon's voice without lemon's bite.",
+    blurb: "Thai cooks bruise the stalk before cutting — the crush releases citral, the same compound that flavors lemon peel and repels mosquitoes. Folk medicine uses it for fever and stomach across South and Southeast Asia; citral is a documented antimicrobial. Lemon's voice without lemon's bite.",
     facts: [
       "Lemongrass — thai cooks crush the stalk before they cut it — the bruising releases citral, the lift molecule that also keeps mosquitoes at bay.",
       "Citral is so identifiable that perfumers use lemongrass extract to impart 'lemon' to soaps, candles, and detergents far more often than they use lemon itself.",
@@ -271,7 +271,7 @@ const INGREDIENTS = {
     pairs: ["peppermint", "ginger", "chamomile", "lemonbalm", "rooibos", "licorice-root"],
     dose: "1 tsp crushed · 200ml",
     headsUp: "Heavy doses cautioned in pregnancy — verify.",
-    blurb: "Indian restaurants set a small bowl by the door; medieval congregations chewed it through long sermons. The seed's anise note is anethole, which finds GABA receptors in the gut — anxiety quiets where you didn't know it was hiding.",
+    blurb: "Indian restaurants set a small bowl by the door for after-meal chewing; medieval congregations worked through fennel seeds during long sermons to keep the breath sweet. The anise note is anethole, which finds GABA receptors in the gut — anxiety quiets where you didn't know it was hiding. Both folk traditions point to the same receptor science would later name.",
     facts: [
       "Indian restaurants set a small bowl of fennel seeds by the door; medieval congregations chewed them through long sermons.",
       "Fennel seed's anise note is anethole, which finds GABA receptors in the gut — anxiety quiets where you didn't know it was hiding.",
@@ -295,7 +295,7 @@ const INGREDIENTS = {
     pairs: ["rose", "rooibos", "ginger", "lemongrass"],
     dose: "1 tsp · 200ml",
     headsUp: "May lower blood pressure — sip modestly if relevant.",
-    blurb: "Karkadé in Cairo, sorrel in the Caribbean, agua de jamaica at a Mexican lunch — the red flower travels under many names. The ruby is anthocyanin, the same pigment that colors dark berries; the tartness is the cup announcing itself.",
+    blurb: "Karkadé in Cairo, sorrel in the Caribbean, agua de jamaica at a Mexican lunch — the red flower travels under many names. Pharaohs drank it as a royal beverage; modern trials show it modestly lowers blood pressure, with the active anthocyanins being the same pigments that color blueberries. Ruby in the cup, real medicine in the body.",
     facts: [
       "What looks like a red hibiscus flower in your cup is actually the calyx — the fleshy casing under the flower, not the petals.",
       "Hibiscus tea genuinely lowers blood pressure in mild hypertension. Three cups a day for six weeks produced a measurable drop in clinical trials.",
@@ -319,7 +319,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "ginger", "vanilla", "cloves", "rose", "lemongrass", "ashwagandha", "nettle", "lemonbalm"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "The red bush grows nowhere outside the Cederberg mountains, where the Khoisan brewed it long before Europe noticed. Aspalathin lives only in this plant — sweetness without sugar, alertness without caffeine.",
+    blurb: "The red bush grows nowhere outside the Cederberg mountains; the Khoisan brewed it long before Europe noticed in the eighteenth century. Aspalathin lives only in this plant — a flavonoid that gives sweetness without sugar and antioxidant activity without caffeine. A genuinely native cup that science can't synthesize.",
     facts: [
       "The red bush grows nowhere outside the Cederberg mountains of South Africa — global rooibos is one mountain range's export.",
       "Aspalathin, the antioxidant that gives rooibos its sweetness without sugar, exists in only this plant. No analog in any other herbal.",
@@ -346,7 +346,7 @@ const INGREDIENTS = {
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],
     dose: "1 tsp · 200ml",
     headsUp: "May affect blood sugar and thyroid function — verify interactions if relevant.",
-    blurb: "Indian households grow it at the front step — Vishnu's plant, the threshold guardian. The clove-pepper warmth is what the tongue notices; what the body notices is ursolic acid, which softens the day's cortisol rise. Sacred botany doing patient work.",
+    blurb: "Indian households grow it at the front step — Vishnu's plant, the threshold guardian, asked permission before harvesting. The clove-pepper warmth is what the tongue notices; ursolic acid in the leaves measurably blunts cortisol over weeks. Sacred botany doing patient work that the chemistry confirms.",
     facts: [
       "Indian households grow tulsi at the front step — Vishnu's plant, the threshold guardian. Sacred botany planted into daily life.",
       "Tulsi — the clove-pepper warmth is what the tongue notices; what the body notices is ursolic acid, which softens the day's cortisol rise.",
@@ -373,7 +373,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "cardamom", "ginger", "rooibos", "tulsi", "reishi"],
     dose: "½–1 tsp powder · 250ml",
     headsUp: "Avoid in pregnancy. Interacts with thyroid medication and sedatives. Caution with autoimmune conditions.",
-    blurb: "Ashva-gandha in Sanskrit — the smell of horse, because the root smells musky and was thought to grant a horse's strength. The withanolides inside don't promise that, but they do measurably blunt cortisol over weeks. Strength, in this telling, is patience.",
+    blurb: "Ashva-gandha is Sanskrit for 'smell of horse' — the root has a musky scent and Ayurveda taught that drinking it would grant a horse's strength. The withanolides inside won't quite manage that, but trials confirm they reduce cortisol and improve sleep over six to eight weeks of daily use. Strength in this telling is patience.",
     facts: [
       "Ashwagandha — ashva-gandha in Sanskrit means 'smell of horse' — the root smells musky and was thought to grant a horse's strength.",
       "Ashwagandha — withanolides don't promise horse-strength, but in clinical trials they measurably blunt cortisol over six to eight weeks of daily use.",
@@ -413,7 +413,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rooibos", "peppermint", "cinnamon", "cardamom", "cloves", "lemongrass", "turmeric", "black-pepper", "tulsi", "lemonbalm", "echinacea", "yerba-mate", "elderflower", "licorice-root"],
     dose: "2 coins · 250ml",
     headsUp: null,
-    blurb: "The Silk Road carried it before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against the swell. Drying turns gingerol into shogaol — sharper, more warming — which is why dried and fresh taste like cousins, not twins.",
+    blurb: "The Silk Road carried it before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against seasickness; medieval English bakers turned it into gingerbread. Drying converts gingerol to shogaol — sharper, more warming — which is why dried and fresh taste like cousins, not twins. Folk uses against nausea and circulation hold up cleanly under modern trials.",
     facts: [
       "The Silk Road carried ginger before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against the swell.",
       "Drying turns gingerol into shogaol — sharper, more warming — which is why dried ginger and fresh taste like cousins, not twins.",
@@ -440,7 +440,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "cinnamon", "cardamom", "black-pepper"],
     dose: "¼–½ tsp · 250ml",
     headsUp: "Strong staining. Bioavailability needs fat and black pepper. Concentrated curcumin extracts can interact with anticoagulants.",
-    blurb: "Indian brides are anointed with turmeric paste the night before the wedding — auspiciousness rubbed into skin. The cup is quieter: curcumin alone is barely absorbed, which is why the old recipe pairs it with milk fat and black pepper. The science arrives at the kitchen's conclusion.",
+    blurb: "Indian brides are anointed with turmeric paste the night before the wedding — auspiciousness rubbed into skin. Curcumin, the active compound, is barely absorbed on its own; the traditional recipe pairs it with milk fat and black pepper, both of which raise bioavailability dramatically. The kitchen anticipated the pharmacology by a thousand years.",
     facts: [
       "Indian brides are anointed with turmeric paste the night before the wedding — auspiciousness rubbed into skin.",
       "Turmeric — curcumin alone is barely absorbed; the old recipe pairs it with milk fat and black pepper because the science arrives at the kitchen's conclusion.",
@@ -474,7 +474,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rooibos", "ginger", "cardamom", "cloves", "vanilla", "turmeric", "black-pepper", "ashwagandha", "lions-mane", "dandelion-root", "reishi", "licorice-root", "elderflower"],
     dose: "½ stick or ½ tsp · 250ml",
     headsUp: "Cassia (most common) has higher coumarin — heavy daily use is cautioned. Ceylon (C. verum) is safer for frequent use.",
-    blurb: "Worth more than gold to the Romans, who never saw the tree it came from — Pliny invented birds that nested in cliffs to explain the supply chain. Today the choice is simpler: Ceylon (verum) or cassia, the second cheaper but heavier in coumarin. Both warm; one is gentler with daily use.",
+    blurb: "Worth more than gold to the Romans, who never saw the tree it came from — Pliny invented birds nesting in cliffs to explain the supply chain. Today's choice is Ceylon (verum) or cassia, the latter cheaper but heavier in coumarin (a liver irritant in large daily doses). Both warm the cup; for daily use, the gentler Ceylon is the apothecary's pick.",
     facts: [
       "Cinnamon — worth more than gold to the Romans, who never saw the tree. Pliny invented birds that nested in cliffs to explain the supply chain.",
       "Two main commercial cinnamons exist: Ceylon (verum) and cassia. Cassia is cheaper but heavier in coumarin, which can stress the liver at high daily doses.",
@@ -498,7 +498,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rose", "ginger", "cinnamon", "cloves", "vanilla", "tulsi", "ashwagandha", "turmeric", "black-pepper", "dandelion-root"],
     dose: "3–4 crushed pods · 250ml",
     headsUp: null,
-    blurb: "Bedouin coffee passes through cardamom-stuffed spouts; ancient Roman perfumers folded the pods into unguents. Inside the green husk: 1,8-cineole, the eucalyptol that lets a cup feel warming and cooling at once — a paradox the chemistry resolves cleanly.",
+    blurb: "Bedouin coffee passes through cardamom-stuffed spouts; ancient Roman perfumers folded the pods into unguents and wedding unctions. Inside the green husk: 1,8-cineole — the eucalyptol that lets a cup feel warming and cooling at once. A paradox the chemistry resolves cleanly: cooling at the surface, warming in the gut.",
     facts: [
       "Bedouin coffee passes through cardamom-stuffed spouts; ancient Roman perfumers folded the pods into unguents.",
       "Cardamom — inside the green husk: 1,8-cineole, the eucalyptol that lets a cup feel warming and cooling at once.",
@@ -522,7 +522,7 @@ const INGREDIENTS = {
     pairs: ["assam", "cinnamon", "cardamom", "ginger", "rooibos", "black-pepper"],
     dose: "2–3 cloves · 250ml",
     headsUp: "Very strong — can numb the tongue. One or two cloves, not a handful.",
-    blurb: "Han dynasty officials chewed cloves before addressing the emperor — eugenol is a topical anesthetic, and the breath it scrubbed clean is the same molecule a dentist uses today. The Dutch and Portuguese fought wars in the Maluku for the bud.",
+    blurb: "Han dynasty officials chewed cloves before addressing the emperor — the breath it scrubbed clean was managed by eugenol, a topical anesthetic still used in dental clinics today. The Dutch and Portuguese fought wars in the Maluku islands for the bud. The folk use against toothache is the same molecule modern dentistry reaches for.",
     facts: [
       "Han dynasty officials chewed cloves before addressing the emperor — eugenol is a topical anesthetic, and the breath it scrubbed clean is the same molecule a dentist still uses.",
       "The Dutch and Portuguese fought wars in the Maluku islands for control of the clove tree — Indonesia's spice islands shaped European empire-building.",
@@ -546,7 +546,7 @@ const INGREDIENTS = {
     pairs: ["rooibos", "assam", "cinnamon", "cardamom", "rose", "lions-mane", "dandelion-root"],
     dose: "½ bean split · 250ml",
     headsUp: null,
-    blurb: "The orchid that bears vanilla pods has exactly one wild pollinator, a Mexican bee that lives nowhere else. The world drinks vanilla anyway because in 1841, a twelve-year-old boy named Edmond Albius worked out how to pollinate the flower by hand. Sweetness is older than its method.",
+    blurb: "The vanilla orchid has exactly one wild pollinator, a Mexican bee that lives nowhere else. The world drinks vanilla anyway because in 1841, a twelve-year-old enslaved boy named Edmond Albius worked out hand pollination on Réunion island. Vanillin, the principal aromatic, is now also synthesized — but the orchid pods carry hundreds of supporting molecules the lab can't replicate.",
     facts: [
       "The orchid that bears vanilla pods has exactly one wild pollinator — a Mexican bee that lives nowhere else.",
       "In 1841, a twelve-year-old boy named Edmond Albius worked out how to pollinate the flower by hand — every vanilla bean from Madagascar onward owes its existence to his technique.",
@@ -572,7 +572,7 @@ const INGREDIENTS = {
     pairs: ["turmeric", "cinnamon", "cardamom", "ginger", "cloves", "assam"],
     dose: "1–3 cracked peppercorns · 250ml (5–10 in chai)",
     headsUp: "Tea-strength is below interaction threshold. Concentrated piperine supplements affect drug metabolism (CYP3A4, P-gp); discontinue 2 weeks pre-surgery.",
-    blurb: "Roman empresses paid in peppercorns; Vasco da Gama crossed an ocean for them. The bite the tongue feels is piperine, the same molecule that quietly slows the liver's enzymes — which is why turmeric travels in pepper's company.",
+    blurb: "Roman empresses paid taxes in peppercorns; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
     facts: [
       "Roman empresses paid in peppercorns; Vasco da Gama crossed an ocean for them.",
       "The bite is piperine — the same molecule that quietly slows the liver's enzymes, which is why turmeric travels in pepper's company.",
@@ -615,7 +615,7 @@ const INGREDIENTS = {
     pairs: ["jasmine", "rose"],
     dose: "1–2 tsp · 200ml",
     headsUp: null,
-    blurb: "Imperial Chinese tea makers picked the youngest leaves, withered them in the sun, and called the work done. No firing, no rolling — what the cup tastes is the leaf almost as the bush gave it. The catechins survive because nothing touched them.",
+    blurb: "Imperial Chinese tea makers picked the youngest leaves, withered them in the sun, and called the work done. No firing, no rolling — what the cup tastes is the leaf almost as the bush gave it. Because nothing touched them, the catechins survive at higher concentration than any other tea, giving white the highest antioxidant load on the shelf.",
     facts: [
       "White tea — imperial Chinese tea makers picked the youngest leaves, withered them in the sun, and called the work done. No firing, no rolling.",
       "Because nothing touches it, white tea has the highest catechin content of any tea grade — antioxidant load that black tea loses to oxidation.",
@@ -639,7 +639,7 @@ const INGREDIENTS = {
     pairs: ["peppermint", "lemonbalm", "jasmine", "spearmint"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "In 1738 a tea master named Soen Nagatani steamed leaves instead of pan-firing them, and Japan's everyday cup was reinvented overnight. Steam stops oxidation faster than fire — chlorophyll stays green, theanine stays sweet, and the leaf burns at a boil.",
+    blurb: "In 1738 a tea master named Soen Nagatani steamed leaves instead of pan-firing them, and Japan's everyday cup was reinvented overnight. Steam stops oxidation faster than fire — chlorophyll stays green, theanine stays sweet, catechins stay intact. The leaf burns at a true boil; brew cool, between 70 and 80°C, or you'll lose the science to scorched grass.",
     facts: [
       "Sencha — in 1738 a tea master named Soen Nagatani steamed leaves instead of pan-firing them, and Japan's everyday cup was reinvented overnight.",
       "Sencha — steam stops oxidation faster than fire — chlorophyll stays green, theanine stays sweet, and the leaf burns at a boil.",
@@ -663,7 +663,7 @@ const INGREDIENTS = {
     pairs: ["rose"],
     dose: "1 tbsp (~4 g) · 100ml",
     headsUp: "Treat like a delicate wine. The unusually cool water is not a typo — near-boiling water destroys the profile this tea is prized for.",
-    blurb: "Jade dew, in translation. For the last three weeks before picking, the bushes are shrouded with reed mats; deprived of sun, the leaf hoards theanine and chlorophyll instead of catechins. Sweetness is what darkness leaves behind.",
+    blurb: "Jade dew, in translation. For the last three weeks before harvest, Uji bushes are shrouded under reed mats; deprived of sun, the leaf hoards theanine and chlorophyll instead of catechins. Folk practice (more shade, sweeter cup) and chemistry (less photosynthesis, less polyphenol synthesis) tell the same story. Sweetness is what darkness leaves behind.",
     facts: [
       "Jade dew, in translation. For three weeks before picking, the bushes are shrouded with reed mats.",
       "Gyokuro — deprived of sun, the leaf hoards theanine and chlorophyll instead of catechins. Sweetness is what darkness leaves behind.",
@@ -693,7 +693,7 @@ const INGREDIENTS = {
     pairs: [],
     dose: "1–2g powder · 60–80ml (whisk)",
     headsUp: "Whole-leaf consumption — verify low-lead source. High caffeine at ceremonial grade. Significant Vitamin K (warfarin interaction).",
-    blurb: "Brought from Song China to Japanese monasteries in the twelfth century by the monk Eisai — a powdered tea for keeping zazen. Drinking the leaf instead of straining it changes the math: every catechin, every theanine, all the way down.",
+    blurb: "Brought from Song China to Japanese monasteries in the twelfth century by the monk Eisai — a powdered tea for keeping zazen. Drinking the leaf instead of straining it changes the math: every catechin, every theanine, all the way down. The L-theanine-to-caffeine ratio is what produces the calm-focus the monks named — modern EEG studies confirm the alpha-wave shift.",
     facts: [
       "Matcha — brought from Song China to Japanese monasteries in the twelfth century by the monk Eisai — a powdered tea for keeping zazen during long meditation.",
       "Matcha — drinking the leaf instead of straining it changes the math: every catechin, every theanine, all the way down.",
@@ -737,7 +737,7 @@ const INGREDIENTS = {
     pairs: [],
     dose: "1½ tsp · 250ml",
     headsUp: "Lowest-caffeine catalog true tea — fine for evening. Tannins soften iron absorption.",
-    blurb: "Peasant tea, in origin — Japanese households stretched scarce leaves with toasted brown rice, the rice's tannins softening the leaf's edge. The frugality became style. Half the caffeine, twice the welcome at the end of a meal.",
+    blurb: "Peasant tea by origin — Japanese households stretched scarce leaves with toasted brown rice, the rice's tannins softening the leaf's edge. The frugality became style and is now served in restaurants. Roughly half the caffeine of plain sencha, twice the welcome at the end of a meal.",
     facts: [
       "Genmaicha — peasant tea, in origin — Japanese households stretched scarce leaves with toasted brown rice.",
       "Genmaicha — the rice's tannins soften the leaf's edge — an accidentally good blending that became a style.",
@@ -770,7 +770,7 @@ const INGREDIENTS = {
     pairs: ["spearmint", "peppermint", "rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Rolled into pellets for the long sea voyage from Zhejiang to Europe — what looked like gunpowder kept the leaf fresh through months at sea. The pellets unfurl in hot water like time-release capsules; in Morocco they meet sugar and mint and refuse to be drowned.",
+    blurb: "Rolled into pellets for the long sea voyage from Zhejiang to Europe — what looked like gunpowder kept the leaf compact and fresh through months at sea. The pellets unfurl in hot water like time-release capsules; in Morocco they meet sugar and mint and refuse to be drowned. Tight rolling preserves catechins by reducing oxygen contact — the practical seafarer trick is also good chemistry.",
     facts: [
       "Rolled into pellets for the long sea voyage from Zhejiang to Europe — what looked like gunpowder kept the leaf fresh through months at sea.",
       "Gunpowder pellets unfurl in hot water like time-release capsules — the cup gets stronger the longer it brews.",
@@ -794,7 +794,7 @@ const INGREDIENTS = {
     pairs: ["rooibos", "ginger", "vanilla"],
     dose: "1 tbsp · 250ml",
     headsUp: null,
-    blurb: "A Kyoto invention from the 1920s — tea merchants roasted stems and late-season leaves to redeem them. Fire above two hundred Celsius burns off most of the caffeine and caramelizes what's left. An evening tea that isn't an herbal.",
+    blurb: "A 1920s Kyoto invention — tea merchants roasted stems and late-season leaves to redeem otherwise-discardable lots. Fire above 200°C burns off most of the caffeine and caramelizes what's left into the toasty register. The frugality became canon: an evening tea that isn't an herbal, and the rare true tea you can drink at nine p.m.",
     facts: [
       "Hojicha — a Kyoto invention from the 1920s — tea merchants roasted stems and late-season leaves to redeem what wouldn't sell as sencha.",
       "Hojicha — fire above 200°C burns off most of the caffeine and caramelizes what's left — an evening tea that isn't an herbal.",
@@ -818,7 +818,7 @@ const INGREDIENTS = {
     pairs: ["rose", "jasmine"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "West Lake legend says the Qianlong emperor pressed the leaves against his palms while the wok was hot — and the flat shape was born. The chestnut sweetness isn't the leaf alone; it's the Maillard reaction, the same chemistry that browns bread crusts.",
+    blurb: "West Lake legend says the Qianlong emperor pressed the leaves against his palms while the wok was hot, and the flat shape was born. The chestnut sweetness isn't the leaf alone; it's the Maillard reaction — the same chemistry that browns bread crusts and sears steaks. Imperial myth and food chemistry, leaning on the same wok.",
     facts: [
       "Dragonwell — west Lake legend says the Qianlong emperor pressed the leaves against his palms while the wok was hot — and the flat shape was born.",
       "Dragonwell's chestnut sweetness isn't just the leaf; it's the Maillard reaction, the same chemistry that browns bread crusts.",
@@ -842,7 +842,7 @@ const INGREDIENTS = {
     pairs: ["rose", "jasmine"],
     dose: "1–2 tsp · 200ml",
     headsUp: null,
-    blurb: "Black dragon, in translation — though the same word covers everything from a green-leaning Taiwanese high-mountain to a roasted Wuyi rock that drinks like a black tea. Partial oxidation is the secret; how partial decides the cup.",
+    blurb: "Black dragon, in translation — though the word covers everything from a green-leaning Taiwanese high-mountain to a roasted Wuyi rock that drinks like a black tea. Partial oxidation is the trick; the percentage decides the cup. Tea masters and food chemists are looking at the same dial: how many polyphenols to leave standing.",
     facts: [
       "Black dragon, in translation — though the same word covers a green-leaning Taiwanese high-mountain to a roasted Wuyi rock that drinks like a black tea.",
       "Oolong — partial oxidation is the secret; how partial decides the cup. 20% feels green; 80% feels black.",
@@ -866,7 +866,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper"],
     dose: "1 tsp · 200ml",
     headsUp: "High caffeine — not for late afternoons.",
-    blurb: "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight. The local variety is bigger-leafed and stronger than its Chinese cousin — more caffeine, more malt, the cup that demands milk and gets it.",
+    blurb: "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight. The local variety, Camellia sinensis assamica, is bigger-leafed and stronger than its Chinese cousin — more caffeine, more malt. The cup demands milk and gets it; British breakfast culture was built on this leaf and on the labor that picked it.",
     facts: [
       "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight.",
       "Camellia sinensis assamica is bigger-leafed and stronger than the Chinese cousin — more caffeine, more malt, the cup that demands milk and gets it.",
@@ -890,7 +890,7 @@ const INGREDIENTS = {
     pairs: ["rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Chinese cuttings planted in Himalayan foothills produced something neither parent had — the muscatel grape note nobody can replicate elsewhere. The aroma comes from a small insect called the tea jassid, whose bite triggers the leaf's defensive chemistry. Beauty as injury, healed.",
+    blurb: "Chinese cuttings planted in Himalayan foothills in the 1840s produced something neither parent had: the muscatel grape note nobody can replicate elsewhere. The aroma comes from the tea jassid, a small insect whose bite triggers the leaf's defensive chemistry — exactly the same mechanism that makes Taiwan's bai hao oolong famous. Beauty as injury, healed.",
     facts: [
       "Darjeeling — chinese cuttings planted in Himalayan foothills produced something neither parent had — the muscatel grape note nobody can replicate elsewhere.",
       "Darjeeling's aroma comes from a small insect called the tea jassid, whose bite triggers the leaf's defensive chemistry. Beauty as injury, healed.",
@@ -918,7 +918,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "lemongrass", "cinnamon", "cardamom", "rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "A coffee blight in the 1860s burned through Ceylon's plantations; the planters switched crops, and an island became famous for tea instead. The bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb.",
+    blurb: "A coffee blight in the 1860s burned through Ceylon's plantations; the planters switched crops, and an island became famous for tea instead. The bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb. Estate names like Uva and Dimbula are altitude bands, not flavor profiles, but the chemistry shows up in the cup.",
     facts: [
       "A coffee blight in the 1860s burned through Ceylon's plantations; the planters switched crops, and an island became famous for tea instead.",
       "Ceylon — the bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb.",
@@ -942,7 +942,7 @@ const INGREDIENTS = {
     pairs: ["rooibos"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Legend says soldiers passing through the Wuyi mountains forced tea farmers to dry their leaves over pinewood fires to free the camp; the smoke became the tea. Guaiacol and syringol are the same compounds in good Scotch — campfire, peat, deliberate provocation.",
+    blurb: "Legend says soldiers passing through the Wuyi mountains in the late Ming forced tea farmers to dry their leaves over pinewood fires to free the camp; the smoke became the tea. The compounds responsible — guaiacol and syringol — are the same molecules in peated Scotch and good barbecue. Folk accident and lab analysis converging on woodsmoke.",
     facts: [
       "Lapsang — legend says soldiers passing through the Wuyi mountains forced tea farmers to dry their leaves over pinewood fires to free the camp; the smoke became the tea.",
       "Guaiacol and syringol — Lapsang's signature compounds — are the same in good Scotch whisky. Campfire and peat are chemistry, not metaphor.",
@@ -966,7 +966,7 @@ const INGREDIENTS = {
     pairs: [],
     dose: "1 tsp · 200ml · multi-steep",
     headsUp: null,
-    blurb: "On the old horse-and-tea road that crossed from Yunnan to Tibet, the leaves fermented in their packs from the journey alone — and aged tea became its own category. Today's pu-erh ages on purpose: fungi work the polyphenols, and a five-year cake tastes nothing like the leaf it was.",
+    blurb: "On the old horse-and-tea road from Yunnan to Tibet, the leaves fermented in their packs from the journey alone — and aged tea became its own category. Today's pu-erh ages on purpose: fungi work the polyphenols, and a five-year cake tastes nothing like the leaf it was. Folk medicine credits it for digestion and cholesterol; small studies confirm both, attributing the effect to the microbial transformation.",
     facts: [
       "Pu-erh — on the old horse-and-tea road from Yunnan to Tibet, the leaves fermented in their packs from the journey alone — and aged tea became its own category.",
       "Today's pu-erh ages on purpose: fungi work the polyphenols, and a five-year cake tastes nothing like the leaf it was.",
@@ -1002,7 +1002,7 @@ const INGREDIENTS = {
     pairs: ["lemongrass", "peppermint", "ginger"],
     dose: "1–2g · 200ml or 30–50g for gourd session",
     headsUp: "Drink at 70–85°C — very hot temperature carries esophageal cancer risk (IARC 2A). Moderate caffeine; cumulative across refills.",
-    blurb: "The Guaraní drank it long before the Jesuits arrived to cultivate it; the gourd passed counterclockwise around a circle is older than any country in South America. Three molecules — caffeine, theobromine, theophylline — share the lift; coffee has only one.",
+    blurb: "The Guaraní drank it long before the Jesuits arrived to cultivate it; the gourd passed counterclockwise around a circle is older than any country in South America. Three xanthines share the lift — caffeine, theobromine, theophylline — where coffee has only the first. The folk claim of 'lift without the crash' has chemistry behind it: theobromine's longer half-life smooths the descent.",
     facts: [
       "The Guaraní drank yerba mate long before the Jesuits arrived to cultivate it; the gourd passed counterclockwise around a circle is older than any country in South America.",
       "Yerba mate — three molecules — caffeine, theobromine, theophylline — share the lift; coffee has only one. The result is alertness without the same crash.",
@@ -1049,7 +1049,7 @@ const INGREDIENTS = {
     pairs: ["lemonbalm", "chamomile", "lavender", "passionflower"],
     dose: "1–2 tsp root · 250ml",
     headsUp: "Sedating — do not drive or combine with alcohol or benzodiazepines. ~5–10% feel paradoxically stimulated. Limit continuous use to 4–6 weeks. Avoid in pregnancy.",
-    blurb: "Medieval herbalists called it All-Heal; cats roll in it; trench veterans of the First World War were prescribed it for nerves. The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net.",
+    blurb: "Medieval herbalists called it All-Heal; cats roll in it like catnip; trench soldiers in the First World War were prescribed it for shell shock. The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net. Use respectfully and never alongside other sedatives.",
     facts: [
       "Medieval herbalists called valerian All-Heal; cats roll in it; trench veterans of the First World War were prescribed it for nerves.",
       "The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net.",
@@ -1092,7 +1092,7 @@ const INGREDIENTS = {
     pairs: ["elderflower", "ginger"],
     dose: "1–2 tsp · 250ml",
     headsUp: "Ragweed/asteraceae cross-allergy possible. Caution with autoimmune conditions and immunosuppressants. Limit to 8–10 weeks traditional.",
-    blurb: "Plains tribes — Lakota, Cheyenne, Comanche — pressed the root against snakebite and chewed it for sore throat. The tongue tingle is real chemistry: alkamides binding the same receptor family the body uses for cannabinoids, on the surface of the mouth where you can feel them work.",
+    blurb: "Plains tribes — Lakota, Cheyenne, Comanche — pressed the root against snakebite and chewed it for sore throat. The tongue-tingle is real chemistry: alkamides binding the cannabinoid receptor family right on the surface of the mouth, where you can feel them work. The folk prescription for the immune system has mixed but real trial support; the tingle, at least, is unambiguous.",
     facts: [
       "Plains tribes — Lakota, Cheyenne, Comanche — pressed echinacea root against snakebite and chewed it for sore throat.",
       "Echinacea's tongue tingle is real chemistry: alkamides bind the same receptor family the body uses for cannabinoids, on the surface of the mouth where you can feel them work.",
@@ -1131,7 +1131,7 @@ const INGREDIENTS = {
     pairs: ["echinacea", "peppermint", "ginger", "linden", "rose"],
     dose: "1–2 tsp · 250ml",
     headsUp: "Use only the flowers — leaves, bark, and raw berries contain cyanogenic glycosides. Avoid S. racemosa.",
-    blurb: "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers were a turn of the year. Modern virology found the asking made sense — quercetin and its kin block certain viruses from entering cells. Steep covered to keep the perfume in the cup.",
+    blurb: "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers marked a turn of the year. Modern virology found the asking made sense — quercetin and its kin block certain viruses (notably influenza A) from entering cells. Steep covered, always, or the volatile flavonoids escape with the steam.",
     facts: [
       "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers were a turn of the year.",
       "Modern elderflower virology found the asking made sense — quercetin and its kin block certain viruses from entering cells.",
@@ -1171,7 +1171,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lemonbalm", "lavender", "passionflower", "peppermint", "rose", "elderflower"],
     dose: "1–2 tsp · 250ml",
     headsUp: null,
-    blurb: "The lime tree of Proust's madeleine; the Slavic lipa shading every village square. The mucilage in the flowers coats a sore throat, and the flavonoids inside dock at the same receptors a small dose of clonazepam would. Proust didn't know; the cup did its work anyway.",
+    blurb: "The lime tree of Proust's madeleine; the Slavic lipa shading every village square. The mucilage in the flowers coats a sore throat, and the flavonoids inside dock at the same GABA receptors a small dose of clonazepam would. Proust didn't know the receptor; the cup did its work anyway, as it had for centuries before.",
     facts: [
       "The lime tree of Proust's madeleine; the Slavic lipa shading every village square.",
       "Linden's mucilage in the flowers coats a sore throat, and the flavonoids inside dock at the same receptors a small dose of clonazepam would.",
@@ -1214,7 +1214,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "cinnamon", "fennel", "peppermint"],
     dose: "½–1 tsp · 250ml — less is more",
     headsUp: "Real risk of pseudoaldosteronism (BP↑, K+↓) above 3g/day or 4–6 weeks continuous. Avoid if hypertensive, pregnant, or on diuretics/digoxin.",
-    blurb: "Found in sixty percent of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs. Glycyrrhizin is fifty times sweeter than sugar, and the same molecule that makes the cup confectionary slows the liver's clearance of cortisol. Treat it as you'd treat any sweet thing — fondly, in moderation.",
+    blurb: "Found in sixty percent of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs. Glycyrrhizin is fifty times sweeter than sugar, and the same molecule slows the liver's clearance of cortisol — which is why high daily doses can raise blood pressure and lower potassium. Treat it as you'd treat any sweet thing: fondly, in moderation.",
     facts: [
       "Found in 60% of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs.",
       "Licorice — glycyrrhizin is fifty times sweeter than sugar — and the same molecule slows the liver's clearance of cortisol.",
@@ -1267,7 +1267,7 @@ const INGREDIENTS = {
     pairs: ["lemonbalm", "peppermint", "rooibos", "dandelion-leaf", "dandelion-root"],
     dose: "1–2 tsp · 250ml",
     headsUp: "Significant Vitamin K — warfarin interaction. Mild diuretic; modest glucose lowering.",
-    blurb: "Roman legionaries slapped their legs with fresh stalks against the cold; Scottish boys passed a rite by grasping a fistful unflinching. The sting is real chemistry — histamine, formic acid, serotonin in the leaf hairs — and a quick steep dismantles every one of them. Spring's reproach turned tonic.",
+    blurb: "Roman legionaries slapped their bare legs with fresh stalks against the British cold; Scottish boys passed a rite by grasping a fistful unflinching. The sting is real chemistry — histamine, formic acid, and serotonin loaded into hollow leaf hairs — and a quick steep dismantles every one. Spring's reproach turned tonic, rich in iron and silica.",
     facts: [
       "Roman legionaries slapped their legs with fresh nettle stalks against the cold; Scottish boys passed a rite by grasping a fistful unflinching.",
       "Nettle's sting is real chemistry — histamine, formic acid, serotonin in the leaf hairs — and a quick steep dismantles every one of them.",
@@ -1313,7 +1313,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "cardamom", "vanilla", "dandelion-leaf"],
     dose: "1–2 tsp roasted · 250ml",
     headsUp: "Avoid with active gallbladder disease, ulcer, or gastritis. Asteraceae/ragweed cross-allergy possible.",
-    blurb: "Roasted as coffee through both World Wars when the real bean was rationed — bittersweet, caramel, almost convincing. The bitter is sesquiterpene lactones, which provoke the bile and digestive juices; the sweetness is inulin, a prebiotic the gut bacteria treat as a long meal.",
+    blurb: "Roasted and ground as ersatz coffee through both World Wars when the bean was rationed — bittersweet, caramel, almost convincing. The bitter is sesquiterpene lactones, which provoke bile and digestive juices the way the body intends a meal-starter to. The sweetness is inulin, a prebiotic the gut bacteria treat as a long meal of their own.",
     facts: [
       "Dandelion root — roasted as coffee through both World Wars when the real bean was rationed — bittersweet, caramel, almost convincing.",
       "Dandelion root's bitter is sesquiterpene lactones, which provoke the bile and digestive juices.",
@@ -1358,7 +1358,7 @@ const INGREDIENTS = {
     pairs: ["nettle", "lemonbalm", "peppermint", "dandelion-root"],
     dose: "1–2 tsp · 250ml",
     headsUp: "Significant Vitamin K — warfarin interaction. Mild diuretic; high in potassium (potassium-sparing, unique).",
-    blurb: "Italian and Greek spring foragers fill bags with the bitter leaves before the flowers open. The French name pissenlit is honest reporting — the cup is reliably diuretic — but the leaf is itself rich in potassium, so you don't lose what most diuretics take with them.",
+    blurb: "Italian and Greek spring foragers fill bags with the bitter leaves before the flowers open. The French pissenlit (literally 'piss the bed') is honest reporting — the cup is reliably diuretic. Unlike most diuretics, the leaf is itself rich in potassium, so the body doesn't lose what it most needs to keep. Folk botany solving its own side effect.",
     facts: [
       "Italian and Greek spring foragers fill bags with dandelion's bitter leaves before the flowers open.",
       "The French name pissenlit is honest reporting — the cup is reliably diuretic.",
@@ -1409,7 +1409,7 @@ const INGREDIENTS = {
     pairs: ["ashwagandha", "cinnamon", "lions-mane"],
     dose: "3–9g sliced · 500ml decoction",
     headsUp: "Anticoagulant and antiplatelet effects — caution with blood thinners. Long decoction required; not casual sipping.",
-    blurb: "Taoist painters drew it in the hands of immortals; Chinese emperors hoarded wild specimens, and reliable cultivation only began in the 1970s. The bitter is triterpene, the same family found in licorice and ginseng — and the same reason the cup needs a long decoction, sweetened with jujube and goji.",
+    blurb: "Taoist painters drew it in the hands of immortals; Chinese emperors hoarded wild specimens until reliable cultivation began in the 1970s. The bitter is triterpenes, the same family found in licorice and ginseng — fat-soluble, slow-extracting, and the reason the cup needs a long decoction sweetened with jujube and goji. Modern trials show real immune modulation; the immortality claim remains pending.",
     facts: [
       "Reishi — taoist painters drew it in the hands of immortals; Chinese emperors hoarded wild specimens, and reliable cultivation only began in the 1970s.",
       "Reishi's bitter is triterpene, the same family found in licorice and ginseng — and the same reason the cup needs a long decoction.",
@@ -1452,7 +1452,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "vanilla", "reishi"],
     dose: "2–3g · 250ml",
     headsUp: "Mushroom allergy is absolute contraindication. Mild antiplatelet; effects build over weeks, not acute.",
-    blurb: "Japan's yamabushi mountain ascetics saw the white cascading tufts and named it for themselves — yamabushitake, mountain-priest's mushroom. Inside it: hericenones, which prompt the brain to make more nerve growth factor. The most palatable mushroom in the cabinet, with the longest tail of effect.",
+    blurb: "Japan's yamabushi mountain ascetics saw the white cascading tufts and named it after themselves — yamabushitake, mountain-priest's mushroom. Inside it: hericenones and erinacines, compounds that prompt the brain to produce more nerve growth factor. The folk reputation for sharpening the mind has held up better in the lab than most mushroom claims.",
     facts: [
       "Japan's yamabushi mountain ascetics saw the white cascading tufts and named the mushroom for themselves — yamabushitake, mountain-priest's mushroom.",
       "Inside lion's mane: hericenones, which prompt the brain to make more nerve growth factor.",
