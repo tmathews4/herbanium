@@ -311,7 +311,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         </div>
 
         {/* Export / Import / Feedback */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12, justifyContent: "center" }}>
           <button
             onClick={handleExport}
             style={{
@@ -383,7 +383,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             </button>
           </div>
         ) : (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             <button
               onClick={() => setConfirmingReset(true)}
               style={{
