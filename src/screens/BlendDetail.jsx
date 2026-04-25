@@ -217,45 +217,31 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             });
           }
           if (tags.length === 0) return null;
-          const open = openTag != null ? tags[openTag] : null;
           return (
-            <>
-              <div style={{
-                display: "flex", flexWrap: "wrap", gap: 5,
-                justifyContent: "center", marginTop: 10,
-              }}>
-                {tags.map((t, i) => {
-                  const active = openTag === i;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setOpenTag(prev => prev === i ? null : i)}
-                      style={{
-                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        color: t.fg, background: t.bg,
-                        border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
-                        borderRadius: 3,
-                        padding: "3px 8px",
-                        cursor: "pointer",
-                        boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",
-                      }}
-                    >{t.label}</button>
-                  );
-                })}
-              </div>
-              {open && (
-                <div style={{ textAlign: "left", marginTop: 4 }}>
-                  <VocabInfoCard
-                    term={open.label}
-                    summary={open.summary}
-                    body={open.body}
-                    tone={open.tone}
-                    onClose={() => setOpenTag(null)}
-                  />
-                </div>
-              )}
-            </>
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: 5,
+              justifyContent: "center", marginTop: 10,
+            }}>
+              {tags.map((t, i) => {
+                const active = openTag?.label === t.label;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setOpenTag(prev => prev?.label === t.label ? null : t)}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: t.fg, background: t.bg,
+                      border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
+                      borderRadius: 3,
+                      padding: "3px 8px",
+                      cursor: "pointer",
+                      boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",
+                    }}
+                  >{t.label}</button>
+                );
+              })}
+            </div>
           );
             })()}
           </div>
@@ -263,6 +249,17 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
       </div>
 
       <div style={{ padding: "18px 22px 32px" }}>
+        {openTag && (
+          <div style={{ marginBottom: 18 }}>
+            <VocabInfoCard
+              term={openTag.label}
+              summary={openTag.summary}
+              body={openTag.body}
+              tone={openTag.tone}
+              onClose={() => setOpenTag(null)}
+            />
+          </div>
+        )}
         {openMood && EFFECT_DESCRIPTIONS[openMood] && (
           <div style={{ marginBottom: 18 }}>
             <VocabInfoCard
