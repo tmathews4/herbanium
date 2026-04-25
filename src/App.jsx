@@ -247,7 +247,7 @@ export default function App() {
   };
 
   const startBrew = (blend, intent, targetMoods) => {
-    setSession({ blend, intent, targetMoods });
+    setSession({ blend, intent, targetMoods, currentMoods: [] });
     setOverlay("steep");
   };
 
@@ -261,7 +261,7 @@ export default function App() {
   // Append a newly-logged cup to the sessions list. Called when the user
   // completes a brew+log cycle. This is what makes newly-brewed cups show
   // up in Home's "Your cups, lately" and Apothecary's history.
-  const addSession = ({ blend, intent, targetMoods, landed, extra, taste, note, save, rename }) => {
+  const addSession = ({ blend, intent, targetMoods, currentMoods, landed, extra, taste, note, save, rename }) => {
     // A blend composed via forward-compose won't have an id; stash it under
     // a synthetic id so the session can reference it via getBlend().
     let blendId = blend.id;
@@ -289,6 +289,7 @@ export default function App() {
       blendId,
       ago: "just now",
       intent: intent || "",
+      currentMoods: currentMoods || [],
       actual,
       taste: taste ?? 4,
       note: note || "",
@@ -391,6 +392,9 @@ export default function App() {
           intent={session.intent}
           setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
           targetMoods={session.targetMoods}
+          setTargetMoods={(v) => setSession(s => s ? { ...s, targetMoods: v } : s)}
+          currentMoods={session.currentMoods || []}
+          setCurrentMoods={(v) => setSession(s => s ? { ...s, currentMoods: v } : s)}
           sessions={sessions}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
@@ -408,6 +412,7 @@ export default function App() {
               blend: session.blend,
               intent: session.intent,
               targetMoods: session.targetMoods,
+              currentMoods: session.currentMoods,
               ...logData,
             });
             setOverlay(null);

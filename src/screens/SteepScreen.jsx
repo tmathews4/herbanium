@@ -16,7 +16,18 @@ import { IngredientSheet } from "./IngredientSheet";
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, sessions, onDone, onCancel, pantryIds, togglePantry }) => {
+// Same condensed mood vocabulary as onboarding — keeps the brewing UI
+// approachable without forcing users back into the full 11-mood list.
+const STEEP_MOOD_CHIPS = [
+  { key: "calm",      label: "Calm" },
+  { key: "focus",     label: "Focus" },
+  { key: "energy",    label: "Energy" },
+  { key: "sleepy",    label: "Sleepy" },
+  { key: "comfort",   label: "Comfort" },
+  { key: "digestive", label: "Digestive" },
+];
+
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -184,11 +195,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, sessions, o
       {/* blend details */}
       <div style={{ textAlign: "center" }}>
         <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink }}>{blend.name}</div>
-        {targetMoods && targetMoods.length > 0 && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.ash, marginTop: 4 }}>
-            brewing for {targetMoods.join(" + ")}
-          </div>
-        )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 8 }}>
           {(blend.ingredients || []).map(item => {
             const id = typeof item === "string" ? item : item.id;
@@ -208,15 +214,30 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, sessions, o
         </div>
       </div>
 
-      {/* current feeling — optional one-line reflection while you wait.
-          Captured into the session so the log retrospective has the "where
-          you came from" alongside where the cup took you. */}
+      {/* mood chips — captured into the session so the log retrospective
+          gets both the from-state (currentMoods) and to-state (targetMoods)
+          structured rather than buried in free text. */}
       <div style={{ marginTop: 18 }}>
+        <MoodChipRow
+          label="Right now I feel…"
+          value={currentMoods || []}
+          setValue={setCurrentMoods}
+        />
+        <MoodChipRow
+          label="I'd like to feel…"
+          value={targetMoods || []}
+          setValue={setTargetMoods}
+        />
+      </div>
+
+      {/* personal notes — free-text reflection, kept for anything the chips
+          don't cover. */}
+      <div style={{ marginTop: 12 }}>
         <div style={{ position: "relative" }}>
           <input
             value={intent || ""}
             onChange={(e) => setIntent && setIntent(e.target.value)}
-            placeholder="How are you feeling?"
+            placeholder="Personal notes…"
             className="steep-intent-input"
             style={{
               width: "100%", background: "rgba(255,255,255,0.35)",
@@ -432,6 +453,42 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, sessions, o
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const MoodChipRow = ({ label, value, setValue }) => {
+  const selected = new Set(value || []);
+  const toggle = (key) => {
+    if (!setValue) return;
+    const next = selected.has(key) ? value.filter(k => k !== key) : [...(value || []), key];
+    setValue(next);
+  };
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+      }}>{label}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+        {STEEP_MOOD_CHIPS.map(c => {
+          const isOn = selected.has(c.key);
+          return (
+            <button
+              key={c.key}
+              onClick={() => toggle(c.key)}
+              style={{
+                fontFamily: ff.serif, fontSize: 12.5,
+                padding: "5px 11px", borderRadius: 999,
+                background: isOn ? theme.terra : "transparent",
+                color: isOn ? theme.cream : theme.inkSoft,
+                border: `1px solid ${isOn ? theme.terra : theme.rule}`,
+                cursor: "pointer", transition: "all 0.15s ease",
+              }}
+            >{c.label}</button>
+          );
+        })}
+      </div>
     </div>
   );
 };
