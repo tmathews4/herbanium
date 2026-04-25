@@ -4,13 +4,12 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 2026. Original 30-ingredient
-> catalog complete; Phase A additions in progress.
+> **Status at creation:** April 2026. **Phase A COMPLETE** —
+> 8 new ingredients researched (turmeric, ashwagandha, matcha,
+> yerba-mate, valerian, echinacea, licorice-root, genmaicha)
+> alongside the 30 original catalog entries.
 >
-> **Catalog target (Phase A complete):** 38 ingredients
-> (30 original + 8 Phase A: matcha, yerba-mate, valerian,
-> echinacea, licorice-root, genmaicha + provisionals turmeric,
-> ashwagandha)
+> **Catalog at Phase A complete:** 38 ingredients
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
@@ -603,11 +602,202 @@ valerian: {
 },
 ```
 
-**Schema caveat:** All five Section 3 entries (turmeric, ashwagandha,
-matcha, yerba-mate, valerian) are best-guess schemas. Will need
+### 3.6 Echinacea
+
+**Decision required:** Add to catalog. Tests immune-support
+vocabulary gap; classic North American indigenous medicine.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+echinacea: {
+  id: "echinacea",
+  displayName: "Echinacea",
+  latin: "Echinacea purpurea (most common; also E. angustifolia, E. pallida)",
+  category: "herbal",
+  subcategory: "flower",  // aerial parts most common in tea; roots traditional
+  aliases: ["purple coneflower", "purple Kansas coneflower", "Black Sampson"],
+
+  // Sensory
+  flavors: ["earthy", "grassy", "slightly-bitter", "subtly-floral", "tongue-tingling"],
+  basicTastes: {
+    bitter: 2,
+    astringent: 2,
+    aromatic: 2,
+    sweet: 1,
+    tingling: 2,  // alkamide-driven; species-dependent
+  },
+
+  // Brewing
+  tempRange: [90, 100],
+  timeRange: [300, 900],  // 5-15 min
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried herb per 250ml; clinical extracts use 300-500mg standardized",
+
+  // Effects (vocabulary v1)
+  effects: [["soothing", 2], ["warming", 1], ["uplifting", 1], ["digestive", 1]],
+  // NOTE: "Immune support" effect doesn't map cleanly to vocabulary v1.
+  // Captured as soothing=2 with copy-driven framing for the immune role.
+  // Mechanistically real (alkamide-CB2 binding); clinical effects modest.
+
+  // Pairing notes
+  idealPairings: ["elderberry", "ginger", "lemon", "honey", "thyme"],
+  canonicalPreparation: "Best at first sign of cold; tea-strength is sub-medicinal vs. tinctures",
+
+  // Safety flags (IMPORTANT)
+  safetyFlags: {
+    asteraceaeAllergy: "cross-react",  // ragweed/chamomile/marigold allergy
+    autoimmune: "caution-traditional",  // immune-stimulating; modern evidence evolving
+    pregnancy: "avoid-insufficient-data",
+    immunosuppressants: "interaction",
+    durationLimit: "8-10-weeks-traditional",  // conservative; Eccles 2012 4-month trial showed safety
+  },
+
+  // Flags
+  confidenceMarkers: {
+    coldDuration: "attested",
+    coldPrevention: "attested",
+    CB2_alkamide_binding: "established",
+    immunomodulation: "attested",
+    "antiviral-in-vitro": "established",
+  },
+},
+```
+
+### 3.7 Licorice Root
+
+**Decision required:** Add to catalog. The TCM harmonizer with
+the most significant safety profile in the catalog.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+"licorice-root": {
+  id: "licorice-root",
+  displayName: "Licorice Root",
+  latin: "Glycyrrhiza glabra (Western) / G. uralensis (Chinese, Gan Cao)",
+  category: "herbal",
+  subcategory: "root",
+  aliases: ["sweet root", "Gan Cao (甘草)", "Mulethi", "Yashtimadhu", "liquorice"],
+
+  // Sensory
+  flavors: ["intensely-sweet", "anise", "woody", "earthy", "slightly-bitter"],
+  basicTastes: {
+    sweet: 5,  // CATALOG CEILING — 50x sucrose by weight (glycyrrhizin)
+    aromatic: 3,
+    bitter: 1,
+    astringent: 1,
+    umami: 1,
+  },
+
+  // Brewing
+  tempRange: [95, 100],
+  timeRange: [300, 900],
+  caffeine: 0,
+  doseGuidance: "1/2-1 tsp per 250ml. CRITICAL: less is more; 2+ tsp approaches dose ceiling",
+
+  // Effects (vocabulary v1)
+  effects: [["soothing", 4], ["digestive", 2], ["warming", 1], ["calm", 1], ["uplifting", 1]],
+  // NOTE: Joins rooibos and hojicha at soothing=4 via demulcent + cortisol-extending mechanism.
+  // The catalog's sweetness ceiling at 5.
+
+  // Pairing notes
+  idealPairings: ["marshmallow-root", "ginger", "cinnamon", "star-anise", "fennel", "peppermint"],
+  canonicalPreparation: "Typically 5-15% of a blend (TCM harmonizer pattern); rarely consumed solo",
+  harmonizerFlag: true,  // unique blend-recommendation property
+
+  // Safety flags (CRITICAL — most significant in catalog)
+  safetyFlags: {
+    pseudoaldosteronism: "REAL-RISK",  // dose-dependent BP elevation, K+ depletion
+    doseLimit: "max-3g-day-OR-100mg-glycyrrhizin",
+    durationLimit: "max-4-6-weeks-continuous",
+    hypertension: "AVOID",
+    heartDisease: "AVOID",
+    kidneyDisease: "AVOID",
+    pregnancy: "AVOID",  // Finnish cohort studies on preterm birth, child cognition
+    breastfeeding: "AVOID",
+    diuretics: "DANGEROUS-additive-K-depletion",
+    digoxin: "DANGEROUS-via-hypokalemia",
+    corticosteroids: "extends-half-life",
+    spironolactone: "blunts-effect",
+    DGL_alternative: "deglycyrrhizinated-licorice-removes-pseudoaldosteronism-risk",
+  },
+
+  // Flags
+  confidenceMarkers: {
+    "ulcer-DGL": "established",
+    "throat-soothing": "established",
+    pseudoaldosteronism: "established",
+    "11_beta_HSD2_inhibition": "established",
+    antiviral: "established",
+    harmonizer: "verified",  // TCM cultural-functional role
+  },
+},
+```
+
+### 3.8 Genmaicha
+
+**Decision required:** Add to catalog. Tests Principle #18
+(same plant different prep). Easiest Phase A addition; safest
+profile.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+genmaicha: {
+  id: "genmaicha",
+  displayName: "Genmaicha",
+  latin: "Camellia sinensis (sencha) + Oryza sativa (roasted brown rice)",
+  category: "tea",
+  subcategory: "green-with-rice",  // distinguishes from pure sencha per Principle #18
+  aliases: ["玄米茶", "popcorn tea", "people's tea (民の茶)", "brown rice tea"],
+
+  // Sensory
+  flavors: ["toasty", "nutty", "grassy", "mildly-sweet", "slightly-savory"],
+  basicTastes: {
+    umami: 3,
+    sweet: 2,
+    bitter: 1,
+    astringent: 1,
+    aromatic: 3,  // toasty register
+  },
+
+  // Brewing
+  tempRange: [70, 85],  // wider tolerance than pure sencha
+  timeRange: [60, 180],  // 1-3 min; quick like other Japanese greens
+  caffeine: 20,  // ~half of pure sencha
+  doseGuidance: "5g (~1.5 tsp) per 250ml; slightly more than pure sencha because rice takes volume",
+
+  // Effects (vocabulary v1)
+  effects: [["soothing", 3], ["calm", 3], ["focus", 2], ["warming", 2], ["uplifting", 2], ["digestive", 2]],
+  // NOTE: Validates Principle #18. Substantially different effect profile from sencha
+  // (focus 4, energy 3, calm 3, cooling 2). Trades focus/energy for soothing/warming/digestive.
+
+  // Pairing notes
+  idealPairings: ["typically-standalone", "Japanese-confectionery (wagashi)"],
+  canonicalPreparation: "Standard 80°C / 2 min for balanced cup; 70°C emphasizes tea, 85°C emphasizes rice",
+  variants: ["bancha-genmaicha", "matcha-iri-genmaicha", "hoji-genmaicha", "gyokuro-genmaicha"],
+
+  // Safety flags (LOWEST in Phase A)
+  safetyFlags: {
+    caffeine: "low",  // ~20mg/cup; suitable for evening
+    ironAbsorption: "tannin-buffered",  // rice softens tea's iron-absorption effect
+    pregnancyModerate: "well-within-200mg-daily-caffeine-guideline",
+  },
+
+  // Flags
+  confidenceMarkers: {
+    lowerCaffeineThanSencha: "verified",
+    comfortingTexture: "verified",
+    afterMealJapaneseTradition: "verified",
+    mottainai: "verified",  // cultural framing
+  },
+},
+```
+
+**Schema caveats apply to all Section 3 entries.** Will need
 to reconcile with actual `src/data/ingredients.js` schema before
-applying. The research files themselves are schema-agnostic and
-capture everything that matters.
+applying.
 
 **New schema patterns introduced:**
 - `preparationPattern`: distinguishes "steep" / "whisk" /
@@ -615,6 +805,11 @@ capture everything that matters.
   matcha, yerba-mate, ashwagandha, turmeric
 - `gradeMatters`: flag for ingredients where grade variation
   is fundamental to UX (currently just matcha)
+- `harmonizerFlag`: blend-recommendation property (currently
+  just licorice-root)
+- `variants`: array of named cultural variations within an
+  ingredient (genmaicha-iri patterns; could apply to oolong
+  cultivars in future)
 - Expanded `safetyFlags`: more nuanced than original schema
   likely supports; needs review
 
@@ -659,6 +854,9 @@ capture everything that matters.
 | **matcha** | **tea (NEW)** | **add** | `focus 5, energy 4, calm 3, uplifting 2, soothing 1` |
 | **yerba-mate** | **herbal (NEW, caffeinated)** | **add** | `energy 4, focus 3, digestive 2, uplifting 2, warming 1` |
 | **valerian** | **herbal (NEW)** | **add** | `sleepy 5, calm 4, soothing 3, grounding 2` |
+| **echinacea** | **herbal (NEW)** | **add** | `soothing 2, warming 1, uplifting 1, digestive 1` |
+| **licorice-root** | **herbal (NEW)** | **add** | `soothing 4, digestive 2, warming 1, calm 1, uplifting 1` |
+| **genmaicha** | **tea (NEW)** | **add** | `soothing 3, calm 3, focus 2, warming 2, uplifting 2, digestive 2` |
 
 **Status legend:**
 - `swap`: replace `effects` array directly (already vocab v1)

@@ -15,11 +15,11 @@
 | Tier | Count | Status |
 |------|-------|--------|
 | Original catalog (Phase 0) | 30 | Researched; effect arrays pending app integration |
-| Phase A targets | 6 | Identified; research in progress |
-| Phase B targets | ~7 | Identified; research scheduled after Phase A |
+| Phase A targets | 8 | **COMPLETE** — researched; effect arrays pending app integration |
+| Phase B targets | ~7 | Identified; research scheduled after batch app update |
 | Phase C / Tier 3 (deferred) | ~17 | Documented for future consideration |
 | Phase X / Tier 4 (out of scope) | many | Explicitly skipped |
-| **Final target catalog** | **~46** | After Phase A + B complete |
+| **Final target catalog** | **~46** | After Phase B complete |
 
 ---
 
@@ -46,25 +46,25 @@ for the canonical list.)
 
 ---
 
-## Phase A — Tier 1 must-fills (6 ingredients, in progress)
+## Phase A — Tier 1 must-fills (8 ingredients, COMPLETE)
 
-The biggest gaps for a serious tea catalog. Each forces a useful
+The biggest gaps for a serious tea catalog. Each forced a useful
 vocabulary or category-structure decision.
 
-| Ingredient | Why | Vocabulary test |
+| Ingredient | Why | Vocabulary outcome |
 |-----------|-----|----------------|
-| **Matcha** | Iconic Japanese ceremonial; dominant in modern wellness; whole-leaf consumption is new mechanic | Tests `focus` 5 / `energy` 4 zone; whole-leaf consumption as new pattern |
-| **Yerba mate** | 30+ million daily drinkers in South America; growing Western market; the caffeinated-herbal test case | Tests Principle #16 (caffeine as property); category-structure validation |
-| **Valerian** | Classic Western sleep specialist; was on potential-adds list | Tests `sleepy` 5 ceiling for catalog |
-| **Echinacea** | Classic North American/European immune-support herb; conspicuous absence from a serious catalog | Tests "immune-support" effect gap (likely maps imperfectly to `soothing`) |
-| **Licorice root** | Universal blend ingredient (chai, throat blends, TCM harmonizer); strong unique flavor | Significant safety flag (BP/potassium with chronic use) — tests honest disclosure handling |
-| **Genmaicha** | Common Japanese green tea (sencha + roasted brown rice); meaningfully different from sencha | Tests Principle #18 (same-plant-different-prep); roasted-grain character |
+| **Matcha** | Iconic Japanese ceremonial; dominant in modern wellness; whole-leaf consumption is new mechanic | Joined gyokuro at `focus` 5; joined assam at `energy` 4 via different mechanism |
+| **Yerba mate** | 30+ million daily drinkers in South America; growing Western market; the caffeinated-herbal test case | First caffeinated herbal; validated Principle #16; joined `energy` 4 cluster via xanthine triad |
+| **Valerian** | Classic Western sleep specialist; was on potential-adds list | **Set `sleepy` 5 ceiling** — first ingredient at this level |
+| **Echinacea** | Classic North American/European immune-support herb; conspicuous absence from a serious catalog | Surfaced "immune-support" vocabulary v2 gap; captured as `soothing` 2 + copy |
+| **Licorice root** | Universal blend ingredient (chai, throat blends, TCM harmonizer); strong unique flavor | **Set `sweet` basic taste ceiling at 5**; established `harmonizerFlag` schema property; most significant safety profile in catalog |
+| **Genmaicha** | Common Japanese green tea (sencha + roasted brown rice); meaningfully different from sencha | Validated Principle #18 cleanly; lowest-caffeine catalog true tea |
 
-**Provisional adds from earlier sessions (unchanged):**
-- **Turmeric** — researched; provisional Phase A inclusion
-- **Ashwagandha** — researched; provisional Phase A inclusion
+**Provisional adds from earlier sessions (also complete):**
+- **Turmeric** — researched; `warming 3, soothing 2, grounding 2, digestive 2`
+- **Ashwagandha** — researched; **set `grounding` 4 as first non-tea ceiling**
 
-**Phase A complete count:** 38 ingredients (30 original + 6 new + 2 provisional)
+**Phase A complete count:** 38 ingredients (30 original + 8 Phase A)
 
 ---
 
