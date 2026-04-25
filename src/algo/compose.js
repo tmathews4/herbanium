@@ -1000,6 +1000,27 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       return b[1] - a[1];
     });
 
+  // The bitterness bar represents *total tannin pressure* — effect
+  // bitterness + flavor bitter + flavor bitterness + flavor astringent
+  // — because that's the sum the perception layer's warning math
+  // checks (bitterLevel + astringentLevel >= 4 → "tannins are taking
+  // over"). Without this, ingredients like gunpowder green can fire
+  // the over-pull warning while the bitterness bar still reads below
+  // its threshold marker — a confusing mismatch.
+  // Done after `effects` is built so this only affects display, not
+  // the warning math (which still uses the original maps).
+  const tanninPressure =
+    (perceivedEffectMap.bitterness || 0) +
+    (perceivedFlavorMap.bitter || 0) +
+    (perceivedFlavorMap.bitterness || 0) +
+    (perceivedFlavorMap.astringent || 0);
+  if (tanninPressure > 0) {
+    const display = Math.round(Math.min(5, tanninPressure) * 10) / 10;
+    const idx = effects.findIndex(([t]) => t === "bitterness");
+    if (idx >= 0) effects[idx] = ["bitterness", display];
+    else effects.push(["bitterness", display]);
+  }
+
   const rawFlavorTuples = Object.entries(rawFlavors)
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
     .sort((a, b) => b[1] - a[1]);

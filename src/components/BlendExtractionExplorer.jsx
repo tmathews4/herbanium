@@ -441,11 +441,12 @@ export const BlendExtractionExplorer = ({
                           label={tag}
                           value={n}
                           color={color}
-                          // The bitterness warning fires at 2.5 in perception.js
-                          // ("the bitter side is starting to dominate"). Mark
-                          // that point on the bar so the user can see how far
-                          // they have before tipping into a warning.
-                          thresholdValue={tag === "bitterness" ? 2.5 : undefined}
+                          // The bitterness bar represents total tannin pressure
+                          // (bitter + bitterness + astringent), and perception.js
+                          // fires "tannins are taking over" at the combined
+                          // threshold of 4. Marking that line on the bar gives
+                          // the user a direct read on when the warning trips.
+                          thresholdValue={tag === "bitterness" ? 4 : undefined}
                         />
                       </div>
                     );
