@@ -2,7 +2,7 @@
    screens/ProfileScreen.jsx — user profile: stats, badges, preferences, dev toolbar.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Flower } from "../components/icons";
 import {
   SectionLabel, Stat, Toggle,
@@ -10,6 +10,9 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { getBlend } from "../helpers/misc";
+import {
+  exportAllPersistedState, importAllPersistedState,
+} from "../hooks/usePersistedState";
 import {
   ff, theme,
 } from "../theme";
@@ -35,6 +38,45 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
   // Reset confirm
   const [confirmingReset, setConfirmingReset] = useState(false);
+
+  // Export/import data
+  const importInputRef = useRef(null);
+  const [importMessage, setImportMessage] = useState(null);
+
+  const handleExport = () => {
+    const payload = exportAllPersistedState();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `herbanium-backup-${stamp}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const payload = JSON.parse(e.target.result);
+        const result = importAllPersistedState(payload);
+        if (!result.ok) {
+          setImportMessage({ kind: "error", text: `Import failed: ${result.error}` });
+          return;
+        }
+        if (!window.confirm("Import succeeded. Reload to apply your imported data? Any unsaved changes will be lost.")) {
+          setImportMessage({ kind: "ok", text: "Imported. Reload the page when ready." });
+          return;
+        }
+        window.location.reload();
+      } catch (err) {
+        setImportMessage({ kind: "error", text: `Import failed: ${err.message || "invalid JSON"}` });
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const yourSessions = sessions.filter(s => s.who === "you");
   const cupCount = yourSessions.length;
@@ -263,6 +305,52 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           Your journal lives on this device. No account, no cloud sync.
           Clearing your browser data will clear your journal.
         </div>
+
+        {/* Export / Import data */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+          <button
+            onClick={handleExport}
+            style={{
+              fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+              padding: "8px 14px", borderRadius: 999,
+              background: "transparent", border: `1px solid ${theme.ink}`,
+              cursor: "pointer",
+            }}
+          >
+            export your data
+          </button>
+          <button
+            onClick={() => importInputRef.current?.click()}
+            style={{
+              fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+              padding: "8px 14px", borderRadius: 999,
+              background: "transparent", border: `1px solid ${theme.ink}`,
+              cursor: "pointer",
+            }}
+          >
+            import data
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={(e) => {
+              handleImportFile(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+            style={{ display: "none" }}
+          />
+        </div>
+        {importMessage && (
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: importMessage.kind === "error" ? theme.terra : theme.sageDeep,
+            marginBottom: 12, lineHeight: 1.45,
+          }}>
+            {importMessage.text}
+          </div>
+        )}
+
         {confirmingReset ? (
           <div style={{ display: "flex", gap: 8 }}>
             <button

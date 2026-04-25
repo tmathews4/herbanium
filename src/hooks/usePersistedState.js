@@ -101,6 +101,73 @@ export function usePersistedState(key, defaultValue) {
 }
 
 /**
+ * Export every herbanium.* localStorage key as a JSON-serializable
+ * payload. Used by the Profile "Export your data" action. Caller is
+ * responsible for triggering the download or stashing the result.
+ */
+export function exportAllPersistedState() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return { schemaVersion: CURRENT_SCHEMA, exportedAt: new Date().toISOString(), data: {} };
+  }
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(KEY_PREFIX) && k !== SCHEMA_KEY) {
+      const shortKey = k.slice(KEY_PREFIX.length);
+      try {
+        data[shortKey] = JSON.parse(localStorage.getItem(k));
+      } catch {
+        // Skip malformed values rather than aborting the whole export.
+      }
+    }
+  }
+  return {
+    schemaVersion: CURRENT_SCHEMA,
+    exportedAt: new Date().toISOString(),
+    data,
+  };
+}
+
+/**
+ * Replace localStorage with the contents of an export payload.
+ * Validates schemaVersion. Returns { ok: true } on success or
+ * { ok: false, error } otherwise. Caller should reload to pick up
+ * the new state.
+ */
+export function importAllPersistedState(payload) {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return { ok: false, error: "no localStorage available" };
+  }
+  if (!payload || typeof payload !== "object") {
+    return { ok: false, error: "payload is not an object" };
+  }
+  if (payload.schemaVersion !== CURRENT_SCHEMA) {
+    return { ok: false, error: `schema mismatch: expected ${CURRENT_SCHEMA}, got ${payload.schemaVersion}` };
+  }
+  if (!payload.data || typeof payload.data !== "object") {
+    return { ok: false, error: "payload missing data" };
+  }
+  try {
+    // Wipe existing herbanium.* keys first so import is a clean replace,
+    // not a merge. Avoids stale orphans from a previous app version.
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(KEY_PREFIX)) toRemove.push(k);
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+    // Write the imported keys.
+    for (const [shortKey, value] of Object.entries(payload.data)) {
+      localStorage.setItem(KEY_PREFIX + shortKey, JSON.stringify(value));
+    }
+    localStorage.setItem(SCHEMA_KEY, CURRENT_SCHEMA);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message || "write failed" };
+  }
+}
+
+/**
  * Clear all herbanium.* localStorage keys. Used by the "start over"
  * reset button in Profile. After calling, the app should reload to
  * pick up the fresh state.
