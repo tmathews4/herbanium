@@ -117,8 +117,22 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const sortedEarned = [...earnedAttrs].sort((a, b) =>
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
+  // Prepend the unique creation title as a pinned first card. It's not
+  // a normal attribute (it's granted once, at signup, and never re-evaluates),
+  // but we want users to be able to tap it for the description like the others.
+  const creationTitleName = profile?.title || generateCreationTitle(profile);
+  const allCards = creationTitleName ? [
+    {
+      id: "_creation",
+      name: creationTitleName,
+      displayName: creationTitleName,
+      rarity: "legendary",
+      desc: "Granted at your kettle's first lighting. Drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
+    },
+    ...sortedEarned,
+  ] : sortedEarned;
   const [openAttrId, setOpenAttrId] = useState(null);
-  const openAttr = openAttrId ? earnedAttrs.find(a => a.id === openAttrId) : null;
+  const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
 
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
@@ -223,8 +237,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             and patterns about what lands for you will start to emerge.
           </div>
         )}
-        {earnedAttrs.length > 0 ? (
-          <AttributeShelf attrs={sortedEarned} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />
+        {allCards.length > 0 ? (
+          <AttributeShelf attrs={allCards} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />
         ) : cupCount === 0 ? (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
             Self-knowledge grows from a few cups in. Log three or four
