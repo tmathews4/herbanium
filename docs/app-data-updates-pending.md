@@ -4,12 +4,16 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 2026. **Phase A COMPLETE** —
-> 8 new ingredients researched (turmeric, ashwagandha, matcha,
-> yerba-mate, valerian, echinacea, licorice-root, genmaicha)
-> alongside the 30 original catalog entries.
+> **Status at creation:** April 2026. **Phase A COMPLETE; Phase
+> B in progress** — 13 new ingredients researched (turmeric,
+> ashwagandha, matcha, yerba-mate, valerian, echinacea,
+> licorice-root, genmaicha, reishi, lions-mane, nettle, linden,
+> elderflower) alongside the 30 original catalog entries.
 >
-> **Catalog at Phase A complete:** 38 ingredients
+> **Catalog at this snapshot:** 43 ingredients
+>
+> **Phase B remaining:** 2 ingredients (black pepper, dandelion
+> root + leaf split per Principle #18)
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
@@ -795,14 +799,261 @@ genmaicha: {
 },
 ```
 
+### 3.9 Reishi Mushroom
+
+**Decision required:** Add to catalog. Establishes mushroom
+subcategory per Principle #17; sets `grounding` 5 ceiling.
+
+```js
+reishi: {
+  id: "reishi",
+  displayName: "Reishi",
+  latin: "Ganoderma lucidum",
+  category: "herbal",  // Per Principle #17
+  subcategory: "fungus",  // NEW SUBCATEGORY
+  aliases: ["Lingzhi (灵芝)", "Mannentake (万年茸)", "mushroom of immortality"],
+
+  flavors: ["bitter", "earthy", "woody", "mushroomy", "tannic"],
+  basicTastes: { bitter: 5, astringent: 3, earthy: 4, umami: 1, sweet: 0 },
+
+  tempRange: [95, 100],
+  timeRange: [1800, 7200],  // 30 min - 2 hr decoction
+  caffeine: 0,
+  doseGuidance: "3-9g dried sliced reishi per 500-1000ml water for traditional decoction",
+  preparationPattern: "decoction",  // NEW PATTERN VALUE
+
+  effects: [["grounding", 5], ["sleepy", 4], ["calm", 4], ["soothing", 3], ["warming", 1]],
+  // NOTE: Sets grounding=5 ceiling. First mushroom in catalog establishes subcategory.
+
+  idealPairings: ["jujube", "goji", "ashwagandha", "cinnamon", "honey"],
+  canonicalPreparation: "Long decoction with jujube and goji to balance bitterness; not casual sipping tea",
+
+  safetyFlags: {
+    anticoagulants: "antiplatelet-additive",
+    diabetesMedications: "monitor-glucose",
+    bloodPressure: "modest-additive-hypotensive",
+    immunosuppressants: "caution-immunomodulator",
+    pregnancy: "avoid-insufficient-data",
+    qualityVariation: "fruiting-body-vs-mycelium-vs-spore-significant",
+  },
+
+  confidenceMarkers: {
+    sleep: "established",  // Chu 2023 meta-analysis
+    immunomodulation: "established",
+    HPA_axis: "attested",
+    hepatoprotection: "attested",
+    "an_shen_tradition": "verified",  // TCM cultural-functional role
+  },
+},
+```
+
+### 3.10 Lion's Mane Mushroom
+
+**Decision required:** Add to catalog. Joins reishi in mushroom
+subcategory; surfaces neurotrophic vocabulary v2 gap.
+
+```js
+"lions-mane": {
+  id: "lions-mane",
+  displayName: "Lion's Mane",
+  latin: "Hericium erinaceus",
+  category: "herbal",
+  subcategory: "fungus",  // Second mushroom; subcategory established
+  aliases: ["Yamabushitake (山伏茸)", "Hou Tou Gu (猴頭菇)", "monkey head mushroom", "bearded tooth fungus"],
+
+  flavors: ["mild", "sweet", "seafood-like", "earthy", "nutty"],
+  basicTastes: { umami: 3, sweet: 2, bitter: 1, astringent: 1, earthy: 2 },
+
+  tempRange: [90, 100],
+  timeRange: [600, 1800],  // 10-30 min
+  caffeine: 0,
+  doseGuidance: "2-3g dried lion's mane per 250ml; clinical extracts use 500-3000mg",
+
+  effects: [["focus", 3], ["calm", 2], ["soothing", 2], ["uplifting", 2], ["grounding", 2], ["digestive", 2]],
+  // NOTE: Adds vocabulary v2 gap #7 (neurotrophic NGF-BDNF).
+  // Effects build over weeks, not acute. The most palatable mushroom in catalog.
+
+  idealPairings: ["cocoa", "cinnamon", "vanilla", "reishi", "honey"],
+  canonicalPreparation: "Daily-practice ingredient; effects build over weeks",
+  effectTimeframe: "chronic-build-not-acute",  // NEW field type to surface
+
+  safetyFlags: {
+    anticoagulants: "mild-antiplatelet",
+    diabetesMedications: "modest-glucose-lowering",
+    pregnancy: "limited-data-conservative",
+    mushroomAllergy: "absolute-contraindication",
+    rare_ARDS_case: "single-case-report-Nakatsugawa-2003",
+  },
+
+  confidenceMarkers: {
+    NGF_stimulation: "established",
+    BDNF_pathway: "established",
+    cognitiveSupport: "attested",  // Mori 2009 in MCI
+    neurogenesis: "established",  // hippocampal
+    moodSupport: "attested",
+  },
+},
+```
+
+### 3.11 Stinging Nettle
+
+**Decision required:** Add to catalog. Mineral-rich Western
+herbal; allergy-support documented mechanism; surfaces v2 gap #8.
+
+```js
+nettle: {
+  id: "nettle",
+  displayName: "Nettle",
+  latin: "Urtica dioica",
+  category: "herbal",
+  subcategory: "leaf",
+  aliases: ["stinging nettle", "common nettle", "Bichu butti (Hindi)", "Vrishchhiyaa-shaaka (Sanskrit)"],
+
+  flavors: ["earthy", "grassy", "mineral", "spinach-like", "subtly-sweet"],
+  basicTastes: { earthy: 3, mineral: 3, umami: 2, bitter: 1, sweet: 1 },
+
+  tempRange: [95, 100],
+  timeRange: [300, 900],  // 5-15 min standard; 4-8 hr for nourishing infusion
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried nettle per 250ml; long infusion (4-8 hr) for maximum mineral extraction",
+
+  effects: [["soothing", 3], ["grounding", 2], ["digestive", 2], ["uplifting", 1], ["calm", 1], ["warming", 1]],
+  // NOTE: Adds vocabulary v2 gap #8 (anti-allergic / antihistaminic).
+  // The "spring tonic" mineral-nourishment register.
+
+  idealPairings: ["lemon-balm", "dandelion", "mint", "rooibos", "honey", "lemon"],
+  canonicalPreparation: "Standard 10-min steep OR Susun Weed nourishing infusion (4-8 hours covered)",
+  preparationPattern: "long-infusion-optional",
+
+  safetyFlags: {
+    freshPlantSting: "processing-destroys",
+    warfarin: "vitamin-K-significant",  // genuine concern
+    diuretics: "mild-additive",
+    diabetesMedications: "modest-glucose-lowering",
+    pregnancy: "tea-strength-acceptable-traditional-use",
+    mushroomAllergy: "no-cross-react",
+  },
+
+  confidenceMarkers: {
+    "allergic-rhinitis": "attested",  // Mittman 1990; 2017 Iranian RCT
+    "H1-receptor-antagonism": "established",
+    "BPH-symptom-support": "attested",
+    "blood-glucose-lowering": "attested",  // Kianbakht 2013
+    nutritional: "verified",  // iron, calcium, magnesium, vitamins
+    spring_tonic_tradition: "verified",
+  },
+},
+```
+
+### 3.12 Linden (Tilia)
+
+**Decision required:** Add to catalog. Completes floral-calming
+trio (chamomile + lavender + linden); joins `calm` 4 cluster
+via documented benzodiazepine receptor ligands.
+
+```js
+linden: {
+  id: "linden",
+  displayName: "Linden",
+  latin: "Tilia cordata (small-leaved lime)",
+  category: "herbal",
+  subcategory: "flower",
+  aliases: ["lime flower", "Tilleul (French)", "Tila/Tilo (Spanish)", "Lipa (Slavic)", "Linde (German)", "basswood (T. americana)"],
+
+  flavors: ["honey-sweet", "citrusy", "floral", "delicate", "slightly-green"],
+  basicTastes: { sweet: 3, aromatic: 3, bitter: 0, astringent: 0 },
+
+  tempRange: [85, 95],
+  timeRange: [300, 600],  // 5-10 min
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried flowers per 250ml; covered cup preserves volatile aromatics",
+
+  effects: [["calm", 4], ["sleepy", 3], ["soothing", 3], ["uplifting", 2], ["warming", 1], ["cooling", 1], ["digestive", 1]],
+  // NOTE: Joins calm=4 cluster via Viola 1994 benzodiazepine receptor ligands mechanism.
+  // The lightest "calming flower" in floral-calming trio with chamomile and lavender.
+
+  idealPairings: ["chamomile", "lemon-balm", "lavender", "passionflower", "mint", "honey", "rose"],
+  canonicalPreparation: "Covered-cup steep at 85-90°C for 5-10 min",
+  childrenFriendly: true,  // gentle enough for kids in traditional European pediatric use
+
+  safetyFlags: {
+    pregnancy: "tea-strength-acceptable-traditional-use",
+    sedatives: "theoretical-additive",
+    cardiacGlycosides: "very-high-doses-only-folk-caution",
+    petSafe: true,  // not toxic to dogs/cats per ASPCA
+  },
+
+  confidenceMarkers: {
+    "benzodiazepine-receptor-binding": "established",  // Viola 1994
+    "GABA-mimetic": "attested",
+    anxiolytic: "attested",
+    diaphoretic: "verified",
+    "Proust-tilleul-cultural-depth": "verified",
+    "European-Latin-American-tradition": "verified",
+  },
+},
+```
+
+### 3.13 Elderflower
+
+**Decision required:** Add to catalog. European immune-support
+flower; surfaces v2 gap #6 (immune support); validates
+Principle #18 elderflower/elderberry split.
+
+```js
+elderflower: {
+  id: "elderflower",
+  displayName: "Elderflower",
+  latin: "Sambucus nigra",
+  category: "herbal",
+  subcategory: "flower",
+  aliases: ["black elder", "Holunder (German)", "Sureau (French)", "Sambuco (Italian)", "Saúco (Spanish)"],
+
+  flavors: ["floral", "muscat-grape", "lychee-tropical", "gently-sweet", "delicate"],
+  basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },
+
+  tempRange: [85, 95],
+  timeRange: [300, 600],  // 5-10 min
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried elderflowers per 250ml; covered cup preserves volatile aromatics",
+
+  effects: [["soothing", 3], ["uplifting", 2], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
+  // NOTE: Surfaces vocabulary v2 gap #6 (immune support) - third instance with echinacea and nettle.
+  // Documented antiviral activity (Roschek 2009); German Commission E approved for cold/flu.
+
+  idealPairings: ["echinacea", "peppermint", "ginger", "lemon", "honey", "linden", "rose"],
+  canonicalPreparation: "Covered-cup steep at 85-90°C for 5-10 min; classic European cold-care",
+
+  safetyFlags: {
+    cyanogenicGlycosides_otherParts: "leaves-bark-raw-berries-NOT-flowers",
+    diuretics: "mild-additive",
+    diabetesMedications: "theoretical-additive",
+    immunosuppressants: "caution-theoretical",
+    pregnancy: "tea-strength-acceptable-traditional-use",
+    speciesNote: "S-nigra-or-canadensis-acceptable-S-racemosa-avoid",
+  },
+
+  confidenceMarkers: {
+    "antiviral-flavonoid-mechanism": "established",  // Roschek 2009
+    "cold-flu-symptom-support": "attested",  // mostly elderberry data; family evidence
+    "German-Commission-E-approval": "verified",
+    diaphoretic: "verified",
+    "Elder-Mother-folklore": "verified",
+    "muscat-lychee-aroma": "verified",
+  },
+},
+```
+
 **Schema caveats apply to all Section 3 entries.** Will need
 to reconcile with actual `src/data/ingredients.js` schema before
 applying.
 
 **New schema patterns introduced:**
 - `preparationPattern`: distinguishes "steep" / "whisk" /
-  "gourd-multi-refill" / "milk-preparation" — needed for
-  matcha, yerba-mate, ashwagandha, turmeric
+  "gourd-multi-refill" / "milk-preparation" / **"decoction"**
+  (added by reishi) / **"long-infusion-optional"** (added by
+  nettle) — needed for matcha, yerba-mate, ashwagandha,
+  turmeric, reishi, lion's mane, nettle
 - `gradeMatters`: flag for ingredients where grade variation
   is fundamental to UX (currently just matcha)
 - `harmonizerFlag`: blend-recommendation property (currently
@@ -810,8 +1061,18 @@ applying.
 - `variants`: array of named cultural variations within an
   ingredient (genmaicha-iri patterns; could apply to oolong
   cultivars in future)
+- **`subcategory: fungus`** — new subcategory value (reishi,
+  lion's mane); per Principle #17 mushrooms get subcategory
+  not separate top-level category
+- **`childrenFriendly: true`** — flag for ingredients
+  traditionally safe for pediatric use (currently just linden)
+- **`effectTimeframe: "chronic-build-not-acute"`** — new
+  field type to surface lion's mane's weeks-scale timeline
+  (most catalog ingredients work acutely)
+- **`petSafe: true`** — flag for ingredients not toxic to
+  common pets (currently just linden)
 - Expanded `safetyFlags`: more nuanced than original schema
-  likely supports; needs review
+  likely supports; needs review during integration
 
 ---
 
@@ -857,6 +1118,11 @@ applying.
 | **echinacea** | **herbal (NEW)** | **add** | `soothing 2, warming 1, uplifting 1, digestive 1` |
 | **licorice-root** | **herbal (NEW)** | **add** | `soothing 4, digestive 2, warming 1, calm 1, uplifting 1` |
 | **genmaicha** | **tea (NEW)** | **add** | `soothing 3, calm 3, focus 2, warming 2, uplifting 2, digestive 2` |
+| **reishi** | **herbal/fungus (NEW)** | **add** | `grounding 5, sleepy 4, calm 4, soothing 3, warming 1` |
+| **lions-mane** | **herbal/fungus (NEW)** | **add** | `focus 3, calm 2, soothing 2, uplifting 2, grounding 2, digestive 2` |
+| **nettle** | **herbal (NEW)** | **add** | `soothing 3, grounding 2, digestive 2, uplifting 1, calm 1, warming 1` |
+| **linden** | **herbal (NEW)** | **add** | `calm 4, sleepy 3, soothing 3, uplifting 2, warming 1, cooling 1, digestive 1` |
+| **elderflower** | **herbal (NEW)** | **add** | `soothing 3, uplifting 2, warming 1, cooling 1, calm 1, digestive 1` |
 
 **Status legend:**
 - `swap`: replace `effects` array directly (already vocab v1)

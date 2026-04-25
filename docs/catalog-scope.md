@@ -15,8 +15,8 @@
 | Tier | Count | Status |
 |------|-------|--------|
 | Original catalog (Phase 0) | 30 | Researched; effect arrays pending app integration |
-| Phase A targets | 8 | **COMPLETE** — researched; effect arrays pending app integration |
-| Phase B targets | ~7 | Identified; research scheduled after batch app update |
+| Phase A targets | 8 | Complete; effect arrays pending app integration |
+| Phase B targets | ~7 | **In progress** — 5 of 7 complete (reishi, lions-mane, nettle, linden, elderflower); 2 remaining (black pepper, dandelion root + leaf) |
 | Phase C / Tier 3 (deferred) | ~17 | Documented for future consideration |
 | Phase X / Tier 4 (out of scope) | many | Explicitly skipped |
 | **Final target catalog** | **~46** | After Phase B complete |
