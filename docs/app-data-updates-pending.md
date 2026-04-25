@@ -4,16 +4,18 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 2026. **Phase A COMPLETE; Phase
-> B in progress** — 13 new ingredients researched (turmeric,
+> **Status at creation:** April 2026. **Phase A and Phase B
+> COMPLETE** — 16 new ingredients researched (turmeric,
 > ashwagandha, matcha, yerba-mate, valerian, echinacea,
 > licorice-root, genmaicha, reishi, lions-mane, nettle, linden,
-> elderflower) alongside the 30 original catalog entries.
+> elderflower, black-pepper, dandelion-root, dandelion-leaf)
+> alongside the 30 original catalog entries.
 >
-> **Catalog at this snapshot:** 43 ingredients
+> **Catalog at this snapshot:** **46 ingredients** — Phase B
+> target hit cleanly.
 >
-> **Phase B remaining:** 2 ingredients (black pepper, dandelion
-> root + leaf split per Principle #18)
+> **Ready for batched app integration** with full picture per
+> user's stated preference for single-pass schema reconciliation.
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
@@ -1044,6 +1046,164 @@ elderflower: {
 },
 ```
 
+### 3.14 Black Pepper
+
+**Decision required:** Add to catalog. Surfaces vocabulary v2
+gap #9 (bioenhancement / pharmacokinetic synergy). The
+catalog's first "synergy multiplier" ingredient.
+
+```js
+"black-pepper": {
+  id: "black-pepper",
+  displayName: "Black Pepper",
+  latin: "Piper nigrum",
+  category: "spice",
+  aliases: ["peppercorn", "Maricha (Sanskrit)", "Kali Mirch (Hindi)", "Hu Jiao (胡椒)", "King of spices"],
+
+  flavors: ["pungent", "hot", "earthy", "woody", "citrus-bright", "pine-resinous"],
+  basicTastes: { pungent: 4, bitter: 2, astringent: 2, sweet: 1, sour: 1, umami: 1 },
+
+  tempRange: [95, 100],
+  timeRange: [300, 900],
+  caffeine: 0,
+  doseGuidance: "1-3 freshly cracked peppercorns per 250ml standalone; 5-10 in chai-style preparations",
+
+  effects: [["warming", 3], ["digestive", 3], ["focus", 1], ["energy", 1], ["uplifting", 1]],
+  // NOTE: Surfaces vocabulary v2 gap #9 (bioenhancement). Most distinctive role
+  // is enhancing absorption of OTHER ingredients (curcumin, resveratrol, etc.)
+  // - no vocabulary mapping for this. Captured here as standalone effects.
+
+  idealPairings: ["turmeric", "cinnamon", "cardamom", "ginger", "cloves", "black tea", "milk", "honey"],
+  canonicalPreparation: "Primarily blend ingredient (chai, Golden Milk); standalone less common",
+  bioenhancer: true,  // NEW FLAG - surfaces unique pharmacokinetic synergy role
+
+  safetyFlags: {
+    cyp3a4_inhibition: "concentrated-doses-only-tea-strength-typically-below-threshold",
+    pgp_inhibition: "concentrated-doses-only",
+    medications_caution: ["phenytoin", "propranolol", "statins", "benzodiazepines", "cyclosporine"],
+    surgery: "discontinue-concentrated-piperine-2-weeks-prior",
+    pregnancy: "culinary-acceptable-concentrated-supplements-avoid",
+    activeGI_inflammation: "may-aggravate",
+  },
+
+  confidenceMarkers: {
+    cyp3a4_inhibition: "established",  // Bhardwaj 2002
+    pgp_inhibition: "established",  // Han 2008
+    ugt_inhibition: "established",  // Volak 2008
+    curcumin_bioavailability: "attested",  // Shoba 1998 magnitude debated post-Fanca-Berthon 2021
+    yogavahi_classification: "verified",  // classical Ayurvedic
+    spice_route_history: "verified",
+  },
+},
+```
+
+### 3.15 Dandelion Root
+
+**Decision required:** Add to catalog. First half of Principle
+#18 plant-part split with dandelion leaf. The catalog's primary
+"coffee-like beverage but caffeine-free" option.
+
+```js
+"dandelion-root": {
+  id: "dandelion-root",
+  displayName: "Dandelion Root",
+  latin: "Taraxacum officinale (radix)",
+  category: "herbal",
+  subcategory: "root",
+  aliases: ["roasted dandelion root", "dandelion coffee", "Pissenlit (French)", "lion's tooth", "Pu Gong Ying (蒲公英)"],
+  relatedIngredient: "dandelion-leaf",  // Same plant; different part
+
+  flavors: ["caramel-roasted", "bittersweet", "nutty", "earthy", "coffee-adjacent"],
+  basicTastes: { bitter: 4, astringent: 3, earthy: 3, umami: 1, sweet: 2, sour: 0 },
+
+  tempRange: [95, 100],
+  timeRange: [600, 1800],  // 10-30 min; longer than typical tea
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried roasted root per 250ml; 2-3 tsp for stronger coffee-like preparation",
+  preparationPattern: "decoction",  // Long-simmer/short-decoction style
+
+  effects: [["digestive", 3], ["warming", 2], ["grounding", 2], ["soothing", 1], ["energy", 1], ["focus", 1]],
+  // NOTE: Validates Principle #18 with dandelion-leaf split. Coffee-substitute
+  // use case is unique in catalog. Hepatoprotective evidence (PMC12299503) but
+  // doesn't map cleanly to vocabulary v1.
+
+  idealPairings: ["chicory", "cinnamon", "cardamom", "vanilla", "milk", "honey"],
+  canonicalPreparation: "Decoction-style 10-20 min steep at near-boil; pairs naturally with milk and sweetener",
+
+  safetyFlags: {
+    activeGallbladder: "contraindicated",  // cholagogue effect problematic with biliary obstruction
+    activeGastritisOrUlcer: "may-aggravate",  // bitter stimulation increases gastric acid
+    asteraceae_allergy: "cross-reactivity-with-ragweed-chrysanthemum",
+    diabetes_medications: "modest-glucose-lowering",
+    ciprofloxacin: "documented-interaction-Zhu-1999",
+    pregnancy: "tea-strength-acceptable",
+  },
+
+  confidenceMarkers: {
+    digestive_bitter: "established",
+    hepatoprotective: "attested",  // robust animal evidence; limited human
+    bifidogenic_inulin: "established",  // Trojanová 2004
+    cholagogue: "attested",
+    escop_dyspepsia_approval: "verified",
+    coffee_substitute_tradition: "verified",
+  },
+},
+```
+
+### 3.16 Dandelion Leaf
+
+**Decision required:** Add to catalog. Second half of Principle
+#18 plant-part split with dandelion root. Single best-evidenced
+human herbal diuretic clinical trial (Clare 2009).
+
+```js
+"dandelion-leaf": {
+  id: "dandelion-leaf",
+  displayName: "Dandelion Leaf",
+  latin: "Taraxacum officinale (folium)",
+  category: "herbal",
+  subcategory: "leaf",
+  aliases: ["dandelion greens", "Pissenlit (French - 'wet the bed')", "lion's tooth", "Taraxaci folium"],
+  relatedIngredient: "dandelion-root",  // Same plant; different part
+
+  flavors: ["bitter", "grassy", "fresh-green", "mineral", "vegetal"],
+  basicTastes: { bitter: 3, astringent: 2, mineral: 3, umami: 1, sweet: 1, sour: 1 },
+
+  tempRange: [90, 100],
+  timeRange: [300, 900],  // 5-15 min standard; long infusion 4-8 hr possible
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried leaf per 250ml; 2-3 cups daily for diuretic effect",
+  preparationPattern: "long-infusion-optional",  // Like nettle
+
+  effects: [["digestive", 3], ["cooling", 2], ["soothing", 2], ["grounding", 1], ["uplifting", 1]],
+  // NOTE: Diuretic effect (Clare 2009 RCT) doesn't map cleanly to vocabulary;
+  // captured here as cooling 2 + digestive 3. Potassium-sparing diuretic distinction
+  // unique in catalog. Validates Principle #18 with dandelion-root split.
+
+  idealPairings: ["nettle", "lemon-balm", "mint", "lemon", "dandelion-root", "honey"],
+  canonicalPreparation: "Standard 5-15 min steep at 90-95°C; long infusion 4-8 hours for nourishing-tonic version",
+
+  safetyFlags: {
+    warfarin_vitamin_K: "significant-interaction",  // genuine concern
+    pharmaceutical_diuretics: "additive-effect-but-potassium-rich-may-help",
+    lithium: "diuretic-may-affect-clearance",
+    asteraceae_allergy: "cross-reactivity-with-ragweed-chrysanthemum",
+    activeGallbladder: "less-than-root-but-still-caution",
+    ciprofloxacin: "documented-interaction-Zhu-1999",
+    pregnancy: "tea-strength-acceptable",
+  },
+
+  confidenceMarkers: {
+    diuretic_human_trial: "attested",  // Clare 2009 - single published human RCT
+    high_potassium_content: "verified",  // 4.8% dry weight
+    potassium_sparing_property: "attested",  // unique advantage
+    digestive_bitter: "established",
+    mediterranean_culinary_tradition: "verified",
+    pissenlit_french_naming: "verified",
+  },
+},
+```
+
 **Schema caveats apply to all Section 3 entries.** Will need
 to reconcile with actual `src/data/ingredients.js` schema before
 applying.
@@ -1051,25 +1211,33 @@ applying.
 **New schema patterns introduced:**
 - `preparationPattern`: distinguishes "steep" / "whisk" /
   "gourd-multi-refill" / "milk-preparation" / **"decoction"**
-  (added by reishi) / **"long-infusion-optional"** (added by
-  nettle) — needed for matcha, yerba-mate, ashwagandha,
-  turmeric, reishi, lion's mane, nettle
+  (added by reishi; also dandelion-root) / **"long-infusion-optional"**
+  (added by nettle; also dandelion-leaf) — needed for matcha,
+  yerba-mate, ashwagandha, turmeric, reishi, lion's mane,
+  nettle, dandelion-root, dandelion-leaf
 - `gradeMatters`: flag for ingredients where grade variation
   is fundamental to UX (currently just matcha)
 - `harmonizerFlag`: blend-recommendation property (currently
   just licorice-root)
+- **`bioenhancer`**: NEW flag for ingredients that increase
+  bioavailability of co-administered compounds (currently
+  just black pepper). Distinct from harmonizerFlag — different
+  mechanism (pharmacokinetic synergy vs. flavor/blend smoothing)
+- **`relatedIngredient`**: NEW field linking ingredients that
+  share botanical source but differ by part/preparation per
+  Principle #18 (dandelion-root ↔ dandelion-leaf;
+  potential future: matcha ↔ gyokuro, elderflower ↔ elderberry)
 - `variants`: array of named cultural variations within an
   ingredient (genmaicha-iri patterns; could apply to oolong
   cultivars in future)
-- **`subcategory: fungus`** — new subcategory value (reishi,
+- `subcategory: fungus` — new subcategory value (reishi,
   lion's mane); per Principle #17 mushrooms get subcategory
   not separate top-level category
-- **`childrenFriendly: true`** — flag for ingredients
+- `childrenFriendly: true` — flag for ingredients
   traditionally safe for pediatric use (currently just linden)
-- **`effectTimeframe: "chronic-build-not-acute"`** — new
-  field type to surface lion's mane's weeks-scale timeline
-  (most catalog ingredients work acutely)
-- **`petSafe: true`** — flag for ingredients not toxic to
+- `effectTimeframe: "chronic-build-not-acute"` — field type
+  to surface lion's mane's weeks-scale timeline
+- `petSafe: true` — flag for ingredients not toxic to
   common pets (currently just linden)
 - Expanded `safetyFlags`: more nuanced than original schema
   likely supports; needs review during integration
@@ -1123,6 +1291,9 @@ applying.
 | **nettle** | **herbal (NEW)** | **add** | `soothing 3, grounding 2, digestive 2, uplifting 1, calm 1, warming 1` |
 | **linden** | **herbal (NEW)** | **add** | `calm 4, sleepy 3, soothing 3, uplifting 2, warming 1, cooling 1, digestive 1` |
 | **elderflower** | **herbal (NEW)** | **add** | `soothing 3, uplifting 2, warming 1, cooling 1, calm 1, digestive 1` |
+| **black-pepper** | **spice (NEW)** | **add** | `warming 3, digestive 3, focus 1, energy 1, uplifting 1` |
+| **dandelion-root** | **herbal (NEW)** | **add** | `digestive 3, warming 2, grounding 2, soothing 1, energy 1, focus 1` |
+| **dandelion-leaf** | **herbal (NEW)** | **add** | `digestive 3, cooling 2, soothing 2, grounding 1, uplifting 1` |
 
 **Status legend:**
 - `swap`: replace `effects` array directly (already vocab v1)
