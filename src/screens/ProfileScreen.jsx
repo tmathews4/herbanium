@@ -118,9 +118,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
   // The unique creation title — granted at signup, never re-evaluates.
-  // Rendered explicitly (not via AttributeShelf) so it always shows
-  // when a profile exists, regardless of whether any use-based titles
-  // have been earned yet.
+  // Always rendered when a profile exists; the AttributeShelf prepends
+  // it as the first card so users see their identity title immediately.
   const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
   const creationCard = creationTitleName ? {
     id: "_creation",
