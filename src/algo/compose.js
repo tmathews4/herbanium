@@ -365,7 +365,20 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     const tradition = BLENDS
       .filter(b => b.tradition && moods.some(m => blendMatchesMood(b, m)) &&
         !candidates.some(c => c.name === b.name))
-      .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
+      // Strong matches (blend.mood === user's mood) beat effect-only matches;
+      // then a flavor-tag match (when the user picked a flavor too) beats
+      // a flavor mismatch; then the shortest recipe wins.
+      .sort((a, b) => {
+        const aStrong = moods.includes(a.mood) ? 0 : 1;
+        const bStrong = moods.includes(b.mood) ? 0 : 1;
+        if (aStrong !== bStrong) return aStrong - bStrong;
+        if (flavor) {
+          const aFlav = a.flavor === flavor ? 0 : 1;
+          const bFlav = b.flavor === flavor ? 0 : 1;
+          if (aFlav !== bFlav) return aFlav - bFlav;
+        }
+        return a.ingredients.length - b.ingredients.length;
+      })[0];
     if (tradition) {
       candidates.push({
         ...tradition, kind: "tradition",
@@ -379,11 +392,48 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     const experimental = BLENDS
       .filter(b => b.experimental && moods.some(m => blendMatchesMood(b, m)) &&
         !candidates.some(c => c.name === b.name))
-      .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
+      .sort((a, b) => {
+        const aStrong = moods.includes(a.mood) ? 0 : 1;
+        const bStrong = moods.includes(b.mood) ? 0 : 1;
+        if (aStrong !== bStrong) return aStrong - bStrong;
+        if (flavor) {
+          const aFlav = a.flavor === flavor ? 0 : 1;
+          const bFlav = b.flavor === flavor ? 0 : 1;
+          if (aFlav !== bFlav) return aFlav - bFlav;
+        }
+        return a.ingredients.length - b.ingredients.length;
+      })[0];
     if (experimental) {
       candidates.push({
         ...experimental, kind: "experimental",
         kindLabel: "Herbanium experiment",
+      });
+    }
+
+    // House blends — entries in BLENDS without a tradition or
+    // experimental tag. These are the catalog's everyday cups
+    // (Dusk Lullaby, Hearth & Quiet, sweet-spot customs like
+    // Plumtide / Honeyed Hush / Citrine). Surfaced as a regular
+    // candidate so picking a (mood, flavor) reaches them.
+    const house = BLENDS
+      .filter(b => !b.tradition && !b.experimental &&
+        moods.some(m => blendMatchesMood(b, m)) &&
+        !candidates.some(c => c.name === b.name))
+      .sort((a, b) => {
+        const aStrong = moods.includes(a.mood) ? 0 : 1;
+        const bStrong = moods.includes(b.mood) ? 0 : 1;
+        if (aStrong !== bStrong) return aStrong - bStrong;
+        if (flavor) {
+          const aFlav = a.flavor === flavor ? 0 : 1;
+          const bFlav = b.flavor === flavor ? 0 : 1;
+          if (aFlav !== bFlav) return aFlav - bFlav;
+        }
+        return a.ingredients.length - b.ingredients.length;
+      })[0];
+    if (house) {
+      candidates.push({
+        ...house, kind: "house",
+        kindLabel: "house blend",
       });
     }
   } else {
@@ -406,7 +456,12 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
       const flavorTradition = BLENDS
         .filter(b => b.tradition && blendMatchesFlavor(b, flavor) &&
           !candidates.some(c => c.name === b.name))
-        .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
+        .sort((a, b) => {
+          const aStrong = a.flavor === flavor ? 0 : 1;
+          const bStrong = b.flavor === flavor ? 0 : 1;
+          if (aStrong !== bStrong) return aStrong - bStrong;
+          return a.ingredients.length - b.ingredients.length;
+        })[0];
       if (flavorTradition) {
         candidates.push({
           ...flavorTradition, kind: "tradition",
@@ -417,11 +472,33 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
       const flavorExperimental = BLENDS
         .filter(b => b.experimental && blendMatchesFlavor(b, flavor) &&
           !candidates.some(c => c.name === b.name))
-        .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
+        .sort((a, b) => {
+          const aStrong = a.flavor === flavor ? 0 : 1;
+          const bStrong = b.flavor === flavor ? 0 : 1;
+          if (aStrong !== bStrong) return aStrong - bStrong;
+          return a.ingredients.length - b.ingredients.length;
+        })[0];
       if (flavorExperimental) {
         candidates.push({
           ...flavorExperimental, kind: "experimental",
           kindLabel: "Herbanium experiment",
+        });
+      }
+      // House blends matching the chosen flavor.
+      const flavorHouse = BLENDS
+        .filter(b => !b.tradition && !b.experimental &&
+          blendMatchesFlavor(b, flavor) &&
+          !candidates.some(c => c.name === b.name))
+        .sort((a, b) => {
+          const aStrong = a.flavor === flavor ? 0 : 1;
+          const bStrong = b.flavor === flavor ? 0 : 1;
+          if (aStrong !== bStrong) return aStrong - bStrong;
+          return a.ingredients.length - b.ingredients.length;
+        })[0];
+      if (flavorHouse) {
+        candidates.push({
+          ...flavorHouse, kind: "house",
+          kindLabel: "house blend",
         });
       }
     }
@@ -430,10 +507,12 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
   // Final order: pure-tea steeps first, mixes after. The kindLabel still
   // tells the user *what* each candidate is; the position tells them
   // how simple it is. A single-ingredient match always rises to the top
-  // whether it's the primary, a tradition, or an experiment.
+  // whether it's the primary, a tradition, an experiment, or a house
+  // blend. Cap at 5 so all five buckets (primary, accent, tradition,
+  // experimental, house) can coexist when each finds a hit.
   return candidates
     .sort((a, b) => a.ingredients.length - b.ingredients.length)
-    .slice(0, 4);
+    .slice(0, 5);
 }
 
 /* ──────────────────────────────────────────────────────────────

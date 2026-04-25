@@ -560,6 +560,93 @@ const BLENDS = [
     style: "low-temp",
     effects: [["focus", 4], ["uplifting", 3]],
   },
+
+  // ── Sweet-spot customs ────────────────────────────────────
+  // Hand-tuned so every lead's preferred temp AND time ranges
+  // intersect cleanly. The brewing card opens at the center of the
+  // shared window; no warnings should fire on first paint.
+
+  {
+    id: "plumtide",
+    name: "Plumtide",
+    subtitle: "rose petals over hibiscus tart, chamomile underneath",
+    ingredients: [
+      { id: "rose", g: 0.8 },
+      { id: "hibiscus", g: 0.8 },
+      { id: "chamomile", g: 0.6 },
+    ],
+    tempC: 95, timeS: 300, ml: 250,
+    mood: "calm", flavor: "fruity",
+    public: true,
+    effects: [["calm", 3], ["soothing", 3], ["cooling", 2]],
+  },
+  {
+    id: "honeyed-hush",
+    name: "Honeyed Hush",
+    subtitle: "linden and chamomile honey, lemon balm in the corner",
+    ingredients: [
+      { id: "chamomile", g: 1.0 },
+      { id: "linden", g: 0.8 },
+      { id: "lemonbalm", g: 0.6 },
+    ],
+    tempC: 95, timeS: 300, ml: 250,
+    mood: "soothing", flavor: "honeyed",
+    public: true,
+    effects: [["soothing", 4], ["calm", 4], ["sleepy", 2]],
+  },
+  {
+    id: "citrine",
+    name: "Citrine",
+    subtitle: "two Melissa cousins, no caffeine to wear off",
+    ingredients: [
+      { id: "lemongrass", g: 1.0 },
+      { id: "lemonbalm", g: 1.0 },
+    ],
+    tempC: 95, timeS: 300, ml: 250,
+    mood: "uplifting", flavor: "citrus",
+    public: true,
+    effects: [["uplifting", 4], ["calm", 3], ["cooling", 2]],
+  },
+  {
+    id: "plumcake",
+    name: "Plumcake",
+    subtitle: "Cederberg red sweetened with vanilla bean — pudding without pudding",
+    ingredients: [
+      { id: "rooibos", g: 1.5 },
+      { id: "vanilla", g: 0.4 },
+    ],
+    tempC: 100, timeS: 360, ml: 250,
+    mood: "comfort", flavor: "sweet",
+    public: true,
+    effects: [["soothing", 4], ["comfort", 3], ["warming", 2]],
+  },
+  {
+    id: "gyokuro-properly",
+    name: "Gyokuro, properly",
+    subtitle: "Uji's shaded leaves at 55°C — the slowest, sweetest green",
+    ingredients: [
+      { id: "gyokuro", g: 3.0 },
+    ],
+    tempC: 55, timeS: 120, ml: 100,
+    mood: "focus", flavor: "umami",
+    public: true,
+    tradition: "Japanese",
+    style: "low-temp",
+    effects: [["focus", 5], ["calm", 4], ["energy", 3]],
+  },
+  {
+    id: "crimson-cooler",
+    name: "Crimson Cooler",
+    subtitle: "hibiscus tang with citral lift — the pink summer cup",
+    ingredients: [
+      { id: "hibiscus", g: 1.0 },
+      { id: "lemongrass", g: 0.8 },
+    ],
+    tempC: 98, timeS: 360, ml: 250,
+    mood: "uplifting", flavor: "fruity",
+    public: true,
+    effects: [["uplifting", 3], ["cooling", 3], ["energy", 2]],
+  },
 ];
 
 /* ── Per-mood blend recipes ────────────────────────────────── */

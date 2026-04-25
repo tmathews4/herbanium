@@ -57,7 +57,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   const toggleMood = (m) => {
     setMoods(prev => {
       if (prev.includes(m)) return prev.filter(x => x !== m);
-      if (prev.length >= 3) return [...prev.slice(1), m];
+      if (prev.length >= 4) return [...prev.slice(1), m];
       return [...prev, m];
     });
   };
@@ -65,7 +65,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   const toggleFlavor = (f) => {
     setFlavors(prev => {
       if (prev.includes(f)) return prev.filter(x => x !== f);
-      if (prev.length >= 3) return [...prev.slice(1), f];
+      if (prev.length >= 4) return [...prev.slice(1), f];
       return [...prev, f];
     });
   };
@@ -223,7 +223,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                      moods.length === 0 ? "pick one or two" :
                      moods.length === 1 ? "add a second to combine" :
                      moods.length === 2 ? "2 selected · pairs well" :
-                     "3 selected · at the limit"}
+                     moods.length === 3 ? "3 selected · adding nuance" :
+                     "4 selected · at the limit"}
                   </span>
                 </div>
                 <div style={{ marginTop: 10 }}>
