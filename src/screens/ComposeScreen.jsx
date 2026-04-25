@@ -854,12 +854,16 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                 </div>
               ) : (
                 catVisible.map((b, i) => {
+                  // Tom Foolery is the one experimental treated as a permanent
+                  // catalogue staple — Herbanium's house signature, undeletable.
+                  const isHouseStaple = b.id === "exp-tom-foolery";
                   const author = b.tradition
-                    || (b.synthetic ? "algorithmic experiment"
+                    || (isHouseStaple ? "Herbanium house"
+                       : b.synthetic ? "algorithmic experiment"
                        : b.id?.startsWith("local-") ? "your composition"
                        : b.experimental ? "Herbanium experiment"
                        : null);
-                  const canDelete = !b.tradition && deleteBlend;
+                  const canDelete = !b.tradition && !isHouseStaple && deleteBlend;
                   return (
                     <div key={b.id} style={{ position: "relative" }}>
                       <BlendListRow
