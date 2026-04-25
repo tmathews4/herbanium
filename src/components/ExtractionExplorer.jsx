@@ -68,25 +68,11 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
     }}>
       {/* Header */}
       <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "baseline",
         marginBottom: 14,
+        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
+        textTransform: "uppercase", color: theme.ash, fontWeight: 600,
       }}>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: theme.ash, fontWeight: 600,
-        }}>
-          Explore the brew
-        </div>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em",
-          textTransform: "uppercase", color: theme.terra,
-          padding: "2px 8px",
-          border: `1px solid ${theme.terra}`,
-          borderRadius: 999,
-          opacity: 0.7,
-        }}>
-          experimental
-        </div>
+        Explore the brew
       </div>
 
       {/* Temperature slider */}

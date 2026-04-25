@@ -402,6 +402,205 @@ export const EXTRACTION_PROFILES = {
       effects: [["comfort", 4], ["settle", 3], ["bitterness", 1]],
       character: "Deep extraction. Mineral depth emerges — meditative, grounding." },
   ],
+
+  // ─── Adaptogens & roots ─────────────────────────────────────
+  ashwagandha: [
+    { tempC: 95,  timeS: 600,  flavors: ["earthy", "musty"],
+      effects: [["grounding", 2], ["calm", 2]],
+      character: "Light ashwagandha — gentle root warmth, faint musk." },
+    { tempC: 98,  timeS: 900,  flavors: ["earthy", "musty", "bitter", "woody"],
+      effects: [["grounding", 3], ["calm", 3], ["sleepy", 2]],
+      character: "The standard kshir-style cup. Full root depth, the classic adaptogenic settle." },
+    { tempC: 100, timeS: 1200, flavors: ["earthy", "musty", "bitter", "woody"],
+      effects: [["grounding", 4], ["calm", 3], ["sleepy", 3], ["bitterness", 2]],
+      character: "Long decoction. Maximum withanolide pull — deep grounding, distinctly bitter." },
+  ],
+
+  turmeric: [
+    { tempC: 95,  timeS: 600, flavors: ["earthy", "musky"],
+      effects: [["warming", 2], ["comfort", 1]],
+      character: "Light turmeric — golden color, gentle warmth, mild musk." },
+    { tempC: 98,  timeS: 750, flavors: ["earthy", "bitter", "musky", "woody"],
+      effects: [["warming", 3], ["comfort", 2], ["settle", 2]],
+      character: "The standard cup. Full curcumin extraction — pair with fat and pepper for absorption." },
+    { tempC: 100, timeS: 900, flavors: ["earthy", "bitter", "musky", "woody"],
+      effects: [["warming", 3], ["comfort", 2], ["settle", 2], ["bitterness", 2]],
+      character: "Long simmer. Color deepens; the bitter side surfaces." },
+  ],
+
+  "black-pepper": [
+    { tempC: 95,  timeS: 300, flavors: ["pungent", "warm"],
+      effects: [["warming", 2], ["settle", 2]],
+      character: "Quick pepper — sharp aromatic, faint heat." },
+    { tempC: 98,  timeS: 600, flavors: ["pungent", "warm", "earthy", "woody"],
+      effects: [["warming", 3], ["settle", 3]],
+      character: "The chai cup. Full piperine — bright pungent edge, the absorption-multiplier role." },
+    { tempC: 100, timeS: 900, flavors: ["pungent", "warm", "earthy", "woody"],
+      effects: [["warming", 3], ["settle", 3], ["bitterness", 1]],
+      character: "Long extraction. Heat lingers; piperine pushes into bite." },
+  ],
+
+  "licorice-root": [
+    { tempC: 95,  timeS: 300, flavors: ["sweet", "anise"],
+      effects: [["comfort", 2]],
+      character: "Light licorice — sweet root water, anise on the lift." },
+    { tempC: 98,  timeS: 600, flavors: ["sweet", "anise", "woody", "earthy"],
+      effects: [["comfort", 3], ["settle", 2]],
+      character: "The standard cup. Full glycyrrhizin sweetness — the harmonizer's work." },
+    { tempC: 100, timeS: 900, flavors: ["sweet", "anise", "woody", "earthy", "bitter"],
+      effects: [["comfort", 4], ["settle", 2], ["bitterness", 1]],
+      character: "Long extraction. Sweetness deepens — respect the dose ceiling." },
+  ],
+
+  // ─── True teas (new) ────────────────────────────────────────
+  matcha: [
+    { tempC: 70, timeS: 15, flavors: ["umami", "sweet"],
+      effects: [["focus", 3], ["calm", 2]],
+      character: "Light usucha — frothy and gentle, the morning bowl." },
+    { tempC: 75, timeS: 20, flavors: ["umami", "vegetal", "grassy", "sweet"],
+      effects: [["focus", 4], ["energy", 3], ["calm", 3]],
+      character: "The standard whisk. Full umami body, balanced focus." },
+    { tempC: 80, timeS: 30, flavors: ["umami", "vegetal", "grassy", "sweet", "oceanic"],
+      effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 1]],
+      character: "Koicha-strong. Thick and intense; bitterness edges in." },
+  ],
+
+  genmaicha: [
+    { tempC: 70, timeS: 60,  flavors: ["toasted", "nutty"],
+      effects: [["comfort", 2], ["calm", 2]],
+      character: "Tea-forward genmaicha — sencha leads, the rice whispers." },
+    { tempC: 78, timeS: 120, flavors: ["toasted", "nutty", "grassy", "sweet"],
+      effects: [["comfort", 3], ["calm", 3], ["settle", 2]],
+      character: "The standard cup. Toasted rice and grass in balance." },
+    { tempC: 85, timeS: 180, flavors: ["toasted", "nutty", "grassy", "sweet"],
+      effects: [["comfort", 3], ["calm", 3], ["settle", 2], ["bitterness", 1]],
+      character: "Rice-forward. The roasted side dominates; faint tannic edge." },
+  ],
+
+  // ─── Caffeinated herbal ─────────────────────────────────────
+  "yerba-mate": [
+    { tempC: 70, timeS: 60,  flavors: ["earthy", "grassy"],
+      effects: [["energy", 3], ["focus", 2]],
+      character: "First fill — bright and herbal, the gentle wake." },
+    { tempC: 78, timeS: 180, flavors: ["earthy", "grassy", "herbaceous", "bitter"],
+      effects: [["energy", 4], ["focus", 3], ["settle", 2]],
+      character: "The classic gourd cup. Full mate — the durative caffeine pull." },
+    { tempC: 85, timeS: 300, flavors: ["earthy", "grassy", "herbaceous", "bitter", "smoky"],
+      effects: [["energy", 4], ["focus", 3], ["bitterness", 2]],
+      character: "Pushed long. Saponins surface — tongue-coating bitter." },
+  ],
+
+  // ─── Sleep & calming herbs (new) ────────────────────────────
+  valerian: [
+    { tempC: 85, timeS: 600, flavors: ["earthy", "musky"],
+      effects: [["calm", 3], ["sleepy", 2]],
+      character: "Light valerian — the funk shows but stays gentle." },
+    { tempC: 90, timeS: 750, flavors: ["earthy", "musky", "pungent", "bitter"],
+      effects: [["calm", 4], ["sleepy", 4]],
+      character: "The standard cup. Full valerenic acid — the deep sedation register." },
+    { tempC: 95, timeS: 900, flavors: ["earthy", "musky", "pungent", "bitter", "woody"],
+      effects: [["calm", 4], ["sleepy", 5], ["bitterness", 2]],
+      character: "Maximum extraction. The cheese-funk register — do not drive." },
+  ],
+
+  linden: [
+    { tempC: 85, timeS: 300, flavors: ["honey", "floral"],
+      effects: [["calm", 2], ["sleepy", 1]],
+      character: "Light linden — soft honey-floral, just the perfume." },
+    { tempC: 90, timeS: 450, flavors: ["honey", "citrus", "floral", "sweet"],
+      effects: [["calm", 3], ["sleepy", 2], ["comfort", 2]],
+      character: "The standard tisane. Full honey-citrus body, the European pediatric cup." },
+    { tempC: 95, timeS: 600, flavors: ["honey", "citrus", "floral", "sweet"],
+      effects: [["calm", 4], ["sleepy", 3], ["comfort", 3], ["bitterness", 1]],
+      character: "Pushed. The green-leaf side emerges; gentle astringency." },
+  ],
+
+  // ─── Immune-support florals ─────────────────────────────────
+  echinacea: [
+    { tempC: 90,  timeS: 300, flavors: ["earthy", "grassy"],
+      effects: [["comfort", 1]],
+      character: "Light echinacea — a gentle herbal wash." },
+    { tempC: 95,  timeS: 600, flavors: ["earthy", "grassy"],
+      effects: [["comfort", 2], ["settle", 1]],
+      character: "The standard cup. Alkamides surface — that distinctive tongue tingle." },
+    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "bitter"],
+      effects: [["comfort", 2], ["bitterness", 1]],
+      character: "Pushed. Tingling intensifies; faint bitter edge." },
+  ],
+
+  elderflower: [
+    { tempC: 85, timeS: 300, flavors: ["floral", "fruity"],
+      effects: [["comfort", 2]],
+      character: "Light elderflower — delicate muscat aromatics." },
+    { tempC: 90, timeS: 450, flavors: ["floral", "muscatel", "fruity", "sweet"],
+      effects: [["comfort", 3], ["uplifting", 2]],
+      character: "The standard cup. Full lychee-muscat lift — the European cold-care." },
+    { tempC: 95, timeS: 600, flavors: ["floral", "muscatel", "fruity", "sweet"],
+      effects: [["comfort", 3], ["uplifting", 2], ["bitterness", 1]],
+      character: "Steeped longer. Aroma deepens; faint astringency." },
+  ],
+
+  // ─── Mineral-rich Western herbals ───────────────────────────
+  nettle: [
+    { tempC: 95,  timeS: 300, flavors: ["earthy", "grassy"],
+      effects: [["comfort", 2]],
+      character: "Light nettle — green and mineral, a quiet spring tonic." },
+    { tempC: 98,  timeS: 600, flavors: ["earthy", "grassy", "mineral", "vegetal"],
+      effects: [["comfort", 3], ["settle", 2]],
+      character: "The standard cup. Full mineral pull, the daily green." },
+    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "mineral", "vegetal", "sweet"],
+      effects: [["comfort", 3], ["settle", 2], ["bitterness", 1]],
+      character: "Long-infused. Mineral depth maxes out; faint bitter edge." },
+  ],
+
+  "dandelion-root": [
+    { tempC: 95,  timeS: 600,  flavors: ["caramel", "nutty"],
+      effects: [["settle", 2], ["comfort", 1]],
+      character: "Light dandelion — toasted root warmth, gentle bittersweet." },
+    { tempC: 98,  timeS: 1200, flavors: ["caramel", "nutty", "bittersweet", "earthy"],
+      effects: [["settle", 3], ["comfort", 2]],
+      character: "The standard cup. The caffeine-free coffee — full roasted depth." },
+    { tempC: 100, timeS: 1800, flavors: ["caramel", "nutty", "bittersweet", "earthy"],
+      effects: [["settle", 3], ["comfort", 2], ["bitterness", 2]],
+      character: "Long decoction. Coffee territory; pleasantly bitter." },
+  ],
+
+  "dandelion-leaf": [
+    { tempC: 90,  timeS: 300, flavors: ["grassy", "fresh"],
+      effects: [["settle", 2]],
+      character: "Light dandelion leaf — bright green, mild bitter." },
+    { tempC: 95,  timeS: 600, flavors: ["grassy", "fresh", "mineral", "vegetal"],
+      effects: [["settle", 3], ["cooling", 2]],
+      character: "The standard cup. Full bitter-green tonic, the catalog's potassium-sparing diuretic." },
+    { tempC: 100, timeS: 900, flavors: ["bitter", "grassy", "mineral", "vegetal"],
+      effects: [["settle", 3], ["cooling", 2], ["bitterness", 2]],
+      character: "Pushed long. Bitter dominates; the spring greens turn medicinal." },
+  ],
+
+  // ─── Mushrooms ──────────────────────────────────────────────
+  reishi: [
+    { tempC: 95,  timeS: 1800, flavors: ["earthy", "woody"],
+      effects: [["calm", 2], ["sleepy", 1]],
+      character: "Short reishi — woody-earthy infusion, the bitter held back." },
+    { tempC: 98,  timeS: 3600, flavors: ["earthy", "woody", "bitter", "mushroomy"],
+      effects: [["calm", 3], ["sleepy", 3], ["comfort", 2]],
+      character: "The standard decoction. Full Lingzhi — the An Shen tradition." },
+    { tempC: 100, timeS: 7200, flavors: ["earthy", "woody", "bitter", "mushroomy"],
+      effects: [["calm", 4], ["sleepy", 4], ["comfort", 3], ["bitterness", 3]],
+      character: "Two-hour decoction. Maximum triterpene pull — deeply bitter and grounding." },
+  ],
+
+  "lions-mane": [
+    { tempC: 90,  timeS: 600,  flavors: ["sweet", "umami"],
+      effects: [["focus", 2]],
+      character: "Light lion's mane — gentle, almost broth-like." },
+    { tempC: 95,  timeS: 1200, flavors: ["sweet", "umami", "earthy", "nutty"],
+      effects: [["focus", 3], ["comfort", 2]],
+      character: "The standard cup. The most palatable mushroom — umami and quietly nourishing." },
+    { tempC: 100, timeS: 1800, flavors: ["sweet", "umami", "earthy", "nutty"],
+      effects: [["focus", 3], ["comfort", 2], ["bitterness", 1]],
+      character: "Long-extracted. Earthy depth surfaces; the nootropic register." },
+  ],
 };
 
 /* ──────────────────────────────────────────────────────────────
