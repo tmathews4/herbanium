@@ -17,7 +17,7 @@ import {
   BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
 } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
-import { iconBtn } from "../helpers/misc";
+import { getBlend, iconBtn } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -692,34 +692,38 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
       )}
 
       {mode === "apothecary" && (() => {
-        // Shelf is your-personal-stuff: saved/traditional/experimental
-        // blends in Blends, your check-in history in Journal.
-        const saved = BLENDS.filter(b => savedBlendIds.has(b.id));
+        // Shelf is your-personal-stuff: blends you've brewed at least
+        // once plus your favorites in Blends, the app's curated recipes
+        // in Catalogue, and check-ins in Journal.
         const traditional = BLENDS.filter(b => b.tradition);
         const experimental = BLENDS.filter(b => b.experimental);
         const yourSessions = (sessions || []).filter(s => s.who === "you");
 
+        const brewedIds = new Set(yourSessions.map(s => s.blendId).filter(Boolean));
+        const favSet = favoriteBlendIds || new Set();
+        const personalIds = new Set([...brewedIds, ...favSet]);
+        const saved = [...personalIds]
+          .map(id => getBlend(id))
+          .filter(Boolean);
+
         let visible;
         let emptyMsg;
-        // Blends sub-tab is your-personal: filters operate on saved only.
+        // Blends sub-tab = brewed-at-least-once ∪ favorites.
         if (apothecaryFilter === "all") {
           visible = saved;
-          emptyMsg = "Your Shelf is empty. Save blends from Vibe, Blend, or the Catalogue to see them here.";
+          emptyMsg = "Your Shelf is empty. Brew a cup or favorite a blend from the Catalogue to see it here.";
         } else if (apothecaryFilter === "favorites") {
-          const favSet = favoriteBlendIds || new Set();
           visible = saved.filter(b => favSet.has(b.id));
-          emptyMsg = "No favorites yet. Tap the heart on a saved blend to mark it as a favorite.";
+          emptyMsg = "No favorites yet. Tap the heart on a blend to mark it as a favorite.";
         } else if (apothecaryFilter === "what worked") {
           const wonIds = new Set(
-            sessions
-              .filter(s => s.who === "you" && (s.taste ?? 0) >= 4)
-              .map(s => s.blendId)
+            yourSessions.filter(s => (s.taste ?? 0) >= 4).map(s => s.blendId)
           );
           visible = saved.filter(b => wonIds.has(b.id));
-          emptyMsg = "No saved blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
+          emptyMsg = "No blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
         } else {
           visible = saved.filter(b => b.mood === apothecaryFilter);
-          emptyMsg = `Nothing saved matches ${apothecaryFilter} yet. Try composing one.`;
+          emptyMsg = `Nothing on your shelf matches ${apothecaryFilter} yet. Try brewing one.`;
         }
 
         const subTabHeader = (
