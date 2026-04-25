@@ -344,11 +344,10 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
-      {/* Predicted profile — mood (effect bars) and taste (flavor pills)
-          in a side-by-side row. Each column hides itself when its
-          dataset is empty, so a single-axis recipe just shows one
-          column at full width. Both filter zero-strength entries so
-          ghost rows don't leak through slider motion. */}
+      {/* Predicted profile — taste (flavor pills) on top, mood (effect
+          bars) below. Either section hides itself when its dataset is
+          empty. Both filter zero-strength entries so ghost rows don't
+          leak through slider motion. */}
       {(() => {
         const visibleEffects = (brew.effects || []).filter(([, n]) =>
           Math.round((n || 0) * 10) / 10 > 0
@@ -367,100 +366,93 @@ export const BlendExtractionExplorer = ({
 
         return (
           <div style={{ marginBottom: 14 }}>
-            <div style={{
-              display: "flex", gap: 16, alignItems: "flex-start",
-              flexWrap: "wrap",
-            }}>
-              {visibleEffects.length > 0 && (
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  {sectionLabel("predicted mood")}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {visibleEffects.map(([tag, n], i) => {
-                      const known = !!EFFECT_DESCRIPTIONS[tag];
-                      const active = openEffect === tag;
-                      const color =
-                        tag === "bitterness" ? theme.terra
-                        : i === 0           ? theme.sage
-                        : i === 1           ? theme.ochre
-                        : theme.sky;
-                      return (
-                        <div
-                          key={tag}
-                          role={known ? "button" : undefined}
-                          tabIndex={known ? 0 : undefined}
-                          onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
-                          onKeyDown={known ? (e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              setOpenEffect(prev => prev === tag ? null : tag);
-                            }
-                          } : undefined}
-                          style={{
-                            padding: "2px 4px", borderRadius: 4,
-                            background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                            cursor: known ? "pointer" : "default",
-                            outline: "none",
-                          }}
-                        >
-                          <EffectBar label={tag} value={n} color={color} />
-                        </div>
-                      );
-                    })}
-                  </div>
+            {visibleFlavors.length > 0 && (
+              <div style={{ marginBottom: visibleEffects.length > 0 ? 14 : 0 }}>
+                {sectionLabel("predicted taste")}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {visibleFlavors.map(([name, strength]) => {
+                    const known = !!FLAVOR_DESCRIPTIONS[name];
+                    const active = openFlavor === name;
+                    const intensity = Math.max(0.35, Math.min(1, strength / 5));
+                    return (
+                      <button
+                        key={name}
+                        onClick={() => known && setOpenFlavor(prev => prev === name ? null : name)}
+                        disabled={!known}
+                        style={{
+                          fontFamily: ff.sans, fontSize: 10.5,
+                          color: active ? theme.cream : theme.terra, letterSpacing: "0.04em",
+                          padding: "3px 9px",
+                          border: `1px solid ${theme.terra}`, borderRadius: 999,
+                          background: active ? theme.terra : "transparent",
+                          opacity: active ? 1 : intensity,
+                          cursor: known ? "pointer" : "default",
+                          transition: "all 0.15s ease",
+                        }}
+                      >{name}</button>
+                    );
+                  })}
                 </div>
-              )}
-              {visibleFlavors.length > 0 && (
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  {sectionLabel("predicted taste")}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                    {visibleFlavors.map(([name, strength]) => {
-                      const known = !!FLAVOR_DESCRIPTIONS[name];
-                      const active = openFlavor === name;
-                      const intensity = Math.max(0.35, Math.min(1, strength / 5));
-                      return (
-                        <button
-                          key={name}
-                          onClick={() => known && setOpenFlavor(prev => prev === name ? null : name)}
-                          disabled={!known}
-                          style={{
-                            fontFamily: ff.sans, fontSize: 10.5,
-                            color: active ? theme.cream : theme.terra, letterSpacing: "0.04em",
-                            padding: "3px 9px",
-                            border: `1px solid ${theme.terra}`, borderRadius: 999,
-                            background: active ? theme.terra : "transparent",
-                            opacity: active ? 1 : intensity,
-                            cursor: known ? "pointer" : "default",
-                            transition: "all 0.15s ease",
-                          }}
-                        >{name}</button>
-                      );
-                    })}
+                {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
+                  <div style={{ marginTop: 10 }}>
+                    <VocabInfoCard
+                      term={openFlavor}
+                      summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
+                      body={FLAVOR_DESCRIPTIONS[openFlavor].body}
+                      tone="terra"
+                      onClose={() => setOpenFlavor(null)}
+                    />
                   </div>
-                </div>
-              )}
-            </div>
-            {/* Description popups render below the row so they're always
-                full-width and don't lopside the columns. */}
-            {openEffect && EFFECT_DESCRIPTIONS[openEffect] && (
-              <div style={{ marginTop: 10 }}>
-                <VocabInfoCard
-                  term={openEffect}
-                  summary={EFFECT_DESCRIPTIONS[openEffect].summary}
-                  body={EFFECT_DESCRIPTIONS[openEffect].body}
-                  tone="sage"
-                  onClose={() => setOpenEffect(null)}
-                />
+                )}
               </div>
             )}
-            {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
-              <div style={{ marginTop: 10 }}>
-                <VocabInfoCard
-                  term={openFlavor}
-                  summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
-                  body={FLAVOR_DESCRIPTIONS[openFlavor].body}
-                  tone="terra"
-                  onClose={() => setOpenFlavor(null)}
-                />
+            {visibleEffects.length > 0 && (
+              <div>
+                {sectionLabel("predicted mood")}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {visibleEffects.map(([tag, n], i) => {
+                    const known = !!EFFECT_DESCRIPTIONS[tag];
+                    const active = openEffect === tag;
+                    const color =
+                      tag === "bitterness" ? theme.terra
+                      : i === 0           ? theme.sage
+                      : i === 1           ? theme.ochre
+                      : theme.sky;
+                    return (
+                      <div
+                        key={tag}
+                        role={known ? "button" : undefined}
+                        tabIndex={known ? 0 : undefined}
+                        onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
+                        onKeyDown={known ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setOpenEffect(prev => prev === tag ? null : tag);
+                          }
+                        } : undefined}
+                        style={{
+                          padding: "2px 4px", borderRadius: 4,
+                          background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                          cursor: known ? "pointer" : "default",
+                          outline: "none",
+                        }}
+                      >
+                        <EffectBar label={tag} value={n} color={color} />
+                      </div>
+                    );
+                  })}
+                </div>
+                {openEffect && EFFECT_DESCRIPTIONS[openEffect] && (
+                  <div style={{ marginTop: 10 }}>
+                    <VocabInfoCard
+                      term={openEffect}
+                      summary={EFFECT_DESCRIPTIONS[openEffect].summary}
+                      body={EFFECT_DESCRIPTIONS[openEffect].body}
+                      tone="sage"
+                      onClose={() => setOpenEffect(null)}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
