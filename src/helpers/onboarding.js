@@ -74,7 +74,6 @@ const FALLBACK_FLAVOR_BY_MOOD = {
   energy:    "spiced",
   sleepy:    "honeyed",
   comfort:   "sweet",
-  settle:    "minty",
   soothing:  "honeyed",
   warming:   "spiced",
   cooling:   "minty",

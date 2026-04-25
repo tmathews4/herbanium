@@ -27,7 +27,7 @@ export const SEED_MODES = {
     sessions: [
       // Your cups, most recent first
       { id: "y1", who: "you", blendId: "dusk",    ago: "2h",    intent: "wound up",   actual: "calm",    taste: 4, note: "Honeyed. Slept within 40 min." },
-      { id: "y2", who: "you", blendId: "hearth",  ago: "yest.", intent: "rained-on",  actual: "settle",  taste: 4, note: "" },
+      { id: "y2", who: "you", blendId: "hearth",  ago: "yest.", intent: "rained-on",  actual: "digestive",  taste: 4, note: "" },
       { id: "y3", who: "you", blendId: "morning", ago: "2d",    intent: "slow",       actual: "energy",  taste: 5, note: "" },
       { id: "y4", who: "you", blendId: "study",   ago: "3d",    intent: "scattered",  actual: "focus",   taste: 4, note: "Good clarity." },
       { id: "y5", who: "you", blendId: "dusk",    ago: "4d",    intent: "keyed up",   actual: "calm",    taste: 5, note: "" },
@@ -49,7 +49,7 @@ export const SEED_MODES = {
     description: "a couple weeks in — a handful of cups and one saved blend",
     sessions: [
       { id: "my1", who: "you", blendId: "dusk",   ago: "3h",    intent: "wound up", actual: "calm",    taste: 4, note: "Honeyed." },
-      { id: "my2", who: "you", blendId: "dusk",   ago: "yest.", intent: "keyed up", actual: "settle",  taste: 5, note: "" },
+      { id: "my2", who: "you", blendId: "dusk",   ago: "yest.", intent: "keyed up", actual: "digestive",  taste: 5, note: "" },
       { id: "my3", who: "you", blendId: "hearth", ago: "3d",    intent: "cold",     actual: "comfort", taste: 3, note: "" },
     ],
     savedBlendIds: ["dusk"],

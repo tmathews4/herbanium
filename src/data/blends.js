@@ -15,10 +15,10 @@
    ────────────────────────────────────────────────────────────── */
 
 const MOODS = [
-  "calm", "focus", "energy", "sleepy", "comfort", "settle",
-  // Effect-axis moods — these don't have hand-curated PAIR_BLENDS, but
-  // MOOD_BLENDS gives each a signature single-mood recipe and the
-  // candidate resolver also matches blends whose effects contain them.
+  "calm", "focus", "energy", "sleepy", "comfort",
+  // Effect-axis moods — alongside the original five, the candidate
+  // resolver also matches blends whose effects contain them, and
+  // MOOD_BLENDS gives each a signature single-mood recipe.
   "soothing", "warming", "cooling", "digestive", "grounding", "uplifting",
 ];
 const FLAVORS = [
@@ -401,11 +401,6 @@ const MOOD_BLENDS = {
     temp: 95, time: 360,
     effects: [["sleepy", 4], ["calm", 4]],
   },
-  settle: {
-    ings: [{ id: "lemonbalm", g: 1.2 }, { id: "fennel", g: 0.5 }, { id: "chamomile", g: 0.6 }],
-    temp: 95, time: 300,
-    effects: [["digestive", 4], ["calm", 3]],
-  },
 
   // Effect-axis moods. Each is a single-mood signature recipe; the
   // resolver uses these when the user picks one of the new moods alone.
@@ -478,7 +473,7 @@ const PAIR_BLENDS = {
     temp: 95, time: 420,
     effects: [["calm", 4], ["sleepy", 4]],
   },
-  "calm+settle": {
+  "calm+digestive": {
     name: "Threshold",
     subtitle: "lemon balm catches both ends",
     ings: [{ id: "lemonbalm", g: 1.4 }, { id: "chamomile", g: 0.8 }, { id: "rose", g: 0.2 }],
@@ -523,7 +518,7 @@ const PAIR_BLENDS = {
     temp: 100, time: 360,
     effects: [["sleepy", 3], ["soothing", 4], ["warming", 2]],
   },
-  "focus+settle": {
+  "focus+digestive": {
     name: "Clear Channel",
     subtitle: "tulsi at the desk; lemon balm at the gut",
     ings: [
@@ -535,21 +530,21 @@ const PAIR_BLENDS = {
     style: "low-temp",
     effects: [["focus", 3], ["digestive", 3], ["uplifting", 3]],
   },
-  "settle+sleepy": {
+  "digestive+sleepy": {
     name: "Soft Landing",
     subtitle: "fennel-anethole and apigenin",
     ings: [{ id: "chamomile", g: 1.4 }, { id: "fennel", g: 0.4 }, { id: "lemonbalm", g: 0.8 }, { id: "lavender", g: 0.3 }],
     temp: 95, time: 360,
     effects: [["sleepy", 3], ["digestive", 4], ["calm", 3]],
   },
-  "comfort+settle": {
+  "comfort+digestive": {
     name: "Lamplight",
     subtitle: "rooibos and lemon balm — the slow return",
     ings: [{ id: "rooibos", g: 1.4 }, { id: "lemonbalm", g: 0.8 }, { id: "rose", g: 0.2 }],
     temp: 100, time: 300,
     effects: [["digestive", 3], ["soothing", 4], ["calm", 2]],
   },
-  "energy+settle": {
+  "energy+digestive": {
     name: "Steady Footing",
     subtitle: "Assam grounded with ginger and lemon balm",
     ings: [{ id: "assam", g: 1.2 }, { id: "lemonbalm", g: 0.6 }, { id: "ginger", g: 0.2 }],
@@ -597,16 +592,15 @@ const FLAVOR_CONFLICTS = [
 // selected flavor's bank, then composes the picks into a name. Roughly
 // 10 words per profile, all in the apothecary-poet register.
 const MOOD_WORDS = {
-  calm:      ["Stillwater", "Hush", "Evensong", "Easeful", "Lull", "Quietude", "Breath", "Soft", "Settle", "Sigh"],
+  calm:      ["Stillwater", "Hush", "Evensong", "Easeful", "Lull", "Quietude", "Breath", "Soft", "Sigh", "Settled"],
   focus:     ["Scriptorium", "Lucid", "Channel", "Study", "Ledger", "Signal", "Clarity", "Sharpen", "Thread", "Compass"],
   energy:    ["Dawn", "Kindling", "Spark", "Current", "Vigor", "Pulse", "Rouse", "Ember", "Wake", "Lift"],
   sleepy:    ["Dusk", "Lullaby", "Drift", "Twilight", "Embers", "Fold", "Slumber", "Veil", "Hush", "Shroud"],
   comfort:   ["Hearth", "Blanket", "Mantle", "Alcove", "Refuge", "Harbor", "Nest", "Well", "Hollow", "Cottage"],
-  settle:    ["Anchor", "Ballast", "Root", "Repose", "Ease", "Grounded", "Stillness", "Lull", "Return", "Quiet"],
   soothing:  ["Balm", "Salve", "Hush", "Mend", "Lullaby", "Sigh", "Softening", "Calm", "Comfort", "Gentling"],
   warming:   ["Ember", "Hearth", "Kindle", "Blaze", "Glow", "Bask", "Banked", "Warmth", "Sundown", "Mantle"],
   cooling:   ["Shade", "Breeze", "Stream", "Glade", "Frost", "Brisk", "Dew", "Mountain", "Current", "Exhale"],
-  digestive: ["Ease", "Flow", "Mend", "Clear", "Gentle", "Harmony", "Smooth", "Settled", "Supper", "After"],
+  digestive: ["Ease", "Flow", "Mend", "Clear", "Gentle", "Harmony", "Smooth", "Anchor", "Repose", "Supper"],
   grounding: ["Anchor", "Root", "Stone", "Foundation", "Depth", "Settled", "Weight", "Hold", "Earth", "Low"],
   uplifting: ["Dawn", "Lift", "Sparkle", "Brighten", "Ascend", "Gleam", "Rise", "Lighten", "Kindle", "Soar"],
 };
@@ -641,12 +635,11 @@ const MOOD_SINGLE_NAMES = {
   energy:    ["Morning Vestment",   "Silk-Road spice on a British black"],
   comfort:   ["Hearth Cup",         "Cederberg red, Persian petals — no leaf to over-steep"],
   sleepy:    ["Threshold of Sleep", "apigenin and linalool, covered cup"],
-  settle:    ["The Settling",       "anethole-GABA, the post-meal cup"],
   // Effect-axis signatures
   soothing:  ["The Quiet Hour",     "Cederberg honey under chamomile — nothing to argue with"],
   warming:   ["Hearth Spice",       "ginger and cinnamon, the kettle's slow heat"],
   cooling:   ["Cool Hour",          "peppermint and spearmint, summer's exhale"],
-  digestive: ["Anethole Settle",    "fennel and peppermint, the post-meal cup"],
+  digestive: ["The Settling",       "anethole-GABA, the post-meal cup of fennel and peppermint"],
   grounding: ["Anchor",             "Yunnan road tea — short pours, deep root"],
   uplifting: ["Brightness",         "citral and Melissa, no caffeine to crash"],
 };

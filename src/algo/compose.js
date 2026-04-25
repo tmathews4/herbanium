@@ -250,12 +250,17 @@ export const FLAVOR_COMPLEMENTS = {
 // Simple mood-neighbor map: when flavor is primary, we can suggest an
 // alternate mood that shares a natural affinity with the user's pick.
 export const MOOD_NEIGHBORS = {
-  calm:    ["sleepy", "settle"],
-  focus:   ["energy", "calm"],
-  energy:  ["focus"],
-  sleepy:  ["calm", "settle"],
-  comfort: ["settle", "calm"],
-  settle:  ["comfort", "calm"],
+  calm:      ["sleepy", "soothing"],
+  focus:     ["energy", "calm", "uplifting"],
+  energy:    ["focus", "warming", "uplifting"],
+  sleepy:    ["calm", "soothing"],
+  comfort:   ["soothing", "calm", "warming"],
+  soothing:  ["comfort", "calm", "sleepy"],
+  warming:   ["comfort", "energy", "grounding"],
+  cooling:   ["digestive", "uplifting", "focus"],
+  digestive: ["cooling", "comfort", "calm"],
+  grounding: ["comfort", "warming", "calm"],
+  uplifting: ["energy", "focus", "cooling"],
 };
 
 // Build a flavor-accent variant — holds mood constant, swaps in an ingredient
@@ -453,7 +458,7 @@ function generateBlendName(moods, flavors, primaryAxis = "feel") {
 // take it over an herbal that scores the same. Falls back to any
 // ingredient when no tea works.
 //
-// Some moods (comfort, settle) aren't expressed by any ingredient
+// Some moods (comfort, digestive) aren't expressed by any ingredient
 // directly — they're emergent from blends. When the direct effect
 // lookup finds nothing, we fall back to MOOD_BLENDS[mood] and pull
 // the heaviest-grams ingredient from the curated single-mood recipe.
@@ -474,7 +479,7 @@ function bestIngredientForMood(mood, exclude, minStrength = 3) {
     });
     return cands[0];
   }
-  // Fallback: emergent-only moods (comfort, settle). Pick the heaviest
+  // Fallback: emergent-only moods (comfort, digestive). Pick the heaviest
   // ingredient from the mood's curated single-mood recipe.
   const blend = MOOD_BLENDS[mood];
   if (!blend) return null;

@@ -41,11 +41,11 @@ const BITTER_SUPPRESSION_BY_SWEET = 0.35;
 
 // Effect synergies — non-linear bonuses when both effects co-present
 // at meaningful strength. Trigger threshold: each component ≥ 1.5.
-// Uses the ingredient-profile vocabulary (`comfort`, `settle`) — when
+// Uses the ingredient-profile vocabulary (`comfort`, `digestive`) — when
 // a profile uses v1 names instead, the matching pair is also covered.
 export const EFFECT_SYNERGIES = [
   { when: ["focus", "calm"],     bonus: { focus: 0.6, calm: 0.4 }, label: "calm focus" },
-  { when: ["warming", "settle"], bonus: { settle: 0.5 },           label: "warming digestive" },
+  { when: ["warming", "digestive"], bonus: { digestive: 0.5 },           label: "warming digestive" },
   { when: ["warming", "digestive"], bonus: { digestive: 0.5 },     label: "warming digestive" },
   { when: ["sleepy", "calm"],    bonus: { sleepy: 0.4 },           label: "deepens sedation" },
   { when: ["calm", "comfort"],   bonus: { comfort: 0.3 },          label: "settled" },

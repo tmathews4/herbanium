@@ -37,7 +37,7 @@ export const STRENGTH_RUBRIC = Object.freeze({
 // introduces a tag outside this set — typo guard for things like
 // "groundding" or "uplift".
 export const CANONICAL_EFFECTS = new Set([
-  "calm", "focus", "energy", "sleepy", "comfort", "settle",
+  "calm", "focus", "energy", "sleepy", "comfort",
   "soothing", "warming", "cooling", "digestive", "grounding", "uplifting",
   // Perception-layer tag — not a chip mood, but legitimately appears
   // in extraction-profile effects when extraction starts to pull

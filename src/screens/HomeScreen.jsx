@@ -38,7 +38,12 @@ const getTimeOfDay = (h) => {
 
 export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, profile, welcomeShown, dismissWelcome }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
-  const favoriteBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
+  // Resolve every saved id through getBlend so user-generated /
+  // LOCAL_BLENDS entries (the algorithmic experimentals seeded at
+  // onboarding) appear in favorites alongside catalog blends.
+  const favoriteBlends = [...savedBlendIds]
+    .map(id => getBlend(id))
+    .filter(Boolean);
   const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;
   const name = profile?.name || "friend";
 
@@ -203,7 +208,7 @@ export const FavoriteCard = ({ b, onTap }) => {
         {b.mood === "comfort" && <Sprig  size={16} c={theme.ochre} />}
         {b.mood === "focus"   && <Leaf   size={16} c={theme.sage} />}
         {b.mood === "sleepy"  && <Flower size={16} c={theme.plum} />}
-        {b.mood === "settle"  && <Sprig  size={16} c={theme.sage} />}
+        {b.mood === "digestive"  && <Sprig  size={16} c={theme.sage} />}
         <span style={{
           fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
           color: theme.ash,

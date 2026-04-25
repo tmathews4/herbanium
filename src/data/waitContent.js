@@ -97,7 +97,7 @@ export const WAIT_POEMS = [
   {
     text: "The old pond —\na frog leaps in,\nsound of the water.",
     attribution: "— Bashō (1686)",
-    tags: ["stillness", "calm", "settle", "focus"],
+    tags: ["stillness", "calm", "digestive", "focus"],
   },
   {
     text: "Over the wintry\nforest, winds howl in rage\nwith no leaves to blow.",
@@ -112,7 +112,7 @@ export const WAIT_POEMS = [
   {
     text: "On a withered branch\na crow has alighted —\nnightfall in autumn.",
     attribution: "— Bashō",
-    tags: ["autumn", "evening", "settle", "solitude"],
+    tags: ["autumn", "evening", "digestive", "solitude"],
   },
   {
     text: "From time to time\nthe clouds give rest\nto the moon-beholders.",
@@ -122,7 +122,7 @@ export const WAIT_POEMS = [
   {
     text: "A caterpillar,\nthis deep in fall —\nstill not a butterfly.",
     attribution: "— Bashō",
-    tags: ["patience", "autumn", "comfort", "settle"],
+    tags: ["patience", "autumn", "comfort", "digestive"],
   },
   {
     text: "The wild geese take flight\nlow along the railroad tracks\nin the moonlit night.",
@@ -142,7 +142,7 @@ export const WAIT_POEMS = [
   {
     text: "Silence is the language of God.\nAll else is poor translation.",
     attribution: "— Rumi",
-    tags: ["stillness", "calm", "settle", "reflection"],
+    tags: ["stillness", "calm", "digestive", "reflection"],
   },
   {
     text: "Be melting snow.\nWash yourself of yourself.",
@@ -155,7 +155,7 @@ export const WAIT_POEMS = [
   {
     text: "To make a prairie it takes a clover and one bee,\nOne clover, and a bee,\nAnd revery.\nThe revery alone will do,\nIf bees are few.",
     attribution: "— Emily Dickinson",
-    tags: ["reflection", "calm", "settle", "solitude", "summer", "chamomile", "rose"],
+    tags: ["reflection", "calm", "digestive", "solitude", "summer", "chamomile", "rose"],
   },
   {
     text: "I'll tell you how the sun rose, —\nA ribbon at a time.",
@@ -165,12 +165,12 @@ export const WAIT_POEMS = [
   {
     text: "The soul selects her own society,\nThen shuts the door;\nOn her divine majority\nObtrude no more.",
     attribution: "— Emily Dickinson",
-    tags: ["solitude", "settle", "stillness", "focus", "reflection"],
+    tags: ["solitude", "digestive", "stillness", "focus", "reflection"],
   },
   {
     text: "Hope is the thing with feathers\nThat perches in the soul,\nAnd sings the tune without the words,\nAnd never stops at all.",
     attribution: "— Emily Dickinson",
-    tags: ["comfort", "hope", "calm", "settle"],
+    tags: ["comfort", "hope", "calm", "digestive"],
   },
   {
     text: "A light exists in spring\nNot present on the year\nAt any other period.\nWhen March is scarcely here",
@@ -181,7 +181,7 @@ export const WAIT_POEMS = [
   {
     text: "Remember me when I am gone away,\nGone far away into the silent land;\nWhen you can no more hold me by the hand,\nNor I half turn to go, yet turning stay.",
     attribution: "— Christina Rossetti",
-    tags: ["reflection", "evening", "settle", "solitude"],
+    tags: ["reflection", "evening", "digestive", "solitude"],
   },
   {
     text: "Silent noon: the fields are fair —\nNoontide's silent everywhere.",
@@ -191,7 +191,7 @@ export const WAIT_POEMS = [
   {
     text: "What are heavy? sea-sand and sorrow:\nWhat are brief? today and tomorrow:\nWhat are frail? spring blossoms and youth:\nWhat are deep? the ocean and truth.",
     attribution: "— Christina Rossetti",
-    tags: ["reflection", "comfort", "settle"],
+    tags: ["reflection", "comfort", "digestive"],
   },
 
   {
@@ -214,19 +214,19 @@ export const WAIT_POEMS = [
   {
     text: "When I heard the learn'd astronomer,\nHow soon unaccountable I became tired and sick,\nTill rising and gliding out I wander'd off by myself,\nIn the mystical moist night-air, and from time to time,\nLook'd up in perfect silence at the stars.",
     attribution: "— Walt Whitman",
-    tags: ["night", "solitude", "settle", "reflection", "stillness"],
+    tags: ["night", "solitude", "digestive", "reflection", "stillness"],
   },
 
   {
     text: "The world is too much with us; late and soon,\nGetting and spending, we lay waste our powers;\nLittle we see in Nature that is ours;\nWe have given our hearts away, a sordid boon!",
     attribution: "— William Wordsworth",
-    tags: ["reflection", "settle", "calm"],
+    tags: ["reflection", "digestive", "calm"],
   },
 
   {
     text: "The rain is falling all around,\nIt falls on field and tree,\nIt rains on the umbrellas here,\nAnd on the ships at sea.",
     attribution: "— Robert Louis Stevenson",
-    tags: ["rain", "comfort", "calm", "settle"],
+    tags: ["rain", "comfort", "calm", "digestive"],
   },
   {
     text: "The world is so full of a number of things,\nI'm sure we should all be as happy as kings.",

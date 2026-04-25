@@ -184,13 +184,12 @@ export default function App() {
   // IDs) since they don't live in BLENDS — the algorithm produced them.
   const [generatedBlends, setGeneratedBlends] = usePersistedState("generatedBlends", []);
 
-  // Hydrate LOCAL_BLENDS from the persisted generated-blends list on
-  // every render so getBlend(id) can resolve them. Cheap to repeat;
-  // LOCAL_BLENDS is a plain object that just gets the same keys
-  // re-assigned.
-  useEffect(() => {
-    for (const b of generatedBlends || []) LOCAL_BLENDS[b.id] = b;
-  }, [generatedBlends]);
+  // Hydrate LOCAL_BLENDS from the persisted generated-blends list
+  // synchronously during render. Doing this in useEffect would leave
+  // LOCAL_BLENDS empty on the first paint, so child components calling
+  // getBlend(id) would miss the user's generated experimentals.
+  // Idempotent — same keys get re-assigned with the same values.
+  for (const b of generatedBlends || []) LOCAL_BLENDS[b.id] = b;
 
   // Onboarding completion handler
   const handleOnboardingComplete = ({ name, timeOfDay, draw, flavors }) => {

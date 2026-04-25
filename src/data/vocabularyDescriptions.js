@@ -56,7 +56,7 @@ export const EFFECT_DESCRIPTIONS = {
     summary: "A wrapped-blanket feeling — soothing without sedating.",
     body: "Maps to the soothing effect. Rooibos and hojicha are the prototypes; vanilla and licorice root round any blend toward this register.",
   },
-  settle: {
+  digestive: {
     summary: "Easing the body, especially the gut.",
     body: "Maps to the digestive effect. Peppermint, fennel, ginger, dandelion root, pu-erh — the post-meal cup across cultures.",
   },

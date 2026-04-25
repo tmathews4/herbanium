@@ -244,7 +244,6 @@ const DRAW_OPTIONS = [
   { key: "energy",    label: "Energy",    note: "lift, the spark to begin" },
   { key: "sleepy",    label: "Sleepy",    note: "the drift toward rest" },
   { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup" },
-  { key: "settle",    label: "Settle",    note: "the post-meal calm" },
   { key: "soothing",  label: "Soothing",  note: "gentle, mending" },
   { key: "warming",   label: "Warming",   note: "ginger-and-cinnamon heat" },
   { key: "cooling",   label: "Cooling",   note: "menthol, summer's exhale" },
