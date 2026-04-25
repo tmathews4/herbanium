@@ -991,35 +991,56 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
     .sort((a, b) => b[1] - a[1]);
 
+  // Effects = mood/feel axis only. Sensory dimensions (bitterness,
+  // sweetness, astringency, tartness, menthol mouth-cooling) live in
+  // `balance` below. TCM-cooling stays here as a mood; menthol mouth-
+  // cooling lives on the balance side.
   const effects = Object.entries(perceivedEffectMap)
     .map(([tag, v]) => [tag, Math.round(v * 10) / 10])
-    .filter(([, v]) => v > 0)
-    .sort((a, b) => {
-      if (a[0] === "bitterness") return 1;
-      if (b[0] === "bitterness") return -1;
-      return b[1] - a[1];
-    });
+    .filter(([tag, v]) => v > 0 && tag !== "bitterness")
+    .sort((a, b) => b[1] - a[1]);
 
-  // The bitterness bar represents *total tannin pressure* — effect
-  // bitterness + flavor bitter + flavor bitterness + flavor astringent
-  // — because that's the sum the perception layer's warning math
-  // checks (bitterLevel + astringentLevel >= 4 → "tannins are taking
-  // over"). Without this, ingredients like gunpowder green can fire
-  // the over-pull warning while the bitterness bar still reads below
-  // its threshold marker — a confusing mismatch.
-  // Done after `effects` is built so this only affects display, not
-  // the warning math (which still uses the original maps).
-  const tanninPressure =
-    (perceivedEffectMap.bitterness || 0) +
-    (perceivedFlavorMap.bitter || 0) +
-    (perceivedFlavorMap.bitterness || 0) +
-    (perceivedFlavorMap.astringent || 0);
-  if (tanninPressure > 0) {
-    const display = Math.round(Math.min(5, tanninPressure) * 10) / 10;
-    const idx = effects.findIndex(([t]) => t === "bitterness");
-    if (idx >= 0) effects[idx] = ["bitterness", display];
-    else effects.push(["bitterness", display]);
-  }
+  // Balance bars — taste-structure axes. Each axis sums any flavor or
+  // effect signals that contribute to it, capped at 5. Bitterness uses
+  // the same total-tannin-pressure formula the warning layer checks, so
+  // the bar can't lag behind the over-pull warning it pairs with.
+  const sumCap = (...vals) => {
+    const total = vals.reduce((a, b) => a + (b || 0), 0);
+    return Math.round(Math.min(5, total) * 10) / 10;
+  };
+  const balance = [];
+  const bitterness = sumCap(
+    perceivedEffectMap.bitterness,
+    perceivedFlavorMap.bitter,
+    perceivedFlavorMap.bitterness,
+    perceivedFlavorMap.astringent,
+  );
+  const sweetness = sumCap(
+    perceivedFlavorMap.sweet,
+    perceivedFlavorMap.honey,
+    perceivedFlavorMap.honeyed,
+    perceivedFlavorMap["honey-sweet"],
+  );
+  const astringency = sumCap(
+    perceivedFlavorMap.astringent,
+    perceivedFlavorMap.tannic,
+  );
+  const tartness = sumCap(
+    perceivedFlavorMap.tart,
+    perceivedFlavorMap.bright,
+    perceivedFlavorMap.cranberry,
+  );
+  const menthol = sumCap(
+    perceivedFlavorMap.cool,
+    perceivedFlavorMap.cooling,
+    perceivedFlavorMap.minty,
+    perceivedFlavorMap.mint,
+  );
+  if (bitterness > 0)   balance.push(["bitterness", bitterness]);
+  if (sweetness > 0)    balance.push(["sweetness", sweetness]);
+  if (astringency > 0)  balance.push(["astringency", astringency]);
+  if (tartness > 0)     balance.push(["tartness", tartness]);
+  if (menthol > 0)      balance.push(["menthol", menthol]);
 
   const rawFlavorTuples = Object.entries(rawFlavors)
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
@@ -1126,6 +1147,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   return {
     effects,
+    balance,
     flavors,
     rawFlavors: rawFlavorTuples,
     synergyTags,

@@ -79,10 +79,27 @@ export const EFFECT_DESCRIPTIONS = {
     body: "Top of the range on both temperature and time. Stronger effect, but less forgiving of leaf quality.",
   },
 
-  // ── Bitterness (flavor by vocabulary, but extraction profiles render it as an effect bar) ──
+  // ── Balance axes — taste-structure dimensions surfaced as gradient
+  // bars in the brewing explorer. Distinct from mood/effect. ──
   bitterness: {
-    summary: "Tongue-back bitter taste from over-extraction.",
-    body: "Catechins and tannins released past their balance point. A signal you've gone too long or too hot. Vocabulary-wise this is a flavor, not an effect — listed here only because the brewing explorer surfaces it on a strength bar.",
+    summary: "Tongue-back bitter taste — total tannin pressure.",
+    body: "Sums effect bitterness with flavor bitter and astringent signals, since the warning math treats them as one axis. Climbs when catechins and tannins release past their balance point — too long or too hot.",
+  },
+  sweetness: {
+    summary: "Natural sugar-without-sugar — amino acids and polysaccharides.",
+    body: "Licorice, rooibos, white tea, vanilla, honey-rich herbs all touch this. Balances bitterness; a sweetness-low / bitterness-high cup is the over-pull register.",
+  },
+  astringency: {
+    summary: "Tongue-drying tannin grip — different from bitter.",
+    body: "Catechins binding to mouth proteins. Strong black teas, over-steeped greens, persimmon-adjacent. Closely tracks bitterness but the sensation lands on the cheeks and tongue surface, not the back of the throat.",
+  },
+  tartness: {
+    summary: "Fruity-acidic lift — bright, lemon-and-cranberry register.",
+    body: "Hibiscus, rosehip, citrus-leaning herbs. Not the same as bitter — tartness is up-front and lifting, where bitterness is back-of-tongue and lingering.",
+  },
+  menthol: {
+    summary: "Mouth-cooling sensation — TRPM8 activation.",
+    body: "Peppermint's menthol is sharp and direct; spearmint's carvone is gentler. Distinct from TCM 'cooling' (which is the felt-temperature mood); menthol is the physical mouthfeel.",
   },
 };
 

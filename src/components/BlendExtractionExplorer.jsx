@@ -352,10 +352,13 @@ export const BlendExtractionExplorer = ({
         const visibleEffects = (brew.effects || []).filter(([, n]) =>
           Math.round((n || 0) * 10) / 10 > 0
         );
+        const visibleBalance = (brew.balance || []).filter(([, n]) =>
+          Math.round((n || 0) * 10) / 10 > 0
+        );
         const visibleFlavors = (brew.flavors || []).filter(([, s]) =>
           Math.round((s || 0) * 10) / 10 > 0
         );
-        if (visibleEffects.length === 0 && visibleFlavors.length === 0) return null;
+        if (visibleEffects.length === 0 && visibleBalance.length === 0 && visibleFlavors.length === 0) return null;
 
         const sectionLabel = (text) => (
           <div style={{
@@ -407,16 +410,15 @@ export const BlendExtractionExplorer = ({
               </div>
             )}
             {visibleEffects.length > 0 && (
-              <div>
+              <div style={{ marginBottom: visibleBalance.length > 0 ? 14 : 0 }}>
                 {sectionLabel("predicted mood")}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {visibleEffects.map(([tag, n], i) => {
                     const known = !!EFFECT_DESCRIPTIONS[tag];
                     const active = openEffect === tag;
                     const color =
-                      tag === "bitterness" ? theme.terra
-                      : i === 0           ? theme.sage
-                      : i === 1           ? theme.ochre
+                      i === 0 ? theme.sage
+                      : i === 1 ? theme.ochre
                       : theme.sky;
                     return (
                       <div
@@ -453,6 +455,45 @@ export const BlendExtractionExplorer = ({
                     />
                   </div>
                 )}
+              </div>
+            )}
+            {visibleBalance.length > 0 && (
+              <div>
+                {sectionLabel("predicted balance")}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {visibleBalance.map(([tag, n]) => {
+                    const known = !!EFFECT_DESCRIPTIONS[tag];
+                    const active = openEffect === tag;
+                    const color =
+                      tag === "bitterness" ? theme.terra
+                      : tag === "sweetness" ? theme.ochre
+                      : tag === "astringency" ? theme.terra
+                      : tag === "tartness" ? theme.ochre
+                      : theme.sky;
+                    return (
+                      <div
+                        key={tag}
+                        role={known ? "button" : undefined}
+                        tabIndex={known ? 0 : undefined}
+                        onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
+                        onKeyDown={known ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setOpenEffect(prev => prev === tag ? null : tag);
+                          }
+                        } : undefined}
+                        style={{
+                          padding: "2px 4px", borderRadius: 4,
+                          background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                          cursor: known ? "pointer" : "default",
+                          outline: "none",
+                        }}
+                      >
+                        <EffectBar label={tag} value={n} color={color} />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
