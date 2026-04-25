@@ -31,7 +31,7 @@ const BLENDS = [
   {
     id: "dusk",
     name: "Dusk Lullaby",
-    subtitle: "for wound evenings",
+    subtitle: "for wound-down evenings",
     ingredients: [
       { id: "chamomile", g: 2.0 },
       { id: "lavender", g: 0.3 },
@@ -304,7 +304,7 @@ const FLAVOR_CONFLICTS = [
 // Names used when a single mood is selected — each mood has a canonical
 // "signature" blend name/subtitle pair.
 const MOOD_SINGLE_NAMES = {
-  calm:    ["Dusk Lullaby",        "for wound evenings"],
+  calm:    ["Dusk Lullaby",        "for wound-down evenings"],
   focus:   ["Scriptorium",         "for the hour before dinner"],
   energy:  ["Morning Vestment",    "a quiet start with teeth"],
   comfort: ["Hearth & Quiet",      "rainy-afternoon default"],
