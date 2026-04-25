@@ -20,27 +20,132 @@
    remain in place as test fixtures even after persistence is added.
    ────────────────────────────────────────────────────────────── */
 
+// Materialize seed sessions: each carries an `hoursAgo` offset which
+// resolves to a fresh sess-<ms> id at apply time. Otherwise stored
+// timestamps would drift further into the past on every reset and
+// break the "recent 20 cups" window predicates.
+export function materializeSeedSessions(rawSessions) {
+  const now = Date.now();
+  return (rawSessions || []).map((s, i) => {
+    const hoursAgo = typeof s.hoursAgo === "number" ? s.hoursAgo : (i + 1);
+    const ts = now - hoursAgo * 3600000;
+    const ago = hoursAgo < 24 ? `${Math.round(hoursAgo)}h`
+              : hoursAgo < 48 ? "yesterday"
+              : `${Math.round(hoursAgo / 24)}d`;
+    return {
+      id: s.id || `sess-${ts}`,
+      who: "you",
+      blendId: s.blendId,
+      ago,
+      intent: s.intent || "",
+      actual: s.actual || "",
+      taste: s.taste ?? 4,
+      note: s.note || "",
+      currentMoods: s.currentMoods || [],
+      targetMoods: s.targetMoods || [],
+    };
+  });
+}
+
 export const SEED_MODES = {
   power: {
     label: "power user",
-    description: "established journal — several weeks in",
+    description: "established journal — several weeks in, many titles unlocked",
+    profile: {
+      name: "Tommy",
+      timeOfDay: ["morning", "afternoon", "evening"],
+      draw: ["calm", "focus", "energy", "comfort"],
+      flavors: ["floral", "earthy", "spiced", "smoky", "minty"],
+    },
+    // Sessions stored with hoursAgo so timestamps materialize fresh on
+    // each apply (otherwise they'd drift further into the past every
+    // reset). Newest first. Curated to trigger many titles at once.
     sessions: [
-      // Your cups, most recent first
-      { id: "y1", who: "you", blendId: "dusk",    ago: "2h",    intent: "wound up",   actual: "calm",    taste: 4, note: "Honeyed. Slept within 40 min." },
-      { id: "y2", who: "you", blendId: "hearth",  ago: "yest.", intent: "rained-on",  actual: "digestive",  taste: 4, note: "" },
-      { id: "y3", who: "you", blendId: "morning", ago: "2d",    intent: "slow",       actual: "energy",  taste: 5, note: "" },
-      { id: "y4", who: "you", blendId: "study",   ago: "3d",    intent: "scattered",  actual: "focus",   taste: 4, note: "Good clarity." },
-      { id: "y5", who: "you", blendId: "dusk",    ago: "4d",    intent: "keyed up",   actual: "calm",    taste: 5, note: "" },
-      { id: "y6", who: "you", blendId: "morning", ago: "5d",    intent: "flat",       actual: "energy",  taste: 3, note: "Under-steeped." },
-      { id: "y7", who: "you", blendId: "hearth",  ago: "6d",    intent: "cold",       actual: "comfort", taste: 4, note: "" },
-      { id: "y8", who: "you", blendId: "dusk",    ago: "1w",    intent: "wired",      actual: "calm",    taste: 4, note: "" },
-      { id: "y9", who: "you", blendId: "moroccan", ago: "1w",   intent: "thirsty",    actual: "energy",  taste: 5, note: "Three rounds." },
+      // ── Today ──
+      { hoursAgo: 1,    blendId: "dusk",            actual: "calm",      taste: 5, note: "Honeyed. Slept within 40 min.", currentMoods: ["anxious"], targetMoods: ["calm"] },
+      { hoursAgo: 6,    blendId: "morning",         actual: "energy",    taste: 5, note: "Sharp morning lift.",          currentMoods: ["tired"],   targetMoods: ["energy", "focus"] },
+      // ── Yesterday — multiple cups across times of day ──
+      { hoursAgo: 22,   blendId: "wuyi-smoke",      actual: "energy",    taste: 4, note: "Pine fire afternoon.",                                     targetMoods: ["energy", "warming"] },
+      { hoursAgo: 26,   blendId: "study",           actual: "focus",     taste: 4, note: "Good clarity at the desk.",     currentMoods: ["scattered"], targetMoods: ["focus"] },
+      { hoursAgo: 31,   blendId: "all-heal",        actual: "sleepy",    taste: 5, note: "Slept by ten.",                                            targetMoods: ["sleepy"] },
+      // ── 2 days ago ──
+      { hoursAgo: 47,   blendId: "shou-puerh",      actual: "digestive", taste: 4, note: "Post-supper settled.",                                     targetMoods: ["digestive"] },
+      { hoursAgo: 51,   blendId: "dusk",            actual: "calm",      taste: 5, note: "",                              currentMoods: ["wired"],    targetMoods: ["calm"] },
+      // ── 3 days ago — Course-Corrector pattern ──
+      { hoursAgo: 71,   blendId: "morning",         actual: "energy",    taste: 5, note: "Recovered the morning.",                                    targetMoods: ["energy"] },
+      { hoursAgo: 75,   blendId: "morning",         actual: "energy",    taste: 2, note: "Under-steeped, harsh.",                                    targetMoods: ["energy"] },
+      // ── 4 days ago ──
+      { hoursAgo: 95,   blendId: "moroccan",        actual: "cooling",   taste: 5, note: "Three glasses, mint loud.",                                targetMoods: ["cooling"] },
+      { hoursAgo: 101,  blendId: "chai",            actual: "warming",   taste: 4, note: "",                              currentMoods: ["cold"],     targetMoods: ["warming", "comfort"] },
+      // ── 5 days ago — Witching Hour ──
+      { hoursAgo: 117,  blendId: "dusk",            actual: "calm",      taste: 4, note: "23:00, the lamps were low.",                              targetMoods: ["calm"] },
+      { hoursAgo: 124,  blendId: "study",           actual: "focus",     taste: 5, note: "Strong work session.",                                     targetMoods: ["focus"] },
+      // ── 6 days ago ──
+      { hoursAgo: 142,  blendId: "hearth",          actual: "comfort",   taste: 4, note: "",                              currentMoods: ["sad"],      targetMoods: ["comfort"] },
+      { hoursAgo: 148,  blendId: "dusk",            actual: "calm",      taste: 5, note: "True Believer rotation.",                                  targetMoods: ["calm"] },
+      // ── 7 days ago ──
+      { hoursAgo: 168,  blendId: "morning",         actual: "energy",    taste: 4, note: "",                                                          targetMoods: ["energy"] },
+      // ── 8-10 days ago ──
+      { hoursAgo: 192,  blendId: "spring-tonic",    actual: "digestive", taste: 3, note: "Bitter — a lot of bitter today.",                          targetMoods: ["digestive"] },
+      { hoursAgo: 218,  blendId: "tulsi-doorstep",  actual: "uplifting", taste: 5, note: "",                                                          targetMoods: ["uplifting"] },
+      { hoursAgo: 240,  blendId: "dusk",            actual: "calm",      taste: 4, note: "",                                                          targetMoods: ["calm"] },
+      // ── 11-14 days ago ──
+      { hoursAgo: 270,  blendId: "darj-neat",       actual: "uplifting", taste: 5, note: "Muscatel, no milk.",                                       targetMoods: ["uplifting"] },
+      { hoursAgo: 291,  blendId: "sencha-properly", actual: "focus",     taste: 4, note: "70°C, vegetal.",                                            targetMoods: ["focus"] },
+      { hoursAgo: 313,  blendId: "throat-coat",     actual: "soothing",  taste: 4, note: "Sore throat day.",                                          targetMoods: ["soothing"] },
+      { hoursAgo: 335,  blendId: "local-tomscalm",  actual: "calm",      taste: 5, note: "Self-Repeater #1.",                                         targetMoods: ["calm"] },
+      // ── 15-21 days ago ──
+      { hoursAgo: 360,  blendId: "local-tomscalm",  actual: "calm",      taste: 4, note: "Self-Repeater #2.",                                         targetMoods: ["calm"] },
+      { hoursAgo: 384,  blendId: "hojicha-evening", actual: "comfort",   taste: 5, note: "",                                                          targetMoods: ["comfort"] },
+      { hoursAgo: 410,  blendId: "wuyi-smoke",      actual: "warming",   taste: 4, note: "Smokesworn marker.",                                       targetMoods: ["warming"] },
+      { hoursAgo: 432,  blendId: "golden-milk",     actual: "warming",   taste: 5, note: "Turmeric.",                                                 targetMoods: ["warming"] },
+      { hoursAgo: 458,  blendId: "moroccan",        actual: "cooling",   taste: 4, note: "",                                                          targetMoods: ["cooling"] },
     ],
-    savedBlendIds: ["dusk", "morning", "hearth", "study"],
+    savedBlendIds: [
+      "dusk", "morning", "hearth", "study",
+      "chai", "moroccan", "wuyi-smoke", "shou-puerh",
+      "all-heal", "darj-neat", "sencha-properly",
+      "local-tomscalm", "local-bright",
+    ],
+    favoriteBlendIds: [
+      "dusk", "morning", "study", "wuyi-smoke", "moroccan", "local-tomscalm",
+    ],
     pantryIds: [
       "chamomile", "lavender", "lemonbalm", "peppermint", "rooibos",
       "sencha", "assam", "ginger", "hibiscus", "rose",
       "cinnamon", "cardamom", "vanilla", "spearmint", "jasmine",
+      "passionflower", "valerian", "tulsi", "fennel", "lapsang",
+      "puerh", "matcha", "hojicha", "darjeeling",
+    ],
+    // User-composed blends — make Composer + Self-Repeater fire and
+    // give the Catalogue a couple of "your composition" entries.
+    generatedBlends: [
+      {
+        id: "local-tomscalm",
+        name: "Tom's Calm Hour",
+        subtitle: "tuned to your picks; brewed where each leaf is at its best",
+        ingredients: [
+          { id: "chamomile", g: 1.5 },
+          { id: "lemonbalm", g: 1.0 },
+          { id: "lavender",  g: 0.3, role: "accent" },
+        ],
+        tempC: 95, timeS: 480,
+        mood: "calm", flavor: "floral",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "local-bright",
+        name: "Bright Desk",
+        subtitle: "tuned to your picks; brewed where each leaf is at its best",
+        ingredients: [
+          { id: "sencha",     g: 2.5 },
+          { id: "lemonbalm",  g: 0.5, role: "accent" },
+        ],
+        tempC: 75, timeS: 90,
+        mood: "focus", flavor: "grassy",
+        style: "low-temp",
+        experimental: true, synthetic: false,
+      },
     ],
   },
 

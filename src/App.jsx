@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
-import { SEED_MODES } from "./data/seeds";
+import { SEED_MODES, materializeSeedSessions } from "./data/seeds";
 import { Sprig, Flower, Leaf, Kettle, Ornament } from "./components/icons";
 import { DemoHint } from "./components/DemoHint";
 // Screens
@@ -126,10 +126,12 @@ export default function App() {
   // Only runs if no profile exists yet — doesn't override a real user's profile.
   useEffect(() => {
     if (isDev && !profile) {
+      const seed = SEED_MODES.power.profile || {};
       setProfile({
-        name: "Tommy",
-        timeOfDay: ["morning", "afternoon", "evening"],
-        draw: ["calm", "focus", "energy", "comfort"],
+        name: seed.name || "Tommy",
+        timeOfDay: seed.timeOfDay || ["morning", "afternoon", "evening"],
+        draw: seed.draw || ["calm", "focus", "energy", "comfort"],
+        flavors: seed.flavors || [],
         createdAt: Date.now(),
         isDev: true,
       });
@@ -153,7 +155,7 @@ export default function App() {
   // For normal users: default to empty; onboarding will populate with seeds.
   const [sessions, setSessions] = usePersistedState(
     "sessions",
-    isDev ? SEED_MODES.power.sessions : []
+    isDev ? materializeSeedSessions(SEED_MODES.power.sessions) : []
   );
   const [savedBlendIds, setSavedBlendIds] = usePersistedState(
     "savedBlendIds",
@@ -164,7 +166,7 @@ export default function App() {
   // the favorites filter. Adding a favorite auto-saves so the two stay in sync.
   const [favoriteBlendIds, setFavoriteBlendIds] = usePersistedState(
     "favoriteBlendIds",
-    new Set()
+    isDev ? new Set(SEED_MODES.power.favoriteBlendIds || []) : new Set()
   );
   const [pantryIds, setPantryIds] = usePersistedState(
     "pantryIds",
@@ -175,14 +177,21 @@ export default function App() {
   // when ?dev is set. Flipping it resets state to that seed's snapshot.
   const [seedMode, setSeedMode] = useState("power");
 
-  // When seed mode changes (dev only), reset the varying state to snapshot
+  // When seed mode changes (dev only), reset the varying state to snapshot.
+  // Includes generatedBlends + favorites + profile so the new richer power
+  // seed populates everything that drives titles.
   useEffect(() => {
     if (!isDev) return;
     const mode = SEED_MODES[seedMode];
     if (!mode) return;
-    setSessions(mode.sessions);
-    setSavedBlendIds(new Set(mode.savedBlendIds));
-    setPantryIds(new Set(mode.pantryIds));
+    setSessions(materializeSeedSessions(mode.sessions));
+    setSavedBlendIds(new Set(mode.savedBlendIds || []));
+    setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
+    setPantryIds(new Set(mode.pantryIds || []));
+    setGeneratedBlends(mode.generatedBlends || []);
+    if (mode.profile) {
+      setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
+    }
   }, [seedMode, isDev]);
 
   // Welcome card visibility — shown once after onboarding, then dismissed
