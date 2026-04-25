@@ -226,17 +226,24 @@ export function buildWarnings({
     });
   }
 
-  // Aromatic over-pull — gentle florals (lavender especially) tip into
-  // soapy / camphor / muddy register when brewed too long or too hot.
-  // Different mechanism than tannins; same fix (pull back).
-  const soapy   = perceivedFlavors.soapy   || 0;
-  const camphor = perceivedFlavors.camphor || 0;
-  const muddy   = perceivedFlavors.muddy   || 0;
-  if (soapy >= 0.5 || camphor >= 1.5 || muddy >= 1) {
-    warnings.push({
-      kind: "aromatic",
-      text: "The aromatic register is tipping into soap and camphor — pull back the steep.",
-    });
+  // Off-aromatic over-pull. Different mechanism than tannins; same fix
+  // (pull back). Each off-note has its own threshold and copy — soapy
+  // and camphor for florals, harsh / acrid / burnt for spices and
+  // greens, medicinal for clove- and menthol-driven cups.
+  const offNotes = [
+    { name: "soapy",     threshold: 0.5, text: "The aromatic register is tipping into soap — pull back the steep." },
+    { name: "camphor",   threshold: 1.8, text: "Camphor is overtaking the perfume — gentler heat or shorter time." },
+    { name: "muddy",     threshold: 1,   text: "The cup is going muddy — pull back to keep the notes distinct." },
+    { name: "medicinal", threshold: 1.5, text: "The eugenol is tipping medicinal — fewer cloves or a shorter steep." },
+    { name: "harsh",     threshold: 1.5, text: "Sharpness is turning harsh — drop a few degrees or shorten the pull." },
+    { name: "acrid",     threshold: 1,   text: "An acrid edge is climbing — pull back temp or time." },
+    { name: "burnt",     threshold: 1,   text: "The cup is heading burnt — drop the temperature." },
+  ];
+  for (const off of offNotes) {
+    if ((perceivedFlavors[off.name] || 0) >= off.threshold) {
+      warnings.push({ kind: "aromatic", text: off.text });
+      break; // one aromatic note is enough; the user gets the message
+    }
   }
 
   // Sedative ceiling — calm + sleepy summed pressure

@@ -589,6 +589,29 @@ test("rose at over-steep triggers tannin warning (musky-tannic edge)", () => {
     `expected tannin warning at strong rose`);
 });
 
+// ─── BROAD AUDIT: every ingredient (except the legitimately
+// forgiving ones) fires SOMETHING at full pull. ────────────────
+
+const FORGIVING = new Set(["rooibos", "vanilla", "gyokuro", "hojicha"]);
+
+test("every non-forgiving ingredient fires an over-pull warning at strong end", () => {
+  const ids = Object.keys(INGREDIENT_RANGE);
+  for (const id of ids) {
+    if (FORGIVING.has(id)) continue;
+    const w = warningsFor(strong(id));
+    const off = w.filter(x => x.kind === "tannin" || x.kind === "aromatic" || x.kind === "ceiling");
+    assert(off.length > 0, `${id}: no over-pull warning at strong end`);
+  }
+});
+
+test("forgiving ingredients (rooibos, vanilla, gyokuro, hojicha) do NOT fire over-pull at strong", () => {
+  for (const id of FORGIVING) {
+    const w = warningsFor(strong(id));
+    const off = w.filter(x => x.kind === "tannin" || x.kind === "aromatic");
+    assert(off.length === 0, `${id}: unexpected over-pull warning ${JSON.stringify(off)}`);
+  }
+});
+
 test("time slider moves the cup at constant temp (bracketByIntensity 2D)", () => {
   // This is the regression we just fixed. Pick a few ingredients with
   // long time ranges and verify the cup actually changes when only

@@ -90,9 +90,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 80,  timeS: 150, flavors: ["floral", "sweet", "honeyed", "heady"],
       effects: [["calm", 3], ["energy", 3]],
       character: "The standard cup. Full jasmine bloom, balanced lift." },
-    { tempC: 85,  timeS: 180, flavors: ["floral", "sweet", "honeyed", "heady", "vegetal"],
-      effects: [["calm", 3], ["energy", 3], ["bitterness", 1]],
-      character: "Pushing it — jasmine starts to turn vegetal and brisk." },
+    { tempC: 85,  timeS: 180, flavors: ["floral", "sweet", "honeyed", "heady", "vegetal", "astringent"],
+      effects: [["calm", 3], ["energy", 3], ["bitterness", 2]],
+      character: "Pushed past the perfume's range — green-tea base pulls tannin, the heady note fades." },
   ],
 
   // ─── Herbals ──────────────────────────────────────────────────
@@ -115,9 +115,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 360, flavors: ["minty", "cool", "grassy"],
       effects: [["cooling", 4], ["focus", 3], ["settle", 4]],
       character: "The standard cup. Full menthol, clears the head." },
-    { tempC: 100, timeS: 420, flavors: ["minty", "cool", "grassy", "sharp"],
-      effects: [["cooling", 4], ["focus", 3], ["settle", 4], ["bitterness", 1]],
-      character: "Maximum menthol — can feel almost cold in the mouth." },
+    { tempC: 100, timeS: 420, flavors: ["minty", "cool", "grassy", "sharp", "harsh"],
+      effects: [["cooling", 4], ["focus", 3], ["settle", 4], ["bitterness", 2]],
+      character: "Past the sweet spot. Menthol tips harsh, tannins follow." },
   ],
 
   rooibos: [
@@ -139,9 +139,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 95,  timeS: 360, flavors: ["minty", "sweet", "grassy", "cool"],
       effects: [["cooling", 3], ["settle", 3], ["energy", 2]],
       character: "The standard cup. Sweet mint, mellow cooling effect." },
-    { tempC: 100, timeS: 420, flavors: ["minty", "sweet", "grassy", "cool", "herbal"],
-      effects: [["cooling", 3], ["settle", 3], ["energy", 2], ["bitterness", 1]],
-      character: "Full extraction. Mint dominance holds; slight grassy edge." },
+    { tempC: 100, timeS: 420, flavors: ["minty", "sweet", "grassy", "cool", "herbal", "harsh"],
+      effects: [["cooling", 3], ["settle", 3], ["energy", 2], ["bitterness", 2]],
+      character: "Pushed too far. Carvone goes lawn-clipping, herbal turns hay-bitter." },
   ],
 
   passionflower: [
@@ -163,9 +163,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 360, flavors: ["citrus", "grassy", "bright"],
       effects: [["energy", 3], ["cooling", 3], ["settle", 2]],
       character: "The standard cup. Bright, herbal, uplifting." },
-    { tempC: 100, timeS: 420, flavors: ["citrus", "grassy", "bright", "woody"],
-      effects: [["energy", 3], ["cooling", 3], ["settle", 2], ["bitterness", 1]],
-      character: "Fuller body. Citrus stays prominent, wood notes surface." },
+    { tempC: 100, timeS: 420, flavors: ["citrus", "grassy", "bright", "woody", "acrid"],
+      effects: [["energy", 3], ["cooling", 3], ["settle", 2], ["bitterness", 2]],
+      character: "Past the bright window — citral pushes acrid; the lift dulls." },
   ],
 
   // ─── Spices ───────────────────────────────────────────────────
@@ -176,9 +176,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 100, timeS: 480, flavors: ["spiced", "warm", "citrus"],
       effects: [["comfort", 4], ["settle", 4], ["energy", 2]],
       character: "The standard cup. Full ginger heat, digestive and warming." },
-    { tempC: 100, timeS: 600, flavors: ["spiced", "warm", "citrus", "sharp"],
-      effects: [["comfort", 5], ["settle", 4], ["energy", 2]],
-      character: "Deep extraction. Ginger heat intensifies — almost peppery." },
+    { tempC: 100, timeS: 600, flavors: ["spiced", "warm", "citrus", "sharp", "harsh"],
+      effects: [["comfort", 5], ["settle", 4], ["energy", 2], ["bitterness", 2]],
+      character: "Long simmer. Heat sharpens past pleasant — almost peppery-harsh." },
   ],
 
   cinnamon: [
@@ -188,9 +188,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 480, flavors: ["spiced", "sweet", "woody", "warm"],
       effects: [["comfort", 5], ["settle", 3]],
       character: "The standard cup. Full cinnamon bark, round and warming." },
-    { tempC: 100, timeS: 600, flavors: ["spiced", "sweet", "woody", "warm", "earthy"],
-      effects: [["comfort", 5], ["settle", 3], ["bitterness", 1]],
-      character: "Maximum extraction. Wood and earth deepen behind the sweetness." },
+    { tempC: 100, timeS: 600, flavors: ["spiced", "sweet", "woody", "warm", "earthy", "astringent"],
+      effects: [["comfort", 5], ["settle", 3], ["bitterness", 2]],
+      character: "Long pull. Coumarin pushes astringent — cassia gets harsh, Ceylon stays gentler." },
   ],
 
   cardamom: [
@@ -201,8 +201,8 @@ export const EXTRACTION_PROFILES = {
       effects: [["comfort", 4], ["settle", 3], ["energy", 3]],
       character: "The standard cup. Full cardamom character — complex, lifting." },
     { tempC: 100, timeS: 480, flavors: ["spiced", "floral", "citrus", "complex", "camphor"],
-      effects: [["comfort", 4], ["settle", 3], ["energy", 3], ["bitterness", 1]],
-      character: "Deep extraction. Camphor notes come forward — powerful, heady." },
+      effects: [["comfort", 4], ["settle", 3], ["energy", 3], ["bitterness", 2]],
+      character: "Pushed too far. Volatile aromatics escape; camphor takes their place." },
   ],
 
   cloves: [
@@ -213,8 +213,8 @@ export const EXTRACTION_PROFILES = {
       effects: [["comfort", 5], ["settle", 3]],
       character: "The standard cup. Full clove — warm, slightly numbing, medicinal." },
     { tempC: 100, timeS: 420, flavors: ["spiced", "pungent", "warm", "numbing", "medicinal"],
-      effects: [["comfort", 5], ["settle", 3], ["bitterness", 2]],
-      character: "Full extraction. Clove intensifies toward dental-office territory." },
+      effects: [["comfort", 5], ["settle", 3], ["bitterness", 3]],
+      character: "Eugenol overdose. The cup goes medicinal-numbing." },
   ],
 
   vanilla: [
@@ -249,9 +249,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 360, flavors: ["spiced", "clove", "peppery", "sweet"],
       effects: [["focus", 3], ["calm", 3], ["energy", 3], ["settle", 3]],
       character: "The standard cup. Full holy basil — the adaptogen balance." },
-    { tempC: 100, timeS: 420, flavors: ["spiced", "clove", "peppery", "sweet", "earthy"],
-      effects: [["focus", 3], ["calm", 3], ["energy", 3], ["settle", 3], ["bitterness", 1]],
-      character: "Fuller extraction. Pepper and earth underscore the sweetness." },
+    { tempC: 100, timeS: 420, flavors: ["spiced", "clove", "peppery", "sweet", "earthy", "astringent"],
+      effects: [["focus", 3], ["calm", 3], ["energy", 3], ["settle", 3], ["bitterness", 2]],
+      character: "Past the standard. Earthy depth surfaces; bitter follows." },
   ],
 
   // ─── True teas: Green ─────────────────────────────────────────
@@ -310,9 +310,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 80,  timeS: 140, flavors: ["nutty", "chestnut", "sweet", "vegetal"],
       effects: [["focus", 4], ["energy", 3]],
       character: "The classic cup. Full bean-chestnut character, bright focus." },
-    { tempC: 85,  timeS: 180, flavors: ["nutty", "chestnut", "sweet", "vegetal", "bean"],
-      effects: [["focus", 4], ["energy", 3], ["bitterness", 1]],
-      character: "Stronger extraction. Vegetal side firms up; slight astringency." },
+    { tempC: 85,  timeS: 180, flavors: ["nutty", "chestnut", "sweet", "vegetal", "bean", "astringent"],
+      effects: [["focus", 4], ["energy", 3], ["bitterness", 2]],
+      character: "Hotter than the leaf wants. Chestnut sweetness fades; tannins climb." },
   ],
 
   // ─── True teas: White ─────────────────────────────────────────
@@ -323,9 +323,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 80,  timeS: 240, flavors: ["sweet", "hay", "honey", "delicate", "melon"],
       effects: [["calm", 3], ["energy", 3], ["focus", 3]],
       character: "The standard cup. Full white tea — honeyed, meditative." },
-    { tempC: 85,  timeS: 300, flavors: ["sweet", "hay", "honey", "delicate", "melon", "wood"],
-      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 1]],
-      character: "Fuller body. Wood notes surface; honey thickens." },
+    { tempC: 85,  timeS: 300, flavors: ["sweet", "hay", "honey", "delicate", "melon", "wood", "astringent"],
+      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2]],
+      character: "Past the leaf's tolerance. Honey thins; hay turns tannic." },
   ],
 
   // ─── True teas: Oolong ────────────────────────────────────────
@@ -336,9 +336,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 90,  timeS: 180, flavors: ["floral", "fruit", "toasted", "honey"],
       effects: [["focus", 3], ["energy", 3], ["comfort", 2]],
       character: "The standard cup. Full oolong spectrum — floral to toasted." },
-    { tempC: 95,  timeS: 240, flavors: ["floral", "fruit", "toasted", "honey", "mineral"],
-      effects: [["focus", 3], ["energy", 3], ["comfort", 3], ["bitterness", 1]],
-      character: "Deeper body. Mineral and rock notes emerge behind sweetness." },
+    { tempC: 95,  timeS: 240, flavors: ["floral", "fruit", "toasted", "honey", "mineral", "astringent"],
+      effects: [["focus", 3], ["energy", 3], ["comfort", 3], ["bitterness", 2]],
+      character: "Long pull. Floral notes thin, mineral and tannin take the stage." },
   ],
 
   // ─── True teas: Black ─────────────────────────────────────────
@@ -385,9 +385,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 200, flavors: ["smoked", "pine", "tar", "campfire"],
       effects: [["comfort", 4], ["settle", 2]],
       character: "The standard cup. Full campfire — singular, divisive, warming." },
-    { tempC: 100, timeS: 240, flavors: ["smoked", "pine", "tar", "campfire", "woody"],
-      effects: [["comfort", 4], ["settle", 2], ["bitterness", 1]],
-      character: "Deep extraction. Smoke dominates — like tea brewed over a fire." },
+    { tempC: 100, timeS: 240, flavors: ["smoked", "pine", "tar", "campfire", "woody", "astringent"],
+      effects: [["comfort", 4], ["settle", 2], ["bitterness", 2]],
+      character: "Pushed long. Smoke holds but the body tightens with tannin." },
   ],
 
   // ─── True teas: Pu-erh ────────────────────────────────────────
@@ -398,9 +398,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "dark", "leather"],
       effects: [["comfort", 4], ["settle", 3]],
       character: "The standard cup. Full puerh — earth, wood, digestive warmth." },
-    { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "dark", "leather", "mineral"],
-      effects: [["comfort", 4], ["settle", 3], ["bitterness", 1]],
-      character: "Deep extraction. Mineral depth emerges — meditative, grounding." },
+    { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "dark", "leather", "mineral", "astringent"],
+      effects: [["comfort", 4], ["settle", 3], ["bitterness", 2]],
+      character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
   // ─── Adaptogens & roots ─────────────────────────────────────
@@ -435,9 +435,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 600, flavors: ["pungent", "warm", "earthy", "woody"],
       effects: [["warming", 3], ["settle", 3]],
       character: "The chai cup. Full piperine — bright pungent edge, the absorption-multiplier role." },
-    { tempC: 100, timeS: 900, flavors: ["pungent", "warm", "earthy", "woody"],
-      effects: [["warming", 3], ["settle", 3], ["bitterness", 1]],
-      character: "Long extraction. Heat lingers; piperine pushes into bite." },
+    { tempC: 100, timeS: 900, flavors: ["pungent", "warm", "earthy", "woody", "harsh"],
+      effects: [["warming", 3], ["settle", 3], ["bitterness", 2]],
+      character: "Long extraction. Heat lingers; piperine pushes into raw bite." },
   ],
 
   "licorice-root": [
@@ -460,9 +460,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 75, timeS: 20, flavors: ["umami", "vegetal", "grassy", "sweet"],
       effects: [["focus", 4], ["energy", 3], ["calm", 3]],
       character: "The standard whisk. Full umami body, balanced focus." },
-    { tempC: 80, timeS: 30, flavors: ["umami", "vegetal", "grassy", "sweet", "oceanic"],
-      effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 1]],
-      character: "Koicha-strong. Thick and intense; bitterness edges in." },
+    { tempC: 80, timeS: 30, flavors: ["umami", "vegetal", "grassy", "sweet", "oceanic", "astringent"],
+      effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 2]],
+      character: "Pushed too hot. Catechins surface; the umami narrows behind tannin." },
   ],
 
   genmaicha: [
@@ -472,9 +472,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 78, timeS: 120, flavors: ["toasted", "nutty", "grassy", "sweet"],
       effects: [["comfort", 3], ["calm", 3], ["settle", 2]],
       character: "The standard cup. Toasted rice and grass in balance." },
-    { tempC: 85, timeS: 180, flavors: ["toasted", "nutty", "grassy", "sweet"],
-      effects: [["comfort", 3], ["calm", 3], ["settle", 2], ["bitterness", 1]],
-      character: "Rice-forward. The roasted side dominates; faint tannic edge." },
+    { tempC: 85, timeS: 180, flavors: ["toasted", "nutty", "grassy", "sweet", "astringent"],
+      effects: [["comfort", 3], ["calm", 3], ["settle", 2], ["bitterness", 2]],
+      character: "Past the rice's range. Tea base pulls tannin; the toast dulls." },
   ],
 
   // ─── Caffeinated herbal ─────────────────────────────────────
@@ -510,9 +510,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 90, timeS: 450, flavors: ["honey", "citrus", "floral", "sweet"],
       effects: [["calm", 3], ["sleepy", 2], ["comfort", 2]],
       character: "The standard tisane. Full honey-citrus body, the European pediatric cup." },
-    { tempC: 95, timeS: 600, flavors: ["honey", "citrus", "floral", "sweet"],
-      effects: [["calm", 4], ["sleepy", 3], ["comfort", 3], ["bitterness", 1]],
-      character: "Pushed. The green-leaf side emerges; gentle astringency." },
+    { tempC: 95, timeS: 600, flavors: ["honey", "citrus", "floral", "sweet", "astringent"],
+      effects: [["calm", 4], ["sleepy", 3], ["comfort", 3], ["bitterness", 2]],
+      character: "Pushed too long. Honey-floral fades; the green-leaf side turns tannic." },
   ],
 
   // ─── Immune-support florals ─────────────────────────────────
@@ -535,9 +535,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 90, timeS: 450, flavors: ["floral", "muscatel", "fruity", "sweet"],
       effects: [["comfort", 3], ["uplifting", 2]],
       character: "The standard cup. Full lychee-muscat lift — the European cold-care." },
-    { tempC: 95, timeS: 600, flavors: ["floral", "muscatel", "fruity", "sweet"],
-      effects: [["comfort", 3], ["uplifting", 2], ["bitterness", 1]],
-      character: "Steeped longer. Aroma deepens; faint astringency." },
+    { tempC: 95, timeS: 600, flavors: ["floral", "muscatel", "fruity", "sweet", "astringent"],
+      effects: [["comfort", 3], ["uplifting", 2], ["bitterness", 2]],
+      character: "Pushed past the muscat. Aromatic thins; bitter follows." },
   ],
 
   // ─── Mineral-rich Western herbals ───────────────────────────
@@ -548,9 +548,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 600, flavors: ["earthy", "grassy", "mineral", "vegetal"],
       effects: [["comfort", 3], ["settle", 2]],
       character: "The standard cup. Full mineral pull, the daily green." },
-    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "mineral", "vegetal", "sweet"],
-      effects: [["comfort", 3], ["settle", 2], ["bitterness", 1]],
-      character: "Long-infused. Mineral depth maxes out; faint bitter edge." },
+    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "mineral", "vegetal", "sweet", "astringent"],
+      effects: [["comfort", 3], ["settle", 2], ["bitterness", 2]],
+      character: "Long-infused. Mineral depth maxes out; the cup tightens with tannin." },
   ],
 
   "dandelion-root": [
@@ -560,9 +560,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 1200, flavors: ["caramel", "nutty", "bittersweet", "earthy"],
       effects: [["settle", 3], ["comfort", 2]],
       character: "The standard cup. The caffeine-free coffee — full roasted depth." },
-    { tempC: 100, timeS: 1800, flavors: ["caramel", "nutty", "bittersweet", "earthy"],
+    { tempC: 100, timeS: 1800, flavors: ["caramel", "nutty", "bittersweet", "earthy", "astringent"],
       effects: [["settle", 3], ["comfort", 2], ["bitterness", 2]],
-      character: "Long decoction. Coffee territory; pleasantly bitter." },
+      character: "Long decoction. Coffee territory; bitter and tannic together." },
   ],
 
   "dandelion-leaf": [
@@ -597,9 +597,9 @@ export const EXTRACTION_PROFILES = {
     { tempC: 95,  timeS: 1200, flavors: ["sweet", "umami", "earthy", "nutty"],
       effects: [["focus", 3], ["comfort", 2]],
       character: "The standard cup. The most palatable mushroom — umami and quietly nourishing." },
-    { tempC: 100, timeS: 1800, flavors: ["sweet", "umami", "earthy", "nutty"],
-      effects: [["focus", 3], ["comfort", 2], ["bitterness", 1]],
-      character: "Long-extracted. Earthy depth surfaces; the nootropic register." },
+    { tempC: 100, timeS: 1800, flavors: ["sweet", "umami", "earthy", "nutty", "muddy"],
+      effects: [["focus", 3], ["comfort", 2], ["bitterness", 2]],
+      character: "Long-extracted. Earthy depth surfaces; the cup tips muddy." },
   ],
 };
 
@@ -659,10 +659,19 @@ function blendEffects(lower, upper, t) {
 //   - other flavors descend from the cap by array position (top note
 //     leads, accents follow).
 // Pure function so the result is stable per (flavors, profileIndex).
+// Descriptors that signal extraction-induced off-notes. Their strength
+// rises with profile position rather than array position, so adding any
+// of them to a strong-end profile reliably fires the warnings layer.
+const DIAGNOSTIC_FLAVORS = new Set([
+  "bitter", "bitterness", "astringent",
+  "harsh", "sharp", "acrid", "burnt", "tannic",
+  "soapy", "camphor", "muddy", "medicinal",
+]);
+
 function annotateFlavorStrengths(flavors, profileIndex) {
   const peakStrength = profileIndex === 0 ? 3 : 4;
   return flavors.map((f, i) => {
-    if (f === "bitter" || f === "bitterness" || f === "astringent") {
+    if (DIAGNOSTIC_FLAVORS.has(f)) {
       return [f, Math.min(3, profileIndex + 1)];
     }
     return [f, Math.max(1, peakStrength - i)];
@@ -728,16 +737,29 @@ function bracketByIntensity(profiles, tempC, timeS) {
   const minTime = Math.min(...times);
   const maxTime = Math.max(...times);
 
-  const tempProgress = maxTemp === minTemp ? 0 : (tempC - minTemp) / (maxTemp - minTemp);
-  const timeProgress = maxTime === minTime ? 0 : (timeS - minTime) / (maxTime - minTime);
-  const intensity = Math.max(0, Math.min(1, (tempProgress + timeProgress) / 2));
+  // Map (temp, time) to a single 0–1 intensity coordinate.
+  function intensityOf(t, s) {
+    const tp = maxTemp === minTemp ? 0 : (t - minTemp) / (maxTemp - minTemp);
+    const sp = maxTime === minTime ? 0 : (s - minTime) / (maxTime - minTime);
+    return Math.max(0, Math.min(1, (tp + sp) / 2));
+  }
 
-  const idxFloat = intensity * (n - 1);
-  const lowIdx   = Math.floor(idxFloat);
-  const highIdx  = Math.min(n - 1, lowIdx + 1);
-  const t        = idxFloat - lowIdx;
+  const userIntensity   = intensityOf(tempC, timeS);
+  const pointIntensities = sorted.map(p => intensityOf(p.tempC, p.timeS));
 
-  return [sorted[lowIdx], sorted[highIdx], t];
+  // Bracket using actual point intensities — respects non-uniform spacing
+  // so a profile point at (92, 200) reads as exactly that point when the
+  // user lands there, even if 92 is 70% along the temp axis.
+  if (userIntensity <= pointIntensities[0]) return [sorted[0], sorted[0], 0];
+  if (userIntensity >= pointIntensities[n - 1]) return [sorted[n - 1], sorted[n - 1], 0];
+  for (let i = 0; i < n - 1; i++) {
+    if (userIntensity >= pointIntensities[i] && userIntensity <= pointIntensities[i + 1]) {
+      const span = pointIntensities[i + 1] - pointIntensities[i];
+      const t = span === 0 ? 0 : (userIntensity - pointIntensities[i]) / span;
+      return [sorted[i], sorted[i + 1], t];
+    }
+  }
+  return [sorted[0], sorted[0], 0];
 }
 
 export function resolveExtractionProfile(ingredientId, tempC, timeS) {
