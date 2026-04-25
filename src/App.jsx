@@ -16,7 +16,8 @@ import { ProfileScreen } from "./screens/ProfileScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
-import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+import { generateExperimentalSeeds, pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+import { buildSyntheticForSelections } from "./algo/compose";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 
@@ -178,16 +179,38 @@ export default function App() {
   // Welcome card visibility — shown once after onboarding, then dismissed
   const [welcomeShown, setWelcomeShown] = usePersistedState("welcomeShown", false);
 
+  // User-generated experimental blends, seeded at onboarding from the
+  // user's draw selections. Persisted as full blend objects (not just
+  // IDs) since they don't live in BLENDS — the algorithm produced them.
+  const [generatedBlends, setGeneratedBlends] = usePersistedState("generatedBlends", []);
+
+  // Hydrate LOCAL_BLENDS from the persisted generated-blends list on
+  // every render so getBlend(id) can resolve them. Cheap to repeat;
+  // LOCAL_BLENDS is a plain object that just gets the same keys
+  // re-assigned.
+  useEffect(() => {
+    for (const b of generatedBlends || []) LOCAL_BLENDS[b.id] = b;
+  }, [generatedBlends]);
+
   // Onboarding completion handler
   const handleOnboardingComplete = ({ name, timeOfDay, draw }) => {
     const seedBlendIds = pickSeedBlends({ timeOfDay, draw });
+    // Algorithmic experimentals tailored to the user's draws — usually
+    // 2-3 cups, surfaced alongside the curated seed blends.
+    const experimentals = generateExperimentalSeeds(
+      { draw }, buildSyntheticForSelections,
+    );
     setProfile({
       name,
       timeOfDay,
       draw,
       createdAt: Date.now(),
     });
-    setSavedBlendIds(new Set(seedBlendIds));
+    setGeneratedBlends(experimentals);
+    setSavedBlendIds(new Set([
+      ...seedBlendIds,
+      ...experimentals.map(b => b.id),
+    ]));
     setPantryIds(new Set(ONBOARDING_PANTRY));
     setWelcomeShown(false); // ensure welcome card shows on next Home render
   };

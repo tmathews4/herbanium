@@ -452,6 +452,11 @@ function generateBlendName(moods, flavors, primaryAxis = "feel") {
 // preference: if a true tea (Camellia sinensis) hits the threshold,
 // take it over an herbal that scores the same. Falls back to any
 // ingredient when no tea works.
+//
+// Some moods (comfort, settle) aren't expressed by any ingredient
+// directly — they're emergent from blends. When the direct effect
+// lookup finds nothing, we fall back to MOOD_BLENDS[mood] and pull
+// the heaviest-grams ingredient from the curated single-mood recipe.
 function bestIngredientForMood(mood, exclude, minStrength = 3) {
   const cands = Object.entries(INGREDIENTS)
     .filter(([id]) => !exclude.has(id))
@@ -460,15 +465,25 @@ function bestIngredientForMood(mood, exclude, minStrength = 3) {
       return { id, ing, strength: eff ? eff[1] : 0 };
     })
     .filter(c => c.strength >= minStrength);
-  if (cands.length === 0) return null;
-  // Sort: tea first, then strength descending
-  cands.sort((a, b) => {
-    const aTea = a.ing.category === "true tea" ? 0 : 1;
-    const bTea = b.ing.category === "true tea" ? 0 : 1;
-    if (aTea !== bTea) return aTea - bTea;
-    return b.strength - a.strength;
-  });
-  return cands[0];
+  if (cands.length > 0) {
+    cands.sort((a, b) => {
+      const aTea = a.ing.category === "true tea" ? 0 : 1;
+      const bTea = b.ing.category === "true tea" ? 0 : 1;
+      if (aTea !== bTea) return aTea - bTea;
+      return b.strength - a.strength;
+    });
+    return cands[0];
+  }
+  // Fallback: emergent-only moods (comfort, settle). Pick the heaviest
+  // ingredient from the mood's curated single-mood recipe.
+  const blend = MOOD_BLENDS[mood];
+  if (!blend) return null;
+  const sortedIngs = [...blend.ings]
+    .filter(i => !exclude.has(i.id))
+    .sort((a, b) => (b.g || 0) - (a.g || 0));
+  if (sortedIngs.length === 0) return null;
+  const id = sortedIngs[0].id;
+  return { id, ing: INGREDIENTS[id], strength: 3 };
 }
 
 // Pick a flavor-expressing ingredient, with the same tea preference.
@@ -582,7 +597,7 @@ function bestPartialPrimaryTradition(moods, flavors, primaryAxis) {
 // Names are composed from MOOD_WORDS + FLAVOR_WORDS — one word per
 // selection, deterministic so the same query always produces the
 // same name.
-function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel") {
+export function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel") {
   const picks = [];
   const usedIds = new Set();
 
