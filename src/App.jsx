@@ -57,7 +57,7 @@ const TabBar = ({ tab, setTab }) => {
         }}>
           {React.cloneElement(t.icon, { c: tab === t.k ? theme.terra : theme.ash })}
           <span style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase",
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase",
             whiteSpace: "nowrap",
           }}>{t.label}</span>
         </button>
