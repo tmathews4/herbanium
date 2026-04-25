@@ -18,33 +18,27 @@ const DEFAULT_FEEDBACK_ENDPOINT = "https://formspree.io/f/xpqknrpo";
 import React, { useState } from "react";
 import { ff, theme } from "../theme";
 
+// Consolidated to 7 broad surfaces — finer-grained sub-features (favorites,
+// warnings, mood/balance bars, etc.) are covered implicitly by their parent.
 const FEATURE_OPTIONS = [
-  { key: "vibe",        label: "Vibe (forward compose)" },
-  { key: "blend",       label: "Blend (reverse compose)" },
-  { key: "shelf",       label: "Shelf (your blends)" },
-  { key: "catalogue",   label: "Catalogue (curated recipes)" },
-  { key: "journal",     label: "Journal (check-ins)" },
-  { key: "apothecary",  label: "Apothecary (ingredients)" },
+  { key: "compose",     label: "Composing" },
+  { key: "shelf",       label: "Shelf" },
+  { key: "catalogue",   label: "Catalogue" },
+  { key: "journal",     label: "Journal" },
+  { key: "apothecary",  label: "Apothecary" },
+  { key: "brewing",     label: "Brewing science" },
   { key: "directions",  label: "Recommended Preparations" },
-  { key: "explorer",    label: "Brewing explorer (temp/time sliders)" },
-  { key: "moods",       label: "Mood / balance bars" },
-  { key: "favorites",   label: "Favorites" },
-  { key: "warnings",    label: "Heads-up / over-pull warnings" },
 ];
 
 function buildMailtoFallback(payload) {
-  // Recipient assembled at runtime so static scanners don't pick up
-  // the address. Not bulletproof, but stops casual extraction.
   const local = ["tmathews", "4"].join("");
   const domain = ["gmail", "com"].join(".");
   const to = `${local}@${domain}`;
   const subject = encodeURIComponent("Herbanium feedback");
   const body = encodeURIComponent(
     `Sentiment: ${payload.sentiment}/5\n\n` +
-    `Most useful: ${payload.useful.join(", ") || "(none selected)"}\n\n` +
-    `Least useful: ${payload.least.join(", ") || "(none selected)"}\n\n` +
-    `Bug or confusion:\n${payload.bug || "(none)"}\n\n` +
-    `Wish-list:\n${payload.wish || "(none)"}\n\n` +
+    `Standing out: ${payload.standout.join(", ") || "(none selected)"}\n\n` +
+    `Notes:\n${payload.notes || "(none)"}\n\n` +
     `--\nSubmitted: ${payload.submittedAt}`
   );
   return `mailto:${to}?subject=${subject}&body=${body}`;
@@ -54,19 +48,17 @@ export const FeedbackModal = ({ onClose }) => {
   const closeRef = React.useRef(onClose);
   closeRef.current = onClose;
   const [sentiment, setSentiment] = useState(0);
-  const [useful, setUseful] = useState([]);
-  const [least, setLeast] = useState([]);
-  const [bug, setBug] = useState("");
-  const [wish, setWish] = useState("");
+  const [standout, setStandout] = useState([]);
+  const [notes, setNotes] = useState("");
   const [status, setStatus] = useState(null);
 
-  const toggle = (set, setSet, key) => {
-    setSet(set.includes(key) ? set.filter(k => k !== key) : [...set, key]);
+  const toggle = (key) => {
+    setStandout(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
   const submit = async () => {
     const payload = {
-      sentiment, useful, least, bug, wish,
+      sentiment, standout, notes,
       submittedAt: new Date().toISOString(),
     };
 
@@ -88,7 +80,7 @@ export const FeedbackModal = ({ onClose }) => {
     }
   };
 
-  const canSubmit = sentiment > 0 || useful.length > 0 || least.length > 0 || bug.trim() || wish.trim();
+  const canSubmit = sentiment > 0 || standout.length > 0 || notes.trim();
 
   return (
     <div style={{
@@ -122,42 +114,38 @@ export const FeedbackModal = ({ onClose }) => {
 
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-          color: theme.ash, lineHeight: 1.5, marginBottom: 16,
+          color: theme.ash, lineHeight: 1.5, marginBottom: 18,
         }}>
-          Anything you tell me here helps shape what gets built next. Skip whatever doesn't apply.
+          Skip what doesn't apply. Anything helps.
         </div>
 
-        {/* Sentiment */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6 }}>
-            Overall feel
-          </div>
-          <div style={{ display: "flex", gap: 4 }}>
-            {[1, 2, 3, 4, 5].map(n => (
-              <button
-                key={n}
-                onClick={() => setSentiment(n)}
-                style={{
-                  fontSize: 22, lineHeight: 1, padding: "4px 6px",
-                  background: "transparent", border: "none", cursor: "pointer",
-                  color: n <= sentiment ? theme.ochre : theme.rule,
-                }}
-              >{n <= sentiment ? "★" : "☆"}</button>
-            ))}
-          </div>
+        {/* Sentiment + chip section, tight layout */}
+        <div style={{ marginBottom: 18, display: "flex", gap: 4 }}>
+          {[1, 2, 3, 4, 5].map(n => (
+            <button
+              key={n}
+              onClick={() => setSentiment(n)}
+              aria-label={`${n} of 5`}
+              style={{
+                fontSize: 26, lineHeight: 1, padding: "2px 4px",
+                background: "transparent", border: "none", cursor: "pointer",
+                color: n <= sentiment ? theme.ochre : theme.rule,
+              }}
+            >{n <= sentiment ? "★" : "☆"}</button>
+          ))}
         </div>
 
-        {/* Most useful */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6 }}>
-            What's working for you?
+        {/* Standing out */}
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8 }}>
+            What's standing out?
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {FEATURE_OPTIONS.map(f => {
-              const on = useful.includes(f.key);
+              const on = standout.includes(f.key);
               return (
-                <button key={f.key} onClick={() => toggle(useful, setUseful, f.key)} style={{
-                  fontFamily: ff.serif, fontSize: 12, padding: "4px 10px", borderRadius: 999,
+                <button key={f.key} onClick={() => toggle(f.key)} style={{
+                  fontFamily: ff.serif, fontSize: 13, padding: "5px 12px", borderRadius: 999,
                   background: on ? theme.sageDeep : "transparent",
                   color: on ? theme.cream : theme.inkSoft,
                   border: `1px solid ${on ? theme.sageDeep : theme.ruleSoft}`,
@@ -168,61 +156,22 @@ export const FeedbackModal = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Least useful */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6 }}>
-            Anything you'd cut or never use?
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-            {FEATURE_OPTIONS.map(f => {
-              const on = least.includes(f.key);
-              return (
-                <button key={f.key} onClick={() => toggle(least, setLeast, f.key)} style={{
-                  fontFamily: ff.serif, fontSize: 12, padding: "4px 10px", borderRadius: 999,
-                  background: on ? theme.terra : "transparent",
-                  color: on ? theme.cream : theme.inkSoft,
-                  border: `1px solid ${on ? theme.terra : theme.ruleSoft}`,
-                  cursor: "pointer",
-                }}>{f.label}</button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Bug / confusion */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6 }}>
-            Anything broken or confusing?
+        {/* Free notes — single field replaces the old bug + wish split */}
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8 }}>
+            Anything else?
           </div>
           <textarea
-            value={bug}
-            onChange={(e) => setBug(e.target.value)}
-            rows={2}
-            placeholder="optional"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            placeholder="bugs, wishes, anything"
             style={{
-              width: "100%", padding: "8px 10px", borderRadius: 8,
+              width: "100%", padding: "10px 12px", borderRadius: 8,
               background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-              fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+              fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
               boxSizing: "border-box", outline: "none", resize: "vertical",
-            }}
-          />
-        </div>
-
-        {/* Wish */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6 }}>
-            What do you wish existed?
-          </div>
-          <textarea
-            value={wish}
-            onChange={(e) => setWish(e.target.value)}
-            rows={2}
-            placeholder="optional"
-            style={{
-              width: "100%", padding: "8px 10px", borderRadius: 8,
-              background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-              fontFamily: ff.serif, fontSize: 13, color: theme.ink,
-              boxSizing: "border-box", outline: "none", resize: "vertical",
+              lineHeight: 1.5,
             }}
           />
         </div>
