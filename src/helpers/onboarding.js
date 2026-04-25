@@ -66,68 +66,78 @@ export function pickSeedBlends({ timeOfDay, draw }) {
   return Array.from(pool).slice(0, 3 + ALWAYS_INCLUDE.length);
 }
 
-// Mood → complementary flavor pairings used by generateExperimentalSeeds.
-// Each pairing is meant to be evocative rather than strict — the user
-// can always retune the slider afterwards.
-const FLAVOR_PAIRS_BY_MOOD = {
-  calm:    "floral",
-  focus:   "grassy",
-  energy:  "spiced",
-  sleepy:  "honeyed",
-  comfort: "sweet",
-  settle:  "minty",
+// Default flavor pairings for moods, used when the user didn't pick
+// any flavors at onboarding. Evocative defaults the user can retune.
+const FALLBACK_FLAVOR_BY_MOOD = {
+  calm:      "floral",
+  focus:     "grassy",
+  energy:    "spiced",
+  sleepy:    "honeyed",
+  comfort:   "sweet",
+  settle:    "minty",
+  soothing:  "honeyed",
+  warming:   "spiced",
+  cooling:   "minty",
+  digestive: "minty",
+  grounding: "earthy",
+  uplifting: "citrus",
 };
 
 /**
  * Generate 2-3 algorithmic experimental blends for a new user, seeded
- * from their onboarding answers. Returns full blend objects (not just
- * IDs) — the caller persists them and hydrates LOCAL_BLENDS so
- * getBlend(id) can find them later.
+ * from their onboarding draws + flavor picks. Returns full blend
+ * objects (not just IDs) — the caller persists them and hydrates
+ * LOCAL_BLENDS so getBlend(id) can find them later.
+ *
+ * Combo logic:
+ *   1. Primary draw + first picked flavor (or fallback flavor for that mood)
+ *   2. Second draw (if any) + second picked flavor (or fallback)
+ *   3. Multi-mood pairing for variety, or a contrasting single-mood combo
  *
  * Each generated blend uses the synthesis algorithm (tea-first
  * ingredient picking, 2D sweet-spot brew, MOOD_WORDS / FLAVOR_WORDS
- * naming). The mood/flavor pairings are chosen for variety: the
- * user's primary "draw" gets a complementary-flavor pairing, a
- * second draw (if present) gets its own, plus one quirky combo
- * for fun.
+ * naming) and is tagged experimental + generated.
  */
-export function generateExperimentalSeeds({ draw }, buildSyntheticForSelections) {
+export function generateExperimentalSeeds({ draw, flavors }, buildSyntheticForSelections) {
   const draws = Array.isArray(draw) ? draw : draw ? [draw] : [];
+  const userFlavors = Array.isArray(flavors) ? flavors : flavors ? [flavors] : [];
   if (draws.length === 0 || typeof buildSyntheticForSelections !== "function") {
     return [];
   }
 
+  // Pick a flavor for each draw — user-supplied first, fallback otherwise.
+  const flavorFor = (mood, idx) =>
+    userFlavors[idx] || userFlavors[0] || FALLBACK_FLAVOR_BY_MOOD[mood] || "floral";
+
   const combos = [];
-  // Combo 1: primary draw + complementary flavor
-  combos.push({
-    moods: [draws[0]],
-    flavors: [FLAVOR_PAIRS_BY_MOOD[draws[0]] || "floral"],
-  });
-  // Combo 2: second draw if present
+  combos.push({ moods: [draws[0]], flavors: [flavorFor(draws[0], 0)] });
   if (draws.length > 1) {
-    combos.push({
-      moods: [draws[1]],
-      flavors: [FLAVOR_PAIRS_BY_MOOD[draws[1]] || "earthy"],
-    });
+    combos.push({ moods: [draws[1]], flavors: [flavorFor(draws[1], 1)] });
   }
-  // Combo 3: a quirky multi-mood pairing for variety, or a contrasting
-  // flavor for single-draw users.
   if (draws.length >= 2) {
-    combos.push({ moods: draws.slice(0, 2), flavors: [] });
+    // Quirky multi-mood, leaning on a third user flavor if available
+    const third = userFlavors[2] || null;
+    combos.push({
+      moods: draws.slice(0, 2),
+      flavors: third ? [third] : [],
+    });
   } else {
-    combos.push({ moods: [draws[0]], flavors: ["citrus"] });
+    // Single-draw users: pair their draw with a user-picked secondary
+    // flavor or a contrasting default.
+    combos.push({
+      moods: [draws[0]],
+      flavors: [userFlavors[1] || "citrus"],
+    });
   }
 
   const blends = [];
   const seenIds = new Set();
-  for (const { moods, flavors } of combos) {
-    const synth = buildSyntheticForSelections(moods, flavors, "feel");
+  for (const { moods, flavors: comboFlavors } of combos) {
+    const synth = buildSyntheticForSelections(moods, comboFlavors, "feel");
     if (!synth || seenIds.has(synth.id)) continue;
     seenIds.add(synth.id);
     blends.push({
       ...synth,
-      // Stamp as a user-generated experimental — appears with the
-      // blue in-house outline and shows up in saved blends.
       generated: true,
       experimental: true,
     });

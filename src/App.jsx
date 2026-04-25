@@ -193,17 +193,20 @@ export default function App() {
   }, [generatedBlends]);
 
   // Onboarding completion handler
-  const handleOnboardingComplete = ({ name, timeOfDay, draw }) => {
+  const handleOnboardingComplete = ({ name, timeOfDay, draw, flavors }) => {
     const seedBlendIds = pickSeedBlends({ timeOfDay, draw });
-    // Algorithmic experimentals tailored to the user's draws — usually
-    // 2-3 cups, surfaced alongside the curated seed blends.
+    // Algorithmic experimentals tailored to the user's draws + flavors.
+    // The user's flavor picks bias the synth's accent selection so
+    // their first generated cups align with what they said they'd
+    // reach for.
     const experimentals = generateExperimentalSeeds(
-      { draw }, buildSyntheticForSelections,
+      { draw, flavors }, buildSyntheticForSelections,
     );
     setProfile({
       name,
       timeOfDay,
       draw,
+      flavors: flavors || [],
       createdAt: Date.now(),
     });
     setGeneratedBlends(experimentals);

@@ -1,41 +1,36 @@
 /* ──────────────────────────────────────────────────────────────
    screens/OnboardingScreen.jsx — first-visit profile creation
 
-   Full-screen takeover. Three light steps:
+   Full-screen takeover. Four light steps:
      1. Name ("What should we call you?")
      2. Time of day ("When do you usually reach for tea?")
-     3. What draws you ("What usually pulls you toward a cup?")
+     3. What draws you (mood) — full 12-mood list
+     4. Flavors you reach for — full 19-flavor list
 
    On finish: calls onComplete with profile data. App sets up the
-   user's initial state (profile, seeded favorites, default pantry)
-   and navigates to Home, where the welcome fade card appears.
-
-   Design notes:
-   - No skip button per step — forward-only through the flow. Users
-     can change any answer later in Profile → Preferences.
-   - Name is soft-required: blank → "friend"
-   - Progress indicator (small dots) at top so users know where
-     they are in the flow
-   - Aesthetic matches the rest of the app: Fraunces serif for
-     display text, sans-serif for UI, terra accents
+   user's initial state (profile, seeded favorites + algorithmic
+   experimentals tailored to draws + flavors, default pantry) and
+   navigates to Home.
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState } from "react";
 import { theme, ff } from "../theme";
-import { Flower, Ornament, Sprig } from "../components/icons";
+import { Flower } from "../components/icons";
 
-const STEPS = 3;
+const STEPS = 4;
 
 export const OnboardingScreen = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [timeOfDay, setTimeOfDay] = useState([]);
   const [draw, setDraw] = useState([]);
+  const [flavors, setFlavors] = useState([]);
 
   const canAdvance =
     step === 0 ? true  // name is soft-required; blank → "friend"
     : step === 1 ? timeOfDay.length > 0
     : step === 2 ? draw.length > 0
+    : step === 3 ? true  // flavors are optional — skip-friendly final step
     : false;
 
   const finish = () => {
@@ -43,6 +38,7 @@ export const OnboardingScreen = ({ onComplete }) => {
       name: name.trim() || "friend",
       timeOfDay,
       draw,
+      flavors,
     });
   };
 
@@ -61,11 +57,13 @@ export const OnboardingScreen = ({ onComplete }) => {
       background: theme.ivory,
       display: "flex", flexDirection: "column",
       fontFamily: ff.sans,
+      overflow: "auto",
     }}>
       {/* Top: brand + progress */}
       <div style={{
         padding: "28px 24px 12px",
         display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+        flexShrink: 0,
       }}>
         <Flower size={26} c={theme.terra} />
         <div style={{
@@ -90,38 +88,26 @@ export const OnboardingScreen = ({ onComplete }) => {
       {/* Middle: step content */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
-        justifyContent: "center", padding: "0 28px 40px",
-        maxWidth: 480, width: "100%", alignSelf: "center",
+        justifyContent: "center", padding: "20px 28px 20px",
+        maxWidth: 520, width: "100%", alignSelf: "center",
       }}>
-        {step === 0 && (
-          <StepName name={name} setName={setName} />
-        )}
-        {step === 1 && (
-          <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />
-        )}
-        {step === 2 && (
-          <StepDraw value={draw} setValue={setDraw} />
-        )}
+        {step === 0 && <StepName name={name} setName={setName} />}
+        {step === 1 && <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />}
+        {step === 2 && <StepDraw value={draw} setValue={setDraw} />}
+        {step === 3 && <StepFlavors value={flavors} setValue={setFlavors} />}
       </div>
 
       {/* Selection count hint (multi-select steps only) */}
-      {(step === 1 || step === 2) && (
+      {(step === 1 || step === 2 || step === 3) && (
         <div style={{
           padding: "0 24px 4px", textAlign: "center",
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
           color: theme.ash, lineHeight: 1.4,
-          minHeight: 18,
+          minHeight: 18, flexShrink: 0,
         }}>
-          {step === 1 && (
-            timeOfDay.length === 0
-              ? "pick one or more"
-              : `${timeOfDay.length} selected`
-          )}
-          {step === 2 && (
-            draw.length === 0
-              ? "pick one or more"
-              : `${draw.length} selected`
-          )}
+          {step === 1 && (timeOfDay.length === 0 ? "pick one or more" : `${timeOfDay.length} selected`)}
+          {step === 2 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
+          {step === 3 && (flavors.length === 0 ? "pick any that appeal — or skip" : `${flavors.length} selected`)}
         </div>
       )}
 
@@ -129,6 +115,7 @@ export const OnboardingScreen = ({ onComplete }) => {
       <div style={{
         padding: "0 24px 32px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
+        flexShrink: 0,
       }}>
         <button
           onClick={back}
@@ -159,11 +146,11 @@ export const OnboardingScreen = ({ onComplete }) => {
         </button>
       </div>
 
-      {/* Footer note: persistence honesty */}
+      {/* Footer note */}
       <div style={{
         padding: "0 24px 20px", textAlign: "center",
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-        color: theme.ash, lineHeight: 1.5,
+        color: theme.ash, lineHeight: 1.5, flexShrink: 0,
       }}>
         Your journal lives on this device — no account, no cloud.
       </div>
@@ -222,7 +209,7 @@ const StepName = ({ name, setName }) => (
 );
 
 /* ──────────────────────────────────────────────────────────────
-   Step 2: Time of day
+   Step 2: Time of day (kept as full-width option rows — only 3)
    ────────────────────────────────────────────────────────────── */
 
 const TIME_OPTIONS = [
@@ -233,24 +220,11 @@ const TIME_OPTIONS = [
 
 const StepTimeOfDay = ({ value, setValue }) => {
   const toggle = (key) => {
-    setValue(value.includes(key)
-      ? value.filter(k => k !== key)
-      : [...value, key]);
+    setValue(value.includes(key) ? value.filter(k => k !== key) : [...value, key]);
   };
   return (
     <>
-      <div style={{
-        fontFamily: ff.serif, fontSize: 30, color: theme.ink,
-        lineHeight: 1.15, marginBottom: 10,
-      }}>
-        When do you reach for tea?
-      </div>
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-        color: theme.ash, marginBottom: 24, lineHeight: 1.5,
-      }}>
-        Pick any that feel right — you can change this later.
-      </div>
+      <StepHeader title="When do you reach for tea?" sub="Pick any that feel right — you can change this later." />
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {TIME_OPTIONS.map(opt => (
           <OnboardOption key={opt.key} opt={opt} selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
@@ -261,47 +235,123 @@ const StepTimeOfDay = ({ value, setValue }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Step 3: What draws you
+   Step 3: What draws you (full 12-mood list, chip grid)
    ────────────────────────────────────────────────────────────── */
 
 const DRAW_OPTIONS = [
-  { key: "calm",    label: "Calm",    note: "a settling, a softening" },
-  { key: "focus",   label: "Focus",   note: "attention, the clear mind" },
-  { key: "comfort", label: "Comfort", note: "warmth, the familiar cup" },
-  { key: "energy",  label: "Energy",  note: "lift, the spark to begin" },
+  { key: "calm",      label: "Calm",      note: "a settling, a softening" },
+  { key: "focus",     label: "Focus",     note: "attention, the clear mind" },
+  { key: "energy",    label: "Energy",    note: "lift, the spark to begin" },
+  { key: "sleepy",    label: "Sleepy",    note: "the drift toward rest" },
+  { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup" },
+  { key: "settle",    label: "Settle",    note: "the post-meal calm" },
+  { key: "soothing",  label: "Soothing",  note: "gentle, mending" },
+  { key: "warming",   label: "Warming",   note: "ginger-and-cinnamon heat" },
+  { key: "cooling",   label: "Cooling",   note: "menthol, summer's exhale" },
+  { key: "digestive", label: "Digestive", note: "fennel, after-supper ease" },
+  { key: "grounding", label: "Grounding", note: "deep, rooted, slow" },
+  { key: "uplifting", label: "Uplifting", note: "citrus and sun" },
 ];
 
 const StepDraw = ({ value, setValue }) => {
   const toggle = (key) => {
-    setValue(value.includes(key)
-      ? value.filter(k => k !== key)
-      : [...value, key]);
+    setValue(value.includes(key) ? value.filter(k => k !== key) : [...value, key]);
   };
   return (
     <>
-      <div style={{
-        fontFamily: ff.serif, fontSize: 30, color: theme.ink,
-        lineHeight: 1.15, marginBottom: 10,
-      }}>
-        What pulls you to a cup?
-      </div>
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-        color: theme.ash, marginBottom: 24, lineHeight: 1.5,
-      }}>
-        Pick any that resonate — no wrong answers.
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {DRAW_OPTIONS.map(opt => (
-          <OnboardOption key={opt.key} opt={opt} selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
-        ))}
-      </div>
+      <StepHeader title="What pulls you to a cup?" sub="Pick any that resonate — no wrong answers." />
+      <ChipGrid options={DRAW_OPTIONS} value={value} onToggle={toggle} />
     </>
   );
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Shared option row
+   Step 4: Flavors (full 19-flavor list, chip grid)
+   ────────────────────────────────────────────────────────────── */
+
+const FLAVOR_OPTIONS = [
+  { key: "floral",   label: "Floral" },
+  { key: "citrus",   label: "Citrus" },
+  { key: "fruity",   label: "Fruity" },
+  { key: "sweet",    label: "Sweet" },
+  { key: "honeyed",  label: "Honeyed" },
+  { key: "spiced",   label: "Spiced" },
+  { key: "minty",    label: "Minty" },
+  { key: "earthy",   label: "Earthy" },
+  { key: "woody",    label: "Woody" },
+  { key: "smoky",    label: "Smoky" },
+  { key: "roasted",  label: "Roasted" },
+  { key: "nutty",    label: "Nutty" },
+  { key: "grassy",   label: "Grassy" },
+  { key: "vegetal",  label: "Vegetal" },
+  { key: "umami",    label: "Umami" },
+  { key: "savory",   label: "Savory" },
+  { key: "mineral",  label: "Mineral" },
+  { key: "bitter",   label: "Bitter" },
+  { key: "tart",     label: "Tart" },
+];
+
+const StepFlavors = ({ value, setValue }) => {
+  const toggle = (key) => {
+    setValue(value.includes(key) ? value.filter(k => k !== key) : [...value, key]);
+  };
+  return (
+    <>
+      <StepHeader title="Flavors you reach for?" sub="Optional — pick any you tend to like, or skip ahead." />
+      <ChipGrid options={FLAVOR_OPTIONS} value={value} onToggle={toggle} />
+    </>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────────
+   Shared step header (title + sub)
+   ────────────────────────────────────────────────────────────── */
+
+const StepHeader = ({ title, sub }) => (
+  <>
+    <div style={{
+      fontFamily: ff.serif, fontSize: 28, color: theme.ink,
+      lineHeight: 1.15, marginBottom: 10, textAlign: "center",
+    }}>{title}</div>
+    <div style={{
+      fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5,
+      color: theme.ash, marginBottom: 22, lineHeight: 1.5, textAlign: "center",
+    }}>{sub}</div>
+  </>
+);
+
+/* ──────────────────────────────────────────────────────────────
+   Chip grid — used for the longer multi-select steps (mood, flavor)
+   ────────────────────────────────────────────────────────────── */
+
+const ChipGrid = ({ options, value, onToggle }) => (
+  <div style={{
+    display: "flex", flexWrap: "wrap", gap: 8,
+    justifyContent: "center",
+  }}>
+    {options.map(opt => {
+      const selected = value.includes(opt.key);
+      return (
+        <button
+          key={opt.key}
+          onClick={() => onToggle(opt.key)}
+          title={opt.note || ""}
+          style={{
+            fontFamily: ff.serif, fontSize: 14,
+            padding: "8px 14px", borderRadius: 999,
+            background: selected ? theme.terra : "transparent",
+            color: selected ? theme.cream : theme.inkSoft,
+            border: `1px solid ${selected ? theme.terra : theme.rule}`,
+            cursor: "pointer", transition: "all 0.15s ease",
+          }}
+        >{opt.label}</button>
+      );
+    })}
+  </div>
+);
+
+/* ──────────────────────────────────────────────────────────────
+   Full-width option row (used by time-of-day step, 3 items)
    ────────────────────────────────────────────────────────────── */
 
 const OnboardOption = ({ opt, selected, onSelect }) => (
@@ -332,8 +382,6 @@ const OnboardOption = ({ opt, selected, onSelect }) => (
         {opt.note}
       </div>
     </div>
-    {selected && (
-      <div style={{ color: theme.terra, fontSize: 18 }}>✓</div>
-    )}
+    {selected && <div style={{ color: theme.terra, fontSize: 18 }}>✓</div>}
   </button>
 );
