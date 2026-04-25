@@ -28,7 +28,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
-import { resolveBlendAtBrew } from "../algo/compose";
+import { resolveBlendAtBrew, computeBrewProfile } from "../algo/compose";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -128,6 +128,15 @@ export const BlendExtractionExplorer = ({
   // the user has pushed past them. For curated blends, outsider warnings
   // are also silenced when the user sits exactly on the baseline.
   const brew = resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
+
+  // Algorithm-derived "research-aligned" brew — the temperature-range
+  // intersection (or grams-weighted compromise) plus weighted time.
+  // Surfaced inside the tradition-over-literature notice so a reader
+  // who'd rather brew where the studies recommend has a one-tap target.
+  const sciBrew = useMemo(() => computeBrewProfile(ingredients), [ingredients]);
+  const sciDiffers = sciBrew.tempC !== defaultTempC || sciBrew.timeS !== defaultTimeS;
+  const sciTempDisplay = unit === "F" ? `${cToF(sciBrew.tempC)}°F` : `${sciBrew.tempC}°C`;
+  const sciTimeDisplay = `${Math.floor(sciBrew.timeS / 60)}:${String(sciBrew.timeS % 60).padStart(2, "0")}`;
 
   // Display formatting
   const displayTemp = unit === "F" ? `${cToF(tempC)}°F` : `${tempC}°C`;
@@ -280,6 +289,14 @@ export const BlendExtractionExplorer = ({
           The science matters; the centuries of practice that found this
           cup matter too — and sometimes practice knows what science
           hasn't measured yet.
+          {sciDiffers && (
+            <div style={{ marginTop: 6, color: theme.ash }}>
+              If you'd like the research-aligned version, try{" "}
+              <em style={{ fontStyle: "normal", color: theme.inkSoft }}>
+                {sciTempDisplay} · {sciTimeDisplay}
+              </em>.
+            </div>
+          )}
         </div>
       )}
 
