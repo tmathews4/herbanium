@@ -234,10 +234,18 @@ export const FLAVOR_COMPLEMENTS = {
   minty:   ["citrus", "floral", "sweet"],
   fruity:  ["floral", "spiced", "honeyed"],
   sweet:   ["spiced", "floral", "earthy"],
-  grassy:  ["citrus", "floral", "mineral"],
+  grassy:  ["citrus", "floral", "mineral", "vegetal"],
   smoky:   ["earthy", "spiced", "sweet"],
-  mineral: ["earthy", "grassy"],
+  mineral: ["earthy", "grassy", "umami"],
   honeyed: ["floral", "fruity"],
+  umami:   ["mineral", "savory", "grassy"],
+  woody:   ["earthy", "smoky", "spiced"],
+  roasted: ["nutty", "earthy", "spiced"],
+  bitter:  ["earthy", "woody", "spiced"],
+  tart:    ["fruity", "citrus", "floral"],
+  vegetal: ["grassy", "mineral", "umami"],
+  nutty:   ["roasted", "sweet", "honeyed"],
+  savory:  ["umami", "vegetal", "earthy"],
 };
 
 // Simple mood-neighbor map: when flavor is primary, we can suggest an
@@ -328,190 +336,232 @@ function blendMatchesFlavor(b, flavor) {
   });
 }
 
-// Multi-candidate resolver, axis-aware. Returns 1–4 blends.
-// Always leads with the primary match. Accent candidates vary along the
-// NON-primary axis: when primaryAxis is "feel", accents explore flavor
-// variations; when "taste", accents explore mood variations.
-export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
+// Score how completely a blend embodies the user's selections.
+// `matched` counts mood-hits + flavor-hits; `fullMatch` is true when
+// every selected mood and every selected flavor finds a match.
+function scoreSelections(b, moods, flavors) {
+  const moodHits = moods.filter(m => blendMatchesMood(b, m)).length;
+  const flavorHits = flavors.filter(f => blendMatchesFlavor(b, f)).length;
+  const total = moods.length + flavors.length;
+  const matched = moodHits + flavorHits;
+  return {
+    moodHits,
+    flavorHits,
+    matched,
+    total,
+    fullMatch: total > 0 && matched === total,
+  };
+}
+
+// Build a synthetic ("Herbanium experiment · sweet-spot") candidate
+// when no curated blend embodies all selections. For each selected
+// mood we pull the ingredient that most strongly expresses that
+// effect; for each selected flavor we pull a flavor-matching
+// ingredient as an accent. computeBrewProfile then picks the 2D
+// sweet spot (or the closest-point compromise if the ingredient
+// ranges don't intersect cleanly).
+function buildSyntheticForSelections(moods, flavors) {
+  const picks = [];
+  const usedIds = new Set();
+
+  for (const m of moods) {
+    const cands = Object.entries(INGREDIENTS)
+      .filter(([id]) => !usedIds.has(id))
+      .map(([id, ing]) => {
+        const eff = (ing.effects || []).find(([k]) => k === m);
+        return { id, strength: eff ? eff[1] : 0 };
+      })
+      .filter(c => c.strength >= 3)
+      .sort((a, b) => b.strength - a.strength);
+    if (cands.length === 0) continue;
+    picks.push({ id: cands[0].id, g: 1.0 });
+    usedIds.add(cands[0].id);
+  }
+
+  for (const f of flavors) {
+    const cand = Object.entries(INGREDIENTS).find(([id, ing]) =>
+      !usedIds.has(id) && (ing.flavors || []).includes(f)
+    );
+    if (!cand) continue;
+    picks.push({ id: cand[0], g: 0.5, role: "accent" });
+    usedIds.add(cand[0]);
+  }
+
+  if (picks.length < 2) return null;
+
+  const profile = computeBrewProfile(picks, { leadOnly: true });
+  const isCleanSweet = !!profile.compatible;
+
+  // Surface the leads' actual effect ratings so the predicted-effect
+  // bars on the brew card reflect what the user asked for.
+  const effectMap = {};
+  for (const p of picks) {
+    if (p.role === "accent") continue;
+    const meta = INGREDIENTS[p.id];
+    for (const [tag, str] of (meta?.effects || [])) {
+      effectMap[tag] = Math.max(effectMap[tag] || 0, str);
+    }
+  }
+  const effects = Object.entries(effectMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+
+  const moodPart = moods.slice(0, 2).join(" + ");
+  const flavorTag = flavors[0] ? ` · ${flavors[0]}` : "";
+  const namePrefix = isCleanSweet ? "Sweet-Spot" : "Closest Match";
+  const name = `${namePrefix}: ${moodPart}${flavorTag}`;
+  const subtitle = isCleanSweet
+    ? "a synthesized cup that hits every selection at a clean brewing window"
+    : "the catalog's closest balance for these selections — no clean shared window";
+
+  return {
+    id: `synth-${[...moods, ...flavors].join("-")}`,
+    name,
+    subtitle,
+    ingredients: picks,
+    tempC: profile.tempC,
+    timeS: profile.timeS,
+    mood: moods[0] || null,
+    flavor: flavors[0] || null,
+    effects,
+    experimental: true,
+    synthetic: true,
+    sweetSpot: isCleanSweet,
+  };
+}
+
+// Multi-candidate resolver, axis-aware. Returns 1–5 blends.
+//
+// Selection embodiment is the new ranking primitive: a candidate that
+// matches every selected mood and flavor wins over one that matches
+// fewer. If no curated blend fully embodies the selections, a
+// synthetic candidate is built from the strongest-expressing
+// ingredients and surfaced first — clean sweet-spot if the brewing
+// windows intersect, closest-point compromise if they don't.
+//
+// Legacy: the second positional arg accepts either a single flavor
+// string (older callers) or a flavors array (current callers).
+export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   if (moods.length === 0) return [];
+  const flavors = Array.isArray(flavorArg)
+    ? flavorArg.filter(Boolean)
+    : flavorArg ? [flavorArg] : [];
+  // Legacy single-flavor variable for axis-aware accent generation
+  // (the accent helpers still expect a single flavor or null).
+  const flavor = flavors[0] || null;
+
+  // Score the entire catalog and keep the strongest matches in
+  // descending order (full-match → partial-match → no-match), then
+  // shortest recipe wins among ties.
+  const scoredPool = BLENDS
+    .map(b => ({ blend: b, score: scoreSelections(b, moods, flavors) }))
+    .filter(x => x.score.matched > 0)
+    .sort((a, b) => {
+      if (a.score.fullMatch !== b.score.fullMatch) return a.score.fullMatch ? -1 : 1;
+      if (a.score.matched !== b.score.matched) return b.score.matched - a.score.matched;
+      return a.blend.ingredients.length - b.blend.ingredients.length;
+    });
+
+  // Pull at most one entry per kind (tradition / experimental / house)
+  // from the top of the scored pool, plus the legacy primary-resolver
+  // result and an accent variant. This keeps the list diverse rather
+  // than four near-duplicates.
+  const candidates = [];
+  const seenNames = new Set();
+
+  function addBlend(b, kind, kindLabel, score) {
+    if (seenNames.has(b.name)) return;
+    seenNames.add(b.name);
+    candidates.push({ ...b, kind, kindLabel, _score: score });
+  }
+
+  // Top scorer for each kind, in priority order
+  function topOfKind(predicate) {
+    return scoredPool.find(({ blend }) =>
+      predicate(blend) && !seenNames.has(blend.name)
+    );
+  }
 
   const primary = resolveBlend(moods, flavor);
-  const candidates = [{ ...primary, kind: "primary", kindLabel: "closest match" }];
+  if (primary) {
+    const score = scoreSelections(primary, moods, flavors);
+    addBlend(primary, "primary", "closest match", score);
+  }
 
+  // Pull one accent variant for diversity. On the feel-led axis we vary
+  // along flavor; on the taste-led axis we vary along mood. The accent
+  // is intentionally not in the scored pool — it's a derived variant.
   if (primaryAxis === "feel") {
-    // User cares about mood — vary across flavor axis.
-    // If flavor is selected, try a COMPLEMENTARY flavor accent first.
-    // If no flavor, or complement generation fails, try the user's chosen
-    // flavor as a doubled-down accent.
     const complements = flavor ? (FLAVOR_COMPLEMENTS[flavor] || []) : [];
     for (const comp of complements) {
       const v = buildAccentVariantByFlavor(primary, comp);
       if (v) {
-        candidates.push({ ...v, kind: "accent", kindLabel: `${comp} accent` });
+        addBlend(v, "accent", `${comp} accent`, scoreSelections(v, moods, flavors));
         break;
       }
     }
-    // If we still haven't added an accent and user picked a flavor,
-    // try doubling down on that flavor as a fallback
-    if (candidates.length === 1 && flavor) {
-      const v = buildAccentVariantByFlavor(primary, flavor);
-      if (v) candidates.push({ ...v, kind: "accent", kindLabel: `${flavor}-forward` });
-    }
-
-    // Tradition fits a mood-led view — pick the shortest match so a
-    // pure single-ingredient steep (Sencha properly, Darjeeling neat,
-    // Hojicha at Dusk) wins over a multi-ingredient blend at the same
-    // mood. Pure teas are the truest expression of a tradition.
-    const tradition = BLENDS
-      .filter(b => b.tradition && moods.some(m => blendMatchesMood(b, m)) &&
-        !candidates.some(c => c.name === b.name))
-      // Strong matches (blend.mood === user's mood) beat effect-only matches;
-      // then a flavor-tag match (when the user picked a flavor too) beats
-      // a flavor mismatch; then the shortest recipe wins.
-      .sort((a, b) => {
-        const aStrong = moods.includes(a.mood) ? 0 : 1;
-        const bStrong = moods.includes(b.mood) ? 0 : 1;
-        if (aStrong !== bStrong) return aStrong - bStrong;
-        if (flavor) {
-          const aFlav = a.flavor === flavor ? 0 : 1;
-          const bFlav = b.flavor === flavor ? 0 : 1;
-          if (aFlav !== bFlav) return aFlav - bFlav;
-        }
-        return a.ingredients.length - b.ingredients.length;
-      })[0];
-    if (tradition) {
-      candidates.push({
-        ...tradition, kind: "tradition",
-        kindLabel: `traditional · ${tradition.tradition}`,
-      });
-    }
-
-    // Experimental Herbanium blends are also eligible — pulls in custom
-    // recipes like Tom Foolery so the suggestion row isn't limited to
-    // legacy traditions. The UI marks these with a blue outline.
-    const experimental = BLENDS
-      .filter(b => b.experimental && moods.some(m => blendMatchesMood(b, m)) &&
-        !candidates.some(c => c.name === b.name))
-      .sort((a, b) => {
-        const aStrong = moods.includes(a.mood) ? 0 : 1;
-        const bStrong = moods.includes(b.mood) ? 0 : 1;
-        if (aStrong !== bStrong) return aStrong - bStrong;
-        if (flavor) {
-          const aFlav = a.flavor === flavor ? 0 : 1;
-          const bFlav = b.flavor === flavor ? 0 : 1;
-          if (aFlav !== bFlav) return aFlav - bFlav;
-        }
-        return a.ingredients.length - b.ingredients.length;
-      })[0];
-    if (experimental) {
-      candidates.push({
-        ...experimental, kind: "experimental",
-        kindLabel: "Herbanium experiment",
-      });
-    }
-
-    // House blends — entries in BLENDS without a tradition or
-    // experimental tag. These are the catalog's everyday cups
-    // (Dusk Lullaby, Hearth & Quiet, sweet-spot customs like
-    // Plumtide / Honeyed Hush / Citrine). Surfaced as a regular
-    // candidate so picking a (mood, flavor) reaches them.
-    const house = BLENDS
-      .filter(b => !b.tradition && !b.experimental &&
-        moods.some(m => blendMatchesMood(b, m)) &&
-        !candidates.some(c => c.name === b.name))
-      .sort((a, b) => {
-        const aStrong = moods.includes(a.mood) ? 0 : 1;
-        const bStrong = moods.includes(b.mood) ? 0 : 1;
-        if (aStrong !== bStrong) return aStrong - bStrong;
-        if (flavor) {
-          const aFlav = a.flavor === flavor ? 0 : 1;
-          const bFlav = b.flavor === flavor ? 0 : 1;
-          if (aFlav !== bFlav) return aFlav - bFlav;
-        }
-        return a.ingredients.length - b.ingredients.length;
-      })[0];
-    if (house) {
-      candidates.push({
-        ...house, kind: "house",
-        kindLabel: "house blend",
-      });
-    }
   } else {
-    // User cares about taste — vary across mood axis.
-    // Try mood-neighbor first: same flavor, different mood emphasis.
     const primaryMood = moods[0];
     const neighbors = MOOD_NEIGHBORS[primaryMood] || [];
     for (const nb of neighbors) {
       if (moods.includes(nb)) continue;
       const v = buildAccentVariantByMood(primaryMood, nb, flavor);
       if (v) {
-        candidates.push({ ...v, kind: "accent", kindLabel: `${nb}-leaning` });
+        addBlend(v, "accent", `${nb}-leaning`, scoreSelections(v, moods, flavors));
         break;
-      }
-    }
-
-    // Traditions that share the selected flavor fit a taste-led view —
-    // shortest match wins so a pure tea surfaces over a blend.
-    if (flavor) {
-      const flavorTradition = BLENDS
-        .filter(b => b.tradition && blendMatchesFlavor(b, flavor) &&
-          !candidates.some(c => c.name === b.name))
-        .sort((a, b) => {
-          const aStrong = a.flavor === flavor ? 0 : 1;
-          const bStrong = b.flavor === flavor ? 0 : 1;
-          if (aStrong !== bStrong) return aStrong - bStrong;
-          return a.ingredients.length - b.ingredients.length;
-        })[0];
-      if (flavorTradition) {
-        candidates.push({
-          ...flavorTradition, kind: "tradition",
-          kindLabel: `traditional · ${flavorTradition.tradition}`,
-        });
-      }
-      // Experimental flavor matches for the taste-led view.
-      const flavorExperimental = BLENDS
-        .filter(b => b.experimental && blendMatchesFlavor(b, flavor) &&
-          !candidates.some(c => c.name === b.name))
-        .sort((a, b) => {
-          const aStrong = a.flavor === flavor ? 0 : 1;
-          const bStrong = b.flavor === flavor ? 0 : 1;
-          if (aStrong !== bStrong) return aStrong - bStrong;
-          return a.ingredients.length - b.ingredients.length;
-        })[0];
-      if (flavorExperimental) {
-        candidates.push({
-          ...flavorExperimental, kind: "experimental",
-          kindLabel: "Herbanium experiment",
-        });
-      }
-      // House blends matching the chosen flavor.
-      const flavorHouse = BLENDS
-        .filter(b => !b.tradition && !b.experimental &&
-          blendMatchesFlavor(b, flavor) &&
-          !candidates.some(c => c.name === b.name))
-        .sort((a, b) => {
-          const aStrong = a.flavor === flavor ? 0 : 1;
-          const bStrong = b.flavor === flavor ? 0 : 1;
-          if (aStrong !== bStrong) return aStrong - bStrong;
-          return a.ingredients.length - b.ingredients.length;
-        })[0];
-      if (flavorHouse) {
-        candidates.push({
-          ...flavorHouse, kind: "house",
-          kindLabel: "house blend",
-        });
       }
     }
   }
 
-  // Final order: pure-tea steeps first, mixes after. The kindLabel still
-  // tells the user *what* each candidate is; the position tells them
-  // how simple it is. A single-ingredient match always rises to the top
-  // whether it's the primary, a tradition, an experiment, or a house
-  // blend. Cap at 5 so all five buckets (primary, accent, tradition,
-  // experimental, house) can coexist when each finds a hit.
+  // Top tradition / experimental / house from the scored pool. Each
+  // bucket gets at most one entry, so the suggestion row doesn't get
+  // dominated by near-duplicates from a single category.
+  const traditionTop = topOfKind(b => !!b.tradition);
+  if (traditionTop) {
+    addBlend(traditionTop.blend, "tradition",
+      `traditional · ${traditionTop.blend.tradition}`, traditionTop.score);
+  }
+  const experimentalTop = topOfKind(b => !!b.experimental);
+  if (experimentalTop) {
+    addBlend(experimentalTop.blend, "experimental",
+      "Herbanium experiment", experimentalTop.score);
+  }
+  const houseTop = topOfKind(b => !b.tradition && !b.experimental);
+  if (houseTop) {
+    addBlend(houseTop.blend, "house", "house blend", houseTop.score);
+  }
+
+  // If nothing in the candidates set fully embodies the user's
+  // selections, build a synthetic experiment that does — clean
+  // sweet-spot if the leads' brewing windows intersect, closest-point
+  // compromise if they don't. This is the "we made it for you"
+  // candidate, surfaced first so a full match always leads.
+  const hasFullMatch = candidates.some(c => c._score?.fullMatch);
+  if (!hasFullMatch) {
+    const synth = buildSyntheticForSelections(moods, flavors);
+    if (synth) {
+      const synthScore = scoreSelections(synth, moods, flavors);
+      const label = synth.sweetSpot
+        ? "Herbanium experiment · sweet spot"
+        : "Herbanium experiment · closest fit";
+      addBlend(synth, "synthetic", label, synthScore);
+    }
+  }
+
+  // Final order:
+  //   1. Full-match candidates first (synthetic counts).
+  //   2. Among full-matches, more total selection-hits wins.
+  //   3. Among ties, fewer ingredients wins (pure-tea-first).
   return candidates
-    .sort((a, b) => a.ingredients.length - b.ingredients.length)
+    .sort((a, b) => {
+      const aFull = (a._score?.fullMatch || a.kind === "synthetic") ? 0 : 1;
+      const bFull = (b._score?.fullMatch || b.kind === "synthetic") ? 0 : 1;
+      if (aFull !== bFull) return aFull - bFull;
+      const aMatch = a._score?.matched || 0;
+      const bMatch = b._score?.matched || 0;
+      if (aMatch !== bMatch) return bMatch - aMatch;
+      return a.ingredients.length - b.ingredients.length;
+    })
     .slice(0, 5);
 }
 

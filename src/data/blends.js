@@ -26,6 +26,10 @@ const FLAVORS = [
   // Sensory-register flavors — blends opt in via blend.flavor, and the
   // candidate resolver also matches when an ingredient lists the flavor.
   "grassy", "smoky", "mineral", "honeyed", "umami", "woody", "roasted",
+  // Distinct descriptive registers from the ingredient catalog —
+  // each one resolves to a different family of leaves than the
+  // categories above.
+  "bitter", "tart", "vegetal", "nutty", "savory",
 ];
 
 /* ── Curated named blends ──────────────────────────────────── */
@@ -865,6 +869,14 @@ const FLAVOR_CONFLICTS = [
   ["smoky",  "citrus"],    // smoke buries bright/citrus the same way
   ["umami",  "sweet"],     // savory broth and dessert sweet pull apart
   ["roasted", "floral"],   // toasted depth covers delicate florals
+  ["bitter", "sweet"],     // direct opposition on the basic-taste axis
+  ["bitter", "honeyed"],   // bitter erases honey's gentleness
+  ["bitter", "fruity"],    // bitter crushes fruit brightness
+  ["tart",   "savory"],    // sharp acid and broth read as a kitchen mistake
+  ["tart",   "umami"],     // same — fruit-acid and umami don't braid
+  ["nutty",  "tart"],      // nutty depth and acid don't reconcile in a cup
+  ["vegetal", "smoky"],    // smoke buries fresh vegetal notes
+  ["savory", "fruity"],    // savory broth and fruit pull apart
 ];
 
 // Names used when a single mood is selected — each mood has a canonical

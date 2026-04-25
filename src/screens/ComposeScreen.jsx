@@ -85,8 +85,9 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   // Resolver still takes a single flavor (for now) — we pass the first
   // selected flavor as the primary driver. Additional flavors will be used
   // for accent/variant generation downstream.
-  const primaryFlavor = flavors[0] || null;
-  const rawCandidates = resolveCandidates(moods, primaryFlavor, primaryAxis);
+  // Pass the full flavors array so resolveCandidates can score
+  // candidates against every selected flavor, not just the first.
+  const rawCandidates = resolveCandidates(moods, flavors, primaryAxis);
 
   // When "only use what's in my pantry" is toggled on, drop any candidate
   // that contains an ingredient the user doesn't have. Empty pantry + toggle
