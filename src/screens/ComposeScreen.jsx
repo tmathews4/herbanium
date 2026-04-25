@@ -340,7 +340,9 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
                 {candidates.map((c, i) => {
                   const isSelected = i === selectedIdx;
-                  const isExperimental = c.kind === "experimental";
+                  // Both experimental and accented (Herbanium variations
+                  // on a tradition) get the same in-house blue treatment.
+                  const isExperimental = c.kind === "experimental" || c.kind === "accented";
                   // Experimental blends get a sky-blue outline (and label color)
                   // so they read as a different *kind* of candidate than the
                   // traditions and accents around them.

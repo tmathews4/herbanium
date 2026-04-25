@@ -466,6 +466,88 @@ function bestIngredientForFlavor(flavor, exclude) {
   return cands[0];
 }
 
+// Build an "accented tradition" candidate: take a tradition whose
+// primary axis fully matches the user's selections, then add 1-2
+// accent ingredients to cover the secondary-axis selections it misses.
+// Lets the suggestion row include something like "Masala Chai, Zest"
+// when the user picked energy + citrus and the unaccented chai matches
+// energy but not citrus. The result is tagged experimental + accented
+// so the UI marks it as an in-house variation rather than the
+// tradition itself.
+function buildAccentedTradition(blend, score, moods, flavors, primaryAxis) {
+  const isFeel = primaryAxis === "feel";
+  const secondarySels = isFeel ? flavors : moods;
+  const unmet = secondarySels.filter(s =>
+    isFeel ? !blendMatchesFlavor(blend, s) : !blendMatchesMood(blend, s)
+  );
+  // Only add 1-2 accents; more would stop being "the tradition + a
+  // touch" and start being a different recipe.
+  if (unmet.length === 0 || unmet.length > 2) return null;
+
+  const usedIds = new Set(blend.ingredients.map(i => i.id));
+  const newAccents = [];
+  for (const sel of unmet) {
+    const cand = isFeel
+      ? bestIngredientForFlavor(sel, usedIds)
+      : bestIngredientForMood(sel, usedIds, 2);
+    if (!cand) continue;
+    newAccents.push({ id: cand.id, g: 0.3, role: "accent" });
+    usedIds.add(cand.id);
+  }
+  if (newAccents.length === 0) return null;
+
+  const ingredients = [
+    ...blend.ingredients.map(i => ({ ...i })),
+    ...newAccents,
+  ];
+  const profile = computeBrewProfile(ingredients, { leadOnly: true });
+
+  // Name: "<Tradition>, <AccentWord>" — e.g., "Masala Chai, Zest"
+  // The accent word comes from the same MOOD_WORDS / FLAVOR_WORDS bank
+  // the synthetic builder draws from, so the voice stays consistent.
+  const accentWords = unmet.map(s =>
+    pickFromBank(isFeel ? FLAVOR_WORDS[s] : MOOD_WORDS[s], hashOf(s + blend.name))
+  ).filter(Boolean);
+  const name = `${blend.name}, ${accentWords.join(" & ")}`;
+  const subtitle = `${blend.name} accented for ${unmet.join(" + ")}`;
+
+  return {
+    id: `accented-${blend.id}-${unmet.join("-")}`,
+    name,
+    subtitle,
+    ingredients,
+    tempC: profile.tempC,
+    timeS: profile.timeS,
+    mood: blend.mood,
+    flavor: blend.flavor,
+    effects: blend.effects,
+    experimental: true,
+    accented: true,
+    sourceTradition: blend.name,
+  };
+}
+
+// Find the best tradition for accenting: full primary-axis match,
+// with at least one secondary selection unmet (so there's something
+// for the accent to fill). Prefer traditions that already match more
+// of the secondary axis (less accenting needed) and shorter recipes.
+function bestPartialPrimaryTradition(moods, flavors, primaryAxis) {
+  const isFeel = primaryAxis === "feel";
+  const secondarySels = isFeel ? flavors : moods;
+  if (secondarySels.length === 0) return null;
+
+  return BLENDS
+    .filter(b => b.tradition)
+    .map(b => ({ blend: b, score: scoreSelections(b, moods, flavors, primaryAxis) }))
+    .filter(x => x.score.fullPrimary && x.score.secondaryHits < x.score.secondaryTotal)
+    .sort((a, b) => {
+      const aMissing = a.score.secondaryTotal - a.score.secondaryHits;
+      const bMissing = b.score.secondaryTotal - b.score.secondaryHits;
+      if (aMissing !== bMissing) return aMissing - bMissing;
+      return a.blend.ingredients.length - b.blend.ingredients.length;
+    })[0] || null;
+}
+
 // Build a synthetic candidate when no curated blend embodies the
 // user's selections. For each selected mood, we pull the strongest
 // ingredient expressing that effect (tea-first, herbal fallback);
@@ -643,6 +725,24 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     addBlend(traditionTop.blend, "tradition",
       `traditional · ${traditionTop.blend.tradition}`, traditionTop.score);
   }
+
+  // Accented tradition: take a tradition that matches the primary axis
+  // but misses some of the secondary filter, and extend it with 1-2
+  // accent ingredients to close the gap. Surfaces as an in-house
+  // experiment ("Masala Chai, Zest") so the user can see how a
+  // traditional recipe gets tuned for their picks.
+  const partial = bestPartialPrimaryTradition(moods, flavors, primaryAxis);
+  if (partial) {
+    const accented = buildAccentedTradition(
+      partial.blend, partial.score, moods, flavors, primaryAxis
+    );
+    if (accented) {
+      const accScore = scoreSelections(accented, moods, flavors, primaryAxis);
+      addBlend(accented, "accented",
+        `accented · ${partial.blend.name}`, accScore);
+    }
+  }
+
   const experimentalTop = topOfKind(b => !!b.experimental);
   if (experimentalTop) {
     addBlend(experimentalTop.blend, "experimental",
@@ -690,7 +790,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       if (aSec !== bSec) return bSec - aSec;
       return a.ingredients.length - b.ingredients.length;
     })
-    .slice(0, 5);
+    .slice(0, 6);
 }
 
 /* ──────────────────────────────────────────────────────────────
