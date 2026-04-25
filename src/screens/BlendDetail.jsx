@@ -352,19 +352,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
                   cursor: "pointer", userSelect: "none",
                 }}
               >
-                <SectionLabel n="ii">Recommended Preparations</SectionLabel>
-                <span style={{
-                  display: "flex", alignItems: "baseline", gap: 6,
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
-                }}>
-                  <span>{sourceLabel}</span>
+                <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                   <span style={{
-                    fontFamily: ff.sans, fontSize: 10, color: theme.ash,
+                    fontFamily: ff.sans, fontSize: 9, color: theme.ash,
                     transition: "transform 0.15s ease",
                     transform: directionsOpen ? "rotate(90deg)" : "rotate(0deg)",
                     display: "inline-block",
-                  }}>▸</span>
+                  }}>▶</span>
+                  <SectionLabel n="ii">Recommended Preparations</SectionLabel>
                 </span>
+                <span style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+                }}>{sourceLabel}</span>
               </div>
               {directionsOpen && (
                 <ol style={{
