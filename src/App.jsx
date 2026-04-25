@@ -45,15 +45,16 @@ const TabBar = ({ tab, setTab }) => {
       background: "rgba(243,236,220,0.94)",
       backdropFilter: "blur(8px)",
       borderTop: `1px solid ${theme.rule}`,
-      display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4,
+      display: "grid", gridTemplateColumns: "1.35fr 1fr 1fr 1fr", gap: 4,
     }}>
-      {tabs.map(t => (
+      {tabs.map((t, i) => (
         <button key={t.k} onClick={() => setTab(t.k)} style={{
           background: "transparent", border: "none", cursor: "pointer",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 3,
           padding: "4px 2px",
           color: tab === t.k ? theme.terra : theme.ash,
           minWidth: 0,
+          borderRight: i === 0 ? `1px solid ${theme.ruleSoft}` : "none",
         }}>
           {React.cloneElement(t.icon, { c: tab === t.k ? theme.terra : theme.ash })}
           <span style={{
