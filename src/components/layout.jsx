@@ -124,16 +124,18 @@ export function balanceIntoRows(items, maxPerRow = 4) {
   return out;
 }
 
-// ChipRows — renders a list of items as balanced, left-aligned rows of chips.
-// Each row is a flex container that shares row structure (4+3 for 7 items,
-// 3+3 for 6, etc.) but aligns left to match the section label above it.
-export const ChipRows = ({ items, renderItem, gap = 6, rowGap = 6, maxPerRow = 4 }) => {
+// ChipRows — renders a list of items as balanced rows of chips.
+// align: "start" (default) keeps chips left-aligned beside their section label.
+//        "spread" uses space-between so chips reach edge-to-edge — useful
+//        when a row is the dominant element (filter bars).
+export const ChipRows = ({ items, renderItem, gap = 6, rowGap = 6, maxPerRow = 4, align = "start" }) => {
   const rows = balanceIntoRows(items, maxPerRow);
+  const justify = align === "spread" ? "space-between" : "flex-start";
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: rowGap }}>
       {rows.map((row, i) => (
         <div key={i} style={{
-          display: "flex", justifyContent: "flex-start", flexWrap: "nowrap", gap,
+          display: "flex", justifyContent: justify, flexWrap: "nowrap", gap,
         }}>
           {row.map((item, j) => renderItem(item, i * maxPerRow + j))}
         </div>

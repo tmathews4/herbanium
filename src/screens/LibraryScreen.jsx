@@ -100,7 +100,7 @@ export const LibraryScreen = ({ go, pantryIds }) => {
             )}
           </div>
 
-          {/* Category filter pills */}
+          {/* Category filter pills — spread to edges */}
           <div style={{ marginBottom: 8 }}>
             <ChipRows
               items={[
@@ -113,14 +113,16 @@ export const LibraryScreen = ({ go, pantryIds }) => {
               ]}
               gap={4}
               rowGap={4}
+              maxPerRow={6}
+              align="spread"
               renderItem={([key, label]) => (
                 <button key={key} onClick={() => setShelfCategory(key)} style={{
                   fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                  padding: "3px 9px", borderRadius: 999,
+                  padding: "4px 10px", borderRadius: 999,
                   border: `1px solid ${shelfCategory === key ? theme.ink : theme.ruleSoft}`,
                   background: shelfCategory === key ? theme.ink : "transparent",
                   color: shelfCategory === key ? theme.cream : theme.ash,
-                  cursor: "pointer",
+                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
                 }}>{label}</button>
               )}
             />
@@ -128,57 +130,73 @@ export const LibraryScreen = ({ go, pantryIds }) => {
 
           {/* Tea sub-style pills — only when teas selected */}
           {shelfCategory === "true tea" && (
-            <div style={{ marginBottom: 8, marginLeft: 8 }}>
+            <div style={{ marginBottom: 8 }}>
               <ChipRows
                 items={["all", ...TEA_SUBCATEGORIES]}
                 gap={4}
                 rowGap={4}
+                maxPerRow={6}
+                align="spread"
                 renderItem={(key) => (
                   <button key={key} onClick={() => setTeaSubcategory(key)} style={{
                     fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.02em",
-                    padding: "2px 8px", borderRadius: 999,
+                    padding: "3px 10px", borderRadius: 999,
                     border: `1px solid ${teaSubcategory === key ? theme.terra : theme.ruleSoft}`,
                     background: teaSubcategory === key ? theme.terra : "transparent",
                     color: teaSubcategory === key ? theme.cream : theme.ash,
-                    cursor: "pointer",
+                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
                   }}>{key === "puerh" ? "pu-erh" : key}</button>
                 )}
               />
             </div>
           )}
 
-          {/* Caffeine + effect filters */}
-          <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <span style={{
-              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: theme.ash, marginRight: 2,
-            }}>caffeine</span>
-            {[["any", "any"], ["free", "free"], ["has", "with"]].map(([key, label]) => (
-              <button key={key} onClick={() => setCaffeineFilter(key)} style={{
-                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                padding: "3px 9px", borderRadius: 999,
-                border: `1px solid ${caffeineFilter === key ? theme.ink : theme.ruleSoft}`,
-                background: caffeineFilter === key ? theme.ink : "transparent",
-                color: caffeineFilter === key ? theme.cream : theme.ash,
-                cursor: "pointer",
-              }}>{label}</button>
-            ))}
+          {/* Caffeine — labeled row, three pills span full width */}
+          <div style={{ marginBottom: 8 }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+            }}>caffeine</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCaffeineFilter(key)}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                    padding: "5px 10px", borderRadius: 999,
+                    border: `1px solid ${caffeineFilter === key ? theme.ink : theme.ruleSoft}`,
+                    background: caffeineFilter === key ? theme.ink : "transparent",
+                    color: caffeineFilter === key ? theme.cream : theme.ash,
+                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                  }}
+                >{label}</button>
+              ))}
+            </div>
           </div>
 
+          {/* Effect filter — labeled row, spread pills */}
           <div style={{ marginBottom: 10 }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+            }}>effect</div>
             <ChipRows
               items={["any", ...EFFECT_FILTERS]}
               gap={4}
               rowGap={4}
+              maxPerRow={5}
+              align="spread"
               renderItem={(key) => (
                 <button key={key} onClick={() => setEffectFilter(key)} style={{
                   fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                  padding: "3px 9px", borderRadius: 999,
+                  padding: "4px 10px", borderRadius: 999,
                   border: `1px solid ${effectFilter === key ? theme.sageDeep : theme.ruleSoft}`,
                   background: effectFilter === key ? theme.sageDeep : "transparent",
                   color: effectFilter === key ? theme.cream : theme.ash,
-                  cursor: "pointer",
-                }}>{key === "any" ? "any effect" : key}</button>
+                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                }}>{key === "any" ? "any" : key}</button>
               )}
             />
           </div>
