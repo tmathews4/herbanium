@@ -157,7 +157,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
           }}>
             {favoriteBlends.map(b => (
-              <FavoriteCard key={b.id} b={b} onTap={() => openInCompose(b.id)} />
+              <FavoriteCard key={b.id} b={b} onTap={() => openBlend(b.id)} />
             ))}
           </div>
         </>

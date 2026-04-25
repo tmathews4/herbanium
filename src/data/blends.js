@@ -361,6 +361,22 @@ const BLENDS = [
     effects: [["energy", 3], ["cooling", 3], ["uplifting", 3]],
   },
   {
+    id: "exp-tom-foolery",
+    name: "Tom Foolery",
+    subtitle: "the maker's sneaky cup — gunpowder minds the room while peppermint pulls a chair out, tulsi grinning between them",
+    ingredients: [
+      { id: "gunpowder", g: 1.5 },
+      { id: "peppermint", g: 0.5, role: "accent" },
+      { id: "tulsi", g: 0.8, role: "accent" },
+    ],
+    tempC: 85, timeS: 150, ml: 250,
+    mood: "focus", flavor: "minty",
+    public: true,
+    experimental: true,
+    style: "low-temp",
+    effects: [["focus", 4], ["uplifting", 4], ["calm", 3], ["energy", 2]],
+  },
+  {
     id: "exp-smoky-chai",
     name: "Smoky Chai",
     subtitle: "if Wuyi were Bombay — pine smoke spiced over Fujian",
