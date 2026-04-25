@@ -349,38 +349,23 @@ export default function App() {
     }
   };
 
-  // Save/unsave a blend (puts it on the Shelf).
-  const toggleSave = (blendId) => {
-    const next = new Set(savedBlendIds);
-    if (next.has(blendId)) {
-      next.delete(blendId);
-      // Unsaving also unfavorites — favorites are a subset of saved.
-      const nextFav = new Set(favoriteBlendIds);
-      if (nextFav.has(blendId)) {
-        nextFav.delete(blendId);
-        setFavoriteBlendIds(nextFav);
-      }
-    } else {
-      next.add(blendId);
-    }
-    setSavedBlendIds(next);
-  };
-
-  // Favorite/unfavorite a blend (the "I love this" tier — surfaces on Home).
-  // Adding to favorites auto-saves so the blend appears on Shelf too.
+  // Single favorite toggle — save and favorite are now one concept.
+  // Updates both savedBlendIds and favoriteBlendIds in lockstep so legacy
+  // call sites that read savedBlendIds (Profile stat, etc.) keep working
+  // without a wider rename.
   const toggleFavorite = (blendId) => {
+    const wasFav = favoriteBlendIds.has(blendId);
     const nextFav = new Set(favoriteBlendIds);
-    if (nextFav.has(blendId)) {
+    const nextSaved = new Set(savedBlendIds);
+    if (wasFav) {
       nextFav.delete(blendId);
+      nextSaved.delete(blendId);
     } else {
       nextFav.add(blendId);
-      if (!savedBlendIds.has(blendId)) {
-        const nextSaved = new Set(savedBlendIds);
-        nextSaved.add(blendId);
-        setSavedBlendIds(nextSaved);
-      }
+      nextSaved.add(blendId);
     }
     setFavoriteBlendIds(nextFav);
+    setSavedBlendIds(nextSaved);
   };
 
   const scrollRef = useRef(null);
@@ -470,8 +455,6 @@ export default function App() {
       {overlay === "blend" && blendOverlayId && (
         <BlendDetail
           blendId={blendOverlayId}
-          isSaved={savedBlendIds.has(blendOverlayId)}
-          onToggleSave={() => toggleSave(blendOverlayId)}
           isFavorite={favoriteBlendIds.has(blendOverlayId)}
           onToggleFavorite={() => toggleFavorite(blendOverlayId)}
           sessions={sessions}

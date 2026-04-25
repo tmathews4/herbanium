@@ -30,7 +30,7 @@ import {
    a friend's session — their review in a pull-quote up top.
    ────────────────────────────────────────────────────────────── */
 
-export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSaved, onToggleSave, isFavorite, onToggleFavorite, sessions, go }) => {
+export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavorite, onToggleFavorite, sessions, go }) => {
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
   const [openMood, setOpenMood] = React.useState(null);
@@ -81,27 +81,15 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
             The Blend
           </div>
-          {onToggleSave ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-              {isSaved && onToggleFavorite && (
-                <button onClick={onToggleFavorite} style={{
-                  background: "transparent", border: "none", cursor: "pointer",
-                  padding: "4px 6px",
-                  fontSize: 18, lineHeight: 1,
-                  color: isFavorite ? theme.terra : theme.ash,
-                }} title={isFavorite ? "remove from favorites" : "add to favorites"}>
-                  {isFavorite ? "♥" : "♡"}
-                </button>
-              )}
-              <button onClick={onToggleSave} style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                padding: "4px 6px",
-                fontSize: 20, lineHeight: 1,
-                color: isSaved ? theme.ochre : theme.ash,
-              }} title={isSaved ? "remove from shelf" : "save to shelf"}>
-                {isSaved ? "★" : "☆"}
-              </button>
-            </div>
+          {onToggleFavorite ? (
+            <button onClick={onToggleFavorite} style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              padding: "4px 6px",
+              fontSize: 22, lineHeight: 1,
+              color: isFavorite ? theme.terra : theme.ash,
+            }} title={isFavorite ? "remove from favorites" : "add to favorites"}>
+              {isFavorite ? "♥" : "♡"}
+            </button>
           ) : <div style={{ width: 40 }} />}
         </div>
 
