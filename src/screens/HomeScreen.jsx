@@ -4,7 +4,7 @@
 
 import React from "react";
 import {
-  Flower, Kettle, Leaf, Ornament, Sprig,
+  Flower, Kettle, Leaf, Ornament, Sprig, MOOD_ICONS,
 } from "../components/icons";
 import {
   FitText, SectionLabel,
@@ -206,12 +206,10 @@ export const FavoriteCard = ({ b, onTap }) => {
       display: "flex", flexDirection: "column", gap: 6,
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        {b.mood === "calm"    && <Flower size={16} c={theme.plum} />}
-        {b.mood === "energy"  && <Leaf   size={16} c={theme.sageDeep} />}
-        {b.mood === "comfort" && <Sprig  size={16} c={theme.ochre} />}
-        {b.mood === "focus"   && <Leaf   size={16} c={theme.sage} />}
-        {b.mood === "sleepy"  && <Flower size={16} c={theme.plum} />}
-        {b.mood === "digestive"  && <Sprig  size={16} c={theme.sage} />}
+        {(() => {
+          const Icon = MOOD_ICONS[b.mood] || Flower;
+          return <Icon size={18} />;
+        })()}
         <span style={{
           fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
           color: theme.ash,
@@ -268,10 +266,10 @@ export const SessionRow = ({ s, openBlend, first }) => {
       display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 12, alignItems: "start",
     }}>
       <div style={{ marginTop: 2 }}>
-        {b.mood === "calm"    && <Flower size={22} c={theme.plum} />}
-        {b.mood === "energy"  && <Leaf   size={22} c={theme.sageDeep} />}
-        {b.mood === "comfort" && <Sprig  size={22} c={theme.ochre} />}
-        {b.mood === "focus"   && <Leaf   size={22} c={theme.sage} />}
+        {(() => {
+          const Icon = MOOD_ICONS[b.mood] || Flower;
+          return <Icon size={22} />;
+        })()}
       </div>
       <div>
         <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2 }}>
