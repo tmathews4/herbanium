@@ -290,7 +290,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             const metaParts = [
               formatTempRange(meta.tempC[0], meta.tempC[1], unit),
               topFlavors,
-              topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
+              topEffect ? topEffect[0] : null,
             ].filter(Boolean);
             return (
               <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
