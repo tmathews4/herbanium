@@ -7,6 +7,13 @@ import {
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
 
+// How much steep-time slack counts as the same brew. Used by the
+// tradition-over-literature notice and the research-aligned
+// recommendation line to ignore deltas smaller than this — most
+// ingredient time ranges span 60-120s, so a sub-90s difference is
+// inside the natural fuzziness of brewing rather than a real choice.
+export const TRADITION_TIME_TOLERANCE_S = 90;
+
 /* ──────────────────────────────────────────────────────────────
    Brewing profile — derive temp/time from constituent ingredients.
 
@@ -561,12 +568,22 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const individualWarnings = pushedHarder ? allIndividualWarnings : [];
 
   // Tradition-over-literature notice: when a curator placed the recipe
-  // exactly here AND something was suppressed (raw outsiders or per-
-  // ingredient over-pull warnings), surface a single editorial line
-  // explaining that the brew sits outside what the studies prescribe
-  // because tradition put it there first.
-  const traditionNote = atCuratedBaseline
-    && (rawOutsiders.length > 0 || allIndividualWarnings.length > 0);
+  // exactly here AND at least one lead ingredient is *meaningfully*
+  // outside its preferred window. "Meaningful" filters out small
+  // steep-time deltas (≤ 90s past the time range) because those don't
+  // produce a perceptual shift worth dressing up as tradition. Temp
+  // mismatches always count — those genuinely change extraction.
+  const meaningfulDeviation = contributions.some(c => {
+    if (c.role !== "lead") return false;
+    const meta = INGREDIENTS[c.id];
+    const [tMin, tMax] = meta.tempC;
+    const [sMin, sMax] = meta.timeS;
+    if (tempC < tMin || tempC > tMax) return true;
+    if (timeS < sMin - TRADITION_TIME_TOLERANCE_S) return true;
+    if (timeS > sMax + TRADITION_TIME_TOLERANCE_S) return true;
+    return false;
+  });
+  const traditionNote = atCuratedBaseline && meaningfulDeviation;
 
   // Merge cup-level and individual warnings. Drop a cup-level tannin
   // duplicate if any individual warning of the same kind already fires

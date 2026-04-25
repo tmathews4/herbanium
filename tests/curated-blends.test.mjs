@@ -202,6 +202,35 @@ test("accent ingredients don't fire outsider warnings", () => {
     `accent ingredients should not appear in outsider warnings — got: ${accentLeak.join("; ")}`);
 });
 
+test("traditionNote stays off when lead deviation is only sub-tolerance time", async () => {
+  // Masala Chai: assam lead, brewed at 100°C/300s. Assam's time range
+  // is 180-300s — curator sits exactly on the max, well within tolerance.
+  // Spices are accent. There's no meaningful deviation worth surfacing.
+  const chai = blends.find(b => b.name === "Masala Chai");
+  assert(chai, "Masala Chai fixture not found");
+  const r = resolveBlendAtBrew(chai.ings, chai.t, chai.s, chai.t, chai.s, true);
+  assert(r.traditionNote === false,
+    "traditionNote should not fire — leads are in range and accents shouldn't trigger it");
+});
+
+test("traditionNote fires when a lead is past time tolerance", async () => {
+  // Dusk Lullaby: lavender is a lead with timeS [180,240], curator at
+  // 360s = 120s past max — beyond the 90s tolerance.
+  const dusk = blends.find(b => b.name === "Dusk Lullaby");
+  const r = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
+  assert(r.traditionNote === true,
+    "traditionNote should fire when a lead is more than 90s past its time max");
+});
+
+test("traditionNote fires for any temp deviation on a lead, regardless of time", async () => {
+  // Morning Vestment: ginger is a lead with tempC [100,100], curator
+  // at 95°C — temp deviation always counts.
+  const morning = blends.find(b => b.name === "Morning Vestment");
+  const r = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, true);
+  assert(r.traditionNote === true,
+    "traditionNote should fire when a lead is outside its temp range");
+});
+
 test("computeBrewProfile leadOnly excludes accents from the math", async () => {
   const { computeBrewProfile } = await import("../src/algo/compose.js");
   // Ground & Climb: matcha lead (70-80°C / 15-30s), reishi+ashwagandha accent.

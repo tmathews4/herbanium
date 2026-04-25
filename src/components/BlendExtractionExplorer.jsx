@@ -28,7 +28,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
-import { resolveBlendAtBrew, computeBrewProfile } from "../algo/compose";
+import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -138,7 +138,11 @@ export const BlendExtractionExplorer = ({
     () => computeBrewProfile(ingredients, { leadOnly: true }),
     [ingredients],
   );
-  const sciDiffers = sciBrew.tempC !== defaultTempC || sciBrew.timeS !== defaultTimeS;
+  // Show the recommendation only when it points somewhere meaningfully
+  // different — temp delta or > 90s time delta. A 30-second steep
+  // adjustment isn't a "research-aligned alternative" worth surfacing.
+  const sciDiffers = sciBrew.tempC !== defaultTempC
+    || Math.abs(sciBrew.timeS - defaultTimeS) > TRADITION_TIME_TOLERANCE_S;
   const sciTempDisplay = unit === "F" ? `${cToF(sciBrew.tempC)}°F` : `${sciBrew.tempC}°C`;
   const sciTimeDisplay = `${Math.floor(sciBrew.timeS / 60)}:${String(sciBrew.timeS % 60).padStart(2, "0")}`;
 
