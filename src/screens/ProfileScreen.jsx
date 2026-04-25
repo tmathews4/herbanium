@@ -10,6 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
+import { generateCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
@@ -151,7 +152,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           }}>{(profile?.name || "F").charAt(0).toUpperCase()}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
-              {isEmptyUser ? "a new keeper" : "Keeper of the shelf"}
+              {profile?.title || generateCreationTitle(profile) || (isEmptyUser ? "a new keeper" : "Keeper of the shelf")}
             </div>
             {editingName ? (
               <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 2 }}>

@@ -17,6 +17,7 @@ import { OnboardingScreen } from "./screens/OnboardingScreen";
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { generateExperimentalSeeds, pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+import { generateCreationTitle } from "./data/creationTitle";
 import { buildSyntheticForSelections } from "./algo/compose";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
@@ -249,12 +250,17 @@ export default function App() {
     const experimentals = generateExperimentalSeeds(
       { draw, flavors }, buildSyntheticForSelections,
     );
-    setProfile({
+    const createdAt = Date.now();
+    const baseProfile = {
       name,
       timeOfDay,
       draw,
       flavors: flavors || [],
-      createdAt: Date.now(),
+      createdAt,
+    };
+    setProfile({
+      ...baseProfile,
+      title: generateCreationTitle(baseProfile),
     });
     setGeneratedBlends(experimentals);
     setSavedBlendIds(new Set([
