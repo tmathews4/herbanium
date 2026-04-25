@@ -612,6 +612,45 @@ test("forgiving ingredients (rooibos, vanilla, gyokuro, hojicha) do NOT fire ove
   }
 });
 
+// ─── BLEND-LEVEL OVER-PULL DETECTION ──────────────────────────
+//
+// Mass-weighted averaging in resolveBlendAtBrew used to dilute any
+// single ingredient's failure mode. A 6-ingredient blend with
+// over-pulled Assam at 100°C / 19min would fire NO tannin warning,
+// because Assam's astringency at strength 3 × mass-fraction 0.17 = 0.5,
+// well below the 2 threshold. Now per-ingredient over-pull fires
+// individually with the leaf named.
+
+import { resolveBlendAtBrew } from "../src/algo/compose.js";
+
+test("blend over-pull: 6-ingredient cup at 100°C/19min surfaces over-pulled Assam", () => {
+  const blend = [
+    { id: "chamomile",    g: 1 },
+    { id: "lemonbalm",    g: 1 },
+    { id: "black-pepper", g: 1 },
+    { id: "ashwagandha",  g: 1 },
+    { id: "assam",        g: 1 },
+    { id: "cardamom",     g: 1 },
+  ];
+  const out = resolveBlendAtBrew(blend, 100, 1140); // 100°C, 19min
+  const named = (out.warnings || []).filter(w =>
+    /assam/i.test(w.text) && (w.kind === "tannin" || w.kind === "aromatic")
+  );
+  assert(named.length > 0,
+    `expected an over-pull warning naming Assam at 100°C/19min, got: ${JSON.stringify(out.warnings)}`);
+});
+
+test("blend over-pull: a forgiving cup (rooibos + chamomile, standard brew) fires no over-pull warning", () => {
+  const blend = [
+    { id: "rooibos",   g: 2 },
+    { id: "chamomile", g: 1 },
+  ];
+  const out = resolveBlendAtBrew(blend, 95, 300);
+  const off = (out.warnings || []).filter(w => w.kind === "tannin" || w.kind === "aromatic");
+  assert(off.length === 0,
+    `forgiving standard-brew blend should not fire over-pull, got: ${JSON.stringify(off)}`);
+});
+
 // ─── BLOG / SOMMELIER / HERBALIST TAKES ─────────────────────────
 //
 // Beyond peer-reviewed literature: opinionated brewing guidance from

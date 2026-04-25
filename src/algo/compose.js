@@ -4,8 +4,8 @@
 
 import {
   BLENDS, MOOD_BLENDS, MOOD_CONFLICTS, MOOD_SINGLE_NAMES, PAIR_BLENDS,
-} from "../data/blends";
-import { INGREDIENTS } from "../data/ingredients";
+} from "../data/blends.js";
+import { INGREDIENTS } from "../data/ingredients.js";
 
 /* ──────────────────────────────────────────────────────────────
    Brewing profile — derive temp/time from constituent ingredients.
@@ -353,10 +353,10 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
    site; internals evolve.
    ────────────────────────────────────────────────────────────── */
 
-import { resolveExtractionProfile } from "../data/extractionProfiles";
+import { resolveExtractionProfile } from "../data/extractionProfiles.js";
 import {
   applyMasking, applyEffectSynergies, buildWarnings,
-} from "./perception";
+} from "./perception.js";
 
 /**
  * resolveBlendAtBrew — full perception pipeline.
@@ -456,14 +456,53 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS) {
 
   const outsiders = contributions.filter(c => !c.inRange).map(c => c.name);
 
-  // (5) Build user-facing warnings.
-  const warnings = buildWarnings({
+  // (5a) Cup-level warnings — what the average reads.
+  const cupWarnings = buildWarnings({
     outsiders,
     maskingNotes,
     perceivedEffects: perceivedEffectMap,
     perceivedFlavors: perceivedFlavorMap,
     paradoxTags,
   });
+
+  // (5b) Per-ingredient over-pull check. The mass-weighted sum dilutes
+  // each ingredient's failure mode by everything else in the cup — so
+  // 1g of over-pulled Assam in a 6g blend never crosses the cup-level
+  // tannin threshold, even though that leaf is genuinely being abused.
+  // Walk each ingredient's standalone profile at the current brew and
+  // surface its name if it fires tannin or aromatic.
+  const individualWarnings = [];
+  const seenIndividual = new Set();
+  for (const { name, profile } of contributions) {
+    const fMap = Object.fromEntries(profile.flavors);
+    const eMap = Object.fromEntries(profile.effects);
+    const ingWarnings = buildWarnings({
+      perceivedFlavors: fMap,
+      perceivedEffects: eMap,
+    });
+    for (const w of ingWarnings) {
+      if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
+      const key = `${name}|${w.kind}`;
+      if (seenIndividual.has(key)) continue;
+      seenIndividual.add(key);
+      const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
+      individualWarnings.push({
+        kind: w.kind,
+        text: `${name} is being over-pulled — ${lc}`,
+      });
+    }
+  }
+
+  // Merge cup-level and individual warnings. Drop a cup-level tannin
+  // duplicate if any individual warning of the same kind already fires
+  // — the named version is more actionable.
+  const warnings = [
+    ...cupWarnings.filter(w => {
+      if (w.kind !== "tannin" && w.kind !== "aromatic") return true;
+      return !individualWarnings.some(iw => iw.kind === w.kind);
+    }),
+    ...individualWarnings,
+  ];
 
   return {
     effects,
