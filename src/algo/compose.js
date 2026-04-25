@@ -502,13 +502,16 @@ function buildAccentedTradition(blend, score, moods, flavors, primaryAxis) {
   ];
   const profile = computeBrewProfile(ingredients, { leadOnly: true });
 
-  // Name: "<Tradition>, <AccentWord>" — e.g., "Masala Chai, Zest"
-  // The accent word comes from the same MOOD_WORDS / FLAVOR_WORDS bank
-  // the synthetic builder draws from, so the voice stays consistent.
+  // Name: "<Tradition> (<AccentWord>)" — e.g., "Masala Chai (Zest)".
+  // Parentheses keep traditions whose name already has a comma
+  // ("Darjeeling, neat") readable as "Darjeeling, neat (Sun)" rather
+  // than the three-comma chain. The accent word comes from the same
+  // MOOD_WORDS / FLAVOR_WORDS bank the synthetic builder draws from,
+  // so the voice stays consistent.
   const accentWords = unmet.map(s =>
     pickFromBank(isFeel ? FLAVOR_WORDS[s] : MOOD_WORDS[s], hashOf(s + blend.name))
   ).filter(Boolean);
-  const name = `${blend.name}, ${accentWords.join(" & ")}`;
+  const name = `${blend.name} (${accentWords.join(" & ")})`;
   const subtitle = `${blend.name} accented for ${unmet.join(" + ")}`;
 
   return {
