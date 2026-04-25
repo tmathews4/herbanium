@@ -34,8 +34,9 @@ import { SessionRow } from "./HomeScreen";
 export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
-  const [apothecaryFilter, setApothecaryFilter] = useState("all");
-  const [shelfTab, setShelfTab] = useState("blends"); // blends | journal
+  const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
+  const [catalogueFilter, setCatalogueFilter] = useState("all");
+  const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
@@ -700,50 +701,33 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
 
         let visible;
         let emptyMsg;
+        // Blends sub-tab is your-personal: filters operate on saved only.
         if (apothecaryFilter === "all") {
-          // Union, deduped (a blend could be both saved and traditional).
-          const seen = new Set();
-          visible = [...saved, ...traditional, ...experimental].filter(b => {
-            if (seen.has(b.id)) return false;
-            seen.add(b.id);
-            return true;
-          });
-          emptyMsg = "Your Shelf is empty. Save blends from Vibe or Blend to see them here.";
+          visible = saved;
+          emptyMsg = "Your Shelf is empty. Save blends from Vibe, Blend, or the Catalogue to see them here.";
         } else if (apothecaryFilter === "favorites") {
           const favSet = favoriteBlendIds || new Set();
-          visible = [...saved, ...traditional, ...experimental]
-            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
-            .filter(b => favSet.has(b.id));
-          emptyMsg = "No favorites yet. Tap the heart on a blend to mark it as a favorite.";
-        } else if (apothecaryFilter === "traditional") {
-          visible = traditional;
-          emptyMsg = "No traditional blends to show.";
-        } else if (apothecaryFilter === "experimental") {
-          visible = experimental;
-          emptyMsg = "No experimental blends to show.";
+          visible = saved.filter(b => favSet.has(b.id));
+          emptyMsg = "No favorites yet. Tap the heart on a saved blend to mark it as a favorite.";
         } else if (apothecaryFilter === "what worked") {
           const wonIds = new Set(
             sessions
               .filter(s => s.who === "you" && (s.taste ?? 0) >= 4)
               .map(s => s.blendId)
           );
-          visible = [...saved, ...traditional, ...experimental]
-            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
-            .filter(b => wonIds.has(b.id));
-          emptyMsg = "No blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
+          visible = saved.filter(b => wonIds.has(b.id));
+          emptyMsg = "No saved blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
         } else {
-          // mood filter
-          visible = [...saved, ...traditional, ...experimental]
-            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
-            .filter(b => b.mood === apothecaryFilter);
+          visible = saved.filter(b => b.mood === apothecaryFilter);
           emptyMsg = `Nothing saved matches ${apothecaryFilter} yet. Try composing one.`;
         }
 
         const subTabHeader = (
           <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
             {[
-              ["blends",  "Blends",  saved.length + traditional.length + experimental.length],
-              ["journal", "Journal", yourSessions.length],
+              ["blends",    "Blends",    saved.length],
+              ["catalogue", "Catalogue", traditional.length + experimental.length],
+              ["journal",   "Journal",   yourSessions.length],
             ].map(([k, label, count]) => (
               <button key={k} onClick={() => setShelfTab(k)} style={{
                 background: "transparent", border: "none",
@@ -787,12 +771,96 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
           );
         }
 
+        if (shelfTab === "catalogue") {
+          let catVisible;
+          let catEmpty;
+          if (catalogueFilter === "all") {
+            const seen = new Set();
+            catVisible = [...traditional, ...experimental].filter(b => {
+              if (seen.has(b.id)) return false;
+              seen.add(b.id);
+              return true;
+            });
+            catEmpty = "No catalogue blends to show.";
+          } else if (catalogueFilter === "traditional") {
+            catVisible = traditional;
+            catEmpty = "No traditional blends to show.";
+          } else if (catalogueFilter === "experimental") {
+            catVisible = experimental;
+            catEmpty = "No experimental blends to show.";
+          } else {
+            catVisible = [...traditional, ...experimental]
+              .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
+              .filter(b => b.mood === catalogueFilter);
+            catEmpty = `No catalogue blends match ${catalogueFilter} yet.`;
+          }
+          return (
+            <div style={{ marginTop: 4 }}>
+              {subTabHeader}
+              <div style={{ marginBottom: 10 }}>
+                <ChipRows
+                  items={["all", "traditional", "experimental", "calm", "focus", "energy", "comfort"]}
+                  renderItem={(f) => (
+                    <Chip
+                      key={f}
+                      active={catalogueFilter === f}
+                      onClick={() => setCatalogueFilter(f)}
+                    >{f}</Chip>
+                  )}
+                />
+              </div>
+
+              {catalogueFilter === "traditional" && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+                }}>
+                  Classic preparations, taught the way they're traditionally made.
+                  Tap any to open its recipe or start brewing.
+                </div>
+              )}
+
+              {catalogueFilter === "experimental" && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+                }}>
+                  Recipes the catalog's chemistry suggests but no tradition has codified —
+                  Herbanium house experiments. Try, log, judge for yourself.
+                </div>
+              )}
+
+              {catVisible.length === 0 ? (
+                <div style={{
+                  marginTop: 18, padding: "14px 16px",
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
+                }}>
+                  {catEmpty}
+                </div>
+              ) : (
+                catVisible.map((b, i) => (
+                  <BlendListRow
+                    key={b.id}
+                    b={b}
+                    author={b.tradition || (b.experimental ? "Herbanium experiment" : null)}
+                    first={i === 0}
+                    go={go}
+                    startBrew={startBrew}
+                    openBlend={openBlend}
+                  />
+                ))
+              )}
+            </div>
+          );
+        }
+
         return (
           <div style={{ marginTop: 4 }}>
             {subTabHeader}
             <div style={{ marginBottom: 10 }}>
               <ChipRows
-                items={["all", "favorites", "calm", "focus", "energy", "comfort", "traditional", "experimental", "what worked"]}
+                items={["favorites", "all", "what worked", "calm", "focus", "energy", "comfort"]}
                 renderItem={(f) => (
                   <Chip
                     key={f}
@@ -803,26 +871,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               />
             </div>
 
-            {apothecaryFilter === "traditional" && (
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-              }}>
-                Classic preparations, taught the way they're traditionally made.
-                Tap any to open its recipe or start brewing.
-              </div>
-            )}
-
-            {apothecaryFilter === "experimental" && (
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-              }}>
-                Recipes the catalog's chemistry suggests but no tradition has codified —
-                Herbanium house experiments. Try, log, judge for yourself.
-              </div>
-            )}
-
             {visible.length === 0 ? (
               <div style={{
                 marginTop: 18, padding: "14px 16px",
@@ -831,20 +879,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               }}>
                 {emptyMsg}
               </div>
-            ) : (apothecaryFilter === "traditional" || apothecaryFilter === "experimental") ? (
-              // Traditions and experimentals get their author-attribution row treatment.
-              // openBlend is passed so taps go to the recipe card, not auto-brew.
-              visible.map((b, i) => (
-                <BlendListRow
-                  key={b.id}
-                  b={b}
-                  author={b.tradition || (b.experimental ? "Herbanium experiment" : null)}
-                  first={i === 0}
-                  go={go}
-                  startBrew={startBrew}
-                  openBlend={openBlend}
-                />
-              ))
             ) : (
               <LibraryList
                 blends={visible}
