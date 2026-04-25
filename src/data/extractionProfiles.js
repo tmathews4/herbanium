@@ -704,24 +704,59 @@ function blendCharacter(lower, upper, t) {
   return t < 0.5 ? lower.character : upper.character;
 }
 
+/**
+ * 2D bracketing — temp and time both contribute. The 3 profile points
+ * are ordered light → standard → strong; both axes co-vary across them
+ * (light = lower temp + shorter time, strong = higher temp + longer time).
+ *
+ * Compute "intensity progress" by averaging the user's normalized
+ * position along temp and time, then locate that on the [0, n−1] index
+ * line and lerp between the two adjacent profile points.
+ *
+ * Result: temp and time both visibly drive the cup. Pulling the time
+ * slider longer at constant temp now actually pushes toward the strong
+ * profile, instead of being computed and discarded.
+ */
+function bracketByIntensity(profiles, tempC, timeS) {
+  const sorted = [...profiles].sort((a, b) => a.tempC - b.tempC);
+  const n = sorted.length;
+  if (n === 1) return [sorted[0], sorted[0], 0];
+
+  const minTemp = sorted[0].tempC;
+  const maxTemp = sorted[n - 1].tempC;
+  const times   = sorted.map(p => p.timeS);
+  const minTime = Math.min(...times);
+  const maxTime = Math.max(...times);
+
+  const tempProgress = maxTemp === minTemp ? 0 : (tempC - minTemp) / (maxTemp - minTemp);
+  const timeProgress = maxTime === minTime ? 0 : (timeS - minTime) / (maxTime - minTime);
+  const intensity = Math.max(0, Math.min(1, (tempProgress + timeProgress) / 2));
+
+  const idxFloat = intensity * (n - 1);
+  const lowIdx   = Math.floor(idxFloat);
+  const highIdx  = Math.min(n - 1, lowIdx + 1);
+  const t        = idxFloat - lowIdx;
+
+  return [sorted[lowIdx], sorted[highIdx], t];
+}
+
 export function resolveExtractionProfile(ingredientId, tempC, timeS) {
   const profiles = EXTRACTION_PROFILES[ingredientId];
   if (!profiles || profiles.length === 0) return null;
 
-  const [tLo, tHi, tempT] = bracket(profiles, tempC, "tempC");
-  const [sLo, sHi, timeT] = bracket(profiles, timeS, "timeS");
+  const [lo, hi, t] = bracketByIntensity(profiles, tempC, timeS);
 
-  if (tLo === tHi && sLo === sHi && tLo === sLo) {
+  if (lo === hi) {
     return {
-      flavors: tLo.flavorStrengths,
-      effects: tLo.effects,
-      character: tLo.character,
+      flavors: lo.flavorStrengths,
+      effects: lo.effects,
+      character: lo.character,
     };
   }
 
   return {
-    flavors: blendFlavorsWithStrength(tLo, tHi, tempT),
-    effects: blendEffects(tLo, tHi, tempT),
-    character: blendCharacter(tLo, tHi, tempT),
+    flavors: blendFlavorsWithStrength(lo, hi, t),
+    effects: blendEffects(lo, hi, t),
+    character: blendCharacter(lo, hi, t),
   };
 }
