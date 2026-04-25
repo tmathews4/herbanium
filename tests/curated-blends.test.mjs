@@ -137,15 +137,22 @@ test("non-curated (algorithm-derived) brew at baseline still flags outsiders", (
     "expected outsider warning for non-curated blend at baseline; got none — suppression leaked");
 });
 
-test("traditionNote fires when suppression actually carried weight", () => {
+test("traditionNote fires only on meaningful per-lead deviation", () => {
+  // Morning Vestment: ginger is a lead with tempC [100,100], curator
+  // at 95°C — temp delta on a lead, fires.
   const morning = blends.find(b => b.name === "Morning Vestment");
-  const dusk = blends.find(b => b.name === "Dusk Lullaby");
   const morningBrew = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, true);
-  const duskBrew = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
   assert(morningBrew.traditionNote === true,
-    "Morning Vestment suppresses an outsider — traditionNote should be true");
-  assert(duskBrew.traditionNote === true,
-    "Dusk Lullaby suppresses two over-pull warnings — traditionNote should be true");
+    "Morning Vestment has a lead outside its temp range — traditionNote should be true");
+
+  // Dusk Lullaby: lavender is a lead with timeS [180,240], curator at
+  // 360s — exactly 120s past max, which is *at* the tolerance edge so
+  // the notice should NOT fire. (Lemonbalm is +60s, also within
+  // tolerance; chamomile is fully in range.)
+  const dusk = blends.find(b => b.name === "Dusk Lullaby");
+  const duskBrew = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
+  assert(duskBrew.traditionNote === false,
+    "Dusk Lullaby's leads sit within the time tolerance — traditionNote should be false");
 });
 
 test("traditionNote stays off when nothing was suppressed", () => {
@@ -213,13 +220,14 @@ test("traditionNote stays off when lead deviation is only sub-tolerance time", a
     "traditionNote should not fire — leads are in range and accents shouldn't trigger it");
 });
 
-test("traditionNote fires when a lead is past time tolerance", async () => {
-  // Dusk Lullaby: lavender is a lead with timeS [180,240], curator at
-  // 360s = 120s past max — beyond the 90s tolerance.
-  const dusk = blends.find(b => b.name === "Dusk Lullaby");
-  const r = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
+test("traditionNote fires when a lead is past time tolerance by a clear margin", async () => {
+  // Spring Tonic: leads (nettle, dandelion-leaf) want 300-900s timeS;
+  // curator brews 1800s — 900s past max, well past tolerance.
+  const tonic = blends.find(b => b.name === "Spring Tonic");
+  assert(tonic, "Spring Tonic fixture not found");
+  const r = resolveBlendAtBrew(tonic.ings, tonic.t, tonic.s, tonic.t, tonic.s, true);
   assert(r.traditionNote === true,
-    "traditionNote should fire when a lead is more than 90s past its time max");
+    "traditionNote should fire when a lead is hundreds of seconds past its timeS max");
 });
 
 test("traditionNote fires for any temp deviation on a lead, regardless of time", async () => {

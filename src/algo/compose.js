@@ -9,10 +9,11 @@ import { INGREDIENTS } from "../data/ingredients.js";
 
 // How much steep-time slack counts as the same brew. Used by the
 // tradition-over-literature notice and the research-aligned
-// recommendation line to ignore deltas smaller than this — most
-// ingredient time ranges span 60-120s, so a sub-90s difference is
-// inside the natural fuzziness of brewing rather than a real choice.
-export const TRADITION_TIME_TOLERANCE_S = 90;
+// recommendation line. The user's framing was "off by a minute or
+// two" — 120s captures that and matches most ingredients' wiggle
+// room within their preferred window. Temp deviations always count
+// (no tolerance) because they shift extraction much more sharply.
+export const TRADITION_TIME_TOLERANCE_S = 120;
 
 /* ──────────────────────────────────────────────────────────────
    Brewing profile — derive temp/time from constituent ingredients.
@@ -567,12 +568,12 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   }
   const individualWarnings = pushedHarder ? allIndividualWarnings : [];
 
-  // Tradition-over-literature notice: when a curator placed the recipe
-  // exactly here AND at least one lead ingredient is *meaningfully*
-  // outside its preferred window. "Meaningful" filters out small
-  // steep-time deltas (≤ 90s past the time range) because those don't
-  // produce a perceptual shift worth dressing up as tradition. Temp
-  // mismatches always count — those genuinely change extraction.
+  // Tradition-over-literature notice fires when at least one lead
+  // ingredient is meaningfully outside its preferred window. Temp
+  // deviations count strictly (any value outside [tMin, tMax]); time
+  // deviations only count when they push past the time range by more
+  // than the tolerance. Accents and catalysts are skipped — they're
+  // stylistic adjuncts the recipe accepts as stretched.
   const meaningfulDeviation = contributions.some(c => {
     if (c.role !== "lead") return false;
     const meta = INGREDIENTS[c.id];
