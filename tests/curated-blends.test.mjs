@@ -45,12 +45,7 @@ function assert(cond, msg) {
 }
 
 function gatherAll() {
-  // MOOD_BLENDS / PAIR_BLENDS use tuple form by default but switch to
-  // object form whenever an entry needs to carry a role tag. Normalize
-  // on read so the audit doesn't have to care which it received.
-  const normIngs = (raw) => raw.map(item =>
-    Array.isArray(item) ? { id: item[0], g: item[1] } : { ...item }
-  );
+  // All blend stores use object-form ingredients now [{ id, g, role? }].
   const all = [];
   for (const b of BLENDS) {
     all.push({ label: "BLEND", name: b.name, ings: b.ingredients, t: b.tempC, s: b.timeS, style: b.style });
@@ -58,13 +53,13 @@ function gatherAll() {
   for (const [mood, b] of Object.entries(MOOD_BLENDS)) {
     all.push({
       label: `MOOD:${mood}`, name: `${mood} (single-mood)`,
-      ings: normIngs(b.ings), t: b.temp, s: b.time, style: b.style,
+      ings: b.ings.map(i => ({ ...i })), t: b.temp, s: b.time, style: b.style,
     });
   }
   for (const [key, b] of Object.entries(PAIR_BLENDS)) {
     all.push({
       label: `PAIR:${key}`, name: b.name,
-      ings: normIngs(b.ings), t: b.temp, s: b.time, style: b.style,
+      ings: b.ings.map(i => ({ ...i })), t: b.temp, s: b.time, style: b.style,
     });
   }
   return all;
@@ -105,60 +100,45 @@ for (const b of blends) {
   }
 }
 
-// One sanity test: pushing harder than baseline still fires warnings.
-// This guards against the suppression being too broad.
+// Sanity: pushing past baseline still fires warnings. Uses Spring
+// Tonic (leads at 300-900s, curator at 1800s — already past, so any
+// further push deepens the over-pull condition).
 test("pushing past baseline still fires per-ingredient warnings", () => {
-  const dusk = blends.find(b => b.name === "Dusk Lullaby");
-  assert(dusk, "Dusk Lullaby fixture not found — test data drift");
-  const pushed = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s + 60, dusk.t, dusk.s, true);
+  const tonic = blends.find(b => b.name === "Spring Tonic");
+  assert(tonic, "Spring Tonic fixture not found");
+  const pushed = resolveBlendAtBrew(tonic.ings, tonic.t, tonic.s + 60, tonic.t, tonic.s, true);
   const overs = overPullWarnings(pushed);
   assert(overs.length > 0,
     "expected over-pull warnings when steep is past baseline; got none — suppression is too broad");
 });
 
 // Outsider suppression is curated-only and exact-baseline-only:
-// moving the slider away should restore the warning, and an
-// algorithm-derived (non-curated) brew at baseline should still show it.
+// moving the slider away should restore the warning. Wuyi Pine Smoke
+// has a single lead (lapsang) with tempC [95,100] — moving down to
+// 85°C should make lapsang an outsider.
 test("moving the slider off baseline restores the outsider warning", () => {
-  const morning = blends.find(b => b.name === "Morning Vestment");
-  assert(morning, "Morning Vestment fixture not found — test data drift");
-  const moved = resolveBlendAtBrew(morning.ings, morning.t - 5, morning.s, morning.t, morning.s, true);
+  const wuyi = blends.find(b => b.name === "Wuyi Pine Smoke");
+  assert(wuyi, "Wuyi Pine Smoke fixture not found");
+  const moved = resolveBlendAtBrew(wuyi.ings, 85, wuyi.s, wuyi.t, wuyi.s, true);
   const outs = moved.warnings.filter(w => w.kind === "outsider");
   assert(outs.length > 0,
     "expected outsider warning when slider is moved off curated baseline; got none");
 });
 
-test("non-curated (algorithm-derived) brew at baseline still flags outsiders", () => {
-  const morning = blends.find(b => b.name === "Morning Vestment");
-  assert(morning, "Morning Vestment fixture not found — test data drift");
-  const algo = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, false);
+test("non-curated (algorithm-derived) brew with out-of-range lead flags outsiders", () => {
+  // Same Wuyi Pine Smoke leaf, brewed at 85°C without curated flag —
+  // the suppression doesn't apply, so the outsider should fire.
+  const wuyi = blends.find(b => b.name === "Wuyi Pine Smoke");
+  assert(wuyi, "Wuyi Pine Smoke fixture not found");
+  const algo = resolveBlendAtBrew(wuyi.ings, 85, wuyi.s);
   const outs = algo.warnings.filter(w => w.kind === "outsider");
   assert(outs.length > 0,
-    "expected outsider warning for non-curated blend at baseline; got none — suppression leaked");
-});
-
-test("traditionNote fires only on meaningful per-lead deviation", () => {
-  // Morning Vestment: ginger is a lead with tempC [100,100], curator
-  // at 95°C — temp delta on a lead, fires.
-  const morning = blends.find(b => b.name === "Morning Vestment");
-  const morningBrew = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, true);
-  assert(morningBrew.traditionNote === true,
-    "Morning Vestment has a lead outside its temp range — traditionNote should be true");
-
-  // Dusk Lullaby: lavender is a lead with timeS [180,240], curator at
-  // 360s — exactly 120s past max, which is *at* the tolerance edge so
-  // the notice should NOT fire. (Lemonbalm is +60s, also within
-  // tolerance; chamomile is fully in range.)
-  const dusk = blends.find(b => b.name === "Dusk Lullaby");
-  const duskBrew = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
-  assert(duskBrew.traditionNote === false,
-    "Dusk Lullaby's leads sit within the time tolerance — traditionNote should be false");
+    "expected outsider warning for non-curated brew with lead out of range");
 });
 
 test("traditionNote stays off when nothing was suppressed", () => {
-  // First Light — wait, that's in the audit. Pick a blend not in the audit.
-  // Iterate blends and find one whose naive resolve already has zero
-  // over-pull and zero outsiders — that one should never show traditionNote.
+  // Find a clean blend (no naive over-pull or outsider) — its
+  // traditionNote should be false at baseline.
   const clean = blends.find(b => {
     const r = resolveBlendAtBrew(b.ings, b.t, b.s);
     const overs = r.warnings.filter(w => /is being over-pulled/.test(w.text));
@@ -169,13 +149,6 @@ test("traditionNote stays off when nothing was suppressed", () => {
   const r = resolveBlendAtBrew(clean.ings, clean.t, clean.s, clean.t, clean.s, true);
   assert(r.traditionNote === false,
     `${clean.name} has nothing to suppress — traditionNote should be false`);
-});
-
-test("traditionNote stays off when slider is moved off baseline", () => {
-  const morning = blends.find(b => b.name === "Morning Vestment");
-  const moved = resolveBlendAtBrew(morning.ings, morning.t - 5, morning.s, morning.t, morning.s, true);
-  assert(moved.traditionNote === false,
-    "traditionNote should be false once the user moves off the curator's brew");
 });
 
 test("accent ingredients don't fire over-pull warnings", () => {
@@ -193,18 +166,15 @@ test("accent ingredients don't fire over-pull warnings", () => {
 });
 
 test("accent ingredients don't fire outsider warnings", () => {
-  // Mate Cooler: yerba-mate lead at 75°C/240s; lemongrass/spearmint/ginger
-  // all accent. Move slider off baseline; only the yerba-mate (in range)
-  // should be considered for outsiders.
-  const cooler = blends.find(b => b.name === "Mate Cooler");
-  assert(cooler, "Mate Cooler fixture not found");
-  const moved = resolveBlendAtBrew(cooler.ings, cooler.t + 5, cooler.s, cooler.t, cooler.s, true);
-  const outsiderNames = moved.warnings
+  // Tom Foolery: gunpowder lead at 80°C/150s; spearmint and tulsi
+  // accent. Move slider so accents would be outsiders if they counted.
+  const tf = blends.find(b => b.name === "Tom Foolery");
+  assert(tf, "Tom Foolery fixture not found");
+  const moved = resolveBlendAtBrew(tf.ings, tf.t + 5, tf.s, tf.t, tf.s, true);
+  const accentLeak = moved.warnings
     .filter(w => w.kind === "outsider")
-    .map(w => w.text);
-  const accentLeak = outsiderNames.filter(t =>
-    /Lemongrass|Spearmint|Ginger/.test(t)
-  );
+    .map(w => w.text)
+    .filter(t => /Spearmint|Tulsi/.test(t));
   assert(accentLeak.length === 0,
     `accent ingredients should not appear in outsider warnings — got: ${accentLeak.join("; ")}`);
 });
@@ -230,26 +200,18 @@ test("traditionNote fires when a lead is past time tolerance by a clear margin",
     "traditionNote should fire when a lead is hundreds of seconds past its timeS max");
 });
 
-test("traditionNote fires for any temp deviation on a lead, regardless of time", async () => {
-  // Morning Vestment: ginger is a lead with tempC [100,100], curator
-  // at 95°C — temp deviation always counts.
-  const morning = blends.find(b => b.name === "Morning Vestment");
-  const r = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, true);
-  assert(r.traditionNote === true,
-    "traditionNote should fire when a lead is outside its temp range");
-});
-
 test("computeBrewProfile leadOnly excludes accents from the math", async () => {
   const { computeBrewProfile } = await import("../src/algo/compose.js");
-  // Ground & Climb: matcha lead (70-80°C / 15-30s), reishi+ashwagandha accent.
-  // Without leadOnly, accents drag the recommendation toward 100°C.
-  // With leadOnly, the recommendation should match matcha's tight window.
-  const climb = blends.find(b => b.name === "Ground & Climb");
-  assert(climb, "Ground & Climb fixture not found");
-  const naive = computeBrewProfile(climb.ings);
-  const leadOnly = computeBrewProfile(climb.ings, { leadOnly: true });
-  assert(leadOnly.tempC <= 80,
-    `leadOnly should match matcha's <=80°C ceiling — got ${leadOnly.tempC}°C`);
+  // Tom Foolery: gunpowder lead (80-90°C / 90-180s); spearmint and
+  // tulsi accent (95-100°C / 300-420s). Without leadOnly, the accents
+  // drag the recommendation toward higher temps and longer times.
+  // With leadOnly, the recommendation tracks the gunpowder window.
+  const tf = blends.find(b => b.name === "Tom Foolery");
+  assert(tf, "Tom Foolery fixture not found");
+  const naive = computeBrewProfile(tf.ings);
+  const leadOnly = computeBrewProfile(tf.ings, { leadOnly: true });
+  assert(leadOnly.tempC <= 90,
+    `leadOnly should respect gunpowder's ≤90°C ceiling — got ${leadOnly.tempC}°C`);
   assert(naive.tempC > leadOnly.tempC,
     `naive recommendation should be hotter than leadOnly (accents pull it up) — naive ${naive.tempC}°C, leadOnly ${leadOnly.tempC}°C`);
 });

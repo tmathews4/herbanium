@@ -3,7 +3,8 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  BLENDS, MOOD_BLENDS, MOOD_CONFLICTS, MOOD_SINGLE_NAMES, PAIR_BLENDS,
+  BLENDS, FLAVOR_WORDS, MOOD_BLENDS, MOOD_CONFLICTS, MOOD_SINGLE_NAMES,
+  MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
 
@@ -377,38 +378,125 @@ function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
   };
 }
 
-// Build a synthetic ("Herbanium experiment · sweet-spot") candidate
-// when no curated blend embodies all selections. For each selected
-// mood we pull the ingredient that most strongly expresses that
-// effect; for each selected flavor we pull a flavor-matching
-// ingredient as an accent. computeBrewProfile then picks the 2D
-// sweet spot (or the closest-point compromise if the ingredient
-// ranges don't intersect cleanly).
+// Pick a single word from a bank deterministically — same selection
+// inputs always produce the same name. Hash-of-tag drives the index
+// so different selections rotate through the bank.
+function hashOf(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function pickFromBank(bank, seed) {
+  if (!bank || bank.length === 0) return null;
+  return bank[seed % bank.length];
+}
+
+// Compose a poetic name from one word per selected mood and one per
+// selected flavor. Stays terse — 2-3 words usually, never longer than
+// a typical curated subtitle would be.
+function generateBlendName(moods, flavors) {
+  const moodWords = moods
+    .map(m => pickFromBank(MOOD_WORDS[m], hashOf(m + "|" + flavors.join(","))))
+    .filter(Boolean);
+  const flavorWords = flavors
+    .map(f => pickFromBank(FLAVOR_WORDS[f], hashOf(f + "|" + moods.join(","))))
+    .filter(Boolean);
+
+  if (moodWords.length === 0 && flavorWords.length === 0) return "Untitled";
+  if (moodWords.length === 1 && flavorWords.length === 0) return moodWords[0];
+  if (moodWords.length === 0 && flavorWords.length === 1) return flavorWords[0];
+  if (moodWords.length === 1 && flavorWords.length === 1) {
+    return `${moodWords[0]} ${flavorWords[0]}`;
+  }
+  if (moodWords.length === 2 && flavorWords.length === 0) {
+    return `${moodWords[0]} & ${moodWords[1]}`;
+  }
+  if (moodWords.length === 0 && flavorWords.length === 2) {
+    return `${flavorWords[0]} & ${flavorWords[1]}`;
+  }
+  if (moodWords.length === 2 && flavorWords.length === 1) {
+    return `${moodWords[0]} & ${moodWords[1]}, ${flavorWords[0]}`;
+  }
+  if (moodWords.length === 1 && flavorWords.length === 2) {
+    return `${moodWords[0]}: ${flavorWords[0]} & ${flavorWords[1]}`;
+  }
+  // Anything bigger — 2+ on at least one axis. Trim each side to two
+  // words and only include the dot-separator when both sides have words.
+  const head = moodWords.slice(0, 2).join(" & ");
+  const tail = flavorWords.slice(0, 2).join(" & ");
+  if (head && tail) return `${head} · ${tail}`;
+  return head || tail;
+}
+
+// Pick the strongest ingredient expressing a given mood, with a tea
+// preference: if a true tea (Camellia sinensis) hits the threshold,
+// take it over an herbal that scores the same. Falls back to any
+// ingredient when no tea works.
+function bestIngredientForMood(mood, exclude, minStrength = 3) {
+  const cands = Object.entries(INGREDIENTS)
+    .filter(([id]) => !exclude.has(id))
+    .map(([id, ing]) => {
+      const eff = (ing.effects || []).find(([k]) => k === mood);
+      return { id, ing, strength: eff ? eff[1] : 0 };
+    })
+    .filter(c => c.strength >= minStrength);
+  if (cands.length === 0) return null;
+  // Sort: tea first, then strength descending
+  cands.sort((a, b) => {
+    const aTea = a.ing.category === "true tea" ? 0 : 1;
+    const bTea = b.ing.category === "true tea" ? 0 : 1;
+    if (aTea !== bTea) return aTea - bTea;
+    return b.strength - a.strength;
+  });
+  return cands[0];
+}
+
+// Pick a flavor-expressing ingredient, with the same tea preference.
+function bestIngredientForFlavor(flavor, exclude) {
+  const cands = Object.entries(INGREDIENTS)
+    .filter(([id]) => !exclude.has(id))
+    .filter(([, ing]) => (ing.flavors || []).includes(flavor))
+    .map(([id, ing]) => ({ id, ing }));
+  if (cands.length === 0) return null;
+  cands.sort((a, b) => {
+    const aTea = a.ing.category === "true tea" ? 0 : 1;
+    const bTea = b.ing.category === "true tea" ? 0 : 1;
+    return aTea - bTea;
+  });
+  return cands[0];
+}
+
+// Build a synthetic candidate when no curated blend embodies the
+// user's selections. For each selected mood, we pull the strongest
+// ingredient expressing that effect (tea-first, herbal fallback);
+// for each flavor, we pull a flavor-matching ingredient as an accent.
+// computeBrewProfile resolves the 2D sweet spot if the leads' brewing
+// windows intersect, otherwise the closest-point compromise.
+//
+// Names are composed from MOOD_WORDS + FLAVOR_WORDS — one word per
+// selection, deterministic so the same query always produces the
+// same name.
 function buildSyntheticForSelections(moods, flavors) {
   const picks = [];
   const usedIds = new Set();
 
+  // Lead picks: one per mood, tea-prioritized, fallback to any herbal
+  // if no tea reaches the threshold.
   for (const m of moods) {
-    const cands = Object.entries(INGREDIENTS)
-      .filter(([id]) => !usedIds.has(id))
-      .map(([id, ing]) => {
-        const eff = (ing.effects || []).find(([k]) => k === m);
-        return { id, strength: eff ? eff[1] : 0 };
-      })
-      .filter(c => c.strength >= 3)
-      .sort((a, b) => b.strength - a.strength);
-    if (cands.length === 0) continue;
-    picks.push({ id: cands[0].id, g: 1.0 });
-    usedIds.add(cands[0].id);
+    const cand = bestIngredientForMood(m, usedIds, 3) ||
+                 bestIngredientForMood(m, usedIds, 2) ||
+                 bestIngredientForMood(m, usedIds, 1);
+    if (!cand) continue;
+    picks.push({ id: cand.id, g: 1.0 });
+    usedIds.add(cand.id);
   }
 
+  // Accent picks: one per flavor.
   for (const f of flavors) {
-    const cand = Object.entries(INGREDIENTS).find(([id, ing]) =>
-      !usedIds.has(id) && (ing.flavors || []).includes(f)
-    );
+    const cand = bestIngredientForFlavor(f, usedIds);
     if (!cand) continue;
-    picks.push({ id: cand[0], g: 0.5, role: "accent" });
-    usedIds.add(cand[0]);
+    picks.push({ id: cand.id, g: 0.5, role: "accent" });
+    usedIds.add(cand.id);
   }
 
   if (picks.length < 2) return null;
@@ -416,7 +504,7 @@ function buildSyntheticForSelections(moods, flavors) {
   const profile = computeBrewProfile(picks, { leadOnly: true });
   const isCleanSweet = !!profile.compatible;
 
-  // Surface the leads' actual effect ratings so the predicted-effect
+  // Effects map from leads (not accents) so the predicted-effect
   // bars on the brew card reflect what the user asked for.
   const effectMap = {};
   for (const p of picks) {
@@ -430,13 +518,10 @@ function buildSyntheticForSelections(moods, flavors) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4);
 
-  const moodPart = moods.slice(0, 2).join(" + ");
-  const flavorTag = flavors[0] ? ` · ${flavors[0]}` : "";
-  const namePrefix = isCleanSweet ? "Sweet-Spot" : "Closest Match";
-  const name = `${namePrefix}: ${moodPart}${flavorTag}`;
+  const name = generateBlendName(moods, flavors);
   const subtitle = isCleanSweet
-    ? "a synthesized cup that hits every selection at a clean brewing window"
-    : "the catalog's closest balance for these selections — no clean shared window";
+    ? "a synthesized cup at a clean brewing window for these selections"
+    : "the catalog's closest balance for these selections";
 
   return {
     id: `synth-${[...moods, ...flavors].join("-")}`,

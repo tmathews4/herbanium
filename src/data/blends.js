@@ -326,56 +326,6 @@ const BLENDS = [
   // can surface them with the appropriate "we made this up" badge.
 
   {
-    id: "exp-bioenhanced-mind",
-    name: "Bioenhanced Mind",
-    subtitle: "piperine multiplies curcumin and hericenones — three-way absorption stack",
-    ingredients: [
-      { id: "turmeric", g: 0.5 },
-      { id: "black-pepper", g: 0.05, role: "catalyst" },
-      { id: "lions-mane", g: 1.5 },
-      { id: "cinnamon", g: 0.3, role: "accent" },
-    ],
-    tempC: 100, timeS: 1500, ml: 300,
-    mood: "focus", flavor: "spiced",
-    public: true,
-    experimental: true,
-    style: "decoction",
-    effects: [["focus", 3], ["warming", 3], ["soothing", 2], ["grounding", 2]],
-  },
-  {
-    id: "exp-stillwater-focus",
-    name: "Stillwater Focus",
-    subtitle: "two L-theanine sources with lion's mane on the long timeline",
-    ingredients: [
-      { id: "gyokuro", g: 1.5 },
-      { id: "lemonbalm", g: 0.8, role: "accent" },
-      { id: "lions-mane", g: 1.0, role: "accent" },
-    ],
-    tempC: 60, timeS: 120, ml: 200,
-    mood: "focus", flavor: "umami",
-    public: true,
-    experimental: true,
-    style: "low-temp",
-    effects: [["focus", 5], ["calm", 4], ["soothing", 2]],
-  },
-  {
-    id: "exp-mate-cooler",
-    name: "Mate Cooler",
-    subtitle: "Argentine caffeine with citrus-mint cooling — the gringo summer mate",
-    ingredients: [
-      { id: "yerba-mate", g: 2.0 },
-      { id: "lemongrass", g: 0.8, role: "accent" },
-      { id: "spearmint", g: 0.5, role: "accent" },
-      { id: "ginger", g: 0.2, role: "accent" },
-    ],
-    tempC: 75, timeS: 240, ml: 250,
-    mood: "energy", flavor: "citrus",
-    public: true,
-    experimental: true,
-    style: "low-temp",
-    effects: [["energy", 3], ["cooling", 3], ["uplifting", 3]],
-  },
-  {
     id: "exp-tom-foolery",
     name: "Tom Foolery",
     subtitle: "The maker's sneaky cup",
@@ -391,239 +341,15 @@ const BLENDS = [
     style: "low-temp",
     effects: [["focus", 4], ["uplifting", 4], ["calm", 3], ["energy", 2]],
   },
-  {
-    id: "exp-smoky-chai",
-    name: "Smoky Chai",
-    subtitle: "if Wuyi were Bombay — pine smoke spiced over Fujian",
-    ingredients: [
-      { id: "lapsang", g: 1.5 },
-      { id: "cinnamon", g: 0.3 },
-      { id: "cardamom", g: 0.3 },
-      { id: "cloves", g: 0.1 },
-      { id: "black-pepper", g: 0.05 },
-    ],
-    tempC: 100, timeS: 240, ml: 250,
-    mood: "energy", flavor: "smoky",
-    public: true,
-    experimental: true,
-    effects: [["warming", 5], ["energy", 3], ["digestive", 3], ["grounding", 3]],
-  },
-  {
-    id: "exp-honey-bitter",
-    name: "Honey-Bitter Pull",
-    subtitle: "the model's honey-and-ginger trick — sweet softens the bitter",
-    ingredients: [
-      { id: "licorice-root", g: 0.5 },
-      { id: "dandelion-root", g: 1.5 },
-      { id: "cardamom", g: 0.3, role: "accent" },
-    ],
-    tempC: 100, timeS: 1200, ml: 250,
-    mood: "comfort", flavor: "sweet",
-    public: true,
-    experimental: true,
-    style: "decoction",
-    effects: [["soothing", 3], ["digestive", 3], ["warming", 2]],
-  },
-  {
-    id: "exp-ground-and-climb",
-    name: "Ground & Climb",
-    subtitle: "an impossible cup — focus 5 with grounding 4. Long decoction first.",
-    ingredients: [
-      { id: "matcha", g: 1.5 },
-      { id: "reishi", g: 1.0, role: "accent" },
-      { id: "ashwagandha", g: 0.5, role: "accent" },
-    ],
-    tempC: 75, timeS: 30, ml: 200,
-    mood: "focus", flavor: "earthy",
-    public: true,
-    experimental: true,
-    style: "low-temp",
-    effects: [["focus", 4], ["grounding", 4], ["calm", 3]],
-  },
-  {
-    id: "exp-garden-cup",
-    name: "Garden in a Cup",
-    subtitle: "four florals walking different directions — fruit, lychee, perfume, honey",
-    ingredients: [
-      { id: "hibiscus", g: 1.0 },
-      { id: "elderflower", g: 0.8 },
-      { id: "rose", g: 0.5 },
-      { id: "linden", g: 0.5 },
-    ],
-    tempC: 90, timeS: 360, ml: 250,
-    mood: "calm", flavor: "floral",
-    public: true,
-    experimental: true,
-    effects: [["calm", 3], ["soothing", 3], ["uplifting", 2], ["cooling", 2]],
-  },
-  {
-    id: "exp-two-gaba-stack",
-    name: "The Two-GABA Stack",
-    subtitle: "GABA-T inhibition, GABA-A binding, BDZ-receptor ligands — three pathways",
-    ingredients: [
-      { id: "lemonbalm", g: 1.0 },
-      { id: "valerian", g: 0.8 },
-      { id: "linden", g: 0.5 },
-    ],
-    tempC: 90, timeS: 600, ml: 250,
-    mood: "sleepy", flavor: "earthy",
-    public: true,
-    experimental: true,
-    effects: [["sleepy", 5], ["calm", 5], ["soothing", 3]],
-  },
-  {
-    id: "exp-coffee-midnight",
-    name: "Coffee at Midnight",
-    subtitle: "caffeine-free coffee character with the mushroom's ground",
-    ingredients: [
-      { id: "dandelion-root", g: 1.5 },
-      { id: "reishi", g: 0.8 },
-      { id: "cinnamon", g: 0.3, role: "accent" },
-      { id: "vanilla", g: 0.2, role: "accent" },
-    ],
-    tempC: 100, timeS: 1500, ml: 250,
-    mood: "comfort", flavor: "earthy",
-    public: true,
-    experimental: true,
-    style: "decoction",
-    effects: [["digestive", 3], ["calm", 3], ["grounding", 3], ["warming", 2]],
-  },
-  {
-    id: "exp-whole-pharmacy",
-    name: "The Whole Pharmacy",
-    subtitle: "every adaptogen at once — modern wellness maximalism",
-    ingredients: [
-      { id: "tulsi", g: 0.8 },
-      { id: "ashwagandha", g: 0.5 },
-      { id: "reishi", g: 0.5 },
-      { id: "lions-mane", g: 0.8 },
-      { id: "cinnamon", g: 0.3, role: "accent" },
-      { id: "cardamom", g: 0.2, role: "accent" },
-    ],
-    tempC: 100, timeS: 1800, ml: 300,
-    mood: "focus", flavor: "earthy",
-    public: true,
-    experimental: true,
-    style: "decoction",
-    effects: [["grounding", 4], ["calm", 3], ["focus", 3], ["warming", 2]],
-  },
 
   // ── Customs (Herbanium house blends) ──────────────────────
 
-  {
-    id: "dusk",
-    name: "Dusk Lullaby",
-    subtitle: "the apigenin and linalool hour",
-    ingredients: [
-      { id: "chamomile", g: 2.0 },
-      { id: "lavender", g: 0.3 },
-      { id: "lemonbalm", g: 1.0 },
-    ],
-    tempC: 95, timeS: 360, ml: 250,
-    mood: "calm", flavor: "floral",
-    public: false,
-    effects: [["calm", 4], ["sleepy", 3]],
-  },
-  {
-    id: "morning",
-    name: "Morning Vestment",
-    subtitle: "British black with a Silk Road bite",
-    ingredients: [
-      { id: "assam", g: 2.0 },
-      { id: "ginger", g: 0.5 },
-    ],
-    tempC: 95, timeS: 240, ml: 250,
-    mood: "energy", flavor: "spiced",
-    public: true,
-    effects: [["energy", 4], ["warming", 4]],
-  },
-  {
-    id: "hearth",
-    name: "Hearth & Quiet",
-    subtitle: "Cederberg red, Persian petals",
-    ingredients: [
-      { id: "rooibos", g: 2.0 },
-      { id: "rose", g: 0.5 },
-    ],
-    tempC: 100, timeS: 360, ml: 250,
-    mood: "comfort", flavor: "sweet",
-    public: false,
-    effects: [["soothing", 4], ["calm", 2]],
-  },
-  {
-    id: "study",
-    name: "Scriptorium",
-    subtitle: "L-theanine plus a menthol exhale",
-    ingredients: [
-      { id: "sencha", g: 1.5 },
-      { id: "peppermint", g: 0.5, role: "accent" },
-    ],
-    tempC: 75, timeS: 90, ml: 200,
-    mood: "focus", flavor: "minty",
-    public: true,
-    style: "low-temp",
-    effects: [["focus", 4], ["uplifting", 3]],
-  },
 
   // ── Sweet-spot customs ────────────────────────────────────
   // Hand-tuned so every lead's preferred temp AND time ranges
   // intersect cleanly. The brewing card opens at the center of the
   // shared window; no warnings should fire on first paint.
 
-  {
-    id: "plumtide",
-    name: "Plumtide",
-    subtitle: "rose petals over hibiscus tart, chamomile underneath",
-    ingredients: [
-      { id: "rose", g: 0.8 },
-      { id: "hibiscus", g: 0.8 },
-      { id: "chamomile", g: 0.6 },
-    ],
-    tempC: 95, timeS: 300, ml: 250,
-    mood: "calm", flavor: "fruity",
-    public: true,
-    effects: [["calm", 3], ["soothing", 3], ["cooling", 2]],
-  },
-  {
-    id: "honeyed-hush",
-    name: "Honeyed Hush",
-    subtitle: "linden and chamomile honey, lemon balm in the corner",
-    ingredients: [
-      { id: "chamomile", g: 1.0 },
-      { id: "linden", g: 0.8 },
-      { id: "lemonbalm", g: 0.6 },
-    ],
-    tempC: 95, timeS: 300, ml: 250,
-    mood: "soothing", flavor: "honeyed",
-    public: true,
-    effects: [["soothing", 4], ["calm", 4], ["sleepy", 2]],
-  },
-  {
-    id: "citrine",
-    name: "Citrine",
-    subtitle: "two Melissa cousins, no caffeine to wear off",
-    ingredients: [
-      { id: "lemongrass", g: 1.0 },
-      { id: "lemonbalm", g: 1.0 },
-    ],
-    tempC: 95, timeS: 300, ml: 250,
-    mood: "uplifting", flavor: "citrus",
-    public: true,
-    effects: [["uplifting", 4], ["calm", 3], ["cooling", 2]],
-  },
-  {
-    id: "plumcake",
-    name: "Plumcake",
-    subtitle: "Cederberg red sweetened with vanilla bean — pudding without pudding",
-    ingredients: [
-      { id: "rooibos", g: 1.5 },
-      { id: "vanilla", g: 0.4 },
-    ],
-    tempC: 100, timeS: 360, ml: 250,
-    mood: "comfort", flavor: "sweet",
-    public: true,
-    effects: [["soothing", 4], ["comfort", 3], ["warming", 2]],
-  },
   {
     id: "gyokuro-properly",
     name: "Gyokuro, properly",
@@ -637,19 +363,6 @@ const BLENDS = [
     tradition: "Japanese",
     style: "low-temp",
     effects: [["focus", 5], ["calm", 4], ["energy", 3]],
-  },
-  {
-    id: "crimson-cooler",
-    name: "Crimson Cooler",
-    subtitle: "hibiscus tang with citral lift — the pink summer cup",
-    ingredients: [
-      { id: "hibiscus", g: 1.0 },
-      { id: "lemongrass", g: 0.8 },
-    ],
-    tempC: 98, timeS: 360, ml: 250,
-    mood: "uplifting", flavor: "fruity",
-    public: true,
-    effects: [["uplifting", 3], ["cooling", 3], ["energy", 2]],
   },
 ];
 
@@ -879,6 +592,47 @@ const FLAVOR_CONFLICTS = [
   ["savory", "fruity"],    // savory broth and fruit pull apart
 ];
 
+// Word banks for naming synthesized blends. The synthetic-blend builder
+// pulls one word from each selected mood's bank and one from each
+// selected flavor's bank, then composes the picks into a name. Roughly
+// 10 words per profile, all in the apothecary-poet register.
+const MOOD_WORDS = {
+  calm:      ["Stillwater", "Hush", "Evensong", "Easeful", "Lull", "Quietude", "Breath", "Soft", "Settle", "Sigh"],
+  focus:     ["Scriptorium", "Lucid", "Channel", "Study", "Ledger", "Signal", "Clarity", "Sharpen", "Thread", "Compass"],
+  energy:    ["Dawn", "Kindling", "Spark", "Current", "Vigor", "Pulse", "Rouse", "Ember", "Wake", "Lift"],
+  sleepy:    ["Dusk", "Lullaby", "Drift", "Twilight", "Embers", "Fold", "Slumber", "Veil", "Hush", "Shroud"],
+  comfort:   ["Hearth", "Blanket", "Mantle", "Alcove", "Refuge", "Harbor", "Nest", "Well", "Hollow", "Cottage"],
+  settle:    ["Anchor", "Ballast", "Root", "Repose", "Ease", "Grounded", "Stillness", "Lull", "Return", "Quiet"],
+  soothing:  ["Balm", "Salve", "Hush", "Mend", "Lullaby", "Sigh", "Softening", "Calm", "Comfort", "Gentling"],
+  warming:   ["Ember", "Hearth", "Kindle", "Blaze", "Glow", "Bask", "Banked", "Warmth", "Sundown", "Mantle"],
+  cooling:   ["Shade", "Breeze", "Stream", "Glade", "Frost", "Brisk", "Dew", "Mountain", "Current", "Exhale"],
+  digestive: ["Ease", "Flow", "Mend", "Clear", "Gentle", "Harmony", "Smooth", "Settled", "Supper", "After"],
+  grounding: ["Anchor", "Root", "Stone", "Foundation", "Depth", "Settled", "Weight", "Hold", "Earth", "Low"],
+  uplifting: ["Dawn", "Lift", "Sparkle", "Brighten", "Ascend", "Gleam", "Rise", "Lighten", "Kindle", "Soar"],
+};
+
+const FLAVOR_WORDS = {
+  floral:  ["Petal", "Blossom", "Garden", "Bouquet", "Perfume", "Attar", "Rosegarden", "Meadow", "Bloom", "Posy"],
+  earthy:  ["Loam", "Woodland", "Root", "Moss", "Peat", "Depth", "Hollow", "Undergrowth", "Soil", "Humus"],
+  citrus:  ["Zest", "Peel", "Brightness", "Citrine", "Sour", "Sun", "Golden", "Dawn", "Lift", "Lemonwater"],
+  spiced:  ["Bazaar", "Caravan", "Kindling", "Ember", "Warmth", "Hearth", "Mantle", "Kettle", "Spice-Road", "Simmer"],
+  minty:   ["Breeze", "Cool", "Exhale", "Frost", "Brisk", "Glade", "Moroccan", "Mint", "Fresh", "Peppergrass"],
+  fruity:  ["Orchard", "Harvest", "Plum", "Summer", "Ripe", "Basket", "Pluck", "Compote", "Jam", "Blush"],
+  sweet:   ["Honey", "Cordial", "Treacle", "Amber", "Comfort", "Syrup", "Harvest", "Comb", "Gild", "Candied"],
+  grassy:  ["Meadow", "Lawn", "Field", "Vernal", "Blade", "Paddock", "Fresh-Cut", "Sprout", "Dawn", "Green"],
+  smoky:   ["Campfire", "Ember", "Kiln", "Peat", "Ash", "Char", "Lapsang", "Scotch", "Signal", "Hearth"],
+  mineral: ["Stone", "Slate", "Rock", "Spring", "Well", "Salt", "Mountain", "Gravel", "Marble", "Dew"],
+  honeyed: ["Amber", "Gold", "Hive", "Comb", "Mead", "Harvest", "Posy", "Mantle", "Gild", "Dewdrop"],
+  umami:   ["Brothy", "Savory", "Oceanic", "Marine", "Kelp", "Dashi", "Kombu", "Deep", "Foundation", "Broth"],
+  woody:   ["Bough", "Oak", "Cedar", "Plank", "Branch", "Grain", "Pith", "Beam", "Mantle", "Timber"],
+  roasted: ["Kiln", "Ember", "Char", "Walnut", "Kettle", "Fired", "Browned", "Toasted", "Hearth", "Kindled"],
+  bitter:  ["Gentian", "Draught", "Well", "Depth", "Ledger", "Decoction", "Tincture", "Tinge", "Marrow", "Gravity"],
+  tart:    ["Cranberry", "Sharp", "Brightness", "Tang", "Pluck", "Sour", "Edge", "Prick", "Bite", "Citrine"],
+  vegetal: ["Garden", "Leaf", "Sprout", "Plot", "Sprig", "Kale", "Fresh", "Green", "Harvest", "Meadow"],
+  nutty:   ["Chestnut", "Walnut", "Almond", "Kernel", "Hazel", "Husk", "Harvest", "Hearth", "Kettle", "Pith"],
+  savory:  ["Broth", "Kitchen", "Salt", "Kelp", "Dashi", "Kettle", "Saucepan", "Marine", "Mantle", "Hearth"],
+};
+
 // Names used when a single mood is selected — each mood has a canonical
 // "signature" blend name/subtitle pair. Voice: apothecary-poet.
 const MOOD_SINGLE_NAMES = {
@@ -906,4 +660,6 @@ export {
   MOOD_CONFLICTS,
   FLAVOR_CONFLICTS,
   MOOD_SINGLE_NAMES,
+  MOOD_WORDS,
+  FLAVOR_WORDS,
 };
