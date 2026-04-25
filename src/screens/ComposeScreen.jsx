@@ -31,7 +31,7 @@ import { SessionRow } from "./HomeScreen";
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
@@ -694,15 +694,25 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
       {mode === "apothecary" && (() => {
         // Shelf is your-personal-stuff: blends you've brewed at least
         // once plus your favorites in Blends, the app's curated recipes
-        // in Catalogue, and check-ins in Journal.
-        const traditional = BLENDS.filter(b => b.tradition);
-        const experimental = BLENDS.filter(b => b.experimental);
+        // plus your generated/composed experiments in Catalogue, and
+        // check-ins in Journal.
+        const hidden = hiddenBlendIds || new Set();
+        const traditional = BLENDS.filter(b => b.tradition && !hidden.has(b.id));
+        const curatedExperimental = BLENDS.filter(b => b.experimental && !hidden.has(b.id));
+        // Generated/composed experimentals (onboarding-seeded + user-composed),
+        // deduped by id and excluded if already in the curated set.
+        const curatedIds = new Set(BLENDS.map(b => b.id));
+        const generatedExperimental = (generatedBlends || []).filter(
+          b => !curatedIds.has(b.id) && !hidden.has(b.id)
+        );
+        const experimental = [...curatedExperimental, ...generatedExperimental];
         const yourSessions = (sessions || []).filter(s => s.who === "you");
 
         const brewedIds = new Set(yourSessions.map(s => s.blendId).filter(Boolean));
         const favSet = favoriteBlendIds || new Set();
         const personalIds = new Set([...brewedIds, ...favSet]);
         const saved = [...personalIds]
+          .filter(id => !hidden.has(id))
           .map(id => getBlend(id))
           .filter(Boolean);
 
@@ -843,17 +853,44 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                   {catEmpty}
                 </div>
               ) : (
-                catVisible.map((b, i) => (
-                  <BlendListRow
-                    key={b.id}
-                    b={b}
-                    author={b.tradition || (b.experimental ? "Herbanium experiment" : null)}
-                    first={i === 0}
-                    go={go}
-                    startBrew={startBrew}
-                    openBlend={openBlend}
-                  />
-                ))
+                catVisible.map((b, i) => {
+                  const author = b.tradition
+                    || (b.synthetic ? "algorithmic experiment"
+                       : b.id?.startsWith("local-") ? "your composition"
+                       : b.experimental ? "Herbanium experiment"
+                       : null);
+                  const canDelete = !b.tradition && deleteBlend;
+                  return (
+                    <div key={b.id} style={{ position: "relative" }}>
+                      <BlendListRow
+                        b={b}
+                        author={author}
+                        first={i === 0}
+                        go={go}
+                        startBrew={startBrew}
+                        openBlend={openBlend}
+                      />
+                      {canDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Delete "${b.name}" from your Catalogue?`)) {
+                              deleteBlend(b.id);
+                            }
+                          }}
+                          title="Delete from catalogue"
+                          style={{
+                            position: "absolute", top: 10, right: 8,
+                            background: "transparent", border: "none",
+                            color: theme.ash, fontSize: 14, lineHeight: 1,
+                            padding: "4px 6px", cursor: "pointer",
+                            opacity: 0.55,
+                          }}
+                        >✕</button>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           );

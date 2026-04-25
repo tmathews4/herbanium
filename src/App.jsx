@@ -192,6 +192,9 @@ export default function App() {
   // user's draw selections. Persisted as full blend objects (not just
   // IDs) since they don't live in BLENDS — the algorithm produced them.
   const [generatedBlends, setGeneratedBlends] = usePersistedState("generatedBlends", []);
+  // Hidden curated experimentals — tracked here so deleting Tom Foolery
+  // (which lives in the BLENDS source-of-truth array) sticks across reloads.
+  const [hiddenBlendIds, setHiddenBlendIds] = usePersistedState("hiddenBlendIds", new Set());
 
   // Hydrate LOCAL_BLENDS from the persisted generated-blends list
   // synchronously during render. Doing this in useEffect would leave
@@ -272,7 +275,11 @@ export default function App() {
       // ("Dusk Lullaby · spiced accent"), so the rename field exists to let
       // them give it a name they'll recognize in Apothecary later.
       const finalName = (rename && rename.length > 0) ? rename : blend.name;
-      LOCAL_BLENDS[blendId] = { ...blend, id: blendId, name: finalName };
+      const persisted = { ...blend, id: blendId, name: finalName, experimental: true };
+      LOCAL_BLENDS[blendId] = persisted;
+      // Also persist into generatedBlends so the blend survives reload
+      // and shows up in Catalogue → Experimental.
+      setGeneratedBlends(prev => [...(prev || []), persisted]);
     }
 
     // Derive "actual" from what landed: prefer target moods that landed,
@@ -312,6 +319,34 @@ export default function App() {
     setComposePreselect({ blendId, at: Date.now() });
     setTab("compose");
     setOverlay(null);
+  };
+
+  // Delete a non-traditional blend. For generated/composed blends (in
+  // generatedBlends), drop the persisted record. For curated experimentals
+  // (BLENDS array source-of-truth), record the id in hiddenBlendIds so the
+  // omission survives reloads. Either way, clean up favorites/saved.
+  const deleteBlend = (id) => {
+    const inGenerated = (generatedBlends || []).some(b => b.id === id);
+    if (inGenerated) {
+      setGeneratedBlends(prev => (prev || []).filter(b => b.id !== id));
+      delete LOCAL_BLENDS[id];
+    } else {
+      setHiddenBlendIds(prev => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+    }
+    if (favoriteBlendIds.has(id)) {
+      const nextFav = new Set(favoriteBlendIds);
+      nextFav.delete(id);
+      setFavoriteBlendIds(nextFav);
+    }
+    if (savedBlendIds.has(id)) {
+      const nextSaved = new Set(savedBlendIds);
+      nextSaved.delete(id);
+      setSavedBlendIds(nextSaved);
+    }
   };
 
   // Save/unsave a blend (puts it on the Shelf).
@@ -379,7 +414,7 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
       </div>
