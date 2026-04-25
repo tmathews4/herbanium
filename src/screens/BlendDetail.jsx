@@ -5,7 +5,7 @@
 import React from "react";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
-  Flower, Kettle,
+  Flower, Kettle, MOOD_ICONS,
 } from "../components/icons";
 import {
   SectionLabel, VocabInfoCard,
@@ -111,11 +111,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             flexShrink: 0,
           }}>
             <div style={{
-              width: 56, height: 56, borderRadius: "50%",
+              width: 72, height: 72, borderRadius: "50%",
               background: theme.ivory, border: `1px solid ${theme.rule}`,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <Flower size={28} c={theme.ochre} />
+              {(() => {
+                const Icon = MOOD_ICONS[b.mood] || Flower;
+                return <Icon size={40} />;
+              })()}
             </div>
             {EFFECT_DESCRIPTIONS[b.mood] ? (
               <button

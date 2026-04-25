@@ -72,3 +72,128 @@ export const Ornament = ({ w = 120, c = theme.rule }) => (
     <path d="M50 6 Q55 2 60 6 Q65 10 70 6" />
   </svg>
 );
+
+/* ── Mood icons — one per mood, used in BlendDetail hero ────────── */
+
+export const MoodCalm = ({ size = 28, c = theme.sage }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9 Q7 5 12 9 T21 9" />
+    <path d="M3 15 Q7 11 12 15 T21 15" />
+  </svg>
+);
+
+export const MoodFocus = ({ size = 28, c = theme.sageDeep }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="5" />
+    <circle cx="12" cy="12" r="1.6" fill={c} stroke="none" />
+  </svg>
+);
+
+export const MoodEnergy = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2 V5" />
+    <path d="M12 19 V22" />
+    <path d="M2 12 H5" />
+    <path d="M19 12 H22" />
+    <path d="M4.9 4.9 L7 7" />
+    <path d="M17 17 L19.1 19.1" />
+    <path d="M4.9 19.1 L7 17" />
+    <path d="M17 7 L19.1 4.9" />
+  </svg>
+);
+
+export const MoodSleepy = ({ size = 28, c = theme.plum }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 14.5 A8 8 0 1 1 9.5 5 A6 6 0 0 0 19 14.5 Z" />
+    <circle cx="6" cy="6" r="0.8" fill={c} stroke="none" />
+    <circle cx="20" cy="20" r="0.8" fill={c} stroke="none" />
+  </svg>
+);
+
+export const MoodComfort = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* cup */}
+    <path d="M5 12 H17 V18 C17 19.5 16 20.5 14.5 20.5 H7.5 C6 20.5 5 19.5 5 18 Z" />
+    <path d="M17 13 C19 13 20 14 20 15.5 C20 17 19 18 17 18" />
+    {/* steam */}
+    <path d="M9 8 Q10 6 9 4" />
+    <path d="M12 8 Q13 6 12 4" />
+    <path d="M15 8 Q16 6 15 4" />
+  </svg>
+);
+
+export const MoodSoothing = ({ size = 28, c = theme.sage }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 8 Q7 5 12 8 T21 8" />
+    <path d="M3 12 Q7 9 12 12 T21 12" />
+    <path d="M3 16 Q7 13 12 16 T21 16" />
+    <path d="M3 20 Q7 17 12 20 T21 20" />
+  </svg>
+);
+
+export const MoodWarming = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* outer flame */}
+    <path d="M12 22 C6 22 4 17 5.5 13 C7 9.5 9 9 9 6 C9 4 11 2.5 12 2 C13 4 14 5 14 7.5 C14 9 13 10 13 11 C13 12 14 12.5 15 11.5 C16 10.5 16 9 16 9 C18 11 19 14 18 17 C17 20 14.5 22 12 22 Z" />
+    {/* inner flame */}
+    <path d="M12 18 C9.5 18 9 15.5 10 13.5 C11 11.5 12 11 12 9 C13 11 13.5 13 13 14.5 C12.5 16.5 13 17 14 16.5" />
+  </svg>
+);
+
+export const MoodCooling = ({ size = 28, c = theme.sky || theme.sage }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* 6-pointed snowflake */}
+    <path d="M12 2 V22" />
+    <path d="M3.5 7 L20.5 17" />
+    <path d="M3.5 17 L20.5 7" />
+    {/* small barbs */}
+    <path d="M12 5 L10.5 6.5 M12 5 L13.5 6.5" />
+    <path d="M12 19 L10.5 17.5 M12 19 L13.5 17.5" />
+    <path d="M5.5 8.5 L7.5 9 M5.5 8.5 L6 6.5" />
+    <path d="M18.5 15.5 L16.5 15 M18.5 15.5 L18 17.5" />
+    <path d="M5.5 15.5 L7.5 15 M5.5 15.5 L6 17.5" />
+    <path d="M18.5 8.5 L16.5 9 M18.5 8.5 L18 6.5" />
+  </svg>
+);
+
+export const MoodDigestive = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* spiral */}
+    <path d="M12 12 m0 -1 a1 1 0 1 1 0.01 0 M12 12 m0 -3 a3 3 0 1 1 0.01 0 M12 12 m0 -5 a5 5 0 1 1 0.01 0 M12 12 m0 -7.5 a7.5 7.5 0 1 1 0.01 0" />
+  </svg>
+);
+
+export const MoodGrounding = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* mountain silhouette */}
+    <path d="M2 19 L9 9 L13 14 L17 8 L22 19 Z" />
+    <path d="M2 19 H22" />
+  </svg>
+);
+
+export const MoodUplifting = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* leaf with rising stem */}
+    <path d="M12 22 V10" />
+    <path d="M12 10 C7 10 4 7 4 3 C9 3 12 5 12 10 Z" />
+    <path d="M12 10 C17 10 20 7 20 3 C15 3 12 5 12 10 Z" />
+  </svg>
+);
+
+// Map mood → component for the BlendDetail hero. Anything not in the map
+// falls back to Flower so user-composed/synth blends still get an icon.
+export const MOOD_ICONS = {
+  calm:      MoodCalm,
+  focus:     MoodFocus,
+  energy:    MoodEnergy,
+  sleepy:    MoodSleepy,
+  comfort:   MoodComfort,
+  soothing:  MoodSoothing,
+  warming:   MoodWarming,
+  cooling:   MoodCooling,
+  digestive: MoodDigestive,
+  grounding: MoodGrounding,
+  uplifting: MoodUplifting,
+};
