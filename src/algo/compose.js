@@ -345,6 +345,20 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
         kindLabel: `traditional · ${tradition.tradition}`,
       });
     }
+
+    // Experimental Herbanium blends are also eligible — pulls in custom
+    // recipes like Tom Foolery so the suggestion row isn't limited to
+    // legacy traditions. The UI marks these with a blue outline.
+    const experimental = BLENDS.find(b =>
+      b.experimental && moods.includes(b.mood) &&
+      !candidates.some(c => c.name === b.name)
+    );
+    if (experimental) {
+      candidates.push({
+        ...experimental, kind: "experimental",
+        kindLabel: "Herbanium experiment",
+      });
+    }
   } else {
     // User cares about taste — vary across mood axis.
     // Try mood-neighbor first: same flavor, different mood emphasis.
@@ -371,10 +385,21 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
           kindLabel: `traditional · ${flavorTradition.tradition}`,
         });
       }
+      // Experimental flavor matches for the taste-led view.
+      const flavorExperimental = BLENDS.find(b =>
+        b.experimental && b.flavor === flavor &&
+        !candidates.some(c => c.name === b.name)
+      );
+      if (flavorExperimental) {
+        candidates.push({
+          ...flavorExperimental, kind: "experimental",
+          kindLabel: "Herbanium experiment",
+        });
+      }
     }
   }
 
-  return candidates.slice(0, 3);
+  return candidates.slice(0, 4);
 }
 
 /* ──────────────────────────────────────────────────────────────

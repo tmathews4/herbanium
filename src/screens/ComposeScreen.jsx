@@ -340,12 +340,20 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
                 {candidates.map((c, i) => {
                   const isSelected = i === selectedIdx;
+                  const isExperimental = c.kind === "experimental";
+                  // Experimental blends get a sky-blue outline (and label color)
+                  // so they read as a different *kind* of candidate than the
+                  // traditions and accents around them.
+                  const borderColor = isSelected
+                    ? theme.ink
+                    : isExperimental ? theme.sky : theme.rule;
                   return (
                     <button key={i} onClick={() => setSelectedIdx(i)} style={{
                       flex: "0 0 auto", minWidth: 130, maxWidth: 170,
                       textAlign: "left",
                       padding: "8px 10px", borderRadius: 10,
-                      border: `1px solid ${isSelected ? theme.ink : theme.rule}`,
+                      border: `1px solid ${borderColor}`,
+                      borderWidth: isExperimental && !isSelected ? 1.5 : 1,
                       background: isSelected ? theme.ink : "transparent",
                       color: isSelected ? theme.cream : theme.inkSoft,
                       cursor: "pointer",
@@ -353,7 +361,9 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                     }}>
                       <div style={{
                         fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase",
-                        color: isSelected ? "rgba(243,236,220,0.6)" : theme.ash,
+                        color: isSelected ? "rgba(243,236,220,0.6)"
+                          : isExperimental ? theme.sky
+                          : theme.ash,
                       }}>{c.kindLabel}</div>
                       <div style={{
                         fontFamily: ff.serif, fontSize: 13, lineHeight: 1.15,
