@@ -1,15 +1,16 @@
 /* ──────────────────────────────────────────────────────────────
-   screens/LibraryScreen.jsx — Shelf screen (blends + ingredients tabs) plus LibraryList, BlendListRow.
+   screens/LibraryScreen.jsx — Apothecary tab: ingredient catalog only.
+   Saved blends and Journal/check-ins moved to Compose > Shelf.
+   Also exports LibraryList and BlendListRow used by ComposeScreen.
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState } from "react";
 import {
-  Flower, Kettle, Leaf, Sprig,
+  Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  Chip, ChipRows, EmptyState, SectionLabel,
+  ChipRows, EmptyState, SectionLabel,
 } from "../components/layout";;
-import { BLENDS } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   ff, theme,
@@ -18,20 +19,11 @@ import { mmss } from "../helpers/misc";
 import {
   formatTempShort, useUnit,
 } from "../units/units";
-import { SessionRow } from "./HomeScreen";
 
-export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendIds, pantryIds, togglePantry }) => {
-  const [tab, setTab] = useState("blends"); // blends | history | shelf
-  const [filter, setFilter] = useState("all");
-
-  // "The Shelf" — ingredient catalog browser state
+export const LibraryScreen = ({ go, pantryIds }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(false);
-
-  // Filter saved blends (power user's four, mid user's one, new user's none).
-  const savedBlends = BLENDS.filter(b => savedBlendIds.has(b.id));
-  const yourSessions = sessions.filter(s => s.who === "you");
 
   // All ingredients, filtered by search / category / pantry-toggle, then
   // sorted alphabetically by display name so the catalog is browsable.
@@ -51,103 +43,19 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Sub tabs */}
-      <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
-        {[
-          ["blends",  "Blends",    savedBlends.length],
-          ["history", "Check-ins", yourSessions.length],
-          ["shelf",   "Ingredients", Object.keys(INGREDIENTS).length],
-        ].map(([k, label, count]) => (
-          <button key={k} onClick={() => setTab(k)} style={{
-            background: "transparent", border: "none",
-            fontFamily: ff.serif, fontSize: 15, color: tab === k ? theme.ink : theme.ash,
-            padding: "6px 0 10px", cursor: "pointer",
-            borderBottom: tab === k ? `2px solid ${theme.terra}` : "2px solid transparent",
-            marginBottom: -1,
-            display: "flex", alignItems: "baseline", gap: 5,
-          }}>
-            {label}
-            {count > 0 && (
-              <span style={{
-                fontFamily: ff.mono, fontSize: 10, color: tab === k ? theme.terra : theme.ash, opacity: 0.75,
-              }}>{count}</span>
-            )}
-          </button>
-        ))}
+      <div style={{ marginBottom: 14 }}>
+        <SectionLabel n="i">The Apothecary</SectionLabel>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.ash, marginTop: 4, lineHeight: 1.5,
+        }}>
+          Every leaf, flower, root, and bark Herbanium tracks. Tap any to read its profile.
+        </div>
       </div>
 
-      {tab === "blends" && (
-        <>
-          {savedBlends.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <ChipRows
-                items={["all", "calm", "focus", "energy", "comfort", "what worked"]}
-                renderItem={(f) => (
-                  <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{f}</Chip>
-                )}
-              />
-            </div>
-          )}
-          {(() => {
-            // Filter the saved blends. Moods match against the blend's `mood`
-            // field. "what worked" pulls blends the user rated ≥4 in any
-            // logged session. Unknown filter defaults to all.
-            let filtered = savedBlends;
-            if (filter === "what worked") {
-              const wonIds = new Set(
-                yourSessions.filter(s => (s.taste ?? 0) >= 4).map(s => s.blendId)
-              );
-              filtered = savedBlends.filter(b => wonIds.has(b.id));
-            } else if (filter !== "all") {
-              filtered = savedBlends.filter(b => b.mood === filter);
-            }
-
-            if (filtered.length === 0) {
-              const msg = filter === "what worked"
-                ? "No blends have earned four stars yet — once you rate a cup 4 or higher in your log, it'll surface here."
-                : `None of your saved blends match ${filter} yet. Try composing one.`;
-              return (
-                <div style={{
-                  marginTop: 18, padding: "14px 16px",
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
-                }}>
-                  {msg}
-                </div>
-              );
-            }
-
-            return <LibraryList blends={filtered} compact go={go} startBrew={startBrew} openBlend={openBlend} />;
-          })()}
-        </>
-      )}
-
-      {tab === "history" && (
-        <>
-          {yourSessions.length === 0 ? (
-            <EmptyState
-              icon={<Kettle size={26} c={theme.terra} />}
-              title="Your journal starts with your first cup"
-              body="Every cup you brew and log lands here, with intent, taste, and effect side-by-side."
-              cta={{ label: "set a cup out →", onClick: () => go("compose") }}
-            />
-          ) : (
-            <>
-              <SectionLabel n="i">Every cup you've logged</SectionLabel>
-              <div style={{ marginTop: 12 }}>
-                {yourSessions.map((s, i) => (
-                  <SessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      {tab === "shelf" && (
-        <>
-          {/* Search input */}
-          <div style={{
+      <>
+        {/* Search input */}
+        <div style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "8px 10px", borderRadius: 8,
             background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
@@ -282,14 +190,13 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
               })}
             </div>
           )}
-        </>
-      )}
+      </>
     </div>
   );
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Screen: LIBRARY
+   Saved-blends list (used by Compose > Shelf)
    ────────────────────────────────────────────────────────────── */
 
 export const LibraryList = ({ blends, compact, go, startBrew, openBlend, highlightId }) => {

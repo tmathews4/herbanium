@@ -25,6 +25,7 @@ import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
 } from "../units/units";
 import { LibraryList, BlendListRow } from "./LibraryScreen";
+import { SessionRow } from "./HomeScreen";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: COMPOSE
@@ -34,6 +35,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("all");
+  const [shelfTab, setShelfTab] = useState("blends"); // blends | journal
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
@@ -689,12 +691,12 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
       )}
 
       {mode === "apothecary" && (() => {
-        // The Apothecary unifies what used to be two tabs (saved blends + traditional
-        // preparations). One filter row covers both. The filter values match the
-        // Shelf screen so the mental model is consistent across the app.
+        // Shelf is your-personal-stuff: saved/traditional/experimental
+        // blends in Blends, your check-in history in Journal.
         const saved = BLENDS.filter(b => savedBlendIds.has(b.id));
         const traditional = BLENDS.filter(b => b.tradition);
         const experimental = BLENDS.filter(b => b.experimental);
+        const yourSessions = (sessions || []).filter(s => s.who === "you");
 
         let visible;
         let emptyMsg;
@@ -737,8 +739,57 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
           emptyMsg = `Nothing saved matches ${apothecaryFilter} yet. Try composing one.`;
         }
 
+        const subTabHeader = (
+          <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
+            {[
+              ["blends",  "Blends",  saved.length + traditional.length + experimental.length],
+              ["journal", "Journal", yourSessions.length],
+            ].map(([k, label, count]) => (
+              <button key={k} onClick={() => setShelfTab(k)} style={{
+                background: "transparent", border: "none",
+                fontFamily: ff.serif, fontSize: 15, color: shelfTab === k ? theme.ink : theme.ash,
+                padding: "6px 0 10px", cursor: "pointer",
+                borderBottom: shelfTab === k ? `2px solid ${theme.terra}` : "2px solid transparent",
+                marginBottom: -1,
+                display: "flex", alignItems: "baseline", gap: 5,
+              }}>
+                {label}
+                {count > 0 && (
+                  <span style={{
+                    fontFamily: ff.mono, fontSize: 10, color: shelfTab === k ? theme.terra : theme.ash, opacity: 0.75,
+                  }}>{count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        );
+
+        if (shelfTab === "journal") {
+          return (
+            <div style={{ marginTop: 4 }}>
+              {subTabHeader}
+              {yourSessions.length === 0 ? (
+                <div style={{
+                  marginTop: 18, padding: "14px 16px",
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
+                }}>
+                  Your journal starts with your first cup. Brew, log, and every check-in lands here.
+                </div>
+              ) : (
+                <div style={{ marginTop: 6 }}>
+                  {yourSessions.map((s, i) => (
+                    <SessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
+
         return (
           <div style={{ marginTop: 4 }}>
+            {subTabHeader}
             <div style={{ marginBottom: 10 }}>
               <ChipRows
                 items={["all", "favorites", "calm", "focus", "energy", "comfort", "traditional", "experimental", "what worked"]}
