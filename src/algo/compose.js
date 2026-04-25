@@ -31,7 +31,10 @@ export const TRADITION_TIME_TOLERANCE_S = 120;
 export function computeBrewProfile(ingredients, opts = {}) {
   const { leadOnly = false } = opts;
   if (!ingredients || !ingredients.length) {
-    return { tempC: 95, tempRange: null, timeS: 300, compatible: true, outsiders: [] };
+    return {
+      tempC: 95, tempRange: null, timeS: 300, timeRange: null,
+      compatible: true, outsiders: [],
+    };
   }
 
   // When the caller opts into leadOnly, restrict the math to ingredients
@@ -46,35 +49,45 @@ export function computeBrewProfile(ingredients, opts = {}) {
 
   const totalG = pool.reduce((s, { g }) => s + g, 0);
 
-  const intMin = Math.max(...pool.map(({ id }) => INGREDIENTS[id].tempC[0]));
-  const intMax = Math.min(...pool.map(({ id }) => INGREDIENTS[id].tempC[1]));
+  // 2D sweet-spot search: each ingredient's preferred brew is a
+  // rectangle [tempC range] × [timeS range]. Intersect on each axis;
+  // a non-empty intersection on both axes means there's a single
+  // brewing window that satisfies every ingredient — pick its center.
+  // If an axis has no intersection, fall back to the grams-weighted
+  // midpoint on that axis (closest reasonable compromise).
+  const tIntMin = Math.max(...pool.map(({ id }) => INGREDIENTS[id].tempC[0]));
+  const tIntMax = Math.min(...pool.map(({ id }) => INGREDIENTS[id].tempC[1]));
+  const sIntMin = Math.max(...pool.map(({ id }) => INGREDIENTS[id].timeS[0]));
+  const sIntMax = Math.min(...pool.map(({ id }) => INGREDIENTS[id].timeS[1]));
 
-  // grams-weighted time, rounded to the nearest 30s
-  const wTime = pool.reduce((s, { id, g }) => {
-    const [t1, t2] = INGREDIENTS[id].timeS;
-    return s + ((t1 + t2) / 2) * (g / totalG);
-  }, 0);
-  const timeS = Math.round(wTime / 30) * 30;
+  const tempIntersects = tIntMin <= tIntMax;
+  const timeIntersects = sIntMin <= sIntMax;
 
-  if (intMin <= intMax) {
-    // Clean intersection — everyone brews in the same window.
-    return {
-      tempC: Math.round((intMin + intMax) / 2 / 5) * 5,
-      tempRange: [intMin, intMax],
-      timeS,
-      compatible: true,
-      outsiders: [],
-    };
+  let tempC;
+  if (tempIntersects) {
+    tempC = Math.round((tIntMin + tIntMax) / 2 / 5) * 5;
+  } else {
+    const wTemp = pool.reduce((s, { id, g }) => {
+      const [t1, t2] = INGREDIENTS[id].tempC;
+      return s + ((t1 + t2) / 2) * (g / totalG);
+    }, 0);
+    tempC = Math.round(wTemp / 5) * 5;
   }
 
-  // No overlap — weighted-grams dominance. Find the ingredients that
-  // fall outside the chosen brewing window (the "cost" of this blend).
-  const wTemp = pool.reduce((s, { id, g }) => {
-    const [t1, t2] = INGREDIENTS[id].tempC;
-    return s + ((t1 + t2) / 2) * (g / totalG);
-  }, 0);
-  const tempC = Math.round(wTemp / 5) * 5;
+  let timeS;
+  if (timeIntersects) {
+    timeS = Math.round((sIntMin + sIntMax) / 2 / 30) * 30;
+  } else {
+    const wTime = pool.reduce((s, { id, g }) => {
+      const [t1, t2] = INGREDIENTS[id].timeS;
+      return s + ((t1 + t2) / 2) * (g / totalG);
+    }, 0);
+    timeS = Math.round(wTime / 30) * 30;
+  }
 
+  // Outsiders: ingredients whose temp range doesn't include the chosen
+  // brew temp. Time is informational only — ingredients pulled past
+  // their time window get the per-ingredient over-pull warning instead.
   const outsiders = pool
     .filter(({ id }) => {
       const [lo, hi] = INGREDIENTS[id].tempC;
@@ -82,7 +95,14 @@ export function computeBrewProfile(ingredients, opts = {}) {
     })
     .map(({ id }) => id);
 
-  return { tempC, tempRange: null, timeS, compatible: false, outsiders };
+  return {
+    tempC,
+    tempRange: tempIntersects ? [tIntMin, tIntMax] : null,
+    timeS,
+    timeRange: timeIntersects ? [sIntMin, sIntMax] : null,
+    compatible: tempIntersects && timeIntersects,
+    outsiders,
+  };
 }
 
 // The base resolver. Deterministic — same moods + flavor always → same blend.
