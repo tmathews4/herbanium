@@ -812,6 +812,217 @@ export const ATTRIBUTES = [
     glyph: "comfort", tint: "ash", frame: "hex", accent: "none",
     desc: "Comfort and spiced, picked together with three or more flavors — old memory, slow trunk, the cup that remembers.",
     earned: ctx => onPick(ctx, "comfort", ["spiced"]) && ctx.onboarding.flavorCount >= 3 },
+
+  // ─── Habit triggers — titles earned through patterns of when, how,
+  //     and what the user brews. Reward rhythm, not volume. ─────────
+  { id: "clockwork-cup", name: "The Clockwork Cup", rarity: "rare", window: "recent",
+    glyph: "compass", tint: "ash", frame: "diamond", accent: "dot",
+    desc: "Five recent cups landed within the same hour-of-day. Your kettle keeps appointments.",
+    earned: ctx => {
+      const hours = new Map();
+      ctx.recent.sessions.forEach(s => {
+        const ts = tsFromSession(s);
+        if (!ts) return;
+        const h = ts.getHours();
+        hours.set(h, (hours.get(h) || 0) + 1);
+      });
+      return [...hours.values()].some(v => v >= 5);
+    } },
+  { id: "course-corrector", name: "The Course-Corrector", rarity: "uncommon", window: "recent",
+    glyph: "compass", tint: "sageDeep", frame: "circle", accent: "dot",
+    desc: "Rated a cup low, then immediately followed it with a four-star or better. You learn out loud.",
+    earned: ctx => {
+      // Sessions are newest-first; pair[i] is newer than pair[i+1].
+      for (let i = 0; i < ctx.recent.sessions.length - 1; i++) {
+        const newer = ctx.recent.sessions[i];
+        const older = ctx.recent.sessions[i + 1];
+        if ((newer.taste ?? 0) >= 4 && (older.taste ?? 5) <= 2) return true;
+      }
+      return false;
+    } },
+  { id: "true-believer", name: "The True Believer", rarity: "uncommon", window: "recent",
+    glyph: "heart", tint: "terra", frame: "circle", accent: "star",
+    desc: "One blend brewed five times in your recent rotation, averaging four stars or better.",
+    earned: ctx => {
+      const byBlend = new Map();
+      ctx.recent.sessions.forEach(s => {
+        if (!s.blendId) return;
+        const arr = byBlend.get(s.blendId) || [];
+        arr.push(s.taste ?? 0);
+        byBlend.set(s.blendId, arr);
+      });
+      for (const ratings of byBlend.values()) {
+        if (ratings.length < 5) continue;
+        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+        if (avg >= 4) return true;
+      }
+      return false;
+    } },
+  { id: "weather-vane", name: "The Weather-Vane", rarity: "rare", window: "recent",
+    glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
+    desc: "Five or more different mood targets across your last seven cups. The wind shifts, your kettle shifts.",
+    earned: ctx => {
+      const recent7 = ctx.recent.sessions.slice(0, 7);
+      const moods = new Set();
+      recent7.forEach(s => (s.targetMoods || []).forEach(m => moods.add(m)));
+      return moods.size >= 5;
+    } },
+  { id: "day-knowing", name: "Day-Knowing", rarity: "rare", window: "recent",
+    glyph: "compass", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Cups across all five times of day in your recent rotation — morning, midday, afternoon, evening, late-night.",
+    earned: ctx => ctx.recent.byTimeOfDay.size >= 5 },
+  { id: "versatile-hand", name: "The Versatile Hand", rarity: "rare", window: "recent",
+    glyph: "key", tint: "sageDeep", frame: "square", accent: "rays",
+    desc: "The same blend brewed at three different times of day. One cup, many lives.",
+    earned: ctx => {
+      const blendTimes = new Map();
+      ctx.recent.sessions.forEach(s => {
+        const ts = tsFromSession(s);
+        if (!ts || !s.blendId) return;
+        const set = blendTimes.get(s.blendId) || new Set();
+        set.add(timeOfDay(ts));
+        blendTimes.set(s.blendId, set);
+      });
+      for (const set of blendTimes.values()) if (set.size >= 3) return true;
+      return false;
+    } },
+  { id: "the-steadier", name: "The Steadier", rarity: "uncommon", window: "recent",
+    glyph: "calm", tint: "sage", frame: "circle", accent: "none",
+    desc: "Three or more recent cups began from anxious, stressed, or restless. The cup is your handle.",
+    earned: ctx => ctx.recent.sessions.filter(s =>
+      (s.currentMoods || []).some(m => ["anxious","stressed","restless","tired"].includes(m))
+    ).length >= 3 },
+  { id: "self-reader", name: "The Self-Reader", rarity: "rare", window: "recent",
+    glyph: "feather", tint: "plum", frame: "square", accent: "dot",
+    desc: "You named your starting feeling on five or more recent cups. Self-knowledge in the chips.",
+    earned: ctx => ctx.recent.sessions.filter(s =>
+      (s.currentMoods || []).length >= 1
+    ).length >= 5 },
+  { id: "the-recorder", name: "The Recorder", rarity: "uncommon", window: "recent",
+    glyph: "scroll", tint: "ochre", frame: "square", accent: "dot",
+    desc: "Notes left on five or more recent check-ins. The journal grows by your hand.",
+    earned: ctx => ctx.recent.sessions.filter(s =>
+      (s.note || "").trim().length > 0
+    ).length >= 5 },
+  { id: "witching-hour", name: "The Witching Hour", rarity: "legendary", window: "recent",
+    glyph: "sleepy", tint: "plum", frame: "diamond", accent: "crescent",
+    desc: "A cup brewed between eleven and one. The hour the kettle becomes a candle.",
+    earned: ctx => ctx.recent.sessions.some(s => {
+      const ts = tsFromSession(s);
+      if (!ts) return false;
+      const h = ts.getHours();
+      return h === 23 || h === 0;
+    }) },
+  { id: "unrepeating", name: "The Unrepeating", rarity: "uncommon", window: "recent",
+    glyph: "compass", tint: "sageDeep", frame: "diamond", accent: "rays",
+    desc: "Five different blends across your last five cups. The kettle never visits the same well twice.",
+    earned: ctx => {
+      const last5 = ctx.recent.sessions.slice(0, 5);
+      const ids = new Set(last5.map(s => s.blendId).filter(Boolean));
+      return last5.length === 5 && ids.size === 5;
+    } },
+  { id: "weekend-steeper", name: "The Weekend Steeper", rarity: "uncommon", window: "recent",
+    glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
+    desc: "Last five recent cups all fell on a Saturday or Sunday. Slow days, full kettle.",
+    earned: ctx => {
+      const last5 = ctx.recent.sessions.slice(0, 5);
+      if (last5.length < 5) return false;
+      return last5.every(s => {
+        const ts = tsFromSession(s);
+        if (!ts) return false;
+        const d = ts.getDay();
+        return d === 0 || d === 6;
+      });
+    } },
+  { id: "working-steeper", name: "The Working Steeper", rarity: "uncommon", window: "recent",
+    glyph: "focus", tint: "ash", frame: "square", accent: "none",
+    desc: "Last five recent cups all on a weekday. The desk and the kettle keep the same hours.",
+    earned: ctx => {
+      const last5 = ctx.recent.sessions.slice(0, 5);
+      if (last5.length < 5) return false;
+      return last5.every(s => {
+        const ts = tsFromSession(s);
+        if (!ts) return false;
+        const d = ts.getDay();
+        return d >= 1 && d <= 5;
+      });
+    } },
+  { id: "long-steeper", name: "The Long Steeper", rarity: "uncommon", window: "recent",
+    glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
+    desc: "Every recent cup steeped six minutes or longer. The slow extraction is your register.",
+    earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
+      const b = getBlend(s.blendId);
+      return b && (b.timeS || 0) >= 360;
+    }) },
+  { id: "quick-cup", name: "The Quick Cup", rarity: "uncommon", window: "recent",
+    glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Every recent cup steeped under three minutes. Brisk hand, brisk cup.",
+    earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
+      const b = getBlend(s.blendId);
+      return b && (b.timeS || 9999) < 180;
+    }) },
+  { id: "multi-ingredient-mind", name: "Multi-Ingredient Mind", rarity: "uncommon", window: "recent",
+    glyph: "compass", tint: "ochre", frame: "diamond", accent: "dot",
+    desc: "Average four or more ingredients per recent cup. You like the cup composed, not solo.",
+    earned: ctx => {
+      if (ctx.recent.n < 5) return false;
+      let sum = 0, count = 0;
+      ctx.recent.sessions.forEach(s => {
+        const b = getBlend(s.blendId);
+        if (!b) return;
+        sum += (b.ingredients || []).length;
+        count++;
+      });
+      return count > 0 && sum / count >= 4;
+    } },
+  { id: "pure-steeper", name: "The Pure Steeper", rarity: "uncommon", window: "recent",
+    glyph: "leaf", tint: "sageDeep", frame: "circle", accent: "none",
+    desc: "Every recent cup is a single-ingredient steep. One leaf, full attention.",
+    earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
+      const b = getBlend(s.blendId);
+      return b && (b.ingredients || []).length === 1;
+    }) },
+  { id: "daily-practice", name: "The Daily Practice", rarity: "rare", window: "recent",
+    glyph: "comfort", tint: "terra", frame: "hex", accent: "star",
+    desc: "At least one cup every day for the past seven days. The kettle is the calendar.",
+    earned: ctx => {
+      const today = new Date();
+      const lastWeekDays = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        lastWeekDays.push(d.toISOString().slice(0, 10));
+      }
+      const cupDays = new Set();
+      ctx.recent.sessions.forEach(s => {
+        const ts = tsFromSession(s);
+        if (ts) cupDays.add(ts.toISOString().slice(0, 10));
+      });
+      return lastWeekDays.every(d => cupDays.has(d));
+    } },
+  { id: "connoisseur", name: "The Connoisseur", rarity: "rare", window: "recent",
+    glyph: "star", tint: "ochre", frame: "diamond", accent: "star",
+    desc: "Three different blends rated five stars in your recent rotation. You know the shape of yes.",
+    earned: ctx => {
+      const fiveStarBlends = new Set();
+      ctx.recent.sessions.forEach(s => {
+        if ((s.taste ?? 0) === 5 && s.blendId) fiveStarBlends.add(s.blendId);
+      });
+      return fiveStarBlends.size >= 3;
+    } },
+  { id: "self-repeater", name: "The Self-Repeater", rarity: "uncommon", window: "lifetime",
+    glyph: "heart", tint: "plum", frame: "circle", accent: "dot",
+    desc: "A blend you composed yourself, brewed at least twice. Your hand made it, your hand returned to it.",
+    earned: ctx => {
+      const localCounts = new Map();
+      ctx.lifetime.sessions.forEach(s => {
+        if (s.blendId && String(s.blendId).startsWith("local-")) {
+          localCounts.set(s.blendId, (localCounts.get(s.blendId) || 0) + 1);
+        }
+      });
+      for (const c of localCounts.values()) if (c >= 2) return true;
+      return false;
+    } },
 ];
 
 export function evaluateAttributes(ctx) {

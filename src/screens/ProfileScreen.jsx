@@ -196,7 +196,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Cups"     value={cupCount} />
           <Stat label="Blends"   value={blendCount} />
           <Stat label="In pantry" value={shelfCount} />
-          <Stat label="Marks"    value={earnedAttrs.length} />
+          <Stat label="Titles"   value={earnedAttrs.length} />
         </div>
       </div>
 
