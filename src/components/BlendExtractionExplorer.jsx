@@ -345,8 +345,16 @@ export const BlendExtractionExplorer = ({
       })()}
 
       {/* Predicted flavor strip — strength drives both sort and opacity.
-          Each pill is a button: click reveals a description card. */}
-      {brew.flavors && brew.flavors.length > 0 && (
+          Each pill is a button: click reveals a description card.
+          Defensive filter: drop entries that round to 0 strength so
+          slider motion can't leak ghost pills, and let entries reappear
+          the moment they cross above 0 again. */}
+      {(() => {
+        const visibleFlavors = (brew.flavors || []).filter(([, s]) =>
+          Math.round((s || 0) * 10) / 10 > 0
+        );
+        if (visibleFlavors.length === 0) return null;
+        return (
         <div style={{ marginBottom: 14 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
@@ -355,7 +363,7 @@ export const BlendExtractionExplorer = ({
             predicted flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {brew.flavors.map(([name, strength]) => {
+            {visibleFlavors.map(([name, strength]) => {
               const known = !!FLAVOR_DESCRIPTIONS[name];
               const active = openFlavor === name;
               const intensity = Math.max(0.35, Math.min(1, strength / 5));
@@ -388,10 +396,18 @@ export const BlendExtractionExplorer = ({
             />
           )}
         </div>
-      )}
+        );
+      })()}
 
-      {/* Effect bars — live computed blend profile */}
-      {brew.effects.length > 0 && (
+      {/* Effect bars — live computed blend profile. Same zero-strength
+          filter as the flavor strip: bars at 0 disappear, return when
+          slider motion pushes them above 0. */}
+      {(() => {
+        const visibleEffects = (brew.effects || []).filter(([, n]) =>
+          Math.round((n || 0) * 10) / 10 > 0
+        );
+        if (visibleEffects.length === 0) return null;
+        return (
         <div style={{ marginBottom: brew.synergyTags?.length || brew.warnings?.length ? 14 : 0 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
@@ -400,7 +416,7 @@ export const BlendExtractionExplorer = ({
             predicted effect
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {brew.effects.map(([tag, n], i) => {
+            {visibleEffects.map(([tag, n], i) => {
               const known = !!EFFECT_DESCRIPTIONS[tag];
               const active = openEffect === tag;
               const color =
@@ -442,7 +458,8 @@ export const BlendExtractionExplorer = ({
             />
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
       {brew.synergyTags && brew.synergyTags.length > 0 && (

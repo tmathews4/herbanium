@@ -194,8 +194,18 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
         </div>
       )}
 
-      {/* Flavor tags */}
-      {profile.flavors.length > 0 && (
+      {/* Flavor tags. Drop entries whose strength rounds to 0 — slider
+          motion can interpolate a flavor down to nothing, in which case
+          we want it to disappear from the strip rather than render as
+          a faded zero. The entry comes back as soon as the slider
+          pushes its strength above 0 again. */}
+      {(() => {
+        const visibleFlavors = profile.flavors.filter(entry => {
+          const [, strength] = Array.isArray(entry) ? entry : [entry, 3];
+          return Math.round((strength || 0) * 10) / 10 > 0;
+        });
+        if (visibleFlavors.length === 0) return null;
+        return (
         <div style={{ marginBottom: 12 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
@@ -204,7 +214,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {profile.flavors.map(entry => {
+            {visibleFlavors.map(entry => {
               // Profile flavors are [name, strength] tuples after the
               // perception refactor. Older callers passed bare strings —
               // tolerate both for safety.
@@ -241,10 +251,17 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             />
           )}
         </div>
-      )}
+        );
+      })()}
 
-      {/* Effect bars */}
-      {profile.effects.length > 0 && (
+      {/* Effect bars. Same zero-strength filter as flavors — bars
+          worth 0 hide, bars worth >0 (rounded to 1dp) show. */}
+      {(() => {
+        const visibleEffects = profile.effects.filter(([, n]) =>
+          Math.round((n || 0) * 10) / 10 > 0
+        );
+        if (visibleEffects.length === 0) return null;
+        return (
         <div>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
@@ -253,7 +270,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             effect
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {profile.effects.map(([tag, n], i) => {
+            {visibleEffects.map(([tag, n], i) => {
               const known = !!EFFECT_DESCRIPTIONS[tag];
               const active = openEffect === tag;
               const color =
@@ -295,7 +312,8 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             />
           )}
         </div>
-      )}
+        );
+      })()}
 
     </div>
   );
