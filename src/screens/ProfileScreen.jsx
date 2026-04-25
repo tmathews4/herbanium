@@ -334,17 +334,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           >
             import data
           </button>
-          <button
-            onClick={() => setFeedbackOpen(true)}
-            style={{
-              fontFamily: ff.sans, fontSize: 12, color: theme.terra,
-              padding: "8px 14px", borderRadius: 999,
-              background: "transparent", border: `1px solid ${theme.terra}`,
-              cursor: "pointer",
-            }}
-          >
-            send feedback
-          </button>
           <input
             ref={importInputRef}
             type="file"
@@ -394,17 +383,30 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setConfirmingReset(true)}
-            style={{
-              fontFamily: ff.sans, fontSize: 12, color: theme.terra,
-              padding: "8px 14px", borderRadius: 999,
-              background: "transparent", border: `1px solid ${theme.terra}`,
-              cursor: "pointer",
-            }}
-          >
-            start over
-          </button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={() => setConfirmingReset(true)}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.terra,
+                padding: "8px 14px", borderRadius: 999,
+                background: "transparent", border: `1px solid ${theme.terra}`,
+                cursor: "pointer",
+              }}
+            >
+              start over
+            </button>
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.terra,
+                padding: "8px 14px", borderRadius: 999,
+                background: "transparent", border: `1px solid ${theme.terra}`,
+                cursor: "pointer",
+              }}
+            >
+              send feedback
+            </button>
+          </div>
         )}
       </div>
 
