@@ -209,26 +209,27 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
       }}>
-        {cupCount === 0 ? (
+        {cupCount >= 3 && (
+          <div style={{ fontFamily: ff.serif, fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
+            Across {cupCount} cups, your predicted-to-actual match rate is
+            {" "}<em style={{ color: theme.terra }}>{matchPct}%</em>. You've explored
+            {" "}<em style={{ color: theme.sageDeep }}>{distinctIngredients.size}</em> distinct ingredients so far.
+          </div>
+        )}
+        {cupCount > 0 && cupCount < 3 && (
+          <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
+            You've logged {cupCount} cup{cupCount !== 1 ? "s" : ""}. Keep going — a few more brews
+            and patterns about what lands for you will start to emerge.
+          </div>
+        )}
+        {earnedAttrs.length > 0 ? (
+          <AttributeShelf attrs={sortedEarned} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />
+        ) : cupCount === 0 ? (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
             Self-knowledge grows from a few cups in. Log three or four
             brews with real intent and the patterns start showing up here.
           </div>
-        ) : cupCount < 3 ? (
-          <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.inkSoft, lineHeight: 1.55 }}>
-            You've logged {cupCount} cup{cupCount !== 1 ? "s" : ""}. Keep going — a few more brews
-            and patterns about what lands for you will start to emerge.
-          </div>
-        ) : (
-          <>
-            <div style={{ fontFamily: ff.serif, fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-              Across {cupCount} cups, your predicted-to-actual match rate is
-              {" "}<em style={{ color: theme.terra }}>{matchPct}%</em>. You've explored
-              {" "}<em style={{ color: theme.sageDeep }}>{distinctIngredients.size}</em> distinct ingredients so far.
-            </div>
-            {earnedAttrs.length > 0 && <AttributeShelf attrs={sortedEarned} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />}
-          </>
-        )}
+        ) : null}
       </div>
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
