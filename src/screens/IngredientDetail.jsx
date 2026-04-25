@@ -12,9 +12,12 @@ import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  SectionLabel, StatCard,
+  SectionLabel, StatCard, VocabInfoCard,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import {
+  EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
+} from "../data/vocabularyDescriptions";
 import { iconBtn, mmss } from "../helpers/misc";
 import {
   ff, theme,
@@ -31,6 +34,11 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
   const { unit, weightUnit } = useUnit();
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   const [tab, setTab] = useState("overview");
+  // Click-to-expand description cards. null = closed; clicking the same
+  // term again closes; clicking a different term swaps the card.
+  const [openEffect, setOpenEffect] = useState(null);
+  const [openFlavor, setOpenFlavor] = useState(null);
+  const [openIntent, setOpenIntent] = useState(null);
 
   return (
     <div style={{
@@ -104,21 +112,74 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
 
             <div style={{ margin: "22px 0 14px" }}><SectionLabel n="i">Effect</SectionLabel></div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {ing.effects.map(([tag, n]) => (
-                <EffectBar key={tag} label={tag} value={n} color={theme.sage} />
-              ))}
+              {ing.effects.map(([tag, n]) => {
+                const known = !!EFFECT_DESCRIPTIONS[tag];
+                const active = openEffect === tag;
+                return (
+                  <div
+                    key={tag}
+                    role={known ? "button" : undefined}
+                    tabIndex={known ? 0 : undefined}
+                    onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
+                    onKeyDown={known ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenEffect(prev => prev === tag ? null : tag);
+                      }
+                    } : undefined}
+                    style={{
+                      padding: "4px 6px", borderRadius: 6,
+                      background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                      cursor: known ? "pointer" : "default",
+                      outline: "none",
+                    }}
+                  >
+                    <EffectBar label={tag} value={n} color={theme.sage} />
+                  </div>
+                );
+              })}
             </div>
+            {openEffect && EFFECT_DESCRIPTIONS[openEffect] && (
+              <VocabInfoCard
+                term={openEffect}
+                summary={EFFECT_DESCRIPTIONS[openEffect].summary}
+                body={EFFECT_DESCRIPTIONS[openEffect].body}
+                tone="sage"
+                onClose={() => setOpenEffect(null)}
+              />
+            )}
 
             <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Flavor notes</SectionLabel></div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {ing.flavors.map(f => (
-                <span key={f} style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.terra,
-                  padding: "4px 10px", border: `1px solid ${theme.rule}`, borderRadius: 999,
-                  background: theme.cream,
-                }}>{f}</span>
-              ))}
+              {ing.flavors.map(f => {
+                const known = !!FLAVOR_DESCRIPTIONS[f];
+                const active = openFlavor === f;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => known && setOpenFlavor(prev => prev === f ? null : f)}
+                    disabled={!known}
+                    style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                      color: active ? theme.cream : theme.terra,
+                      padding: "4px 10px", borderRadius: 999,
+                      background: active ? theme.terra : theme.cream,
+                      border: `1px solid ${active ? theme.terra : theme.rule}`,
+                      cursor: known ? "pointer" : "default",
+                    }}
+                  >{f}</button>
+                );
+              })}
             </div>
+            {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
+              <VocabInfoCard
+                term={openFlavor}
+                summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
+                body={FLAVOR_DESCRIPTIONS[openFlavor].body}
+                tone="terra"
+                onClose={() => setOpenFlavor(null)}
+              />
+            )}
 
             {ing.facts && ing.facts.length > 0 && (
               <>
@@ -194,25 +255,50 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 { intent: "calm",       tempC: ing.tempC[0], timeS: ing.timeS[0], note: "Light steep for a softer cup." },
                 { intent: "everyday",   tempC: ing.tempC[1], timeS: Math.round((ing.timeS[0]+ing.timeS[1])/2), note: "Balanced standard." },
                 { intent: "full",       tempC: ing.tempC[1], timeS: ing.timeS[1], note: "Fuller effect, slightly more bitter." },
-              ]).map((v, i) => (
-                <div key={i} style={{
-                  padding: 14, borderRadius: 10,
-                  background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink }}>
-                      for <em style={{ color: theme.terra }}>{v.intent}</em>
+              ]).map((v, i) => {
+                const known = !!EFFECT_DESCRIPTIONS[v.intent];
+                return (
+                  <div key={i} style={{
+                    padding: 14, borderRadius: 10,
+                    background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                      <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink }}>
+                        for{" "}
+                        {known ? (
+                          <button
+                            onClick={() => setOpenIntent(prev => prev === v.intent ? null : v.intent)}
+                            style={{
+                              background: openIntent === v.intent ? "rgba(176, 84, 47, 0.10)" : "transparent",
+                              border: "none", padding: "0 4px", borderRadius: 4,
+                              fontFamily: ff.serif, fontSize: 17, fontStyle: "italic",
+                              color: theme.terra, cursor: "pointer",
+                            }}
+                          >{v.intent}</button>
+                        ) : (
+                          <em style={{ color: theme.terra }}>{v.intent}</em>
+                        )}
+                      </div>
+                      <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.ash }}>
+                        {formatTempShort(v.tempC, v.tempC, unit)} · {mmss(v.timeS)}
+                      </div>
                     </div>
-                    <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.ash }}>
-                      {formatTempShort(v.tempC, v.tempC, unit)} · {mmss(v.timeS)}
+                    <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft, marginTop: 4 }}>
+                      {v.note}
                     </div>
                   </div>
-                  <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft, marginTop: 4 }}>
-                    {v.note}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+            {openIntent && EFFECT_DESCRIPTIONS[openIntent] && (
+              <VocabInfoCard
+                term={openIntent}
+                summary={EFFECT_DESCRIPTIONS[openIntent].summary}
+                body={EFFECT_DESCRIPTIONS[openIntent].body}
+                tone="terra"
+                onClose={() => setOpenIntent(null)}
+              />
+            )}
           </>
         )}
 

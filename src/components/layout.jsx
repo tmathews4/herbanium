@@ -167,6 +167,47 @@ export const Chip = ({ active, onClick, children, tone = "default", caution = fa
   );
 };
 
+// VocabInfoCard — soft inline card that explains a vocabulary term
+// (effect or flavor). Appears below the section that triggered it on
+// detail pages; dismissible via × or by tapping the same chip again.
+// Tone defaults sage (effect register); pass tone="terra" for flavor.
+export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) => {
+  const accent = tone === "terra" ? theme.terra : theme.sageDeep;
+  const bg = tone === "terra" ? "rgba(176, 84, 47, 0.05)" : "rgba(98, 124, 92, 0.06)";
+  const bd = tone === "terra" ? "rgba(176, 84, 47, 0.20)" : "rgba(98, 124, 92, 0.22)";
+  return (
+    <div style={{
+      marginTop: 10, padding: "12px 14px", borderRadius: 8,
+      background: bg, border: `1px solid ${bd}`,
+      position: "relative",
+    }}>
+      <button
+        onClick={onClose}
+        aria-label="dismiss"
+        style={{
+          position: "absolute", top: 4, right: 6,
+          background: "transparent", border: "none", cursor: "pointer",
+          color: theme.ash, fontFamily: ff.sans, fontSize: 18, lineHeight: 1, padding: 4,
+        }}
+      >×</button>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: accent, marginBottom: 4,
+      }}>{term}</div>
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5,
+        color: theme.ink, lineHeight: 1.45, marginRight: 18,
+      }}>{summary}</div>
+      {body && (
+        <div style={{
+          fontFamily: ff.serif, fontSize: 12.5, color: theme.inkSoft,
+          lineHeight: 1.5, marginTop: 6,
+        }}>{body}</div>
+      )}
+    </div>
+  );
+};
+
 export const Rule = ({ dashed, soft }) => (
   <div style={{
     height: 1, width: "100%",

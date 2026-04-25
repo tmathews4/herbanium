@@ -27,7 +27,11 @@ import { useUnit, cToF } from "../units/units";
 import {
   EXTRACTION_PROFILES, resolveExtractionProfile,
 } from "../data/extractionProfiles";
+import {
+  EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
+} from "../data/vocabularyDescriptions";
 import { EffectBar } from "./EffectBar";
+import { VocabInfoCard } from "./layout";
 
 // Returns true if we have mock data for this ingredient
 export const hasExtractionProfile = (id) => Boolean(EXTRACTION_PROFILES[id]);
@@ -40,6 +44,8 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
   const defaultTime = Math.round((timeSRange[0] + timeSRange[1]) / 2);
   const [tempC, setTempC] = useState(defaultTemp);
   const [timeS, setTimeS] = useState(defaultTime);
+  const [openFlavor, setOpenFlavor] = useState(null);
+  const [openEffect, setOpenEffect] = useState(null);
 
   const profile = resolveExtractionProfile(ingredientId, tempC, timeS);
   if (!profile) return null;
@@ -179,17 +185,37 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {profile.flavors.map(f => (
-              <span key={f} style={{
-                fontFamily: ff.sans, fontSize: 10.5,
-                color: theme.terra, letterSpacing: "0.04em",
-                padding: "3px 9px",
-                border: `1px solid ${theme.terra}`, borderRadius: 999,
-                opacity: 0.85,
-                transition: "opacity 0.2s ease",
-              }}>{f}</span>
-            ))}
+            {profile.flavors.map(f => {
+              const known = !!FLAVOR_DESCRIPTIONS[f];
+              const active = openFlavor === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => known && setOpenFlavor(prev => prev === f ? null : f)}
+                  disabled={!known}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 10.5,
+                    color: active ? theme.cream : theme.terra, letterSpacing: "0.04em",
+                    padding: "3px 9px",
+                    border: `1px solid ${theme.terra}`, borderRadius: 999,
+                    background: active ? theme.terra : "transparent",
+                    opacity: 0.95,
+                    cursor: known ? "pointer" : "default",
+                    transition: "all 0.15s ease",
+                  }}
+                >{f}</button>
+              );
+            })}
           </div>
+          {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
+            <VocabInfoCard
+              term={openFlavor}
+              summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
+              body={FLAVOR_DESCRIPTIONS[openFlavor].body}
+              tone="terra"
+              onClose={() => setOpenFlavor(null)}
+            />
+          )}
         </div>
       )}
 
@@ -203,20 +229,47 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             effect
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {profile.effects.map(([tag, n], i) => (
-              <EffectBar
-                key={tag}
-                label={tag}
-                value={n}
-                color={
-                  tag === "bitterness" ? theme.terra
-                  : i === 0           ? theme.sage
-                  : i === 1           ? theme.ochre
-                  : theme.sky
-                }
-              />
-            ))}
+            {profile.effects.map(([tag, n], i) => {
+              const known = !!EFFECT_DESCRIPTIONS[tag];
+              const active = openEffect === tag;
+              const color =
+                tag === "bitterness" ? theme.terra
+                : i === 0           ? theme.sage
+                : i === 1           ? theme.ochre
+                : theme.sky;
+              return (
+                <div
+                  key={tag}
+                  role={known ? "button" : undefined}
+                  tabIndex={known ? 0 : undefined}
+                  onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
+                  onKeyDown={known ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setOpenEffect(prev => prev === tag ? null : tag);
+                    }
+                  } : undefined}
+                  style={{
+                    padding: "2px 4px", borderRadius: 4,
+                    background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                    cursor: known ? "pointer" : "default",
+                    outline: "none",
+                  }}
+                >
+                  <EffectBar label={tag} value={n} color={color} />
+                </div>
+              );
+            })}
           </div>
+          {openEffect && EFFECT_DESCRIPTIONS[openEffect] && (
+            <VocabInfoCard
+              term={openEffect}
+              summary={EFFECT_DESCRIPTIONS[openEffect].summary}
+              body={EFFECT_DESCRIPTIONS[openEffect].body}
+              tone="sage"
+              onClose={() => setOpenEffect(null)}
+            />
+          )}
         </div>
       )}
     </div>

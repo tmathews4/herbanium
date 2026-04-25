@@ -8,9 +8,12 @@ import {
   Flower, Kettle,
 } from "../components/icons";
 import {
-  SectionLabel,
+  SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import {
+  EFFECT_DESCRIPTIONS,
+} from "../data/vocabularyDescriptions";
 import { getBlend } from "../helpers/misc";
 import {
   ff, theme,
@@ -29,6 +32,7 @@ import {
 export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavorite, onToggleFavorite, sessions, go }) => {
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
+  const [openMood, setOpenMood] = React.useState(null);
   if (!b) return null;
 
   // Filter the user's sessions for this specific blend. These become
@@ -97,9 +101,23 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
           <div style={{ flex: 1, paddingTop: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
-                for {b.mood}
-              </span>
+              {EFFECT_DESCRIPTIONS[b.mood] ? (
+                <button
+                  onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
+                  style={{
+                    background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                    border: "none", padding: "2px 6px", borderRadius: 4,
+                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
+                    textTransform: "uppercase", color: theme.ash, cursor: "pointer",
+                  }}
+                >
+                  for {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
+                </button>
+              ) : (
+                <span style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
+                  for {b.mood}
+                </span>
+              )}
               {b.tradition && (
                 <span style={{
                   fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
@@ -119,6 +137,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
       </div>
 
       <div style={{ padding: "18px 22px 32px" }}>
+        {openMood && EFFECT_DESCRIPTIONS[openMood] && (
+          <div style={{ marginBottom: 18 }}>
+            <VocabInfoCard
+              term={openMood}
+              summary={EFFECT_DESCRIPTIONS[openMood].summary}
+              body={EFFECT_DESCRIPTIONS[openMood].body}
+              tone="sage"
+              onClose={() => setOpenMood(null)}
+            />
+          </div>
+        )}
+
         {/* Ingredients */}
         <SectionLabel n="i">The recipe</SectionLabel>
         <div style={{
