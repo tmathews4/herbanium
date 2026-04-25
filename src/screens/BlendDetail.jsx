@@ -131,36 +131,93 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
                 for {b.mood}
               </span>
             )}
-            {b.style && (
-              <span
-                title={b.style === "low-temp"
-                  ? "Brewed cooler than a Western steep — Japanese green-tea or yerba-mate tradition."
-                  : b.style === "decoction"
-                  ? "Long active simmer (15-30 min). The recipe accepts that supporting spices steep past their delicate window."
-                  : ""}
-                style={{
-                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-                  color: theme.sageDeep, border: `1px solid ${theme.sageDeep}`, borderRadius: 3,
-                  padding: "1px 6px",
-                }}
-              >
-                {b.style === "low-temp" ? "low-temp" : b.style === "decoction" ? "decoction" : b.style}
-              </span>
-            )}
-            {b.tradition && (
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-                color: theme.ochre, border: `1px solid ${theme.ochre}`, borderRadius: 3,
-                padding: "1px 6px",
-              }}>{b.tradition}</span>
-            )}
-            {b.experimental && (
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-                color: theme.plum, border: `1px dashed ${theme.plum}`, borderRadius: 3,
-                padding: "1px 6px",
-              }}>Herbanium experiment</span>
-            )}
+            {(() => {
+              // Aggregate signal tags into a uniform 2-col grid below the
+              // mood label. Each tag has a distinct color so the eye can
+              // scan to the dimension it cares about (caffeine, brew style,
+              // origin, caution) without reading every word.
+              const caffeineMg = (b.ingredients || []).reduce((sum, ing) => {
+                const meta = INGREDIENTS[ing.id];
+                return sum + (meta?.caffeine || 0) * (ing.g || 0);
+              }, 0);
+              const flagged = (b.ingredients || []).some(ing => INGREDIENTS[ing.id]?.headsUp);
+              const tags = [];
+              if (caffeineMg > 0) {
+                tags.push({
+                  label: "caffeinated",
+                  title: `~${Math.round(caffeineMg)}mg caffeine per cup`,
+                  fg: theme.cream, bg: theme.terra, border: theme.terra,
+                });
+              }
+              if (b.style === "low-temp") {
+                tags.push({
+                  label: "low-temp",
+                  title: "Brewed cooler than a Western steep — Japanese green-tea or yerba-mate tradition.",
+                  fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
+                });
+              } else if (b.style === "decoction") {
+                tags.push({
+                  label: "decoction",
+                  title: "Long active simmer (15-30 min). The recipe accepts that supporting spices steep past their delicate window.",
+                  fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
+                });
+              } else if (b.style) {
+                tags.push({
+                  label: b.style,
+                  title: "",
+                  fg: theme.sageDeep, bg: "transparent", border: theme.sageDeep,
+                });
+              }
+              if (b.tradition) {
+                tags.push({
+                  label: b.tradition,
+                  title: "Curated tradition.",
+                  fg: theme.ochre, bg: "transparent", border: theme.ochre,
+                });
+              }
+              if (b.experimental) {
+                tags.push({
+                  label: b.id === "exp-tom-foolery" ? "house staple" : "experiment",
+                  title: b.id === "exp-tom-foolery"
+                    ? "Herbanium house signature — undeletable from the catalogue."
+                    : "Recipe the catalog's chemistry suggests but no tradition has codified.",
+                  fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
+                });
+              }
+              if (flagged) {
+                tags.push({
+                  label: "heads-up",
+                  title: "One or more ingredients carry a heads-up note (drug interaction, pregnancy, sedative, etc.). Open the ingredient for details.",
+                  fg: theme.terra, bg: "transparent", border: theme.terra, dashed: true,
+                });
+              }
+              if (tags.length === 0) return null;
+              return (
+                <div style={{
+                  display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4,
+                  width: 130,
+                }}>
+                  {tags.map((t, i) => (
+                    <span
+                      key={i}
+                      title={t.title}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.08em",
+                        textTransform: "uppercase", textAlign: "center",
+                        color: t.fg, background: t.bg,
+                        border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
+                        borderRadius: 3,
+                        padding: "2px 4px",
+                        // Last tag spans both columns when count is odd, so the
+                        // grid never leaves a half-row hanging.
+                        gridColumn: (tags.length % 2 === 1 && i === tags.length - 1) ? "1 / -1" : "auto",
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                      }}
+                    >{t.label}</span>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
           <div style={{ flex: 1, textAlign: "center" }}>
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
