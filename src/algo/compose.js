@@ -334,11 +334,14 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
       if (v) candidates.push({ ...v, kind: "accent", kindLabel: `${flavor}-forward` });
     }
 
-    // Tradition fits a mood-led view — add if one matches
-    const tradition = BLENDS.find(b =>
-      b.tradition && moods.includes(b.mood) &&
-      !candidates.some(c => c.name === b.name)
-    );
+    // Tradition fits a mood-led view — pick the shortest match so a
+    // pure single-ingredient steep (Sencha properly, Darjeeling neat,
+    // Hojicha at Dusk) wins over a multi-ingredient blend at the same
+    // mood. Pure teas are the truest expression of a tradition.
+    const tradition = BLENDS
+      .filter(b => b.tradition && moods.includes(b.mood) &&
+        !candidates.some(c => c.name === b.name))
+      .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
     if (tradition) {
       candidates.push({
         ...tradition, kind: "tradition",
@@ -349,10 +352,10 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     // Experimental Herbanium blends are also eligible — pulls in custom
     // recipes like Tom Foolery so the suggestion row isn't limited to
     // legacy traditions. The UI marks these with a blue outline.
-    const experimental = BLENDS.find(b =>
-      b.experimental && moods.includes(b.mood) &&
-      !candidates.some(c => c.name === b.name)
-    );
+    const experimental = BLENDS
+      .filter(b => b.experimental && moods.includes(b.mood) &&
+        !candidates.some(c => c.name === b.name))
+      .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
     if (experimental) {
       candidates.push({
         ...experimental, kind: "experimental",
@@ -373,12 +376,13 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
       }
     }
 
-    // Traditions that share the selected flavor fit a taste-led view
+    // Traditions that share the selected flavor fit a taste-led view —
+    // shortest match wins so a pure tea surfaces over a blend.
     if (flavor) {
-      const flavorTradition = BLENDS.find(b =>
-        b.tradition && b.flavor === flavor &&
-        !candidates.some(c => c.name === b.name)
-      );
+      const flavorTradition = BLENDS
+        .filter(b => b.tradition && b.flavor === flavor &&
+          !candidates.some(c => c.name === b.name))
+        .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
       if (flavorTradition) {
         candidates.push({
           ...flavorTradition, kind: "tradition",
@@ -386,10 +390,10 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
         });
       }
       // Experimental flavor matches for the taste-led view.
-      const flavorExperimental = BLENDS.find(b =>
-        b.experimental && b.flavor === flavor &&
-        !candidates.some(c => c.name === b.name)
-      );
+      const flavorExperimental = BLENDS
+        .filter(b => b.experimental && b.flavor === flavor &&
+          !candidates.some(c => c.name === b.name))
+        .sort((a, b) => a.ingredients.length - b.ingredients.length)[0];
       if (flavorExperimental) {
         candidates.push({
           ...flavorExperimental, kind: "experimental",
@@ -399,7 +403,13 @@ export function resolveCandidates(moods, flavor, primaryAxis = "feel") {
     }
   }
 
-  return candidates.slice(0, 4);
+  // Final order: pure-tea steeps first, mixes after. The kindLabel still
+  // tells the user *what* each candidate is; the position tells them
+  // how simple it is. A single-ingredient match always rises to the top
+  // whether it's the primary, a tradition, or an experiment.
+  return candidates
+    .sort((a, b) => a.ingredients.length - b.ingredients.length)
+    .slice(0, 4);
 }
 
 /* ──────────────────────────────────────────────────────────────
