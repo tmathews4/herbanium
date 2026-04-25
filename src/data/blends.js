@@ -660,7 +660,7 @@ const BLENDS = [
 
 const MOOD_BLENDS = {
   calm: {
-    ings: [["chamomile", 1.5], ["lemonbalm", 0.8], ["lavender", 0.2]],
+    ings: [{ id: "chamomile", g: 1.5 }, { id: "lemonbalm", g: 0.8 }, { id: "lavender", g: 0.2 }],
     temp: 95, time: 300,
     effects: [["calm", 4], ["sleepy", 2]],
   },
@@ -674,22 +674,22 @@ const MOOD_BLENDS = {
     effects: [["focus", 4], ["uplifting", 3]],
   },
   energy: {
-    ings: [["assam", 1.5], ["ginger", 0.3], ["cardamom", 0.2], ["cinnamon", 0.2]],
+    ings: [{ id: "assam", g: 1.5 }, { id: "ginger", g: 0.3 }, { id: "cardamom", g: 0.2 }, { id: "cinnamon", g: 0.2 }],
     temp: 95, time: 240,
     effects: [["energy", 4], ["warming", 4]],
   },
   comfort: {
-    ings: [["rooibos", 1.8], ["rose", 0.3]],
+    ings: [{ id: "rooibos", g: 1.8 }, { id: "rose", g: 0.3 }],
     temp: 100, time: 360,
     effects: [["soothing", 4], ["digestive", 3]],
   },
   sleepy: {
-    ings: [["chamomile", 2.0], ["lavender", 0.4]],
+    ings: [{ id: "chamomile", g: 2.0 }, { id: "lavender", g: 0.4 }],
     temp: 95, time: 360,
     effects: [["sleepy", 4], ["calm", 4]],
   },
   settle: {
-    ings: [["lemonbalm", 1.2], ["fennel", 0.5], ["chamomile", 0.6]],
+    ings: [{ id: "lemonbalm", g: 1.2 }, { id: "fennel", g: 0.5 }, { id: "chamomile", g: 0.6 }],
     temp: 95, time: 300,
     effects: [["digestive", 4], ["calm", 3]],
   },
@@ -697,7 +697,7 @@ const MOOD_BLENDS = {
   // Effect-axis moods. Each is a single-mood signature recipe; the
   // resolver uses these when the user picks one of the new moods alone.
   soothing: {
-    ings: [["rooibos", 1.8], ["chamomile", 0.6]],
+    ings: [{ id: "rooibos", g: 1.8 }, { id: "chamomile", g: 0.6 }],
     temp: 100, time: 360,
     effects: [["soothing", 5], ["calm", 3]],
   },
@@ -712,22 +712,22 @@ const MOOD_BLENDS = {
     effects: [["warming", 5], ["digestive", 3]],
   },
   cooling: {
-    ings: [["peppermint", 1.0], ["spearmint", 0.5], ["lemongrass", 0.5]],
+    ings: [{ id: "peppermint", g: 1.0 }, { id: "spearmint", g: 0.5 }, { id: "lemongrass", g: 0.5 }],
     temp: 95, time: 300,
     effects: [["cooling", 4], ["digestive", 3], ["uplifting", 2]],
   },
   digestive: {
-    ings: [["fennel", 0.8], ["peppermint", 0.5], ["chamomile", 0.5]],
+    ings: [{ id: "fennel", g: 0.8 }, { id: "peppermint", g: 0.5 }, { id: "chamomile", g: 0.5 }],
     temp: 95, time: 360,
     effects: [["digestive", 5], ["calm", 3], ["soothing", 2]],
   },
   grounding: {
-    ings: [["puerh", 3.0]],
+    ings: [{ id: "puerh", g: 3.0 }],
     temp: 100, time: 90,
     effects: [["grounding", 4], ["digestive", 3], ["warming", 3]],
   },
   uplifting: {
-    ings: [["lemongrass", 1.0], ["lemonbalm", 0.8], ["rose", 0.3]],
+    ings: [{ id: "lemongrass", g: 1.0 }, { id: "lemonbalm", g: 0.8 }, { id: "rose", g: 0.3 }],
     temp: 95, time: 240,
     effects: [["uplifting", 4], ["calm", 3], ["cooling", 2]],
   },
@@ -754,21 +754,21 @@ const PAIR_BLENDS = {
   "calm+comfort": {
     name: "Evensong",
     subtitle: "honey-floral over Cederberg red",
-    ings: [["chamomile", 1.2], ["rooibos", 1.0], ["rose", 0.3]],
+    ings: [{ id: "chamomile", g: 1.2 }, { id: "rooibos", g: 1.0 }, { id: "rose", g: 0.3 }],
     temp: 95, time: 300,
     effects: [["calm", 3], ["soothing", 4]],
   },
   "calm+sleepy": {
     name: "Deepening",
     subtitle: "the GABA stack, gently",
-    ings: [["chamomile", 2.0], ["passionflower", 0.5], ["lavender", 0.3], ["lemonbalm", 0.4]],
+    ings: [{ id: "chamomile", g: 2.0 }, { id: "passionflower", g: 0.5 }, { id: "lavender", g: 0.3 }, { id: "lemonbalm", g: 0.4 }],
     temp: 95, time: 420,
     effects: [["calm", 4], ["sleepy", 4]],
   },
   "calm+settle": {
     name: "Threshold",
     subtitle: "lemon balm catches both ends",
-    ings: [["lemonbalm", 1.4], ["chamomile", 0.8], ["rose", 0.2]],
+    ings: [{ id: "lemonbalm", g: 1.4 }, { id: "chamomile", g: 0.8 }, { id: "rose", g: 0.2 }],
     temp: 95, time: 300,
     effects: [["calm", 4], ["digestive", 4]],
   },
@@ -787,7 +787,7 @@ const PAIR_BLENDS = {
   "comfort+energy": {
     name: "Hearth Kindler",
     subtitle: "rooibos and Assam, chai-adjacent",
-    ings: [["rooibos", 1.2], ["assam", 0.5], ["cinnamon", 0.3], ["cardamom", 0.2]],
+    ings: [{ id: "rooibos", g: 1.2 }, { id: "assam", g: 0.5 }, { id: "cinnamon", g: 0.3 }, { id: "cardamom", g: 0.2 }],
     temp: 100, time: 300,
     effects: [["energy", 3], ["soothing", 3], ["warming", 4]],
   },
@@ -806,7 +806,7 @@ const PAIR_BLENDS = {
   "comfort+sleepy": {
     name: "Wool & Wick",
     subtitle: "vanilla, lavender, bundled under covers",
-    ings: [["rooibos", 1.0], ["chamomile", 1.0], ["vanilla", 0.2], ["lavender", 0.2]],
+    ings: [{ id: "rooibos", g: 1.0 }, { id: "chamomile", g: 1.0 }, { id: "vanilla", g: 0.2 }, { id: "lavender", g: 0.2 }],
     temp: 100, time: 360,
     effects: [["sleepy", 3], ["soothing", 4], ["warming", 2]],
   },
@@ -825,21 +825,21 @@ const PAIR_BLENDS = {
   "settle+sleepy": {
     name: "Soft Landing",
     subtitle: "fennel-anethole and apigenin",
-    ings: [["chamomile", 1.4], ["fennel", 0.4], ["lemonbalm", 0.8], ["lavender", 0.3]],
+    ings: [{ id: "chamomile", g: 1.4 }, { id: "fennel", g: 0.4 }, { id: "lemonbalm", g: 0.8 }, { id: "lavender", g: 0.3 }],
     temp: 95, time: 360,
     effects: [["sleepy", 3], ["digestive", 4], ["calm", 3]],
   },
   "comfort+settle": {
     name: "Lamplight",
     subtitle: "rooibos and lemon balm — the slow return",
-    ings: [["rooibos", 1.4], ["lemonbalm", 0.8], ["rose", 0.2]],
+    ings: [{ id: "rooibos", g: 1.4 }, { id: "lemonbalm", g: 0.8 }, { id: "rose", g: 0.2 }],
     temp: 100, time: 300,
     effects: [["digestive", 3], ["soothing", 4], ["calm", 2]],
   },
   "energy+settle": {
     name: "Steady Footing",
     subtitle: "Assam grounded with ginger and lemon balm",
-    ings: [["assam", 1.2], ["lemonbalm", 0.6], ["ginger", 0.2]],
+    ings: [{ id: "assam", g: 1.2 }, { id: "lemonbalm", g: 0.6 }, { id: "ginger", g: 0.2 }],
     temp: 95, time: 240,
     effects: [["energy", 3], ["digestive", 3], ["warming", 3]],
   },
@@ -897,40 +897,6 @@ const MOOD_SINGLE_NAMES = {
   uplifting: ["Brightness",         "citral and Melissa, no caffeine to crash"],
 };
 
-// Dead exports kept for API stability — the live copies live in
-// src/algo/compose.js.
-const FLAVOR_COMPLEMENTS = {
-  floral:  ["citrus", "honeyed", "grassy"],
-  earthy:  ["spiced", "smoky", "mineral"],
-  citrus:  ["floral", "spiced", "grassy"],
-  spiced:  ["earthy", "sweet", "citrus"],
-  minty:   ["citrus", "floral", "sweet"],
-  fruity:  ["floral", "spiced", "honeyed"],
-  sweet:   ["spiced", "floral", "earthy"],
-  grassy:  ["citrus", "floral", "mineral"],
-  smoky:   ["earthy", "spiced", "sweet"],
-  mineral: ["earthy", "grassy"],
-  honeyed: ["floral", "fruity"],
-  umami:   ["grassy", "mineral"],
-  woody:   ["earthy", "spiced", "smoky"],
-  roasted: ["sweet", "earthy", "spiced"],
-};
-
-const MOOD_NEIGHBORS = {
-  calm:      ["sleepy", "settle", "soothing"],
-  focus:     ["energy", "calm", "uplifting"],
-  energy:    ["focus", "warming", "uplifting"],
-  sleepy:    ["calm", "settle", "soothing"],
-  comfort:   ["settle", "calm", "soothing", "warming"],
-  settle:    ["comfort", "calm", "digestive"],
-  soothing:  ["comfort", "calm", "settle"],
-  warming:   ["comfort", "energy", "grounding"],
-  cooling:   ["digestive", "uplifting", "focus"],
-  digestive: ["settle", "cooling", "comfort"],
-  grounding: ["comfort", "warming", "calm"],
-  uplifting: ["energy", "focus", "cooling"],
-};
-
 export {
   MOODS,
   FLAVORS,
@@ -940,6 +906,4 @@ export {
   MOOD_CONFLICTS,
   FLAVOR_CONFLICTS,
   MOOD_SINGLE_NAMES,
-  FLAVOR_COMPLEMENTS,
-  MOOD_NEIGHBORS,
 };

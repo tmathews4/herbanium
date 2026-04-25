@@ -7,7 +7,7 @@ import { Flower } from "../components/icons";
 import {
   SectionLabel, Stat, Toggle,
 } from "../components/layout";
-import { MOODS } from "../data/ingredients";
+import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { getBlend } from "../helpers/misc";
 import {

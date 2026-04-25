@@ -7,7 +7,7 @@ import { Flower } from "../components/icons";
 import {
   Chip, ChipRows, SectionLabel, Toggle,
 } from "../components/layout";;
-import { MOODS } from "../data/ingredients";
+import { MOODS } from "../data/blends";
 import {
   ff, theme,
 } from "../theme";

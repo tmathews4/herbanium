@@ -128,12 +128,10 @@ export function resolveBlend(moods, flavor) {
     };
   }
 
-  // MOOD_BLENDS / PAIR_BLENDS use object-form ingredients [{id, g, role?}]
-  // alongside the legacy tuple form [[id, g], ...]. Normalize on read so
-  // the rest of the resolver doesn't have to care which it received.
-  const normIngs = (raw) => raw.map(item =>
-    Array.isArray(item) ? { id: item[0], g: item[1] } : { ...item }
-  );
+  // MOOD_BLENDS / PAIR_BLENDS use object-form ingredients
+  // [{ id, g, role? }, ...]. Clone before reuse so callers can't
+  // mutate the curated source.
+  const cloneIngs = (raw) => raw.map(i => ({ ...i }));
 
   let base;
   if (moods.length === 1) {
@@ -142,7 +140,7 @@ export function resolveBlend(moods, flavor) {
     const [name, subtitle] = MOOD_SINGLE_NAMES[m];
     base = {
       name, subtitle,
-      ingredients: normIngs(b.ings),
+      ingredients: cloneIngs(b.ings),
       tempC: b.temp, timeS: b.time, effects: b.effects,
       style: b.style,
       conflict, moods,
@@ -153,7 +151,7 @@ export function resolveBlend(moods, flavor) {
     if (curated) {
       base = {
         name: curated.name, subtitle: curated.subtitle,
-        ingredients: normIngs(curated.ings),
+        ingredients: cloneIngs(curated.ings),
         tempC: curated.temp, timeS: curated.time, effects: curated.effects,
         style: curated.style,
         conflict, moods,
@@ -168,7 +166,7 @@ export function resolveBlend(moods, flavor) {
     let tempSum = 0, timeSum = 0;
     moods.forEach(m => {
       const b = MOOD_BLENDS[m];
-      normIngs(b.ings).forEach(({ id, g }) => { mergedG[id] = (mergedG[id] || 0) + g / moods.length; });
+      b.ings.forEach(({ id, g }) => { mergedG[id] = (mergedG[id] || 0) + g / moods.length; });
       tempSum += b.temp;
       timeSum += b.time;
     });

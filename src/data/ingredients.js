@@ -1487,9 +1487,3 @@ const INGREDIENTS = {
 export default INGREDIENTS;
 export { INGREDIENTS };
 
-/* ── User-facing mood and flavor chips ─────────────────────── */
-
-// MOODS and FLAVORS live in src/data/blends.js as the single source
-// of truth — the Compose chips and the candidate resolver share the
-// same vocabulary. Re-exported here so older imports keep working.
-export { MOODS, FLAVORS } from "./blends.js";

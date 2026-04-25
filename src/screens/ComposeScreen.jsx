@@ -14,11 +14,9 @@ import {
   Chip, ChipRows, Rule, SectionLabel,
 } from "../components/layout";
 import {
-  BLENDS, FLAVOR_CONFLICTS, MOOD_CONFLICTS,
+  BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
 } from "../data/blends";
-import {
-  FLAVORS, INGREDIENTS, MOODS,
-} from "../data/ingredients";
+import { INGREDIENTS } from "../data/ingredients";
 import { iconBtn } from "../helpers/misc";
 import {
   ff, theme,
