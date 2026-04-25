@@ -19,36 +19,20 @@ import { theme, ff } from "../theme";
 // blend feels moderate visually instead of looking nearly empty,
 // while max strength still reaches the right edge.
 //
-// maxValue (optional) renders a thin vertical tick on the bar at
-// the strongest level this blend reaches at maximum slider settings.
-// Lets the user see the cup's ceiling without hunting for it.
-//
-// thresholdValue (optional) renders a distinct terra-colored tick
-// at a perception-layer warning threshold (e.g. 2.5 on the
-// bitterness bar — where the "bitter side is starting to dominate"
-// warning fires). Lets the user see exactly when pushing further
-// will trip a warning.
+// thresholdValue (optional) renders a terra-colored tick at a
+// perception-layer warning threshold (e.g. 2.5 on the bitterness
+// bar — where the "bitter side is starting to dominate" warning
+// fires). Lets the user see exactly when pushing further will
+// trip a warning.
 const VISUAL_GAMMA = 0.7;
 
 const visualPosition = (v) =>
   5 * Math.pow(Math.max(0, v) / 5, VISUAL_GAMMA);
 
-export const EffectBar = ({ label, value, maxValue, thresholdValue, color = theme.sage }) => {
+export const EffectBar = ({ label, value, thresholdValue, color = theme.sage }) => {
   const v = Number(value) || 0;
   const display = Math.round(v * 10) / 10;
   const visualV = visualPosition(v);
-
-  // Tick renders whenever the max-settings value differs meaningfully
-  // from the current value — in either direction. Most of the time
-  // pushing the slider to max increases the strength, but some effects
-  // peak mid-range and drop at maximum (over-extraction can dampen
-  // certain notes), so the tick can land behind the fill to mean
-  // "the cup is already past peak on this one."
-  const showTick =
-    typeof maxValue === "number" &&
-    maxValue > 0 &&
-    Math.abs(maxValue - v) > 0.05;
-  const tickV = showTick ? visualPosition(maxValue) : null;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: ff.sans }}>
@@ -70,22 +54,6 @@ export const EffectBar = ({ label, value, maxValue, thresholdValue, color = them
             </div>
           );
         })}
-        {showTick && (
-          <div
-            title={`Max: ${Math.round(maxValue * 10) / 10}`}
-            style={{
-              position: "absolute",
-              left: `${(tickV / 5) * 100}%`,
-              top: -2,
-              transform: "translateX(-50%)",
-              width: 2, height: 9,
-              background: theme.inkSoft,
-              borderRadius: 1,
-              opacity: 0.55,
-              pointerEvents: "none",
-            }}
-          />
-        )}
         {typeof thresholdValue === "number" && thresholdValue > 0 && thresholdValue <= 5 && (
           <div
             title={`Warning at ${thresholdValue}`}
