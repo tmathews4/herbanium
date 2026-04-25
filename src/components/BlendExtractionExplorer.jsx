@@ -276,8 +276,9 @@ export const BlendExtractionExplorer = ({
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
             textTransform: "uppercase", marginRight: 6,
           }}>tradition over literature</em>
-          Some traditional recipes brew outside the ranges current studies
-          suggest — that's why tradition sometimes outweighs the science.
+          The studies draw careful windows; this recipe steeps just past
+          them. Generations of kettles got there first — sometimes
+          tradition knows what science doesn't.
         </div>
       )}
 
