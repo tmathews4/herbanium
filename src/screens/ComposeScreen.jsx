@@ -826,8 +826,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
     setBrewTimeS(profile.timeS);
   }, [profile.tempC, profile.timeS]);
 
+  // Custom user-built blend — no curator, no baseline. Every warning
+  // fires immediately so the user exploring an arbitrary combination
+  // sees the consequence of each slider position the moment it lands.
   const liveBrew = ingsForProfile.length > 0
-    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS, profile.tempC, profile.timeS)
+    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS)
     : { outsiders: [], perIngredient: [] };
   const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
@@ -1053,6 +1056,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
             timeS={brewTimeS}
             setTimeS={setBrewTimeS}
             compact
+            experimental
           />
         </div>
       )}

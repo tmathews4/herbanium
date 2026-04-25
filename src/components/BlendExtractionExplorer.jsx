@@ -87,6 +87,9 @@ export const BlendExtractionExplorer = ({
   compact = false,          // smaller layout for Compose context
   curated = false,          // curator-chosen recipe — suppresses outsider
                             // warnings when sitting on the curator's defaults
+  experimental = false,     // user-built blend — every warning fires
+                            // immediately, no baseline-at-rest suppression.
+                            // The user is exploring; spell out what's wrong.
 }) => {
   const { unit } = useUnit();
 
@@ -127,7 +130,11 @@ export const BlendExtractionExplorer = ({
   // act as the baseline — per-ingredient over-pull warnings only fire when
   // the user has pushed past them. For curated blends, outsider warnings
   // are also silenced when the user sits exactly on the baseline.
-  const brew = resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
+  // Experimental (user-built) blends skip baseline entirely so every
+  // warning fires immediately.
+  const brew = experimental
+    ? resolveBlendAtBrew(ingredients, tempC, timeS)
+    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
 
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.
