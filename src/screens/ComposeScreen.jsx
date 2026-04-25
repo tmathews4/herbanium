@@ -674,13 +674,14 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         // Shelf screen so the mental model is consistent across the app.
         const saved = BLENDS.filter(b => savedBlendIds.has(b.id));
         const traditional = BLENDS.filter(b => b.tradition);
+        const experimental = BLENDS.filter(b => b.experimental);
 
         let visible;
         let emptyMsg;
         if (apothecaryFilter === "all") {
           // Union, deduped (a blend could be both saved and traditional).
           const seen = new Set();
-          visible = [...saved, ...traditional].filter(b => {
+          visible = [...saved, ...traditional, ...experimental].filter(b => {
             if (seen.has(b.id)) return false;
             seen.add(b.id);
             return true;
@@ -689,19 +690,22 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         } else if (apothecaryFilter === "traditional") {
           visible = traditional;
           emptyMsg = "No traditional blends to show.";
+        } else if (apothecaryFilter === "experimental") {
+          visible = experimental;
+          emptyMsg = "No experimental blends to show.";
         } else if (apothecaryFilter === "what worked") {
           const wonIds = new Set(
             sessions
               .filter(s => s.who === "you" && (s.taste ?? 0) >= 4)
               .map(s => s.blendId)
           );
-          visible = [...saved, ...traditional]
+          visible = [...saved, ...traditional, ...experimental]
             .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
             .filter(b => wonIds.has(b.id));
           emptyMsg = "No blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
         } else {
           // mood filter
-          visible = [...saved, ...traditional]
+          visible = [...saved, ...traditional, ...experimental]
             .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
             .filter(b => b.mood === apothecaryFilter);
           emptyMsg = `Nothing saved matches ${apothecaryFilter} yet. Try composing one.`;
@@ -711,7 +715,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
           <div style={{ marginTop: 4 }}>
             <div style={{ marginBottom: 10 }}>
               <ChipRows
-                items={["all", "calm", "focus", "energy", "comfort", "traditional", "what worked"]}
+                items={["all", "calm", "focus", "energy", "comfort", "traditional", "experimental", "what worked"]}
                 renderItem={(f) => (
                   <Chip
                     key={f}
@@ -732,6 +736,16 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               </div>
             )}
 
+            {apothecaryFilter === "experimental" && (
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+              }}>
+                Recipes the catalog's chemistry suggests but no tradition has codified —
+                Herbanium house experiments. Try, log, judge for yourself.
+              </div>
+            )}
+
             {visible.length === 0 ? (
               <div style={{
                 marginTop: 18, padding: "14px 16px",
@@ -740,14 +754,14 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
               }}>
                 {emptyMsg}
               </div>
-            ) : apothecaryFilter === "traditional" ? (
-              // Traditions get their author-attribution row treatment.
+            ) : (apothecaryFilter === "traditional" || apothecaryFilter === "experimental") ? (
+              // Traditions and experimentals get their author-attribution row treatment.
               // openBlend is passed so taps go to the recipe card, not auto-brew.
               visible.map((b, i) => (
                 <BlendListRow
                   key={b.id}
                   b={b}
-                  author={b.tradition}
+                  author={b.tradition || (b.experimental ? "Herbanium experiment" : null)}
                   first={i === 0}
                   go={go}
                   startBrew={startBrew}

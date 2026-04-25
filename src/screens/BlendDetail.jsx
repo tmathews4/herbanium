@@ -125,6 +125,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                   padding: "1px 6px",
                 }}>{b.tradition}</span>
               )}
+              {b.experimental && (
+                <span style={{
+                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: theme.plum, border: `1px dashed ${theme.plum}`, borderRadius: 3,
+                  padding: "1px 6px",
+                }}>Herbanium experiment</span>
+              )}
             </div>
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
               {b.name}
