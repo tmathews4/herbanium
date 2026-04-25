@@ -106,7 +106,11 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
       <div style={{ padding: "18px 22px 130px" }}>
         {tab === "overview" && (
           <>
-            <p style={{ fontFamily: ff.serif, fontSize: 15.5, color: theme.inkSoft, lineHeight: 1.6, margin: 0 }}>
+            <p style={{
+              fontFamily: ff.serif, fontSize: 15.5, color: theme.inkSoft,
+              lineHeight: 1.6, margin: 0,
+              textAlign: "left", textIndent: "1.4em",
+            }}>
               {ing.blurb}
             </p>
 
