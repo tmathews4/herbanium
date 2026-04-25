@@ -488,6 +488,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   const effects = Object.entries(perceivedEffectMap)
     .map(([tag, v]) => [tag, Math.round(v * 10) / 10])
+    .filter(([, v]) => v > 0)
     .sort((a, b) => {
       if (a[0] === "bitterness") return 1;
       if (b[0] === "bitterness") return -1;

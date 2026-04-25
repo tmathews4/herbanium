@@ -69,84 +69,38 @@ const TabBar = ({ tab, setTab }) => {
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
-const PhoneFrame = ({ children, label }) => {
-  // On narrow screens (real mobile devices), skip the fake-phone frame
-  // and render the app full-screen. Otherwise, show the frame (desktop preview).
-  const [isNarrow, setIsNarrow] = React.useState(
-    typeof window !== "undefined" && window.innerWidth < 500
-  );
-  React.useEffect(() => {
-    const onResize = () => setIsNarrow(window.innerWidth < 500);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  if (isNarrow) {
-    return (
+const PhoneFrame = ({ children }) => {
+  // Single layout for all viewports: full height, content capped at a
+  // readable column width and centered. The dark "phone bezel" desktop
+  // preview is gone — visitors on a laptop see a normal centered web
+  // app rather than a mock device. Mobile is unaffected (the cap is
+  // larger than any phone width).
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: theme.ivory,
+      overflowX: "hidden",
+      overflowY: "hidden",
+      display: "flex", flexDirection: "column",
+      alignItems: "center",
+      // Dynamic viewport height handles mobile browser chrome (address bar);
+      // falls back to 100vh on older browsers.
+      height: "100dvh",
+      width: "100vw",
+    }}>
       <div style={{
-        position: "fixed", inset: 0,
-        background: theme.ivory,
-        overflowX: "hidden",
-        overflowY: "hidden",
+        width: "100%",
+        maxWidth: 520,
+        height: "100%",
         display: "flex", flexDirection: "column",
-        // Use dynamic viewport height on modern browsers to handle mobile
-        // browser chrome (address bar) gracefully; falls back to 100vh.
-        height: "100dvh",
-        width: "100vw",
+        // Soft border on desktop where the column doesn't fill the viewport;
+        // invisible on mobile where width === maxWidth or smaller.
+        boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
+        background: theme.ivory,
       }}>
         {children}
       </div>
-    );
-  }
-
-  return (
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-    <div style={{
-      width: 380, height: 780,
-      background: theme.ink,
-      borderRadius: 44,
-      padding: 10,
-      boxShadow: "0 30px 60px -20px rgba(30,24,18,0.35), 0 10px 20px -10px rgba(30,24,18,0.2)",
-    }}>
-      <div style={{
-        width: "100%", height: "100%",
-        background: theme.ivory,
-        borderRadius: 36,
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* status bar */}
-        <div style={{
-          height: 44, display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "0 24px",
-          fontFamily: ff.sans, fontSize: 12.5, color: theme.ink, fontWeight: 600,
-          position: "relative", zIndex: 20,
-        }}>
-          <span>9:41</span>
-          <div style={{
-            position: "absolute", left: "50%", top: 14, transform: "translateX(-50%)",
-            width: 100, height: 26, background: theme.ink, borderRadius: 20,
-          }} />
-          <span style={{ display: "flex", gap: 5, alignItems: "center" }}>
-            <span style={{ fontSize: 10 }}>●●●</span>
-            <span>􀛨</span>
-          </span>
-        </div>
-        {/* content area (scrollable) */}
-        <div style={{
-          position: "absolute", top: 44, left: 0, right: 0, bottom: 0,
-          overflow: "hidden",
-        }}>
-          {children}
-        </div>
-      </div>
     </div>
-    {label && (
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash,
-      }}>{label}</div>
-    )}
-  </div>
   );
 };
 
@@ -550,7 +504,7 @@ export default function App() {
         maxWidth: 1400, margin: "0 auto",
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
-        <PhoneFrame label="the app">
+        <PhoneFrame>
           {appContent}
         </PhoneFrame>
       </div>

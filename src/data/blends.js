@@ -363,13 +363,13 @@ const BLENDS = [
   {
     id: "exp-tom-foolery",
     name: "Tom Foolery",
-    subtitle: "the maker's sneaky cup — gunpowder minds the room while peppermint pulls a chair out, tulsi grinning between them",
+    subtitle: "the maker's sneaky cup",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
       { id: "peppermint", g: 0.5, role: "accent" },
       { id: "tulsi", g: 0.8, role: "accent" },
     ],
-    tempC: 85, timeS: 150, ml: 250,
+    tempC: 80, timeS: 150, ml: 250,
     mood: "focus", flavor: "minty",
     public: true,
     experimental: true,
