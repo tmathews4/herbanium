@@ -799,13 +799,29 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
 
   // Final order:
   //   1. Full primary-axis match first (synthetic counts).
-  //   2. Among ties, more secondary-axis hits wins.
-  //   3. Among further ties, fewer ingredients wins (pure-tea-first).
+  //   2. Among ties, traditional blends rank ahead of in-house ones —
+  //      the user wants real cultural recipes before Herbanium's
+  //      derived experiments / accents / synthetics.
+  //   3. Among ties, more primary-axis hits wins.
+  //   4. Among ties, more secondary-axis hits wins.
+  //   5. Among further ties, fewer ingredients wins (pure-tea-first).
+  const KIND_PRIORITY = {
+    primary: 0,
+    tradition: 1,
+    house: 2,
+    experimental: 3,
+    accented: 4,
+    synthetic: 5,
+    accent: 6,
+  };
   return candidates
     .sort((a, b) => {
       const aFull = (a._score?.fullPrimary || a.kind === "synthetic") ? 0 : 1;
       const bFull = (b._score?.fullPrimary || b.kind === "synthetic") ? 0 : 1;
       if (aFull !== bFull) return aFull - bFull;
+      const aKind = KIND_PRIORITY[a.kind] ?? 99;
+      const bKind = KIND_PRIORITY[b.kind] ?? 99;
+      if (aKind !== bKind) return aKind - bKind;
       const aPrim = a._score?.primaryHits || 0;
       const bPrim = b._score?.primaryHits || 0;
       if (aPrim !== bPrim) return bPrim - aPrim;
