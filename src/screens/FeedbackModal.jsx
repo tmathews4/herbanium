@@ -3,13 +3,17 @@
 
    Captures structured feedback on which features land and which
    don't. Submission path:
-     1. If VITE_FEEDBACK_ENDPOINT is set, POST JSON there (Formspree
-        / Web3Forms / custom backend). Recommended path — recipient
-        email never appears in client code.
-     2. Otherwise, fall back to mailto: with the recipient address
-        assembled at runtime so it's not a static string literal.
-        Opens the user's mail client with a prefilled body.
+     1. POST JSON to the Formspree endpoint. Default is the
+        hardcoded production form (xpqknrpo); VITE_FEEDBACK_ENDPOINT
+        overrides for staging or alternate routing.
+     2. If the POST fails (network, 5xx, etc.), fall back to mailto:
+        with the recipient address assembled at runtime.
    ────────────────────────────────────────────────────────────── */
+
+// Formspree endpoint — the form id is not a secret; Formspree's spam
+// and abuse controls live on their side. Override via env var for
+// staging environments or routing changes.
+const DEFAULT_FEEDBACK_ENDPOINT = "https://formspree.io/f/xpqknrpo";
 
 import React, { useState } from "react";
 import { ff, theme } from "../theme";
@@ -64,26 +68,20 @@ export const FeedbackModal = ({ onClose }) => {
       submittedAt: new Date().toISOString(),
     };
 
-    const endpoint = import.meta.env.VITE_FEEDBACK_ENDPOINT;
-    if (endpoint) {
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setStatus({ kind: "ok", text: "Thanks — feedback received." });
-        return;
-      } catch (e) {
-        setStatus({ kind: "error", text: `Submit failed: ${e.message}. Falling back to mail client.` });
-        // Fall through to mailto.
-      }
+    const endpoint = import.meta.env.VITE_FEEDBACK_ENDPOINT || DEFAULT_FEEDBACK_ENDPOINT;
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setStatus({ kind: "ok", text: "Thanks — feedback received." });
+      return;
+    } catch (e) {
+      setStatus({ kind: "error", text: `Submit failed: ${e.message}. Opening mail client as a backup.` });
+      window.location.href = buildMailtoFallback(payload);
     }
-
-    // mailto fallback
-    window.location.href = buildMailtoFallback(payload);
-    setStatus({ kind: "ok", text: "Opening your mail client — hit send to deliver." });
   };
 
   const canSubmit = sentiment > 0 || useful.length > 0 || least.length > 0 || bug.trim() || wish.trim();
