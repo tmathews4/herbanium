@@ -30,6 +30,7 @@ import {
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
+import { buildWarnings } from "../algo/perception";
 import { EffectBar } from "./EffectBar";
 import { VocabInfoCard } from "./layout";
 
@@ -49,6 +50,17 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
 
   const profile = resolveExtractionProfile(ingredientId, tempC, timeS);
   if (!profile) return null;
+
+  // Run the profile through the warnings layer so single-ingredient
+  // brewing surfaces the same tannin/ceiling/paradox nudges as the
+  // blend explorer. Single-ingredient: no masking between ingredients,
+  // but bitter/astringent/bitterness levels still drive the warning.
+  const flavorMap = Object.fromEntries(profile.flavors);
+  const effectMap = Object.fromEntries(profile.effects);
+  const warnings = buildWarnings({
+    perceivedFlavors: flavorMap,
+    perceivedEffects: effectMap,
+  });
 
   // Format helpers for display
   const displayTemp = unit === "F" ? `${cToF(tempC)}°F` : `${tempC}°C`;
@@ -261,6 +273,26 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
               onClose={() => setOpenEffect(null)}
             />
           )}
+        </div>
+      )}
+
+      {/* Warnings — tannin creep, ceiling. */}
+      {warnings.length > 0 && (
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+          {warnings.map((w, i) => {
+            const accent = w.kind === "tannin" || w.kind === "ceiling"
+              ? theme.terra
+              : w.kind === "paradox" ? theme.sageDeep
+              : theme.ash;
+            return (
+              <div key={i} style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: accent, lineHeight: 1.4,
+              }}>
+                {w.text}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
