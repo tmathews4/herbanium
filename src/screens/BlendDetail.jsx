@@ -105,7 +105,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           ) : <div style={{ width: 40 }} />}
         </div>
 
-        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
             flexShrink: 0,
