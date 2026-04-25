@@ -258,7 +258,7 @@ export const BlendExtractionExplorer = ({
             predicted flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {brew.flavors.slice(0, 8).map(([name, strength]) => {
+            {brew.flavors.map(([name, strength]) => {
               const intensity = Math.max(0.35, Math.min(1, strength / 5));
               return (
                 <span key={name} style={{
@@ -284,7 +284,7 @@ export const BlendExtractionExplorer = ({
             predicted effect
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {brew.effects.slice(0, 4).map(([tag, n], i) => (
+            {brew.effects.map(([tag, n], i) => (
               <EffectBar
                 key={tag}
                 label={tag}
