@@ -658,10 +658,115 @@ const MOOD_SINGLE_NAMES = {
   uplifting: ["Brightness",         "citral and Melissa, no caffeine to crash"],
 };
 
+/* ── Brewing directions ──────────────────────────────────────
+   Tradition-specific steps for curated traditional blends. Keys
+   are blend ids. Non-traditional blends fall back to a generic
+   templated steep in BlendDetail. Steps are short and ordered.
+   ──────────────────────────────────────────────────────────── */
+const BLEND_DIRECTIONS = {
+  "chai": [
+    "Crush the spices lightly with a mortar or the flat of a knife.",
+    "Bring 1 cup water to a boil with the spices; simmer 3–4 minutes.",
+    "Add black tea; simmer 2 more minutes.",
+    "Add 1 cup whole milk and a pinch of sugar; bring just back to a low simmer.",
+    "Strain into a warmed cup.",
+  ],
+  "moroccan": [
+    "Rinse the gunpowder: pour 90°C water over the leaves, swirl, and discard within 30 seconds.",
+    "Pile a generous handful of fresh spearmint and a heaped spoon of sugar on the leaves.",
+    "Pour 90°C water and steep 3 minutes.",
+    "Pour from a height into a glass and back into the pot three times to oxygenate before the final pour.",
+  ],
+  "darj-neat": [
+    "Heat water to ~90°C.",
+    "Steep 2.5–3 minutes — no longer.",
+    "Take it neat. Milk masks the muscatel character.",
+  ],
+  "sencha-properly": [
+    "Heat water to 70°C (let a boiled kettle rest about 4 minutes).",
+    "Steep 60 seconds. Pour completely; never leave leaves wet.",
+    "Re-steep with slightly hotter water for 30 seconds, then again for a third infusion.",
+  ],
+  "usucha": [
+    "Sift 2g (one heaped chashaku) of matcha through a fine strainer into a warmed bowl.",
+    "Add 70ml of 80°C water.",
+    "Whisk briskly with a chasen in zigzag M-strokes until a fine foam covers the surface.",
+    "Drink in three measured sips.",
+  ],
+  "hojicha-evening": [
+    "Heat water to 90°C.",
+    "Steep 30 seconds — short, the leaves are already roasted.",
+    "Forgiving of slight over-steep; bitterness is naturally low.",
+  ],
+  "shou-puerh": [
+    "Rinse: pour boiling water over the leaf and discard immediately to wake it.",
+    "Steep 90 seconds for the first proper infusion.",
+    "Re-steep 5 or more times, adding ~30 seconds to each round.",
+  ],
+  "wuyi-smoke": [
+    "Heat water to a full boil.",
+    "Steep 3–4 minutes.",
+    "Best in a heavy mug — neat, or with a splash of milk if the smoke is too forward.",
+  ],
+  "cimarron": [
+    "Fill a gourd 2/3 with yerba; tilt to keep dry leaf piled on one side.",
+    "Pour cool water (~75°C) onto the dry slope; insert a bombilla into the wet trough.",
+    "Sip until empty, refill with water for the next round (cebada), and pass clockwise around the circle.",
+  ],
+  "golden-milk": [
+    "Whisk 1 tsp turmeric, ½ tsp ginger powder, and a pinch of black pepper into 1 cup milk.",
+    "Simmer gently for 5 minutes until aromatic.",
+    "Sweeten with honey off the heat — heat destroys honey's enzymes.",
+  ],
+  "all-heal": [
+    "Heat water to ~95°C.",
+    "Pour over the herbs; cover the cup or pot to trap the volatile aromatics.",
+    "Steep covered for 8–10 minutes.",
+  ],
+  "throat-coat": [
+    "Bring water just below boiling.",
+    "Pour over and cover — the mucilage in slippery elm and marshmallow needs a long covered steep.",
+    "Steep 8 minutes. Sip warm; the mouth-coating effect is the point.",
+  ],
+  "spring-tonic": [
+    "Heat water to 95°C.",
+    "Pour over the bitter herbs; cover and steep 8–10 minutes.",
+    "Drink 20 minutes before a meal to prime digestion.",
+  ],
+  "mycelium-morning": [
+    "Simmer the mushroom blend gently in 1 cup water for 15–30 minutes.",
+    "Strain; the broth keeps overnight in the fridge.",
+    "Stir into hot water, milk, or fresh coffee. Daily use is the tradition — one cup won't tell you much.",
+  ],
+  "tulsi-doorstep": [
+    "Bring water to ~95°C.",
+    "Pour over fresh or dried tulsi; cover to trap aromatics.",
+    "Steep 6 minutes.",
+  ],
+  "pissenlit-cafe": [
+    "Roast the dandelion root pieces in a dry pan or 180°C oven until fragrant and dark.",
+    "Simmer the roasted root in water for 10 minutes — this one wants the boil.",
+    "Strain. Add milk for a café-au-lait register if you want it.",
+  ],
+  "holunder-care": [
+    "Heat water just to boiling.",
+    "Pour over the elderflowers and cover immediately — the volatiles escape fast.",
+    "Steep covered for 8 minutes.",
+    "Drink warm at the first sign of a cold.",
+  ],
+  "gyokuro-properly": [
+    "Heat water to 50°C — warm, well below a sip-temp coffee.",
+    "Use 4g leaf in a small kyusu with only 60ml of water.",
+    "Steep 90–120 seconds.",
+    "Pour completely, last drop included. Re-steep three or more times with progressively hotter water.",
+  ],
+};
+
 export {
   MOODS,
   FLAVORS,
   BLENDS,
+  BLEND_DIRECTIONS,
   MOOD_BLENDS,
   PAIR_BLENDS,
   MOOD_CONFLICTS,

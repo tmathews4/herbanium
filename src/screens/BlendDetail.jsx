@@ -11,6 +11,7 @@ import {
   SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import { BLEND_DIRECTIONS } from "../data/blends";
 import {
   EFFECT_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
@@ -34,6 +35,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
   const b = getBlend(blendId);
   const [openMood, setOpenMood] = React.useState(null);
   const [openTag, setOpenTag] = React.useState(null);
+  const [directionsOpen, setDirectionsOpen] = React.useState(false);
   if (!b) return null;
 
   // Filter the user's sessions for this specific blend. These become
@@ -316,9 +318,72 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           })}
         </div>
 
+        {/* Directions — tradition-specific steps when curated, generic
+            template otherwise. Expandable; collapsed by default to keep
+            the page scannable. */}
+        {(() => {
+          const tradSteps = BLEND_DIRECTIONS[b.id];
+          const tempLabel = formatTempRange(b.tempC, b.tempC, unit);
+          const minutes = Math.round((b.timeS || 0) / 60);
+          const timeLabel = minutes >= 1
+            ? `${minutes} minute${minutes !== 1 ? "s" : ""}`
+            : `${b.timeS} seconds`;
+          const fallbackSteps = [
+            `Heat water to ${tempLabel}.`,
+            `Use the gram amounts in the recipe above (or about 1–2 teaspoons of blend per ${b.ml || 250}ml).`,
+            `Steep covered for ${timeLabel}.`,
+            "Strain into your cup. Inhale before sipping.",
+          ];
+          const steps = tradSteps || fallbackSteps;
+          const sourceLabel = tradSteps
+            ? (b.tradition ? `${b.tradition} preparation` : "house preparation")
+            : "simple steep";
+          return (
+            <div style={{ margin: "22px 0 10px" }}>
+              <button
+                onClick={() => setDirectionsOpen(o => !o)}
+                style={{
+                  width: "100%", textAlign: "left",
+                  background: "transparent", border: "none", padding: 0,
+                  cursor: "pointer",
+                  display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8,
+                }}
+              >
+                <SectionLabel n="ii">Directions</SectionLabel>
+                <span style={{
+                  display: "flex", alignItems: "baseline", gap: 6,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+                }}>
+                  <span>{sourceLabel}</span>
+                  <span style={{
+                    fontFamily: ff.sans, fontSize: 10, color: theme.ash,
+                    transition: "transform 0.15s ease",
+                    transform: directionsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                    display: "inline-block",
+                  }}>▸</span>
+                </span>
+              </button>
+              {directionsOpen && (
+                <ol style={{
+                  marginTop: 10, padding: "12px 16px 12px 32px", borderRadius: 8,
+                  background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+                  fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                  lineHeight: 1.55,
+                }}>
+                  {steps.map((step, i) => (
+                    <li key={i} style={{ marginBottom: i === steps.length - 1 ? 0 : 6 }}>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Brewing — interactive explorer */}
         <div style={{ margin: "22px 0 10px" }}>
-          <SectionLabel n="ii">Brewing</SectionLabel>
+          <SectionLabel n="iii">Brewing</SectionLabel>
         </div>
         <BlendExtractionExplorer
           ingredients={b.ingredients}
@@ -338,7 +403,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>
-          <SectionLabel n="iii">Your log with this blend</SectionLabel>
+          <SectionLabel n="iv">Your log with this blend</SectionLabel>
         </div>
         {brewCount === 0 ? (
           <div style={{
