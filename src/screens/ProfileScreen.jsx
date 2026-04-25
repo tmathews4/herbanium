@@ -9,6 +9,7 @@ import {
 } from "../components/layout";
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
+import { buildBadgeContext, evaluateBadges } from "../data/badges";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
@@ -96,22 +97,16 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   }).length;
   const matchPct = cupCount > 0 ? Math.round((matched / cupCount) * 100) : 0;
 
-  // Badges earned by simple thresholds. Falls clean to zero for new users.
+  // Badge grid lives in Compose > Shelf > Badges; only the count stat
+  // surfaces here on the identity card.
   const distinctIngredients = new Set();
   yourSessions.forEach(s => {
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-
-  const badges = [
-    { name: "First Brewing",    earned: cupCount >= 1,  desc: "The first recorded cup." },
-    { name: "Sworn Evening",    earned: cupCount >= 7,  desc: "Seven calming cups before bed." },
-    { name: "The Cartographer", earned: distinctIngredients.size >= 12, desc: "Logged twelve distinct ingredients." },
-    { name: "Self-Knower",      earned: matched >= 10,  desc: "Prediction matched truth ten times." },
-    { name: "The Lavandière",   earned: false,          desc: "Try every flower in the catalog." },
-    { name: "Dawn Watcher",     earned: false,          desc: "Five cups before 7am." },
-  ];
-  const earnedCount = badges.filter(b => b.earned).length;
+  const earnedCount = evaluateBadges(
+    buildBadgeContext({ sessions, savedBlendIds, pantryIds })
+  ).filter(b => b.earned).length;
 
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
@@ -222,26 +217,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
       </div>
 
-      <div style={{ margin: "22px 0 12px" }}><SectionLabel n="ii">Badges</SectionLabel></div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {badges.map(b => (
-          <div key={b.name} style={{
-            padding: 12, borderRadius: 10,
-            background: b.earned ? theme.cream : "transparent",
-            border: `1px ${b.earned ? "solid" : "dashed"} ${theme.rule}`,
-            opacity: b.earned ? 1 : 0.55,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              {b.earned ? <Flower size={18} c={theme.ochre} /> : <Flower size={18} c={theme.ash} />}
-              {b.earned && <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 10, color: theme.terra }}>sealed</span>}
-            </div>
-            <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink, lineHeight: 1.2 }}>{b.name}</div>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.ash, marginTop: 3 }}>{b.desc}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ margin: "22px 0 10px" }}><SectionLabel n="iii">Preferences</SectionLabel></div>
+      <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -296,7 +272,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
       {/* Reset — available to all users */}
       <div style={{ margin: "26px 0 10px" }}>
-        <SectionLabel n="iv">Your journal</SectionLabel>
+        <SectionLabel n="iii">Your journal</SectionLabel>
       </div>
       <div style={{
         padding: 14, borderRadius: 10,
@@ -414,7 +390,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {isDev && (
         <>
           <div style={{ margin: "26px 0 10px" }}>
-            <SectionLabel n="v">Dev — seed data</SectionLabel>
+            <SectionLabel n="iv">Dev — seed data</SectionLabel>
           </div>
           <div style={{
             padding: 12, borderRadius: 10,
