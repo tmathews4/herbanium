@@ -51,6 +51,8 @@ function buildMailtoFallback(payload) {
 }
 
 export const FeedbackModal = ({ onClose }) => {
+  const closeRef = React.useRef(onClose);
+  closeRef.current = onClose;
   const [sentiment, setSentiment] = useState(0);
   const [useful, setUseful] = useState([]);
   const [least, setLeast] = useState([]);
@@ -77,6 +79,8 @@ export const FeedbackModal = ({ onClose }) => {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setStatus({ kind: "ok", text: "Thanks — feedback received." });
+      // Brief pause so the user sees the confirmation, then dismiss.
+      setTimeout(() => closeRef.current && closeRef.current(), 1200);
       return;
     } catch (e) {
       setStatus({ kind: "error", text: `Submit failed: ${e.message}. Opening mail client as a backup.` });
