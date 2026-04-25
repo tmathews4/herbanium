@@ -369,6 +369,11 @@ import {
  *                ──► (5) buildWarnings (outsiders, masking, ceiling, paradox)
  *                ──► return felt cup
  *
+ * baselineTempC/baselineTimeS (optional): the curator's chosen brew or
+ * the algorithm's recommendation. Per-ingredient over-pull warnings only
+ * fire when the live tempC/timeS is past the baseline on either axis —
+ * the baseline brew itself is treated as accepted compromise.
+ *
  * Output shape:
  *   {
  *     effects:        [[tag, 0–5], ...] sorted strong → weak, bitterness last
@@ -381,7 +386,7 @@ import {
  *     perIngredient:  [{id, name, weight, profile, inRange}, ...]
  *   }
  */
-export function resolveBlendAtBrew(ingredients, tempC, timeS) {
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
@@ -471,25 +476,36 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS) {
   // tannin threshold, even though that leaf is genuinely being abused.
   // Walk each ingredient's standalone profile at the current brew and
   // surface its name if it fires tannin or aromatic.
+  //
+  // Suppress these warnings at or below the baseline brew (curator's
+  // tempC/timeS, or the algorithm's recommendation) — that brew is
+  // treated as accepted compromise. Fire only when the user has
+  // pushed *past* it on either axis.
+  const baselineKnown = baselineTempC != null && baselineTimeS != null;
+  const pushedHarder = !baselineKnown
+    || tempC > baselineTempC
+    || timeS > baselineTimeS;
   const individualWarnings = [];
   const seenIndividual = new Set();
-  for (const { name, profile } of contributions) {
-    const fMap = Object.fromEntries(profile.flavors);
-    const eMap = Object.fromEntries(profile.effects);
-    const ingWarnings = buildWarnings({
-      perceivedFlavors: fMap,
-      perceivedEffects: eMap,
-    });
-    for (const w of ingWarnings) {
-      if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
-      const key = `${name}|${w.kind}`;
-      if (seenIndividual.has(key)) continue;
-      seenIndividual.add(key);
-      const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
-      individualWarnings.push({
-        kind: w.kind,
-        text: `${name} is being over-pulled — ${lc}`,
+  if (pushedHarder) {
+    for (const { name, profile } of contributions) {
+      const fMap = Object.fromEntries(profile.flavors);
+      const eMap = Object.fromEntries(profile.effects);
+      const ingWarnings = buildWarnings({
+        perceivedFlavors: fMap,
+        perceivedEffects: eMap,
       });
+      for (const w of ingWarnings) {
+        if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
+        const key = `${name}|${w.kind}`;
+        if (seenIndividual.has(key)) continue;
+        seenIndividual.add(key);
+        const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
+        individualWarnings.push({
+          kind: w.kind,
+          text: `${name} is being over-pulled — ${lc}`,
+        });
+      }
     }
   }
 

@@ -152,7 +152,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   // the static algorithmic defaults. `outsiders` is an array of ingredient
   // NAMES (not ids) at the live temp.
   const liveBrew = effectiveIngredients.length > 0
-    ? resolveBlendAtBrew(effectiveIngredients, brewTempC, brewTimeS)
+    ? resolveBlendAtBrew(effectiveIngredients, brewTempC, brewTimeS, blend.tempC, blend.timeS)
     : { outsiders: [], perIngredient: [] };
   const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
@@ -819,7 +819,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
   }, [profile.tempC, profile.timeS]);
 
   const liveBrew = ingsForProfile.length > 0
-    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS)
+    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS, profile.tempC, profile.timeS)
     : { outsiders: [], perIngredient: [] };
   const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 

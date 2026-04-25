@@ -121,8 +121,10 @@ export const BlendExtractionExplorer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempCRange, timeSRange]);
 
-  // Live blend computation at current slider values
-  const brew = resolveBlendAtBrew(ingredients, tempC, timeS);
+  // Live blend computation at current slider values. The default tempC/timeS
+  // act as the baseline — per-ingredient over-pull warnings only fire when
+  // the user has pushed past them.
+  const brew = resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS);
 
   // Display formatting
   const displayTemp = unit === "F" ? `${cToF(tempC)}°F` : `${tempC}°C`;

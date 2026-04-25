@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node tests/literature.test.mjs"
+    "test": "node tests/literature.test.mjs && node tests/curated-blends.test.mjs"
   },
   "dependencies": {
     "react": "^19.2.5",
