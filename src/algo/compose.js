@@ -337,14 +337,40 @@ function blendMatchesFlavor(b, flavor) {
 // Score how completely a blend embodies the user's selections.
 // `matched` counts mood-hits + flavor-hits; `fullMatch` is true when
 // every selected mood and every selected flavor finds a match.
-function scoreSelections(b, moods, flavors) {
+// Primary axis sorts; secondary axis filters. On "by feel", mood is
+// the primary sorter and flavor selections act as a strict filter
+// (any flavor mismatch knocks the candidate out of the list). On
+// "by taste", flavor sorts and mood filters. This makes the second
+// chip strip behave like a refining lens rather than a co-equal
+// scoring axis — the user's chosen primary axis is the one that
+// orders results.
+function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
   const moodHits = moods.filter(m => blendMatchesMood(b, m)).length;
   const flavorHits = flavors.filter(f => blendMatchesFlavor(b, f)).length;
-  const total = moods.length + flavors.length;
+  const isFeel = primaryAxis === "feel";
+
+  const primaryHits = isFeel ? moodHits : flavorHits;
+  const primaryTotal = isFeel ? moods.length : flavors.length;
+  const secondaryHits = isFeel ? flavorHits : moodHits;
+  const secondaryTotal = isFeel ? flavors.length : moods.length;
+
+  // Filter pass: if the user picked anything on the secondary axis,
+  // the candidate must match at least one of those picks. No
+  // secondary picks → no filter, pass everyone through.
+  const passesFilter = secondaryTotal === 0 || secondaryHits > 0;
+  const fullPrimary = primaryTotal > 0 && primaryHits === primaryTotal;
   const matched = moodHits + flavorHits;
+  const total = moods.length + flavors.length;
+
   return {
     moodHits,
     flavorHits,
+    primaryHits,
+    primaryTotal,
+    secondaryHits,
+    secondaryTotal,
+    passesFilter,
+    fullPrimary,
     matched,
     total,
     fullMatch: total > 0 && matched === total,
@@ -451,12 +477,17 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   // Score the entire catalog and keep the strongest matches in
   // descending order (full-match → partial-match → no-match), then
   // shortest recipe wins among ties.
+  // Filter: secondary-axis selections strictly exclude (no flavor
+  // match knocks the candidate out on by-feel; no mood match knocks
+  // it out on by-taste). Sort: primary-axis hits descending, then
+  // secondary-axis hits as tiebreak, then shortest recipe.
   const scoredPool = BLENDS
-    .map(b => ({ blend: b, score: scoreSelections(b, moods, flavors) }))
-    .filter(x => x.score.matched > 0)
+    .map(b => ({ blend: b, score: scoreSelections(b, moods, flavors, primaryAxis) }))
+    .filter(x => x.score.passesFilter && x.score.primaryHits > 0)
     .sort((a, b) => {
-      if (a.score.fullMatch !== b.score.fullMatch) return a.score.fullMatch ? -1 : 1;
-      if (a.score.matched !== b.score.matched) return b.score.matched - a.score.matched;
+      if (a.score.fullPrimary !== b.score.fullPrimary) return a.score.fullPrimary ? -1 : 1;
+      if (a.score.primaryHits !== b.score.primaryHits) return b.score.primaryHits - a.score.primaryHits;
+      if (a.score.secondaryHits !== b.score.secondaryHits) return b.score.secondaryHits - a.score.secondaryHits;
       return a.blend.ingredients.length - b.blend.ingredients.length;
     });
 
@@ -482,8 +513,14 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
 
   const primary = resolveBlend(moods, flavor);
   if (primary) {
-    const score = scoreSelections(primary, moods, flavors);
-    addBlend(primary, "primary", "closest match", score);
+    const score = scoreSelections(primary, moods, flavors, primaryAxis);
+    // The primary candidate also respects the secondary-axis filter
+    // — if the user picked flavors and the mood-resolved primary
+    // doesn't hit any of them, it's filtered out the same way the
+    // scored pool would filter it.
+    if (score.passesFilter) {
+      addBlend(primary, "primary", "closest match", score);
+    }
   }
 
   // Pull one accent variant for diversity. On the feel-led axis we vary
@@ -493,10 +530,11 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     const complements = flavor ? (FLAVOR_COMPLEMENTS[flavor] || []) : [];
     for (const comp of complements) {
       const v = buildAccentVariantByFlavor(primary, comp);
-      if (v) {
-        addBlend(v, "accent", `${comp} accent`, scoreSelections(v, moods, flavors));
-        break;
-      }
+      if (!v) continue;
+      const score = scoreSelections(v, moods, flavors, primaryAxis);
+      if (!score.passesFilter) continue;
+      addBlend(v, "accent", `${comp} accent`, score);
+      break;
     }
   } else {
     const primaryMood = moods[0];
@@ -504,10 +542,11 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     for (const nb of neighbors) {
       if (moods.includes(nb)) continue;
       const v = buildAccentVariantByMood(primaryMood, nb, flavor);
-      if (v) {
-        addBlend(v, "accent", `${nb}-leaning`, scoreSelections(v, moods, flavors));
-        break;
-      }
+      if (!v) continue;
+      const score = scoreSelections(v, moods, flavors, primaryAxis);
+      if (!score.passesFilter) continue;
+      addBlend(v, "accent", `${nb}-leaning`, score);
+      break;
     }
   }
 
@@ -534,11 +573,14 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   // sweet-spot if the leads' brewing windows intersect, closest-point
   // compromise if they don't. This is the "we made it for you"
   // candidate, surfaced first so a full match always leads.
-  const hasFullMatch = candidates.some(c => c._score?.fullMatch);
-  if (!hasFullMatch) {
+  // If nothing fully covers the primary axis, build a synthetic
+  // experiment that does — clean sweet-spot if the leads' brewing
+  // windows intersect, closest-point compromise if they don't.
+  const hasFullPrimary = candidates.some(c => c._score?.fullPrimary);
+  if (!hasFullPrimary) {
     const synth = buildSyntheticForSelections(moods, flavors);
     if (synth) {
-      const synthScore = scoreSelections(synth, moods, flavors);
+      const synthScore = scoreSelections(synth, moods, flavors, primaryAxis);
       const label = synth.sweetSpot
         ? "Herbanium experiment · sweet spot"
         : "Herbanium experiment · closest fit";
@@ -547,17 +589,20 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   }
 
   // Final order:
-  //   1. Full-match candidates first (synthetic counts).
-  //   2. Among full-matches, more total selection-hits wins.
-  //   3. Among ties, fewer ingredients wins (pure-tea-first).
+  //   1. Full primary-axis match first (synthetic counts).
+  //   2. Among ties, more secondary-axis hits wins.
+  //   3. Among further ties, fewer ingredients wins (pure-tea-first).
   return candidates
     .sort((a, b) => {
-      const aFull = (a._score?.fullMatch || a.kind === "synthetic") ? 0 : 1;
-      const bFull = (b._score?.fullMatch || b.kind === "synthetic") ? 0 : 1;
+      const aFull = (a._score?.fullPrimary || a.kind === "synthetic") ? 0 : 1;
+      const bFull = (b._score?.fullPrimary || b.kind === "synthetic") ? 0 : 1;
       if (aFull !== bFull) return aFull - bFull;
-      const aMatch = a._score?.matched || 0;
-      const bMatch = b._score?.matched || 0;
-      if (aMatch !== bMatch) return bMatch - aMatch;
+      const aPrim = a._score?.primaryHits || 0;
+      const bPrim = b._score?.primaryHits || 0;
+      if (aPrim !== bPrim) return bPrim - aPrim;
+      const aSec = a._score?.secondaryHits || 0;
+      const bSec = b._score?.secondaryHits || 0;
+      if (aSec !== bSec) return bSec - aSec;
       return a.ingredients.length - b.ingredients.length;
     })
     .slice(0, 5);
