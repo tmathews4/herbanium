@@ -315,7 +315,7 @@ const INGREDIENTS = {
 
   white: {
     name: "White Tea", latin: "Camellia sinensis", category: "true tea", subcategory: "white",
-    caffeine: 18, tempC: [75, 85], timeS: [180, 300],
+    caffeine: 18, tempC: [75, 85], timeS: [120, 240],
     effects: [["calm", 3], ["uplifting", 3], ["focus", 3], ["cooling", 2]],
     flavors: ["sweet", "hay", "honey", "delicate", "melon"],
     pairs: ["jasmine", "rose"],
@@ -380,7 +380,7 @@ const INGREDIENTS = {
   genmaicha: {
     name: "Genmaicha", latin: "Camellia sinensis + Oryza sativa", category: "true tea", subcategory: "green",
     aliases: ["玄米茶", "popcorn tea", "people's tea", "brown rice tea"],
-    caffeine: 20, tempC: [70, 85], timeS: [60, 180],
+    caffeine: 20, tempC: [70, 85], timeS: [60, 150],
     effects: [["soothing", 3], ["calm", 3], ["focus", 2], ["warming", 2], ["uplifting", 2], ["digestive", 2]],
     flavors: ["toasty", "nutty", "grassy", "mildly sweet", "savory"],
     basicTastes: { umami: 3, sweet: 2, bitter: 1, astringent: 1, aromatic: 3 },
@@ -400,7 +400,7 @@ const INGREDIENTS = {
   },
   gunpowder: {
     name: "Gunpowder Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    caffeine: 30, tempC: [80, 90], timeS: [120, 240],
+    caffeine: 30, tempC: [80, 90], timeS: [90, 180],
     effects: [["focus", 3], ["energy", 3], ["cooling", 2], ["uplifting", 2], ["digestive", 2]],
     flavors: ["smoky", "toasted", "vegetal", "brisk"],
     pairs: ["spearmint", "peppermint", "rose"],
@@ -420,7 +420,7 @@ const INGREDIENTS = {
   },
   dragonwell: {
     name: "Dragonwell", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    caffeine: 28, tempC: [75, 85], timeS: [90, 180],
+    caffeine: 28, tempC: [75, 85], timeS: [75, 150],
     effects: [["focus", 4], ["uplifting", 3], ["energy", 3], ["cooling", 2], ["calm", 2]],
     flavors: ["nutty", "chestnut", "sweet", "vegetal", "bean"],
     pairs: ["rose", "jasmine"],
@@ -430,7 +430,7 @@ const INGREDIENTS = {
   },
   oolong: {
     name: "Oolong", latin: "Camellia sinensis", category: "true tea", subcategory: "oolong",
-    caffeine: 37, tempC: [85, 95], timeS: [120, 240],
+    caffeine: 37, tempC: [85, 95], timeS: [90, 180],
     effects: [["focus", 4], ["uplifting", 3], ["energy", 3], ["warming", 2], ["calm", 2], ["soothing", 2]],
     flavors: ["floral", "fruit", "toasted", "honey"],
     pairs: ["rose", "jasmine"],
