@@ -26,7 +26,6 @@ const visualPosition = (v) =>
 
 export const EffectBar = ({ label, value, color = theme.sage }) => {
   const v = Number(value) || 0;
-  const display = Math.round(v * 10) / 10;
   const visualV = visualPosition(v);
 
   return (
@@ -49,9 +48,6 @@ export const EffectBar = ({ label, value, color = theme.sage }) => {
             </div>
           );
         })}
-      </div>
-      <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.ink, width: 28, textAlign: "right" }}>
-        {Number.isInteger(display) ? display : display.toFixed(1)}
       </div>
     </div>
   );
