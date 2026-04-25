@@ -451,7 +451,17 @@ export const BlendExtractionExplorer = ({
                           outline: "none",
                         }}
                       >
-                        <EffectBar label={tag} value={n} maxValue={maxByTag[tag]} color={color} />
+                        <EffectBar
+                          label={tag}
+                          value={n}
+                          maxValue={maxByTag[tag]}
+                          color={color}
+                          // The bitterness warning fires at 2.5 in perception.js
+                          // ("the bitter side is starting to dominate"). Mark
+                          // that point on the bar so the user can see how far
+                          // they have before tipping into a warning.
+                          thresholdValue={tag === "bitterness" ? 2.5 : undefined}
+                        />
                       </div>
                     );
                   })}

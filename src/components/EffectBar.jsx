@@ -22,12 +22,18 @@ import { theme, ff } from "../theme";
 // maxValue (optional) renders a thin vertical tick on the bar at
 // the strongest level this blend reaches at maximum slider settings.
 // Lets the user see the cup's ceiling without hunting for it.
+//
+// thresholdValue (optional) renders a distinct terra-colored tick
+// at a perception-layer warning threshold (e.g. 2.5 on the
+// bitterness bar — where the "bitter side is starting to dominate"
+// warning fires). Lets the user see exactly when pushing further
+// will trip a warning.
 const VISUAL_GAMMA = 0.7;
 
 const visualPosition = (v) =>
   5 * Math.pow(Math.max(0, v) / 5, VISUAL_GAMMA);
 
-export const EffectBar = ({ label, value, maxValue, color = theme.sage }) => {
+export const EffectBar = ({ label, value, maxValue, thresholdValue, color = theme.sage }) => {
   const v = Number(value) || 0;
   const display = Math.round(v * 10) / 10;
   const visualV = visualPosition(v);
@@ -76,6 +82,22 @@ export const EffectBar = ({ label, value, maxValue, color = theme.sage }) => {
               background: theme.inkSoft,
               borderRadius: 1,
               opacity: 0.55,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        {typeof thresholdValue === "number" && thresholdValue > 0 && thresholdValue <= 5 && (
+          <div
+            title={`Warning at ${thresholdValue}`}
+            style={{
+              position: "absolute",
+              left: `${(visualPosition(thresholdValue) / 5) * 100}%`,
+              top: -3,
+              transform: "translateX(-50%)",
+              width: 2, height: 11,
+              background: theme.terra,
+              borderRadius: 1,
+              opacity: 0.85,
               pointerEvents: "none",
             }}
           />
