@@ -180,6 +180,89 @@ export const MoodUplifting = ({ size = 28, c = theme.ochre }) => (
   </svg>
 );
 
+/* ── Generic glyphs for attributes/badges — broaden the icon vocab
+   beyond mood icons so the 80+ attributes don't all look alike. ── */
+
+export const GlyphStar = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3 L14.6 9.5 L21.5 10.1 L16.2 14.6 L17.8 21.4 L12 17.8 L6.2 21.4 L7.8 14.6 L2.5 10.1 L9.4 9.5 Z" />
+  </svg>
+);
+
+export const GlyphHeart = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 21 C5 16.5 3 12.5 3 9 C3 6 5.5 4 8 4 C10 4 11.5 5 12 7 C12.5 5 14 4 16 4 C18.5 4 21 6 21 9 C21 12.5 19 16.5 12 21 Z" />
+  </svg>
+);
+
+export const GlyphCompass = ({ size = 28, c = theme.sageDeep }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M14 8 L12 14 L10 16 L12 10 Z" />
+    <circle cx="12" cy="12" r="1.2" fill={c} stroke="none" />
+  </svg>
+);
+
+export const GlyphKey = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="8" cy="12" r="4.5" />
+    <path d="M12.5 12 H21" />
+    <path d="M17 12 V16" />
+    <path d="M20 12 V15" />
+  </svg>
+);
+
+export const GlyphFeather = ({ size = 28, c = theme.plum }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 19 L19 5" />
+    <path d="M19 5 C16 3 11 4 8 8 C5 12 5 17 5 19 C7 19 12 19 16 16 C20 13 21 8 19 5 Z" />
+    <path d="M9 13 H14" />
+  </svg>
+);
+
+export const GlyphMortar = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 11 H19" />
+    <path d="M6 11 L8 19 H16 L18 11" />
+    <path d="M14 11 L18 4" />
+  </svg>
+);
+
+export const GlyphBee = ({ size = 28, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="14" rx="5" ry="6" />
+    <path d="M9 11 H15" />
+    <path d="M9 14 H15" />
+    <path d="M9 17 H15" />
+    <path d="M7 9 C5 7 5 5 7 4" />
+    <path d="M17 9 C19 7 19 5 17 4" />
+  </svg>
+);
+
+export const GlyphRoot = ({ size = 28, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3 V12" />
+    <path d="M12 12 C8 14 6 18 5 21" />
+    <path d="M12 12 C16 14 18 18 19 21" />
+    <path d="M12 12 C12 16 11 19 10 21" />
+    <path d="M12 12 C12 16 13 19 14 21" />
+  </svg>
+);
+
+export const GlyphScroll = ({ size = 28, c = theme.ash }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 5 H17 C19 5 19 8 17 8 H7 C5 8 5 5 5 5 Z" />
+    <path d="M7 8 V19 C7 20 8 21 9 21 H17 C19 21 19 18 17 18 H9" />
+    <path d="M19 8 V18" />
+  </svg>
+);
+
+export const GlyphDroplet = ({ size = 28, c = theme.sky || theme.sage }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3 C8 8 5 12 5 15 C5 19 8 21 12 21 C16 21 19 19 19 15 C19 12 16 8 12 3 Z" />
+  </svg>
+);
+
 // Map mood → component for the BlendDetail hero. Anything not in the map
 // falls back to Flower so user-composed/synth blends still get an icon.
 export const MOOD_ICONS = {
@@ -194,4 +277,16 @@ export const MOOD_ICONS = {
   digestive: MoodDigestive,
   grounding: MoodGrounding,
   uplifting: MoodUplifting,
+};
+
+// Combined registry — used by the attribute panel to look up by glyph key.
+export const ATTRIBUTE_GLYPHS = {
+  calm: MoodCalm, focus: MoodFocus, energy: MoodEnergy, sleepy: MoodSleepy,
+  comfort: MoodComfort, soothing: MoodSoothing, warming: MoodWarming,
+  cooling: MoodCooling, digestive: MoodDigestive, grounding: MoodGrounding,
+  uplifting: MoodUplifting,
+  flower: Flower, sprig: Sprig, leaf: Leaf, kettle: Kettle,
+  star: GlyphStar, heart: GlyphHeart, compass: GlyphCompass, key: GlyphKey,
+  feather: GlyphFeather, mortar: GlyphMortar, bee: GlyphBee, root: GlyphRoot,
+  scroll: GlyphScroll, droplet: GlyphDroplet,
 };

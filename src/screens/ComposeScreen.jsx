@@ -27,16 +27,16 @@ import {
 import { LibraryList, BlendListRow } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { BadgesPanel } from "./BadgesPanel";
-import { buildBadgeContext, evaluateBadges } from "../data/badges";
+import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
 export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
-  // Pre-compute badge count for the sub-tab header chip.
-  const earnedBadgeCount = evaluateBadges(
-    buildBadgeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds })
+  // Pre-compute attribute count for the sub-tab header chip.
+  const earnedBadgeCount = evaluateAttributes(
+    buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds })
   ).filter(b => b.earned).length;
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary

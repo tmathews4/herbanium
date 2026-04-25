@@ -189,6 +189,19 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </div>
         </>
       )}
+
+      {/* Quiet footer — speaks to the local-first nature of the journal
+          and nudges the eye-to-eye sharing the project values. */}
+      <div style={{
+        marginTop: 28, padding: "14px 4px",
+        textAlign: "center",
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+        color: theme.ash, lineHeight: 1.55,
+        borderTop: `1px solid ${theme.ruleSoft}`,
+      }}>
+        Your journal lives on this device — no account, no cloud.
+        Whip it out, show a friend, meet eye to eye, brew a cup together.
+      </div>
     </div>
   );
 };

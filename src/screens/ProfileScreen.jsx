@@ -9,7 +9,7 @@ import {
 } from "../components/layout";
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
-import { buildBadgeContext, evaluateBadges } from "../data/badges";
+import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
@@ -104,9 +104,15 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const earnedCount = evaluateBadges(
-    buildBadgeContext({ sessions, savedBlendIds, pantryIds })
-  ).filter(b => b.earned).length;
+  const attrEvaluation = evaluateAttributes(
+    buildAttributeContext({ sessions, savedBlendIds, pantryIds })
+  );
+  const earnedCount = attrEvaluation.filter(a => a.earned).length;
+  const earnedAttrs = attrEvaluation.filter(a => a.earned);
+  const rarestEarned = [...earnedAttrs].sort((a, b) => {
+    const order = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
+    return (order[b.rarity] || 0) - (order[a.rarity] || 0);
+  }).slice(0, 3);
 
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
@@ -209,11 +215,39 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             and patterns about what lands for you will start to emerge.
           </div>
         ) : (
-          <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.inkSoft, lineHeight: 1.55 }}>
-            Across {cupCount} logged cups, your predicted-to-actual match rate is
-            {" "}<em style={{ color: theme.terra }}>{matchPct}%</em>. You've explored
-            {" "}<em style={{ color: theme.sageDeep }}>{distinctIngredients.size}</em> distinct ingredients so far.
-          </div>
+          <>
+            <div style={{ fontFamily: ff.serif, fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 12 : 0 }}>
+              Across {cupCount} cups, your predicted-to-actual match rate is
+              {" "}<em style={{ color: theme.terra }}>{matchPct}%</em>. You've explored
+              {" "}<em style={{ color: theme.sageDeep }}>{distinctIngredients.size}</em> distinct ingredients so far.
+            </div>
+            {earnedAttrs.length > 0 && (
+              <>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+                }}>
+                  You've become · {earnedAttrs.length} of {attrEvaluation.length}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {rarestEarned.map(a => (
+                    <span key={a.id} style={{
+                      fontFamily: ff.serif, fontSize: 12,
+                      padding: "3px 10px", borderRadius: 999,
+                      background: theme.ivory, color: theme.terra,
+                      border: `1px solid ${theme.ruleSoft}`,
+                    }}>{a.name}</span>
+                  ))}
+                </div>
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: theme.ash, marginTop: 10, lineHeight: 1.5,
+                }}>
+                  See the full set in Compose → Shelf → Badges.
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
 
