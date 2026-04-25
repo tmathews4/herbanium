@@ -39,7 +39,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
-  const [reverseIngs, setReverseIngs] = useState(["chamomile", "lemonbalm"]);
+  const [reverseIngs, setReverseIngs] = useState([]);
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
   // resolver varies across for alternate candidates.
