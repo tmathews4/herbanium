@@ -646,8 +646,8 @@ export function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel"
 
   const name = generateBlendName(moods, flavors, primaryAxis);
   const subtitle = isCleanSweet
-    ? "a synthesized cup at a clean brewing window for these selections"
-    : "the catalog's closest balance for these selections";
+    ? "tuned to your picks; brewed where each leaf is at its best"
+    : "tuned to your picks; the catalog's closest balance, respectful of each ingredient";
 
   return {
     id: `synth-${[...moods, ...flavors].join("-")}`,
