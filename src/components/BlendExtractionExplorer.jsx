@@ -254,6 +254,35 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
+      {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
+          Surfaced ABOVE the predicted flavor/effect blocks so the
+          user sees the brewing nudge before reading the cup it
+          would produce. Outsiders are still shown inline above
+          with the per-ingredient pills; filter to avoid duplication. */}
+      {(() => {
+        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
+        if (filtered.length === 0) return null;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+            {filtered.map((w, i) => {
+              const accent = w.kind === "ceiling" ? theme.terra
+                : w.kind === "tannin" ? theme.terra
+                : w.kind === "aromatic" ? theme.terra
+                : w.kind === "paradox" ? theme.sageDeep
+                : theme.ash;
+              return (
+                <div key={i} style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: accent, lineHeight: 1.4,
+                }}>
+                  {w.text}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       {/* Predicted flavor strip — strength drives both sort and opacity.
           Each pill is a button: click reveals a description card. */}
       {brew.flavors && brew.flavors.length > 0 && (
@@ -356,7 +385,7 @@ export const BlendExtractionExplorer = ({
 
       {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
       {brew.synergyTags && brew.synergyTags.length > 0 && (
-        <div style={{ marginBottom: brew.warnings?.length ? 12 : 0 }}>
+        <div style={{ marginTop: 4 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {brew.synergyTags.map(tag => (
               <span key={tag} style={{
@@ -370,33 +399,6 @@ export const BlendExtractionExplorer = ({
           </div>
         </div>
       )}
-
-      {/* Warnings — masking, ceiling, paradox. Outsiders are shown
-          inline above next to the per-ingredient pills, so filter
-          them here to avoid double-rendering. */}
-      {(() => {
-        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
-        if (filtered.length === 0) return null;
-        return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {filtered.map((w, i) => {
-              const accent = w.kind === "ceiling" ? theme.terra
-                : w.kind === "tannin" ? theme.terra
-                : w.kind === "aromatic" ? theme.terra
-                : w.kind === "paradox" ? theme.sageDeep
-                : theme.ash;
-              return (
-                <div key={i} style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                  color: accent, lineHeight: 1.4,
-                }}>
-                  {w.text}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
     </div>
   );
 };

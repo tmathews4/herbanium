@@ -173,6 +173,27 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
         {profile.character}
       </div>
 
+      {/* Warnings — surfaced ABOVE flavor/effect so the user sees the
+          brewing nudge before reading the cup it would produce. */}
+      {warnings.length > 0 && (
+        <div style={{ marginBottom: 14, display: "flex", flexDirection: "column", gap: 6 }}>
+          {warnings.map((w, i) => {
+            const accent = w.kind === "tannin" || w.kind === "ceiling" || w.kind === "aromatic"
+              ? theme.terra
+              : w.kind === "paradox" ? theme.sageDeep
+              : theme.ash;
+            return (
+              <div key={i} style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: accent, lineHeight: 1.4,
+              }}>
+                {w.text}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Flavor tags */}
       {profile.flavors.length > 0 && (
         <div style={{ marginBottom: 12 }}>
@@ -276,25 +297,6 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
         </div>
       )}
 
-      {/* Warnings — tannin creep, ceiling. */}
-      {warnings.length > 0 && (
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-          {warnings.map((w, i) => {
-            const accent = w.kind === "tannin" || w.kind === "ceiling" || w.kind === "aromatic"
-              ? theme.terra
-              : w.kind === "paradox" ? theme.sageDeep
-              : theme.ash;
-            return (
-              <div key={i} style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                color: accent, lineHeight: 1.4,
-              }}>
-                {w.text}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };
