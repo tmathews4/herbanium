@@ -443,7 +443,7 @@ export const BlendExtractionExplorer = ({
                     outline: "none",
                   }}
                 >
-                  <EffectBar label={tag} value={Math.round(n)} color={color} />
+                  <EffectBar label={tag} value={n} color={color} />
                 </div>
               );
             })}
