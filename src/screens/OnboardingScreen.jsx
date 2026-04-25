@@ -4,8 +4,8 @@
    Full-screen takeover. Four light steps:
      1. Name ("What should we call you?")
      2. Time of day ("When do you usually reach for tea?")
-     3. What draws you (mood) — full 12-mood list
-     4. Flavors you reach for — full 19-flavor list
+     3. What draws you (mood) — condensed 6-mood list
+     4. Flavors you reach for — condensed 8-flavor list
 
    On finish: calls onComplete with profile data. App sets up the
    user's initial state (profile, seeded favorites + algorithmic
@@ -235,7 +235,9 @@ const StepTimeOfDay = ({ value, setValue }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Step 3: What draws you (full 12-mood list, chip grid)
+   Step 3: What draws you — condensed 6-mood list for first-run.
+   The full vocabulary lives in data/blends.js MOODS; this is just
+   the easy-on-ramp subset.
    ────────────────────────────────────────────────────────────── */
 
 const DRAW_OPTIONS = [
@@ -244,12 +246,7 @@ const DRAW_OPTIONS = [
   { key: "energy",    label: "Energy",    note: "lift, the spark to begin" },
   { key: "sleepy",    label: "Sleepy",    note: "the drift toward rest" },
   { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup" },
-  { key: "soothing",  label: "Soothing",  note: "gentle, mending" },
-  { key: "warming",   label: "Warming",   note: "ginger-and-cinnamon heat" },
-  { key: "cooling",   label: "Cooling",   note: "menthol, summer's exhale" },
   { key: "digestive", label: "Digestive", note: "fennel, after-supper ease" },
-  { key: "grounding", label: "Grounding", note: "deep, rooted, slow" },
-  { key: "uplifting", label: "Uplifting", note: "citrus and sun" },
 ];
 
 const StepDraw = ({ value, setValue }) => {
@@ -265,7 +262,9 @@ const StepDraw = ({ value, setValue }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Step 4: Flavors (full 19-flavor list, chip grid)
+   Step 4: Flavors — condensed 8-flavor list for first-run.
+   The full vocabulary lives in data/blends.js FLAVORS; this is
+   just the broadest, most legible families for new users.
    ────────────────────────────────────────────────────────────── */
 
 const FLAVOR_OPTIONS = [
@@ -273,21 +272,10 @@ const FLAVOR_OPTIONS = [
   { key: "citrus",   label: "Citrus" },
   { key: "fruity",   label: "Fruity" },
   { key: "sweet",    label: "Sweet" },
-  { key: "honeyed",  label: "Honeyed" },
   { key: "spiced",   label: "Spiced" },
   { key: "minty",    label: "Minty" },
   { key: "earthy",   label: "Earthy" },
-  { key: "woody",    label: "Woody" },
   { key: "smoky",    label: "Smoky" },
-  { key: "roasted",  label: "Roasted" },
-  { key: "nutty",    label: "Nutty" },
-  { key: "grassy",   label: "Grassy" },
-  { key: "vegetal",  label: "Vegetal" },
-  { key: "umami",    label: "Umami" },
-  { key: "savory",   label: "Savory" },
-  { key: "mineral",  label: "Mineral" },
-  { key: "bitter",   label: "Bitter" },
-  { key: "tart",     label: "Tart" },
 ];
 
 const StepFlavors = ({ value, setValue }) => {
