@@ -276,9 +276,10 @@ export const BlendExtractionExplorer = ({
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
             textTransform: "uppercase", marginRight: 6,
           }}>tradition over literature</em>
-          The studies draw careful windows; this recipe steeps just past
-          them. Generations of kettles got there first — sometimes
-          tradition knows what science doesn't.
+          This brew sits outside the ranges current research recommends.
+          The science matters; the centuries of practice that found this
+          cup matter too — and sometimes practice knows what science
+          hasn't measured yet.
         </div>
       )}
 
