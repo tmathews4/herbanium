@@ -153,6 +153,11 @@ export const OnboardingScreen = ({ onComplete }) => {
         color: theme.ash, lineHeight: 1.5, flexShrink: 0,
       }}>
         Your journal lives on this device — no account, no cloud.
+        {step === STEPS - 1 && (
+          <div style={{ marginTop: 6 }}>
+            Herbanium is a brewing companion, not medical advice. Verify with a clinician for anything that matters.
+          </div>
+        )}
       </div>
     </div>
   );

@@ -214,7 +214,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             tags.push({
               label: "heads-up",
               summary: "Caution — at least one ingredient has a heads-up note.",
-              body: "Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open any ingredient with a flagged badge to read its specific note.",
+              body: "Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open any ingredient with a flagged badge to read its specific note. Herbanium is a brewing companion, not medical advice — verify with a clinician.",
               tone: "terra",
               fg: theme.terra, bg: "transparent", border: theme.terra, dashed: true,
             });

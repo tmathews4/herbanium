@@ -343,6 +343,20 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         </>
       )}
+
+      {/* Notice — soft legal disclaimer; deliberately at the very bottom
+          so it's findable but doesn't compete with anything daily. */}
+      <div style={{ margin: "32px 0 8px" }}>
+        <SectionLabel>Notice</SectionLabel>
+      </div>
+      <div style={{
+        padding: "14px 16px", borderRadius: 10,
+        background: "transparent", border: `1px dashed ${theme.ruleSoft}`,
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+        lineHeight: 1.55,
+      }}>
+        Herbanium is a brewing companion and journal — not medical advice. Effects, traditional uses, and ingredient warnings reflect common literature and should never replace a clinician. If you're pregnant, nursing, taking prescription medication, or managing a health condition, verify any herb with a qualified professional before use. Trust your body; trust the cup; verify the science.
+      </div>
     </div>
   );
 };
