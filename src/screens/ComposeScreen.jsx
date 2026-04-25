@@ -30,7 +30,7 @@ import { LibraryList, BlendListRow } from "./LibraryScreen";
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("all");
@@ -707,6 +707,12 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             return true;
           });
           emptyMsg = "Your Shelf is empty. Save blends from Vibe or Blend to see them here.";
+        } else if (apothecaryFilter === "favorites") {
+          const favSet = favoriteBlendIds || new Set();
+          visible = [...saved, ...traditional, ...experimental]
+            .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
+            .filter(b => favSet.has(b.id));
+          emptyMsg = "No favorites yet. Tap the heart on a blend to mark it as a favorite.";
         } else if (apothecaryFilter === "traditional") {
           visible = traditional;
           emptyMsg = "No traditional blends to show.";
@@ -735,7 +741,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
           <div style={{ marginTop: 4 }}>
             <div style={{ marginBottom: 10 }}>
               <ChipRows
-                items={["all", "calm", "focus", "energy", "comfort", "traditional", "experimental", "what worked"]}
+                items={["all", "favorites", "calm", "focus", "energy", "comfort", "traditional", "experimental", "what worked"]}
                 renderItem={(f) => (
                   <Chip
                     key={f}

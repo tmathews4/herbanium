@@ -36,12 +36,15 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, profile, welcomeShown, dismissWelcome }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
-  // Resolve every saved id through getBlend so user-generated /
-  // LOCAL_BLENDS entries (the algorithmic experimentals seeded at
-  // onboarding) appear in favorites alongside catalog blends.
-  const favoriteBlends = [...savedBlendIds]
+  // Home shows true favorites — the curated tier — and falls back to all
+  // saved blends until the user has marked any. Resolve every id through
+  // getBlend so user-generated / LOCAL_BLENDS entries (the algorithmic
+  // experimentals seeded at onboarding) appear alongside catalog blends.
+  const favSet = favoriteBlendIds || new Set();
+  const sourceIds = favSet.size > 0 ? [...favSet] : [...(savedBlendIds || [])];
+  const favoriteBlends = sourceIds
     .map(id => getBlend(id))
     .filter(Boolean);
   const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;

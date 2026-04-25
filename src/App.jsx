@@ -159,6 +159,13 @@ export default function App() {
     "savedBlendIds",
     isDev ? new Set(SEED_MODES.power.savedBlendIds) : new Set()
   );
+  // Favorites are a curated subset of saved — the user's "I love this" tier.
+  // Saving puts a blend on the Shelf; favoriting elevates it to Home and
+  // the favorites filter. Adding a favorite auto-saves so the two stay in sync.
+  const [favoriteBlendIds, setFavoriteBlendIds] = usePersistedState(
+    "favoriteBlendIds",
+    new Set()
+  );
   const [pantryIds, setPantryIds] = usePersistedState(
     "pantryIds",
     isDev ? new Set(SEED_MODES.power.pantryIds) : new Set()
@@ -306,13 +313,38 @@ export default function App() {
     setOverlay(null);
   };
 
-  // Favorite/unfavorite a blend. Uses the same savedBlendIds set — a saved
-  // blend IS a favorite. No second list.
-  const toggleFavorite = (blendId) => {
+  // Save/unsave a blend (puts it on the Shelf).
+  const toggleSave = (blendId) => {
     const next = new Set(savedBlendIds);
-    if (next.has(blendId)) next.delete(blendId);
-    else next.add(blendId);
+    if (next.has(blendId)) {
+      next.delete(blendId);
+      // Unsaving also unfavorites — favorites are a subset of saved.
+      const nextFav = new Set(favoriteBlendIds);
+      if (nextFav.has(blendId)) {
+        nextFav.delete(blendId);
+        setFavoriteBlendIds(nextFav);
+      }
+    } else {
+      next.add(blendId);
+    }
     setSavedBlendIds(next);
+  };
+
+  // Favorite/unfavorite a blend (the "I love this" tier — surfaces on Home).
+  // Adding to favorites auto-saves so the blend appears on Shelf too.
+  const toggleFavorite = (blendId) => {
+    const nextFav = new Set(favoriteBlendIds);
+    if (nextFav.has(blendId)) {
+      nextFav.delete(blendId);
+    } else {
+      nextFav.add(blendId);
+      if (!savedBlendIds.has(blendId)) {
+        const nextSaved = new Set(savedBlendIds);
+        nextSaved.add(blendId);
+        setSavedBlendIds(nextSaved);
+      }
+    }
+    setFavoriteBlendIds(nextFav);
   };
 
   const scrollRef = useRef(null);
@@ -345,8 +377,8 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
       </div>
@@ -397,7 +429,9 @@ export default function App() {
       {overlay === "blend" && blendOverlayId && (
         <BlendDetail
           blendId={blendOverlayId}
-          isFavorite={savedBlendIds.has(blendOverlayId)}
+          isSaved={savedBlendIds.has(blendOverlayId)}
+          onToggleSave={() => toggleSave(blendOverlayId)}
+          isFavorite={favoriteBlendIds.has(blendOverlayId)}
           onToggleFavorite={() => toggleFavorite(blendOverlayId)}
           sessions={sessions}
           go={go}
