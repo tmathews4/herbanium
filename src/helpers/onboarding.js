@@ -35,13 +35,19 @@ const DRAW_SEEDS = {
 // Default padding set if the union is thin — always-popular starters.
 const DEFAULT_FALLBACK = ["dusk", "morning", "hearth"];
 
+// Blends every new user gets, regardless of onboarding answers. Tom
+// Foolery is the Herbanium calling-card cup — shipped to everyone so
+// the catalog has a personality from minute one.
+const ALWAYS_INCLUDE = ["exp-tom-foolery"];
+
 /**
  * Pick seed blend IDs based on onboarding answers.
  * timeOfDay and draw are arrays (multi-select) — iterate each and union.
  * Returns array of blend IDs (not objects).
  */
 export function pickSeedBlends({ timeOfDay, draw }) {
-  const pool = new Set();
+  // Always-include comes first so it leads the saved-blends list.
+  const pool = new Set(ALWAYS_INCLUDE);
 
   // Normalize: accept both arrays (current) and strings (legacy/defensive)
   const times = Array.isArray(timeOfDay) ? timeOfDay : timeOfDay ? [timeOfDay] : [];
@@ -50,14 +56,14 @@ export function pickSeedBlends({ timeOfDay, draw }) {
   times.forEach(t => (TIME_OF_DAY_SEEDS[t] || []).forEach(id => pool.add(id)));
   draws.forEach(d => (DRAW_SEEDS[d] || []).forEach(id => pool.add(id)));
 
-  // If we got fewer than 2, pad from defaults until we have 2-3
+  // If we got fewer than 2 from preferences, pad from defaults
   const defaults = DEFAULT_FALLBACK.slice();
-  while (pool.size < 2 && defaults.length > 0) {
+  while (pool.size < 2 + ALWAYS_INCLUDE.length && defaults.length > 0) {
     pool.add(defaults.shift());
   }
 
-  // Cap at 3 — preserves the "small starting library" feel
-  return Array.from(pool).slice(0, 3);
+  // Cap holds preference-driven slots (3) + the always-include count.
+  return Array.from(pool).slice(0, 3 + ALWAYS_INCLUDE.length);
 }
 
 /**
@@ -77,6 +83,8 @@ export const ONBOARDING_PANTRY = [
   "sencha",      // for Scriptorium
   "jasmine",
   "rooibos",     // for Hearth & Quiet
-  "peppermint",  // a universal
+  "peppermint",  // a universal — also for Tom Foolery
   "rose",        // a universal
+  "gunpowder",   // for Tom Foolery
+  "tulsi",       // for Tom Foolery
 ];
