@@ -106,9 +106,7 @@ export const MoodEnergy = ({ size = 28, c = theme.ochre }) => (
 
 export const MoodSleepy = ({ size = 28, c = theme.plum }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 14.5 A8 8 0 1 1 9.5 5 A6 6 0 0 0 19 14.5 Z" />
-    <circle cx="6" cy="6" r="0.8" fill={c} stroke="none" />
-    <circle cx="20" cy="20" r="0.8" fill={c} stroke="none" />
+    <path d="M20 15 A8.5 8.5 0 1 1 9 4 A7 7 0 0 0 20 15 Z" />
   </svg>
 );
 

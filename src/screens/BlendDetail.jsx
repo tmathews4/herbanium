@@ -318,9 +318,29 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           })}
         </div>
 
-        {/* Directions — tradition-specific steps when curated, generic
-            template otherwise. Expandable; collapsed by default to keep
-            the page scannable. */}
+        {/* Brewing — interactive explorer */}
+        <div style={{ margin: "22px 0 10px" }}>
+          <SectionLabel n="ii">Brewing</SectionLabel>
+        </div>
+        <BlendExtractionExplorer
+          ingredients={b.ingredients}
+          defaultTempC={b.tempC}
+          defaultTimeS={b.timeS}
+          curated
+        />
+        {b.ml && (
+          <div style={{
+            marginTop: 8,
+            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: theme.ash, textAlign: "right",
+          }}>
+            Volume · {b.ml} ml
+          </div>
+        )}
+
+        {/* Recommended Preparations — tradition-specific steps when curated,
+            generic template otherwise. Sits after the predicted-mood/balance
+            bars so the brewing science reads first, the ritual second. */}
         {(() => {
           const tradSteps = BLEND_DIRECTIONS[b.id];
           const tempLabel = formatTempRange(b.tempC, b.tempC, unit);
@@ -362,7 +382,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
                     transform: directionsOpen ? "rotate(90deg)" : "rotate(0deg)",
                     display: "inline-block",
                   }}>▶</span>
-                  <SectionLabel n="ii">Recommended Preparations</SectionLabel>
+                  <SectionLabel n="iii">Recommended Preparations</SectionLabel>
                 </span>
                 <span style={{
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
@@ -387,26 +407,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
             </div>
           );
         })()}
-
-        {/* Brewing — interactive explorer */}
-        <div style={{ margin: "22px 0 10px" }}>
-          <SectionLabel n="iii">Brewing</SectionLabel>
-        </div>
-        <BlendExtractionExplorer
-          ingredients={b.ingredients}
-          defaultTempC={b.tempC}
-          defaultTimeS={b.timeS}
-          curated
-        />
-        {b.ml && (
-          <div style={{
-            marginTop: 8,
-            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: theme.ash, textAlign: "right",
-          }}>
-            Volume · {b.ml} ml
-          </div>
-        )}
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>
