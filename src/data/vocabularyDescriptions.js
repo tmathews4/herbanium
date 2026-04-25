@@ -97,6 +97,7 @@ export const FLAVOR_DESCRIPTIONS = {
     body: "The full-bloom register — jasmine's signature. Tea-community word for what perfumery calls 'indolic'.",
   },
   honeyed: { summary: "Soft amber sweetness — the dried-flower-and-honey register.", body: "Linden, chamomile, white tea, rooibos all touch this." },
+  "honey-sweet": { summary: "Honey-leaning sweetness — flower nectar more than sugar.", body: "Linden's signature; soft amber sweetness that sits forward without cloying." },
 
   // ── Fruity family ──
   fruity: {
@@ -107,6 +108,7 @@ export const FLAVOR_DESCRIPTIONS = {
     summary: "Bright, lifting, lemon-adjacent without being sour.",
     body: "Lemongrass, lemon balm, hibiscus's tartness, ceylon's lift, darjeeling's muscatel.",
   },
+  citrusy: { summary: "Citrus-leaning lift — lemon-and-rind brightness.", body: "Adjective form of citrus; lemongrass, lemon balm, linden, bergamot." },
   muscatel: { summary: "Grape-like aromatics — Darjeeling's signature.", body: "Use specifically for Darjeeling and Darjeeling-adjacent teas." },
   tart: { summary: "Fruity-acidic character.", body: "Hibiscus, rosehip — the cranberry-edge register." },
   bright: { summary: "Lively, refreshing acidity.", body: "Tea-community preference over 'acidic'. Ceylon, darjeeling, lemongrass." },
