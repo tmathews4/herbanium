@@ -32,7 +32,7 @@ import { LibraryList, BlendListRow } from "./LibraryScreen";
 
 export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
   const { unit, weightUnit } = useUnit();
-  const [mode, setMode] = useState("forward"); // forward | reverse | apothecary
+  const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("all");
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
@@ -171,8 +171,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         marginBottom: 14, background: theme.cream,
       }}>
         {[
-          ["forward",    "Compose"],
           ["reverse",    "Blend"],
+          ["forward",    "Vibe"],
           ["apothecary", "Apothecary"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => setMode(k)} style={{
