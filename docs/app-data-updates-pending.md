@@ -1340,4 +1340,12 @@ them) so the remaining pending list stays accurate.
 
 ### Completed
 
-*(empty — no app data updates have been applied yet)*
+**2026-04-25 — Full Phase 0 + A + B integration applied to `src/data/ingredients.js`:**
+
+- Section 1 (effect-array swaps, vocab v1): all 15 entries applied — assam (verified unchanged), darjeeling, ceylon, lapsang, white, oolong, puerh, gyokuro, gunpowder, hojicha, dragonwell, rooibos, tulsi, lemonbalm, lemongrass, fennel, spearmint, ginger, cinnamon, cardamom, cloves, vanilla.
+- Section 2 (effect-array swaps with v0→v1 vocabulary migration): all 7 entries applied — chamomile (`settle` → `soothing`), lavender (`comfort` → `soothing`), rose (verified), jasmine (reduced uplifting per research), passionflower (`settle` → `soothing`, dropped digestive), peppermint (`settle` → `digestive`, replaced energy with calm), hibiscus (`settle` → `digestive`), sencha (verified, cooling already added).
+- Section 3 (new ingredient additions): all 16 entries added with full research-backed objects — turmeric, ashwagandha, matcha, yerba-mate, valerian, echinacea, licorice-root, genmaicha, reishi, lions-mane, nettle, linden, elderflower, black-pepper, dandelion-root, dandelion-leaf.
+- Schema reconciliation: extended live schema with `aliases`, `basicTastes`, `safetyFlags` (object), `confidenceMarkers`, `preparationPattern`, `relatedIngredient`, `harmonizerFlag`, `bioenhancer`, `gradeMatters`, `childrenFriendly`, `petSafe`, `effectTimeframe`. All existing fields preserved.
+- Pair references translated: `lemon-balm` → `lemonbalm`; non-catalog pairs (honey, milk, lemon, marshmallow-root, etc.) dropped.
+- Validation: 46 ingredients load; all pair references and `relatedIngredient` keys resolve.
+
