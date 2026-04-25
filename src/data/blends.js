@@ -19,6 +19,27 @@ const FLAVORS = ["floral", "earthy", "citrus", "spiced", "minty", "fruity", "swe
 
 /* ── Curated named blends ──────────────────────────────────── */
 
+// Optional fields that explain why a recipe doesn't fit a Western steep:
+//
+//   style: "low-temp"  — Japanese-style cool brew; lead ingredient is a
+//                        green tea (sencha/gyokuro/matcha/gunpowder) or
+//                        yerba-mate gourd cup. Other ingredients are
+//                        accepted as under-extracted on purpose.
+//   style: "decoction" — long boil/simmer (15-30 min); usually root- or
+//                        mushroom-led. Spices and aromatics steeped this
+//                        long are flavoring a broth, not being abused.
+//
+// Per-ingredient `role` (default "lead"):
+//   role: "lead"     — ingredient drives the cup; range warnings apply.
+//   role: "accent"   — supporting flavor/aroma at trace weight; warning
+//                      math is suppressed (the recipe accepts the stretch).
+//   role: "catalyst" — bioavailability adjunct (e.g. black pepper for
+//                      turmeric); warning math is suppressed.
+//
+// The style + role pair lets the warning system stay strict on what the
+// curator considers "the leaf that defines this cup" while staying quiet
+// on stylistic adjuncts the curator deliberately stretched.
+
 const BLENDS = [
   // ── Traditional teas ────────────────────────────────────────
 
@@ -46,12 +67,13 @@ const BLENDS = [
     subtitle: "Maghrebi gunpowder; carvone over menthol",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
-      { id: "spearmint", g: 1.0 },
+      { id: "spearmint", g: 1.0, role: "accent" },
     ],
     tempC: 90, timeS: 180, ml: 200,
     mood: "focus", flavor: "minty",
     public: true,
     tradition: "Maghrebi",
+    style: "low-temp",
     effects: [["focus", 3], ["cooling", 3], ["uplifting", 3]],
   },
   {
@@ -78,6 +100,7 @@ const BLENDS = [
     mood: "focus", flavor: "grassy",
     public: true,
     tradition: "Japanese",
+    style: "low-temp",
     effects: [["focus", 4], ["energy", 3], ["calm", 3]],
   },
   {
@@ -91,6 +114,7 @@ const BLENDS = [
     mood: "focus", flavor: "umami",
     public: true,
     tradition: "Japanese / chanoyu",
+    style: "low-temp",
     effects: [["focus", 5], ["energy", 4], ["calm", 3]],
   },
   {
@@ -143,6 +167,7 @@ const BLENDS = [
     mood: "energy", flavor: "earthy",
     public: true,
     tradition: "South American gaucho",
+    style: "low-temp",
     effects: [["energy", 4], ["focus", 3], ["uplifting", 2]],
   },
 
@@ -154,15 +179,16 @@ const BLENDS = [
     subtitle: "haldi doodh — fat and pepper unlock the curcumin",
     ingredients: [
       { id: "turmeric", g: 0.5 },
-      { id: "ginger", g: 0.3 },
-      { id: "black-pepper", g: 0.05 },
-      { id: "cinnamon", g: 0.2 },
-      { id: "cardamom", g: 0.2 },
+      { id: "ginger", g: 0.3, role: "accent" },
+      { id: "black-pepper", g: 0.05, role: "catalyst" },
+      { id: "cinnamon", g: 0.2, role: "accent" },
+      { id: "cardamom", g: 0.2, role: "accent" },
     ],
     tempC: 95, timeS: 600, ml: 250,
     mood: "comfort", flavor: "spiced",
     public: true,
     tradition: "Ayurvedic",
+    style: "decoction",
     effects: [["warming", 4], ["soothing", 3], ["digestive", 3]],
   },
   {
@@ -187,13 +213,14 @@ const BLENDS = [
     ingredients: [
       { id: "licorice-root", g: 0.5 },
       { id: "ginger", g: 0.5 },
-      { id: "fennel", g: 0.3 },
-      { id: "peppermint", g: 0.3 },
+      { id: "fennel", g: 0.3, role: "accent" },
+      { id: "peppermint", g: 0.3, role: "accent" },
     ],
     tempC: 100, timeS: 600, ml: 250,
     mood: "comfort", flavor: "sweet",
     public: true,
     tradition: "Western herbal / TCM",
+    style: "decoction",
     effects: [["soothing", 4], ["digestive", 3], ["warming", 2]],
   },
   {
@@ -203,12 +230,13 @@ const BLENDS = [
     ingredients: [
       { id: "nettle", g: 1.5 },
       { id: "dandelion-leaf", g: 1.0 },
-      { id: "lemonbalm", g: 0.5 },
+      { id: "lemonbalm", g: 0.5, role: "accent" },
     ],
     tempC: 100, timeS: 1800, ml: 500,
     mood: "comfort", flavor: "earthy",
     public: true,
     tradition: "European folk / Wise Woman",
+    style: "decoction",
     effects: [["soothing", 3], ["digestive", 3], ["grounding", 2]],
   },
   {
@@ -218,13 +246,14 @@ const BLENDS = [
     ingredients: [
       { id: "lions-mane", g: 1.5 },
       { id: "reishi", g: 0.5 },
-      { id: "cinnamon", g: 0.3 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
       { id: "ashwagandha", g: 0.5 },
     ],
     tempC: 100, timeS: 1800, ml: 500,
     mood: "focus", flavor: "earthy",
     public: true,
     tradition: "modern adaptogen",
+    style: "decoction",
     effects: [["focus", 3], ["grounding", 4], ["calm", 3]],
   },
   {
@@ -248,14 +277,15 @@ const BLENDS = [
     subtitle: "the war-rationed coffee — caramel, bittersweet, root",
     ingredients: [
       { id: "dandelion-root", g: 2.0 },
-      { id: "cinnamon", g: 0.3 },
-      { id: "cardamom", g: 0.2 },
-      { id: "vanilla", g: 0.2 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
+      { id: "cardamom", g: 0.2, role: "accent" },
+      { id: "vanilla", g: 0.2, role: "accent" },
     ],
     tempC: 100, timeS: 1200, ml: 250,
     mood: "comfort", flavor: "earthy",
     public: true,
     tradition: "European wartime",
+    style: "decoction",
     effects: [["digestive", 3], ["warming", 2], ["grounding", 2]],
   },
   {
@@ -286,14 +316,15 @@ const BLENDS = [
     subtitle: "piperine multiplies curcumin and hericenones — three-way absorption stack",
     ingredients: [
       { id: "turmeric", g: 0.5 },
-      { id: "black-pepper", g: 0.05 },
+      { id: "black-pepper", g: 0.05, role: "catalyst" },
       { id: "lions-mane", g: 1.5 },
-      { id: "cinnamon", g: 0.3 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
     ],
     tempC: 100, timeS: 1500, ml: 300,
     mood: "focus", flavor: "spiced",
     public: true,
     experimental: true,
+    style: "decoction",
     effects: [["focus", 3], ["warming", 3], ["soothing", 2], ["grounding", 2]],
   },
   {
@@ -302,13 +333,14 @@ const BLENDS = [
     subtitle: "two L-theanine sources with lion's mane on the long timeline",
     ingredients: [
       { id: "gyokuro", g: 1.5 },
-      { id: "lemonbalm", g: 0.8 },
-      { id: "lions-mane", g: 1.0 },
+      { id: "lemonbalm", g: 0.8, role: "accent" },
+      { id: "lions-mane", g: 1.0, role: "accent" },
     ],
     tempC: 60, timeS: 120, ml: 200,
     mood: "focus", flavor: "umami",
     public: true,
     experimental: true,
+    style: "low-temp",
     effects: [["focus", 5], ["calm", 4], ["soothing", 2]],
   },
   {
@@ -317,14 +349,15 @@ const BLENDS = [
     subtitle: "Argentine caffeine with citrus-mint cooling — the gringo summer mate",
     ingredients: [
       { id: "yerba-mate", g: 2.0 },
-      { id: "lemongrass", g: 0.8 },
-      { id: "spearmint", g: 0.5 },
-      { id: "ginger", g: 0.2 },
+      { id: "lemongrass", g: 0.8, role: "accent" },
+      { id: "spearmint", g: 0.5, role: "accent" },
+      { id: "ginger", g: 0.2, role: "accent" },
     ],
     tempC: 75, timeS: 240, ml: 250,
     mood: "energy", flavor: "citrus",
     public: true,
     experimental: true,
+    style: "low-temp",
     effects: [["energy", 3], ["cooling", 3], ["uplifting", 3]],
   },
   {
@@ -351,12 +384,13 @@ const BLENDS = [
     ingredients: [
       { id: "licorice-root", g: 0.5 },
       { id: "dandelion-root", g: 1.5 },
-      { id: "cardamom", g: 0.3 },
+      { id: "cardamom", g: 0.3, role: "accent" },
     ],
     tempC: 100, timeS: 1200, ml: 250,
     mood: "comfort", flavor: "sweet",
     public: true,
     experimental: true,
+    style: "decoction",
     effects: [["soothing", 3], ["digestive", 3], ["warming", 2]],
   },
   {
@@ -365,13 +399,14 @@ const BLENDS = [
     subtitle: "an impossible cup — focus 5 with grounding 4. Long decoction first.",
     ingredients: [
       { id: "matcha", g: 1.5 },
-      { id: "reishi", g: 1.0 },
-      { id: "ashwagandha", g: 0.5 },
+      { id: "reishi", g: 1.0, role: "accent" },
+      { id: "ashwagandha", g: 0.5, role: "accent" },
     ],
     tempC: 75, timeS: 30, ml: 200,
     mood: "focus", flavor: "earthy",
     public: true,
     experimental: true,
+    style: "low-temp",
     effects: [["focus", 4], ["grounding", 4], ["calm", 3]],
   },
   {
@@ -412,13 +447,14 @@ const BLENDS = [
     ingredients: [
       { id: "dandelion-root", g: 1.5 },
       { id: "reishi", g: 0.8 },
-      { id: "cinnamon", g: 0.3 },
-      { id: "vanilla", g: 0.2 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
+      { id: "vanilla", g: 0.2, role: "accent" },
     ],
     tempC: 100, timeS: 1500, ml: 250,
     mood: "comfort", flavor: "earthy",
     public: true,
     experimental: true,
+    style: "decoction",
     effects: [["digestive", 3], ["calm", 3], ["grounding", 3], ["warming", 2]],
   },
   {
@@ -430,13 +466,14 @@ const BLENDS = [
       { id: "ashwagandha", g: 0.5 },
       { id: "reishi", g: 0.5 },
       { id: "lions-mane", g: 0.8 },
-      { id: "cinnamon", g: 0.3 },
-      { id: "cardamom", g: 0.2 },
+      { id: "cinnamon", g: 0.3, role: "accent" },
+      { id: "cardamom", g: 0.2, role: "accent" },
     ],
     tempC: 100, timeS: 1800, ml: 300,
     mood: "focus", flavor: "earthy",
     public: true,
     experimental: true,
+    style: "decoction",
     effects: [["grounding", 4], ["calm", 3], ["focus", 3], ["warming", 2]],
   },
 
@@ -488,11 +525,12 @@ const BLENDS = [
     subtitle: "L-theanine plus a menthol exhale",
     ingredients: [
       { id: "sencha", g: 1.5 },
-      { id: "peppermint", g: 0.5 },
+      { id: "peppermint", g: 0.5, role: "accent" },
     ],
     tempC: 75, timeS: 90, ml: 200,
     mood: "focus", flavor: "minty",
     public: true,
+    style: "low-temp",
     effects: [["focus", 4], ["uplifting", 3]],
   },
 ];
@@ -509,8 +547,12 @@ const MOOD_BLENDS = {
     effects: [["calm", 4], ["sleepy", 2]],
   },
   focus: {
-    ings: [["sencha", 1.2], ["peppermint", 0.4]],
+    ings: [
+      { id: "sencha", g: 1.2 },
+      { id: "peppermint", g: 0.4, role: "accent" },
+    ],
     temp: 75, time: 90,
+    style: "low-temp",
     effects: [["focus", 4], ["uplifting", 3]],
   },
   energy: {
@@ -544,8 +586,13 @@ const PAIR_BLENDS = {
   "calm+focus": {
     name: "Stillwater Study",
     subtitle: "L-theanine plus the lemon-balm exhale",
-    ings: [["lemonbalm", 1.2], ["sencha", 0.5], ["rose", 0.2]],
+    ings: [
+      { id: "lemonbalm", g: 1.2, role: "accent" },
+      { id: "sencha", g: 0.5 },
+      { id: "rose", g: 0.2, role: "accent" },
+    ],
     temp: 80, time: 180,
+    style: "low-temp",
     effects: [["calm", 3], ["focus", 3]],
   },
   "calm+comfort": {
@@ -572,8 +619,13 @@ const PAIR_BLENDS = {
   "energy+focus": {
     name: "First Light",
     subtitle: "matcha-caffeine math, two greens deep",
-    ings: [["sencha", 1.5], ["assam", 0.6], ["peppermint", 0.3]],
+    ings: [
+      { id: "sencha", g: 1.5 },
+      { id: "assam", g: 0.6, role: "accent" },
+      { id: "peppermint", g: 0.3, role: "accent" },
+    ],
     temp: 80, time: 120,
+    style: "low-temp",
     effects: [["energy", 3], ["focus", 4]],
   },
   "comfort+energy": {
@@ -586,8 +638,13 @@ const PAIR_BLENDS = {
   "comfort+focus": {
     name: "Long Desk",
     subtitle: "rooibos with a peppermint exhale",
-    ings: [["rooibos", 1.4], ["peppermint", 0.4], ["sencha", 0.3]],
+    ings: [
+      { id: "rooibos", g: 1.4 },
+      { id: "peppermint", g: 0.4, role: "accent" },
+      { id: "sencha", g: 0.3, role: "accent" },
+    ],
     temp: 85, time: 180,
+    style: "low-temp",
     effects: [["focus", 3], ["soothing", 3]],
   },
   "comfort+sleepy": {
@@ -600,8 +657,13 @@ const PAIR_BLENDS = {
   "focus+settle": {
     name: "Clear Channel",
     subtitle: "tulsi at the desk; lemon balm at the gut",
-    ings: [["tulsi", 1.0], ["lemonbalm", 1.0], ["sencha", 0.3]],
+    ings: [
+      { id: "tulsi", g: 1.0 },
+      { id: "lemonbalm", g: 1.0 },
+      { id: "sencha", g: 0.3, role: "accent" },
+    ],
     temp: 85, time: 180,
+    style: "low-temp",
     effects: [["focus", 3], ["digestive", 3], ["uplifting", 3]],
   },
   "settle+sleepy": {

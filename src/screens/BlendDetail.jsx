@@ -119,6 +119,22 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 for {b.mood}
               </span>
             )}
+            {b.style && (
+              <span
+                title={b.style === "low-temp"
+                  ? "Brewed cooler than a Western steep — Japanese green-tea or yerba-mate tradition."
+                  : b.style === "decoction"
+                  ? "Long active simmer (15-30 min). The recipe accepts that supporting spices steep past their delicate window."
+                  : ""}
+                style={{
+                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: theme.sageDeep, border: `1px solid ${theme.sageDeep}`, borderRadius: 3,
+                  padding: "1px 6px",
+                }}
+              >
+                {b.style === "low-temp" ? "low-temp" : b.style === "decoction" ? "decoction" : b.style}
+              </span>
+            )}
             {b.tradition && (
               <span style={{
                 fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",

@@ -20,18 +20,29 @@ import { INGREDIENTS } from "../data/ingredients.js";
      the peppermint extracts lightly).
    Time is grams-weighted from each ingredient's timeS range.
    ────────────────────────────────────────────────────────────── */
-export function computeBrewProfile(ingredients) {
+export function computeBrewProfile(ingredients, opts = {}) {
+  const { leadOnly = false } = opts;
   if (!ingredients || !ingredients.length) {
     return { tempC: 95, tempRange: null, timeS: 300, compatible: true, outsiders: [] };
   }
 
-  const totalG = ingredients.reduce((s, { g }) => s + g, 0);
+  // When the caller opts into leadOnly, restrict the math to ingredients
+  // tagged `lead` (or untagged — default is lead). Accents and catalysts
+  // are stylistic adjuncts and would skew the recommended brew toward
+  // their preferred window even though the recipe doesn't want them to.
+  const considered = leadOnly
+    ? ingredients.filter(i => !i.role || i.role === "lead")
+    : ingredients;
+  // Empty leads (rare misconfiguration) — fall back to using all.
+  const pool = considered.length > 0 ? considered : ingredients;
 
-  const intMin = Math.max(...ingredients.map(({ id }) => INGREDIENTS[id].tempC[0]));
-  const intMax = Math.min(...ingredients.map(({ id }) => INGREDIENTS[id].tempC[1]));
+  const totalG = pool.reduce((s, { g }) => s + g, 0);
+
+  const intMin = Math.max(...pool.map(({ id }) => INGREDIENTS[id].tempC[0]));
+  const intMax = Math.min(...pool.map(({ id }) => INGREDIENTS[id].tempC[1]));
 
   // grams-weighted time, rounded to the nearest 30s
-  const wTime = ingredients.reduce((s, { id, g }) => {
+  const wTime = pool.reduce((s, { id, g }) => {
     const [t1, t2] = INGREDIENTS[id].timeS;
     return s + ((t1 + t2) / 2) * (g / totalG);
   }, 0);
@@ -50,13 +61,13 @@ export function computeBrewProfile(ingredients) {
 
   // No overlap — weighted-grams dominance. Find the ingredients that
   // fall outside the chosen brewing window (the "cost" of this blend).
-  const wTemp = ingredients.reduce((s, { id, g }) => {
+  const wTemp = pool.reduce((s, { id, g }) => {
     const [t1, t2] = INGREDIENTS[id].tempC;
     return s + ((t1 + t2) / 2) * (g / totalG);
   }, 0);
   const tempC = Math.round(wTemp / 5) * 5;
 
-  const outsiders = ingredients
+  const outsiders = pool
     .filter(({ id }) => {
       const [lo, hi] = INGREDIENTS[id].tempC;
       return tempC < lo - 2 || tempC > hi + 2;
@@ -80,6 +91,13 @@ export function resolveBlend(moods, flavor) {
     };
   }
 
+  // MOOD_BLENDS / PAIR_BLENDS use object-form ingredients [{id, g, role?}]
+  // alongside the legacy tuple form [[id, g], ...]. Normalize on read so
+  // the rest of the resolver doesn't have to care which it received.
+  const normIngs = (raw) => raw.map(item =>
+    Array.isArray(item) ? { id: item[0], g: item[1] } : { ...item }
+  );
+
   let base;
   if (moods.length === 1) {
     const m = moods[0];
@@ -87,8 +105,9 @@ export function resolveBlend(moods, flavor) {
     const [name, subtitle] = MOOD_SINGLE_NAMES[m];
     base = {
       name, subtitle,
-      ingredients: b.ings.map(([id, g]) => ({ id, g })),
+      ingredients: normIngs(b.ings),
       tempC: b.temp, timeS: b.time, effects: b.effects,
+      style: b.style,
       conflict, moods,
     };
   } else if (moods.length === 2) {
@@ -97,8 +116,9 @@ export function resolveBlend(moods, flavor) {
     if (curated) {
       base = {
         name: curated.name, subtitle: curated.subtitle,
-        ingredients: curated.ings.map(([id, g]) => ({ id, g })),
+        ingredients: normIngs(curated.ings),
         tempC: curated.temp, timeS: curated.time, effects: curated.effects,
+        style: curated.style,
         conflict, moods,
       };
     }
@@ -111,7 +131,7 @@ export function resolveBlend(moods, flavor) {
     let tempSum = 0, timeSum = 0;
     moods.forEach(m => {
       const b = MOOD_BLENDS[m];
-      b.ings.forEach(([id, g]) => { mergedG[id] = (mergedG[id] || 0) + g / moods.length; });
+      normIngs(b.ings).forEach(({ id, g }) => { mergedG[id] = (mergedG[id] || 0) + g / moods.length; });
       tempSum += b.temp;
       timeSum += b.time;
     });
@@ -415,9 +435,10 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   // (1) Per-ingredient contributions. Falls back to flat ingredient
   // flavors/effects if no extraction profile exists for that id.
-  const contributions = ingredients.map(({ id, g }) => {
+  const contributions = ingredients.map(({ id, g, role }) => {
     const meta = INGREDIENTS[id];
     const weight = g / totalG;
+    const ingRole = role || "lead";
 
     const profile = resolveExtractionProfile(id, tempC, timeS) || {
       flavors: normalizeFlavors(meta.flavors || []),
@@ -428,7 +449,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const [tMin, tMax] = meta.tempC;
     const inRange = tempC >= tMin && tempC <= tMax;
 
-    return { id, name: meta.name, weight, profile, inRange };
+    return { id, name: meta.name, weight, profile, inRange, role: ingRole };
   });
 
   // (2) Grams-weighted accumulation into raw flavor + effect maps.
@@ -469,7 +490,12 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
     .sort((a, b) => b[1] - a[1]);
 
-  const rawOutsiders = contributions.filter(c => !c.inRange).map(c => c.name);
+  // Only lead-role ingredients can fire outsider warnings. Accents and
+  // catalysts are stylistic adjuncts — a 0.05g pinch of black pepper at
+  // the wrong temp isn't a problem worth surfacing.
+  const rawOutsiders = contributions
+    .filter(c => !c.inRange && c.role === "lead")
+    .map(c => c.name);
 
   // For curated blends sitting exactly on the curator's chosen brew,
   // suppress cup-level outsider warnings — the curator already accepted
@@ -504,12 +530,16 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const pushedHarder = !baselineKnown
     || tempC > baselineTempC
     || timeS > baselineTimeS;
-  // Walk every ingredient regardless — we need to know what *would* fire
+  // Walk every lead ingredient — we need to know what *would* fire
   // even when suppressed, so the tradition-over-literature notice can
   // mention only the blends where suppression actually carried weight.
+  // Accent and catalyst ingredients skip this entirely: their "abuse"
+  // is the point of the recipe (a pinch of cardamom in a 20-min
+  // decoction isn't being over-pulled — it's flavoring a broth).
   const allIndividualWarnings = [];
   const seenIndividual = new Set();
-  for (const { name, profile } of contributions) {
+  for (const { name, profile, role } of contributions) {
+    if (role !== "lead") continue;
     const fMap = Object.fromEntries(profile.flavors);
     const eMap = Object.fromEntries(profile.effects);
     const ingWarnings = buildWarnings({

@@ -45,20 +45,26 @@ function assert(cond, msg) {
 }
 
 function gatherAll() {
+  // MOOD_BLENDS / PAIR_BLENDS use tuple form by default but switch to
+  // object form whenever an entry needs to carry a role tag. Normalize
+  // on read so the audit doesn't have to care which it received.
+  const normIngs = (raw) => raw.map(item =>
+    Array.isArray(item) ? { id: item[0], g: item[1] } : { ...item }
+  );
   const all = [];
   for (const b of BLENDS) {
-    all.push({ label: "BLEND", name: b.name, ings: b.ingredients, t: b.tempC, s: b.timeS });
+    all.push({ label: "BLEND", name: b.name, ings: b.ingredients, t: b.tempC, s: b.timeS, style: b.style });
   }
   for (const [mood, b] of Object.entries(MOOD_BLENDS)) {
     all.push({
       label: `MOOD:${mood}`, name: `${mood} (single-mood)`,
-      ings: b.ings.map(([id, g]) => ({ id, g })), t: b.temp, s: b.time,
+      ings: normIngs(b.ings), t: b.temp, s: b.time, style: b.style,
     });
   }
   for (const [key, b] of Object.entries(PAIR_BLENDS)) {
     all.push({
       label: `PAIR:${key}`, name: b.name,
-      ings: b.ings.map(([id, g]) => ({ id, g })), t: b.temp, s: b.time,
+      ings: normIngs(b.ings), t: b.temp, s: b.time, style: b.style,
     });
   }
   return all;
@@ -163,6 +169,52 @@ test("traditionNote stays off when slider is moved off baseline", () => {
   const moved = resolveBlendAtBrew(morning.ings, morning.t - 5, morning.s, morning.t, morning.s, true);
   assert(moved.traditionNote === false,
     "traditionNote should be false once the user moves off the curator's brew");
+});
+
+test("accent ingredients don't fire over-pull warnings", () => {
+  // Pissenlit Café: dandelion-root lead, cinnamon/cardamom/vanilla all
+  // accent. Push past baseline so warnings could fire — accents must
+  // still stay quiet.
+  const pissenlit = blends.find(b => b.name === "Pissenlit Café");
+  assert(pissenlit, "Pissenlit Café fixture not found");
+  const pushed = resolveBlendAtBrew(pissenlit.ings, pissenlit.t, pissenlit.s + 60, pissenlit.t, pissenlit.s, true);
+  const accentWarnings = pushed.warnings.filter(w =>
+    /Cinnamon|Cardamom|Vanilla/.test(w.text) && /over-pulled/.test(w.text)
+  );
+  assert(accentWarnings.length === 0,
+    `accents should not fire over-pull warnings — got: ${accentWarnings.map(w => w.text).join("; ")}`);
+});
+
+test("accent ingredients don't fire outsider warnings", () => {
+  // Mate Cooler: yerba-mate lead at 75°C/240s; lemongrass/spearmint/ginger
+  // all accent. Move slider off baseline; only the yerba-mate (in range)
+  // should be considered for outsiders.
+  const cooler = blends.find(b => b.name === "Mate Cooler");
+  assert(cooler, "Mate Cooler fixture not found");
+  const moved = resolveBlendAtBrew(cooler.ings, cooler.t + 5, cooler.s, cooler.t, cooler.s, true);
+  const outsiderNames = moved.warnings
+    .filter(w => w.kind === "outsider")
+    .map(w => w.text);
+  const accentLeak = outsiderNames.filter(t =>
+    /Lemongrass|Spearmint|Ginger/.test(t)
+  );
+  assert(accentLeak.length === 0,
+    `accent ingredients should not appear in outsider warnings — got: ${accentLeak.join("; ")}`);
+});
+
+test("computeBrewProfile leadOnly excludes accents from the math", async () => {
+  const { computeBrewProfile } = await import("../src/algo/compose.js");
+  // Ground & Climb: matcha lead (70-80°C / 15-30s), reishi+ashwagandha accent.
+  // Without leadOnly, accents drag the recommendation toward 100°C.
+  // With leadOnly, the recommendation should match matcha's tight window.
+  const climb = blends.find(b => b.name === "Ground & Climb");
+  assert(climb, "Ground & Climb fixture not found");
+  const naive = computeBrewProfile(climb.ings);
+  const leadOnly = computeBrewProfile(climb.ings, { leadOnly: true });
+  assert(leadOnly.tempC <= 80,
+    `leadOnly should match matcha's <=80°C ceiling — got ${leadOnly.tempC}°C`);
+  assert(naive.tempC > leadOnly.tempC,
+    `naive recommendation should be hotter than leadOnly (accents pull it up) — naive ${naive.tempC}°C, leadOnly ${leadOnly.tempC}°C`);
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

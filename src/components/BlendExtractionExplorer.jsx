@@ -131,9 +131,13 @@ export const BlendExtractionExplorer = ({
 
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.
-  // Surfaced inside the tradition-over-literature notice so a reader
-  // who'd rather brew where the studies recommend has a one-tap target.
-  const sciBrew = useMemo(() => computeBrewProfile(ingredients), [ingredients]);
+  // Restricts to lead-role ingredients so accents and catalysts (which
+  // the curator deliberately stretched) don't drag the recommendation
+  // toward a Western-steep compromise that nobody actually drinks.
+  const sciBrew = useMemo(
+    () => computeBrewProfile(ingredients, { leadOnly: true }),
+    [ingredients],
+  );
   const sciDiffers = sciBrew.tempC !== defaultTempC || sciBrew.timeS !== defaultTimeS;
   const sciTempDisplay = unit === "F" ? `${cToF(sciBrew.tempC)}°F` : `${sciBrew.tempC}°C`;
   const sciTimeDisplay = `${Math.floor(sciBrew.timeS / 60)}:${String(sciBrew.timeS % 60).padStart(2, "0")}`;

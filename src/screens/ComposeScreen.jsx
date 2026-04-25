@@ -156,10 +156,12 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
     : { outsiders: [], perIngredient: [] };
   // Curated blends sitting on the curator's chosen brew don't surface the
   // temperature-compromise note — the curator already accepted that trade.
+  // Accent/catalyst ingredients also don't fire it (they're stylistic
+  // adjuncts; the recipe accepts the stretch by design).
   const atCuratedBaseline = brewTempC === blend.tempC && brewTimeS === blend.timeS;
   const liveOutsiders = atCuratedBaseline
     ? []
-    : liveBrew.perIngredient?.filter(c => !c.inRange) || [];
+    : (liveBrew.perIngredient || []).filter(c => !c.inRange && (c.role === "lead" || c.role == null));
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
