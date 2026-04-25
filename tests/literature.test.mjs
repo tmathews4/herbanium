@@ -612,6 +612,169 @@ test("forgiving ingredients (rooibos, vanilla, gyokuro, hojicha) do NOT fire ove
   }
 });
 
+// ─── BLOG / SOMMELIER / HERBALIST TAKES ─────────────────────────
+//
+// Beyond peer-reviewed literature: opinionated brewing guidance from
+// working tea people, herbalists, and forum consensus. Each test
+// names the source's voice and a directional claim the model should
+// satisfy.
+
+test("pu-erh (Don Mei, Mei Leaf): long Western steeps stew bitter — short flash steeps preserve", () => {
+  const lightBit  = getEffect(light("puerh"),  "bitterness") + getFlavor(light("puerh"),  "astringent");
+  const strongBit = getEffect(strong("puerh"), "bitterness") + getFlavor(strong("puerh"), "astringent");
+  assert(strongBit > lightBit, `bitter+astringent should rise from light (${lightBit}) to strong (${strongBit})`);
+});
+
+test("lapsang (Mei Leaf): smoke runs over everything — never absent", () => {
+  for (const fn of [light, standard, strong]) {
+    const p = fn("lapsang");
+    assert(hasFlavor(p, "smoked") || hasFlavor(p, "smoky"),
+      `smoke should be present at every lapsang setting`);
+  }
+});
+
+test("gyokuro (Mary Lou Heiss, The Story of Tea): umami present across the cool-water range", () => {
+  // Heiss's warning is about pushing PAST 60°C (which the slider deliberately
+  // doesn't allow). Within the canonical 50–60°C window, umami should be
+  // robustly present at every setting, and no over-pull warning should fire.
+  for (const fn of [light, standard, strong]) {
+    const p = fn("gyokuro");
+    assert(getFlavor(p, "umami") >= 2,
+      `gyokuro umami should hold ≥ 2 across the cool-water range`);
+  }
+  assert(!hasWarning(warningsFor(strong("gyokuro")), "tannin"),
+    `gyokuro within its slider range should never fire tannin`);
+});
+
+test("darjeeling (Kevin Gascoyne, Camellia Sinensis): past 90°C the muscatel collapses", () => {
+  assert(hasWarning(warningsFor(strong("darjeeling")), "tannin"),
+    `tannin should fire at strong darjeeling (per Gascoyne's collapse warning)`);
+});
+
+test("assam (James Norwood Pratt, Tea Lover's Treasury): built for boil and milk — no aromatic warning", () => {
+  const w = warningsFor(strong("assam"));
+  assert(!hasWarning(w, "aromatic"),
+    `assam at strong should not fire aromatic — it's tannic by design, built for full extraction`);
+});
+
+test("white tea (Aaron Fisher, Global Tea Hut): boiling silver needle is a tragedy", () => {
+  // Fisher's claim is that pushing white tea hot wrecks the leaf's
+  // delicate aromatics — the failure mode is the tannin/wood register
+  // surfacing on top of what should be a gentle cup. Sweet/honey may
+  // technically climb (more compounds extracted) but the warning system
+  // is what catches the failure.
+  const w = warningsFor(strong("white"));
+  assert(hasWarning(w, "tannin") || hasWarning(w, "aromatic"),
+    `boiling silver needle should fire over-pull warning`);
+  assert(hasFlavor(strong("white"), "wood") || hasFlavor(strong("white"), "astringent"),
+    `strong white tea should surface wood/astringent — the leaf protesting`);
+});
+
+test("dragonwell (Path of Cha): hot water scorches the chestnut into flat", () => {
+  assert(hasFlavor(standard("dragonwell"), "chestnut") || hasFlavor(standard("dragonwell"), "nutty"),
+    `dragonwell at standard should carry chestnut/nutty`);
+  assert(hasWarning(warningsFor(strong("dragonwell")), "tannin"),
+    `dragonwell at 85°C should fire tannin (per Path of Cha brewing notes)`);
+});
+
+test("matcha (r/tea consensus, Breakaway Matcha): hot water turns it spinach-bitter", () => {
+  assert(!hasWarning(warningsFor(light("matcha")), "tannin"),
+    `matcha at 70°C/15s should NOT fire tannin (the canonical usucha)`);
+  assert(hasWarning(warningsFor(strong("matcha")), "tannin"),
+    `matcha at 80°C/30s SHOULD fire tannin (the spinach failure mode)`);
+});
+
+test("hojicha (Wu De, Global Tea Hut): roasted forgives boiling water", () => {
+  const cup = resolveExtractionProfile("hojicha", 100, 30);
+  assert(!hasWarning(warningsFor(cup), "tannin"),
+    `hojicha at 100°C/30s should NOT fire tannin`);
+  for (const fn of [light, standard, strong]) {
+    assert(hasFlavor(fn("hojicha"), "roasted"),
+      `roasted should be present across hojicha range (the whole point)`);
+  }
+});
+
+test("jasmine (Rishi Tea): above 85°C aromatics flash off", () => {
+  const w = warningsFor(strong("jasmine"));
+  assert(hasWarning(w, "tannin") || hasWarning(w, "aromatic"),
+    `jasmine at upper end should fire over-pull warning (volatile aromatic loss)`);
+});
+
+test("nettle (Susun Weed, Healing Wise): long infusion is the medicine, short is decoration", () => {
+  const lightMin  = getFlavor(light("nettle"),  "mineral") + getFlavor(light("nettle"),  "vegetal");
+  const strongMin = getFlavor(strong("nettle"), "mineral") + getFlavor(strong("nettle"), "vegetal");
+  assert(strongMin >= lightMin,
+    `mineral/vegetal pull should not invert with longer infusion: light=${lightMin}, strong=${strongMin}`);
+});
+
+test("dandelion root vs leaf (Rosemary Gladstar, Family Herbal): root decocts, leaf infuses", () => {
+  const lightSettle  = getEffect(light("dandelion-root"),  "settle") + getEffect(light("dandelion-root"),  "comfort");
+  const strongSettle = getEffect(strong("dandelion-root"), "settle") + getEffect(strong("dandelion-root"), "comfort");
+  assert(strongSettle > lightSettle,
+    `dandelion-root effect should rise with decoction time (${lightSettle} → ${strongSettle})`);
+  assert(hasWarning(warningsFor(strong("dandelion-leaf")), "tannin"),
+    `dandelion-leaf at strong should fire tannin (over-infused leaf turns medicinal)`);
+});
+
+test("linden (Susun Weed, Wise Woman Tradition): boil it hard, you get hay water", () => {
+  const w = warningsFor(strong("linden"));
+  assert(hasWarning(w, "tannin") || hasWarning(w, "aromatic"),
+    `linden at strong should fire over-pull warning (mucilage and perfume both die)`);
+});
+
+test("hibiscus (Rishi, Mountain Rose Herbs): long steep adds pucker, not flavor", () => {
+  assert(hasWarning(warningsFor(strong("hibiscus")), "tannin"),
+    `hibiscus at strong should fire tannin (the pucker)`);
+  const lightTart  = getFlavor(light("hibiscus"),  "tart") + getFlavor(light("hibiscus"),  "sour");
+  const strongTart = getFlavor(strong("hibiscus"), "tart") + getFlavor(strong("hibiscus"), "sour");
+  assert(strongTart >= lightTart,
+    `tartness should not invert: light=${lightTart}, strong=${strongTart}`);
+});
+
+test("genmaicha (Half Moon, Bitterleaf): rice should be present across the range", () => {
+  for (const fn of [light, standard, strong]) {
+    const p = fn("genmaicha");
+    assert(hasFlavor(p, "toasted") || hasFlavor(p, "nutty"),
+      `toasted/nutty rice should always be present in genmaicha`);
+  }
+});
+
+test("ginger (Mei Leaf): three minutes is a tease, ten is the heat", () => {
+  const cool   = resolveExtractionProfile("ginger", 100, 300);
+  const middle = resolveExtractionProfile("ginger", 100, 480);
+  const long   = resolveExtractionProfile("ginger", 100, 600);
+  const c = getEffect(cool,   "warming") + getEffect(cool,   "comfort");
+  const m = getEffect(middle, "warming") + getEffect(middle, "comfort");
+  const l = getEffect(long,   "warming") + getEffect(long,   "comfort");
+  assert(l >= m && m >= c,
+    `warming/comfort should rise monotonically with steep time: ${c} → ${m} → ${l}`);
+});
+
+test("cloves (Linda Gaylard, The Tea Book): the dominator — over-pull surfaces medicinal", () => {
+  const w = warningsFor(strong("cloves"));
+  assert(hasWarning(w, "tannin") || hasWarning(w, "aromatic"),
+    `cloves at strong should fire dominator warning (eugenol overdose / medicinal)`);
+});
+
+test("reishi & lions-mane (Paul Stamets, Mycelium Running): under 20 min is a placebo", () => {
+  const lightR  = getEffect(light("reishi"),  "calm") + getEffect(light("reishi"),  "sleepy");
+  const strongR = getEffect(strong("reishi"), "calm") + getEffect(strong("reishi"), "sleepy");
+  assert(strongR > lightR + 1,
+    `reishi calm+sleepy should rise substantially with decoction time: ${lightR} → ${strongR}`);
+  const lightL  = getEffect(light("lions-mane"),  "focus") + getEffect(light("lions-mane"),  "comfort");
+  const strongL = getEffect(strong("lions-mane"), "focus") + getEffect(strong("lions-mane"), "comfort");
+  assert(strongL >= lightL,
+    `lions-mane focus+comfort should not invert with longer extraction`);
+});
+
+test("yerba-mate (Circle of Drink, gaucho tradition): above 75°C is gringo mate", () => {
+  assert(hasWarning(warningsFor(strong("yerba-mate")), "tannin"),
+    `yerba-mate at strong should fire tannin (the gringo failure mode)`);
+  const lightE = getEffect(light("yerba-mate"), "energy");
+  assert(lightE >= 3,
+    `yerba-mate at light should still pack energy (xanthine triad doesn't need over-pull): got ${lightE}`);
+});
+
 test("time slider moves the cup at constant temp (bracketByIntensity 2D)", () => {
   // This is the regression we just fixed. Pick a few ingredients with
   // long time ranges and verify the cup actually changes when only
