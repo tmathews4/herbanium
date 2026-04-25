@@ -34,7 +34,7 @@ const TabBar = ({ tab, setTab }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
     { k: "compose",  label: "Compose",  icon: <Flower size={18} /> },
-    { k: "library",  label: "Shelf",  icon: <Leaf size={18} /> },
+    { k: "library",  label: "Apothecary",  icon: <Leaf size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
 

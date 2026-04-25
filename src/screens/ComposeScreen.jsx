@@ -173,7 +173,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
         {[
           ["reverse",    "Blend"],
           ["forward",    "Vibe"],
-          ["apothecary", "Apothecary"],
+          ["apothecary", "Shelf"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => setMode(k)} style={{
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
@@ -706,7 +706,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
             seen.add(b.id);
             return true;
           });
-          emptyMsg = "Your Apothecary is empty. Save blends from Compose to see them here.";
+          emptyMsg = "Your Shelf is empty. Save blends from Vibe or Blend to see them here.";
         } else if (apothecaryFilter === "traditional") {
           visible = traditional;
           emptyMsg = "No traditional blends to show.";
@@ -939,7 +939,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
         }}>
           <span>add ingredient</span>
           <span style={{ letterSpacing: 0, textTransform: "none", fontStyle: "italic", fontFamily: ff.serif, fontSize: 11 }}>
-            {filteredAvailable.length} on the shelf
+            {filteredAvailable.length} in the apothecary
           </span>
         </div>
 
@@ -953,7 +953,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="search the shelf…"
+            placeholder="search the apothecary…"
             style={{
               flex: 1, background: "transparent", border: "none",
               fontFamily: ff.serif, fontStyle: search ? "normal" : "italic",
@@ -1004,7 +1004,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
               color: theme.ash, padding: "12px 0", textAlign: "center",
             }}>
-              no match on your shelf.
+              no match in your apothecary.
             </div>
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>

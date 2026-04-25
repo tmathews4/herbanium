@@ -157,7 +157,7 @@ export const LibraryScreen = ({ go, startBrew, openBlend, sessions, savedBlendId
             <input
               value={shelfSearch}
               onChange={(e) => setShelfSearch(e.target.value)}
-              placeholder="search the shelf…"
+              placeholder="search the apothecary…"
               style={{
                 flex: 1, background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: shelfSearch ? "normal" : "italic",
