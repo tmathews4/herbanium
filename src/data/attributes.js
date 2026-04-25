@@ -147,6 +147,66 @@ const onPick = (ctx, mood, flavors) =>
   ctx.onboarding.moods.has(mood) &&
   flavors.some(f => ctx.onboarding.flavors.has(f));
 
+// Adjective prefix for colorable titles. Derives from the user's
+// recent mood profile, with prestige overrides for rare patterns.
+// Returns null when there's not enough recent data to characterize.
+const MOOD_ADJECTIVES = {
+  calm:      "Quiet",
+  sleepy:    "Drowsy",
+  soothing:  "Tender",
+  cooling:   "Cool",
+  focus:     "Clever",
+  grounding: "Steady",
+  energy:    "Feisty",
+  warming:   "Burning",
+  uplifting: "Joyful",
+  comfort:   "Cozy",
+  digestive: "Particular",
+};
+
+const MOODS_FOR_MATCH = ["calm","focus","energy","sleepy","comfort","soothing","warming","cooling","digestive","grounding","uplifting"];
+
+export function getUserPrefix(ctx) {
+  // Prestige overrides — checked first, rarest first.
+  // Silver: high self-knowledge match rate over a meaningful sample.
+  if (ctx.lifetime.n >= 10) {
+    const matched = ctx.lifetime.sessions.filter(s => {
+      const hit = (s.actual || "").toLowerCase();
+      return MOODS_FOR_MATCH.includes(hit);
+    }).length;
+    if (matched / ctx.lifetime.n > 0.7) return "Silver";
+  }
+  // Wild: high range — many distinct ingredients in recent rotation.
+  if (ctx.recent.distinctIngredients >= 18) return "Wild";
+  // Silly: lots of self-composed blends (you play with the kettle).
+  if (ctx.composedCount >= 5) return "Silly";
+  // Stubborn: bitter cups dominate the recent rotation.
+  if ((ctx.recent.byFlavor.get("bitter") || 0) >= 4) return "Stubborn";
+  // Curious: many distinct blends in recent rotation.
+  if (ctx.recent.byBlendId.size >= 12) return "Curious";
+
+  // Base prefix — adjective for the dominant recent mood.
+  if (ctx.recent.n < 5) return null;
+  let topMood = null, topCount = 0;
+  for (const [m, c] of ctx.recent.byMood) {
+    if (c > topCount) { topMood = m; topCount = c; }
+  }
+  return MOOD_ADJECTIVES[topMood] || null;
+}
+
+export function applyPrefix(name, prefix) {
+  if (!prefix) return name;
+  return name.startsWith("The ") ? name.replace(/^The /, `The ${prefix} `) : `${prefix} ${name}`;
+}
+
+// Which titles accept a prefix. Spirit animals + rare/legendary/mythic
+// titles get the adjective; common/uncommon non-animal titles stay
+// neutral so the system doesn't bolt prefixes onto every label.
+export function isColorable(attr) {
+  if (attr.id.startsWith("spirit-")) return true;
+  return attr.rarity === "rare" || attr.rarity === "legendary" || attr.rarity === "mythic";
+}
+
 // Predicate helpers — terse access to window data
 const moodCount       = (w, m) => w.byMood.get(m) || 0;
 const moodFamily      = (w, ms) => ms.reduce((s, m) => s + (w.byMood.get(m) || 0), 0);

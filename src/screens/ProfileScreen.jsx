@@ -9,7 +9,7 @@ import {
 } from "../components/layout";
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
-import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
+import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
@@ -104,10 +104,13 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const attrEvaluation = evaluateAttributes(
-    buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile })
-  );
-  const earnedAttrs = attrEvaluation.filter(a => a.earned);
+  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile });
+  const attrEvaluation = evaluateAttributes(attrCtx);
+  const userPrefix = getUserPrefix(attrCtx);
+  const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => ({
+    ...a,
+    displayName: isColorable(a) ? applyPrefix(a.name, userPrefix) : a.name,
+  }));
   // Sort earned by rarity desc — rarest finds bubble up.
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
   const sortedEarned = [...earnedAttrs].sort((a, b) =>
@@ -488,7 +491,7 @@ const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => (
           }}>×</button>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
             <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
-              {openAttr.name}
+              {openAttr.displayName || openAttr.name}
             </span>
             <span style={{
               fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
@@ -525,7 +528,7 @@ const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => (
               transition: "background 0.15s ease",
               whiteSpace: "nowrap",
             }}
-          >{a.name}</button>
+          >{a.displayName || a.name}</button>
         );
       })}
     </div>
