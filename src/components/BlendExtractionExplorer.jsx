@@ -328,6 +328,7 @@ export const BlendExtractionExplorer = ({
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {filtered.map((w, i) => {
               const accent = w.kind === "ceiling" ? theme.terra
+                : w.kind === "tannin" ? theme.terra
                 : w.kind === "paradox" ? theme.sageDeep
                 : theme.ash;
               return (

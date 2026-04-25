@@ -489,6 +489,73 @@ test("all 46 ingredients resolve a non-null profile at their midpoint", () => {
   }
 });
 
+// ─── TANNIN-CREEP WARNINGS ──────────────────────────────────────
+
+import { buildWarnings, applyMasking } from "../src/algo/perception.js";
+
+function rawFlavorsFromProfile(profile) {
+  const out = {};
+  for (const [name, strength] of profile.flavors) out[name] = strength;
+  return out;
+}
+function rawEffectsFromProfile(profile) {
+  const out = {};
+  for (const [tag, strength] of profile.effects) out[tag] = strength;
+  return out;
+}
+function warningsFor(profile) {
+  const raw = rawFlavorsFromProfile(profile);
+  const { perceived } = applyMasking(raw);
+  return buildWarnings({
+    perceivedFlavors: perceived,
+    perceivedEffects: rawEffectsFromProfile(profile),
+  });
+}
+function hasWarning(warnings, kind) {
+  return warnings.some(w => w.kind === kind);
+}
+
+test("assam at full pull triggers tannin warning", () => {
+  assert(hasWarning(warningsFor(strong("assam")), "tannin"),
+    `expected tannin warning at strong assam`);
+});
+
+test("hibiscus at full pull triggers tannin warning", () => {
+  assert(hasWarning(warningsFor(strong("hibiscus")), "tannin"),
+    `expected tannin warning at strong hibiscus`);
+});
+
+test("ceylon at full pull triggers tannin warning", () => {
+  assert(hasWarning(warningsFor(strong("ceylon")), "tannin"),
+    `expected tannin warning at strong ceylon`);
+});
+
+test("gyokuro at canonical cool brew does NOT trigger tannin warning", () => {
+  const cool = resolveExtractionProfile("gyokuro", 50, 90);
+  assert(!hasWarning(warningsFor(cool), "tannin"),
+    `unexpected tannin warning at canonical gyokuro`);
+});
+
+test("white tea at standard does NOT trigger tannin warning", () => {
+  assert(!hasWarning(warningsFor(standard("white")), "tannin"),
+    `unexpected tannin warning at standard white tea`);
+});
+
+test("chamomile at light pull does NOT trigger tannin warning", () => {
+  assert(!hasWarning(warningsFor(light("chamomile")), "tannin"),
+    `unexpected tannin warning at light chamomile`);
+});
+
+test("dandelion-leaf at full pull triggers tannin warning (bitter spring greens)", () => {
+  assert(hasWarning(warningsFor(strong("dandelion-leaf")), "tannin"),
+    `expected tannin warning at strong dandelion-leaf`);
+});
+
+test("reishi at full decoction triggers tannin warning (deeply bitter)", () => {
+  assert(hasWarning(warningsFor(strong("reishi")), "tannin"),
+    `expected tannin warning at strong reishi`);
+});
+
 test("time slider moves the cup at constant temp (bracketByIntensity 2D)", () => {
   // This is the regression we just fixed. Pick a few ingredients with
   // long time ranges and verify the cup actually changes when only

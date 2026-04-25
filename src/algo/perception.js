@@ -179,7 +179,13 @@ export function applyEffectSynergies(rawEffects) {
  *   synergyTags      — from applyEffectSynergies (passed through, not warned)
  *   paradoxTags      — from applyEffectSynergies
  */
-export function buildWarnings({ outsiders = [], maskingNotes = [], perceivedEffects = {}, paradoxTags = [] } = {}) {
+export function buildWarnings({
+  outsiders = [],
+  maskingNotes = [],
+  perceivedEffects = {},
+  perceivedFlavors = {},
+  paradoxTags = [],
+} = {}) {
   const warnings = [];
 
   for (const name of outsiders) {
@@ -192,6 +198,31 @@ export function buildWarnings({ outsiders = [], maskingNotes = [], perceivedEffe
     warnings.push({
       kind: "masking",
       text: `${maskerLabel} is muting the ${note.flavor} you'd expect to taste.`,
+    });
+  }
+
+  // Tannin creep — bitter and astringent climbing past their gentler register.
+  // Combines flavor-side bitter/bitterness/astringent with the bitterness
+  // effect (some extraction profiles render bitterness as an effect bar).
+  const bitterLevel = (perceivedFlavors.bitter || 0)
+                    + (perceivedFlavors.bitterness || 0)
+                    + (perceivedEffects.bitterness || 0);
+  const astringentLevel = perceivedFlavors.astringent || 0;
+
+  if (bitterLevel + astringentLevel >= 4) {
+    warnings.push({
+      kind: "tannin",
+      text: "Tannins are taking over — drop a few degrees or shave the steep.",
+    });
+  } else if (astringentLevel >= 2) {
+    warnings.push({
+      kind: "tannin",
+      text: "Astringent edge climbing — gentler heat or a shorter steep would soften it.",
+    });
+  } else if (bitterLevel >= 2.5) {
+    warnings.push({
+      kind: "tannin",
+      text: "The bitter side is starting to dominate — pull back the steep or drop a few degrees.",
     });
   }
 

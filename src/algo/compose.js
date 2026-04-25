@@ -461,6 +461,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS) {
     outsiders,
     maskingNotes,
     perceivedEffects: perceivedEffectMap,
+    perceivedFlavors: perceivedFlavorMap,
     paradoxTags,
   });
 
