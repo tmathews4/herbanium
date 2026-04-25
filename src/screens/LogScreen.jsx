@@ -16,7 +16,7 @@ import {
    Screen: LOG
    ────────────────────────────────────────────────────────────── */
 
-export const LogScreen = ({ blend, intent, targetMoods, onSubmit, onCancel }) => {
+export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, onCancel }) => {
   const safeMoods = targetMoods && targetMoods.length ? targetMoods : [];
   // Per-dimension "did it land?" — default each target mood to "landed".
   const [landed, setLanded] = useState(() =>
@@ -67,9 +67,25 @@ export const LogScreen = ({ blend, intent, targetMoods, onSubmit, onCancel }) =>
 
       <div style={{ margin: "20px 0" }}>
         <SectionLabel>Set out feeling</SectionLabel>
-        <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 18, color: theme.inkSoft, marginTop: 6 }}>
-          {intent ? `"${intent}"` : <span style={{ color: theme.ash, fontStyle: "normal" }}>—</span>}
-        </div>
+        {currentMoods && currentMoods.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+            {currentMoods.map(m => (
+              <span key={m} style={{
+                fontFamily: ff.serif, fontSize: 12.5,
+                padding: "4px 10px", borderRadius: 999,
+                background: theme.cream, color: theme.terra,
+                border: `1px solid ${theme.ruleSoft}`,
+              }}>{m}</span>
+            ))}
+          </div>
+        )}
+        {intent ? (
+          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 16, color: theme.inkSoft, marginTop: currentMoods?.length ? 8 : 6 }}>
+            "{intent}"
+          </div>
+        ) : (!currentMoods || currentMoods.length === 0) && (
+          <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ash, marginTop: 6 }}>—</div>
+        )}
       </div>
 
       {/* Per-mood confirmation — "you aimed for calm + focus; did they land?" */}

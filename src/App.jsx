@@ -407,6 +407,7 @@ export default function App() {
           blend={session.blend}
           intent={session.intent}
           targetMoods={session.targetMoods}
+          currentMoods={session.currentMoods}
           onSubmit={(logData) => {
             addSession({
               blend: session.blend,
