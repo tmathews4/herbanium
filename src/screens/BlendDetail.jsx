@@ -90,7 +90,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           ) : <div style={{ width: 40 }} />}
         </div>
 
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{
             width: 56, height: 56, borderRadius: "50%",
             background: theme.ivory, border: `1px solid ${theme.rule}`,
@@ -99,7 +99,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           }}>
             <Flower size={28} c={theme.ochre} />
           </div>
-          <div style={{ flex: 1, paddingTop: 2 }}>
+          <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               {EFFECT_DESCRIPTIONS[b.mood] ? (
                 <button
