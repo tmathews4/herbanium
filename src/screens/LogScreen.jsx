@@ -7,7 +7,7 @@ import { Flower } from "../components/icons";
 import {
   Chip, ChipRows, SectionLabel, Toggle,
 } from "../components/layout";;
-import { MOODS } from "../data/blends";
+import { MOODS, UNEXPECTED_MOODS } from "../data/blends";
 import {
   ff, theme,
 } from "../theme";
@@ -140,7 +140,7 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
         )}
         <div style={{ marginTop: 10 }}>
           <ChipRows
-            items={MOODS.filter(m => !safeMoods.includes(m))}
+            items={UNEXPECTED_MOODS.filter(m => !safeMoods.includes(m))}
             renderItem={(m) => (
               <Chip key={m} active={extra.includes(m)} onClick={() => toggleExtra(m)} tone="sage">{m}</Chip>
             )}

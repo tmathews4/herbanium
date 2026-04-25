@@ -21,6 +21,20 @@ const MOODS = [
   // MOOD_BLENDS gives each a signature single-mood recipe.
   "soothing", "warming", "cooling", "digestive", "grounding", "uplifting",
 ];
+
+// Vocabulary for the LogScreen "unexpected moods" prompt — what showed
+// up that you weren't aiming for. Distinct from MOODS (the brewing-intent
+// vocabulary) because outcomes include things you'd never aim for: a tea
+// can leave you anxious, wired, or foggy, and that signal is worth
+// capturing. Trimmed of overlap (soothing≈calm, uplifting carries the
+// brightness side) and physical-effect moods (warming, cooling, digestive)
+// that aren't really unexpected emotional outcomes.
+export const UNEXPECTED_MOODS = [
+  // positives that can genuinely surprise
+  "calm", "focus", "energy", "sleepy", "uplifting",
+  // negatives — paradoxical or backfire outcomes
+  "anxious", "jittery", "restless", "wired", "foggy", "queasy",
+];
 const FLAVORS = [
   "floral", "earthy", "citrus", "spiced", "minty", "fruity", "sweet",
   // Sensory-register flavors — blends opt in via blend.flavor, and the
