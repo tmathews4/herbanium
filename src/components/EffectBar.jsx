@@ -32,10 +32,16 @@ export const EffectBar = ({ label, value, maxValue, color = theme.sage }) => {
   const display = Math.round(v * 10) / 10;
   const visualV = visualPosition(v);
 
-  // Tick only renders when maxValue is meaningfully greater than
-  // the current value — otherwise the slider's already at the
-  // ceiling and the tick would just sit on the right edge of fill.
-  const showTick = typeof maxValue === "number" && maxValue > v + 0.05;
+  // Tick renders whenever the max-settings value differs meaningfully
+  // from the current value — in either direction. Most of the time
+  // pushing the slider to max increases the strength, but some effects
+  // peak mid-range and drop at maximum (over-extraction can dampen
+  // certain notes), so the tick can land behind the fill to mean
+  // "the cup is already past peak on this one."
+  const showTick =
+    typeof maxValue === "number" &&
+    maxValue > 0 &&
+    Math.abs(maxValue - v) > 0.05;
   const tickV = showTick ? visualPosition(maxValue) : null;
 
   return (
