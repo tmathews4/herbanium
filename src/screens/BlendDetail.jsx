@@ -132,20 +132,17 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
               </span>
             )}
           </div>
-          <div style={{ flex: 1, textAlign: "center" }}>
+          <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.15 }}>
               {b.subtitle}
             </div>
-          </div>
-        </div>
 
-        {/* Signal tag tiles — caffeine / brew style / origin / caution.
-            Centered below the name with full hero width so labels never
-            truncate. Color codes the dimension; dashed = caution. */}
-        {(() => {
+            {/* Signal tag tiles — centered under the name/subtitle column,
+                not the full hero, so they read as belonging to the title. */}
+            {(() => {
           const caffeineMg = (b.ingredients || []).reduce((sum, ing) => {
             const meta = INGREDIENTS[ing.id];
             return sum + (meta?.caffeine || 0) * (ing.g || 0);
@@ -204,7 +201,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
           return (
             <div style={{
               display: "flex", flexWrap: "wrap", gap: 5,
-              justifyContent: "center", marginTop: 14,
+              justifyContent: "center", marginTop: 10,
             }}>
               {tags.map((t, i) => (
                 <span
@@ -222,7 +219,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isSave
               ))}
             </div>
           );
-        })()}
+            })()}
+          </div>
+        </div>
       </div>
 
       <div style={{ padding: "18px 22px 32px" }}>
