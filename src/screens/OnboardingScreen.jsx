@@ -148,16 +148,23 @@ export const OnboardingScreen = ({ onComplete }) => {
 
       {/* Footer note */}
       <div style={{
-        padding: "0 24px 20px", textAlign: "center",
+        padding: "0 24px 12px", textAlign: "center",
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
         color: theme.ash, lineHeight: 1.5, flexShrink: 0,
       }}>
         Your journal lives on this device — no account, no cloud.
-        {step === STEPS - 1 && (
-          <div style={{ marginTop: 6 }}>
-            Herbanium is a brewing companion, not medical advice. Verify with a clinician for anything that matters.
-          </div>
-        )}
+      </div>
+
+      {/* Legal notice — shown on every step in a red-bordered card */}
+      <div style={{
+        margin: "0 24px 20px", padding: "10px 12px", borderRadius: 8,
+        border: `2px solid ${theme.terra}`,
+        background: "rgba(176, 84, 47, 0.05)",
+        fontFamily: ff.serif, fontSize: 11.5, fontWeight: 600,
+        color: theme.terra, lineHeight: 1.5, textAlign: "center",
+        flexShrink: 0,
+      }}>
+        Herbanium is a brewing companion, <em>not</em> medical advice. Verify with a clinician for anything that matters.
       </div>
     </div>
   );
