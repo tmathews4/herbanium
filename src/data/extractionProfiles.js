@@ -652,16 +652,19 @@ function blendEffects(lower, upper, t) {
   });
 }
 
-// Annotate a string-array of flavors with strengths in [1, 4].
-//   - profileIndex 0 (light) caps at 3; 1+ caps at 4.
-//   - bitter / bitterness / astringent are diagnostic — strength rises
-//     with profile index regardless of array position.
-//   - other flavors descend from the cap by array position (top note
-//     leads, accents follow).
+// Annotate a string-array of flavors with strengths in [1, 5].
+//   - profileIndex 0 (light)    caps at 3
+//   - profileIndex 1 (standard) caps at 4
+//   - profileIndex 2 (strong)   caps at 5
+// The 1-5 range is now used in full: a strong-profile leading flavor
+// fills all five segments on the EffectBar, matching the assumption
+// the perception-layer thresholds were calibrated against.
+//
+// bitter / bitterness / astringent are diagnostic — strength rises
+// with profile index regardless of array position.
+// other flavors descend from the cap by array position (top note
+// leads, accents follow).
 // Pure function so the result is stable per (flavors, profileIndex).
-// Descriptors that signal extraction-induced off-notes. Their strength
-// rises with profile position rather than array position, so adding any
-// of them to a strong-end profile reliably fires the warnings layer.
 const DIAGNOSTIC_FLAVORS = new Set([
   "bitter", "bitterness", "astringent",
   "harsh", "sharp", "acrid", "burnt", "tannic",
@@ -669,7 +672,7 @@ const DIAGNOSTIC_FLAVORS = new Set([
 ]);
 
 function annotateFlavorStrengths(flavors, profileIndex) {
-  const peakStrength = profileIndex === 0 ? 3 : 4;
+  const peakStrength = profileIndex === 0 ? 3 : profileIndex === 1 ? 4 : 5;
   return flavors.map((f, i) => {
     if (DIAGNOSTIC_FLAVORS.has(f)) {
       return [f, Math.min(3, profileIndex + 1)];
