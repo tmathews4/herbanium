@@ -92,51 +92,53 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: theme.ivory, border: `1px solid ${theme.rule}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
             flexShrink: 0,
           }}>
-            <Flower size={28} c={theme.ochre} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              {EFFECT_DESCRIPTIONS[b.mood] ? (
-                <button
-                  onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
-                  style={{
-                    background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                    border: "none", padding: "2px 6px", borderRadius: 4,
-                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
-                    textTransform: "uppercase", color: theme.ash, cursor: "pointer",
-                  }}
-                >
-                  for {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
-                </button>
-              ) : (
-                <span style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
-                  for {b.mood}
-                </span>
-              )}
-              {b.tradition && (
-                <span style={{
-                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-                  color: theme.ochre, border: `1px solid ${theme.ochre}`, borderRadius: 3,
-                  padding: "1px 6px",
-                }}>{b.tradition}</span>
-              )}
-              {b.experimental && (
-                <span style={{
-                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-                  color: theme.plum, border: `1px dashed ${theme.plum}`, borderRadius: 3,
-                  padding: "1px 6px",
-                }}>Herbanium experiment</span>
-              )}
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%",
+              background: theme.ivory, border: `1px solid ${theme.rule}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Flower size={28} c={theme.ochre} />
             </div>
-            <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
+            {EFFECT_DESCRIPTIONS[b.mood] ? (
+              <button
+                onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
+                style={{
+                  background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                  border: "none", padding: "2px 6px", borderRadius: 4,
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
+                  textTransform: "uppercase", color: theme.ash, cursor: "pointer",
+                }}
+              >
+                for {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
+              </button>
+            ) : (
+              <span style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
+                for {b.mood}
+              </span>
+            )}
+            {b.tradition && (
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+                color: theme.ochre, border: `1px solid ${theme.ochre}`, borderRadius: 3,
+                padding: "1px 6px",
+              }}>{b.tradition}</span>
+            )}
+            {b.experimental && (
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+                color: theme.plum, border: `1px dashed ${theme.plum}`, borderRadius: 3,
+                padding: "1px 6px",
+              }}>Herbanium experiment</span>
+            )}
+          </div>
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2, lineHeight: 1.15 }}>
+            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.15 }}>
               {b.subtitle}
             </div>
           </div>

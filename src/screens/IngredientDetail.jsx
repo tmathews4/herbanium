@@ -60,26 +60,31 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           <div style={{ flex: 1 }} />
         </div>
 
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{
-            width: 64, height: 64, borderRadius: "50%",
-            background: theme.ivory, border: `1px solid ${theme.rule}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+            flexShrink: 0,
           }}>
-            {ing.category === "flower"    && <Flower size={34} c={theme.ochre} />}
-            {ing.category === "herbal"    && <Sprig  size={34} c={theme.sage} />}
-            {ing.category === "true tea"  && <Leaf   size={34} c={theme.sageDeep} />}
-            {ing.category === "spice"     && <Flower size={34} c={theme.terra} />}
-            {ing.category === "adaptogen" && <Sprig  size={34} c={theme.plum} />}
-          </div>
-          <div style={{ flex: 1, paddingTop: 2 }}>
-            <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: "50%",
+              background: theme.ivory, border: `1px solid ${theme.rule}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {ing.category === "flower"    && <Flower size={34} c={theme.ochre} />}
+              {ing.category === "herbal"    && <Sprig  size={34} c={theme.sage} />}
+              {ing.category === "true tea"  && <Leaf   size={34} c={theme.sageDeep} />}
+              {ing.category === "spice"     && <Flower size={34} c={theme.terra} />}
+              {ing.category === "adaptogen" && <Sprig  size={34} c={theme.plum} />}
+            </div>
+            <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash, textAlign: "center" }}>
               {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
             </div>
-            <h1 style={{ fontFamily: ff.serif, fontSize: 32, fontWeight: 400, color: theme.ink, margin: "2px 0 0", lineHeight: 1.05 }}>
+          </div>
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <h1 style={{ fontFamily: ff.serif, fontSize: 32, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {ing.name}
             </h1>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
+            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.15 }}>
               {ing.latin}
             </div>
           </div>
