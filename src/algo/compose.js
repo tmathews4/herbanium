@@ -374,6 +374,13 @@ import {
  * fire when the live tempC/timeS is past the baseline on either axis —
  * the baseline brew itself is treated as accepted compromise.
  *
+ * curated (optional, default false): when true AND the live brew matches
+ * the baseline exactly, also suppress cup-level outsider warnings and
+ * empty `brew.outsiders`. The curator already accepted that ingredient X
+ * sits outside its preferred temp at this brew; the warning is meaningful
+ * only when the user moves away. For algorithm-derived (custom) blends,
+ * leave outsiders visible at baseline since the user hasn't signed off.
+ *
  * Output shape:
  *   {
  *     effects:        [[tag, 0–5], ...] sorted strong → weak, bitterness last
@@ -384,9 +391,12 @@ import {
  *     warnings:       [{kind, text}, ...]
  *     outsiders:      [name, ...] kept for backward compatibility
  *     perIngredient:  [{id, name, weight, profile, inRange}, ...]
+ *     traditionNote:  true when curated && at-baseline && suppression
+ *                     actually carried weight (raw outsiders or per-
+ *                     ingredient warnings would have fired)
  *   }
  */
-export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS) {
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
@@ -459,7 +469,16 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
     .sort((a, b) => b[1] - a[1]);
 
-  const outsiders = contributions.filter(c => !c.inRange).map(c => c.name);
+  const rawOutsiders = contributions.filter(c => !c.inRange).map(c => c.name);
+
+  // For curated blends sitting exactly on the curator's chosen brew,
+  // suppress cup-level outsider warnings — the curator already accepted
+  // that an ingredient lives at the edge of its window. The moment the
+  // user moves either slider, fall back to the honest list.
+  const atCuratedBaseline = curated
+    && baselineTempC != null && baselineTimeS != null
+    && tempC === baselineTempC && timeS === baselineTimeS;
+  const outsiders = atCuratedBaseline ? [] : rawOutsiders;
 
   // (5a) Cup-level warnings — what the average reads.
   const cupWarnings = buildWarnings({
@@ -485,29 +504,39 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const pushedHarder = !baselineKnown
     || tempC > baselineTempC
     || timeS > baselineTimeS;
-  const individualWarnings = [];
+  // Walk every ingredient regardless — we need to know what *would* fire
+  // even when suppressed, so the tradition-over-literature notice can
+  // mention only the blends where suppression actually carried weight.
+  const allIndividualWarnings = [];
   const seenIndividual = new Set();
-  if (pushedHarder) {
-    for (const { name, profile } of contributions) {
-      const fMap = Object.fromEntries(profile.flavors);
-      const eMap = Object.fromEntries(profile.effects);
-      const ingWarnings = buildWarnings({
-        perceivedFlavors: fMap,
-        perceivedEffects: eMap,
+  for (const { name, profile } of contributions) {
+    const fMap = Object.fromEntries(profile.flavors);
+    const eMap = Object.fromEntries(profile.effects);
+    const ingWarnings = buildWarnings({
+      perceivedFlavors: fMap,
+      perceivedEffects: eMap,
+    });
+    for (const w of ingWarnings) {
+      if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
+      const key = `${name}|${w.kind}`;
+      if (seenIndividual.has(key)) continue;
+      seenIndividual.add(key);
+      const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
+      allIndividualWarnings.push({
+        kind: w.kind,
+        text: `${name} is being over-pulled — ${lc}`,
       });
-      for (const w of ingWarnings) {
-        if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
-        const key = `${name}|${w.kind}`;
-        if (seenIndividual.has(key)) continue;
-        seenIndividual.add(key);
-        const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
-        individualWarnings.push({
-          kind: w.kind,
-          text: `${name} is being over-pulled — ${lc}`,
-        });
-      }
     }
   }
+  const individualWarnings = pushedHarder ? allIndividualWarnings : [];
+
+  // Tradition-over-literature notice: when a curator placed the recipe
+  // exactly here AND something was suppressed (raw outsiders or per-
+  // ingredient over-pull warnings), surface a single editorial line
+  // explaining that the brew sits outside what the studies prescribe
+  // because tradition put it there first.
+  const traditionNote = atCuratedBaseline
+    && (rawOutsiders.length > 0 || allIndividualWarnings.length > 0);
 
   // Merge cup-level and individual warnings. Drop a cup-level tannin
   // duplicate if any individual warning of the same kind already fires
@@ -529,6 +558,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     warnings,
     outsiders,
     perIngredient: contributions,
+    traditionNote,
   };
 }
 

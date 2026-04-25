@@ -152,9 +152,14 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
   // the static algorithmic defaults. `outsiders` is an array of ingredient
   // NAMES (not ids) at the live temp.
   const liveBrew = effectiveIngredients.length > 0
-    ? resolveBlendAtBrew(effectiveIngredients, brewTempC, brewTimeS, blend.tempC, blend.timeS)
+    ? resolveBlendAtBrew(effectiveIngredients, brewTempC, brewTimeS, blend.tempC, blend.timeS, true)
     : { outsiders: [], perIngredient: [] };
-  const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
+  // Curated blends sitting on the curator's chosen brew don't surface the
+  // temperature-compromise note — the curator already accepted that trade.
+  const atCuratedBaseline = brewTempC === blend.tempC && brewTimeS === blend.timeS;
+  const liveOutsiders = atCuratedBaseline
+    ? []
+    : liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -606,6 +611,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, openBlend, compose
                 timeS={brewTimeS}
                 setTimeS={setBrewTimeS}
                 compact
+                curated
               />
             )}
 

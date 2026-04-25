@@ -85,6 +85,8 @@ export const BlendExtractionExplorer = ({
   timeS: timeSProp,         // optional controlled
   setTimeS: setTimeSProp,   // optional controlled
   compact = false,          // smaller layout for Compose context
+  curated = false,          // curator-chosen recipe — suppresses outsider
+                            // warnings when sitting on the curator's defaults
 }) => {
   const { unit } = useUnit();
 
@@ -123,8 +125,9 @@ export const BlendExtractionExplorer = ({
 
   // Live blend computation at current slider values. The default tempC/timeS
   // act as the baseline — per-ingredient over-pull warnings only fire when
-  // the user has pushed past them.
-  const brew = resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS);
+  // the user has pushed past them. For curated blends, outsider warnings
+  // are also silenced when the user sits exactly on the baseline.
+  const brew = resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
 
   // Display formatting
   const displayTemp = unit === "F" ? `${cToF(tempC)}°F` : `${tempC}°C`;
@@ -253,6 +256,28 @@ export const BlendExtractionExplorer = ({
                 : `${brew.outsiders.join(", ")} are outside their preferred temps.`}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tradition-over-literature notice — appears on curated blends
+          that brew outside what the studies prescribe. The curator
+          chose this point on purpose; the note acknowledges that the
+          warning system has been silenced here, and explains why. */}
+      {brew.traditionNote && (
+        <div style={{
+          marginBottom: 12, padding: "8px 10px", borderRadius: 6,
+          background: "rgba(165, 120, 54, 0.08)",
+          border: `1px solid rgba(165, 120, 54, 0.22)`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: theme.inkSoft, lineHeight: 1.45,
+        }}>
+          <em style={{
+            color: theme.ochre, fontStyle: "normal",
+            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+            textTransform: "uppercase", marginRight: 6,
+          }}>tradition over literature</em>
+          Some traditional recipes brew outside the ranges current studies
+          suggest — that's why tradition sometimes outweighs the science.
         </div>
       )}
 

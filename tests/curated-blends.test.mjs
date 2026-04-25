@@ -72,22 +72,30 @@ const blends = gatherAll();
 
 console.log(`Curated blends — clean-default audit (${blends.length} blends)\n`);
 
+function outsiderWarnings(brew) {
+  return brew.warnings.filter(w => w.kind === "outsider");
+}
+
 for (const b of blends) {
   test(`${b.label} ${b.name} clean at default brew`, () => {
-    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s);
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true);
     const overs = overPullWarnings(brew);
-    assert(overs.length === 0,
-      `${b.name} fires ${overs.length} over-pull warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
-      overs.map(o => o.text).join("\n        - "));
+    const outs = outsiderWarnings(brew);
+    const issues = [...overs, ...outs];
+    assert(issues.length === 0,
+      `${b.name} fires ${issues.length} warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
+      issues.map(o => o.text).join("\n        - "));
+    assert(brew.outsiders.length === 0,
+      `${b.name} still lists outsiders at curated baseline: ${brew.outsiders.join(", ")}`);
   });
 
-  // Track which blends would over-pull if the baseline suppression were
-  // removed — surfaced under AUDIT=1 so a developer can see how much load
-  // option 2's suppression is carrying.
+  // Track which blends would over-pull or flag outsiders if the baseline
+  // suppression were removed — surfaced under AUDIT=1 so a developer can
+  // see how much load the suppression is carrying.
   if (process.env.AUDIT) {
     const naive = resolveBlendAtBrew(b.ings, b.t, b.s);
-    const overs = overPullWarnings(naive);
-    if (overs.length > 0) audit.push({ ...b, overs });
+    const issues = [...overPullWarnings(naive), ...outsiderWarnings(naive)];
+    if (issues.length > 0) audit.push({ ...b, overs: issues });
   }
 }
 
@@ -96,16 +104,71 @@ for (const b of blends) {
 test("pushing past baseline still fires per-ingredient warnings", () => {
   const dusk = blends.find(b => b.name === "Dusk Lullaby");
   assert(dusk, "Dusk Lullaby fixture not found — test data drift");
-  const pushed = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s + 60, dusk.t, dusk.s);
+  const pushed = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s + 60, dusk.t, dusk.s, true);
   const overs = overPullWarnings(pushed);
   assert(overs.length > 0,
     "expected over-pull warnings when steep is past baseline; got none — suppression is too broad");
 });
 
+// Outsider suppression is curated-only and exact-baseline-only:
+// moving the slider away should restore the warning, and an
+// algorithm-derived (non-curated) brew at baseline should still show it.
+test("moving the slider off baseline restores the outsider warning", () => {
+  const morning = blends.find(b => b.name === "Morning Vestment");
+  assert(morning, "Morning Vestment fixture not found — test data drift");
+  const moved = resolveBlendAtBrew(morning.ings, morning.t - 5, morning.s, morning.t, morning.s, true);
+  const outs = moved.warnings.filter(w => w.kind === "outsider");
+  assert(outs.length > 0,
+    "expected outsider warning when slider is moved off curated baseline; got none");
+});
+
+test("non-curated (algorithm-derived) brew at baseline still flags outsiders", () => {
+  const morning = blends.find(b => b.name === "Morning Vestment");
+  assert(morning, "Morning Vestment fixture not found — test data drift");
+  const algo = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, false);
+  const outs = algo.warnings.filter(w => w.kind === "outsider");
+  assert(outs.length > 0,
+    "expected outsider warning for non-curated blend at baseline; got none — suppression leaked");
+});
+
+test("traditionNote fires when suppression actually carried weight", () => {
+  const morning = blends.find(b => b.name === "Morning Vestment");
+  const dusk = blends.find(b => b.name === "Dusk Lullaby");
+  const morningBrew = resolveBlendAtBrew(morning.ings, morning.t, morning.s, morning.t, morning.s, true);
+  const duskBrew = resolveBlendAtBrew(dusk.ings, dusk.t, dusk.s, dusk.t, dusk.s, true);
+  assert(morningBrew.traditionNote === true,
+    "Morning Vestment suppresses an outsider — traditionNote should be true");
+  assert(duskBrew.traditionNote === true,
+    "Dusk Lullaby suppresses two over-pull warnings — traditionNote should be true");
+});
+
+test("traditionNote stays off when nothing was suppressed", () => {
+  // First Light — wait, that's in the audit. Pick a blend not in the audit.
+  // Iterate blends and find one whose naive resolve already has zero
+  // over-pull and zero outsiders — that one should never show traditionNote.
+  const clean = blends.find(b => {
+    const r = resolveBlendAtBrew(b.ings, b.t, b.s);
+    const overs = r.warnings.filter(w => /is being over-pulled/.test(w.text));
+    const outs = r.warnings.filter(w => w.kind === "outsider");
+    return overs.length === 0 && outs.length === 0;
+  });
+  assert(clean, "no clean curated blend found — test data drift");
+  const r = resolveBlendAtBrew(clean.ings, clean.t, clean.s, clean.t, clean.s, true);
+  assert(r.traditionNote === false,
+    `${clean.name} has nothing to suppress — traditionNote should be false`);
+});
+
+test("traditionNote stays off when slider is moved off baseline", () => {
+  const morning = blends.find(b => b.name === "Morning Vestment");
+  const moved = resolveBlendAtBrew(morning.ings, morning.t - 5, morning.s, morning.t, morning.s, true);
+  assert(moved.traditionNote === false,
+    "traditionNote should be false once the user moves off the curator's brew");
+});
+
 console.log(`\n\n  ${pass} passed, ${fail} failed`);
 
 if (process.env.AUDIT) {
-  console.log(`\n  ${audit.length}/${blends.length} blends would over-pull at their own default if baseline suppression were removed:`);
+  console.log(`\n  ${audit.length}/${blends.length} blends would surface over-pull or outsider warnings at their own default if baseline suppression were removed:`);
   for (const a of audit) {
     console.log(`    [${a.label}] ${a.name} @ ${a.t}°C / ${a.s}s`);
     for (const o of a.overs) console.log(`        ! ${o.text}`);
