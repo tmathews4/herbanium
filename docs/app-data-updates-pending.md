@@ -4,9 +4,13 @@
 > `src/data/ingredients.js` that have been proposed during
 > ingredient research but not yet pushed to the live app.
 >
-> **Status at creation:** April 24, 2026. **Original 30-ingredient
-> catalog now fully researched.** Plus 2 new candidate additions
-> (turmeric and ashwagandha) for a total of 32 ingredients.
+> **Status at creation:** April 2026. Original 30-ingredient
+> catalog complete; Phase A additions in progress.
+>
+> **Catalog target (Phase A complete):** 38 ingredients
+> (30 original + 8 Phase A: matcha, yerba-mate, valerian,
+> echinacea, licorice-root, genmaicha + provisionals turmeric,
+> ashwagandha)
 >
 > **How to use:** Work through sections 1-3 in order. Section 1 is
 > the quickest wins (simple effect array swaps). Section 2 requires
@@ -417,11 +421,202 @@ ashwagandha: {
 },
 ```
 
-**Schema caveat:** Both turmeric and ashwagandha entries above
-are best-guess schemas. Will need to reconcile with actual
-`src/data/ingredients.js` schema before applying. The research
-files themselves are schema-agnostic and capture everything that
-matters.
+### 3.3 Matcha
+
+**Decision required:** Add to catalog. Strong recommendation —
+matcha was the biggest single gap in the original catalog.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+matcha: {
+  id: "matcha",
+  displayName: "Matcha",
+  latin: "Camellia sinensis (shaded, powdered)",
+  category: "tea",
+  subcategory: "green-shaded-powdered",  // distinguishes from gyokuro per Principle #18
+  aliases: ["抹茶", "tencha (pre-ground)", "usucha (thin)", "koicha (thick)"],
+
+  // Sensory
+  flavors: ["umami", "vegetal", "grassy", "sweet", "oceanic"],
+  basicTastes: {
+    umami: 5,
+    sweet: 2,
+    bitter: 2,
+    astringent: 1,
+  },
+
+  // Brewing — DIFFERENT MECHANIC than steeped tea
+  tempRange: [70, 80],  // CRITICAL: never use boiling water
+  timeRange: [15, 30],  // whisk time, not infusion time
+  caffeine: 60,  // standard usucha; ceremonial 2g serving up to 140mg
+  doseGuidance: "1-2g powder per 60-80ml water; whisked, not steeped; entire leaf consumed",
+  preparationPattern: "whisk",  // NEW field type — distinguishes from "steep"
+
+  // Effects (vocabulary v1)
+  effects: [["focus", 5], ["energy", 4], ["calm", 3], ["uplifting", 2], ["soothing", 1]],
+  // NOTE: Joins gyokuro at focus=5 ceiling. Joins assam at energy=4.
+  // The "calm focus" prototype — L-theanine + caffeine synergy.
+
+  // Pairing notes
+  idealPairings: ["typically standalone", "milk (latte preparation)"],
+  canonicalPreparation: "usucha (thin) — 1-2g whisked into 60-80ml water at 70-80°C until frothy",
+  gradeMatters: true,  // ceremonial / premium / culinary; significant quality variation
+
+  // Safety flags
+  safetyFlags: {
+    caffeine: "high",  // catalog ceiling at ceremonial grade
+    leadTesting: "verify-source",  // whole-leaf consumption increases lead exposure
+    pregnancyModerate: "limit-200mg-caffeine-daily",
+    warfarin: "interaction",  // significant Vitamin K from chlorophyll
+  },
+
+  // Flags
+  confidenceMarkers: {
+    cognitiveEnhancement: "established",
+    antioxidant: "established",
+    sustainedEnergy: "attested",
+    metabolismBoost: "attested",
+  },
+},
+```
+
+### 3.4 Yerba Mate
+
+**Decision required:** Add to catalog. First caffeinated herbal.
+Tests Principle #16.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+"yerba-mate": {
+  id: "yerba-mate",
+  displayName: "Yerba Mate",
+  latin: "Ilex paraguariensis",
+  category: "herbal",  // Per Principle #16: not Camellia sinensis = herbal
+  subcategory: "leaf",
+  aliases: ["mate", "chimarrão", "cimarrón", "ka'ay", "erva-mate", "Paraguay tea"],
+
+  // Sensory
+  flavors: ["earthy", "grassy", "herbaceous", "bitter", "slightly-smoky"],
+  basicTastes: {
+    bitter: 4,
+    astringent: 3,
+    earthy: 3,
+    sweet: 0,
+    umami: 1,
+  },
+
+  // Brewing
+  tempRange: [70, 85],  // CRITICAL: never boiling (cancer association at very hot temps)
+  timeRange: [60, 300],  // single fill; multi-refill sessions extend
+  caffeine: 40,  // single cup; cumulative across refills 80-120mg
+  doseGuidance: "Gourd 2/3 full of dried mate (~30-50g leaves) per multi-refill session OR 1-2g per single tea-bag cup",
+  preparationPattern: "gourd-multi-refill OR steep-single-cup",
+
+  // Effects (vocabulary v1)
+  effects: [["energy", 4], ["focus", 3], ["digestive", 2], ["uplifting", 2], ["warming", 1]],
+  // NOTE: First caffeinated herbal in catalog. Joins assam and matcha at energy=4
+  // via different mechanism (xanthine triad: caffeine + theobromine + theophylline).
+
+  // Pairing notes
+  idealPairings: ["lemongrass", "mint", "citrus-peel", "ginger"],
+  canonicalPreparation: "Traditional gourd + bombilla + multi-refill social session",
+
+  // Safety flags
+  safetyFlags: {
+    caffeine: "moderate",
+    veryHotTemperature: "esophageal-cancer-risk",  // IARC Group 2A; drink at 70-80°C not above
+    pregnancy: "limit-caffeine",
+    smokeDried: "PAH-concern",  // for barbacuá-processed varieties
+  },
+
+  // Flags
+  confidenceMarkers: {
+    sustainedEnergy: "established",
+    antioxidant: "established",
+    cardiovascularSupport: "attested",
+    weightManagement: "attested",
+  },
+},
+```
+
+### 3.5 Valerian
+
+**Decision required:** Add to catalog. Sets sleepy=5 ceiling.
+The classic Western sleep specialist.
+
+If approved, add this entry to INGREDIENTS:
+
+```js
+valerian: {
+  id: "valerian",
+  displayName: "Valerian",
+  latin: "Valeriana officinalis",
+  category: "herbal",
+  subcategory: "root",
+  aliases: ["all-heal", "garden heliotrope", "setwall", "phu (historical Greek)"],
+
+  // Sensory
+  flavors: ["earthy", "musky", "pungent", "bitter", "woody"],
+  basicTastes: {
+    bitter: 4,
+    astringent: 3,
+    earthy: 4,
+    pungent: 3,
+    sweet: 0,
+  },
+
+  // Brewing
+  tempRange: [85, 95],
+  timeRange: [600, 900],  // 10-15 min for therapeutic effect
+  caffeine: 0,
+  doseGuidance: "1-2 tsp dried root per 250ml; 2-3g for therapeutic strength",
+
+  // Effects (vocabulary v1)
+  effects: [["sleepy", 5], ["calm", 4], ["soothing", 3], ["grounding", 2]],
+  // NOTE: Sets catalog sleepy=5 ceiling. First ingredient at this level.
+  // GABA-A receptor binding (beta subunit) similar to benzodiazepines (gamma subunit).
+  // ALSO: explicit driving/operating-machinery warning required.
+
+  // Pairing notes
+  idealPairings: ["lemon-balm", "chamomile", "lavender", "passionflower"],
+  canonicalPreparation: "Often combined with lemon balm (Cerny 1999 validated combination)",
+
+  // Safety flags (CRITICAL)
+  safetyFlags: {
+    sedation: "DO-NOT-DRIVE",  // explicit functional warning required
+    alcohol: "additive-do-not-combine",
+    benzodiazepines: "additive-do-not-combine",
+    pregnancy: "avoid-insufficient-data",
+    paradoxicalStimulation: "5-10-percent-of-users",
+    longTermUse: "limit-4-6-weeks-without-medical-evaluation",
+  },
+
+  // Flags
+  confidenceMarkers: {
+    insomnia: "established",
+    anxiety: "established",
+    GABA_A_modulation: "established",
+    smell: "verified",  // funky-cheesy is a feature not a bug
+  },
+},
+```
+
+**Schema caveat:** All five Section 3 entries (turmeric, ashwagandha,
+matcha, yerba-mate, valerian) are best-guess schemas. Will need
+to reconcile with actual `src/data/ingredients.js` schema before
+applying. The research files themselves are schema-agnostic and
+capture everything that matters.
+
+**New schema patterns introduced:**
+- `preparationPattern`: distinguishes "steep" / "whisk" /
+  "gourd-multi-refill" / "milk-preparation" — needed for
+  matcha, yerba-mate, ashwagandha, turmeric
+- `gradeMatters`: flag for ingredients where grade variation
+  is fundamental to UX (currently just matcha)
+- Expanded `safetyFlags`: more nuanced than original schema
+  likely supports; needs review
 
 ---
 
@@ -461,6 +656,9 @@ matters.
 | vanilla | spice | swap | `soothing 3, calm 2, uplifting 2, warming 1, sleepy 1` |
 | **turmeric** | **spice (NEW)** | **add** | `warming 3, soothing 2, grounding 2, digestive 2` |
 | **ashwagandha** | **herbal (NEW)** | **add** | `grounding 4, calm 3, sleepy 3, soothing 3, warming 2` |
+| **matcha** | **tea (NEW)** | **add** | `focus 5, energy 4, calm 3, uplifting 2, soothing 1` |
+| **yerba-mate** | **herbal (NEW, caffeinated)** | **add** | `energy 4, focus 3, digestive 2, uplifting 2, warming 1` |
+| **valerian** | **herbal (NEW)** | **add** | `sleepy 5, calm 4, soothing 3, grounding 2` |
 
 **Status legend:**
 - `swap`: replace `effects` array directly (already vocab v1)
