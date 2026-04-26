@@ -88,18 +88,11 @@ export const AnimiArrivalCard = ({ animi, onDismiss }) => {
 
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 18,
-          color: theme.inkSoft, lineHeight: 1.45, marginBottom: 14,
+          color: theme.inkSoft, lineHeight: 1.45, marginBottom: 18,
         }}>
           <em style={{ color: theme.terra, fontStyle: "normal" }}>{displayName}</em>
           {" "}{verb}.
         </div>
-
-        {animi.desc && (
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-            color: theme.inkSoft, lineHeight: 1.55, marginBottom: 18,
-          }}>{animi.desc}</div>
-        )}
 
         <button
           onClick={beginExit}

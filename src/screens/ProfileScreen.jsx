@@ -172,8 +172,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     name: creationTitleName,
     displayName: creationTitleName,
     rarity: "legendary",
-    desc: (creatureDesc ? creatureDesc + " " : "") +
-      "Granted at your kettle's first lighting — drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
+    desc: creatureDesc || "",
   } : null;
   const allCards = creationCard ? [creationCard, ...sortedEarned] : sortedEarned;
   const [openAttrId, setOpenAttrId] = useState(null);
