@@ -73,31 +73,63 @@ const GEMS_BY_FLAVOR = {
   _none:   ["Diamond", "Crystal", "Pearl", "Quartz", "Marble", "Bone"],
 };
 
-// Creature pool per mood family. Hash picks within the user's chosen
-// mood's pool. Fallback to flavor-based creatures when no moods picked.
-// Pools mix real animals with mythological/spirit creatures so the
-// creation title can land on either register — every user has a chance
-// at a rarer mythical creature without it being the default.
-const CREATURES_BY_MOOD = {
-  calm:      ["Heron", "Dove", "Doe", "Owl", "Selkie", "Naiad"],
-  focus:     ["Fox", "Falcon", "Cat", "Mantis", "Sphinx", "Yale"],
-  energy:    ["Tiger", "Hawk", "Stag", "Wolf", "Garuda", "Pegasus"],
-  sleepy:    ["Bear", "Otter", "Sloth", "Mole", "Lilith", "Ouroboros"],
-  comfort:   ["Bear", "Beaver", "Hedgehog", "Marmot", "Hestia", "Brownie"],
-  digestive: ["Tortoise", "Crane", "Goat", "Ox", "Kobold", "Mandrake"],
+// Two creature tiers per category. The picker rolls into the mythical
+// pool only ~15% of the time, so common animals dominate while a rarer
+// mythical beast remains possible. Mythical entries are strictly
+// animal-esque: dragons, hybrids, beasts — never deities or humanoid
+// spirits.
+const COMMON_BY_MOOD = {
+  calm:      ["Heron", "Dove", "Doe", "Owl", "Swan", "Rabbit"],
+  focus:     ["Fox", "Falcon", "Cat", "Mantis", "Raven", "Lynx"],
+  energy:    ["Tiger", "Hawk", "Stag", "Wolf", "Cheetah", "Horse"],
+  sleepy:    ["Bear", "Otter", "Sloth", "Mole", "Badger", "Dormouse"],
+  comfort:   ["Bear", "Beaver", "Hedgehog", "Marmot", "Capybara", "Quokka"],
+  digestive: ["Tortoise", "Crane", "Goat", "Ox", "Hare", "Pelican"],
 };
 
-const CREATURES_BY_FLAVOR = {
-  floral:  ["Stag", "Doe", "Crane", "Lark", "Dryad", "Faerie"],
-  citrus:  ["Lark", "Robin", "Hummingbird", "Oriole", "Halcyon", "Phoenix"],
-  fruity:  ["Robin", "Otter", "Squirrel", "Bee", "Faun", "Sprite"],
-  sweet:   ["Bee", "Hummingbird", "Fawn", "Mouse", "Melissa", "Pixie"],
-  spiced:  ["Tiger", "Phoenix", "Salamander", "Boar", "Wyrm", "Garuda"],
-  minty:   ["Fox", "Hare", "Trout", "Otter", "Yuki-Onna", "Selkie"],
-  earthy:  ["Bear", "Mole", "Badger", "Bull", "Greenman", "Leshy"],
-  smoky:   ["Wolf", "Raven", "Lynx", "Falcon", "Tengu", "Pyralis"],
-  _none:   ["Heron", "Stag", "Wolf", "Owl", "Hare", "Fox", "Sphinx", "Phoenix", "Pegasus"],
+const MYTHICAL_BY_MOOD = {
+  calm:      ["Halcyon", "Caladrius", "Unicorn", "Amphithere"],
+  focus:     ["Sphinx", "Yale", "Bakeneko", "Cockatrice"],
+  energy:    ["Pegasus", "Griffon", "Garuda", "Sleipnir", "Hippogriff", "Buraq"],
+  sleepy:    ["Ouroboros", "Bunyip", "Yeti", "Behemoth"],
+  comfort:   ["Kirin", "Jackalope", "Bonnacon", "Sasquatch"],
+  digestive: ["Wyvern", "Bennu", "Catoblepas", "Tarasque"],
 };
+
+const COMMON_BY_FLAVOR = {
+  floral:  ["Stag", "Doe", "Crane", "Lark", "Swan", "Mockingbird"],
+  citrus:  ["Lark", "Robin", "Hummingbird", "Oriole", "Goldfinch", "Canary"],
+  fruity:  ["Robin", "Otter", "Squirrel", "Bee", "Chipmunk", "Marten"],
+  sweet:   ["Bee", "Hummingbird", "Fawn", "Mouse", "Dormouse", "Vole"],
+  spiced:  ["Tiger", "Boar", "Lynx", "Jaguar", "Camel", "Cougar"],
+  minty:   ["Fox", "Hare", "Trout", "Otter", "Mink", "Stoat"],
+  earthy:  ["Bear", "Mole", "Badger", "Bull", "Wombat", "Capybara"],
+  smoky:   ["Wolf", "Raven", "Lynx", "Falcon", "Wolverine", "Coyote"],
+  _none:   ["Heron", "Stag", "Wolf", "Owl", "Hare", "Fox"],
+};
+
+const MYTHICAL_BY_FLAVOR = {
+  floral:  ["Unicorn", "Caladrius", "Pegasus", "Kirin"],
+  citrus:  ["Phoenix", "Bennu", "Simurgh", "Halcyon"],
+  fruity:  ["Jackalope", "Bakeneko", "Caladrius", "Bicorn"],
+  sweet:   ["Halcyon", "Caladrius", "Hippocampus", "Phoenix"],
+  spiced:  ["Phoenix", "Salamander", "Wyrm", "Manticore", "Chimera", "Garuda"],
+  minty:   ["Kelpie", "Hippocampus", "Cetus", "Knucker"],
+  earthy:  ["Catoblepas", "Bonnacon", "Yale", "Behemoth", "Tarasque"],
+  smoky:   ["Cerberus", "Fenrir", "Wyvern", "Cockatrice", "Basilisk"],
+  _none:   ["Sphinx", "Phoenix", "Pegasus", "Wyrm", "Kirin", "Griffon"],
+};
+
+// Roll for the rarer mythical pool. ~15% chance keeps mythical beasts
+// the exception, not the default.
+const MYTHICAL_RATE = 15;
+function pickCreature(commonPool, mythicalPool, seed) {
+  const roll = hash(seed + "|tier") % 100;
+  if (roll < MYTHICAL_RATE && mythicalPool && mythicalPool.length > 0) {
+    return pick(mythicalPool, seed + "|mythical");
+  }
+  return pick(commonPool, seed + "|common");
+}
 
 export function generateCreationTitle(profile) {
   if (!profile) return null;
@@ -122,18 +154,22 @@ export function generateCreationTitle(profile) {
 
   // Creature — pick a mood first (if any), then a creature. Fallback
   // to flavor-derived creatures when no moods were chosen at onboarding.
+  // The picker rolls against MYTHICAL_RATE so a mythical beast appears
+  // only occasionally, regardless of which category is sourced.
   const moods = profile.draw || [];
   let creature;
   if (moods.length > 0) {
     const m = moods[hash(seedBase + "|moodPick") % moods.length];
-    const pool = CREATURES_BY_MOOD[m] || CREATURES_BY_FLAVOR._none;
-    creature = pick(pool, seedBase + "|creature");
+    const common = COMMON_BY_MOOD[m] || COMMON_BY_FLAVOR._none;
+    const mythical = MYTHICAL_BY_MOOD[m] || MYTHICAL_BY_FLAVOR._none;
+    creature = pickCreature(common, mythical, seedBase + "|creature");
   } else if (flavors.length > 0) {
     const f = flavors[hash(seedBase + "|creatureFlavorPick") % flavors.length];
-    const pool = CREATURES_BY_FLAVOR[f] || CREATURES_BY_FLAVOR._none;
-    creature = pick(pool, seedBase + "|creature");
+    const common = COMMON_BY_FLAVOR[f] || COMMON_BY_FLAVOR._none;
+    const mythical = MYTHICAL_BY_FLAVOR[f] || MYTHICAL_BY_FLAVOR._none;
+    creature = pickCreature(common, mythical, seedBase + "|creature");
   } else {
-    creature = pick(CREATURES_BY_FLAVOR._none, seedBase + "|creature");
+    creature = pickCreature(COMMON_BY_FLAVOR._none, MYTHICAL_BY_FLAVOR._none, seedBase + "|creature");
   }
 
   return `The ${element} ${gem} ${creature}`;
