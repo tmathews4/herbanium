@@ -10,7 +10,6 @@ import {
   FitText, SectionLabel,
 } from "../components/layout";
 import { FirstCupHintCard } from "../components/FirstCupHintCard";
-import { PantryHintCard } from "../components/PantryHintCard";
 import { BLENDS } from "../data/blends";
 import { getBlend, mmss } from "../helpers/misc";
 import {
@@ -37,7 +36,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, firstCupHintShown, dismissFirstCupHint, animisBanished }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, firstCupHintShown, dismissFirstCupHint, animisBanished }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -62,14 +61,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           onDismiss={dismissFirstCupHint}
           onCompose={() => { dismissFirstCupHint(); go("compose"); }}
           onApothecary={() => { dismissFirstCupHint(); go("library"); }}
-        />
-      )}
-      {/* Pantry hint — chained after the first-cup hint, shown only
-          while the pantry is empty. */}
-      {firstCupHintShown && !pantryHintShown && profile && pantryCount === 0 && (
-        <PantryHintCard
-          onDismiss={dismissPantryHint}
-          onOpenLibrary={() => { dismissPantryHint(); go("library"); }}
         />
       )}
 

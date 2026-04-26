@@ -12,10 +12,10 @@ import React from "react";
 import { theme, ff } from "../theme";
 import { Sprig } from "./icons";
 
-export const PantryHintCard = ({ onDismiss, onOpenLibrary }) => {
+export const PantryHintCard = ({ onDismiss }) => {
   return (
     <div style={{
-      marginBottom: 20,
+      marginBottom: 16,
       padding: "16px 18px",
       borderRadius: 12,
       background: theme.cream,
@@ -41,35 +41,26 @@ export const PantryHintCard = ({ onDismiss, onOpenLibrary }) => {
             fontFamily: ff.serif, fontSize: 16, color: theme.ink,
             lineHeight: 1.25, marginBottom: 4,
           }}>
-            Your pantry is empty.
+            Welcome to the apothecary.
           </div>
           <div style={{
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
             color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
           }}>
-            Mark the leaves and herbs you actually have on hand. Compose
-            and Library can then filter to what you can brew right now —
-            no shopping run needed.
+            Tap any ingredient and add it to your pantry to mark what you
+            have on hand. Compose and the apothecary can then filter to
+            what you can brew right now — no shopping run needed.
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
-              onClick={onOpenLibrary}
+              onClick={onDismiss}
               style={{
                 fontFamily: ff.serif, fontSize: 14,
-                padding: "8px 16px", borderRadius: 999,
+                padding: "8px 18px", borderRadius: 999,
                 background: theme.terra, color: theme.cream,
                 border: "none", cursor: "pointer",
               }}
-            >open the apothecary</button>
-            <button
-              onClick={onDismiss}
-              style={{
-                fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.06em",
-                color: theme.ash,
-                background: "transparent", border: "none",
-                cursor: "pointer", padding: "8px 10px",
-              }}
-            >maybe later</button>
+            >got it</button>
           </div>
         </div>
       </div>

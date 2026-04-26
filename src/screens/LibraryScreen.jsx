@@ -16,6 +16,7 @@ import {
   ff, theme,
 } from "../theme";
 import { mmss } from "../helpers/misc";
+import { PantryHintCard } from "../components/PantryHintCard";
 import {
   formatTempShort, useUnit,
 } from "../units/units";
@@ -32,7 +33,7 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds, libraryView }) => {
+export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(false);
@@ -72,6 +73,12 @@ export const LibraryScreen = ({ go, pantryIds, libraryView }) => {
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {/* First-visit pantry hint — shown once, only while the pantry
+          is still empty. Explains how to mark ingredients on hand so
+          Compose and the apothecary can filter to what you can brew. */}
+      {!pantryHintShown && pantryIds && pantryIds.size === 0 && dismissPantryHint && (
+        <PantryHintCard onDismiss={dismissPantryHint} />
+      )}
       <div style={{ marginBottom: 14 }}>
         <SectionLabel n="i">The Apothecary</SectionLabel>
         <div style={{
