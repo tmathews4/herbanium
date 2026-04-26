@@ -21,7 +21,9 @@ import {
 } from "../units/units";
 
 // Tea sub-styles, used for the conditional sub-pill row when category=teas.
-const TEA_SUBCATEGORIES = ["green", "black", "white", "oolong", "puerh"];
+// Subcategory keys must match the values stored on each ingredient
+// (see src/data/ingredients.js) — the filter compares strings exactly.
+const TEA_SUBCATEGORIES = ["green", "black", "white", "oolong", "pu-erh"];
 
 // Effects offered as filter chips. Subset of MOODS; matches an ingredient
 // when it lists the effect at strength ≥ 3.
@@ -152,7 +154,7 @@ export const LibraryScreen = ({ go, pantryIds, libraryView }) => {
                     background: teaSubcategory === key ? theme.terra : "transparent",
                     color: teaSubcategory === key ? theme.cream : theme.ash,
                     cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                  }}>{key === "puerh" ? "pu-erh" : key}</button>
+                  }}>{key}</button>
                 )}
               />
             </div>
