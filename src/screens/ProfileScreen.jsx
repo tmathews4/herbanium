@@ -196,12 +196,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 {profile?.name || "friend"}
               </div>
             )}
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
-              {isEmptyUser
-                ? "private · journal is still empty"
-                : `private · ${cupCount} cup${cupCount !== 1 ? "s" : ""} · ${blendCount} blend${blendCount !== 1 ? "s" : ""}`
-              }
-            </div>
           </div>
         </div>
 
