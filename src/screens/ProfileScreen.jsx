@@ -516,20 +516,43 @@ const RARITY_TONE = {
 //           the rest of the row when the user has fewer
 //   below — collapsible reserve grid containing every other earned
 //           animi, with a feature/unfeature button on each detail card
+//
+// Slot-pick interaction: tap an empty pip to enter "selecting" mode;
+// the reserve auto-opens and prompts a pick. The next reserve tile
+// tapped fills the next available slot. Tap the empty pip again or
+// the prompt's cancel to leave selecting mode.
 const AttributeShelf = ({
   creationCard, featured, reserve, featuredLimit,
   isFeatured, toggleFeatured,
   openId, setOpenId, openAttr,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+
+  // Selecting mode only makes sense when there's an empty slot to fill.
+  // If the user fills the last slot or removes a featured one, reset.
+  const hasEmptySlot = featured.length < featuredLimit;
+  React.useEffect(() => {
+    if (selecting && !hasEmptySlot) setSelecting(false);
+  }, [selecting, hasEmptySlot]);
 
   const renderTile = (a) => {
     const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
     const isOpen = openId === a.id;
+    const inReserve = reserve.find(x => x.id === a.id);
+    const handleClick = () => {
+      if (selecting && inReserve && toggleFeatured) {
+        // Fill the next empty slot with this animi.
+        toggleFeatured(a.id);
+        setSelecting(false);
+        return;
+      }
+      setOpenId(prev => prev === a.id ? null : a.id);
+    };
     return (
       <button
         key={a.id}
-        onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
+        onClick={handleClick}
         style={{
           fontFamily: ff.serif, fontSize: 13,
           padding: "6px 12px", borderRadius: 6,
@@ -544,17 +567,31 @@ const AttributeShelf = ({
     );
   };
 
-  const emptySlot = (i) => (
-    <div
-      key={`empty-${i}`}
-      style={{
-        padding: "6px 14px", borderRadius: 6,
-        border: `2px dashed ${theme.ruleSoft}`,
-        color: theme.ash, fontFamily: ff.serif, fontSize: 12,
-        fontStyle: "italic", opacity: 0.65,
-      }}
-    >empty</div>
-  );
+  const emptySlot = (i) => {
+    const onClick = () => {
+      if (!toggleFeatured) return;
+      setSelecting(prev => !prev);
+    };
+    const active = selecting;
+    return (
+      <button
+        key={`empty-${i}`}
+        onClick={onClick}
+        style={{
+          padding: "6px 14px", borderRadius: 6,
+          border: active
+            ? `2px dashed ${theme.terra}`
+            : `2px dashed ${theme.ruleSoft}`,
+          color: active ? theme.terra : theme.ash,
+          background: "transparent",
+          fontFamily: ff.serif, fontSize: 12,
+          fontStyle: "italic",
+          cursor: "pointer",
+          opacity: active ? 1 : 0.7,
+        }}
+      >{active ? "pick…" : "empty"}</button>
+    );
+  };
 
   const isCreationOpen = openAttr && openAttr.id === "_creation";
   const canToggleOpen = openAttr && !isCreationOpen && toggleFeatured;
@@ -562,9 +599,10 @@ const AttributeShelf = ({
   const featuredFull = featured.length >= featuredLimit;
 
   // Auto-expand reserve when the user opens an animi that lives there
-  // so the highlighted tile is visible alongside its detail card.
+  // so the highlighted tile is visible alongside its detail card,
+  // and whenever they're in slot-pick mode so the reserve is on screen.
   const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
-  const reserveOpen = expanded || !!openInReserve;
+  const reserveOpen = expanded || !!openInReserve || selecting;
 
   return (
     <>
@@ -636,6 +674,30 @@ const AttributeShelf = ({
         {Array.from({ length: featuredLimit }).map((_, i) =>
           featured[i] ? renderTile(featured[i]) : emptySlot(i))}
       </div>
+
+      {/* Slot-pick prompt — appears under the row while selecting */}
+      {selecting && (
+        <div style={{
+          marginTop: 10, padding: "6px 10px", borderRadius: 6,
+          background: "rgba(176,84,47,0.08)",
+          border: `1px solid rgba(176,84,47,0.22)`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
+        }}>
+          Pick an animi from the reserve to place it on the altar.
+          {" "}
+          <button
+            onClick={() => setSelecting(false)}
+            style={{
+              background: "transparent", border: "none", padding: 0,
+              fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
+              color: theme.terra, textDecoration: "underline",
+              textDecorationStyle: "dotted", textUnderlineOffset: 3,
+              cursor: "pointer",
+            }}
+          >cancel</button>
+        </div>
+      )}
 
       {reserve.length > 0 && (
         <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
