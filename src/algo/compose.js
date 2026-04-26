@@ -462,15 +462,26 @@ function generateBlendName(moods, flavors, primaryAxis = "feel") {
 // directly — they're emergent from blends. When the direct effect
 // lookup finds nothing, we fall back to MOOD_BLENDS[mood] and pull
 // the heaviest-grams ingredient from the curated single-mood recipe.
-// True when the ingredient's brew window has non-empty overlap with the
-// supplied temp/time ranges. Used by the synthetic picker to ensure every
-// chosen ingredient shares a sweet spot with the running blend window.
+// True when the ingredient's brew window has *meaningful* overlap with the
+// supplied temp/time ranges — not just a boundary touch. Used by the
+// synthetic picker so every ingredient shares enough of a sweet spot that
+// the resulting brew tolerates normal slider exploration.
+const MIN_TEMP_OVERLAP_C = 3;
+const MIN_TIME_OVERLAP_S = 30;
 function windowsOverlap(ing, tempRange, timeRange) {
   if (!ing) return false;
   const [t1, t2] = ing.tempC || [0, 100];
   const [s1, s2] = ing.timeS || [0, 9999];
-  if (tempRange && (t1 > tempRange[1] || t2 < tempRange[0])) return false;
-  if (timeRange && (s1 > timeRange[1] || s2 < timeRange[0])) return false;
+  if (tempRange) {
+    const lo = Math.max(t1, tempRange[0]);
+    const hi = Math.min(t2, tempRange[1]);
+    if (hi - lo < MIN_TEMP_OVERLAP_C) return false;
+  }
+  if (timeRange) {
+    const lo = Math.max(s1, timeRange[0]);
+    const hi = Math.min(s2, timeRange[1]);
+    if (hi - lo < MIN_TIME_OVERLAP_S) return false;
+  }
   return true;
 }
 
