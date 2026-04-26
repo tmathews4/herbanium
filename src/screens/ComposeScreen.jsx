@@ -28,6 +28,31 @@ import {
 import { LibraryList, BlendListRow } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 
+// Stable signature for an ingredient list — same ids with same grams,
+// order-independent. Used to detect when a candidate brew already
+// exists in the user's catalogue under a different name.
+function ingredientsKey(ings) {
+  return (ings || [])
+    .map(i => `${i.id}:${Number(i.g ?? 0).toFixed(2)}`)
+    .sort()
+    .join("|");
+}
+
+// Find a catalogue entry that matches the candidate by tempC and
+// ingredient set (ids + grams). Returns the matched blend or null.
+// Skips entries the user has hidden.
+function findDuplicateBlend(candidate, allBlends, hidden) {
+  if (!candidate || !candidate.ingredients?.length) return null;
+  const tempC = candidate.tempC;
+  const key = ingredientsKey(candidate.ingredients);
+  const skipped = hidden || new Set();
+  return allBlends.find(b =>
+    !skipped.has(b.id)
+    && b.tempC === tempC
+    && ingredientsKey(b.ingredients) === key
+  ) || null;
+}
+
 /* ──────────────────────────────────────────────────────────────
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
@@ -796,6 +821,18 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                     || (addedIngIds && addedIngIds.length > 0)
                     || (String(blend.id).startsWith("local-") && savedBlendIds && !savedBlendIds.has(blend.id));
                   if (isCustomUnsaved) {
+                    // If the catalogue already holds a blend with the
+                    // same temp + ingredients, brew that one instead of
+                    // re-prompting to save a duplicate.
+                    const allCatalogue = [
+                      ...BLENDS,
+                      ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
+                    ];
+                    const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+                    if (dup) {
+                      startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", moods);
+                      return;
+                    }
                     setPendingBrew({ candidate, moods: [...moods] });
                     setBrewAsk(true);
                     return;
@@ -845,7 +882,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
       )}
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
       {mode === "apothecary" && (() => {
@@ -1107,7 +1144,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds }) => {
   const [rcSaveName, setRcSaveName] = useState("");
   const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
   const [rcSaveStatus, setRcSaveStatus] = useState(null);
@@ -1486,6 +1523,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         <button onClick={() => {
           if (reverseIngs.length === 0) return;
           const candidate = { name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS };
+          // Skip the prompt when the catalogue already holds a blend
+          // with the same temp + ingredients — brew the saved record so
+          // repeats count toward animis like the Self-Repeater.
+          const allCatalogue = [
+            ...BLENDS,
+            ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
+          ];
+          const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+          if (dup) {
+            startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
+            return;
+          }
           // Reverse-built blends never have an id — always custom.
           setRcPendingBrew({ candidate, moods: ["calm"] });
           setRcBrewAsk(true);
