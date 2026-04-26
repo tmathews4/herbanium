@@ -1,10 +1,11 @@
 /* ──────────────────────────────────────────────────────────────
-   components/OmenCard.jsx — first-visit animi omen, top of Home.
+   components/OmenCard.jsx — first-visit animi omen popup.
 
-   Replaces the old WelcomeCard. Sits at the top of Home on first
-   visit after onboarding, fades in slowly, holds, fades out slowly,
-   then unmounts and signals via onDismiss so the omenShown flag
-   gets persisted.
+   Renders as a centered modal over Home on first visit after
+   onboarding. Fades in slowly so the line lands as a moment, then
+   waits — the user dismisses it themselves via the close button or
+   by tapping the backdrop. No auto-dismiss; the spirit's name is
+   the point, and we want to be sure they read it.
    ────────────────────────────────────────────────────────────── */
 
 import React, { useEffect, useState } from "react";
@@ -12,8 +13,7 @@ import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
 
 const FADE_IN_MS  = 1500;
-const VISIBLE_MS  = 3500;
-const FADE_OUT_MS = 2800;
+const FADE_OUT_MS = 800;
 
 function stripLeadingThe(title) {
   return (title || "").replace(/^The\s+/i, "");
@@ -25,52 +25,90 @@ function articleFor(word) {
 }
 
 export const OmenCard = ({ title, onDismiss }) => {
-  const [phase, setPhase] = useState("entering");
+  const [phase, setPhase] = useState("entering"); // entering | visible | leaving | gone
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("visible"), FADE_IN_MS);
-    const t2 = setTimeout(() => setPhase("leaving"), FADE_IN_MS + VISIBLE_MS);
-    const t3 = setTimeout(() => {
+    const t = setTimeout(() => setPhase("visible"), FADE_IN_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  const beginExit = () => {
+    if (phase === "leaving" || phase === "gone") return;
+    setPhase("leaving");
+    setTimeout(() => {
       setPhase("gone");
       onDismiss();
-    }, FADE_IN_MS + VISIBLE_MS + FADE_OUT_MS);
-    return () => {
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
-    };
-  }, [onDismiss]);
+    }, FADE_OUT_MS);
+  };
 
   if (phase === "gone") return null;
 
-  const opacity = phase === "entering" ? 0 : phase === "visible" ? 1 : 0;
+  const opacity = phase === "entering" || phase === "leaving" ? 0 : 1;
   const transitionMs = phase === "entering" ? FADE_IN_MS : FADE_OUT_MS;
   const stripped = stripLeadingThe(title) || "spirit";
   const article = articleFor(stripped);
 
   return (
     <div
+      onClick={beginExit}
       style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(232, 220, 192, 0.86)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 24px",
         opacity,
         transition: `opacity ${transitionMs}ms ease-in-out`,
-        marginBottom: 20,
-        padding: "22px 24px",
-        borderRadius: 12,
-        background: theme.cream,
-        border: `1px solid ${theme.ruleSoft}`,
-        textAlign: "center",
+        cursor: "pointer",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-        <Ornament w={100} c={theme.terra} />
-      </div>
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 16,
-          color: theme.inkSoft, lineHeight: 1.55,
+          position: "relative",
+          maxWidth: 460, width: "100%",
+          padding: "30px 30px 26px",
+          background: theme.cream,
+          border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: 14,
+          textAlign: "center",
+          boxShadow: "0 18px 44px rgba(0,0,0,0.14)",
+          cursor: "default",
         }}
       >
-        What was that? {article}{" "}
-        <em style={{ color: theme.terra, fontStyle: "normal" }}>{stripped}</em>
-        {" "}wisps by — an omen of good brews to come…
+        <button
+          onClick={beginExit}
+          aria-label="close"
+          style={{
+            position: "absolute", top: 8, right: 12,
+            background: "transparent", border: "none", cursor: "pointer",
+            color: theme.ash, fontSize: 22, lineHeight: 1, padding: 4,
+          }}
+        >×</button>
+
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+          <Ornament w={120} c={theme.terra} />
+        </div>
+
+        <div
+          style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 17,
+            color: theme.inkSoft, lineHeight: 1.55, marginBottom: 18,
+          }}
+        >
+          What was that? {article}{" "}
+          <em style={{ color: theme.terra, fontStyle: "normal" }}>{stripped}</em>
+          {" "}wisps by — an omen of good brews to come…
+        </div>
+
+        <button
+          onClick={beginExit}
+          style={{
+            fontFamily: ff.serif, fontSize: 14,
+            padding: "8px 22px", borderRadius: 999,
+            background: theme.ink, color: theme.cream,
+            border: "none", cursor: "pointer",
+          }}
+        >onward</button>
       </div>
     </div>
   );
