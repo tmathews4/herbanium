@@ -156,7 +156,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
 
         <div style={{ display: "flex" }}>
-          <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+          <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
             <div style={{
               fontFamily: ff.serif, fontSize: 13.5, fontStyle: "italic",
               color: theme.terra, letterSpacing: "0.02em", lineHeight: 1.2,
@@ -164,7 +164,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
               {profile?.title || generateCreationTitle(profile) || (isEmptyUser ? "a new keeper" : "Keeper of the shelf")}
             </div>
             {editingName ? (
-              <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 2 }}>
+              <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 2, justifyContent: "center" }}>
                 <input
                   type="text"
                   value={nameDraft}
