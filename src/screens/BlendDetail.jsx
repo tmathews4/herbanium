@@ -11,7 +11,7 @@ import {
   SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
-import { BLEND_DIRECTIONS, BLEND_TABLE_ACCENTS } from "../data/blends";
+import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";
 import {
   EFFECT_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
@@ -584,6 +584,31 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               </button>
             )}
           </div>
+        )}
+
+        {/* Sources — listed at the foot of the page when this blend's
+            preparation, brew window, or pairing is drawn from a
+            specific named source. Quiet, italic, footer voice. */}
+        {BLEND_SOURCES[b.id] && BLEND_SOURCES[b.id].length > 0 && (
+          <>
+            <div style={{ margin: "26px 0 10px" }}>
+              <SectionLabel n="v">Sources</SectionLabel>
+            </div>
+            <div style={{
+              padding: "12px 14px", borderRadius: 10,
+              background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+              textAlign: "left",
+            }}>
+              {BLEND_SOURCES[b.id].map((src, i) => (
+                <div key={i} style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                  color: theme.inkSoft, lineHeight: 1.5,
+                  padding: "6px 0",
+                  borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                }}>{src}</div>
+              ))}
+            </div>
+          </>
         )}
 
       </div>

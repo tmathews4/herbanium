@@ -121,7 +121,7 @@ const BLENDS = [
   {
     id: "sencha-properly",
     name: "Sencha, properly",
-    subtitle: "Soen Nagatani's 1738 invention — 75°C, one minute",
+    subtitle: "steamed Japanese green — 75°C, one minute",
     ingredients: [
       { id: "sencha", g: 3.0 },
     ],
@@ -135,7 +135,7 @@ const BLENDS = [
   {
     id: "usucha",
     name: "Usucha",
-    subtitle: "thin matcha — Eisai's monastery cup, whisked",
+    subtitle: "thin matcha — the monastery cup, whisked",
     ingredients: [
       { id: "matcha", g: 2.0 },
     ],
@@ -223,7 +223,7 @@ const BLENDS = [
   {
     id: "all-heal",
     name: "All-Heal",
-    subtitle: "valerian and lemon balm — Cerny's 1999 pairing",
+    subtitle: "valerian and lemon balm — a classical sleep pairing",
     ingredients: [
       { id: "valerian", g: 1.0 },
       { id: "lemonbalm", g: 1.5 },
@@ -255,7 +255,7 @@ const BLENDS = [
   {
     id: "spring-tonic",
     name: "Spring Tonic",
-    subtitle: "Susun Weed's nourishing infusion — long, covered, mineral",
+    subtitle: "a nourishing infusion — long, covered, mineral",
     ingredients: [
       { id: "nettle", g: 1.5 },
       { id: "dandelion-leaf", g: 1.0 },
@@ -946,6 +946,26 @@ const BLEND_DIRECTIONS = {
   ],
 };
 
+// Per-blend source attributions — listed at the bottom of a blend's
+// page when the preparation, brew window, or pairing is drawn from a
+// specific named source. Removed from subtitles and preparation copy
+// so the user-facing language stays evocative; the credit lives in
+// its proper place at the foot of the page.
+const BLEND_SOURCES = {
+  "sencha-properly": [
+    "Soen Nagatani's 1738 sencha-steaming method — the Japanese green-tea innovation that displaced earlier pan-fired styles.",
+  ],
+  "usucha": [
+    "Eisai (12th c.), the Buddhist monk who introduced whisked powdered green tea (matcha) from China to Japan.",
+  ],
+  "all-heal": [
+    "Cerny A, Schmid K. 1999. Tolerability and efficacy of a valerian/lemon balm fixed-combination preparation in healthy volunteers. Fitoterapia 70:221–228.",
+  ],
+  "spring-tonic": [
+    "Susun Weed's Wise Woman tradition — the long, covered, four-hour infusion approach to mineral-rich herbal nourishment.",
+  ],
+};
+
 // At-the-table accents — kitchen additions that aren't part of the
 // brewed-leaf recipe but show up in the preparation: milk, sugar,
 // honey, lemon. Surface as a quiet italic hint on BlendDetail so the
@@ -967,6 +987,7 @@ export {
   FLAVORS,
   BLENDS,
   BLEND_DIRECTIONS,
+  BLEND_SOURCES,
   BLEND_TABLE_ACCENTS,
   MOOD_BLENDS,
   PAIR_BLENDS,
