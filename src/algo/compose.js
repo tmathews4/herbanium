@@ -462,9 +462,22 @@ function generateBlendName(moods, flavors, primaryAxis = "feel") {
 // directly — they're emergent from blends. When the direct effect
 // lookup finds nothing, we fall back to MOOD_BLENDS[mood] and pull
 // the heaviest-grams ingredient from the curated single-mood recipe.
-function bestIngredientForMood(mood, exclude, minStrength = 3) {
+// True when the ingredient's brew window has non-empty overlap with the
+// supplied temp/time ranges. Used by the synthetic picker to ensure every
+// chosen ingredient shares a sweet spot with the running blend window.
+function windowsOverlap(ing, tempRange, timeRange) {
+  if (!ing) return false;
+  const [t1, t2] = ing.tempC || [0, 100];
+  const [s1, s2] = ing.timeS || [0, 9999];
+  if (tempRange && (t1 > tempRange[1] || t2 < tempRange[0])) return false;
+  if (timeRange && (s1 > timeRange[1] || s2 < timeRange[0])) return false;
+  return true;
+}
+
+function bestIngredientForMood(mood, exclude, minStrength = 3, compatTemp = null, compatTime = null) {
   const cands = Object.entries(INGREDIENTS)
     .filter(([id]) => !exclude.has(id))
+    .filter(([, ing]) => windowsOverlap(ing, compatTemp, compatTime))
     .map(([id, ing]) => {
       const eff = (ing.effects || []).find(([k]) => k === mood);
       return { id, ing, strength: eff ? eff[1] : 0 };
@@ -480,11 +493,13 @@ function bestIngredientForMood(mood, exclude, minStrength = 3) {
     return cands[0];
   }
   // Fallback: emergent-only moods (comfort, digestive). Pick the heaviest
-  // ingredient from the mood's curated single-mood recipe.
+  // ingredient from the mood's curated single-mood recipe — but still respect
+  // the running window so the synth stays sweet-spot.
   const blend = MOOD_BLENDS[mood];
   if (!blend) return null;
   const sortedIngs = [...blend.ings]
     .filter(i => !exclude.has(i.id))
+    .filter(i => windowsOverlap(INGREDIENTS[i.id], compatTemp, compatTime))
     .sort((a, b) => (b.g || 0) - (a.g || 0));
   if (sortedIngs.length === 0) return null;
   const id = sortedIngs[0].id;
@@ -492,10 +507,11 @@ function bestIngredientForMood(mood, exclude, minStrength = 3) {
 }
 
 // Pick a flavor-expressing ingredient, with the same tea preference.
-function bestIngredientForFlavor(flavor, exclude) {
+function bestIngredientForFlavor(flavor, exclude, compatTemp = null, compatTime = null) {
   const cands = Object.entries(INGREDIENTS)
     .filter(([id]) => !exclude.has(id))
     .filter(([, ing]) => (ing.flavors || []).includes(flavor))
+    .filter(([, ing]) => windowsOverlap(ing, compatTemp, compatTime))
     .map(([id, ing]) => ({ id, ing }));
   if (cands.length === 0) return null;
   cands.sort((a, b) => {
@@ -606,23 +622,40 @@ export function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel"
   const picks = [];
   const usedIds = new Set();
 
+  // Track the running brew window. Each pick narrows it via intersection,
+  // and every subsequent candidate must overlap — guaranteeing the synth
+  // ends up at a single sweet-spot all ingredients share. If a mood/flavor
+  // has no compatible candidate, it's skipped rather than violating the
+  // window. Synths are always sweet-spot blends by construction.
+  let runTemp = null, runTime = null;
+  const tighten = (ing) => {
+    const [t1, t2] = ing.tempC;
+    const [s1, s2] = ing.timeS;
+    if (!runTemp) { runTemp = [t1, t2]; runTime = [s1, s2]; return; }
+    runTemp = [Math.max(runTemp[0], t1), Math.min(runTemp[1], t2)];
+    runTime = [Math.max(runTime[0], s1), Math.min(runTime[1], s2)];
+  };
+
   // Lead picks: one per mood, tea-prioritized, fallback to any herbal
-  // if no tea reaches the threshold.
+  // if no tea reaches the threshold. Each lead must share a brew window
+  // with the prior leads.
   for (const m of moods) {
-    const cand = bestIngredientForMood(m, usedIds, 3) ||
-                 bestIngredientForMood(m, usedIds, 2) ||
-                 bestIngredientForMood(m, usedIds, 1);
+    const cand = bestIngredientForMood(m, usedIds, 3, runTemp, runTime) ||
+                 bestIngredientForMood(m, usedIds, 2, runTemp, runTime) ||
+                 bestIngredientForMood(m, usedIds, 1, runTemp, runTime);
     if (!cand) continue;
     picks.push({ id: cand.id, g: 1.0 });
     usedIds.add(cand.id);
+    tighten(cand.ing);
   }
 
-  // Accent picks: one per flavor.
+  // Accent picks: one per flavor, also constrained to the running window.
   for (const f of flavors) {
-    const cand = bestIngredientForFlavor(f, usedIds);
+    const cand = bestIngredientForFlavor(f, usedIds, runTemp, runTime);
     if (!cand) continue;
     picks.push({ id: cand.id, g: 0.5, role: "accent" });
     usedIds.add(cand.id);
+    tighten(cand.ing);
   }
 
   if (picks.length < 2) return null;
