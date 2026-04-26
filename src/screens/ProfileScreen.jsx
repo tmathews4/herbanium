@@ -184,7 +184,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Cups"     value={cupCount} />
           <Stat label="Blends"   value={blendCount} />
           <Stat label="In pantry" value={shelfCount} />
-          <Stat label="Titles"   value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+          <Stat label="Animis"   value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
         </div>
       </div>
 
@@ -203,7 +203,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
         {cupCount > 0 && cupCount < 3 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            Drink more to attract different spirits.
+            Different vibes attract different animis.
           </div>
         )}
         {creationCard && (
@@ -211,7 +211,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
         {!creationCard && cupCount === 0 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
-            Drink more to attract different spirits.
+            Different vibes attract different animis.
           </div>
         )}
       </div>

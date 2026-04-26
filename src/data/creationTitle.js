@@ -75,25 +75,28 @@ const GEMS_BY_FLAVOR = {
 
 // Creature pool per mood family. Hash picks within the user's chosen
 // mood's pool. Fallback to flavor-based creatures when no moods picked.
+// Pools mix real animals with mythological/spirit creatures so the
+// creation title can land on either register — every user has a chance
+// at a rarer mythical creature without it being the default.
 const CREATURES_BY_MOOD = {
-  calm:      ["Heron", "Dove", "Doe", "Owl"],
-  focus:     ["Fox", "Falcon", "Cat", "Mantis"],
-  energy:    ["Tiger", "Hawk", "Stag", "Wolf"],
-  sleepy:    ["Bear", "Otter", "Sloth", "Mole"],
-  comfort:   ["Bear", "Beaver", "Hedgehog", "Marmot"],
-  digestive: ["Tortoise", "Crane", "Goat", "Ox"],
+  calm:      ["Heron", "Dove", "Doe", "Owl", "Selkie", "Naiad"],
+  focus:     ["Fox", "Falcon", "Cat", "Mantis", "Sphinx", "Yale"],
+  energy:    ["Tiger", "Hawk", "Stag", "Wolf", "Garuda", "Pegasus"],
+  sleepy:    ["Bear", "Otter", "Sloth", "Mole", "Lilith", "Ouroboros"],
+  comfort:   ["Bear", "Beaver", "Hedgehog", "Marmot", "Hestia", "Brownie"],
+  digestive: ["Tortoise", "Crane", "Goat", "Ox", "Kobold", "Mandrake"],
 };
 
 const CREATURES_BY_FLAVOR = {
-  floral:  ["Stag", "Doe", "Crane", "Lark"],
-  citrus:  ["Lark", "Robin", "Hummingbird", "Oriole"],
-  fruity:  ["Robin", "Otter", "Squirrel", "Bee"],
-  sweet:   ["Bee", "Hummingbird", "Fawn", "Mouse"],
-  spiced:  ["Tiger", "Phoenix", "Salamander", "Boar"],
-  minty:   ["Fox", "Hare", "Trout", "Otter"],
-  earthy:  ["Bear", "Mole", "Badger", "Bull"],
-  smoky:   ["Wolf", "Raven", "Lynx", "Falcon"],
-  _none:   ["Heron", "Stag", "Wolf", "Owl", "Hare", "Fox"],
+  floral:  ["Stag", "Doe", "Crane", "Lark", "Dryad", "Faerie"],
+  citrus:  ["Lark", "Robin", "Hummingbird", "Oriole", "Halcyon", "Phoenix"],
+  fruity:  ["Robin", "Otter", "Squirrel", "Bee", "Faun", "Sprite"],
+  sweet:   ["Bee", "Hummingbird", "Fawn", "Mouse", "Melissa", "Pixie"],
+  spiced:  ["Tiger", "Phoenix", "Salamander", "Boar", "Wyrm", "Garuda"],
+  minty:   ["Fox", "Hare", "Trout", "Otter", "Yuki-Onna", "Selkie"],
+  earthy:  ["Bear", "Mole", "Badger", "Bull", "Greenman", "Leshy"],
+  smoky:   ["Wolf", "Raven", "Lynx", "Falcon", "Tengu", "Pyralis"],
+  _none:   ["Heron", "Stag", "Wolf", "Owl", "Hare", "Fox", "Sphinx", "Phoenix", "Pegasus"],
 };
 
 export function generateCreationTitle(profile) {

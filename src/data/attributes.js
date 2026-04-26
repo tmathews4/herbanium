@@ -253,61 +253,61 @@ const noCategory = (sessions, category) =>
 // glyph/tint/frame/accent combo so it reads distinct in the grid.
 export const ATTRIBUTES = [
   // ─── Lifetime milestones ──────────────────────────────────
-  { id: "first-brew", name: "First Brewing", rarity: "common", window: "lifetime",
+  { id: "first-brew", name: "The Newt", rarity: "common", window: "lifetime",
     glyph: "kettle", tint: "ochre", frame: "circle", accent: "none",
     desc: "The first cup recorded. The journal began.",
     earned: ctx => ctx.lifetime.n >= 1 },
-  { id: "ten-cups", name: "Ten Cups", rarity: "common", window: "lifetime",
+  { id: "ten-cups", name: "The Sparrow", rarity: "common", window: "lifetime",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
     desc: "The habit shows up. The kettle is on its way to becoming a friend.",
     earned: ctx => ctx.lifetime.n >= 10 },
-  { id: "half-centurion", name: "Half-Centurion", rarity: "uncommon", window: "lifetime",
+  { id: "half-centurion", name: "The Hippogriff", rarity: "uncommon", window: "lifetime",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "star",
     desc: "You know your kettle. Each cup arrives with less surprise.",
     earned: ctx => ctx.lifetime.n >= 50 },
-  { id: "centurion", name: "The Centurion", rarity: "rare", window: "lifetime",
+  { id: "centurion", name: "The Roc", rarity: "rare", window: "lifetime",
     glyph: "comfort", tint: "terra", frame: "hex", accent: "star",
     desc: "A small tea life accumulated. The cup is no longer an event.",
     earned: ctx => ctx.lifetime.n >= 100 },
-  { id: "year-walker", name: "Year-Walker", rarity: "rare", window: "lifetime",
+  { id: "year-walker", name: "The Cernunnos", rarity: "rare", window: "lifetime",
     glyph: "compass", tint: "plum", frame: "circle", accent: "rays",
     desc: "The seasons have turned beneath your kettle. You've watched the leaves change at least once.",
     earned: ctx => ctx.daysSinceFirst >= 365 && ctx.lifetime.n >= 50 },
-  { id: "decade-of-cups", name: "Decade of Cups", rarity: "legendary", window: "lifetime",
+  { id: "decade-of-cups", name: "The Yggdrasil", rarity: "legendary", window: "lifetime",
     glyph: "scroll", tint: "plum", frame: "diamond", accent: "star",
     desc: "A practice, not a habit. The cup is your slow archive.",
     earned: ctx => ctx.lifetime.n >= 500 },
-  { id: "compose-initiate", name: "Compose Initiate", rarity: "common", window: "lifetime",
+  { id: "compose-initiate", name: "The Sprite", rarity: "common", window: "lifetime",
     glyph: "focus", tint: "sage", frame: "square", accent: "none",
     desc: "The hand picked the leaves. Your own first arrangement.",
     earned: ctx => ctx.composedCount >= 1 },
-  { id: "compose-master", name: "Compose Master", rarity: "rare", window: "lifetime",
+  { id: "compose-master", name: "The Daemon", rarity: "rare", window: "lifetime",
     glyph: "focus", tint: "plum", frame: "diamond", accent: "star",
     desc: "A vocabulary of your own. The kettle now answers in your voice.",
     earned: ctx => ctx.composedCount >= 10 },
-  { id: "apothecary-walker", name: "Apothecary Walker", rarity: "uncommon", window: "lifetime",
+  { id: "apothecary-walker", name: "The Leshy", rarity: "uncommon", window: "lifetime",
     glyph: "leaf", tint: "sageDeep", frame: "hex", accent: "none",
     desc: "A quiet curiosity has carried you through many leaves.",
     earned: ctx => ctx.lifetime.distinctIngredients >= Math.floor(ctx.allIngs.length * 0.25) },
-  { id: "apothecary-master", name: "Apothecary Master", rarity: "legendary", window: "lifetime",
+  { id: "apothecary-master", name: "The Hermes", rarity: "legendary", window: "lifetime",
     glyph: "leaf", tint: "plum", frame: "diamond", accent: "rays",
     desc: "Few stranger cups remain. You've walked deep into the catalog.",
     earned: ctx => ctx.lifetime.distinctIngredients >= Math.floor(ctx.allIngs.length * 0.5) },
-  { id: "lavandiere-life", name: "The Lavandière", rarity: "rare", window: "lifetime",
+  { id: "lavandiere-life", name: "The Naiad", rarity: "rare", window: "lifetime",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "star",
     desc: "Every flower the catalog holds has crossed your cup.",
     earned: ctx => ctx.flowerIngsAll.length > 0
       && ctx.flowerIngsAll.every(id => ctx.lifetime.byIngredient.has(id) || ctx.pantryIds.has(id)) },
-  { id: "all-leaves", name: "All Leaves", rarity: "legendary", window: "lifetime",
+  { id: "all-leaves", name: "The Kirin", rarity: "legendary", window: "lifetime",
     glyph: "leaf", tint: "sageDeep", frame: "hex", accent: "rays",
     desc: "Every true-tea variant has passed your kettle.",
     earned: ctx => ctx.teaIngsAll.length > 0
       && ctx.teaIngsAll.every(id => ctx.lifetime.byIngredient.has(id)) },
-  { id: "polyglot-life", name: "The Polyglot", rarity: "uncommon", window: "lifetime",
+  { id: "polyglot-life", name: "The Anansi", rarity: "uncommon", window: "lifetime",
     glyph: "compass", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Your cup has crossed borders. Many traditions live in your journal.",
     earned: ctx => ctx.lifetime.distinctTraditions >= 3 },
-  { id: "tradition-completionist", name: "Tradition Completionist", rarity: "mythic", window: "lifetime",
+  { id: "tradition-completionist", name: "The Banyan Spirit", rarity: "mythic", window: "lifetime",
     glyph: "scroll", tint: "plum", frame: "diamond", accent: "rays",
     desc: "A pilgrim of the cup. Every traditional preparation has met your kettle.",
     earned: ctx => {
@@ -318,7 +318,7 @@ export const ATTRIBUTES = [
       });
       return traditions.size >= 14;
     } },
-  { id: "self-knower", name: "Self-Knower", rarity: "rare", window: "lifetime",
+  { id: "self-knower", name: "The Sphinx", rarity: "rare", window: "lifetime",
     glyph: "focus", tint: "sageDeep", frame: "circle", accent: "rays",
     desc: "You name what you need; the kettle delivers. The match is not luck.",
     earned: ctx => {
@@ -330,31 +330,31 @@ export const ATTRIBUTES = [
     } },
 
   // ─── Recent: time-of-day patterns ─────────────────────────
-  { id: "dawn-steeper", name: "The Dawn Steeper", rarity: "common", window: "recent",
+  { id: "dawn-steeper", name: "The Eos", rarity: "common", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "You wake with the kettle. The world hasn't opened its eyes yet.",
     earned: ctx => ctx.recent.sessions.filter(s => {
       const ts = tsFromSession(s); return ts && ts.getHours() < 7;
     }).length >= 4 },
-  { id: "midnight-pourer", name: "The Midnight Pourer", rarity: "uncommon", window: "recent",
+  { id: "midnight-pourer", name: "The Lampad", rarity: "uncommon", window: "recent",
     glyph: "sleepy", tint: "plum", frame: "circle", accent: "crescent",
     desc: "The lamps stay low for you. The kettle keeps the small hours.",
     earned: ctx => ctx.recent.sessions.filter(s => {
       const ts = tsFromSession(s); return ts && ts.getHours() >= 22;
     }).length >= 3 },
-  { id: "afternoon-constant", name: "Afternoon Constant", rarity: "common", window: "recent",
+  { id: "afternoon-constant", name: "The Helios", rarity: "common", window: "recent",
     glyph: "comfort", tint: "ochre", frame: "square", accent: "none",
     desc: "The afternoon has its own kettle, and you keep its appointments.",
     earned: ctx => ctx.recent.sessions.filter(s => {
       const ts = tsFromSession(s); return ts && ts.getHours() >= 13 && ts.getHours() < 16;
     }).length >= 5 },
-  { id: "evening-familiar", name: "Evening Familiar", rarity: "common", window: "recent",
+  { id: "evening-familiar", name: "The Domovoi", rarity: "common", window: "recent",
     glyph: "soothing", tint: "plum", frame: "square", accent: "dot",
     desc: "The evening cup is your familiar. The day softens around it.",
     earned: ctx => (ctx.recent.byTimeOfDay.get("evening") || 0) >= 5 },
 
   // ─── Recent: seasonal × pattern ───────────────────────────
-  { id: "snowqueen", name: "The Snowqueen", rarity: "rare", window: "recent",
+  { id: "snowqueen", name: "The Yuki-Onna", rarity: "rare", window: "recent",
     glyph: "cooling", tint: "sky", frame: "diamond", accent: "crescent",
     desc: "Menthol cups, at night, in winter — the cool exhale answering cold air.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -365,7 +365,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.flavor === "minty" || b.mood === "cooling");
     }).length >= 2 },
-  { id: "summer-forager", name: "The Summer Forager", rarity: "uncommon", window: "recent",
+  { id: "summer-forager", name: "The Faun", rarity: "uncommon", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Summer light, met with petals, citrus, and frost.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -374,7 +374,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.flavor === "floral" || b.flavor === "citrus" || b.flavor === "minty" || b.mood === "cooling");
     }).length >= 4 },
-  { id: "autumn-hearth", name: "Autumn Hearth", rarity: "uncommon", window: "recent",
+  { id: "autumn-hearth", name: "The Hestia", rarity: "uncommon", window: "recent",
     glyph: "warming", tint: "terra", frame: "hex", accent: "none",
     desc: "The days shorten. Your kettle leans into spice and warmth.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -383,7 +383,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.flavor === "spiced" || b.mood === "warming" || b.mood === "comfort");
     }).length >= 4 },
-  { id: "spring-riser", name: "Spring Riser", rarity: "uncommon", window: "recent",
+  { id: "spring-riser", name: "The Persephone", rarity: "uncommon", window: "recent",
     glyph: "uplifting", tint: "sage", frame: "circle", accent: "rays",
     desc: "Spring at the rim. Citrus and lift, the year stretching.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -394,193 +394,193 @@ export const ATTRIBUTES = [
     }).length >= 4 },
 
   // ─── Recent: mood-family patterns ─────────────────────────
-  { id: "soft-hand", name: "The Soft Hand", rarity: "common", window: "recent",
+  { id: "soft-hand", name: "The Selene", rarity: "common", window: "recent",
     glyph: "calm", tint: "sage", frame: "circle", accent: "none",
     desc: "The kettle is your soft hand. Quiet is what you reach for.",
     earned: ctx => moodFamily(ctx.recent, ["calm","sleepy","soothing"]) >= 5 },
-  { id: "restless-one", name: "The Restless One", rarity: "common", window: "recent",
+  { id: "restless-one", name: "The Aeolus", rarity: "common", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "There's a thread you're pulling. The cup keeps the hands working.",
     earned: ctx => moodFamily(ctx.recent, ["focus","energy"]) >= 5 },
-  { id: "hearth-keeper", name: "The Hearth-Keeper", rarity: "common", window: "recent",
+  { id: "hearth-keeper", name: "The Penates", rarity: "common", window: "recent",
     glyph: "warming", tint: "terra", frame: "square", accent: "none",
     desc: "You keep the hearth. The cup is a small fire kept lit.",
     earned: ctx => moodFamily(ctx.recent, ["warming","comfort"]) >= 5 },
-  { id: "sun-chaser", name: "The Sun-Chaser", rarity: "common", window: "recent",
+  { id: "sun-chaser", name: "The Sol Invictus", rarity: "common", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "You chase the sun in the cup. Lift over rest.",
     earned: ctx => moodFamily(ctx.recent, ["uplifting","energy"]) >= 5 },
-  { id: "convalescent", name: "The Convalescent", rarity: "uncommon", window: "recent",
+  { id: "convalescent", name: "The Asclepius", rarity: "uncommon", window: "recent",
     glyph: "soothing", tint: "sage", frame: "square", accent: "dot",
     desc: "Healing, or tending someone who is. The cup as gentle medicine.",
     earned: ctx => moodFamily(ctx.recent, ["soothing","digestive"]) >= 5 },
-  { id: "grounded-one", name: "The Grounded One", rarity: "uncommon", window: "recent",
+  { id: "grounded-one", name: "The Atlas", rarity: "uncommon", window: "recent",
     glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
     desc: "The cup goes down before it rises. Your kettle answers gravity.",
     earned: ctx => moodCount(ctx.recent, "grounding") >= 3 },
-  { id: "cooler-headed", name: "The Cooler-Headed", rarity: "uncommon", window: "recent",
+  { id: "cooler-headed", name: "The Halcyon", rarity: "uncommon", window: "recent",
     glyph: "cooling", tint: "sky", frame: "circle", accent: "crescent",
     desc: "Yin in your cup. The exhale cools the room.",
     earned: ctx => moodCount(ctx.recent, "cooling") >= 3 },
-  { id: "the-whitespace", name: "The Whitespace", rarity: "rare", window: "recent",
+  { id: "the-whitespace", name: "The Wisp", rarity: "rare", window: "recent",
     glyph: "calm", tint: "ash", frame: "diamond", accent: "none",
     desc: "Quiet, spacious, kept. Your cup leaves room around itself.",
     earned: ctx => moodCount(ctx.recent, "calm") >= 8 },
 
   // ─── Recent: flavor patterns ──────────────────────────────
-  { id: "petal-drinker", name: "Petal-Drinker", rarity: "common", window: "recent",
+  { id: "petal-drinker", name: "The Dryad", rarity: "common", window: "recent",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Petals lead the kettle. The cup smells of a slow garden.",
     earned: ctx => flavorCount(ctx.recent, "floral") >= 4 },
-  { id: "the-mineralist", name: "The Mineralist", rarity: "common", window: "recent",
+  { id: "the-mineralist", name: "The Gnome", rarity: "common", window: "recent",
     glyph: "grounding", tint: "ash", frame: "hex", accent: "none",
     desc: "Earthy, woody, mineral — your cups speak of stone and root.",
     earned: ctx => flavorFamily(ctx.recent, ["earthy","woody","mineral"]) >= 4 },
-  { id: "sweet-tooth", name: "Sweet Tooth", rarity: "common", window: "recent",
+  { id: "sweet-tooth", name: "The Melissa", rarity: "common", window: "recent",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
     desc: "The cup leans toward honey. Sugar without sugar.",
     earned: ctx => flavorFamily(ctx.recent, ["sweet","honeyed"]) >= 4 },
-  { id: "bitter-adept", name: "The Bitter Adept", rarity: "uncommon", window: "recent",
+  { id: "bitter-adept", name: "The Wormwood", rarity: "uncommon", window: "recent",
     glyph: "digestive", tint: "terra", frame: "hex", accent: "none",
     desc: "You take the cup honest. Bitter is not a flaw to you.",
     earned: ctx => flavorCount(ctx.recent, "bitter") >= 3 },
-  { id: "smokesworn", name: "Smokesworn", rarity: "rare", window: "recent",
+  { id: "smokesworn", name: "The Tengu", rarity: "rare", window: "recent",
     glyph: "warming", tint: "ash", frame: "diamond", accent: "none",
     desc: "The pine fire calls. The cup tastes of woodsmoke.",
     earned: ctx => flavorCount(ctx.recent, "smoky") >= 2 },
-  { id: "umami-initiate", name: "Umami Initiate", rarity: "uncommon", window: "recent",
+  { id: "umami-initiate", name: "The Tanuki", rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "dot",
     desc: "The savory cup. Gyokuro country, broth without bone.",
     earned: ctx => flavorCount(ctx.recent, "umami") >= 3 },
-  { id: "citrus-hand", name: "The Citrus Hand", rarity: "common", window: "recent",
+  { id: "citrus-hand", name: "The Iris", rarity: "common", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Citrus at the rim. Your cup wakes with bright.",
     earned: ctx => flavorCount(ctx.recent, "citrus") >= 4 },
-  { id: "spice-hand", name: "The Spice Hand", rarity: "common", window: "recent",
+  { id: "spice-hand", name: "The Salamander", rarity: "common", window: "recent",
     glyph: "warming", tint: "terra", frame: "square", accent: "dot",
     desc: "Chai country. The cup smells of the road.",
     earned: ctx => flavorCount(ctx.recent, "spiced") >= 4 },
-  { id: "roast-devotee", name: "Roast Devotee", rarity: "uncommon", window: "recent",
+  { id: "roast-devotee", name: "The Pyralis", rarity: "uncommon", window: "recent",
     glyph: "warming", tint: "terra", frame: "hex", accent: "dot",
     desc: "Hojicha country. Pan-fired, sweet without honey.",
     earned: ctx => flavorCount(ctx.recent, "roasted") >= 3 },
-  { id: "five-tongues-recent", name: "Five Tongues", rarity: "rare", window: "recent",
+  { id: "five-tongues-recent", name: "The Chimera", rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
     desc: "A wide palate, hungry for range. The cup speaks many tongues.",
     earned: ctx => ctx.recent.distinctFlavors >= 5 },
 
   // ─── Recent: ingredient patterns ──────────────────────────
-  { id: "rose-companion", name: "Rose-Companion", rarity: "rare", window: "recent",
+  { id: "rose-companion", name: "The Aphrodite", rarity: "rare", window: "recent",
     glyph: "flower", tint: "terra", frame: "circle", accent: "star",
     desc: "The cup remembers a garden. Rose is your companion.",
     earned: ctx => ingCount(ctx.recent, "rose") >= 3 },
-  { id: "mint-devotee", name: "Mint Devotee", rarity: "uncommon", window: "recent",
+  { id: "mint-devotee", name: "The Menthe", rarity: "uncommon", window: "recent",
     glyph: "cooling", tint: "sage", frame: "circle", accent: "rays",
     desc: "Cool exhale, fresh tongue. Mint is your minor key.",
     earned: ctx => ingCount(ctx.recent, "peppermint") + ingCount(ctx.recent, "spearmint") >= 4 },
-  { id: "chamomile-friend", name: "Chamomile Friend", rarity: "common", window: "recent",
+  { id: "chamomile-friend", name: "The Galene", rarity: "common", window: "recent",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "none",
     desc: "The familiar bedtime apple. A small flower keeps showing up.",
     earned: ctx => ingCount(ctx.recent, "chamomile") >= 3 },
-  { id: "lavender-calm", name: "Lavender Calm", rarity: "uncommon", window: "recent",
+  { id: "lavender-calm", name: "The Hesperide", rarity: "uncommon", window: "recent",
     glyph: "calm", tint: "plum", frame: "circle", accent: "dot",
     desc: "Camphor and quiet. The cup smells of the south of France.",
     earned: ctx => ingCount(ctx.recent, "lavender") >= 3 },
-  { id: "tea-faithful", name: "Tea-Faithful", rarity: "uncommon", window: "recent",
+  { id: "tea-faithful", name: "The Camellia", rarity: "uncommon", window: "recent",
     glyph: "leaf", tint: "sageDeep", frame: "hex", accent: "none",
     desc: "The leaf is loyal. Every cup has a true tea inside it.",
     earned: ctx => ctx.recent.n >= 5 && containsCategory(ctx.recent.sessions, "true tea") },
-  { id: "herb-lover", name: "Herb-Lover", rarity: "uncommon", window: "recent",
+  { id: "herb-lover", name: "The Flora", rarity: "uncommon", window: "recent",
     glyph: "sprig", tint: "sage", frame: "circle", accent: "none",
     desc: "No leaf, only herb. The cup is meadow.",
     earned: ctx => ctx.recent.n >= 5 && noCategory(ctx.recent.sessions, "true tea") },
-  { id: "mushroom-whisperer", name: "Mushroom Whisperer", rarity: "rare", window: "recent",
+  { id: "mushroom-whisperer", name: "The Hobgoblin", rarity: "rare", window: "recent",
     glyph: "grounding", tint: "plum", frame: "hex", accent: "dot",
     desc: "The slow medicine. Mycelium answers your kettle.",
     earned: ctx => ingFamily(ctx.recent, ["reishi","lions-mane"]) >= 3 },
-  { id: "adaptogen-initiate", name: "Adaptogen Initiate", rarity: "uncommon", window: "recent",
+  { id: "adaptogen-initiate", name: "The Ent", rarity: "uncommon", window: "recent",
     glyph: "grounding", tint: "plum", frame: "square", accent: "none",
     desc: "You ask the cup to adapt with you. The slow allies in rotation.",
     earned: ctx => ctx.recent.sessions.filter(s => {
       const b = getBlend(s.blendId);
       return b && (b.ingredients || []).some(i => INGREDIENTS[i.id]?.category === "adaptogen");
     }).length >= 3 },
-  { id: "ginger-hand", name: "Ginger Hand", rarity: "common", window: "recent",
+  { id: "ginger-hand", name: "The Brigid", rarity: "common", window: "recent",
     glyph: "warming", tint: "terra", frame: "circle", accent: "rays",
     desc: "The warming root. Ginger is your hand in the cold.",
     earned: ctx => ingCount(ctx.recent, "ginger") >= 4 },
 
   // ─── Recent: caffeine patterns ────────────────────────────
-  { id: "the-buzzed", name: "The Buzzed", rarity: "common", window: "recent",
+  { id: "the-buzzed", name: "The Loki", rarity: "common", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Tea-leaf adrenaline. The kettle is the alarm.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.caffeineFree === 0 },
-  { id: "decaf-devotee", name: "Decaf Devotee", rarity: "common", window: "recent",
+  { id: "decaf-devotee", name: "The Hesychast", rarity: "common", window: "recent",
     glyph: "calm", tint: "sage", frame: "circle", accent: "none",
     desc: "The herbal route. The cup carries no buzz.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.caffeinated === 0 },
-  { id: "the-switcher", name: "The Switcher", rarity: "uncommon", window: "recent",
+  { id: "the-switcher", name: "The Janus", rarity: "uncommon", window: "recent",
     glyph: "compass", tint: "ash", frame: "circle", accent: "dot",
     desc: "You read the hour. The cup matches the moment.",
     earned: ctx => ctx.recent.caffeinated >= 4 && ctx.recent.caffeineFree >= 4 },
 
   // ─── Recent: tradition patterns ───────────────────────────
-  { id: "way-of-tea", name: "Way of Tea", rarity: "uncommon", window: "recent",
+  { id: "way-of-tea", name: "The Chajin", rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "none",
     desc: "The way of tea. Stillness in the steam.",
     earned: ctx => traditionMatches(ctx.recent, /Japanese/i) >= 3 },
-  { id: "south-born", name: "The South-Born", rarity: "uncommon", window: "recent",
+  { id: "south-born", name: "The Quetzal", rarity: "uncommon", window: "recent",
     glyph: "warming", tint: "terra", frame: "hex", accent: "dot",
     desc: "The South-born cup. Spice and slow heat.",
     earned: ctx => traditionMatches(ctx.recent, /South Asian|Ayurvedic/i) >= 3 },
-  { id: "old-continent", name: "Old Continent", rarity: "uncommon", window: "recent",
+  { id: "old-continent", name: "The Sidhe", rarity: "uncommon", window: "recent",
     glyph: "scroll", tint: "ochre", frame: "square", accent: "none",
     desc: "The Old Continent's herbs. The European hand still keeps a kettle.",
     earned: ctx => traditionMatches(ctx.recent, /European|Western/i) >= 3 },
-  { id: "andean-path", name: "Andean Path", rarity: "rare", window: "recent",
+  { id: "andean-path", name: "The Condor", rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "hex", accent: "rays",
     desc: "The Andean path. Yerba and the shared gourd.",
     earned: ctx => traditionMatches(ctx.recent, /South American/i) >= 1 },
-  { id: "chinese-mountain", name: "Chinese Mountain", rarity: "rare", window: "recent",
+  { id: "chinese-mountain", name: "The Bai-Hu", rarity: "rare", window: "recent",
     glyph: "grounding", tint: "terra", frame: "diamond", accent: "none",
     desc: "The Chinese mountain. Pu-erh, oolong, the older patience.",
     earned: ctx => traditionMatches(ctx.recent, /Chinese/i) >= 2 },
 
   // ─── Recent: rhythm patterns ──────────────────────────────
-  { id: "the-steady", name: "The Steady", rarity: "common", window: "recent",
+  { id: "the-steady", name: "The Polestar", rarity: "common", window: "recent",
     glyph: "comfort", tint: "sage", frame: "square", accent: "dot",
     desc: "A ritual, not a binge. The cup keeps showing up on its own days.",
     earned: ctx => ctx.recent.distinctDays.size >= 7 },
-  { id: "binge-watcher", name: "The Binge-Watcher", rarity: "rare", window: "recent",
+  { id: "binge-watcher", name: "The Hydra", rarity: "rare", window: "recent",
     glyph: "kettle", tint: "ash", frame: "diamond", accent: "rays",
     desc: "The kettle never cooled. A day spent fully inside the cup.",
     earned: ctx => ctx.recent.n === 10 && ctx.recent.distinctDays.size === 1 },
-  { id: "the-loyal", name: "The Loyal", rarity: "uncommon", window: "recent",
+  { id: "the-loyal", name: "The Argus", rarity: "uncommon", window: "recent",
     glyph: "heart", tint: "terra", frame: "circle", accent: "dot",
     desc: "You return to the same well. Something keeps calling you back.",
     earned: ctx => ctx.recent.maxRepeat >= 5 },
-  { id: "the-wanderer", name: "The Wanderer", rarity: "rare", window: "recent",
+  { id: "the-wanderer", name: "The Pooka", rarity: "rare", window: "recent",
     glyph: "compass", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Never the same twice. The kettle keeps offering a new shore.",
     earned: ctx => ctx.recent.n >= 10 && ctx.recent.byBlendId.size >= 10 },
 
   // ─── Recent: rating patterns ──────────────────────────────
-  { id: "the-approver", name: "The Approver", rarity: "common", window: "recent",
+  { id: "the-approver", name: "The Cherub", rarity: "common", window: "recent",
     glyph: "heart", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Most recent cups have been good ones. You picked well.",
     earned: ctx => ctx.recent.ratings.filter(r => r >= 4).length >= 8 },
-  { id: "honest-critic", name: "The Honest Critic", rarity: "uncommon", window: "recent",
+  { id: "honest-critic", name: "The Themis", rarity: "uncommon", window: "recent",
     glyph: "feather", tint: "terra", frame: "diamond", accent: "none",
     desc: "You tell the truth, even to your own kettle.",
     earned: ctx => ctx.recent.ratings.filter(r => r <= 3).length >= 5 },
-  { id: "steady-marker", name: "Steady Marker", rarity: "rare", window: "recent",
+  { id: "steady-marker", name: "The Mneme", rarity: "rare", window: "recent",
     glyph: "compass", tint: "ash", frame: "square", accent: "dot",
     desc: "Every cup the same shape of yes. Calibrated, predictable, kind.",
     earned: ctx => ctx.recent.n >= 8 && ctx.recent.ratings.length === ctx.recent.n
       && ctx.recent.ratings.every(r => r === 4) },
 
   // ─── Recent: multi-condition rare ─────────────────────────
-  { id: "morning-mountain", name: "Morning Mountain", rarity: "rare", window: "recent",
+  { id: "morning-mountain", name: "The Tianlong", rarity: "rare", window: "recent",
     glyph: "grounding", tint: "terra", frame: "hex", accent: "rays",
     desc: "The mountain at dawn. Aged leaf before the world wakes.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -589,7 +589,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.ingredients || []).some(i => /puerh|oolong|wuyi|lapsang/i.test(i.id));
     }).length >= 3 },
-  { id: "sleepy-bee", name: "Sleepy Bee", rarity: "rare", window: "recent",
+  { id: "sleepy-bee", name: "The Morpheus", rarity: "rare", window: "recent",
     glyph: "bee", tint: "ochre", frame: "circle", accent: "crescent",
     desc: "Honey before sleep. The cup as a small hum at the rim.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -600,7 +600,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.flavor === "honeyed" || b.flavor === "sweet");
     }).length >= 3 },
-  { id: "post-meal-settler", name: "Post-Meal Settler", rarity: "uncommon", window: "recent",
+  { id: "post-meal-settler", name: "The Hygieia", rarity: "uncommon", window: "recent",
     glyph: "digestive", tint: "ochre", frame: "circle", accent: "dot",
     desc: "After the meal, the cup. The day's center settled.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -611,7 +611,7 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.mood === "digestive" || b.flavor === "spiced");
     }).length >= 3 },
-  { id: "diurnal-pendulum", name: "Diurnal Pendulum", rarity: "rare", window: "recent",
+  { id: "diurnal-pendulum", name: "The Aion", rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
     desc: "Bright before noon, restful after dark. The kettle is your pendulum.",
     earned: ctx => {
@@ -626,7 +626,7 @@ export const ATTRIBUTES = [
       });
       return morning >= 3 && evening >= 3;
     } },
-  { id: "solstice-soul", name: "Solstice Soul", rarity: "mythic", window: "recent",
+  { id: "solstice-soul", name: "The Saturnalia", rarity: "mythic", window: "recent",
     glyph: "star", tint: "plum", frame: "diamond", accent: "rays",
     desc: "The sky was watching. A cup brewed close to the turn of the year.",
     earned: ctx => ctx.recent.sessions.some(s => {
@@ -636,7 +636,7 @@ export const ATTRIBUTES = [
       const within = (mm, dd) => m === mm && Math.abs(d - dd) <= 7;
       return within(11, 21) || within(2, 20) || within(5, 21) || within(8, 23);
     }) },
-  { id: "the-twin-cups", name: "The Twin Cups", rarity: "rare", window: "recent",
+  { id: "the-twin-cups", name: "The Dioscuri", rarity: "rare", window: "recent",
     glyph: "heart", tint: "plum", frame: "diamond", accent: "dot",
     desc: "Twice the same cup at the same hour. The kettle keeps a calendar.",
     earned: ctx => {
@@ -655,24 +655,24 @@ export const ATTRIBUTES = [
     } },
 
   // ─── Lifetime: rhythm and time ────────────────────────────
-  { id: "lifelong-steeper", name: "Lifelong Steeper", rarity: "legendary", window: "lifetime",
+  { id: "lifelong-steeper", name: "The Mnemosyne", rarity: "legendary", window: "lifetime",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
     desc: "Two years of the same kettle. The cup has watched you change.",
     earned: ctx => ctx.daysSinceFirst >= 730 },
-  { id: "tea-veteran", name: "Tea Veteran", rarity: "rare", window: "lifetime",
+  { id: "tea-veteran", name: "The Bodhisattva", rarity: "rare", window: "lifetime",
     glyph: "scroll", tint: "ochre", frame: "hex", accent: "star",
     desc: "Sixty different days have ended in a cup. The kettle is part of the calendar now.",
     earned: ctx => ctx.lifetime.distinctDays.size >= 60 },
-  { id: "all-the-flowers", name: "All the Flowers", rarity: "legendary", window: "lifetime",
+  { id: "all-the-flowers", name: "The Anthousai", rarity: "legendary", window: "lifetime",
     glyph: "flower", tint: "ochre", frame: "diamond", accent: "rays",
     desc: "Every flower the catalog holds. A garden, fully visited.",
     earned: ctx => ctx.flowerIngsAll.length > 0
       && ctx.flowerIngsAll.every(id => ctx.lifetime.byIngredient.has(id)) },
-  { id: "favorite-five", name: "Favorite Five", rarity: "common", window: "lifetime",
+  { id: "favorite-five", name: "The Lares", rarity: "common", window: "lifetime",
     glyph: "heart", tint: "terra", frame: "circle", accent: "dot",
     desc: "Five cups you keep close. A small library of yes.",
     earned: ctx => ctx.favoriteBlendIds.size >= 5 },
-  { id: "favorite-twenty", name: "The Curator", rarity: "rare", window: "lifetime",
+  { id: "favorite-twenty", name: "The Thoth", rarity: "rare", window: "lifetime",
     glyph: "heart", tint: "plum", frame: "hex", accent: "star",
     desc: "A library of yes. Twenty cups you'd brew again without thinking.",
     earned: ctx => ctx.favoriteBlendIds.size >= 20 },
@@ -685,105 +685,105 @@ export const ATTRIBUTES = [
     glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
     desc: "Rooted, slow, deep — the forest is your kettle. You take the cup like a long sit on a moss bed.",
     earned: ctx => usePick(ctx, "calm", ["earthy", "smoky"]) },
-  { id: "garden-walker",     name: "The Garden Walker",  rarity: "common", window: "recent",
+  { id: "garden-walker",     name: "The Nymph",  rarity: "common", window: "recent",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Petals and quiet. The cup is a slow afternoon in the garden.",
     earned: ctx => usePick(ctx, "calm", ["floral", "fruity"]) },
-  { id: "cooling-hand",      name: "The Cooling Hand",   rarity: "uncommon", window: "recent",
+  { id: "cooling-hand",      name: "The Rusalka",   rarity: "uncommon", window: "recent",
     glyph: "cooling", tint: "sky", frame: "circle", accent: "crescent",
     desc: "Cool exhale, soft mind. Yin energy, taken as tea.",
     earned: ctx => usePick(ctx, "calm", ["minty"]) },
-  { id: "mountain-scribe",   name: "The Mountain Scribe", rarity: "uncommon", window: "recent",
+  { id: "mountain-scribe",   name: "The Sennin", rarity: "uncommon", window: "recent",
     glyph: "grounding", tint: "ash", frame: "diamond", accent: "none",
     desc: "Grounded attention. The desk steady, the leaves dark.",
     earned: ctx => usePick(ctx, "focus", ["earthy"]) },
-  { id: "smoke-sage",        name: "The Smoke Sage",     rarity: "rare", window: "recent",
+  { id: "smoke-sage",        name: "The Tezcatlipoca",     rarity: "rare", window: "recent",
     glyph: "warming", tint: "ash", frame: "diamond", accent: "rays",
     desc: "Pine fire and concentration. The mind that thinks best near woodsmoke.",
     earned: ctx => usePick(ctx, "focus", ["smoky"]) },
-  { id: "the-sharpener",     name: "The Sharpener",      rarity: "uncommon", window: "recent",
+  { id: "the-sharpener",     name: "The Athena",      rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "rays",
     desc: "Clean cut, clarity through cold. The mind as a knife.",
     earned: ctx => usePick(ctx, "focus", ["minty"]) },
-  { id: "bright-mind",       name: "The Bright Mind",    rarity: "common", window: "recent",
+  { id: "bright-mind",       name: "The Apollo",    rarity: "common", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Clean cognition. The morning of the mind, regardless of the hour.",
     earned: ctx => usePick(ctx, "focus", ["citrus", "fruity"]) },
-  { id: "sun-sailor",        name: "The Sun Sailor",     rarity: "common", window: "recent",
+  { id: "sun-sailor",        name: "The Ra",     rarity: "common", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Bright lift. You take the cup like a sail takes wind.",
     earned: ctx => usePick(ctx, "energy", ["citrus", "fruity"]) },
-  { id: "forge-hand",        name: "The Forge-Hand",     rarity: "rare", window: "recent",
+  { id: "forge-hand",        name: "The Hephaestus",     rarity: "rare", window: "recent",
     glyph: "warming", tint: "terra", frame: "hex", accent: "star",
     desc: "Hot iron, steady force. The cup is a hammer.",
     earned: ctx => usePick(ctx, "energy", ["smoky"]) },
-  { id: "the-caravan",       name: "The Caravan",        rarity: "uncommon", window: "recent",
+  { id: "the-caravan",       name: "The Argonaut",        rarity: "uncommon", window: "recent",
     glyph: "warming", tint: "terra", frame: "circle", accent: "dot",
     desc: "Chai and movement. Your cup smells of roads.",
     earned: ctx => usePick(ctx, "energy", ["spiced"]) },
-  { id: "frost-runner",      name: "The Frost Runner",   rarity: "rare", window: "recent",
+  { id: "frost-runner",      name: "The Skadi",   rarity: "rare", window: "recent",
     glyph: "cooling", tint: "sky", frame: "diamond", accent: "rays",
     desc: "Cool kinetic. Lift without heat, motion without sweat.",
     earned: ctx => usePick(ctx, "energy", ["minty"]) },
-  { id: "the-moonflower",    name: "The Moonflower",     rarity: "uncommon", window: "recent",
+  { id: "the-moonflower",    name: "The Cynthia",     rarity: "uncommon", window: "recent",
     glyph: "sleepy", tint: "plum", frame: "circle", accent: "crescent",
     desc: "Bedside petals. The cup is your lullaby.",
     earned: ctx => usePick(ctx, "sleepy", ["floral"]) },
-  { id: "the-lullaby",       name: "The Lullaby",        rarity: "common", window: "recent",
+  { id: "the-lullaby",       name: "The Hypnos",        rarity: "common", window: "recent",
     glyph: "sleepy", tint: "plum", frame: "circle", accent: "dot",
     desc: "Sugared dusk. The cup is your bedtime story.",
     earned: ctx => usePick(ctx, "sleepy", ["sweet"]) },
-  { id: "the-rootbed",       name: "The Rootbed",        rarity: "rare", window: "recent",
+  { id: "the-rootbed",       name: "The Demeter",        rarity: "rare", window: "recent",
     glyph: "grounding", tint: "plum", frame: "diamond", accent: "none",
     desc: "The soil at night. You go down to rise.",
     earned: ctx => usePick(ctx, "sleepy", ["earthy"]) },
-  { id: "hearth-witch",      name: "The Hearth Witch",   rarity: "uncommon", window: "recent",
+  { id: "hearth-witch",      name: "The Baba Yaga",   rarity: "uncommon", window: "recent",
     glyph: "warming", tint: "terra", frame: "square", accent: "dot",
     desc: "Kitchen warmth. The cup as a slow embrace.",
     earned: ctx => usePick(ctx, "comfort", ["spiced"]) },
-  { id: "the-honeycake",     name: "The Honeycake",      rarity: "common", window: "recent",
+  { id: "the-honeycake",     name: "The Comus",      rarity: "common", window: "recent",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
     desc: "The cup as a soft seat. Honey in everything.",
     earned: ctx => usePick(ctx, "comfort", ["sweet"]) },
-  { id: "the-wood-stove",    name: "The Wood Stove",     rarity: "rare", window: "recent",
+  { id: "the-wood-stove",    name: "The Vesta",     rarity: "rare", window: "recent",
     glyph: "warming", tint: "terra", frame: "hex", accent: "rays",
     desc: "Smoldering ease. The cup smells like home in winter.",
     earned: ctx => usePick(ctx, "comfort", ["smoky"]) },
-  { id: "the-bittersmith",   name: "The Bittersmith",    rarity: "uncommon", window: "recent",
+  { id: "the-bittersmith",   name: "The Mandragora",    rarity: "uncommon", window: "recent",
     glyph: "digestive", tint: "ochre", frame: "hex", accent: "dot",
     desc: "You know what bitters do. The cup as the meal's punctuation.",
     earned: ctx => usePick(ctx, "digestive", ["spiced"]) },
-  { id: "the-apothecary-self", name: "The Apothecary",   rarity: "rare", window: "recent",
+  { id: "the-apothecary-self", name: "The Hekate",   rarity: "rare", window: "recent",
     glyph: "mortar", tint: "terra", frame: "hex", accent: "star",
     desc: "Bitter roots, dandelion café. You take the cup like medicine.",
     earned: ctx => usePick(ctx, "digestive", ["earthy"]) },
-  { id: "after-supper",      name: "The After-Supper",   rarity: "common", window: "recent",
+  { id: "after-supper",      name: "The Hob",   rarity: "common", window: "recent",
     glyph: "digestive", tint: "sage", frame: "circle", accent: "dot",
     desc: "Fennel-and-mint clarity. The cup as the meal's last sentence.",
     earned: ctx => usePick(ctx, "digestive", ["minty"]) },
-  { id: "the-specialist",    name: "The Specialist",     rarity: "uncommon", window: "recent",
+  { id: "the-specialist",    name: "The Augur",     rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "dot",
     desc: "Narrow and deep beats wide and thin. You know exactly what you like.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.distinctFlavors > 0 && ctx.recent.distinctFlavors <= 2 },
-  { id: "the-single-note",   name: "The Single Note",    rarity: "rare", window: "recent",
+  { id: "the-single-note",   name: "The Monad",    rarity: "rare", window: "recent",
     glyph: "key", tint: "sageDeep", frame: "diamond", accent: "none",
     desc: "The cup is for one thing, and that thing exactly. A clean intent.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.distinctMoods === 1 && ctx.recent.distinctFlavors === 1 },
-  { id: "dawn-voyager",      name: "The Dawn Voyager",   rarity: "uncommon", window: "recent",
+  { id: "dawn-voyager",      name: "The Hemera",   rarity: "uncommon", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "You meet the day with the kettle. Sail set before the sun.",
     earned: ctx => usePickAtTime(ctx, "energy", null, "morning", 3)
       || usePickAtTime(ctx, "focus", null, "morning", 3) },
-  { id: "lamp-watcher",      name: "The Lamp-Watcher",   rarity: "uncommon", window: "recent",
+  { id: "lamp-watcher",      name: "The Hespera",   rarity: "uncommon", window: "recent",
     glyph: "sleepy", tint: "plum", frame: "circle", accent: "crescent",
     desc: "The cup is the lowering light. The lamps grow dim around it.",
     earned: ctx => usePickAtTime(ctx, "calm", null, "evening", 3)
       || usePickAtTime(ctx, "sleepy", null, "evening", 3) },
-  { id: "afternoon-scholar", name: "The Afternoon Scholar", rarity: "uncommon", window: "recent",
+  { id: "afternoon-scholar", name: "The Saraswati", rarity: "uncommon", window: "recent",
     glyph: "scroll", tint: "ochre", frame: "square", accent: "none",
     desc: "The cup keeps the page open past three. Slow scholar, steady kettle.",
     earned: ctx => usePickAtTime(ctx, "focus", null, "afternoon", 3) },
-  { id: "the-all-hours",     name: "The All-Hours",      rarity: "rare", window: "recent",
+  { id: "the-all-hours",     name: "The Horae",      rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "star",
     desc: "You don't keep the kettle in one drawer. The cup is for every hour.",
     earned: ctx => ctx.recent.byTimeOfDay.size >= 3 && ctx.recent.n >= 5 },
@@ -885,7 +885,7 @@ export const ATTRIBUTES = [
 
   // ─── Habit triggers — titles earned through patterns of when, how,
   //     and what the user brews. Reward rhythm, not volume. ─────────
-  { id: "clockwork-cup", name: "The Clockwork Cup", rarity: "rare", window: "recent",
+  { id: "clockwork-cup", name: "The Chronos", rarity: "rare", window: "recent",
     glyph: "compass", tint: "ash", frame: "diamond", accent: "dot",
     desc: "Your kettle keeps appointments. The hour calls; the cup answers.",
     earned: ctx => {
@@ -898,7 +898,7 @@ export const ATTRIBUTES = [
       });
       return [...hours.values()].some(v => v >= 5);
     } },
-  { id: "course-corrector", name: "The Course-Corrector", rarity: "uncommon", window: "recent",
+  { id: "course-corrector", name: "The Nemesis", rarity: "uncommon", window: "recent",
     glyph: "compass", tint: "sageDeep", frame: "circle", accent: "dot",
     desc: "You learn out loud. Bad cup, better cup, no time wasted in between.",
     earned: ctx => {
@@ -910,7 +910,7 @@ export const ATTRIBUTES = [
       }
       return false;
     } },
-  { id: "true-believer", name: "The True Believer", rarity: "uncommon", window: "recent",
+  { id: "true-believer", name: "The Hierophant", rarity: "uncommon", window: "recent",
     glyph: "heart", tint: "terra", frame: "circle", accent: "star",
     desc: "The cup that doesn't disappoint. You return because it returns.",
     earned: ctx => {
@@ -928,7 +928,7 @@ export const ATTRIBUTES = [
       }
       return false;
     } },
-  { id: "weather-vane", name: "The Weather-Vane", rarity: "rare", window: "recent",
+  { id: "weather-vane", name: "The Boreas", rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
     desc: "The wind shifts, your kettle shifts. You meet what the day brings.",
     earned: ctx => {
@@ -937,11 +937,11 @@ export const ATTRIBUTES = [
       recent7.forEach(s => (s.targetMoods || []).forEach(m => moods.add(m)));
       return moods.size >= 5;
     } },
-  { id: "day-knowing", name: "Day-Knowing", rarity: "rare", window: "recent",
+  { id: "day-knowing", name: "The Pythia", rarity: "rare", window: "recent",
     glyph: "compass", tint: "ochre", frame: "circle", accent: "rays",
     desc: "The cup is for every hour. You know each one.",
     earned: ctx => ctx.recent.byTimeOfDay.size >= 5 },
-  { id: "versatile-hand", name: "The Versatile Hand", rarity: "rare", window: "recent",
+  { id: "versatile-hand", name: "The Proteus", rarity: "rare", window: "recent",
     glyph: "key", tint: "sageDeep", frame: "square", accent: "rays",
     desc: "One cup, many lives. The leaves answer differently as the light shifts.",
     earned: ctx => {
@@ -956,25 +956,25 @@ export const ATTRIBUTES = [
       for (const set of blendTimes.values()) if (set.size >= 3) return true;
       return false;
     } },
-  { id: "the-steadier", name: "The Steadier", rarity: "uncommon", window: "recent",
+  { id: "the-steadier", name: "The Caryatid", rarity: "uncommon", window: "recent",
     glyph: "calm", tint: "sage", frame: "circle", accent: "none",
     desc: "The cup is your handle. You hold it when the day is jagged.",
     earned: ctx => ctx.recent.sessions.filter(s =>
       (s.currentMoods || []).some(m => ["anxious","stressed","restless","tired"].includes(m))
     ).length >= 3 },
-  { id: "self-reader", name: "The Self-Reader", rarity: "rare", window: "recent",
+  { id: "self-reader", name: "The Heimdall", rarity: "rare", window: "recent",
     glyph: "feather", tint: "plum", frame: "square", accent: "dot",
     desc: "You arrive at the cup already knowing where you stand.",
     earned: ctx => ctx.recent.sessions.filter(s =>
       (s.currentMoods || []).length >= 1
     ).length >= 5 },
-  { id: "the-recorder", name: "The Recorder", rarity: "uncommon", window: "recent",
+  { id: "the-recorder", name: "The Nabu", rarity: "uncommon", window: "recent",
     glyph: "scroll", tint: "ochre", frame: "square", accent: "dot",
     desc: "The journal grows by your hand. Each cup leaves a small line behind it.",
     earned: ctx => ctx.recent.sessions.filter(s =>
       (s.note || "").trim().length > 0
     ).length >= 5 },
-  { id: "witching-hour", name: "The Witching Hour", rarity: "legendary", window: "recent",
+  { id: "witching-hour", name: "The Strega", rarity: "legendary", window: "recent",
     glyph: "sleepy", tint: "plum", frame: "diamond", accent: "crescent",
     desc: "The hour the kettle becomes a candle. A cup at the seam between days.",
     earned: ctx => ctx.recent.sessions.some(s => {
@@ -983,7 +983,7 @@ export const ATTRIBUTES = [
       const h = ts.getHours();
       return h === 23 || h === 0;
     }) },
-  { id: "unrepeating", name: "The Unrepeating", rarity: "uncommon", window: "recent",
+  { id: "unrepeating", name: "The Lethe", rarity: "uncommon", window: "recent",
     glyph: "compass", tint: "sageDeep", frame: "diamond", accent: "rays",
     desc: "The kettle never visits the same well twice. A new cup is its own answer.",
     earned: ctx => {
@@ -991,7 +991,7 @@ export const ATTRIBUTES = [
       const ids = new Set(last5.map(s => s.blendId).filter(Boolean));
       return last5.length === 5 && ids.size === 5;
     } },
-  { id: "weekend-steeper", name: "The Weekend Steeper", rarity: "uncommon", window: "recent",
+  { id: "weekend-steeper", name: "The Kupala", rarity: "uncommon", window: "recent",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Slow days, full kettle. The weekend belongs to the cup.",
     earned: ctx => {
@@ -1004,7 +1004,7 @@ export const ATTRIBUTES = [
         return d === 0 || d === 6;
       });
     } },
-  { id: "working-steeper", name: "The Working Steeper", rarity: "uncommon", window: "recent",
+  { id: "working-steeper", name: "The Lar", rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "ash", frame: "square", accent: "none",
     desc: "The desk and the kettle keep the same hours.",
     earned: ctx => {
@@ -1017,21 +1017,21 @@ export const ATTRIBUTES = [
         return d >= 1 && d <= 5;
       });
     } },
-  { id: "long-steeper", name: "The Long Steeper", rarity: "uncommon", window: "recent",
+  { id: "long-steeper", name: "The Methuselah", rarity: "uncommon", window: "recent",
     glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
     desc: "The slow extraction is your register. You let the leaves talk all the way.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
       const b = getBlend(s.blendId);
       return b && (b.timeS || 0) >= 360;
     }) },
-  { id: "quick-cup", name: "The Quick Cup", rarity: "uncommon", window: "recent",
+  { id: "quick-cup", name: "The Sleipnir", rarity: "uncommon", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Brisk hand, brisk cup. The leaf gives quickly.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
       const b = getBlend(s.blendId);
       return b && (b.timeS || 9999) < 180;
     }) },
-  { id: "multi-ingredient-mind", name: "Multi-Ingredient Mind", rarity: "uncommon", window: "recent",
+  { id: "multi-ingredient-mind", name: "The Alchemist", rarity: "uncommon", window: "recent",
     glyph: "compass", tint: "ochre", frame: "diamond", accent: "dot",
     desc: "You like the cup composed, not solo. Every brew is an ensemble.",
     earned: ctx => {
@@ -1045,14 +1045,14 @@ export const ATTRIBUTES = [
       });
       return count > 0 && sum / count >= 4;
     } },
-  { id: "pure-steeper", name: "The Pure Steeper", rarity: "uncommon", window: "recent",
+  { id: "pure-steeper", name: "The Brahman", rarity: "uncommon", window: "recent",
     glyph: "leaf", tint: "sageDeep", frame: "circle", accent: "none",
     desc: "One leaf, full attention. The cup is a single voice.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
       const b = getBlend(s.blendId);
       return b && (b.ingredients || []).length === 1;
     }) },
-  { id: "daily-practice", name: "The Daily Practice", rarity: "rare", window: "recent",
+  { id: "daily-practice", name: "The Dervish", rarity: "rare", window: "recent",
     glyph: "comfort", tint: "terra", frame: "hex", accent: "star",
     desc: "The kettle is the calendar. The cup keeps the days.",
     earned: ctx => {
@@ -1070,7 +1070,7 @@ export const ATTRIBUTES = [
       });
       return lastWeekDays.every(d => cupDays.has(d));
     } },
-  { id: "connoisseur", name: "The Connoisseur", rarity: "rare", window: "recent",
+  { id: "connoisseur", name: "The Dionysus", rarity: "rare", window: "recent",
     glyph: "star", tint: "ochre", frame: "diamond", accent: "star",
     desc: "You know the shape of yes. Several cups have earned the highest mark.",
     earned: ctx => {
@@ -1080,7 +1080,7 @@ export const ATTRIBUTES = [
       });
       return fiveStarBlends.size >= 3;
     } },
-  { id: "self-repeater", name: "The Self-Repeater", rarity: "uncommon", window: "lifetime",
+  { id: "self-repeater", name: "The Ouroboros", rarity: "uncommon", window: "lifetime",
     glyph: "heart", tint: "plum", frame: "circle", accent: "dot",
     desc: "Your hand made it; your hand returned to it. A self-trusted cup.",
     earned: ctx => {
