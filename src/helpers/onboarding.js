@@ -32,13 +32,36 @@ const DRAW_SEEDS = {
   energy:  ["morning"],     // Morning Vestment
 };
 
+// Curated traditional preparations seeded alongside the algorithmic mood
+// blends, so the favorites rail isn't all house/synth. Each draw maps to
+// one or two well-known traditions whose register fits.
+const TRADITIONAL_BY_DRAW = {
+  calm:      ["all-heal", "throat-coat"],
+  focus:     ["sencha-properly", "darj-neat"],
+  energy:    ["chai", "wuyi-smoke"],
+  sleepy:    ["all-heal"],
+  comfort:   ["hojicha-evening", "chai"],
+  digestive: ["shou-puerh", "spring-tonic"],
+  cooling:   ["moroccan"],
+  warming:   ["chai", "golden-milk"],
+  uplifting: ["darj-neat", "tulsi-doorstep"],
+  grounding: ["shou-puerh", "mycelium-morning"],
+  soothing:  ["throat-coat", "holunder-care"],
+};
+
+// At least one traditional always lands in every new shelf, even if the
+// user's draws didn't surface a clear match. Tom Foolery is the house
+// experimental — Moroccan Mint is its traditional counterpart, broadly
+// liked, easy entry point.
+const UNIVERSAL_TRADITIONALS = ["moroccan"];
+
 // Default padding set if the union is thin — always-popular starters.
 const DEFAULT_FALLBACK = ["dusk", "morning", "hearth"];
 
 // Blends every new user gets, regardless of onboarding answers. Tom
 // Foolery is the Herbanium calling-card cup — shipped to everyone so
 // the catalog has a personality from minute one.
-const ALWAYS_INCLUDE = ["exp-tom-foolery"];
+const ALWAYS_INCLUDE = ["exp-tom-foolery", ...UNIVERSAL_TRADITIONALS];
 
 /**
  * Pick seed blend IDs based on onboarding answers.
@@ -56,14 +79,31 @@ export function pickSeedBlends({ timeOfDay, draw }) {
   times.forEach(t => (TIME_OF_DAY_SEEDS[t] || []).forEach(id => pool.add(id)));
   draws.forEach(d => (DRAW_SEEDS[d] || []).forEach(id => pool.add(id)));
 
+  // Pull at least one traditional preparation per draw — keeps the favorites
+  // rail from looking 100% house/synth on day one. Cap at two traditionals
+  // so it doesn't crowd the algorithmic picks the user is meant to discover.
+  let traditionalsPicked = 0;
+  for (const d of draws) {
+    if (traditionalsPicked >= 2) break;
+    const candidates = TRADITIONAL_BY_DRAW[d] || [];
+    for (const id of candidates) {
+      if (traditionalsPicked >= 2) break;
+      if (!pool.has(id)) {
+        pool.add(id);
+        traditionalsPicked += 1;
+      }
+    }
+  }
+
   // If we got fewer than 2 from preferences, pad from defaults
   const defaults = DEFAULT_FALLBACK.slice();
   while (pool.size < 2 + ALWAYS_INCLUDE.length && defaults.length > 0) {
     pool.add(defaults.shift());
   }
 
-  // Cap holds preference-driven slots (3) + the always-include count.
-  return Array.from(pool).slice(0, 3 + ALWAYS_INCLUDE.length);
+  // Cap holds preference-driven slots (3 mood-blends + up to 2 traditionals)
+  // plus the always-include count.
+  return Array.from(pool).slice(0, 5 + ALWAYS_INCLUDE.length);
 }
 
 // Default flavor pairings for moods, used when the user didn't pick
