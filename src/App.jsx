@@ -147,6 +147,23 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [composePreselect, setComposePreselect] = useState(null);
 
+  // Browser-back support for modal overlays. When an overlay opens we
+  // push a sentinel history entry; the system back gesture (Android
+  // back, iOS edge-swipe, browser back button) then closes the overlay
+  // instead of leaving the page entirely. Lateral tab switches stay
+  // outside this flow — only the modal screens (steep/log/ingredient/
+  // blend detail) participate.
+  useEffect(() => {
+    if (!overlay) return;
+    window.history.pushState({ herbaniumOverlay: overlay }, "");
+    const onPop = () => {
+      setOverlay(null);
+      setSession(null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [overlay]);
+
   // Persisted preferences
   const [unit, setUnit] = usePersistedState("unit", "F");
   const [weightUnit, setWeightUnit] = usePersistedState("weightUnit", "tsp");

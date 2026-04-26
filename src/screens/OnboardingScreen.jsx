@@ -104,6 +104,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
           color: theme.ash, lineHeight: 1.4,
           minHeight: 18, flexShrink: 0,
+          maxWidth: 520, width: "100%", alignSelf: "center",
         }}>
           {step === 1 && (timeOfDay.length === 0 ? "pick one or more" : `${timeOfDay.length} selected`)}
           {step === 2 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
@@ -111,11 +112,14 @@ export const OnboardingScreen = ({ onComplete }) => {
         </div>
       )}
 
-      {/* Bottom: nav */}
+      {/* Bottom: nav — share the same maxWidth column as the step
+          content so back/next align with the inputs above on wide
+          (desktop) viewports. */}
       <div style={{
         padding: "0 24px 32px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         flexShrink: 0,
+        maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
         <button
           onClick={back}
@@ -151,6 +155,7 @@ export const OnboardingScreen = ({ onComplete }) => {
         padding: "0 24px 12px", textAlign: "center",
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
         color: theme.ash, lineHeight: 1.5, flexShrink: 0,
+        maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
         Your journal lives on this device — no account, no cloud.
       </div>
