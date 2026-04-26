@@ -37,7 +37,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome, pantryHintShown, dismissPantryHint, pantryCount }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome, pantryHintShown, dismissPantryHint, pantryCount, omenShown }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -53,8 +53,10 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Welcome card — shown once on first visit after onboarding */}
-      {!welcomeShown && profile && (
+      {/* Welcome card — shown once on first visit after onboarding,
+          and only after the OmenSplash has finished so its auto-dismiss
+          timer doesn't run while the splash covers it. */}
+      {omenShown !== false && !welcomeShown && profile && (
         <WelcomeCard name={name} onDismiss={dismissWelcome} />
       )}
       {/* Pantry hint — shown once after the welcome card auto-dismisses,
