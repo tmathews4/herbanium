@@ -228,7 +228,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         <div style={{ marginTop: 14, display: "flex", gap: 16, justifyContent: "center" }}>
           <Stat label="Cups"      value={cupCount}    onClick={() => go("compose", { mode: "apothecary", shelfTab: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("compose", { mode: "apothecary", shelfTab: "catalogue" })} />
-          <Stat label="In pantry" value={shelfCount}  onClick={() => go("library", { pantryOnly: true })} />
+          <Stat label="Pantry"    value={shelfCount}  onClick={() => go("library", { pantryOnly: true })} />
           <Stat label="Animis"    value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
         </div>
       </div>
