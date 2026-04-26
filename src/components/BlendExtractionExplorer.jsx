@@ -245,35 +245,6 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
-      {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
-          Surfaced ABOVE the predicted flavor/effect blocks so the
-          user sees the brewing nudge before reading the cup it
-          would produce. Outsiders are still shown inline above
-          with the per-ingredient pills; filter to avoid duplication. */}
-      {(() => {
-        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
-        if (filtered.length === 0) return null;
-        return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
-            {filtered.map((w, i) => {
-              const accent = w.kind === "ceiling" ? theme.terra
-                : w.kind === "tannin" ? theme.terra
-                : w.kind === "aromatic" ? theme.terra
-                : w.kind === "paradox" ? theme.sageDeep
-                : theme.ash;
-              return (
-                <div key={i} style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                  color: accent, lineHeight: 1.4,
-                }}>
-                  {w.text}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
-
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Either section hides itself when its dataset is
           empty. Both filter zero-strength entries so ghost rows don't
@@ -426,6 +397,36 @@ export const BlendExtractionExplorer = ({
                 </div>
               </div>
             )}
+          </div>
+        );
+      })()}
+
+      {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
+          Sit between the slider levers and the profile bars so the user
+          can adjust steep/temp and immediately see whether the cup is
+          pulling tannins or hitting another ceiling. Outsiders are
+          shown inline above with the per-ingredient pills; filter here
+          to avoid duplication. */}
+      {(() => {
+        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
+        if (filtered.length === 0) return null;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 14 }}>
+            {filtered.map((w, i) => {
+              const accent = w.kind === "ceiling" ? theme.terra
+                : w.kind === "tannin" ? theme.terra
+                : w.kind === "aromatic" ? theme.terra
+                : w.kind === "paradox" ? theme.sageDeep
+                : theme.ash;
+              return (
+                <div key={i} style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: accent, lineHeight: 1.4,
+                }}>
+                  {w.text}
+                </div>
+              );
+            })}
           </div>
         );
       })()}
