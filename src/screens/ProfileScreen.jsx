@@ -10,7 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { generateCreationTitle } from "../data/creationTitle";
+import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
@@ -121,12 +121,14 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // Always rendered when a profile exists; the AttributeShelf prepends
   // it as the first card so users see their identity title immediately.
   const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
+  const creatureDesc = describeCreationTitle(creationTitleName);
   const creationCard = creationTitleName ? {
     id: "_creation",
     name: creationTitleName,
     displayName: creationTitleName,
     rarity: "legendary",
-    desc: "Granted at your kettle's first lighting. Drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
+    desc: (creatureDesc ? creatureDesc + " " : "") +
+      "Granted at your kettle's first lighting — drawn from the hour you arrived, the flavors you reached for, and the moods you carried in. Nobody else holds this exact one.",
   } : null;
   const allCards = creationCard ? [creationCard, ...sortedEarned] : sortedEarned;
   const [openAttrId, setOpenAttrId] = useState(null);
