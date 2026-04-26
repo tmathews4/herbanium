@@ -56,7 +56,7 @@ const INGREDIENTS = {
       "Chamomile — the Greek name chamaemelon means 'earth apple' — the scent of crushed leaves genuinely recalls fresh apple.",
       "Cultivated since the Bronze Age — chamomile pollen turns up in European archaeological sites from the period forward.",
       "Apigenin makes up roughly 65% of chamomile's total flavonoid content; one gram of dried flowers carries 8-12 mg of apigenin glycosides.",
-      "Chamomile — harbourne's 2008 brewing-optimization paper found 90°C for 20 minutes is the maximum-phenol, minimum-turbidity point — the chemist's perfect cup.",
+      "A 2008 brewing-optimization paper on chamomile found 90°C for 20 minutes is the maximum-phenol, minimum-turbidity point — the chemist's perfect cup.",
       "Chamomile genuinely does not get bitter with long steeping, unlike true tea. It develops cloudiness above 90°C, but no astringent edge.",
       "A case report in the medical literature linked maternal chamomile tea to premature constriction of the fetal ductus arteriosus — the basis for the pregnancy caution.",
       "German Commission E approved chamomile flowers for gastrointestinal discomfort, mouth and throat inflammation, and skin inflammation — three official medicinal uses.",
@@ -1134,7 +1134,7 @@ const INGREDIENTS = {
     blurb: "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers marked a turn of the year. Modern virology found the asking made sense — quercetin and its kin block certain viruses (notably influenza A) from entering cells. Steep covered, always, or the volatile flavonoids escape with the steam.",
     facts: [
       "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers were a turn of the year.",
-      "Modern elderflower virology found the asking made sense — quercetin and its kin block certain viruses from entering cells.",
+      "The folk reverence for the elder turned out to track real chemistry — quercetin in elderflower and its kin block certain viruses from entering cells.",
       "Elder is famous in Harry Potter as the wand wood and in Norse myth as the tree of Hel; its protective magic predates literature by millennia.",
       "Cordial, fritters, syrup, gin botanical — elderflower migrated from medicine to dessert without losing its identity.",
       "Saint-Germain liqueur, the cocktail bartender's elderflower staple, only launched in 2007 — the flower has been in cordial form for centuries, but the spirit is brand-new.",

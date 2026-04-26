@@ -217,7 +217,7 @@ export const WAIT_FACTS = {
   ],
   elderflower: [
     { type: "tradition", text: "Northern European folk wouldn't cut an elder without asking the Elder Mother first. Midsummer's flowers marked a turn of the year." },
-    { type: "fact",      text: "Modern virology found the asking made sense. Quercetin and its kin block certain viruses — notably influenza A — from entering cells." },
+    { type: "fact",      text: "The folk reverence for the elder turned out to track real chemistry — quercetin in elderflower and its kin block certain viruses, notably influenza A, from entering cells." },
     { type: "fact",      text: "Elderflower volatiles escape with the steam. Steep covered, always, or the perfume goes up the chimney." },
   ],
   linden: [
