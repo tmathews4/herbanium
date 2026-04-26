@@ -31,7 +31,11 @@ import { SessionRow } from "./HomeScreen";
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, saveComposedBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
+  // Save-prompt state for the forward (Vibe) compose flow.
+  const [saveName, setSaveName] = useState("");
+  const [savePromptOpen, setSavePromptOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null);
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
@@ -658,37 +662,110 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               </div>
             )}
 
-            {/* Primary action: brew the current blend. Placed at the
-                bottom of the card, after the user has seen ingredients,
-                stats, and any compromise warning. Decision-to-action
-                follows, rather than precedes, the context. Uses the
-                effective ingredient list so user additions carry through. */}
-            <button
-              disabled={blend.empty}
-              onClick={() => startBrew(
-                { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS },
-                "",
-                moods
-              )}
-              style={{
-                width: "100%", marginTop: 16,
-                fontFamily: ff.serif, fontSize: 16,
-                padding: "14px 16px", borderRadius: 10,
-                background: blend.empty ? theme.rule : theme.terra,
-                color: theme.cream, border: "none",
-                cursor: blend.empty ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              }}
-            >
-              <Kettle size={18} c={theme.cream} />
-              start brewing
-            </button>
+            {/* Save / brew row. Save prompts for a name (defaults to the
+                algorithm-suggested one); brew goes straight into Steep. */}
+            {savePromptOpen && (
+              <div style={{
+                marginTop: 14, padding: "10px 12px", borderRadius: 8,
+                background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+                display: "flex", flexDirection: "column", gap: 8,
+              }}>
+                <input
+                  autoFocus
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="name your blend"
+                  maxLength={48}
+                  style={{
+                    fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+                    background: "transparent", border: "none",
+                    borderBottom: `1px solid ${theme.terra}`,
+                    padding: "4px 2px", outline: "none",
+                  }}
+                />
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => { setSavePromptOpen(false); setSaveStatus(null); }}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 12, color: theme.ash,
+                      padding: "6px 12px", borderRadius: 999,
+                      background: "transparent", border: "none", cursor: "pointer",
+                    }}
+                  >cancel</button>
+                  <button
+                    onClick={() => {
+                      const id = saveComposedBlend && saveComposedBlend(
+                        { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS },
+                        saveName,
+                      );
+                      if (id) {
+                        setSaveStatus({ kind: "ok", text: `Saved as "${saveName.trim() || blend.name || 'Untitled blend'}"` });
+                        setSavePromptOpen(false);
+                        setSaveName("");
+                        setTimeout(() => setSaveStatus(null), 2000);
+                      }
+                    }}
+                    style={{
+                      fontFamily: ff.serif, fontSize: 14,
+                      padding: "6px 16px", borderRadius: 999,
+                      background: theme.ink, color: theme.cream,
+                      border: "none", cursor: "pointer",
+                    }}
+                  >save</button>
+                </div>
+              </div>
+            )}
+            {saveStatus && (
+              <div style={{
+                marginTop: 10, padding: "6px 10px", borderRadius: 8,
+                background: "rgba(98,124,92,0.10)", border: `1px solid ${theme.ruleSoft}`,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.sageDeep,
+                textAlign: "center",
+              }}>{saveStatus.text}</div>
+            )}
+            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+              <button
+                disabled={blend.empty}
+                onClick={() => {
+                  setSaveName(blend.name || "");
+                  setSavePromptOpen(true);
+                  setSaveStatus(null);
+                }}
+                style={{
+                  fontFamily: ff.sans, fontSize: 13, color: theme.terra,
+                  padding: "12px 18px", borderRadius: 10,
+                  background: "transparent", border: `1px solid ${theme.terra}`,
+                  cursor: blend.empty ? "not-allowed" : "pointer",
+                  opacity: blend.empty ? 0.4 : 1,
+                }}
+              >save</button>
+              <button
+                disabled={blend.empty}
+                onClick={() => startBrew(
+                  { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS },
+                  "",
+                  moods
+                )}
+                style={{
+                  flex: 1,
+                  fontFamily: ff.serif, fontSize: 16,
+                  padding: "14px 16px", borderRadius: 10,
+                  background: blend.empty ? theme.rule : theme.terra,
+                  color: theme.cream, border: "none",
+                  cursor: blend.empty ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}
+              >
+                <Kettle size={18} c={theme.cream} />
+                start brewing
+              </button>
+            </div>
           </div>
         </>
       )}
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} />
       )}
 
       {mode === "apothecary" && (() => {
@@ -941,7 +1018,10 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend }) => {
+  const [rcSaveName, setRcSaveName] = useState("");
+  const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
+  const [rcSaveStatus, setRcSaveStatus] = useState(null);
   const { unit, weightUnit } = useUnit();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -1209,8 +1289,81 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew }) =
         </div>
       )}
 
+      {rcSavePromptOpen && (
+        <div style={{
+          marginTop: 14, padding: "10px 12px", borderRadius: 8,
+          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+          display: "flex", flexDirection: "column", gap: 8,
+        }}>
+          <input
+            autoFocus
+            value={rcSaveName}
+            onChange={(e) => setRcSaveName(e.target.value)}
+            placeholder="name your blend"
+            maxLength={48}
+            style={{
+              fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+              background: "transparent", border: "none",
+              borderBottom: `1px solid ${theme.terra}`,
+              padding: "4px 2px", outline: "none",
+            }}
+          />
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button
+              onClick={() => { setRcSavePromptOpen(false); setRcSaveStatus(null); }}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.ash,
+                padding: "6px 12px", borderRadius: 999,
+                background: "transparent", border: "none", cursor: "pointer",
+              }}
+            >cancel</button>
+            <button
+              onClick={() => {
+                const id = saveComposedBlend && saveComposedBlend(
+                  { name: rcSaveName.trim() || "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS },
+                  rcSaveName,
+                );
+                if (id) {
+                  setRcSaveStatus({ kind: "ok", text: `Saved as "${rcSaveName.trim() || 'Untitled blend'}"` });
+                  setRcSavePromptOpen(false);
+                  setRcSaveName("");
+                  setTimeout(() => setRcSaveStatus(null), 2000);
+                }
+              }}
+              style={{
+                fontFamily: ff.serif, fontSize: 14,
+                padding: "6px 16px", borderRadius: 999,
+                background: theme.ink, color: theme.cream,
+                border: "none", cursor: "pointer",
+              }}
+            >save</button>
+          </div>
+        </div>
+      )}
+      {rcSaveStatus && (
+        <div style={{
+          marginTop: 10, padding: "6px 10px", borderRadius: 8,
+          background: "rgba(98,124,92,0.10)", border: `1px solid ${theme.ruleSoft}`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.sageDeep,
+          textAlign: "center",
+        }}>{rcSaveStatus.text}</div>
+      )}
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-        <button style={iconBtn()}>save as recipe</button>
+        <button
+          disabled={!saveComposedBlend || reverseIngs.length === 0}
+          onClick={() => {
+            setRcSaveName("");
+            setRcSavePromptOpen(true);
+            setRcSaveStatus(null);
+          }}
+          style={{
+            fontFamily: ff.sans, fontSize: 13, color: theme.terra,
+            padding: "12px 18px", borderRadius: 10,
+            background: "transparent", border: `1px solid ${theme.terra}`,
+            cursor: reverseIngs.length === 0 ? "not-allowed" : "pointer",
+            opacity: reverseIngs.length === 0 ? 0.4 : 1,
+          }}
+        >save</button>
         <button onClick={() => startBrew({ name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS }, "", ["calm"])} style={{
           flex: 1, fontFamily: ff.serif, fontSize: 16,
           padding: "12px 16px", borderRadius: 10,

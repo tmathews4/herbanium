@@ -430,6 +430,35 @@ export default function App() {
     }
   };
 
+  // Save a composed blend without brewing it first. Mints a local- id,
+  // persists into generatedBlends + LOCAL_BLENDS, and lands on the Shelf
+  // (savedBlendIds) and the Home favorites rail (favoriteBlendIds).
+  // Returns the new blend id so callers can confirm the save.
+  const saveComposedBlend = (blend, providedName) => {
+    const id = `local-${Date.now()}`;
+    const finalName = (providedName || "").trim() || blend.name || "Untitled blend";
+    const persisted = {
+      ...blend,
+      id,
+      name: finalName,
+      experimental: true,
+      synthetic: false,
+    };
+    LOCAL_BLENDS[id] = persisted;
+    setGeneratedBlends(prev => [...(prev || []), persisted]);
+    setSavedBlendIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setFavoriteBlendIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    return id;
+  };
+
   // Single favorite toggle — save and favorite are now one concept.
   // Updates both savedBlendIds and favoriteBlendIds in lockstep so legacy
   // call sites that read savedBlendIds (Profile stat, etc.) keep working
@@ -480,7 +509,7 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
       </div>
