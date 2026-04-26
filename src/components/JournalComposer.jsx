@@ -27,8 +27,10 @@ export const JournalComposer = ({ onSave, onCancel }) => {
   const [text, setText] = useState("");
   const [slots, setSlots] = useState({ thing: "", sound: "", color: "", feeling: "" });
   const [haikuSeed, setHaikuSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
+  const [haikuNote, setHaikuNote] = useState("");
   const [limSlots, setLimSlots] = useState({ name: "", place: "", action: "", object: "", feeling: "" });
   const [limSeed, setLimSeed] = useState(() => Math.floor(Math.random() * LIMERICK_TEMPLATE_COUNT));
+  const [limNote, setLimNote] = useState("");
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
   const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
@@ -43,9 +45,9 @@ export const JournalComposer = ({ onSave, onCancel }) => {
   const handleSave = () => {
     if (!ready) return;
     if (mode === "haiku") {
-      onSave(haikuPreview, "haiku");
+      onSave(haikuPreview, "haiku", haikuNote.trim());
     } else if (mode === "limerick") {
-      onSave(limerickPreview, "limerick");
+      onSave(limerickPreview, "limerick", limNote.trim());
     } else {
       onSave(text.trim(), "entry");
     }
@@ -157,6 +159,28 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               >shuffle</button>
             </div>
           )}
+
+          <div style={{ marginTop: 12 }}>
+            <label style={{
+              display: "block",
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+            }}>your notes (optional)</label>
+            <textarea
+              value={haikuNote}
+              onChange={(e) => setHaikuNote(e.target.value)}
+              placeholder="What inspired this verse, or what it means to you…"
+              rows={2}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+                background: "rgba(255,255,255,0.4)",
+                border: `1px dashed ${theme.rule}`, borderRadius: 8,
+                padding: "8px 10px", outline: "none",
+                resize: "vertical", minHeight: 50,
+              }}
+            />
+          </div>
         </>
       )}
 
@@ -221,6 +245,28 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               >shuffle</button>
             </div>
           )}
+
+          <div style={{ marginTop: 12 }}>
+            <label style={{
+              display: "block",
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+            }}>your notes (optional)</label>
+            <textarea
+              value={limNote}
+              onChange={(e) => setLimNote(e.target.value)}
+              placeholder="What inspired this limerick, or what it means to you…"
+              rows={2}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+                background: "rgba(255,255,255,0.4)",
+                border: `1px dashed ${theme.rule}`, borderRadius: 8,
+                padding: "8px 10px", outline: "none",
+                resize: "vertical", minHeight: 50,
+              }}
+            />
+          </div>
         </>
       )}
 

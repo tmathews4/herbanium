@@ -1715,6 +1715,15 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
         whiteSpace: "pre-line",
         fontStyle: isVerse ? "italic" : "normal",
       }}>{entry.text}</div>
+      {entry.note && (
+        <div style={{
+          marginTop: 8, paddingTop: 6,
+          borderTop: `1px dashed ${theme.ruleSoft}`,
+          fontFamily: ff.serif, fontSize: 12.5,
+          color: theme.inkSoft, lineHeight: 1.5,
+          whiteSpace: "pre-line",
+        }}>{entry.note}</div>
+      )}
       {onDelete && (
         <button
           onClick={() => {

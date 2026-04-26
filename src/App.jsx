@@ -446,7 +446,7 @@ export default function App() {
   // Append a free-form journal entry. Entries live alongside cup
   // sessions in the chronology and render via JournalEntryRow on the
   // Compose · Shelf · Journal tab.
-  const addJournalEntry = (text, kind) => {
+  const addJournalEntry = (text, kind, note) => {
     if (!text || !text.trim()) return;
     const validKind =
       kind === "haiku" ? "haiku"
@@ -457,6 +457,7 @@ export default function App() {
       ts: Date.now(),
       text: text.trim(),
       kind: validKind,
+      note: note && note.trim ? note.trim() : "",
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
   };
