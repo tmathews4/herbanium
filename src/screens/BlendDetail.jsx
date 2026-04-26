@@ -356,7 +356,17 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             `Steep covered for ${timeLabel}.`,
             "Strain into your cup. Inhale before sipping.",
           ];
-          const steps = tradSteps || fallbackSteps;
+          // Localize Celsius temperatures in curated direction strings to
+          // the user's selected temperature unit. Catches both bare and
+          // tilde-prefixed forms (e.g. "90°C", "~95°C", "above 85°C").
+          const localizeSteps = (raw) => {
+            if (unit !== "F") return raw;
+            return raw.map(s =>
+              s.replace(/(\d+)\s*°C/g, (_, c) =>
+                `${Math.round(Number(c) * 9 / 5 + 32)}°F`)
+            );
+          };
+          const steps = localizeSteps(tradSteps || fallbackSteps);
           const sourceLabel = tradSteps
             ? (b.tradition ? `${b.tradition} preparation` : "house preparation")
             : "simple steep";
