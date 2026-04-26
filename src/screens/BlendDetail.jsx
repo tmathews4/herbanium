@@ -327,6 +327,20 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
         )}
 
+        {/* Brew CTA — sits above Recommended Preparations so the action
+            is reachable without scrolling past the ritual notes. */}
+        <button onClick={onBrew} style={{
+          marginTop: 18, width: "100%",
+          fontFamily: ff.serif, fontSize: 17,
+          padding: "14px", borderRadius: 10,
+          background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+          boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
+        }}>
+          <Kettle size={20} c={theme.cream} />
+          Brew this cup →
+        </button>
+
         {/* Recommended Preparations — tradition-specific steps when curated,
             generic template otherwise. Sits after the predicted-mood/balance
             bars so the brewing science reads first, the ritual second. */}
@@ -495,17 +509,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
         )}
 
-        <button onClick={onBrew} style={{
-          marginTop: 22, width: "100%",
-          fontFamily: ff.serif, fontSize: 17,
-          padding: "14px", borderRadius: 10,
-          background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-          boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
-        }}>
-          <Kettle size={20} c={theme.cream} />
-          Brew this cup →
-        </button>
       </div>
     </div>
   );
