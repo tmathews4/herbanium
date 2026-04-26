@@ -259,7 +259,7 @@ const DRAW_OPTIONS = [
   { key: "calm",      label: "Calm",      note: "a settling, a softening" },
   { key: "focus",     label: "Focus",     note: "attention, the clear mind" },
   { key: "energy",    label: "Energy",    note: "lift, the spark to begin" },
-  { key: "sleepy",    label: "Sleepy",    note: "the drift toward rest" },
+  { key: "sleepy",    label: "Sleep",     note: "the drift toward rest" },
   { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup" },
   { key: "digestive", label: "Digestive", note: "fennel, after-supper ease" },
 ];
