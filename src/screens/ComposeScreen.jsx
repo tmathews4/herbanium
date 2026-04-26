@@ -990,6 +990,15 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               return true;
             });
             catEmpty = "No catalogue blends to show.";
+          } else if (catalogueFilter === "favorites") {
+            const fav = favoriteBlendIds || new Set();
+            const seen = new Set();
+            catVisible = [...traditional, ...experimental].filter(b => {
+              if (seen.has(b.id)) return false;
+              seen.add(b.id);
+              return fav.has(b.id);
+            });
+            catEmpty = "No favorites yet. Tap the star on a blend to mark it.";
           } else if (catalogueFilter === "traditional") {
             catVisible = traditional;
             catEmpty = "No traditional blends to show.";
@@ -1007,7 +1016,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               {subTabHeader}
               <div style={{ marginBottom: 10 }}>
                 <ChipRows
-                  items={["all", "traditional", "experimental", "calm", "focus", "energy", "comfort"]}
+                  items={["favorites", "all", "traditional", "experimental", "calm", "focus", "energy", "comfort"]}
                   renderItem={(f) => (
                     <Chip
                       key={f}
@@ -1017,6 +1026,16 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                   )}
                 />
               </div>
+
+              {catalogueFilter === "favorites" && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+                }}>
+                  Blends you've starred. Same set as your Home favorites — tap
+                  the star on any blend to add or remove it.
+                </div>
+              )}
 
               {catalogueFilter === "traditional" && (
                 <div style={{
