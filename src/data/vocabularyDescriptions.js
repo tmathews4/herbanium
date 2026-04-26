@@ -27,7 +27,7 @@ export const EFFECT_DESCRIPTIONS = {
     body: "Jasmine, bergamot, light oolongs, citrus-forward herbs. Darjeeling's muscatel character lifts this way.",
   },
   warming: {
-    summary: "TCM Yang energy. Generates internal heat.",
+    summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
     body: "Black teas, roasted oolongs, ripe pu-erh, ginger, cinnamon, cardamom, cloves. Ginger sets the catalog ceiling at 5.",
   },
   focus: {
@@ -43,7 +43,7 @@ export const EFFECT_DESCRIPTIONS = {
     body: "Heavier than calm — a downward drift. Valerian sets the ceiling at 5; reishi at 4; passionflower, chamomile, ashwagandha all in this register.",
   },
   cooling: {
-    summary: "TCM Yin energy. Refreshes, clarifies, reduces internal heat.",
+    summary: "Refreshes and clarifies. The settling-down register opposite warming.",
     body: "Green tea, white tea, hibiscus, mints, light oolongs. Distinct from menthol's mouthfeel cool, though the two can co-occur.",
   },
   grounding: {
@@ -99,7 +99,7 @@ export const EFFECT_DESCRIPTIONS = {
   },
   menthol: {
     summary: "Mouth-cooling sensation — TRPM8 activation.",
-    body: "Peppermint's menthol is sharp and direct; spearmint's carvone is gentler. Distinct from TCM 'cooling' (which is the felt-temperature mood); menthol is the physical mouthfeel.",
+    body: "Peppermint's menthol is sharp and direct; spearmint's carvone is gentler. Distinct from the cooling mood (felt-temperature register); menthol is the physical mouthfeel.",
   },
 };
 
@@ -201,7 +201,7 @@ export const FLAVOR_DESCRIPTIONS = {
   },
   mint: { summary: "Same as minty — cool aromatic register.", body: "Peppermint, spearmint, lemon balm's mint family edge." },
   cool: { summary: "Mouthfeel cooling — TRPM8 activation from menthol.", body: "Peppermint, lavender, eucalyptus." },
-  cooling: { summary: "Refreshing, clarifying register.", body: "Both mouthfeel (menthol) and effect (TCM Yin) — they often co-occur." },
+  cooling: { summary: "Refreshing, clarifying register.", body: "Both mouthfeel (menthol) and felt-temperature effect — they often co-occur." },
   fresh: { summary: "Just-picked-greens register.", body: "Sencha, lemongrass, dandelion leaf." },
 
   // ── Mouthfeel ──
