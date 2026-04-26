@@ -962,7 +962,7 @@ import {
  *                     ingredient warnings would have fired)
  *   }
  */
-export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false) {
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
@@ -1165,7 +1165,11 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     if (timeS > sMax + TRADITION_TIME_TOLERANCE_S) return true;
     return false;
   });
-  const traditionNote = atCuratedBaseline && meaningfulDeviation;
+  // Tradition-over-literature note only makes sense for actual traditional
+  // preparations. Experimental and synthetic blends are still "curated" (we
+  // pass a baseline for warning suppression) but they don't carry centuries
+  // of practice — firing the note on them would misattribute their brew.
+  const traditionNote = atCuratedBaseline && meaningfulDeviation && isTraditional;
 
   // Merge cup-level and individual warnings. Drop a cup-level tannin
   // duplicate if any individual warning of the same kind already fires

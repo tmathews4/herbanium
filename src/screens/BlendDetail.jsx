@@ -315,6 +315,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           defaultTempC={b.tempC}
           defaultTimeS={b.timeS}
           curated
+          isTraditional={!!b.tradition}
         />
         {b.ml && (
           <div style={{

@@ -90,6 +90,10 @@ export const BlendExtractionExplorer = ({
   experimental = false,     // user-built blend — every warning fires
                             // immediately, no baseline-at-rest suppression.
                             // The user is exploring; spell out what's wrong.
+  isTraditional = false,    // genuine cultural tradition (chai, sencha…).
+                            // Required for the tradition-over-literature
+                            // notice to fire; experimentals and synths
+                            // shouldn't claim that lineage.
 }) => {
   const { unit } = useUnit();
 
@@ -134,7 +138,7 @@ export const BlendExtractionExplorer = ({
   // warning fires immediately.
   const brew = experimental
     ? resolveBlendAtBrew(ingredients, tempC, timeS)
-    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated);
+    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated, isTraditional);
 
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.
