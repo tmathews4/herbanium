@@ -45,9 +45,17 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
 
   // Past brews of this blend — only meaningful if the blend has an id (saved
   // or previously-logged). Freshly-composed blends won't have prior sessions.
-  const pastSessions = React.useMemo(() => {
+  // Filter to sessions that actually carry a written note from the user
+  // (steep-time intent or post-brew log note); blank-noted sessions are
+  // skipped so the panel reads as a notebook of what you've written, not
+  // a generic brew log.
+  const pastNoteSessions = React.useMemo(() => {
     if (!sessions || !blend.id) return [];
-    return sessions.filter(s => s.who === "you" && s.blendId === blend.id);
+    return sessions.filter(s =>
+      s.who === "you"
+      && s.blendId === blend.id
+      && ((s.intent && s.intent.trim()) || (s.note && s.note.trim()))
+    );
   }, [sessions, blend.id]);
 
   // Build the "while you wait" pool once per brew. Memoized to avoid
@@ -151,16 +159,16 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
         <button
-          onClick={() => pastSessions.length > 0 && setNotesOpen(true)}
-          disabled={pastSessions.length === 0}
+          onClick={() => pastNoteSessions.length > 0 && setNotesOpen(true)}
+          disabled={pastNoteSessions.length === 0}
           style={{
             background: "transparent", border: "none",
-            color: pastSessions.length === 0 ? theme.ruleSoft : theme.ash,
+            color: pastNoteSessions.length === 0 ? theme.ruleSoft : theme.ash,
             fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-            cursor: pastSessions.length === 0 ? "not-allowed" : "pointer",
+            cursor: pastNoteSessions.length === 0 ? "not-allowed" : "pointer",
           }}
         >
-          notes{pastSessions.length > 0 && ` (${pastSessions.length})`}
+          notes{pastNoteSessions.length > 0 && ` (${pastNoteSessions.length})`}
         </button>
       </div>
 
@@ -429,7 +437,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div>
                 <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-                  Past brews
+                  Notes from past brews
                 </div>
                 <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ink, marginTop: 2 }}>
                   {blend.name}
@@ -445,46 +453,43 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
               >close</button>
             </div>
             <div style={{ overflowY: "auto", flex: 1 }}>
-              {pastSessions.length === 0 ? (
+              {pastNoteSessions.length === 0 ? (
                 <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, padding: "20px 0", textAlign: "center" }}>
-                  No past brews logged yet.
+                  No notes from past brews of this cup yet. Whatever you write
+                  in the steep notes field — or in the log after — will land here
+                  for next time.
                 </div>
               ) : (
-                pastSessions.map((s, i) => (
-                  <div key={s.id} style={{
-                    padding: "12px 0",
-                    borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                  }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-                      <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft }}>
-                        {s.intent ? <em>{s.intent}</em> : <span style={{ color: theme.ash }}>—</span>}
-                        {" → "}
-                        <em style={{ color: theme.terra }}>{s.actual}</em>
-                      </div>
-                      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash }}>
+                pastNoteSessions.map((s, i) => {
+                  const intent = (s.intent || "").trim();
+                  const note = (s.note || "").trim();
+                  return (
+                    <div key={s.id} style={{
+                      padding: "12px 0",
+                      borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                    }}>
+                      <div style={{
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                        color: theme.ash, marginBottom: 4,
+                      }}>
                         {s.ago}
                       </div>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                      <div style={{ display: "flex", gap: 2 }}>
-                        {[1,2,3,4,5].map(n => (
-                          <span key={n} style={{
-                            width: 5, height: 5, borderRadius: "50%",
-                            background: n <= (s.taste || 0) ? theme.terra : theme.ruleSoft,
-                          }} />
-                        ))}
-                      </div>
-                      {s.note && (
+                      {intent && (
                         <div style={{
-                          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.inkSoft,
-                          textAlign: "right", marginLeft: 12, flex: 1,
-                        }}>
-                          {s.note}
-                        </div>
+                          fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                          lineHeight: 1.5, whiteSpace: "pre-line",
+                        }}>{intent}</div>
+                      )}
+                      {note && (
+                        <div style={{
+                          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                          color: theme.inkSoft, lineHeight: 1.5, marginTop: intent ? 6 : 0,
+                          whiteSpace: "pre-line",
+                        }}>{note}</div>
                       )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
