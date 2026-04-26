@@ -256,7 +256,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             <VocabInfoCard
               term={openMood}
               summary={EFFECT_DESCRIPTIONS[openMood].summary}
-              body={EFFECT_DESCRIPTIONS[openMood].body}
               tone="sage"
               onClose={() => setOpenMood(null)}
             />
