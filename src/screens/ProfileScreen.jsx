@@ -191,7 +191,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       </div>
 
       {/* self-knowledge */}
-      <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">What you've learned about yourself</SectionLabel></div>
+      <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">Animis Altar</SectionLabel></div>
       <div style={{
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
