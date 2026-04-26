@@ -147,7 +147,7 @@ const INGREDIENTS = {
     flavors: ["grassy", "hay", "delicate"],
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
     dose: "1 tsp · 200ml",
-    headsUp: "Sedative — avoid combining with other sedatives or alcohol, and don't drive after. Not for pregnancy.",
+    headsUp: "Strong calming herb — talk to your doctor before combining with sedative medications or alcohol, and skip driving after. Not for use during pregnancy.",
     blurb: "Spanish missionaries read the Passion of Christ in its anatomy — the corona for the crown of thorns, the three styles for the nails. The cup is quieter than the imagery: chrysin and apigenin in the leaves bind GABA receptors and reliably ease anxiety. The folk drowsiness is real and replicated in trials.",
     facts: [
       "Passionflower is indigenous to the southeastern United States — used by Cherokee, Houma, and Seminole peoples long before European contact.",
@@ -372,7 +372,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 3, astringent: 3, earthy: 5, sweet: 1, umami: 1 },
     pairs: ["cinnamon", "cardamom", "ginger", "rooibos", "tulsi", "reishi"],
     dose: "½–1 tsp powder · 250ml",
-    headsUp: "Avoid in pregnancy. Interacts with thyroid medication and sedatives. Caution with autoimmune conditions.",
+    headsUp: "Talk to your doctor before using if pregnant, on thyroid or sedative medications, or living with an autoimmune condition. Effects build over weeks, not from a single cup.",
     blurb: "Ashva-gandha is Sanskrit for 'smell of horse' — the root has a musky scent and Ayurveda taught that drinking it would grant a horse's strength. The withanolides inside won't quite manage that, but trials confirm they reduce cortisol and improve sleep over six to eight weeks of daily use. Strength in this telling is patience.",
     facts: [
       "Ashwagandha — ashva-gandha in Sanskrit means 'smell of horse' — the root smells musky and was thought to grant a horse's strength.",
@@ -571,7 +571,7 @@ const INGREDIENTS = {
     basicTastes: { pungent: 4, bitter: 2, astringent: 2, sweet: 1, sour: 1, umami: 1 },
     pairs: ["turmeric", "cinnamon", "cardamom", "ginger", "cloves", "assam"],
     dose: "1–3 cracked peppercorns · 250ml (5–10 in chai)",
-    headsUp: "Tea-strength is below interaction threshold. Concentrated piperine supplements affect drug metabolism (CYP3A4, P-gp); discontinue 2 weeks pre-surgery.",
+    headsUp: "A pinch in tea is gentle. Concentrated piperine supplements can affect how the body metabolizes some medications — talk to your doctor if you take prescriptions, especially before surgery.",
     blurb: "Roman empresses paid taxes in peppercorns; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
     facts: [
       "Roman empresses paid in peppercorns; Vasco da Gama crossed an ocean for them.",
@@ -692,7 +692,7 @@ const INGREDIENTS = {
     basicTastes: { umami: 5, sweet: 2, bitter: 2, astringent: 1 },
     pairs: [],
     dose: "1–2g powder · 60–80ml (whisk)",
-    headsUp: "Whole-leaf consumption — verify low-lead source. High caffeine at ceremonial grade. Significant Vitamin K (warfarin interaction).",
+    headsUp: "Source from a quality grower — whole-leaf consumption makes lead-free sourcing matter. Strong caffeine at ceremonial grade. High in vitamin K, so consistency matters if you take warfarin.",
     blurb: "Brought from Song China to Japanese monasteries in the twelfth century by the monk Eisai — a powdered tea for keeping zazen. Drinking the leaf instead of straining it changes the math: every catechin, every theanine, all the way down. The L-theanine-to-caffeine ratio is what produces the calm-focus the monks named — modern EEG studies confirm the alpha-wave shift.",
     facts: [
       "Matcha — brought from Song China to Japanese monasteries in the twelfth century by the monk Eisai — a powdered tea for keeping zazen during long meditation.",
@@ -1001,7 +1001,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 4, astringent: 3, earthy: 3, sweet: 0, umami: 1 },
     pairs: ["lemongrass", "peppermint", "ginger"],
     dose: "1–2g · 200ml or 30–50g for gourd session",
-    headsUp: "Drink at 70–85°C — very hot temperature carries esophageal cancer risk (IARC 2A). Moderate caffeine; cumulative across refills.",
+    headsUp: "Brew at 70–85°C — drinking liquids near boiling has been associated with esophageal irritation. Moderately caffeinated; refills add up.",
     blurb: "The Guaraní drank it long before the Jesuits arrived to cultivate it; the gourd passed counterclockwise around a circle is older than any country in South America. Three xanthines share the lift — caffeine, theobromine, theophylline — where coffee has only the first. The folk claim of 'lift without the crash' has chemistry behind it: theobromine's longer half-life smooths the descent.",
     facts: [
       "The Guaraní drank yerba mate long before the Jesuits arrived to cultivate it; the gourd passed counterclockwise around a circle is older than any country in South America.",
@@ -1048,8 +1048,8 @@ const INGREDIENTS = {
     basicTastes: { bitter: 4, astringent: 3, earthy: 4, pungent: 3, sweet: 0 },
     pairs: ["lemonbalm", "chamomile", "lavender", "passionflower"],
     dose: "1–2 tsp root · 250ml",
-    headsUp: "Sedating — do not drive or combine with alcohol or benzodiazepines. ~5–10% feel paradoxically stimulated. Limit continuous use to 4–6 weeks. Avoid in pregnancy.",
-    blurb: "Medieval herbalists called it All-Heal; cats roll in it like catnip; trench soldiers in the First World War were prescribed it for shell shock. The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net. Use respectfully and never alongside other sedatives.",
+    headsUp: "Strong calming herb — don't drive after, and skip combining with alcohol or sedative medications. About 1 in 10 people find it paradoxically stimulating. Best as a short course (a few weeks at a time). Not for use during pregnancy.",
+    blurb: "Medieval herbalists called it All-Heal; cats roll in it like catnip; trench soldiers in the First World War were given it for nerves. The cheese-funk smell is valerenic acid, which binds the same receptor pocket as the benzodiazepine family. Use respectfully and never alongside sedative medications or alcohol.",
     facts: [
       "Medieval herbalists called valerian All-Heal; cats roll in it; trench veterans of the First World War were prescribed it for nerves.",
       "The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net.",
@@ -1091,7 +1091,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 2, astringent: 2, aromatic: 2, sweet: 1, tingling: 2 },
     pairs: ["elderflower", "ginger"],
     dose: "1–2 tsp · 250ml",
-    headsUp: "Ragweed/asteraceae cross-allergy possible. Caution with autoimmune conditions and immunosuppressants. Limit to 8–10 weeks traditional.",
+    headsUp: "Daisy-family cross-allergy is possible. Talk to your doctor before using if you have an autoimmune condition or take immune-modulating medications. Traditionally taken in short courses, not continuously.",
     blurb: "Plains tribes — Lakota, Cheyenne, Comanche — pressed the root against snakebite and chewed it for sore throat. The tongue-tingle is real chemistry: alkamides binding the cannabinoid receptor family right on the surface of the mouth, where you can feel them work. The folk prescription for the immune system has mixed but real trial support; the tingle, at least, is unambiguous.",
     facts: [
       "Plains tribes — Lakota, Cheyenne, Comanche — pressed echinacea root against snakebite and chewed it for sore throat.",
@@ -1130,7 +1130,7 @@ const INGREDIENTS = {
     basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },
     pairs: ["echinacea", "peppermint", "ginger", "linden", "rose"],
     dose: "1–2 tsp · 250ml",
-    headsUp: "Use only the flowers — leaves, bark, and raw berries contain cyanogenic glycosides. Avoid S. racemosa.",
+    headsUp: "Use only the dried flowers — the leaves, bark, and raw berries are not edible. Avoid the red-berried Sambucus racemosa species.",
     blurb: "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers marked a turn of the year. Modern virology found the asking made sense — quercetin and its kin block certain viruses (notably influenza A) from entering cells. Steep covered, always, or the volatile flavonoids escape with the steam.",
     facts: [
       "Northern European folk wouldn't cut an elder without asking the Elder Mother first; midsummer's flowers were a turn of the year.",
@@ -1213,7 +1213,7 @@ const INGREDIENTS = {
     basicTastes: { sweet: 5, aromatic: 3, bitter: 1, astringent: 1, umami: 1 },
     pairs: ["ginger", "cinnamon", "fennel", "peppermint"],
     dose: "½–1 tsp · 250ml — less is more",
-    headsUp: "Real risk of pseudoaldosteronism (BP↑, K+↓) above 3g/day or 4–6 weeks continuous. Avoid if hypertensive, pregnant, or on diuretics/digoxin.",
+    headsUp: "More than ~3g per day or several weeks of continuous use can raise blood pressure and lower potassium. Talk to your doctor before using if you have heart, kidney, or blood-pressure conditions, are pregnant, or take diuretics or digoxin.",
     blurb: "Found in sixty percent of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs. Glycyrrhizin is fifty times sweeter than sugar, and the same molecule slows the liver's clearance of cortisol — which is why high daily doses can raise blood pressure and lower potassium. Treat it as you'd treat any sweet thing: fondly, in moderation.",
     facts: [
       "Found in 60% of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs.",
@@ -1266,7 +1266,7 @@ const INGREDIENTS = {
     basicTastes: { earthy: 3, mineral: 3, umami: 2, bitter: 1, sweet: 1 },
     pairs: ["lemonbalm", "peppermint", "rooibos", "dandelion-leaf", "dandelion-root"],
     dose: "1–2 tsp · 250ml",
-    headsUp: "Significant Vitamin K — warfarin interaction. Mild diuretic; modest glucose lowering.",
+    headsUp: "High in vitamin K — talk to your doctor if you take warfarin so your dose stays consistent. Gently diuretic and may modestly affect blood sugar.",
     blurb: "Roman legionaries slapped their bare legs with fresh stalks against the British cold; Scottish boys passed a rite by grasping a fistful unflinching. The sting is real chemistry — histamine, formic acid, and serotonin loaded into hollow leaf hairs — and a quick steep dismantles every one. Spring's reproach turned tonic, rich in iron and silica.",
     facts: [
       "Roman legionaries slapped their legs with fresh nettle stalks against the cold; Scottish boys passed a rite by grasping a fistful unflinching.",
@@ -1312,7 +1312,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 4, astringent: 3, earthy: 3, umami: 1, sweet: 2 },
     pairs: ["cinnamon", "cardamom", "vanilla", "dandelion-leaf"],
     dose: "1–2 tsp roasted · 250ml",
-    headsUp: "Avoid with active gallbladder disease, ulcer, or gastritis. Asteraceae/ragweed cross-allergy possible.",
+    headsUp: "Skip if you have active gallbladder, ulcer, or gastritis issues. Daisy-family cross-allergy is possible.",
     blurb: "Roasted and ground as ersatz coffee through both World Wars when the bean was rationed — bittersweet, caramel, almost convincing. The bitter is sesquiterpene lactones, which provoke bile and digestive juices the way the body intends a meal-starter to. The sweetness is inulin, a prebiotic the gut bacteria treat as a long meal of their own.",
     facts: [
       "Dandelion root — roasted as coffee through both World Wars when the real bean was rationed — bittersweet, caramel, almost convincing.",
@@ -1357,7 +1357,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 3, astringent: 2, mineral: 3, umami: 1, sweet: 1, sour: 1 },
     pairs: ["nettle", "lemonbalm", "peppermint", "dandelion-root"],
     dose: "1–2 tsp · 250ml",
-    headsUp: "Significant Vitamin K — warfarin interaction. Mild diuretic; high in potassium (potassium-sparing, unique).",
+    headsUp: "High in vitamin K — talk to your doctor if you take warfarin so your dose stays consistent. Gently diuretic but unusually rich in potassium, so it doesn't deplete potassium the way many diuretics do.",
     blurb: "Italian and Greek spring foragers fill bags with the bitter leaves before the flowers open. The French pissenlit (literally 'piss the bed') is honest reporting — the cup is reliably diuretic. Unlike most diuretics, the leaf is itself rich in potassium, so the body doesn't lose what it most needs to keep. Folk botany solving its own side effect.",
     facts: [
       "Italian and Greek spring foragers fill bags with dandelion's bitter leaves before the flowers open.",
@@ -1408,7 +1408,7 @@ const INGREDIENTS = {
     basicTastes: { bitter: 5, astringent: 3, earthy: 4, umami: 1, sweet: 0 },
     pairs: ["ashwagandha", "cinnamon", "lions-mane"],
     dose: "3–9g sliced · 500ml decoction",
-    headsUp: "Anticoagulant and antiplatelet effects — caution with blood thinners. Long decoction required; not casual sipping.",
+    headsUp: "Mild blood-thinning effect — talk to your doctor first if you take blood thinners or are scheduled for surgery. Needs a long simmer, not a casual cup.",
     blurb: "Taoist painters drew it in the hands of immortals; Chinese emperors hoarded wild specimens until reliable cultivation began in the 1970s. The bitter is triterpenes, the same family found in licorice and ginseng — fat-soluble, slow-extracting, and the reason the cup needs a long decoction sweetened with jujube and goji. Modern trials show real immune modulation; the immortality claim remains pending.",
     facts: [
       "Reishi — taoist painters drew it in the hands of immortals; Chinese emperors hoarded wild specimens, and reliable cultivation only began in the 1970s.",
@@ -1451,7 +1451,7 @@ const INGREDIENTS = {
     basicTastes: { umami: 3, sweet: 2, bitter: 1, astringent: 1, earthy: 2 },
     pairs: ["cinnamon", "vanilla", "reishi"],
     dose: "2–3g · 250ml",
-    headsUp: "Mushroom allergy is absolute contraindication. Mild antiplatelet; effects build over weeks, not acute.",
+    headsUp: "Skip if you have a mushroom allergy. Mildly blood-thinning. Effects build over weeks, not from a single cup.",
     blurb: "Japan's yamabushi mountain ascetics saw the white cascading tufts and named it after themselves — yamabushitake, mountain-priest's mushroom. Inside it: hericenones and erinacines, compounds that prompt the brain to produce more nerve growth factor. The folk reputation for sharpening the mind has held up better in the lab than most mushroom claims.",
     facts: [
       "Japan's yamabushi mountain ascetics saw the white cascading tufts and named the mushroom for themselves — yamabushitake, mountain-priest's mushroom.",

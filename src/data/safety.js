@@ -25,40 +25,40 @@ const allIn = (set, ids) => ids.every(id => set.has(id));
 const countIn = (set, ids) => ids.reduce((n, id) => n + (set.has(id) ? 1 : 0), 0);
 
 export const INGREDIENT_INTERACTIONS = [
-  // ─── HIGH severity — block in generators, red banner in UI ─────
+  // ─── HIGH severity — blocked in generators, red banner in UI ───
   {
     id: "licorice-hibiscus",
     severity: "high",
     title: "Licorice + hibiscus",
-    message: "Licorice raises blood pressure and depletes potassium; hibiscus lowers blood pressure. Together they pull in opposite directions and can destabilize electrolytes.",
+    message: "Licorice can raise blood pressure; hibiscus can lower it. Together they can be unpredictable on the cardiovascular system — talk to your doctor first, especially if you take heart or blood-pressure medications.",
     test: ids => allIn(ids, ["licorice-root", "hibiscus"]),
   },
   {
     id: "licorice-nettle",
     severity: "high",
     title: "Licorice + nettle",
-    message: "Licorice depletes potassium; nettle is mildly diuretic. Combined daily this stack can lower potassium far enough to affect heart rhythm.",
+    message: "Licorice can lower potassium and nettle is gently diuretic — together they can amplify potassium loss enough to affect heart rhythm. Talk to your doctor before combining daily.",
     test: ids => allIn(ids, ["licorice-root", "nettle"]),
   },
   {
     id: "licorice-dandelion-leaf",
     severity: "high",
     title: "Licorice + dandelion leaf",
-    message: "Licorice depletes potassium; dandelion leaf is a documented diuretic. The combination amplifies electrolyte loss and is unsafe with heart or kidney conditions.",
+    message: "Licorice can lower potassium and dandelion leaf is a diuretic. The combination can amplify electrolyte changes — talk to your doctor first if you have heart or kidney conditions.",
     test: ids => allIn(ids, ["licorice-root", "dandelion-leaf"]),
   },
   {
     id: "licorice-dandelion-root",
     severity: "high",
     title: "Licorice + dandelion root",
-    message: "Licorice depletes potassium; dandelion root is diuretic and gallbladder-active. The pair is unsafe with hypertension, heart disease, or active gallbladder issues.",
+    message: "Licorice can lower potassium and dandelion root is diuretic and gallbladder-active. Talk to your doctor before combining, especially with high blood pressure, heart conditions, or active gallbladder issues.",
     test: ids => allIn(ids, ["licorice-root", "dandelion-root"]),
   },
   {
     id: "valerian-ashwagandha",
     severity: "high",
     title: "Valerian + ashwagandha",
-    message: "Valerian is a benzodiazepine-like sedative; ashwagandha is sedating and HPA-axis active. Stacking them is heavy CNS depression — do not combine, and never drive after either.",
+    message: "Both are strongly calming. Combining them stacks sedation more than expected — talk to your doctor first, and don't drive after either.",
     test: ids => allIn(ids, ["valerian", "ashwagandha"]),
   },
 
@@ -67,35 +67,35 @@ export const INGREDIENT_INTERACTIONS = [
     id: "echinacea-reishi",
     severity: "moderate",
     title: "Echinacea + reishi",
-    message: "Echinacea stimulates short-term immune response; reishi modulates it over weeks. They pull on the same system in opposite directions — pick one lane, especially with autoimmune conditions.",
+    message: "Echinacea is associated with short-term immune support; reishi is associated with longer-term immune modulation. They work in opposite directions — pick one path, especially with autoimmune conditions.",
     test: ids => allIn(ids, ["echinacea", "reishi"]),
   },
   {
     id: "echinacea-ashwagandha",
     severity: "moderate",
     title: "Echinacea + ashwagandha",
-    message: "Echinacea stimulates immune response; ashwagandha modulates it. They work against each other and both warrant caution with autoimmune conditions.",
+    message: "Echinacea is associated with short-term immune support; ashwagandha is associated with immune modulation. They work in opposite directions — both warrant caution with autoimmune conditions.",
     test: ids => allIn(ids, ["echinacea", "ashwagandha"]),
   },
   {
     id: "sedative-trifecta",
     severity: "moderate",
-    title: "Heavy sedative stack",
-    message: "Three or more strong sedative herbs in one cup compound CNS depression. Safe occasionally; do not drive, and avoid pairing with alcohol or sleep medications.",
+    title: "Heavy calming stack",
+    message: "Three or more strongly calming herbs in one cup stack sedation more than expected. Fine occasionally; don't drive after, and skip pairing with alcohol or sleep medications.",
     test: ids => countIn(ids, ["valerian", "passionflower", "chamomile", "lavender", "lemonbalm", "ashwagandha"]) >= 3,
   },
   {
     id: "vitamin-k-stack",
     severity: "moderate",
     title: "Nettle + dandelion leaf — vitamin K",
-    message: "Both are significantly high in vitamin K. If you take warfarin, inconsistent intake of this pair will destabilize INR — stay consistent or skip the combo.",
+    message: "Both are high in vitamin K. If you take warfarin, inconsistent intake of this pair can affect your dose — stay consistent or talk to your doctor.",
     test: ids => allIn(ids, ["nettle", "dandelion-leaf"]),
   },
   {
     id: "antiplatelet-stack",
     severity: "moderate",
-    title: "Antiplatelet herb stack",
-    message: "Reishi, lion's mane, ginger, and turmeric are each mildly antiplatelet. Two or more stacked daily compound the effect — relevant if you take aspirin, warfarin, or other blood thinners.",
+    title: "Mildly blood-thinning stack",
+    message: "Reishi, lion's mane, ginger, and turmeric each have mild blood-thinning properties. Two or more daily can compound the effect — talk to your doctor first if you take blood thinners or are scheduled for surgery.",
     test: ids => countIn(ids, ["reishi", "lions-mane", "ginger", "turmeric"]) >= 3,
   },
 ];

@@ -726,7 +726,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                     color: high ? "rgb(176, 64, 48)" : theme.ochre,
                     fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
                     letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
-                  }}>{high ? "do not combine" : "heads up"} · {flag.title}</em>
+                  }}>{high ? "skip this combination" : "heads up"} · {flag.title}</em>
                   {flag.message}
                 </div>
               );
@@ -1298,7 +1298,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 color: high ? "rgb(176, 64, 48)" : theme.ochre,
                 fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
                 letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
-              }}>{high ? "do not combine" : "heads up"} · {flag.title}</em>
+              }}>{high ? "skip this combination" : "heads up"} · {flag.title}</em>
               {flag.message}
             </div>
           );
