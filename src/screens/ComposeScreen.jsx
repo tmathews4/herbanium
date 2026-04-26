@@ -820,11 +820,12 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             {/* Confirm-before-brew dialog for custom unsaved blends. */}
             {brewAsk && pendingBrew && (
               <BrewSavePrompt
-                onSaveAndBrew={() => {
+                defaultName={pendingBrew.candidate.name}
+                onSaveAndBrew={(chosenName) => {
                   if (saveComposedBlend) {
-                    const id = saveComposedBlend(pendingBrew.candidate, pendingBrew.candidate.name);
+                    const id = saveComposedBlend(pendingBrew.candidate, chosenName);
                     if (id) {
-                      const persisted = { ...pendingBrew.candidate, id };
+                      const persisted = { ...pendingBrew.candidate, id, name: chosenName };
                       startBrew(persisted, "", pendingBrew.moods);
                     }
                   }
@@ -1497,11 +1498,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
       {rcBrewAsk && rcPendingBrew && (
         <BrewSavePrompt
-          onSaveAndBrew={() => {
+          defaultName={rcPendingBrew.candidate.name}
+          onSaveAndBrew={(chosenName) => {
             if (saveComposedBlend) {
-              const id = saveComposedBlend(rcPendingBrew.candidate, rcPendingBrew.candidate.name);
+              const id = saveComposedBlend(rcPendingBrew.candidate, chosenName);
               if (id) {
-                const persisted = { ...rcPendingBrew.candidate, id };
+                const persisted = { ...rcPendingBrew.candidate, id, name: chosenName };
                 startBrew(persisted, "", rcPendingBrew.moods);
               }
             }
@@ -1535,71 +1537,100 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    Backdrop tap closes via the cancel handler.
    ────────────────────────────────────────────────────────────── */
 
-const BrewSavePrompt = ({ onSaveAndBrew, onJustBrew, onCancel }) => (
-  <div
-    onClick={onCancel}
-    style={{
-      position: "fixed", inset: 0, zIndex: 220,
-      background: "rgba(40, 30, 20, 0.35)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "0 24px",
-    }}
-  >
+const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) => {
+  // Pre-fill with the blend's algorithmic name, but treat the reverse-
+  // compose placeholder ("Untitled blend") as empty so the user is
+  // nudged to write something of their own.
+  const seed = (defaultName && defaultName !== "Untitled blend") ? defaultName : "";
+  const [name, setName] = useState(seed);
+  const trimmed = name.trim();
+  const canSave = trimmed.length > 0;
+
+  return (
     <div
-      onClick={(e) => e.stopPropagation()}
+      onClick={onCancel}
       style={{
-        maxWidth: 360, width: "100%",
-        background: theme.cream,
-        border: `1px solid ${theme.ruleSoft}`,
-        borderRadius: 12,
-        padding: "18px 20px",
-        boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
+        position: "fixed", inset: 0, zIndex: 220,
+        background: "rgba(40, 30, 20, 0.35)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 24px",
       }}
     >
-      <div style={{
-        fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-        lineHeight: 1.35, marginBottom: 6,
-      }}>
-        Save this blend first?
-      </div>
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-        color: theme.inkSoft, lineHeight: 1.5, marginBottom: 14,
-      }}>
-        It isn't in your catalogue yet. Save it now and you'll find it
-        again later — or just brew it and decide after.
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <button
-          onClick={onSaveAndBrew}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: 360, width: "100%",
+          background: theme.cream,
+          border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: 12,
+          padding: "18px 20px",
+          boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
+        }}
+      >
+        <div style={{
+          fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+          lineHeight: 1.35, marginBottom: 6,
+        }}>
+          Save this blend first?
+        </div>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
+        }}>
+          It isn't in your catalogue yet. Name it to save and brew, or
+          skip and brew it without saving.
+        </div>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && canSave) onSaveAndBrew(trimmed); }}
+          autoFocus
+          maxLength={48}
+          placeholder="name your blend"
           style={{
-            fontFamily: ff.serif, fontSize: 14,
-            padding: "10px 14px", borderRadius: 999,
-            background: theme.ink, color: theme.cream,
-            border: "none", cursor: "pointer",
+            width: "100%", boxSizing: "border-box",
+            fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+            background: "transparent",
+            border: "none", borderBottom: `1px solid ${theme.terra}`,
+            padding: "6px 2px", outline: "none",
+            marginBottom: 14,
           }}
-        >save & brew</button>
-        <button
-          onClick={onJustBrew}
-          style={{
-            fontFamily: ff.serif, fontSize: 14,
-            padding: "10px 14px", borderRadius: 999,
-            background: "transparent", color: theme.terra,
-            border: `1px solid ${theme.terra}`, cursor: "pointer",
-          }}
-        >brew without saving</button>
-        <button
-          onClick={onCancel}
-          style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-            background: "transparent", border: "none",
-            color: theme.ash, cursor: "pointer", padding: "6px 10px",
-          }}
-        >cancel</button>
+        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <button
+            onClick={() => canSave && onSaveAndBrew(trimmed)}
+            disabled={!canSave}
+            style={{
+              fontFamily: ff.serif, fontSize: 14,
+              padding: "10px 14px", borderRadius: 999,
+              background: canSave ? theme.ink : theme.rule,
+              color: theme.cream, border: "none",
+              cursor: canSave ? "pointer" : "not-allowed",
+            }}
+          >save & brew</button>
+          <button
+            onClick={onJustBrew}
+            style={{
+              fontFamily: ff.serif, fontSize: 14,
+              padding: "10px 14px", borderRadius: 999,
+              background: "transparent", color: theme.terra,
+              border: `1px solid ${theme.terra}`, cursor: "pointer",
+            }}
+          >brew without saving</button>
+          <button
+            onClick={onCancel}
+            style={{
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+              background: "transparent", border: "none",
+              color: theme.ash, cursor: "pointer", padding: "6px 10px",
+            }}
+          >cancel</button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RestoreDeletedPanel = ({ hiddenBlendIds, unhideBlend }) => {
   const [open, setOpen] = useState(false);
