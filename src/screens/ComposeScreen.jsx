@@ -17,6 +17,7 @@ import {
   BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
 } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
+import { checkIngredientInteractions } from "../data/safety";
 import { getBlend, iconBtn } from "../helpers/misc";
 import {
   ff, theme,
@@ -168,6 +169,13 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   const liveOutsiders = atCuratedBaseline
     ? []
     : (liveBrew.perIngredient || []).filter(c => !c.inRange && (c.role === "lead" || c.role == null));
+
+  // Ingredient-interaction safety flags (high + moderate). Surfaced
+  // below the temperature-compromise banner so the user sees both
+  // brewing and safety considerations in one place.
+  const safetyFlags = !blend.empty
+    ? checkIngredientInteractions(effectiveIngredients)
+    : [];
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -662,6 +670,30 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
               </div>
             )}
 
+            {/* Ingredient-interaction safety banners. High-severity
+                stacks (e.g. licorice + a diuretic herb, valerian +
+                ashwagandha) read red; moderate ones (additive sedation,
+                vitamin-K stack, antiplatelet stack) read yellow. */}
+            {safetyFlags.map(flag => {
+              const high = flag.severity === "high";
+              return (
+                <div key={flag.id} style={{
+                  marginTop: 14, padding: "8px 10px", borderRadius: 6,
+                  background: high ? "rgba(176, 64, 48, 0.10)" : "rgba(165, 120, 54, 0.08)",
+                  border: high ? `1px solid rgba(176, 64, 48, 0.30)` : `1px solid rgba(165, 120, 54, 0.22)`,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: theme.inkSoft, lineHeight: 1.45,
+                }}>
+                  <em style={{
+                    color: high ? "rgb(176, 64, 48)" : theme.ochre,
+                    fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
+                    letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
+                  }}>{high ? "do not combine" : "heads up"} · {flag.title}</em>
+                  {flag.message}
+                </div>
+              );
+            })}
+
             {/* Save / brew row. Save prompts for a name (defaults to the
                 algorithm-suggested one); brew goes straight into Steep. */}
             {savePromptOpen && (
@@ -1062,6 +1094,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     : { outsiders: [], perIngredient: [] };
   const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
 
+  // Reverse-mode safety check — same rules as forward mode. Custom
+  // user-built combinations are exactly where unsafe pairs can sneak
+  // in (the generators are already filtered), so the warning matters
+  // most here.
+  const rcSafetyFlags = checkIngredientInteractions(reverseIngs);
+
   // For the picker: would adding this ingredient conflict with ANY ingredient
   // already in the pot? The rule: flag the candidate if there exists at least
   // one pot member whose temp range has zero overlap with the candidate's.
@@ -1147,6 +1185,27 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             </div>
           </div>
         )}
+
+        {/* Ingredient-interaction safety banners — reverse mode. */}
+        {rcSafetyFlags.map(flag => {
+          const high = flag.severity === "high";
+          return (
+            <div key={flag.id} style={{
+              marginTop: 10, padding: "8px 10px", borderRadius: 6,
+              background: high ? "rgba(176, 64, 48, 0.10)" : "rgba(165, 120, 54, 0.08)",
+              border: high ? `1px solid rgba(176, 64, 48, 0.30)` : `1px solid rgba(165, 120, 54, 0.22)`,
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+              color: theme.inkSoft, lineHeight: 1.45,
+            }}>
+              <em style={{
+                color: high ? "rgb(176, 64, 48)" : theme.ochre,
+                fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
+                letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
+              }}>{high ? "do not combine" : "heads up"} · {flag.title}</em>
+              {flag.message}
+            </div>
+          );
+        })}
 
         <Rule soft />
         <div style={{

@@ -7,6 +7,7 @@ import {
   MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
+import { wouldCreateUnsafeCombination } from "../data/safety.js";
 
 // How much steep-time slack counts as the same brew. Used by the
 // tradition-over-literature notice and the research-aligned
@@ -488,6 +489,7 @@ function windowsOverlap(ing, tempRange, timeRange) {
 function bestIngredientForMood(mood, exclude, minStrength = 3, compatTemp = null, compatTime = null) {
   const cands = Object.entries(INGREDIENTS)
     .filter(([id]) => !exclude.has(id))
+    .filter(([id]) => !wouldCreateUnsafeCombination(exclude, id))
     .filter(([, ing]) => windowsOverlap(ing, compatTemp, compatTime))
     .map(([id, ing]) => {
       const eff = (ing.effects || []).find(([k]) => k === mood);
@@ -510,6 +512,7 @@ function bestIngredientForMood(mood, exclude, minStrength = 3, compatTemp = null
   if (!blend) return null;
   const sortedIngs = [...blend.ings]
     .filter(i => !exclude.has(i.id))
+    .filter(i => !wouldCreateUnsafeCombination(exclude, i.id))
     .filter(i => windowsOverlap(INGREDIENTS[i.id], compatTemp, compatTime))
     .sort((a, b) => (b.g || 0) - (a.g || 0));
   if (sortedIngs.length === 0) return null;
@@ -521,6 +524,7 @@ function bestIngredientForMood(mood, exclude, minStrength = 3, compatTemp = null
 function bestIngredientForFlavor(flavor, exclude, compatTemp = null, compatTime = null) {
   const cands = Object.entries(INGREDIENTS)
     .filter(([id]) => !exclude.has(id))
+    .filter(([id]) => !wouldCreateUnsafeCombination(exclude, id))
     .filter(([, ing]) => (ing.flavors || []).includes(flavor))
     .filter(([, ing]) => windowsOverlap(ing, compatTemp, compatTime))
     .map(([id, ing]) => ({ id, ing }));
