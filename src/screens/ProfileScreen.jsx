@@ -3,7 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState, useRef } from "react";
-import { Flower, ATTRIBUTE_GLYPHS } from "../components/icons";
+import { Flower, Ornament, ATTRIBUTE_GLYPHS } from "../components/icons";
 import {
   SectionLabel, Stat, Toggle,
 } from "../components/layout";
@@ -31,6 +31,17 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // Name edit mode
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(profile?.name || "");
+
+  // Motto edit mode — short user-authored line under the name. Lives
+  // on profile.motto so it persists with the rest of identity state.
+  const [editingMotto, setEditingMotto] = useState(false);
+  const [mottoDraft, setMottoDraft] = useState(profile?.motto || "");
+  const saveMotto = () => {
+    const clean = mottoDraft.trim().slice(0, 80);
+    setProfile({ ...profile, motto: clean });
+    setMottoDraft(clean);
+    setEditingMotto(false);
+  };
 
   const saveName = () => {
     const clean = nameDraft.trim() || "friend";
@@ -222,10 +233,56 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 {profile?.name || "friend"}
               </div>
             )}
+
+            {/* Motto — tap to author, blank by default. Same affordance
+                pattern as the name above. */}
+            {editingMotto ? (
+              <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 6, justifyContent: "center" }}>
+                <input
+                  type="text"
+                  value={mottoDraft}
+                  onChange={e => setMottoDraft(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") saveMotto(); }}
+                  autoFocus
+                  maxLength={80}
+                  placeholder="a line for your kettle"
+                  style={{
+                    fontFamily: ff.serif, fontSize: 13, fontStyle: "italic",
+                    color: theme.inkSoft, background: "transparent",
+                    border: "none", borderBottom: `1px solid ${theme.terra}`,
+                    padding: "2px 0", outline: "none",
+                    flex: 1, minWidth: 0, textAlign: "center",
+                  }}
+                />
+                <button onClick={saveMotto} style={{
+                  fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                  background: "transparent", border: "none", cursor: "pointer",
+                }}>save</button>
+              </div>
+            ) : (
+              <div
+                onClick={() => { setMottoDraft(profile?.motto || ""); setEditingMotto(true); }}
+                style={{
+                  marginTop: 6,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: profile?.motto ? theme.inkSoft : theme.ash,
+                  lineHeight: 1.4, cursor: "pointer",
+                  opacity: profile?.motto ? 1 : 0.7,
+                }}
+              >
+                {profile?.motto || "a line for your kettle"}
+              </div>
+            )}
           </div>
         </div>
 
-        <div style={{ marginTop: 14, display: "flex", gap: 16, justifyContent: "center" }}>
+        {/* Quiet ornament between identity and stats — visual rhythm
+            without filler imagery. */}
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 14, marginBottom: 4 }}>
+          <Ornament w={120} c={theme.ochre} />
+        </div>
+
+        <div style={{ marginTop: 6, display: "flex", gap: 16, justifyContent: "center" }}>
           <Stat label="Cups"      value={cupCount}    onClick={() => go("compose", { mode: "apothecary", shelfTab: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("compose", { mode: "apothecary", shelfTab: "catalogue" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("library", { pantryOnly: true })} />
