@@ -34,7 +34,7 @@ const ELEMENT_POOLS = {
   // dawn (5-8)
   dawn:      ["Light", "Sunfire", "Ember", "Aurora", "Bloom"],
   // morning (8-11)
-  morning:   ["Wind", "Sky", "Cloud", "Lightning", "Lark"],
+  morning:   ["Wind", "Sky", "Cloud", "Lightning", "Daybreak"],
   // midday (11-14)
   midday:    ["Fire", "Sun", "Stone", "Iron", "Forge"],
   // afternoon (14-17)
@@ -44,7 +44,7 @@ const ELEMENT_POOLS = {
   // night (20-23)
   night:     ["Shadow", "Moon", "Frost", "Smoke", "Velvet"],
   // late-night (23-2)
-  latenight: ["Void", "Nightshade", "Star", "Ash", "Owlfall"],
+  latenight: ["Void", "Nightshade", "Star", "Ash", "Crescent"],
 };
 
 function elementWindow(hour) {
