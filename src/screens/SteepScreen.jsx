@@ -286,6 +286,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
               {waitCards[waitIdx]?.type === "poem"      ? "a verse" :
                waitCards[waitIdx]?.type === "tradition" ? "tradition" :
+               waitCards[waitIdx]?.type === "prompt"    ? "a question for the cup" :
                "while you wait"}
             </div>
           </div>
@@ -326,6 +327,30 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             transition: "opacity 0.4s ease",
           }}>
             {waitCards[waitIdx].attribution}
+          </div>
+        )}
+        {/* Prompt-only affordance: lift the question into the notes
+            field above so the user can answer it while the cup steeps. */}
+        {waitCards[waitIdx]?.type === "prompt" && setIntent && (
+          <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const prompt = waitCards[waitIdx].text;
+                const cur = (intent || "").trim();
+                const next = cur
+                  ? `${cur}\n\n${prompt}\n`
+                  : `${prompt}\n`;
+                setIntent(next);
+              }}
+              style={{
+                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                color: theme.terra, background: "transparent",
+                border: `1px solid ${theme.terra}`, borderRadius: 999,
+                padding: "4px 12px", cursor: "pointer",
+                opacity: waitFading ? 0 : 1, transition: "opacity 0.4s ease",
+              }}
+            >+ note</button>
           </div>
         )}
         {/* Tap-to-advance affordance: a small right-pointing triangle

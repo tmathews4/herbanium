@@ -450,6 +450,37 @@ export const WAIT_POEMS = [
   },
 ];
 
+// Brew-companion writing prompts. Short, sensory, low-friction —
+// the tea-and-haiku tradition reframed as a personal beat. Each one
+// is small enough to answer in the steep-screen notes field while
+// the cup is still warming. Universal pool (no tag filter) so a
+// prompt can surface in any brew, but capped at 1 per brew so the
+// rotation stays fact-dominant.
+export const WAIT_PROMPTS = [
+  { type: "prompt", text: "Write one sentence about why you reached for this cup." },
+  { type: "prompt", text: "Name three things you can hear right now." },
+  { type: "prompt", text: "Describe today's light in one word." },
+  { type: "prompt", text: "What does the steam smell like before the leaves arrive?" },
+  { type: "prompt", text: "Notice your hands. Warm? Cool? Tired? Steady?" },
+  { type: "prompt", text: "If this cup were a season, which one?" },
+  { type: "prompt", text: "Write the last thing you remember tasting today." },
+  { type: "prompt", text: "Imagine the leaves before they were leaves. Where did they grow?" },
+  { type: "prompt", text: "What sound is in the room that wasn't there a minute ago?" },
+  { type: "prompt", text: "If you could only describe this brew in a colour, which?" },
+  { type: "prompt", text: "What were you carrying when you walked into the kitchen?" },
+  { type: "prompt", text: "Write one line you would want to read again tomorrow." },
+  { type: "prompt", text: "Who taught you to make tea? Or who would you want to?" },
+  { type: "prompt", text: "Describe the cup's weight in your hand." },
+  { type: "prompt", text: "What's the last thing that surprised you today?" },
+  { type: "prompt", text: "If the tea could ask you one question, what would it be?" },
+  { type: "prompt", text: "Note the temperature of the room around you." },
+  { type: "prompt", text: "Listen for the next sound longer than three seconds." },
+  { type: "prompt", text: "What are you trying not to think about right now?" },
+  { type: "prompt", text: "Write a single word for the weather inside you." },
+  { type: "prompt", text: "Three words for the colour of the brew before you sip." },
+  { type: "prompt", text: "What does this hour feel like, exactly?" },
+];
+
 // Build the content pool for a given blend. Pulls ingredient-specific facts
 // from WAIT_FACTS, matching poems from WAIT_POEMS, and interleaves them.
 export function buildWaitCards(blend, targetMoods) {
@@ -476,23 +507,28 @@ export function buildWaitCards(blend, targetMoods) {
   // 3. Rotate each list by a time-based seed so a given brew doesn't always
   //    start with the same content. Rotation, not shuffle — cards should
   //    still feel curated, not random.
-  const rotate = (arr) => {
+  const rotate = (arr, seed) => {
     if (arr.length < 2) return arr;
-    const n = Date.now() % arr.length;
+    const n = (seed ?? Date.now()) % arr.length;
     return [...arr.slice(n), ...arr.slice(0, n)];
   };
   const rotatedFacts = rotate(facts);
   const rotatedPoems = rotate(poems);
+  // Use a different seed for prompts so they don't always pair with the
+  // same fact in the rotation.
+  const rotatedPrompts = rotate([...WAIT_PROMPTS], Math.floor(Date.now() / 60000));
 
   // 4. Cap poems at ~1 per 5 facts, minimum 1 if any match, maximum 4.
   //    This keeps the pool fact-dominant — the app is about ingredients,
   //    poems are punctuation, not half the content.
   const poemCap = Math.min(4, Math.max(rotatedPoems.length > 0 ? 1 : 0, Math.floor(rotatedFacts.length / 5)));
   const selectedPoems = rotatedPoems.slice(0, poemCap);
+  // One writing prompt per brew. Universal pool, so always available.
+  const selectedPrompts = rotatedPrompts.slice(0, 1);
 
-  // 5. Interleave: place poems at roughly-even intervals through the facts,
-  //    never as the first card (open with ingredient grounding) and never
-  //    as the last (close with the cup, not literature).
+  // 5. Interleave: place poems and prompts at roughly-even intervals through
+  //    the facts, never as the first card (open with ingredient grounding)
+  //    and never as the last (close with the cup, not literature).
   if (rotatedFacts.length === 0) {
     // Edge case: no facts (shouldn't happen if ingredients are in corpus).
     // Fall back to a universal poem so the user sees *something*.
@@ -504,14 +540,15 @@ export function buildWaitCards(blend, targetMoods) {
   }
 
   const cards = [...rotatedFacts];
-  if (selectedPoems.length > 0 && cards.length >= 3) {
-    // Valid insertion range: positions 1 through length-1 (exclusive of first
-    // and last). Spread poems evenly through that range.
+  // Combine poems and prompts as "punctuation" cards, placed evenly through
+  // the fact stream. Prompts come first in the order so they typically
+  // appear earlier — the steep is still warm, the user is still settling.
+  const punctuation = [...selectedPrompts, ...selectedPoems];
+  if (punctuation.length > 0 && cards.length >= 3) {
     const insertRange = cards.length - 1;
-    selectedPoems.forEach((poem, i) => {
-      // Evenly distributed positions within the valid range
-      const pos = 1 + Math.floor((i + 1) * insertRange / (selectedPoems.length + 1));
-      cards.splice(pos + i, 0, poem); // +i accounts for prior insertions
+    punctuation.forEach((card, i) => {
+      const pos = 1 + Math.floor((i + 1) * insertRange / (punctuation.length + 1));
+      cards.splice(pos + i, 0, card); // +i accounts for prior insertions
     });
   }
 
