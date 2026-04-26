@@ -901,7 +901,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
           return { kind: "cup", ts: Number.isFinite(n) ? n : 0, ref: s };
         });
         const entryItems = (journalEntries || []).map(e => ({
-          kind: e.kind === "haiku" ? "haiku" : "entry",
+          kind: "entry",
           ts: e.ts || 0,
           ref: e,
         }));
@@ -1680,9 +1680,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    ────────────────────────────────────────────────────────────── */
 
 const JournalEntryRow = ({ entry, first, onDelete }) => {
-  const isHaiku = entry.kind === "haiku";
+  const isHaiku    = entry.kind === "haiku";
+  const isLimerick = entry.kind === "limerick";
+  const isVerse    = isHaiku || isLimerick;
   const stamp = entry.ts ? new Date(entry.ts) : null;
   const ago = stamp ? formatAgo(stamp) : "";
+  const label =
+    isHaiku    ? "a verse"
+    : isLimerick ? "a limerick"
+    : "an entry";
   return (
     <div style={{
       padding: "12px 0",
@@ -1697,7 +1703,7 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
           textTransform: "uppercase", color: theme.ash,
         }}>
-          {isHaiku ? "a verse" : "an entry"}
+          {label}
         </div>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
@@ -1705,9 +1711,9 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
       </div>
       <div style={{
         fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-        lineHeight: isHaiku ? 1.7 : 1.55,
+        lineHeight: isVerse ? 1.7 : 1.55,
         whiteSpace: "pre-line",
-        fontStyle: isHaiku ? "italic" : "normal",
+        fontStyle: isVerse ? "italic" : "normal",
       }}>{entry.text}</div>
       {onDelete && (
         <button

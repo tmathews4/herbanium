@@ -18,21 +18,34 @@ import { theme, ff } from "../theme";
 import {
   HAIKU_PROMPTS, assembleHaiku, HAIKU_TEMPLATE_COUNT,
 } from "../data/haikuAdlibs";
+import {
+  LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
+} from "../data/limerickAdlibs";
 
 export const JournalComposer = ({ onSave, onCancel }) => {
   const [mode, setMode] = useState("free");
   const [text, setText] = useState("");
   const [slots, setSlots] = useState({ thing: "", sound: "", color: "", feeling: "" });
-  const [seed, setSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
+  const [haikuSeed, setHaikuSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
+  const [limSlots, setLimSlots] = useState({ name: "", place: "", action: "", object: "", feeling: "" });
+  const [limSeed, setLimSeed] = useState(() => Math.floor(Math.random() * LIMERICK_TEMPLATE_COUNT));
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
-  const haikuPreview = slotsFilled ? assembleHaiku(slots, seed) : null;
-  const ready = mode === "free" ? text.trim().length > 0 : !!haikuPreview;
+  const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
+  const limFilled = Object.values(limSlots).every(v => v.trim());
+  const limerickPreview = limFilled ? assembleLimerick(limSlots, limSeed) : null;
+  const ready =
+    mode === "free"     ? text.trim().length > 0
+    : mode === "haiku"  ? !!haikuPreview
+    : mode === "limerick" ? !!limerickPreview
+    : false;
 
   const handleSave = () => {
     if (!ready) return;
     if (mode === "haiku") {
       onSave(haikuPreview, "haiku");
+    } else if (mode === "limerick") {
+      onSave(limerickPreview, "limerick");
     } else {
       onSave(text.trim(), "entry");
     }
@@ -59,11 +72,14 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           write freely
         </button>
         <button onClick={() => setMode("haiku")} style={tabBtnStyle(mode === "haiku")}>
-          haiku ad-lib
+          haiku
+        </button>
+        <button onClick={() => setMode("limerick")} style={tabBtnStyle(mode === "limerick")}>
+          limerick
         </button>
       </div>
 
-      {mode === "free" ? (
+      {mode === "free" && (
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -78,7 +94,9 @@ export const JournalComposer = ({ onSave, onCancel }) => {
             resize: "vertical", minHeight: 90,
           }}
         />
-      ) : (
+      )}
+
+      {mode === "haiku" && (
         <>
           <div style={{
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
@@ -128,7 +146,71 @@ export const JournalComposer = ({ onSave, onCancel }) => {
                 color: theme.ink, lineHeight: 1.6, whiteSpace: "pre-line",
               }}>{haikuPreview}</div>
               <button
-                onClick={() => setSeed(s => s + 1)}
+                onClick={() => setHaikuSeed(s => s + 1)}
+                style={{
+                  position: "absolute", top: 6, right: 8,
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
+                  textTransform: "uppercase", color: theme.terra,
+                  background: "transparent", border: "none",
+                  padding: "4px 6px", cursor: "pointer",
+                }}
+              >shuffle</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {mode === "limerick" && (
+        <>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, lineHeight: 1.5, marginBottom: 10, textAlign: "left",
+          }}>
+            Five small inputs — a name, a place, an -ing verb, an object, and a
+            feeling — and we'll weave them into a five-line whimsy.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {LIMERICK_PROMPTS.map(p => (
+              <div key={p.key}>
+                <label style={{
+                  display: "block",
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 3,
+                }}>{p.label}</label>
+                <input
+                  value={limSlots[p.key]}
+                  onChange={(e) => setLimSlots(s => ({ ...s, [p.key]: e.target.value }))}
+                  placeholder={p.placeholder}
+                  maxLength={30}
+                  style={{
+                    width: "100%", boxSizing: "border-box",
+                    fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+                    background: "transparent",
+                    border: "none", borderBottom: `1px solid ${theme.ruleSoft}`,
+                    padding: "4px 2px", outline: "none",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {limerickPreview && (
+            <div style={{
+              marginTop: 12, padding: "10px 12px", borderRadius: 8,
+              background: "rgba(176, 84, 47, 0.05)",
+              border: `1px solid ${theme.ruleSoft}`,
+              position: "relative",
+            }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: theme.terra, marginBottom: 6,
+              }}>your limerick</div>
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+                color: theme.ink, lineHeight: 1.6, whiteSpace: "pre-line",
+              }}>{limerickPreview}</div>
+              <button
+                onClick={() => setLimSeed(s => s + 1)}
                 style={{
                   position: "absolute", top: 6, right: 8,
                   fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",

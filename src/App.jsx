@@ -448,11 +448,15 @@ export default function App() {
   // Compose · Shelf · Journal tab.
   const addJournalEntry = (text, kind) => {
     if (!text || !text.trim()) return;
+    const validKind =
+      kind === "haiku" ? "haiku"
+      : kind === "limerick" ? "limerick"
+      : "entry";
     const entry = {
       id: `entry-${Date.now()}`,
       ts: Date.now(),
       text: text.trim(),
-      kind: kind === "haiku" ? "haiku" : "entry",
+      kind: validKind,
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
   };
