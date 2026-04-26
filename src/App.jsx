@@ -641,9 +641,10 @@ export default function App() {
             href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
           />
-          {appContent}
-          {!omenShown && profile && profile.title && (
+          {!omenShown && profile && profile.title ? (
             <OmenSplash title={profile.title} onDismiss={() => setOmenShown(true)} />
+          ) : (
+            appContent
           )}
         </div>
       </UnitContext.Provider>
@@ -714,7 +715,7 @@ export default function App() {
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
         <PhoneFrame>
-          {appContent}
+          {!omenShown && profile && profile.title ? null : appContent}
         </PhoneFrame>
       </div>
 

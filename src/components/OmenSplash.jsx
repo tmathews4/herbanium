@@ -15,7 +15,7 @@ import { theme, ff } from "../theme";
 
 const FADE_IN_MS  = 1800;
 const VISIBLE_MS  = 3200;
-const FADE_OUT_MS = 1800;
+const FADE_OUT_MS = 2800;
 
 // Strip the leading "The " from the creation title — the surrounding
 // sentence supplies its own article.
