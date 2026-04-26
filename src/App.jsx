@@ -14,7 +14,6 @@ import { IngredientDetail } from "./screens/IngredientDetail";
 import { BlendDetail } from "./screens/BlendDetail";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
-import { OmenSplash } from "./components/OmenSplash";
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { generateExperimentalSeeds, pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
@@ -240,13 +239,11 @@ export default function App() {
     setSeedVersion(SEED_VERSION);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Welcome card visibility — shown once after onboarding, then dismissed
-  const [welcomeShown, setWelcomeShown] = usePersistedState("welcomeShown", false);
   // Pantry hint visibility — one-time card pointing at the pantry toggle.
   // Pantry starts empty for new users; this nudges them toward filling it.
   const [pantryHintShown, setPantryHintShown] = usePersistedState("pantryHintShown", false);
-  // Omen splash visibility — full-screen fading text that names the
-  // user's unique animi after onboarding completes, before Home loads.
+  // Omen card visibility — first-visit fading animi reveal at the top
+  // of Home. Replaces the old welcome card.
   const [omenShown, setOmenShown] = usePersistedState("omenShown", false);
 
   // User-generated experimental blends, seeded at onboarding from the
@@ -316,8 +313,7 @@ export default function App() {
     setGeneratedBlends([]);
     setSavedBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
-    setOmenShown(false); // ensure the animi omen splash plays first
-    setWelcomeShown(false); // ensure welcome card shows on next Home render
+    setOmenShown(false); // ensure the animi omen card plays on first Home view
     setPantryHintShown(false); // ensure pantry hint shows for new users
   };
 
@@ -519,7 +515,7 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} />}
         {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
@@ -641,11 +637,7 @@ export default function App() {
             href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
           />
-          {!omenShown && profile && profile.title ? (
-            <OmenSplash title={profile.title} onDismiss={() => setOmenShown(true)} />
-          ) : (
-            appContent
-          )}
+          {appContent}
         </div>
       </UnitContext.Provider>
     );
@@ -715,7 +707,7 @@ export default function App() {
         display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
       }}>
         <PhoneFrame>
-          {!omenShown && profile && profile.title ? null : appContent}
+          {appContent}
         </PhoneFrame>
       </div>
 
@@ -728,9 +720,6 @@ export default function App() {
         <br />
         Deterministic, local engine — no AI in the loop.
       </div>
-      {!omenShown && profile && profile.title && (
-        <OmenSplash title={profile.title} onDismiss={() => setOmenShown(true)} />
-      )}
     </div>
     </UnitContext.Provider>
   );

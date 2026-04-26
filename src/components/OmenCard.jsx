@@ -1,38 +1,31 @@
 /* ──────────────────────────────────────────────────────────────
-   components/OmenSplash.jsx — full-screen post-onboarding omen.
+   components/OmenCard.jsx — first-visit animi omen, top of Home.
 
-   Plays once after onboarding completes and before Home first
-   renders. Fades a single line in slowly, holds, fades out slowly,
-   then unmounts and signals completion via onDismiss.
-
-   The line names the user's unique creation animi:
-     "What was that? An Echo Topaz Phoenix wisps by — an omen of
-      good brews to come..."
+   Replaces the old WelcomeCard. Sits at the top of Home on first
+   visit after onboarding, fades in slowly, holds, fades out slowly,
+   then unmounts and signals via onDismiss so the omenShown flag
+   gets persisted.
    ────────────────────────────────────────────────────────────── */
 
 import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
+import { Ornament } from "./icons";
 
-const FADE_IN_MS  = 1800;
-const VISIBLE_MS  = 3200;
+const FADE_IN_MS  = 1500;
+const VISIBLE_MS  = 3500;
 const FADE_OUT_MS = 2800;
 
-// Strip the leading "The " from the creation title — the surrounding
-// sentence supplies its own article.
 function stripLeadingThe(title) {
   return (title || "").replace(/^The\s+/i, "");
 }
 
-// Pick "An" before a vowel sound; "A" otherwise. Cheap heuristic that
-// handles the words actually in the creation pool well enough.
 function articleFor(word) {
   if (!word) return "A";
-  const c = word.trim().charAt(0).toLowerCase();
-  return /[aeiou]/.test(c) ? "An" : "A";
+  return /[aeiou]/i.test(word.trim().charAt(0)) ? "An" : "A";
 }
 
-export const OmenSplash = ({ title, onDismiss }) => {
-  const [phase, setPhase] = useState("entering"); // entering | visible | leaving | gone
+export const OmenCard = ({ title, onDismiss }) => {
+  const [phase, setPhase] = useState("entering");
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("visible"), FADE_IN_MS);
@@ -56,21 +49,23 @@ export const OmenSplash = ({ title, onDismiss }) => {
   return (
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: theme.ivory,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "0 28px",
         opacity,
         transition: `opacity ${transitionMs}ms ease-in-out`,
-        pointerEvents: phase === "leaving" ? "none" : "auto",
+        marginBottom: 20,
+        padding: "22px 24px",
+        borderRadius: 12,
+        background: theme.cream,
+        border: `1px solid ${theme.ruleSoft}`,
+        textAlign: "center",
       }}
     >
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+        <Ornament w={100} c={theme.terra} />
+      </div>
       <div
         style={{
-          fontFamily: ff.serif, fontStyle: "italic",
-          fontSize: 22, lineHeight: 1.55,
-          color: theme.inkSoft, textAlign: "center",
-          maxWidth: 560,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 16,
+          color: theme.inkSoft, lineHeight: 1.55,
         }}
       >
         What was that? {article}{" "}

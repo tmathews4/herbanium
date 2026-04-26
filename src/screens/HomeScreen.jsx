@@ -9,7 +9,7 @@ import {
 import {
   FitText, SectionLabel,
 } from "../components/layout";
-import { WelcomeCard } from "../components/WelcomeCard";
+import { OmenCard } from "../components/OmenCard";
 import { PantryHintCard } from "../components/PantryHintCard";
 import { BLENDS } from "../data/blends";
 import { getBlend, mmss } from "../helpers/misc";
@@ -37,7 +37,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome, pantryHintShown, dismissPantryHint, pantryCount, omenShown }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, omenShown, dismissOmen }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -53,17 +53,16 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Welcome card — shown once on first visit after onboarding,
-          and only after the OmenSplash has finished so its auto-dismiss
-          timer doesn't run while the splash covers it. */}
-      {omenShown !== false && !welcomeShown && profile && (
-        <WelcomeCard name={name} onDismiss={dismissWelcome} />
+      {/* Omen card — first-visit animi reveal at the top of Home.
+          Fades in, holds, fades out, then unmounts. Replaces the old
+          welcome card so the user sees the named animi instead. */}
+      {!omenShown && profile?.title && (
+        <OmenCard title={profile.title} onDismiss={dismissOmen} />
       )}
-      {/* Pantry hint — shown once after the welcome card auto-dismisses,
-          and only while the pantry is still empty. Points the user at
-          the pantry toggle in Library / IngredientDetail so they can
-          mark what they have on hand. */}
-      {welcomeShown && !pantryHintShown && profile && pantryCount === 0 && (
+      {/* Pantry hint — shown once after the omen finishes, while the
+          pantry is still empty. Points at the pantry toggle in Library
+          / IngredientDetail so the user can mark what they have. */}
+      {omenShown && !pantryHintShown && profile && pantryCount === 0 && (
         <PantryHintCard
           onDismiss={dismissPantryHint}
           onOpenLibrary={() => { dismissPantryHint(); go("library"); }}
