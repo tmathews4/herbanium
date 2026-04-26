@@ -185,24 +185,8 @@ export function generateExperimentalSeeds({ draw, flavors }, buildSyntheticForSe
 }
 
 /**
- * Default starting pantry for new users. A small, useful subset
- * spanning categories — enough to actually brew the seeded blends,
- * and a few extras for exploration. Not every ingredient; the user
- * can add more as they go.
+ * Default starting pantry for new users — empty. The user curates
+ * their own from day one; a one-time hint card on Home points them
+ * to the toggle in Library and on each Ingredient detail page.
  */
-export const ONBOARDING_PANTRY = [
-  "chamomile",   // for Dusk Lullaby
-  "lavender",
-  "lemonbalm",
-  "assam",       // for Morning Vestment
-  "ginger",
-  "cardamom",
-  "cinnamon",
-  "sencha",      // for Scriptorium
-  "jasmine",
-  "rooibos",     // for Hearth & Quiet
-  "peppermint",  // a universal — also for Tom Foolery
-  "rose",        // a universal
-  "gunpowder",   // for Tom Foolery
-  "tulsi",       // for Tom Foolery
-];
+export const ONBOARDING_PANTRY = [];

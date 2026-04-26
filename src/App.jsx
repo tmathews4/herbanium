@@ -241,6 +241,9 @@ export default function App() {
 
   // Welcome card visibility — shown once after onboarding, then dismissed
   const [welcomeShown, setWelcomeShown] = usePersistedState("welcomeShown", false);
+  // Pantry hint visibility — one-time card pointing at the pantry toggle.
+  // Pantry starts empty for new users; this nudges them toward filling it.
+  const [pantryHintShown, setPantryHintShown] = usePersistedState("pantryHintShown", false);
 
   // User-generated experimental blends, seeded at onboarding from the
   // user's draw selections. Persisted as full blend objects (not just
@@ -310,6 +313,7 @@ export default function App() {
     setSavedBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
     setWelcomeShown(false); // ensure welcome card shows on next Home render
+    setPantryHintShown(false); // ensure pantry hint shows for new users
   };
 
   // Full reset — wipes localStorage and reloads to restart from onboarding
@@ -510,7 +514,7 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} welcomeShown={welcomeShown} dismissWelcome={() => setWelcomeShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} />}
         {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}

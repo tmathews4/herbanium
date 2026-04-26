@@ -10,6 +10,7 @@ import {
   FitText, SectionLabel,
 } from "../components/layout";
 import { WelcomeCard } from "../components/WelcomeCard";
+import { PantryHintCard } from "../components/PantryHintCard";
 import { BLENDS } from "../data/blends";
 import { getBlend, mmss } from "../helpers/misc";
 import {
@@ -36,7 +37,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, welcomeShown, dismissWelcome, pantryHintShown, dismissPantryHint, pantryCount }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -55,6 +56,16 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       {/* Welcome card — shown once on first visit after onboarding */}
       {!welcomeShown && profile && (
         <WelcomeCard name={name} onDismiss={dismissWelcome} />
+      )}
+      {/* Pantry hint — shown once after the welcome card auto-dismisses,
+          and only while the pantry is still empty. Points the user at
+          the pantry toggle in Library / IngredientDetail so they can
+          mark what they have on hand. */}
+      {welcomeShown && !pantryHintShown && profile && pantryCount === 0 && (
+        <PantryHintCard
+          onDismiss={dismissPantryHint}
+          onOpenLibrary={() => { dismissPantryHint(); go("library"); }}
+        />
       )}
 
       {/* Header */}
