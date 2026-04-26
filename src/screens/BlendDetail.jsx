@@ -345,7 +345,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                         transform: tableAccentsOpen ? "rotate(90deg)" : "rotate(0deg)",
                         display: "inline-block",
                       }}>▶</span>
-                      at the table
+                      from the kitchen
                     </div>
                     <div style={{
                       fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
