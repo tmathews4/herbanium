@@ -946,11 +946,28 @@ const BLEND_DIRECTIONS = {
   ],
 };
 
+// At-the-table accents — kitchen additions that aren't part of the
+// brewed-leaf recipe but show up in the preparation: milk, sugar,
+// honey, lemon. Surface as a quiet italic hint on BlendDetail so the
+// user has a packing list, without polluting the herbal catalog with
+// pantry staples.
+const BLEND_TABLE_ACCENTS = {
+  "chai":              ["milk", "sugar"],
+  "moroccan":          ["sugar"],
+  "golden-milk":       ["milk", "honey"],
+  "mycelium-morning":  ["milk (optional)"],
+  "wuyi-smoke":        ["milk (optional)"],
+  "pissenlit-cafe":    ["milk (optional)"],
+  "exp-suns-roots":    ["honey (optional)"],
+  "exp-steady-state":  ["milk (optional)"],
+};
+
 export {
   MOODS,
   FLAVORS,
   BLENDS,
   BLEND_DIRECTIONS,
+  BLEND_TABLE_ACCENTS,
   MOOD_BLENDS,
   PAIR_BLENDS,
   MOOD_CONFLICTS,

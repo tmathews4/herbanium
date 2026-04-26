@@ -11,7 +11,7 @@ import {
   SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
-import { BLEND_DIRECTIONS } from "../data/blends";
+import { BLEND_DIRECTIONS, BLEND_TABLE_ACCENTS } from "../data/blends";
 import {
   EFFECT_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
@@ -304,6 +304,28 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             );
           })}
         </div>
+
+        {/* At-the-table accents — kitchen additions the preparation
+            assumes (milk, honey, sugar, lemon). Quiet italic line under
+            the recipe so the user has a packing list without these
+            staples cluttering the herbal catalogue. */}
+        {BLEND_TABLE_ACCENTS[b.id] && BLEND_TABLE_ACCENTS[b.id].length > 0 && (
+          <div style={{
+            marginTop: 10,
+            padding: "8px 14px",
+            borderRadius: 8,
+            background: "transparent",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, lineHeight: 1.5,
+          }}>
+            <span style={{
+              fontFamily: ff.sans, fontStyle: "normal", fontSize: 9.5,
+              letterSpacing: "0.16em", textTransform: "uppercase",
+              color: theme.ash, marginRight: 8,
+            }}>at the table</span>
+            {BLEND_TABLE_ACCENTS[b.id].join(" · ")}
+          </div>
+        )}
 
         {/* Brewing — interactive explorer */}
         <div style={{ margin: "22px 0 10px" }}>
