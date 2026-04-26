@@ -80,7 +80,7 @@ const CREATURES_BY_MOOD = {
   focus:     ["Fox", "Falcon", "Cat", "Mantis"],
   energy:    ["Tiger", "Hawk", "Stag", "Wolf"],
   sleepy:    ["Bear", "Otter", "Sloth", "Mole"],
-  comfort:   ["Bear", "Beaver", "Hedgehog", "Lamb"],
+  comfort:   ["Bear", "Beaver", "Hedgehog", "Marmot"],
   digestive: ["Tortoise", "Crane", "Goat", "Ox"],
 };
 
