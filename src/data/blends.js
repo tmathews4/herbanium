@@ -888,6 +888,62 @@ const BLEND_DIRECTIONS = {
     "Steep 90–120 seconds.",
     "Pour completely, last drop included. Re-steep three or more times with progressively hotter water.",
   ],
+
+  // ── House experimentals — the maker's curated steps ────────
+  "exp-tom-foolery": [
+    "Heat water to 80°C — let a boiled kettle rest about 2 minutes.",
+    "Pour over the gunpowder, spearmint, and tulsi.",
+    "Steep 2½ minutes — short, the leaves are pellets and unfurl fast.",
+    "Pour completely; re-steep with slightly hotter water for 60 seconds.",
+  ],
+  "exp-quiet-apple": [
+    "Heat water just under boiling (~95°C).",
+    "Pour over the chamomile, vanilla, and cardamom; cover the cup or pot.",
+    "Steep covered for 6 minutes — apigenin extracts slowly, and the cover keeps the cardamom aromatics in.",
+    "Strain. Take warm before bed.",
+  ],
+  "exp-mint-fennel-settle": [
+    "Bruise the fennel seeds lightly with the flat of a knife to release anethole.",
+    "Pour 95°C water over the peppermint, fennel, and lemongrass; cover.",
+    "Steep covered for 6 minutes.",
+    "Drink after a heavy meal — the cooling exhale is the cue that it's working.",
+  ],
+  "exp-suns-roots": [
+    "Combine turmeric, ginger, cinnamon, and a pinch of cracked black pepper in a small pot with 1 cup water.",
+    "Bring to a simmer and decoct gently for 10 minutes — the slow heat is what extracts curcumin into water.",
+    "Strain into a warm mug. The black pepper raises curcumin's bioavailability — don't skip it.",
+    "Sweeten with honey off the heat if you'd like.",
+  ],
+  "exp-crimson-glow": [
+    "Bring water to a full boil.",
+    "Pour over the hibiscus, rooibos, and ginger.",
+    "Steep 7 minutes — both the calyx and the red bush are forgiving of long steeps.",
+    "Strain. Drink hot, or pour over ice for a ruby-red cooler.",
+  ],
+  "exp-garden-court": [
+    "Heat water to 90°C.",
+    "Pour over the darjeeling and rose petals.",
+    "Steep 4 minutes — long enough for muscatel notes, short enough not to bitter the rose.",
+    "Take it neat. Milk masks the floral lift.",
+  ],
+  "exp-dawn-petal": [
+    "Heat water to 80°C — silver-needle white scorches above 85°C.",
+    "Pour over the white tea and jasmine.",
+    "Steep 2½ minutes; the jasmine releases quickly, the white needs gentle warmth.",
+    "Pour completely. Re-steep two or three times — the cup deepens with each round.",
+  ],
+  "exp-steady-state": [
+    "Bring water to a low simmer with the ashwagandha and cinnamon.",
+    "Simmer covered for 10 minutes — withanolides are fat-soluble, and the long heat coaxes them out.",
+    "Strain into a warmed mug. Daily use is the tradition; one cup won't tell you much.",
+    "A splash of milk smooths the musty note if it's too forward.",
+  ],
+  "exp-tulsi-mountain": [
+    "Bring water just to a boil.",
+    "Pour over the tulsi, cardamom, and ginger; cover to keep the volatile aromatics.",
+    "Steep covered for 7 minutes.",
+    "Strain. The clove-pepper warmth and ginger's heat read like a doorstep cup with altitude.",
+  ],
 };
 
 export {

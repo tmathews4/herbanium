@@ -475,7 +475,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                   const metaParts = [
                     formatTempRange(ing.tempC[0], ing.tempC[1], unit),
                     topFlavors,
-                    topEffect ? `${topEffect[0]} ${topEffect[1]}` : null,
+                    topEffect ? topEffect[0] : null,
                   ].filter(Boolean);
                   return (
                     <div key={id} onClick={() => go("ingredient", id)} style={{
