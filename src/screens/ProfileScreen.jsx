@@ -3,7 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState, useRef } from "react";
-import { Flower, Ornament, ATTRIBUTE_GLYPHS } from "../components/icons";
+import { Flower, Ornament, Pencil, ATTRIBUTE_GLYPHS } from "../components/icons";
 import {
   SectionLabel, Stat, Toggle,
 } from "../components/layout";
@@ -268,9 +268,11 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                   color: profile?.motto ? theme.inkSoft : theme.ash,
                   lineHeight: 1.4, cursor: "pointer",
                   opacity: profile?.motto ? 1 : 0.7,
+                  display: "inline-flex", alignItems: "center", gap: 6,
                 }}
               >
-                {profile?.motto || "a line for your kettle"}
+                <span>{profile?.motto || "a line for your kettle"}</span>
+                {!profile?.motto && <Pencil size={11} c={theme.terra} />}
               </div>
             )}
           </div>

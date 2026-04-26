@@ -21,6 +21,13 @@
 import React from "react";
 import { theme } from "../theme";
 
+export const Pencil = ({ size = 12, c = theme.ash }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21 L7 20 L20 7 L17 4 L4 17 Z" />
+    <path d="M14 7 L17 10" />
+  </svg>
+);
+
 export const Sprig = ({ size = 20, c = theme.sage }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22 V4" />
