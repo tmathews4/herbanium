@@ -142,27 +142,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         padding: 20, background: theme.cream,
         position: "relative", overflow: "hidden",
       }}>
-        {/* faux stamp — only appears once they've earned it */}
-        {cupCount >= 1 && (
-          <div style={{
-            position: "absolute", top: 14, right: 14,
-            width: 60, height: 60, borderRadius: "50%",
-            border: `2px dashed ${theme.terra}`, opacity: 0.35,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transform: "rotate(-8deg)",
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.terra,
-            textAlign: "center", lineHeight: 1.1,
-          }}>kept<br/>since<br/>'24</div>
-        )}
-
         <div style={{ display: "flex" }}>
           <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
-            <div style={{
-              fontFamily: ff.serif, fontSize: 13.5, fontStyle: "italic",
-              color: theme.terra, letterSpacing: "0.02em", lineHeight: 1.2,
-            }}>
-              {profile?.title || generateCreationTitle(profile) || (isEmptyUser ? "a new keeper" : "Keeper of the shelf")}
-            </div>
             {editingName ? (
               <div style={{ display: "flex", gap: 6, alignItems: "baseline", marginTop: 2, justifyContent: "center" }}>
                 <input
@@ -221,9 +202,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         )}
         {cupCount > 0 && cupCount < 3 && (
-          <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            You've logged {cupCount} cup{cupCount !== 1 ? "s" : ""}. Keep going — a few more brews
-            and patterns about what lands for you will start to emerge.
+          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
+            Drink more to attract different spirits.
           </div>
         )}
         {creationCard && (
@@ -231,8 +211,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
         {!creationCard && cupCount === 0 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
-            Self-knowledge grows from a few cups in. Log three or four
-            brews with real intent and the patterns start showing up here.
+            Drink more to attract different spirits.
           </div>
         )}
       </div>
