@@ -5,7 +5,7 @@
 import React, { useState, useRef } from "react";
 import { Flower, Ornament, Pencil, ATTRIBUTE_GLYPHS } from "../components/icons";
 import {
-  SectionLabel, Stat, Toggle,
+  SectionLabel, Stat,
 } from "../components/layout";
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
@@ -377,8 +377,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             ))}
           </div>
         </div>
-        <Toggle label="Notify when timer completes" value={true} onChange={() => {}} />
-        <Toggle label="Quiet hours (10pm–7am)" value={true} onChange={() => {}} />
       </div>
 
       {/* Reset — available to all users */}
