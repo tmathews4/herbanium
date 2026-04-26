@@ -59,6 +59,10 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     a.download = `herbanium-backup-${stamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    // Stamp the profile so the Caladrius animi unlocks.
+    if (profile && !profile.exportedAt) {
+      setProfile({ ...profile, exportedAt: Date.now() });
+    }
   };
 
   const handleImportFile = (file) => {
@@ -71,6 +75,17 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         if (!result.ok) {
           setImportMessage({ kind: "error", text: `Import failed: ${result.error}` });
           return;
+        }
+        // Stamp the imported profile so the Bennu animi unlocks. Import
+        // wipes localStorage, so we mutate the freshly-written profile
+        // entry directly before the page reloads to pick it up.
+        try {
+          const k = "herbanium.profile";
+          const cur = JSON.parse(localStorage.getItem(k) || "{}");
+          cur.importedAt = Date.now();
+          localStorage.setItem(k, JSON.stringify(cur));
+        } catch {
+          // Best-effort — failure here just means the milestone isn't recorded.
         }
         if (!window.confirm("Import succeeded. Reload to apply your imported data? Any unsaved changes will be lost.")) {
           setImportMessage({ kind: "ok", text: "Imported. Reload the page when ready." });

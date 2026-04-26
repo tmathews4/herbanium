@@ -138,6 +138,10 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     favoriteBlendIds: favoriteBlendIds || new Set(),
     savedBlendIds:   savedBlendIds   || new Set(),
     pantryIds:       pantryIds       || new Set(),
+    // Data-flow milestones — stamped on profile by the Export and
+    // Import handlers in ProfileScreen.
+    exportedAt: profile?.exportedAt || null,
+    importedAt: profile?.importedAt || null,
   };
 }
 
@@ -1147,6 +1151,17 @@ export const ATTRIBUTES = [
       const b = getBlend(s.blendId);
       return b && (b.timeS || 0) >= 900;
     }).length >= 5 },
+
+  // ─── Data-flow spirits — earned by exporting or importing your
+  //     journal, so the backup workflow becomes its own discovery. ──
+  { id: "caladrius", name: "The Caladrius", rarity: "uncommon", window: "lifetime",
+    glyph: "feather", tint: "sky", frame: "circle", accent: "rays",
+    desc: "White prophetic bird of Roman lore, said to draw away what ails the patient and carry it skyward into the sun. Drawn by exporting your journal — the cup's record carried out to safekeeping.",
+    earned: ctx => !!ctx.exportedAt },
+  { id: "bennu", name: "The Bennu", rarity: "rare", window: "lifetime",
+    glyph: "uplifting", tint: "ochre", frame: "circle", accent: "star",
+    desc: "Egyptian heron-form phoenix said to have risen at the world's first sunrise. Drawn by importing a saved journal — the kettle restored to its full memory.",
+    earned: ctx => !!ctx.importedAt },
 ];
 
 export function evaluateAttributes(ctx) {
