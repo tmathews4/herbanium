@@ -85,7 +85,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
 
   // Manual advance to the next card — shared by the click handler and
   // the auto-cycle interval. Bumps `lastAdvance` which resets the interval.
-  const CARD_CYCLE_S = 5;
+  const CARD_CYCLE_S = 10;
   const [lastAdvance, setLastAdvance] = useState(Date.now());
   // Seconds remaining until the next auto-advance. Drives the small
   // progress ring in the card's corner. Resets to CARD_CYCLE_S on advance.
