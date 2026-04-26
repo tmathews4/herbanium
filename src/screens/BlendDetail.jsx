@@ -355,13 +355,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                     </div>
                   </button>
                   {tableAccentsOpen && (
-                    <div style={{ padding: "0 14px 6px" }}>
+                    <div style={{ padding: "0 14px 6px", textAlign: "left" }}>
                       {accents.map((label, i) => (
                         <div key={label} style={{
                           padding: "6px 0",
                           borderTop: `1px solid ${theme.ruleSoft}`,
                           fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
                           fontStyle: "italic",
+                          textAlign: "left",
                         }}>{label}</div>
                       ))}
                     </div>
