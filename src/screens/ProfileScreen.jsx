@@ -25,7 +25,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -149,6 +149,34 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const [openAttrId, setOpenAttrId] = useState(null);
   const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
 
+  // Featured altar slots — up to 5 ids the user surfaces below their
+  // unique spirit. Falls back to top-5-by-rarity until the user picks.
+  const FEATURED_LIMIT = 5;
+  const validFeatured = (featuredAnimis || []).filter(id =>
+    sortedEarned.find(a => a.id === id));
+  const effectiveFeaturedIds = validFeatured.length > 0
+    ? validFeatured.slice(0, FEATURED_LIMIT)
+    : sortedEarned.slice(0, FEATURED_LIMIT).map(a => a.id);
+  const featured = effectiveFeaturedIds
+    .map(id => sortedEarned.find(a => a.id === id))
+    .filter(Boolean);
+  const reserve = sortedEarned.filter(a => !effectiveFeaturedIds.includes(a.id));
+  const isFeatured = (id) => effectiveFeaturedIds.includes(id);
+  const toggleFeatured = (id) => {
+    if (!setFeaturedAnimis) return;
+    const cur = effectiveFeaturedIds.slice();
+    if (cur.includes(id)) {
+      setFeaturedAnimis(cur.filter(x => x !== id));
+      return;
+    }
+    if (cur.length >= FEATURED_LIMIT) {
+      // Replace the last (lowest-priority) slot so the swap is one tap.
+      setFeaturedAnimis([...cur.slice(0, FEATURED_LIMIT - 1), id]);
+      return;
+    }
+    setFeaturedAnimis([...cur, id]);
+  };
+
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
   return (
@@ -222,7 +250,17 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         )}
         {creationCard && (
-          <AttributeShelf attrs={allCards} openId={openAttrId} setOpenId={setOpenAttrId} openAttr={openAttr} />
+          <AttributeShelf
+            creationCard={creationCard}
+            featured={featured}
+            reserve={reserve}
+            featuredLimit={FEATURED_LIMIT}
+            isFeatured={isFeatured}
+            toggleFeatured={toggleFeatured}
+            openId={openAttrId}
+            setOpenId={setOpenAttrId}
+            openAttr={openAttr}
+          />
         )}
         {!creationCard && cupCount === 0 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
@@ -472,26 +510,65 @@ const RARITY_TONE = {
   mythic:    { color: theme.plum,     label: "mythic",    bg: "rgba(120,72,140,0.12)" },
 };
 
-// Default visible animis on the altar. Anything beyond this hides
-// behind a "show all" toggle so the section doesn't dominate the
-// Profile screen as the collection grows.
-const ANIMIS_COLLAPSED_LIMIT = 12;
-
-const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => {
+// AttributeShelf altar:
+//   row 1 — the unique creation animi, alone and centered
+//   row 2 — up to 5 "featured" earned animis, with empty pip-slots for
+//           the rest of the row when the user has fewer
+//   below — collapsible reserve grid containing every other earned
+//           animi, with a feature/unfeature button on each detail card
+const AttributeShelf = ({
+  creationCard, featured, reserve, featuredLimit,
+  isFeatured, toggleFeatured,
+  openId, setOpenId, openAttr,
+}) => {
   const [expanded, setExpanded] = useState(false);
-  const overflow = attrs.length - ANIMIS_COLLAPSED_LIMIT;
-  const visible = expanded || overflow <= 0
-    ? attrs
-    : attrs.slice(0, ANIMIS_COLLAPSED_LIMIT);
-  // If the user opens an animi that's hidden behind the collapse,
-  // expand the grid so the highlighted card has visible context.
-  const openHidden = openAttr && !visible.find(a => a.id === openAttr.id);
-  const effectiveVisible = openHidden ? attrs : visible;
-  const showToggle = overflow > 0;
+
+  const renderTile = (a) => {
+    const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
+    const isOpen = openId === a.id;
+    return (
+      <button
+        key={a.id}
+        onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
+        style={{
+          fontFamily: ff.serif, fontSize: 13,
+          padding: "6px 12px", borderRadius: 6,
+          background: isOpen ? tone.bg : "transparent",
+          color: theme.ink,
+          border: `2px solid ${tone.color}`,
+          cursor: "pointer",
+          transition: "background 0.15s ease",
+          whiteSpace: "nowrap",
+        }}
+      >{a.displayName || a.name}</button>
+    );
+  };
+
+  const emptySlot = (i) => (
+    <div
+      key={`empty-${i}`}
+      style={{
+        padding: "6px 14px", borderRadius: 6,
+        border: `2px dashed ${theme.ruleSoft}`,
+        color: theme.ash, fontFamily: ff.serif, fontSize: 12,
+        fontStyle: "italic", opacity: 0.65,
+      }}
+    >empty</div>
+  );
+
+  const isCreationOpen = openAttr && openAttr.id === "_creation";
+  const canToggleOpen = openAttr && !isCreationOpen && toggleFeatured;
+  const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
+  const featuredFull = featured.length >= featuredLimit;
+
+  // Auto-expand reserve when the user opens an animi that lives there
+  // so the highlighted tile is visible alongside its detail card.
+  const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
+  const reserveOpen = expanded || !!openInReserve;
 
   return (
     <>
-      {/* Detail card — sits above the grid when one is open */}
+      {/* Detail card — sits above the rest when one is open */}
       {openAttr && (() => {
         const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
         return (
@@ -523,34 +600,44 @@ const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => {
             }}>
               {openAttr.desc}
             </div>
+            {canToggleOpen && (
+              <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => toggleFeatured(openAttr.id)}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                    background: "transparent",
+                    border: `1px solid ${theme.terra}`, borderRadius: 999,
+                    padding: "5px 12px", cursor: "pointer",
+                  }}
+                >
+                  {openIsFeatured
+                    ? "remove from altar"
+                    : featuredFull ? "swap onto altar" : "place on altar"}
+                </button>
+              </div>
+            )}
           </div>
         );
       })()}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {effectiveVisible.map(a => {
-          const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
-          const isOpen = openId === a.id;
-          return (
-            <button
-              key={a.id}
-              onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
-              style={{
-                fontFamily: ff.serif, fontSize: 13,
-                padding: "6px 12px", borderRadius: 6,
-                background: isOpen ? tone.bg : "transparent",
-                color: theme.ink,
-                border: `2px solid ${tone.color}`,
-                cursor: "pointer",
-                transition: "background 0.15s ease",
-                whiteSpace: "nowrap",
-              }}
-            >{a.displayName || a.name}</button>
-          );
-        })}
+      {/* Row 1 — the unique creation animi, alone and centered */}
+      {creationCard && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          {renderTile(creationCard)}
+        </div>
+      )}
+
+      {/* Row 2 — up to five featured slots */}
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: 6,
+        justifyContent: "center",
+      }}>
+        {Array.from({ length: featuredLimit }).map((_, i) =>
+          featured[i] ? renderTile(featured[i]) : emptySlot(i))}
       </div>
 
-      {showToggle && (
+      {reserve.length > 0 && (
         <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
           <button
             onClick={() => setExpanded(prev => !prev)}
@@ -561,10 +648,20 @@ const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => {
               cursor: "pointer", padding: "4px 8px",
             }}
           >
-            {expanded
-              ? "show fewer"
-              : `show all · ${attrs.length}`}
+            {reserveOpen
+              ? "hide reserve"
+              : `show reserve · ${reserve.length}`}
           </button>
+        </div>
+      )}
+
+      {reserveOpen && reserve.length > 0 && (
+        <div style={{
+          marginTop: 6, paddingTop: 10,
+          borderTop: `1px solid ${theme.ruleSoft}`,
+          display: "flex", flexWrap: "wrap", gap: 6,
+        }}>
+          {reserve.map(renderTile)}
         </div>
       )}
     </>
