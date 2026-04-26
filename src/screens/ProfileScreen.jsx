@@ -163,7 +163,10 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             fontFamily: ff.serif, fontSize: 26, color: theme.terra,
           }}>{(profile?.name || "F").charAt(0).toUpperCase()}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
+            <div style={{
+              fontFamily: ff.serif, fontSize: 13.5, fontStyle: "italic",
+              color: theme.terra, letterSpacing: "0.02em", lineHeight: 1.2,
+            }}>
               {profile?.title || generateCreationTitle(profile) || (isEmptyUser ? "a new keeper" : "Keeper of the shelf")}
             </div>
             {editingName ? (
