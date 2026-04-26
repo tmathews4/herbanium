@@ -918,7 +918,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
           emptyMsg = "Your Shelf is empty. Brew a cup or favorite a blend from the Catalogue to see it here.";
         } else if (apothecaryFilter === "favorites") {
           visible = saved.filter(b => favSet.has(b.id));
-          emptyMsg = "No favorites yet. Tap the heart on a blend to mark it as a favorite.";
+          emptyMsg = "No favorites yet. Tap the star on a blend to mark it as a favorite.";
         } else if (apothecaryFilter === "what worked") {
           const wonIds = new Set(
             yourSessions.filter(s => (s.taste ?? 0) >= 4).map(s => s.blendId)

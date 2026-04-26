@@ -88,7 +88,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               fontSize: 22, lineHeight: 1,
               color: isFavorite ? theme.terra : theme.ash,
             }} title={isFavorite ? "remove from favorites" : "add to favorites"}>
-              {isFavorite ? "♥" : "♡"}
+              {isFavorite ? "★" : "☆"}
             </button>
           ) : <div style={{ width: 40 }} />}
         </div>
