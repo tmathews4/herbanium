@@ -352,8 +352,136 @@ const BLENDS = [
     mood: "focus", flavor: "minty",
     public: true,
     experimental: true,
+    house: true,
     style: "low-temp",
     effects: [["focus", 4], ["uplifting", 4], ["calm", 3], ["energy", 2]],
+  },
+
+  // ── House experimentals — research-driven combinations the
+  //    catalog suggests would taste good and serve a purpose, but
+  //    don't appear in any traditional preparation. Each is hand-
+  //    tuned to a clean sweet spot. Marked house: true so they
+  //    can't be deleted from the Catalogue. ────────────────────
+
+  {
+    id: "exp-quiet-apple",
+    name: "Quiet Apple",
+    subtitle: "Chamomile's apple, vanilla's sweetness, cardamom's lift",
+    ingredients: [
+      { id: "chamomile", g: 1.5 },
+      { id: "vanilla",   g: 0.3, role: "accent" },
+      { id: "cardamom",  g: 0.2, role: "accent" },
+    ],
+    tempC: 97, timeS: 360, ml: 250,
+    mood: "calm", flavor: "sweet",
+    public: true, experimental: true, house: true,
+    effects: [["calm", 4], ["comfort", 4], ["soothing", 3]],
+  },
+
+  {
+    id: "exp-mint-fennel-settle",
+    name: "Mint & Fennel Settle",
+    subtitle: "Anethole and menthol after the plate is cleared",
+    ingredients: [
+      { id: "peppermint", g: 1.0 },
+      { id: "fennel",     g: 0.5 },
+      { id: "lemongrass", g: 0.3, role: "accent" },
+    ],
+    tempC: 97, timeS: 360, ml: 250,
+    mood: "digestive", flavor: "minty",
+    public: true, experimental: true, house: true,
+    effects: [["digestive", 5], ["cooling", 3], ["calm", 2]],
+  },
+
+  {
+    id: "exp-suns-roots",
+    name: "The Sun's Roots",
+    subtitle: "Ayurvedic golden mix — every root warming, no milk required",
+    ingredients: [
+      { id: "turmeric",     g: 0.5 },
+      { id: "ginger",       g: 0.5 },
+      { id: "cinnamon",     g: 0.3, role: "accent" },
+      { id: "black-pepper", g: 0.05, role: "catalyst" },
+    ],
+    tempC: 100, timeS: 600, ml: 250,
+    mood: "warming", flavor: "spiced",
+    public: true, experimental: true, house: true,
+    style: "decoction",
+    effects: [["warming", 5], ["digestive", 5], ["soothing", 3]],
+  },
+
+  {
+    id: "exp-crimson-glow",
+    name: "Crimson Glow",
+    subtitle: "Hibiscus ruby meets the red bush — caffeine-free brightness",
+    ingredients: [
+      { id: "hibiscus", g: 1.5 },
+      { id: "rooibos",  g: 1.0 },
+      { id: "ginger",   g: 0.3, role: "accent" },
+    ],
+    tempC: 100, timeS: 420, ml: 250,
+    mood: "cooling", flavor: "tart",
+    public: true, experimental: true, house: true,
+    effects: [["cooling", 4], ["uplifting", 3], ["digestive", 3]],
+  },
+
+  {
+    id: "exp-garden-court",
+    name: "Garden Court",
+    subtitle: "Muscatel grape with rose — drinks like champagne",
+    ingredients: [
+      { id: "darjeeling", g: 2.0 },
+      { id: "rose",       g: 0.3, role: "accent" },
+    ],
+    tempC: 90, timeS: 240, ml: 200,
+    mood: "uplifting", flavor: "floral",
+    public: true, experimental: true, house: true,
+    effects: [["uplifting", 5], ["focus", 3], ["energy", 3]],
+  },
+
+  {
+    id: "exp-dawn-petal",
+    name: "Dawn Petal",
+    subtitle: "Silver-needle white with night-picked jasmine — the lightest cup",
+    ingredients: [
+      { id: "white",   g: 2.0 },
+      { id: "jasmine", g: 0.3, role: "accent" },
+    ],
+    tempC: 80, timeS: 150, ml: 200,
+    mood: "focus", flavor: "floral",
+    public: true, experimental: true, house: true,
+    style: "low-temp",
+    effects: [["focus", 3], ["calm", 3], ["uplifting", 2]],
+  },
+
+  {
+    id: "exp-steady-state",
+    name: "Steady State",
+    subtitle: "Adaptogen patience — daily, not for tonight",
+    ingredients: [
+      { id: "ashwagandha", g: 0.7 },
+      { id: "cinnamon",    g: 0.3, role: "accent" },
+    ],
+    tempC: 100, timeS: 600, ml: 250,
+    mood: "grounding", flavor: "spiced",
+    public: true, experimental: true, house: true,
+    style: "decoction",
+    effects: [["grounding", 4], ["calm", 3], ["warming", 3]],
+  },
+
+  {
+    id: "exp-tulsi-mountain",
+    name: "Tulsi Mountain",
+    subtitle: "Holy basil under cardamom and ginger — the doorstep cup with altitude",
+    ingredients: [
+      { id: "tulsi",    g: 1.5 },
+      { id: "cardamom", g: 0.3, role: "accent" },
+      { id: "ginger",   g: 0.3, role: "accent" },
+    ],
+    tempC: 100, timeS: 420, ml: 250,
+    mood: "uplifting", flavor: "spiced",
+    public: true, experimental: true, house: true,
+    effects: [["uplifting", 4], ["focus", 3], ["warming", 3]],
   },
 
   // ── Customs (Herbanium house blends) ──────────────────────

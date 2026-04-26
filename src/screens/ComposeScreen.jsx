@@ -931,9 +931,9 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                 </div>
               ) : (
                 catVisible.map((b, i) => {
-                  // Tom Foolery is the one experimental treated as a permanent
-                  // catalogue staple — Herbanium's house signature, undeletable.
-                  const isHouseStaple = b.id === "exp-tom-foolery";
+                  // House experimentals (Tom Foolery + the curated research
+                  // blends) are permanent Catalogue staples — undeletable.
+                  const isHouseStaple = b.house === true || b.id === "exp-tom-foolery";
                   const author = b.tradition
                     || (isHouseStaple ? "Herbanium house"
                        : b.synthetic ? "algorithmic experiment"

@@ -240,11 +240,11 @@ export default function App() {
   // Idempotent — same keys get re-assigned with the same values.
   for (const b of generatedBlends || []) LOCAL_BLENDS[b.id] = b;
 
-  // Regenerate stale algorithmic synths once per algorithm bump. Old
-  // synths (pre sweet-spot enforcement) may have ingredients that don't
-  // share a brew window — bump SYNTHS_VERSION below to refresh them.
-  // Skips user-composed `local-` blends, which are kept as-is.
-  const SYNTHS_VERSION = "2";
+  // Synth-cleanup pass: remove any algorithmically-generated synth blends
+  // from existing accounts. Onboarding no longer generates synths; this
+  // purges legacy ones so the user's shelf reflects only curated picks
+  // and their own compositions. User-composed `local-` blends stay.
+  const SYNTHS_VERSION = "3";
   useEffect(() => {
     if (!profile || profile.synthsVersion === SYNTHS_VERSION) return;
     const syntheticIds = (generatedBlends || [])
@@ -254,41 +254,28 @@ export default function App() {
       setProfile(prev => prev ? { ...prev, synthsVersion: SYNTHS_VERSION } : prev);
       return;
     }
-    const fresh = generateExperimentalSeeds(
-      { draw: profile.draw, flavors: profile.flavors },
-      buildSyntheticForSelections,
-    );
     const nonSynth = (generatedBlends || []).filter(
       b => !String(b.id || "").startsWith("synth-")
     );
-    const replaced = [...nonSynth, ...fresh];
-    setGeneratedBlends(replaced);
-    // Wipe stale entries from LOCAL_BLENDS and rehydrate.
+    setGeneratedBlends(nonSynth);
     syntheticIds.forEach(id => { delete LOCAL_BLENDS[id]; });
-    fresh.forEach(b => { LOCAL_BLENDS[b.id] = b; });
-    // Keep saved/favorite sets pointing at fresh ids.
     const oldIdSet = new Set(syntheticIds);
-    const remap = (set) => {
+    const purge = (set) => {
       const next = new Set();
       for (const id of set) if (!oldIdSet.has(id)) next.add(id);
-      fresh.forEach(b => next.add(b.id));
       return next;
     };
-    setSavedBlendIds(prev => remap(prev));
-    setFavoriteBlendIds(prev => remap(prev));
+    setSavedBlendIds(prev => purge(prev));
+    setFavoriteBlendIds(prev => purge(prev));
     setProfile(prev => prev ? { ...prev, synthsVersion: SYNTHS_VERSION } : prev);
-  }, [profile?.synthsVersion, profile?.draw, profile?.flavors]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profile?.synthsVersion]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Onboarding completion handler
+  // Onboarding completion handler. No algorithmic synths are generated
+  // anymore — discoverability happens through the curated Catalogue
+  // (traditionals + house experimentals). The favorites rail seeds
+  // with adjacent traditions only, picked from the user's draws.
   const handleOnboardingComplete = ({ name, timeOfDay, draw, flavors }) => {
     const seedBlendIds = pickSeedBlends({ timeOfDay, draw });
-    // Algorithmic experimentals tailored to the user's draws + flavors.
-    // The user's flavor picks bias the synth's accent selection so
-    // their first generated cups align with what they said they'd
-    // reach for.
-    const experimentals = generateExperimentalSeeds(
-      { draw, flavors }, buildSyntheticForSelections,
-    );
     const createdAt = Date.now();
     const baseProfile = {
       name,
@@ -300,12 +287,10 @@ export default function App() {
     setProfile({
       ...baseProfile,
       title: generateCreationTitle(baseProfile),
+      synthsVersion: "3", // signals the no-synth onboarding generation
     });
-    setGeneratedBlends(experimentals);
-    setSavedBlendIds(new Set([
-      ...seedBlendIds,
-      ...experimentals.map(b => b.id),
-    ]));
+    setGeneratedBlends([]);
+    setSavedBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
     setWelcomeShown(false); // ensure welcome card shows on next Home render
   };
