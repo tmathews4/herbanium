@@ -1093,6 +1093,60 @@ export const ATTRIBUTES = [
       for (const c of localCounts.values()) if (c >= 2) return true;
       return false;
     } },
+
+  // ─── Workflow spirits — earned by exploring app paths users may
+  //     overlook: catalogue-curation, pantry-curation, mood/flavor
+  //     completionism, true-tea breadth, decoction patience. Each is
+  //     tied to a specific UI flow so the spirit becomes a reason to
+  //     try something the user hasn't done yet. ─────────────────────
+  { id: "odin", name: "The Odin", rarity: "rare", window: "lifetime",
+    glyph: "scroll", tint: "plum", frame: "diamond", accent: "star",
+    desc: "All-Father riding eight-legged Sleipnir, two ravens at his shoulder. Drawn by fifteen of your own composed blends kept in your catalogue.",
+    earned: ctx => {
+      let n = 0;
+      for (const id of ctx.savedBlendIds) if (String(id).startsWith("local-")) n++;
+      return n >= 15;
+    } },
+  { id: "feng-huang", name: "The Feng-Huang", rarity: "legendary", window: "lifetime",
+    glyph: "leaf", tint: "ochre", frame: "hex", accent: "rays",
+    desc: "Five-coloured phoenix of Chinese myth, plumage holding every direction. Drawn by a kettle that has brewed white, green, oolong, black, and pu-erh — every face of the leaf.",
+    earned: ctx => {
+      const byI = ctx.lifetime.byIngredient;
+      const has = ids => ids.some(id => byI.has(id));
+      return has(["white"])
+        && has(["sencha","gyokuro","matcha","genmaicha","gunpowder","hojicha","dragonwell"])
+        && has(["oolong"])
+        && has(["assam","darjeeling","ceylon","lapsang"])
+        && has(["puerh"]);
+    } },
+  { id: "kitsune", name: "The Kitsune", rarity: "uncommon", window: "lifetime",
+    glyph: "sprig", tint: "terra", frame: "circle", accent: "dot",
+    desc: "Nine-tailed fox of Japanese myth, guardian of the inari rice-stores and a thousand small kept gifts. Drawn by a curated pantry of fifteen ingredients held ready for the kettle.",
+    earned: ctx => ctx.pantryIds.size >= 15 },
+  { id: "xuanwu", name: "The Xuanwu", rarity: "legendary", window: "lifetime",
+    glyph: "compass", tint: "ash", frame: "hex", accent: "none",
+    desc: "Black Tortoise of Chinese myth, intertwined with serpent, guardian of the north and of completed cycles. Drawn by a kettle that has answered nine of the moods the leaf can name.",
+    earned: ctx => ctx.lifetime.byMood.size >= 9 },
+  { id: "hoopoe", name: "The Hoopoe", rarity: "uncommon", window: "lifetime",
+    glyph: "flower", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Crowned multicoloured bird of Persian and Egyptian myth, leader of all birds in flight. Drawn by a kettle that has tasted every flavour family the catalogue holds.",
+    earned: ctx => ctx.lifetime.distinctFlavors >= 8 },
+  { id: "zaratan", name: "The Zaratan", rarity: "rare", window: "lifetime",
+    glyph: "heart", tint: "plum", frame: "diamond", accent: "dot",
+    desc: "Vast island-turtle of medieval bestiaries, an entire small world resting on its back. Drawn by thirty cups kept close in your catalogue.",
+    earned: ctx => ctx.savedBlendIds.size >= 30 },
+  { id: "cu-sith", name: "The Cu Sith", rarity: "uncommon", window: "lifetime",
+    glyph: "heart", tint: "sage", frame: "circle", accent: "star",
+    desc: "Green-furred fairy hound of Scottish folklore, silent on the moor at dusk. Drawn by your own composed blend earning the highest mark from your own hand.",
+    earned: ctx => ctx.lifetime.sessions.some(s =>
+      s.taste === 5 && String(s.blendId || "").startsWith("local-")) },
+  { id: "cetus", name: "The Cetus", rarity: "rare", window: "lifetime",
+    glyph: "grounding", tint: "sky", frame: "diamond", accent: "none",
+    desc: "Great Greek sea-monster the constellation is named for, slow as deep water. Drawn by five long decoctions taken with the patience root and bark require.",
+    earned: ctx => ctx.lifetime.sessions.filter(s => {
+      const b = getBlend(s.blendId);
+      return b && (b.timeS || 0) >= 900;
+    }).length >= 5 },
 ];
 
 export function evaluateAttributes(ctx) {
