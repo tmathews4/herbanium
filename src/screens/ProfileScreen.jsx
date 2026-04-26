@@ -212,10 +212,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
       }}>
         {cupCount >= 3 && (
-          <div style={{ fontFamily: ff.serif, fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            Across {cupCount} cups, your predicted-to-actual match rate is
-            {" "}<em style={{ color: theme.terra }}>{matchPct}%</em>. You've explored
-            {" "}<em style={{ color: theme.sageDeep }}>{distinctIngredients.size}</em> distinct ingredients so far.
+          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
+            Practice your brew craft to attract spirits.
           </div>
         )}
         {cupCount > 0 && cupCount < 3 && (
