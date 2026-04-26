@@ -36,6 +36,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
   const [openMood, setOpenMood] = React.useState(null);
   const [openTag, setOpenTag] = React.useState(null);
   const [directionsOpen, setDirectionsOpen] = React.useState(false);
+  const [tableAccentsOpen, setTableAccentsOpen] = React.useState(false);
   if (!b) return null;
 
   // Filter the user's sessions for this specific blend. These become
@@ -264,68 +265,112 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
 
         {/* Ingredients */}
         <SectionLabel n="i">The recipe</SectionLabel>
-        <div style={{
-          marginTop: 10, padding: "4px 14px", borderRadius: 10,
-          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-        }}>
-          {b.ingredients.map((ing, i) => {
-            const meta = INGREDIENTS[ing.id];
-            if (!meta) return null;
-            // Compact metadata line: temp range, top 2 flavors, top effect
-            const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
-            const topEffect = (meta.effects || []).filter(([t]) => t !== "bitterness")[0];
-            const metaParts = [
-              formatTempRange(meta.tempC[0], meta.tempC[1], unit),
-              topFlavors,
-              topEffect ? topEffect[0] : null,
-            ].filter(Boolean);
-            return (
-              <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
-                width: "100%", textAlign: "left", background: "transparent",
-                border: "none", borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                padding: "10px 0", cursor: "pointer",
-                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        {(() => {
+          const accents = BLEND_TABLE_ACCENTS[b.id] || [];
+          const hasAccents = accents.length > 0;
+          return (
+            <>
+              <div style={{
+                marginTop: 10, padding: "4px 14px",
+                borderRadius: hasAccents ? "10px 10px 0 0" : 10,
+                background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+                borderBottom: hasAccents ? "none" : `1px solid ${theme.ruleSoft}`,
               }}>
-                <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                  <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
-                    {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
-                  </div>
-                  <div style={{
-                    fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
-                    marginTop: 2, letterSpacing: "0.02em",
-                  }}>
-                    {metaParts.join(" · ")}
-                  </div>
-                </div>
-                <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
-                  {formatAmount(ing.g, meta.category, weightUnit)}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                {b.ingredients.map((ing, i) => {
+                  const meta = INGREDIENTS[ing.id];
+                  if (!meta) return null;
+                  // Compact metadata line: temp range, top 2 flavors, top effect
+                  const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
+                  const topEffect = (meta.effects || []).filter(([t]) => t !== "bitterness")[0];
+                  const metaParts = [
+                    formatTempRange(meta.tempC[0], meta.tempC[1], unit),
+                    topFlavors,
+                    topEffect ? topEffect[0] : null,
+                  ].filter(Boolean);
+                  return (
+                    <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
+                      width: "100%", textAlign: "left", background: "transparent",
+                      border: "none", borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                      padding: "10px 0", cursor: "pointer",
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                          {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        </div>
+                        <div style={{
+                          fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                          marginTop: 2, letterSpacing: "0.02em",
+                        }}>
+                          {metaParts.join(" · ")}
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
+                        {formatAmount(ing.g, meta.category, weightUnit)}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-        {/* At-the-table accents — kitchen additions the preparation
-            assumes (milk, honey, sugar, lemon). Quiet italic line under
-            the recipe so the user has a packing list without these
-            staples cluttering the herbal catalogue. */}
-        {BLEND_TABLE_ACCENTS[b.id] && BLEND_TABLE_ACCENTS[b.id].length > 0 && (
-          <div style={{
-            marginTop: 10,
-            padding: "8px 14px",
-            borderRadius: 8,
-            background: "transparent",
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-            color: theme.ash, lineHeight: 1.5,
-          }}>
-            <span style={{
-              fontFamily: ff.sans, fontStyle: "normal", fontSize: 9.5,
-              letterSpacing: "0.16em", textTransform: "uppercase",
-              color: theme.ash, marginRight: 8,
-            }}>at the table</span>
-            {BLEND_TABLE_ACCENTS[b.id].join(" · ")}
-          </div>
-        )}
+              {/* At-the-table accents — connected sub-card (shares the
+                  recipe card's border, dashed top divider, lighter
+                  background). Thinner padding implies non-essential.
+                  Click the header to expand the list. */}
+              {hasAccents && (
+                <div style={{
+                  borderRadius: "0 0 10px 10px",
+                  background: "rgba(98, 124, 92, 0.04)",
+                  border: `1px solid ${theme.ruleSoft}`,
+                  borderTop: `1px dashed ${theme.ruleSoft}`,
+                  overflow: "hidden",
+                }}>
+                  <button
+                    onClick={() => setTableAccentsOpen(o => !o)}
+                    style={{
+                      width: "100%", textAlign: "left",
+                      background: "transparent", border: "none",
+                      padding: "6px 14px", cursor: "pointer",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                    }}
+                  >
+                    <div style={{
+                      fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+                      textTransform: "uppercase", color: theme.ash,
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}>
+                      <span style={{
+                        fontSize: 9, color: theme.ash,
+                        transition: "transform 0.15s ease",
+                        transform: tableAccentsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                        display: "inline-block",
+                      }}>▶</span>
+                      at the table
+                    </div>
+                    <div style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                      color: theme.ash,
+                    }}>
+                      {accents.length} {accents.length === 1 ? "addition" : "additions"}
+                    </div>
+                  </button>
+                  {tableAccentsOpen && (
+                    <div style={{ padding: "0 14px 6px" }}>
+                      {accents.map((label, i) => (
+                        <div key={label} style={{
+                          padding: "6px 0",
+                          borderTop: `1px solid ${theme.ruleSoft}`,
+                          fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
+                          fontStyle: "italic",
+                        }}>{label}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Brewing — interactive explorer */}
         <div style={{ margin: "22px 0 10px" }}>
