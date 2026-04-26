@@ -249,6 +249,10 @@ export default function App() {
   // surfaced row below their unique spirit. Empty default falls back to
   // top-5-by-rarity in ProfileScreen.
   const [featuredAnimis, setFeaturedAnimis] = usePersistedState("featuredAnimis", []);
+  // Banish the spirits — disables every animis surface (creation omen,
+  // altar, profile stat) for users who'd rather not engage with the
+  // mythic layer.
+  const [animisBanished, setAnimisBanished] = usePersistedState("animisBanished", false);
 
   // User-generated experimental blends, seeded at onboarding from the
   // user's draw selections. Persisted as full blend objects (not just
@@ -541,10 +545,10 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} animisBanished={animisBanished} />}
         {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} libraryView={libraryView} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} />}
       </div>
 
       <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />

@@ -25,7 +25,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -288,11 +288,15 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Cups"      value={cupCount}    onClick={() => go("compose", { mode: "apothecary", shelfTab: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("compose", { mode: "apothecary", shelfTab: "catalogue" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("library", { pantryOnly: true })} />
-          <Stat label="Animis"    value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+          {!animisBanished && (
+            <Stat label="Animis"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+          )}
         </div>
       </div>
 
-      {/* self-knowledge */}
+      {/* self-knowledge — hidden entirely when the user has banished
+          the spirits via Preferences below. */}
+      {!animisBanished && (<>
       <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">Animis Altar</SectionLabel></div>
       <div style={{
         padding: 14, borderRadius: 10,
@@ -327,6 +331,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         )}
       </div>
+      </>)}
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -376,6 +381,38 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
               }}>{label}</button>
             ))}
           </div>
+        </div>
+
+        {/* Banish the spirits — hides every animis surface for users
+            who'd rather not engage with the mythic layer. */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
+          fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
+        }}>
+          <span>Banish the spirits</span>
+          <span
+            onClick={() => setAnimisBanished && setAnimisBanished(!animisBanished)}
+            style={{
+              width: 34, height: 20, borderRadius: 999,
+              background: animisBanished ? theme.terra : theme.rule,
+              position: "relative", cursor: "pointer",
+              transition: "background .2s",
+            }}
+          >
+            <span style={{
+              position: "absolute", top: 2, left: animisBanished ? 16 : 2,
+              width: 16, height: 16, borderRadius: "50%", background: theme.cream,
+              transition: "left .2s",
+            }} />
+          </span>
+        </div>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: theme.ash, lineHeight: 1.5, padding: "0 0 6px",
+        }}>
+          Hides the animi omen, the altar, and the animis stat. The cup
+          stays. You can restore them any time.
         </div>
       </div>
 

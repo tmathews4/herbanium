@@ -37,7 +37,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, omenShown, dismissOmen }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, omenShown, dismissOmen, animisBanished }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -54,9 +54,9 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Omen card — first-visit animi reveal at the top of Home.
-          Fades in, holds, fades out, then unmounts. Replaces the old
-          welcome card so the user sees the named animi instead. */}
-      {!omenShown && profile?.title && (
+          Fades in, holds, fades out, then unmounts. Skipped entirely
+          when the user has banished the spirits. */}
+      {!omenShown && !animisBanished && profile?.title && (
         <OmenCard title={profile.title} onDismiss={dismissOmen} />
       )}
       {/* Pantry hint — shown once after the omen finishes, while the
