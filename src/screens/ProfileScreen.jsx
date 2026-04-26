@@ -497,11 +497,19 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
       </div>
 
+      {/* Sources — collapsible at the bottom for users who want to know
+          where the catalog's claims, dosing windows, and brewing
+          chemistry come from. */}
+      <div style={{ margin: "26px 0 10px" }}>
+        <SectionLabel n="iv">Sources</SectionLabel>
+      </div>
+      <SourcesPanel />
+
       {/* Dev toolbar — only visible in ?dev mode */}
       {isDev && (
         <>
           <div style={{ margin: "26px 0 10px" }}>
-            <SectionLabel n="iv">Dev — seed data</SectionLabel>
+            <SectionLabel n="v">Dev — seed data</SectionLabel>
           </div>
           <div style={{
             padding: 12, borderRadius: 10,
@@ -551,6 +559,139 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       }}>
         Herbanium is a brewing companion and journal — <em>not</em> medical advice. Effects, traditional uses, and ingredient warnings reflect common literature and should never replace a clinician. If you're pregnant, nursing, taking prescription medication, or managing a health condition, verify any herb with a qualified professional before use. Trust your body; trust the cup; verify the science.
       </div>
+    </div>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────────
+   SourcesPanel — categorised list of the literature, monographs,
+   pharmacopoeia, and traditional texts the catalog draws from.
+   Per-ingredient citations live in docs/research/ingredients/*.md;
+   this panel surfaces the high-level inventory so users can see
+   where the brewing windows, dosing notes, and effect claims come
+   from without dumping a hundred individual papers in the UI.
+   ────────────────────────────────────────────────────────────── */
+
+const SOURCES = [
+  {
+    heading: "Pharmacopoeia & monographs",
+    items: [
+      "European Medicines Agency — Traditional Herbal Medicinal Products register",
+      "European Scientific Cooperative on Phytotherapy (ESCOP) monographs",
+      "German Commission E monographs (Bundesinstitut für Arzneimittel)",
+      "United States Pharmacopoeia (USP) — botanical monographs and standardised assays",
+      "Memorial Sloan Kettering Cancer Center — \"About Herbs\" integrative-medicine database",
+    ],
+  },
+  {
+    heading: "Traditional texts",
+    items: [
+      "Charaka Samhita (~100 BCE – 200 CE) — foundational Ayurvedic compendium",
+      "Bhava Prakasha (16th century) — Ayurvedic materia medica",
+      "Shen Nong Ben Cao Jing (~100 BCE) — earliest surviving Chinese herbal pharmacopeia",
+      "Compendium of Materia Medica / Bencao Gangmu (Li Shizhen, 1578)",
+      "Hildegard von Bingen — Physica & Causae et Curae (12th century)",
+      "Dioscorides — De Materia Medica (~50–70 CE)",
+    ],
+  },
+  {
+    heading: "Brewing & extraction chemistry",
+    items: [
+      "Tea catechin and L-theanine extraction kinetics (peer-reviewed food-chemistry literature)",
+      "Chamomile apigenin extraction kinetics — first-order release across 57–100 °C",
+      "Hibiscus anthocyanin cold- and hot-brew comparative extraction studies",
+      "Yerba mate decoction and gourd-temperature studies",
+      "Curcumin bioavailability and piperine synergy literature",
+    ],
+  },
+  {
+    heading: "Clinical evidence base",
+    items: [
+      "Systematic reviews and randomized controlled trials for chamomile, valerian, ashwagandha, ginger, hibiscus, peppermint, lion's mane, reishi, and others",
+      "Mechanism papers — apigenin / GABA, valerenic acid, withanolides, glycyrrhizin / 11β-HSD2, hericenones / NGF, gingerol / TRPV1",
+      "Pharmacovigilance and interaction case reports (warfarin / vitamin K, licorice / pseudoaldosteronism, ashwagandha / thyroid medication, etc.)",
+    ],
+  },
+  {
+    heading: "Cultural & culinary references",
+    items: [
+      "Tea-tradition primary sources: Japanese chajin manuals, Chinese gongfu cha texts, North African mint-tea ritual, Argentine yerba mate cebada practice",
+      "European folk-herbal lineage — wise-woman infusion traditions, Provençal lavender & herbal practice",
+      "South Asian masala chai household preparation; Egyptian and West African karkadé / bissap traditions",
+      "Indigenous American plant medicine — Lakota, Cheyenne, Cherokee, and Andean uses, where the relevant ingredient draws on those lineages",
+    ],
+  },
+];
+
+const SourcesPanel = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{
+      padding: 14, borderRadius: 10,
+      border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
+    }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", textAlign: "left",
+          background: "transparent", border: "none",
+          padding: "2px 0", cursor: "pointer",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+        }}
+      >
+        <span style={{ fontStyle: "italic", color: theme.inkSoft }}>
+          Where the catalog's claims come from
+        </span>
+        <span style={{
+          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.terra,
+        }}>{open ? "hide" : "show"}</span>
+      </button>
+
+      {open && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+          }}>
+            Brewing windows, doses, safety flags, and effect claims are drawn
+            from peer-reviewed literature, classical pharmacopoeia, and
+            living tradition. Per-ingredient citations live in the project's
+            research files.
+          </div>
+          {SOURCES.map(group => (
+            <div key={group.heading} style={{ marginBottom: 14 }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.sageDeep,
+                marginBottom: 6,
+              }}>{group.heading}</div>
+              <ul style={{
+                listStyle: "none", padding: 0, margin: 0,
+              }}>
+                {group.items.map(item => (
+                  <li
+                    key={item}
+                    style={{
+                      fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
+                      lineHeight: 1.5, padding: "4px 0",
+                      borderBottom: `1px solid ${theme.ruleSoft}`,
+                    }}
+                  >{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+            color: theme.ash, lineHeight: 1.5, marginTop: 10,
+          }}>
+            Herbanium is a brewing companion, not medical advice. For
+            anything safety-relevant, verify with a clinician.
+          </div>
+        </div>
+      )}
     </div>
   );
 };
