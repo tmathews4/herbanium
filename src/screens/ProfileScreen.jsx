@@ -474,65 +474,101 @@ const RARITY_TONE = {
   mythic:    { color: theme.plum,     label: "mythic",    bg: "rgba(120,72,140,0.12)" },
 };
 
-const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => (
-  <>
-    {/* Detail card — sits above the grid when one is open */}
-    {openAttr && (() => {
-      const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
-      return (
-        <div style={{
-          marginBottom: 12, padding: "12px 14px", borderRadius: 10,
-          background: tone.bg,
-          border: `2px solid ${tone.color}`,
-          position: "relative",
-        }}>
-          <button onClick={() => setOpenId(null)} aria-label="close" style={{
-            position: "absolute", top: 4, right: 8,
-            background: "transparent", border: "none", cursor: "pointer",
-            color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
-          }}>×</button>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
-            <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
-              {openAttr.displayName || openAttr.name}
-            </span>
-            <span style={{
-              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-              textTransform: "uppercase", color: tone.color, fontWeight: 600,
-            }}>
-              {tone.label}
-            </span>
-          </div>
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-            color: theme.inkSoft, lineHeight: 1.5,
-          }}>
-            {openAttr.desc}
-          </div>
-        </div>
-      );
-    })()}
+// Default visible animis on the altar. Anything beyond this hides
+// behind a "show all" toggle so the section doesn't dominate the
+// Profile screen as the collection grows.
+const ANIMIS_COLLAPSED_LIMIT = 12;
 
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-      {attrs.map(a => {
-        const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
-        const isOpen = openId === a.id;
+const AttributeShelf = ({ attrs, openId, setOpenId, openAttr }) => {
+  const [expanded, setExpanded] = useState(false);
+  const overflow = attrs.length - ANIMIS_COLLAPSED_LIMIT;
+  const visible = expanded || overflow <= 0
+    ? attrs
+    : attrs.slice(0, ANIMIS_COLLAPSED_LIMIT);
+  // If the user opens an animi that's hidden behind the collapse,
+  // expand the grid so the highlighted card has visible context.
+  const openHidden = openAttr && !visible.find(a => a.id === openAttr.id);
+  const effectiveVisible = openHidden ? attrs : visible;
+  const showToggle = overflow > 0;
+
+  return (
+    <>
+      {/* Detail card — sits above the grid when one is open */}
+      {openAttr && (() => {
+        const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
         return (
-          <button
-            key={a.id}
-            onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
-            style={{
-              fontFamily: ff.serif, fontSize: 13,
-              padding: "6px 12px", borderRadius: 6,
-              background: isOpen ? tone.bg : "transparent",
-              color: theme.ink,
-              border: `2px solid ${tone.color}`,
-              cursor: "pointer",
-              transition: "background 0.15s ease",
-              whiteSpace: "nowrap",
-            }}
-          >{a.displayName || a.name}</button>
+          <div style={{
+            marginBottom: 12, padding: "12px 14px", borderRadius: 10,
+            background: tone.bg,
+            border: `2px solid ${tone.color}`,
+            position: "relative",
+          }}>
+            <button onClick={() => setOpenId(null)} aria-label="close" style={{
+              position: "absolute", top: 4, right: 8,
+              background: "transparent", border: "none", cursor: "pointer",
+              color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
+            }}>×</button>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
+              <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
+                {openAttr.displayName || openAttr.name}
+              </span>
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: tone.color, fontWeight: 600,
+              }}>
+                {tone.label}
+              </span>
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+              color: theme.inkSoft, lineHeight: 1.5,
+            }}>
+              {openAttr.desc}
+            </div>
+          </div>
         );
-      })}
-    </div>
-  </>
-);
+      })()}
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {effectiveVisible.map(a => {
+          const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
+          const isOpen = openId === a.id;
+          return (
+            <button
+              key={a.id}
+              onClick={() => setOpenId(prev => prev === a.id ? null : a.id)}
+              style={{
+                fontFamily: ff.serif, fontSize: 13,
+                padding: "6px 12px", borderRadius: 6,
+                background: isOpen ? tone.bg : "transparent",
+                color: theme.ink,
+                border: `2px solid ${tone.color}`,
+                cursor: "pointer",
+                transition: "background 0.15s ease",
+                whiteSpace: "nowrap",
+              }}
+            >{a.displayName || a.name}</button>
+          );
+        })}
+      </div>
+
+      {showToggle && (
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
+          <button
+            onClick={() => setExpanded(prev => !prev)}
+            style={{
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.terra,
+              background: "transparent", border: "none",
+              cursor: "pointer", padding: "4px 8px",
+            }}
+          >
+            {expanded
+              ? "show fewer"
+              : `show all · ${attrs.length}`}
+          </button>
+        </div>
+      )}
+    </>
+  );
+};
