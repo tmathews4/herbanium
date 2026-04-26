@@ -155,14 +155,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           }}>kept<br/>since<br/>'24</div>
         )}
 
-        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: theme.ivory, border: `1px solid ${theme.rule}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: ff.serif, fontSize: 26, color: theme.terra,
-          }}>{(profile?.name || "F").charAt(0).toUpperCase()}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex" }}>
+          <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
             <div style={{
               fontFamily: ff.serif, fontSize: 13.5, fontStyle: "italic",
               color: theme.terra, letterSpacing: "0.02em", lineHeight: 1.2,
