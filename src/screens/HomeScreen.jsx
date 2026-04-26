@@ -9,7 +9,7 @@ import {
 import {
   FitText, SectionLabel,
 } from "../components/layout";
-import { OmenCard } from "../components/OmenCard";
+import { FirstCupHintCard } from "../components/FirstCupHintCard";
 import { PantryHintCard } from "../components/PantryHintCard";
 import { BLENDS } from "../data/blends";
 import { getBlend, mmss } from "../helpers/misc";
@@ -37,7 +37,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, omenShown, dismissOmen, animisBanished }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, pantryHintShown, dismissPantryHint, pantryCount, firstCupHintShown, dismissFirstCupHint, animisBanished }) => {
   const yourSessions = sessions.filter(s => s.who === "you");
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
@@ -53,16 +53,20 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Omen card — first-visit animi reveal at the top of Home.
-          Fades in, holds, fades out, then unmounts. Skipped entirely
-          when the user has banished the spirits. */}
-      {!omenShown && !animisBanished && profile?.title && (
-        <OmenCard title={profile.title} onDismiss={dismissOmen} />
+      {/* First-cup hint — tutorial card pointing at Compose / Apothecary.
+          Replaces the old animi-omen popup; the unique animi reveal now
+          fires on first Profile visit instead. Auto-hides once the user
+          has logged any cup. */}
+      {!firstCupHintShown && profile && yourSessions.length === 0 && (
+        <FirstCupHintCard
+          onDismiss={dismissFirstCupHint}
+          onCompose={() => { dismissFirstCupHint(); go("compose"); }}
+          onApothecary={() => { dismissFirstCupHint(); go("library"); }}
+        />
       )}
-      {/* Pantry hint — shown once after the omen finishes, while the
-          pantry is still empty. Points at the pantry toggle in Library
-          / IngredientDetail so the user can mark what they have. */}
-      {omenShown && !pantryHintShown && profile && pantryCount === 0 && (
+      {/* Pantry hint — chained after the first-cup hint, shown only
+          while the pantry is empty. */}
+      {firstCupHintShown && !pantryHintShown && profile && pantryCount === 0 && (
         <PantryHintCard
           onDismiss={dismissPantryHint}
           onOpenLibrary={() => { dismissPantryHint(); go("library"); }}

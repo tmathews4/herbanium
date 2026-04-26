@@ -242,9 +242,16 @@ export default function App() {
   // Pantry hint visibility — one-time card pointing at the pantry toggle.
   // Pantry starts empty for new users; this nudges them toward filling it.
   const [pantryHintShown, setPantryHintShown] = usePersistedState("pantryHintShown", false);
-  // Omen card visibility — first-visit fading animi reveal at the top
-  // of Home. Replaces the old welcome card.
+  // First-cup hint visibility — tutorial card on Home pointing at
+  // Compose/Apothecary. Stays until the user dismisses or brews a cup.
+  const [firstCupHintShown, setFirstCupHintShown] = usePersistedState("firstCupHintShown", false);
+  // Unique creation animi popup — now fires on first Profile visit
+  // rather than on Home, so it doesn't hit users right at app entry.
   const [omenShown, setOmenShown] = usePersistedState("omenShown", false);
+  // Set of animi attribute ids the user has been shown an arrival
+  // popup for. Newly-earned animis whose ids aren't in here trigger
+  // an AnimiArrivalCard on the next Profile visit.
+  const [seenAnimiIds, setSeenAnimiIds] = usePersistedState("seenAnimiIds", new Set());
   // Featured animis on the altar — up to 5 ids the user keeps in the
   // surfaced row below their unique spirit. Empty default falls back to
   // top-5-by-rarity in ProfileScreen.
@@ -321,8 +328,10 @@ export default function App() {
     setGeneratedBlends([]);
     setSavedBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
-    setOmenShown(false); // ensure the animi omen card plays on first Home view
+    setOmenShown(false); // unique animi popup plays on first Profile visit
     setPantryHintShown(false); // ensure pantry hint shows for new users
+    setFirstCupHintShown(false); // first-cup tutorial card on Home
+    setSeenAnimiIds(new Set()); // arrival popups start fresh
   };
 
   // Full reset — wipes localStorage and reloads to restart from onboarding
@@ -545,10 +554,10 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} animisBanished={animisBanished} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} animisBanished={animisBanished} />}
         {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} libraryView={libraryView} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} />}
       </div>
 
       <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />

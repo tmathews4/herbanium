@@ -16,6 +16,8 @@ import {
   exportAllPersistedState, importAllPersistedState,
 } from "../hooks/usePersistedState";
 import { FeedbackModal } from "./FeedbackModal";
+import { OmenCard } from "../components/OmenCard";
+import { AnimiArrivalCard } from "../components/AnimiArrivalCard";
 import {
   ff, theme,
 } from "../theme";
@@ -25,7 +27,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -143,6 +145,23 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const sortedEarned = [...earnedAttrs].sort((a, b) =>
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
+
+  // Arrival queue — earned animis whose ids the user hasn't been
+  // shown a popup for. Limited to one popup at a time so a user with
+  // many new animis isn't bombarded; dismissing reveals the next.
+  const seenIds = seenAnimiIds || new Set();
+  const arrivalQueue = !animisBanished
+    ? sortedEarned.filter(a => !seenIds.has(a.id))
+    : [];
+  const nextArrival = arrivalQueue[0] || null;
+  const markAnimiSeen = (id) => {
+    if (!setSeenAnimiIds) return;
+    setSeenAnimiIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
   // The unique creation title — granted at signup, never re-evaluates.
   // Always rendered when a profile exists; the AttributeShelf prepends
   // it as the first card so users see their identity title immediately.
@@ -192,6 +211,23 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {/* Unique animi creation popup — fires once on first Profile
+          visit. Skipped entirely when the user has banished spirits. */}
+      {!omenShown && !animisBanished && profile?.title && dismissOmen && (
+        <OmenCard title={profile.title} onDismiss={dismissOmen} />
+      )}
+
+      {/* Newly-earned animi arrival popup. Once the omen has been
+          dismissed (or if it's already been seen), surface the next
+          unseen earned animi with its arrival verb. Dismiss → mark
+          seen → next one in the queue surfaces on next render. */}
+      {omenShown && !animisBanished && nextArrival && (
+        <AnimiArrivalCard
+          animi={nextArrival}
+          onDismiss={() => markAnimiSeen(nextArrival.id)}
+        />
+      )}
+
       {/* Identity card */}
       <div style={{
         border: `1px solid ${theme.rule}`, borderRadius: 14,
