@@ -283,9 +283,24 @@ export const StatCard = ({ label, value }) => (
 );
 
 // Stat — bare label+value, no card chrome. Used on Profile summary.
-export const Stat = ({ label, value }) => (
-  <div>
-    <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink, lineHeight: 1 }}>{value}</div>
-    <div style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash, marginTop: 3 }}>{label}</div>
-  </div>
-);
+// When `onClick` is supplied the stat becomes a button that links to
+// the relevant surface (recent brews, catalogue, pantry, etc.).
+export const Stat = ({ label, value, onClick }) => {
+  const inner = (
+    <>
+      <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash, marginTop: 3 }}>{label}</div>
+    </>
+  );
+  if (!onClick) return <div>{inner}</div>;
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: "transparent", border: "none", padding: 0,
+        textAlign: "left", cursor: "pointer", color: "inherit",
+        font: "inherit",
+      }}
+    >{inner}</button>
+  );
+};

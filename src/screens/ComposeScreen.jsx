@@ -32,7 +32,7 @@ import { SessionRow } from "./HomeScreen";
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, saveComposedBlend, openBlend, composePreselect, openInCompose, pantryIds, sessions = [] }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [] }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -59,6 +59,14 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
     setMode("apothecary");
     setApothecaryFilter("all");
   }, [composePreselect?.at]);
+
+  // Deep-link from Profile stats: lands on Compose with the requested
+  // sub-mode/tab pre-selected.
+  React.useEffect(() => {
+    if (!composeView) return;
+    if (composeView.mode) setMode(composeView.mode);
+    if (composeView.shelfTab) setShelfTab(composeView.shelfTab);
+  }, [composeView?.at]);
 
   const toggleMood = (m) => {
     setMoods(prev => {
@@ -972,7 +980,11 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                        : b.id?.startsWith("local-") ? "your composition"
                        : b.experimental ? "Herbanium experiment"
                        : null);
-                  const canDelete = !b.tradition && !isHouseStaple && deleteBlend;
+                  // Any catalogue blend except permanent house staples
+                  // can be removed; curated traditions get hidden via
+                  // hiddenBlendIds and can be restored from the panel
+                  // below the list.
+                  const canDelete = !isHouseStaple && deleteBlend;
                   return (
                     <div key={b.id} style={{ position: "relative" }}>
                       <BlendListRow
@@ -1005,6 +1017,11 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
                   );
                 })
               )}
+
+              <RestoreDeletedPanel
+                hiddenBlendIds={hidden}
+                unhideBlend={unhideBlend}
+              />
             </div>
           );
         }
@@ -1430,5 +1447,118 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         }}>start brewing</button>
       </div>
     </>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────────
+   RestoreDeletedPanel — collapsible "X removed · search · restore"
+   block at the bottom of Catalogue. Lets the user bring back any
+   curated blend they've previously deleted; user-composed blends
+   that were dropped from generatedBlends can't be restored here
+   (they're gone from storage, not just hidden).
+   ────────────────────────────────────────────────────────────── */
+
+const RestoreDeletedPanel = ({ hiddenBlendIds, unhideBlend }) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // Resolve hidden ids against BLENDS — user-composed `local-` ids
+  // won't be in BLENDS and aren't restorable from this panel.
+  const hiddenList = [...(hiddenBlendIds || new Set())]
+    .map(id => BLENDS.find(b => b.id === id))
+    .filter(Boolean);
+  if (hiddenList.length === 0) return null;
+
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? hiddenList.filter(b =>
+        (b.name || "").toLowerCase().includes(q)
+        || (b.subtitle || "").toLowerCase().includes(q)
+        || (b.tradition || "").toLowerCase().includes(q)
+      )
+    : hiddenList;
+
+  return (
+    <div style={{
+      marginTop: 22,
+      padding: "10px 12px",
+      borderTop: `1px solid ${theme.ruleSoft}`,
+    }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", textAlign: "left",
+          background: "transparent", border: "none",
+          padding: "6px 0", cursor: "pointer",
+          fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}
+      >
+        <span>removed · {hiddenList.length}</span>
+        <span style={{ fontFamily: ff.serif, fontSize: 14, letterSpacing: 0 }}>
+          {open ? "hide" : "restore"}
+        </span>
+      </button>
+
+      {open && (
+        <>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="search removed recipes…"
+            style={{
+              width: "100%",
+              marginTop: 8,
+              fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+              background: "transparent",
+              border: "none", borderBottom: `1px solid ${theme.ruleSoft}`,
+              padding: "6px 2px", outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          <div style={{ marginTop: 10 }}>
+            {filtered.length === 0 ? (
+              <div style={{
+                padding: "10px 0",
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, textAlign: "center",
+              }}>
+                Nothing matches that search.
+              </div>
+            ) : filtered.map(b => (
+              <div key={b.id} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "8px 0", borderBottom: `1px solid ${theme.ruleSoft}`,
+                gap: 10,
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>{b.name}</div>
+                  {b.tradition && (
+                    <div style={{
+                      fontFamily: ff.sans, fontSize: 10, color: theme.ash,
+                      letterSpacing: "0.06em", marginTop: 1,
+                    }}>{b.tradition}</div>
+                  )}
+                </div>
+                <button
+                  onClick={() => unhideBlend && unhideBlend(b.id)}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                    background: "transparent",
+                    border: `1px solid ${theme.terra}`, borderRadius: 999,
+                    padding: "5px 12px", cursor: "pointer", flexShrink: 0,
+                  }}
+                >restore</button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 };

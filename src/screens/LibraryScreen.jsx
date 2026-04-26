@@ -30,13 +30,20 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds }) => {
+export const LibraryScreen = ({ go, pantryIds, libraryView }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(false);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
+
+  // Deep-link from Profile → Pantry stat: arrives with pantryOnly=true
+  // so the user lands on their curated subset.
+  React.useEffect(() => {
+    if (!libraryView) return;
+    if (typeof libraryView.pantryOnly === "boolean") setPantryOnly(libraryView.pantryOnly);
+  }, [libraryView?.at]);
 
   // All ingredients, filtered then sorted alphabetically by display name.
   const shelfItems = Object.entries(INGREDIENTS)

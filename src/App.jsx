@@ -323,13 +323,35 @@ export default function App() {
     window.location.href = window.location.pathname; // strip any ?dev, reload clean
   };
 
+  // Per-screen view presets — let other screens deep-link into a
+  // specific sub-mode (e.g. Profile → Compose Shelf → Journal).
+  const [composeView, setComposeView] = useState(null);
+  const [libraryView, setLibraryView] = useState(null);
+
   const go = (to, arg) => {
     if (to === "ingredient") {
       if (arg) setIngredientId(arg);
       setOverlay("ingredient");
       return;
     }
+    if (to === "compose" && arg && typeof arg === "object") {
+      setComposeView({ ...arg, at: Date.now() });
+    }
+    if (to === "library" && arg && typeof arg === "object") {
+      setLibraryView({ ...arg, at: Date.now() });
+    }
     setTab(to);
+  };
+
+  // Restore a curated blend the user previously deleted from their
+  // catalogue. Only meaningful for entries in BLENDS — user-generated
+  // blends in `generatedBlends` were dropped, not hidden.
+  const unhideBlend = (id) => {
+    setHiddenBlendIds(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
   };
 
   const openBlend = (blendId) => {
@@ -516,8 +538,8 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} pantryCount={pantryIds.size} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
-        {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
+        {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} libraryView={libraryView} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} />}
       </div>
 
