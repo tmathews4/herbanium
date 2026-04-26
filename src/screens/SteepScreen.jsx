@@ -314,6 +314,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           opacity: waitFading ? 0 : 1,
           transition: "opacity 0.4s ease",
           whiteSpace: waitCards[waitIdx]?.type === "poem" ? "pre-line" : "normal",
+          overflowWrap: "break-word", wordBreak: "break-word",
         }}>
           {waitCards[waitIdx]?.text}
         </div>

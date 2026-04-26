@@ -26,58 +26,234 @@ export const WAIT_FACTS = {
     { type: "fact",      text: "Chamomile's calming compound, apigenin, releases most in the final two minutes. The last minutes of the steep are where most of it arrives." },
     { type: "tradition", text: "In parts of Eastern Europe, chamomile was strewn across floors before gatherings — walking on it released the scent, perfuming the room." },
     { type: "fact",      text: "Chamomile has been cultivated for at least 2,000 years — Bronze Age pollen turns up in European archaeological sites, and the plant was widely traded across the ancient Mediterranean." },
+    { type: "fact",      text: "Apigenin docks at the same GABA-A receptor site as benzodiazepines — the cup nudges the same lock the prescription opens, just gentler and slower." },
   ],
   lavender: [
     { type: "fact",      text: "The word lavender comes from the Latin lavare — to wash. Romans added it to bathwater." },
     { type: "fact",      text: "Lavender's essential oil contains linalool, the compound clinical trials credit with the herb's measurable anxiolytic effect — Germany's Silexan preparation runs on it." },
     { type: "tradition", text: "In Provence, lavender harvest begins at dawn, when the oils are most concentrated and the heat hasn't yet driven them off." },
+    { type: "fact",      text: "Linalool reaches the brain through breath as effectively as through the gut — half the cup's effect arrives before you sip." },
   ],
   lemonbalm: [
     { type: "fact",      text: "Lemon balm (Melissa officinalis) takes its botanical name from the Greek melissa — honeybee. Bees are drawn to it reliably." },
     { type: "tradition", text: "Medieval monks brewed lemon balm for what they called 'gladness of spirit' — an early recognition of its mild mood-lifting effect. Carmelite Water, a 17th-century French nun's recipe, made the use famous." },
+    { type: "fact",      text: "Rosmarinic acid in lemon balm modestly raises GABA in the brain — the calm-without-drowsy register that Paracelsus, who called it the elixir of life, would have recognized." },
   ],
   peppermint: [
     { type: "fact",      text: "Peppermint is a natural hybrid of spearmint and water mint. Most of what sells as 'mint' in tea is actually peppermint." },
     { type: "fact",      text: "Menthol, peppermint's cooling compound, triggers the same TRPM8 cold-receptors that respond to actual cold — your mouth 'feels' the chill that isn't there." },
+    { type: "tradition", text: "Greek and Roman tables ended with mint two thousand years before TRPM8 was discovered — folk medicine got there by experiment, the lab caught up later." },
   ],
   spearmint: [
     { type: "tradition", text: "Moroccan tea service traditionally uses three pours: the first bitter as life, the second sweet as love, the third gentle as death." },
     { type: "fact",      text: "Spearmint has carvone where peppermint has menthol — a different cooling compound entirely, which is why it reads softer and pairs better with green tea." },
+    { type: "fact",      text: "Recent trials show spearmint modestly lowers androgens — the Mediterranean folk wisdom about 'cooling the blood' meeting endocrinology." },
   ],
   rooibos: [
     { type: "fact",      text: "Rooibos grows only in the Cederberg region of South Africa. Attempts to cultivate it elsewhere have largely failed." },
     { type: "tradition", text: "The Khoi people of the Cederberg have used rooibos for centuries; it entered European consciousness only in the early 1900s." },
+    { type: "fact",      text: "Aspalathin — the antioxidant that gives rooibos its sweetness without sugar — exists in no other plant on earth." },
   ],
   sencha: [
     { type: "fact",      text: "Sencha is made by steaming fresh tea leaves within hours of harvest — a Japanese innovation, introduced by Soen Nagatani in 1738, that preserves the grassy green notes Chinese pan-firing doesn't." },
     { type: "tradition", text: "Japanese tea masters consider the first pour of sencha almost ceremonial — water at the wrong temperature can ruin months of the farmer's work." },
+    { type: "fact",      text: "The leaf burns at a true boil. Brew between 70 and 80°C or you'll lose the theanine to scorched grass." },
   ],
   assam: [
     { type: "fact",      text: "Assam was discovered growing wild by British botanist Robert Bruce in 1823, disproving the assumption that tea was exclusively Chinese — and breaking the empire's monopoly on the trade." },
+    { type: "fact",      text: "Camellia sinensis assamica has bigger leaves and more caffeine than its Chinese cousin — the cup demands milk and gets it." },
+    { type: "tradition", text: "British breakfast culture was built on Assam, and on the labor that picked it. The leaf travels with that history." },
   ],
   darjeeling: [
     { type: "fact",      text: "Darjeeling's character comes from elevation — gardens sit at 600-2000m in the Himalayan foothills, producing slow-growing, intensely flavored leaves." },
     { type: "tradition", text: "The 'first flush' — Darjeeling leaves picked in spring after dormancy — is considered the estate's finest, sometimes called the 'champagne of teas.'" },
+    { type: "fact",      text: "Darjeeling's muscatel grape note comes from the tea jassid, a tiny insect whose bite triggers the leaf's defensive chemistry. Beauty as injury, healed." },
   ],
   ginger: [
     { type: "fact",      text: "Ginger's heat comes from gingerol, which converts to shogaol when dried or heated — shogaol is sharper, more warming, and a different molecule than the fresh root carries." },
     { type: "tradition", text: "In Ayurvedic tradition, ginger is considered a universal medicine — warming to the digestive fire and circulation both." },
+    { type: "fact",      text: "Roman cooks used ginger before Europe knew where it grew. Chinese sailors chewed it against the swell. The folk uses against nausea hold up cleanly under modern trials." },
   ],
   hibiscus: [
     { type: "fact",      text: "Hibiscus's ruby color comes from anthocyanins, the same family of pigments that make blueberries blue and red cabbage red." },
     { type: "tradition", text: "Known as karkadé in Egypt and agua de jamaica in Mexico, hibiscus tea has traveled widely with different names and almost identical preparations." },
+    { type: "fact",      text: "Pharaohs drank hibiscus as a royal beverage. Modern trials show it modestly lowers blood pressure — the crown turned out to know something." },
   ],
   rose: [
     { type: "fact",      text: "Rose petals used in tea are typically Rosa × damascena, cultivated for oil and aroma rather than for the rose gardens most people imagine." },
+    { type: "tradition", text: "Tenth-century Persian distillers invented attar of rose chasing the soul of the flower. What's left in dried petals is the gentler form — same family of molecules, slower release." },
+    { type: "fact",      text: "Modern trials confirm what Unani physicians have prescribed for a thousand years: rose modestly modulates cortisol and eases mild anxiety without sedation." },
   ],
   cinnamon: [
     { type: "fact",      text: "What most Western markets sell as 'cinnamon' is usually cassia — a close relative. True cinnamon (Ceylon) is lighter in color and more delicate in flavor — and lower in coumarin, which the cassia version carries enough of to stress the liver at heavy daily doses." },
+    { type: "fact",      text: "Cinnamon was worth more than gold to the Romans, who never saw the tree. Pliny invented birds nesting on cliffs to explain the supply chain." },
+    { type: "tradition", text: "The Maltese knights kept cinnamon in their treasury alongside silver. Trade routes for the spice predate written records." },
   ],
   cardamom: [
     { type: "fact",      text: "Green cardamom pods keep their aromatic oils far longer than the seeds alone. Opening a pod releases the scent, but cracks the preservation." },
+    { type: "fact",      text: "Inside the pod sits 1,8-cineole — eucalyptol — the molecule that lets cardamom feel warming and cooling at the same time. The paradox the chemistry resolves cleanly." },
+    { type: "tradition", text: "Bedouin coffee is poured through a cardamom-stuffed spout. The pod has flavored hospitality across the Arabian peninsula for over a thousand years." },
   ],
   ashwagandha: [
     { type: "fact",      text: "Ashwagandha's Sanskrit name means 'smell of horse' — referring both to the root's musky scent and, traditionally, the strength it was said to convey." },
+    { type: "fact",      text: "The withanolides in ashwagandha don't grant a horse's strength, but trials show they reduce cortisol and improve sleep over six to eight weeks of daily use." },
+    { type: "tradition", text: "Ayurveda classes ashwagandha as a rasayana — a longevity tonic. Daily use over months, not a single cup, is how it was always meant." },
+  ],
+
+  jasmine: [
+    { type: "fact",      text: "Jasmine flowers are picked at dusk and pressed against tea leaves overnight in southern China — the bloom opens after dark and gives up its perfume to whatever's waiting." },
+    { type: "fact",      text: "Indole, the molecule that gives jasmine its heady richness, is the same one used in synthetic perfumery. At high concentrations it smells unpleasant; at low ones, it's the soul of the flower." },
+    { type: "tradition", text: "Boiling water destroys jasmine's volatile aromatics. Keep the brew below ninety, or the perfume escapes with the steam." },
+  ],
+  passionflower: [
+    { type: "fact",      text: "Spanish missionaries read the Passion of Christ in passionflower's anatomy — the corona for the crown of thorns, the three styles for the nails." },
+    { type: "fact",      text: "Chrysin and apigenin in the leaves bind the same GABA receptors that benzodiazepines do. The folk drowsiness is real and replicated in trials." },
+    { type: "tradition", text: "Mid-19th-century American physicians prescribed passionflower for what they called 'nervous restlessness.' The diagnosis aged better than its century." },
+  ],
+  lemongrass: [
+    { type: "fact",      text: "Thai cooks bruise lemongrass stalks before cutting. The crush releases citral, the same compound that flavors lemon peel and repels mosquitoes." },
+    { type: "fact",      text: "Citral is a documented antimicrobial. The folk uses across South and Southeast Asia for fever and stomach line up cleanly with the lab." },
+    { type: "tradition", text: "Lemongrass is the foundation of tom yum, a soup whose name simply means 'sour soup.' Citral does most of the work that name describes." },
+  ],
+  fennel: [
+    { type: "fact",      text: "Indian restaurants set a small bowl of fennel by the door for after-meal chewing. The seed's anise note is anethole, which finds GABA receptors in the gut." },
+    { type: "tradition", text: "Medieval congregations chewed fennel seeds through long sermons to keep the breath sweet and the stomach quiet." },
+    { type: "fact",      text: "Both folk traditions — Indian and European — point to the same receptor that science would later name. Anxiety quiets where you didn't know it was hiding." },
+  ],
+  tulsi: [
+    { type: "tradition", text: "Indian households grow tulsi at the front step — Vishnu's plant, the threshold guardian. Tradition asks permission before harvesting." },
+    { type: "fact",      text: "Ursolic acid in tulsi leaves measurably blunts the day's cortisol rise over weeks of daily use. Sacred botany doing patient work." },
+    { type: "fact",      text: "Tulsi is one of the few herbs traditionally classed as both a stimulant and a calming agent. The chemistry shows it modulates rather than pushes — adaptogen behavior." },
+  ],
+  turmeric: [
+    { type: "tradition", text: "Indian brides are anointed with turmeric paste the night before the wedding — auspiciousness rubbed into skin, going back centuries." },
+    { type: "fact",      text: "Curcumin, turmeric's active compound, is barely absorbed on its own. The traditional pairing with milk fat and black pepper raises bioavailability dramatically — the kitchen anticipated the pharmacology by a thousand years." },
+    { type: "fact",      text: "Piperine in black pepper inhibits the enzymes that would otherwise clear curcumin from the bloodstream. The Ayurvedic recipe for golden milk is, accidentally, a textbook bioavailability hack." },
+  ],
+  cloves: [
+    { type: "fact",      text: "Han dynasty officials chewed cloves before addressing the emperor. The breath it scrubbed clean was managed by eugenol — a topical anesthetic still used in dental clinics today." },
+    { type: "tradition", text: "The Dutch and Portuguese fought wars in the Maluku islands for the clove bud. For two centuries, all trade in cloves passed through Amsterdam." },
+    { type: "fact",      text: "Eugenol is the same molecule a dentist applies for tooth pain. The folk use against toothache and modern dental practice converged on identical chemistry." },
+  ],
+  vanilla: [
+    { type: "fact",      text: "The vanilla orchid has exactly one wild pollinator — a Mexican Melipona bee that lives nowhere else." },
+    { type: "tradition", text: "In 1841, a twelve-year-old enslaved boy named Edmond Albius worked out hand-pollination on Réunion island. The world drinks vanilla because of his technique." },
+    { type: "fact",      text: "Vanillin, the principal aromatic, is now synthesized from petrochemicals and wood pulp. Real vanilla pods carry hundreds of supporting molecules the lab can't replicate." },
+  ],
+  "black-pepper": [
+    { type: "fact",      text: "Roman empresses paid taxes in peppercorns. Vasco da Gama crossed an ocean for them. For most of European history, pepper was its own currency." },
+    { type: "fact",      text: "The bite the tongue feels is piperine, which slows liver enzymes that would otherwise clear other compounds — exactly why the Ayurvedic recipe pairs turmeric with pepper." },
+    { type: "tradition", text: "Visigoths sacking Rome in 410 demanded 3,000 pounds of pepper as part of the ransom. The spice was already older than the empire it broke." },
+  ],
+  white: [
+    { type: "fact",      text: "White tea is the youngest leaves on the bush — withered in the sun, never fired or rolled. The cup tastes the leaf almost as the bush gave it." },
+    { type: "fact",      text: "Because nothing touched them, white tea's catechins survive at higher concentration than any other tea — the highest antioxidant load on the shelf." },
+    { type: "tradition", text: "Imperial Chinese tea-makers reserved white tea for the court. Silver Needle (Bai Hao Yinzhen) is still graded by how downy and intact each bud is." },
+  ],
+  gyokuro: [
+    { type: "fact",      text: "Gyokuro means 'jade dew.' For the last three weeks before harvest, Uji bushes are shrouded under reed mats." },
+    { type: "fact",      text: "Deprived of sun, the leaf hoards theanine and chlorophyll instead of catechins. Sweetness, in this tea, is what darkness leaves behind." },
+    { type: "tradition", text: "Gyokuro brews at 50°C in a tiny kyusu with only 60ml of water. Treating it like sencha will burn the cup." },
+  ],
+  matcha: [
+    { type: "tradition", text: "The monk Eisai brought powdered tea from Song China to Japanese monasteries in the twelfth century — a cup for keeping zazen." },
+    { type: "fact",      text: "Drinking the leaf instead of straining it changes the math: every catechin, every theanine, the full L-theanine-to-caffeine ratio that produces calm focus." },
+    { type: "fact",      text: "Modern EEG studies confirm the alpha-wave shift the monks named — the cup measurably increases the brainwaves associated with relaxed alertness." },
+  ],
+  genmaicha: [
+    { type: "fact",      text: "Genmaicha was peasant tea by origin — Japanese households stretched scarce leaves with toasted brown rice." },
+    { type: "tradition", text: "The frugality became style. Roughly half the caffeine of plain sencha and twice the welcome at the end of a meal." },
+    { type: "fact",      text: "The toasted rice does double duty: it tempers the leaf's astringency and adds a starchy roundness no green tea reaches alone." },
+  ],
+  gunpowder: [
+    { type: "fact",      text: "Gunpowder green was rolled into pellets for the long sea voyage from Zhejiang to Europe. What looked like gunpowder kept the leaf compact and fresh through months at sea." },
+    { type: "fact",      text: "Tight rolling preserves catechins by reducing oxygen contact — the practical seafarer trick is also good chemistry." },
+    { type: "tradition", text: "In Morocco, gunpowder meets sugar and mint and refuses to be drowned. The pellets unfurl in hot water like time-release capsules." },
+  ],
+  hojicha: [
+    { type: "fact",      text: "Hojicha is a 1920s Kyoto invention — tea merchants roasted stems and late-season leaves to redeem otherwise-discardable lots. The frugality became canon." },
+    { type: "fact",      text: "Fire above 200°C burns off most of the caffeine and caramelizes what's left. Hojicha is the rare true tea you can drink at nine p.m." },
+    { type: "tradition", text: "Roasted teas were originally Buddhist temple drink — the fire turned the cup into something the monks could take after vespers without losing sleep." },
+  ],
+  dragonwell: [
+    { type: "tradition", text: "West Lake legend says the Qianlong emperor pressed Longjing leaves against his palms while the wok was hot, and the flat shape was born." },
+    { type: "fact",      text: "The chestnut sweetness isn't the leaf alone; it's the Maillard reaction — the same chemistry that browns bread crusts and sears steaks." },
+    { type: "fact",      text: "Genuine West Lake Longjing comes from a small protected zone around the lake. Most 'dragonwell' on the world market is grown elsewhere and styled the same." },
+  ],
+  oolong: [
+    { type: "fact",      text: "Oolong means 'black dragon' in Chinese — though the word covers everything from a green-leaning Taiwanese high-mountain to a roasted Wuyi rock that drinks like a black tea." },
+    { type: "fact",      text: "Partial oxidation is the trick. The percentage decides the cup, and tea masters and food chemists are looking at the same dial: how many polyphenols to leave standing." },
+    { type: "tradition", text: "Gongfu-style oolong service uses tiny pots and quick infusions — a single batch of leaves can yield seven to twelve cups, each tasting different." },
+  ],
+  ceylon: [
+    { type: "fact",      text: "A coffee blight in the 1860s burned through Ceylon's plantations. The planters switched crops, and an island became famous for tea instead." },
+    { type: "fact",      text: "Ceylon's bright citrus character is altitude. Cooler-grown leaves climb higher into the aromatic register; estate names like Uva and Dimbula are altitude bands." },
+    { type: "tradition", text: "James Taylor, a Scottish planter, established Ceylon's first commercial tea garden in 1867. Within forty years, the island was the world's largest tea exporter." },
+  ],
+  lapsang: [
+    { type: "tradition", text: "Legend says soldiers passing through the Wuyi mountains in the late Ming forced tea farmers to dry their leaves over pinewood fires to free the camp. The smoke became the tea." },
+    { type: "fact",      text: "The compounds responsible — guaiacol and syringol — are the same molecules in peated Scotch and good barbecue. Folk accident and lab analysis converge on woodsmoke." },
+    { type: "fact",      text: "Lapsang is the love-it-or-never-again register of the tea world. The smoke divides drinkers cleanly; there's rarely a polite middle ground." },
+  ],
+  puerh: [
+    { type: "fact",      text: "On the old horse-and-tea road from Yunnan to Tibet, the leaves fermented in their packs from the journey alone — and aged tea became its own category." },
+    { type: "fact",      text: "Today's shou pu-erh ages on purpose: fungi work the polyphenols, and a five-year cake tastes nothing like the leaf it was." },
+    { type: "tradition", text: "Pu-erh is sold in compressed cakes that families pass down. A well-aged cake is a small inheritance, increasing in value year by year." },
+  ],
+  "yerba-mate": [
+    { type: "tradition", text: "The Guaraní drank yerba mate long before the Jesuits arrived to cultivate it. The gourd passed counterclockwise around a circle is older than any country in South America." },
+    { type: "fact",      text: "Three xanthines share the lift — caffeine, theobromine, theophylline — where coffee uses only one. The 'lift without the crash' has chemistry behind it." },
+    { type: "fact",      text: "The bombilla — the metal straw with a filter — was invented to drink the loose leaves directly from the gourd without scooping or straining." },
+  ],
+  valerian: [
+    { type: "fact",      text: "Medieval herbalists called valerian 'All-Heal.' Cats roll in it like catnip; trench soldiers in WWI were prescribed it for shell shock." },
+    { type: "fact",      text: "The cheese-funk smell is valerenic acid, which finds the same receptor pocket as benzodiazepines — without the prescription, and without the safety net." },
+    { type: "tradition", text: "Hippocrates recorded valerian's use against insomnia. The herb has held that role across two and a half millennia of European medicine." },
+  ],
+  echinacea: [
+    { type: "tradition", text: "Plains tribes — Lakota, Cheyenne, Comanche — pressed echinacea root against snakebite and chewed it for sore throat. The Plains pharmacopeia entered Western medicine in the 1880s." },
+    { type: "fact",      text: "The tongue-tingle is real chemistry: alkamides binding the cannabinoid receptor family right on the surface of the mouth, where you can feel them work." },
+    { type: "fact",      text: "Trial evidence for echinacea's immune effect is mixed but real. The tingle, at least, is unambiguous." },
+  ],
+  elderflower: [
+    { type: "tradition", text: "Northern European folk wouldn't cut an elder without asking the Elder Mother first. Midsummer's flowers marked a turn of the year." },
+    { type: "fact",      text: "Modern virology found the asking made sense. Quercetin and its kin block certain viruses — notably influenza A — from entering cells." },
+    { type: "fact",      text: "Elderflower volatiles escape with the steam. Steep covered, always, or the perfume goes up the chimney." },
+  ],
+  linden: [
+    { type: "fact",      text: "Linden is the lime tree of Proust's madeleine, and the Slavic lipa shading every village square." },
+    { type: "fact",      text: "The mucilage in the flowers coats a sore throat. The flavonoids inside dock at the same GABA receptors a small dose of clonazepam would." },
+    { type: "tradition", text: "Linden honey, made by bees foraging on the flowers, is one of the most prized honeys in central Europe. The cup carries the same molecules in trace." },
+  ],
+  "licorice-root": [
+    { type: "fact",      text: "Licorice root is found in 60% of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs." },
+    { type: "fact",      text: "Glycyrrhizin is fifty times sweeter than sugar, and the same molecule slows the liver's clearance of cortisol — which is why high daily doses can raise blood pressure and lower potassium." },
+    { type: "tradition", text: "Egyptian pharaohs were buried with licorice root. King Tut's tomb contained a substantial supply — the apothecary went with him." },
+  ],
+  nettle: [
+    { type: "tradition", text: "Roman legionaries slapped their bare legs with fresh nettle stalks against the British cold. Scottish boys passed a rite by grasping a fistful unflinching." },
+    { type: "fact",      text: "The sting is real chemistry — histamine, formic acid, and serotonin loaded into hollow leaf hairs — and a quick steep dismantles every one." },
+    { type: "fact",      text: "Nettle leaves are unusually rich in iron, calcium, and silica. Spring tonics across European folk medicine all converge on this plant." },
+  ],
+  "dandelion-root": [
+    { type: "tradition", text: "Dandelion root was roasted and ground as ersatz coffee through both World Wars when the bean was rationed — bittersweet, caramel, almost convincing." },
+    { type: "fact",      text: "The bitter is sesquiterpene lactones, which provoke bile and digestive juices the way the body intends a meal-starter to." },
+    { type: "fact",      text: "The sweetness is inulin, a prebiotic the gut bacteria treat as a long meal of their own. The cup feeds two ecologies at once." },
+  ],
+  "dandelion-leaf": [
+    { type: "tradition", text: "Italian and Greek spring foragers fill bags with dandelion leaves before the flowers open. The bitter is at its peak then, and so is the medicine." },
+    { type: "fact",      text: "The French name pissenlit (literally 'piss the bed') is honest reporting — the cup is reliably diuretic." },
+    { type: "fact",      text: "Unlike most diuretics, the leaf is itself rich in potassium, so the body doesn't lose what it most needs to keep. Folk botany solving its own side effect." },
+  ],
+  reishi: [
+    { type: "tradition", text: "Taoist painters drew reishi in the hands of immortals; Chinese emperors hoarded wild specimens, and reliable cultivation only began in the 1970s." },
+    { type: "fact",      text: "The bitter is triterpenes, the same family found in licorice and ginseng — fat-soluble, slow-extracting, and the reason the cup needs a long decoction." },
+    { type: "fact",      text: "Modern trials show real immune modulation from reishi extracts. The immortality claim remains pending." },
+  ],
+  "lions-mane": [
+    { type: "tradition", text: "Japan's yamabushi mountain ascetics named lion's mane after themselves — yamabushitake, mountain-priest's mushroom — for its white cascading tufts." },
+    { type: "fact",      text: "Hericenones and erinacines inside prompt the brain to produce more nerve growth factor. The folk reputation for sharpening the mind has held up better in the lab than most mushroom claims." },
+    { type: "fact",      text: "Lion's mane is the most palatable mushroom in the cabinet — tradition compares it to crab or lobster — with the longest tail of effect when taken daily." },
   ],
 };
 
