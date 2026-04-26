@@ -72,7 +72,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
   const { unit, weightUnit } = useUnit();
-  const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
+  const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary | journal
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
@@ -223,7 +223,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* Segmented control */}
       <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+        display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
         border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
         marginBottom: 14, background: theme.cream,
       }}>
@@ -231,6 +231,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
           ["reverse",    "Blend"],
           ["forward",    "Vibe"],
           ["apothecary", "Shelf"],
+          ["journal",    "Journal"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => setMode(k)} style={{
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
@@ -889,6 +890,92 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
+      {mode === "journal" && (() => {
+        // Merge cup sessions and free-form journal entries by
+        // timestamp so the journal reads as a single chronology.
+        // Sessions stamp ts off their numeric id (sess-<ts>); entries
+        // carry an explicit ts field.
+        const yourSessions = (sessions || []).filter(s => s.who === "you");
+        const sessionItems = yourSessions.map(s => {
+          const n = parseInt(String(s?.id || "").replace("sess-", ""), 10);
+          return { kind: "cup", ts: Number.isFinite(n) ? n : 0, ref: s };
+        });
+        const entryItems = (journalEntries || []).map(e => ({
+          kind: e.kind === "haiku" ? "haiku" : "entry",
+          ts: e.ts || 0,
+          ref: e,
+        }));
+        const timeline = [...sessionItems, ...entryItems]
+          .sort((a, b) => b.ts - a.ts);
+
+        return (
+          <div style={{ marginTop: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, lineHeight: 1.5,
+              }}>
+                Cups, verses, and notes — everything in time.
+              </div>
+              <button
+                onClick={() => setJournalComposerOpen(o => !o)}
+                style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                  color: theme.terra,
+                  background: "transparent",
+                  border: `1px solid ${theme.terra}`, borderRadius: 999,
+                  padding: "5px 12px", cursor: "pointer",
+                  flexShrink: 0, marginLeft: 12,
+                }}
+              >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
+            </div>
+            {journalComposerOpen && (
+              <JournalComposer
+                onCancel={() => setJournalComposerOpen(false)}
+                onSave={(text, kind) => {
+                  if (addJournalEntry) addJournalEntry(text, kind);
+                  setJournalComposerOpen(false);
+                }}
+              />
+            )}
+
+            {timeline.length === 0 ? (
+              <div style={{
+                marginTop: 18, padding: "14px 16px",
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, textAlign: "center", lineHeight: 1.5,
+              }}>
+                Your journal is open. Brew a cup, log it, or write an entry —
+                everything lands here in time.
+              </div>
+            ) : (
+              <div style={{ marginTop: 6 }}>
+                {timeline.map((item, i) => {
+                  if (item.kind === "cup") {
+                    return (
+                      <SessionRow
+                        key={item.ref.id}
+                        s={item.ref}
+                        openBlend={openBlend}
+                        first={i === 0}
+                      />
+                    );
+                  }
+                  return (
+                    <JournalEntryRow
+                      key={item.ref.id}
+                      entry={item.ref}
+                      first={i === 0}
+                      onDelete={deleteJournalEntry}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {mode === "apothecary" && (() => {
         // Shelf is your-personal-stuff: blends you've brewed at least
         // once plus your favorites in Blends, the app's curated recipes
@@ -939,7 +1026,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             {[
               ["blends",    "Blends",    saved.length],
               ["catalogue", "Catalogue", traditional.length + experimental.length],
-              ["journal",   "Journal",   yourSessions.length],
             ].map(([k, label, count]) => (
               <button key={k} onClick={() => setShelfTab(k)} style={{
                 background: "transparent", border: "none",
@@ -959,85 +1045,6 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             ))}
           </div>
         );
-
-        if (shelfTab === "journal") {
-          // Merge cup sessions and free-form journal entries by
-          // timestamp so the journal reads as a single chronology.
-          // Sessions stamp ts off their numeric id (sess-<ts>); entries
-          // carry an explicit ts field.
-          const sessionItems = yourSessions.map(s => {
-            const n = parseInt(String(s?.id || "").replace("sess-", ""), 10);
-            return { kind: "cup", ts: Number.isFinite(n) ? n : 0, ref: s };
-          });
-          const entryItems = (journalEntries || []).map(e => ({
-            kind: e.kind === "haiku" ? "haiku" : "entry",
-            ts: e.ts || 0,
-            ref: e,
-          }));
-          const timeline = [...sessionItems, ...entryItems]
-            .sort((a, b) => b.ts - a.ts);
-
-          return (
-            <div style={{ marginTop: 4 }}>
-              {subTabHeader}
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                <button
-                  onClick={() => setJournalComposerOpen(o => !o)}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-                    color: theme.terra,
-                    background: "transparent",
-                    border: `1px solid ${theme.terra}`, borderRadius: 999,
-                    padding: "5px 12px", cursor: "pointer",
-                  }}
-                >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
-              </div>
-              {journalComposerOpen && (
-                <JournalComposer
-                  onCancel={() => setJournalComposerOpen(false)}
-                  onSave={(text, kind) => {
-                    if (addJournalEntry) addJournalEntry(text, kind);
-                    setJournalComposerOpen(false);
-                  }}
-                />
-              )}
-
-              {timeline.length === 0 ? (
-                <div style={{
-                  marginTop: 18, padding: "14px 16px",
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
-                }}>
-                  Your journal is open. Brew a cup, log it, or write an entry —
-                  everything lands here in time.
-                </div>
-              ) : (
-                <div style={{ marginTop: 6 }}>
-                  {timeline.map((item, i) => {
-                    if (item.kind === "cup") {
-                      return (
-                        <SessionRow
-                          key={item.ref.id}
-                          s={item.ref}
-                          openBlend={openBlend}
-                          first={i === 0}
-                        />
-                      );
-                    }
-                    return (
-                      <JournalEntryRow
-                        key={item.ref.id}
-                        entry={item.ref}
-                        first={i === 0}
-                        onDelete={deleteJournalEntry}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        }
 
         if (shelfTab === "catalogue") {
           let catVisible;
