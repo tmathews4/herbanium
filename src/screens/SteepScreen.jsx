@@ -507,12 +507,13 @@ const MoodChipRow = ({ label, value, setValue, chips }) => {
     setValue(next);
   };
   return (
-    <div style={{ marginBottom: 8 }}>
+    <div style={{ marginBottom: 8, textAlign: "left" }}>
       <div style={{
-        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
-        textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6,
+        textAlign: "left",
       }}>{label}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, justifyContent: "flex-start" }}>
         {(chips || DESIRED_MOOD_CHIPS).map(c => {
           const isOn = selected.has(c.key);
           return (
