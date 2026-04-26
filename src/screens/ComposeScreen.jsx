@@ -27,6 +27,7 @@ import {
 } from "../units/units";
 import { LibraryList, BlendListRow } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
+import { JournalComposer } from "../components/JournalComposer";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -57,7 +58,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [] }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -67,6 +68,9 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   // brewing so they can save first if they want.
   const [brewAsk, setBrewAsk] = useState(false);
   const [pendingBrew, setPendingBrew] = useState(null);
+  // Journal composer visibility — toggled by the "+ new entry" button
+  // on Compose · Shelf · Journal.
+  const [journalComposerOpen, setJournalComposerOpen] = useState(false);
   const { unit, weightUnit } = useUnit();
   const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
@@ -957,22 +961,78 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         );
 
         if (shelfTab === "journal") {
+          // Merge cup sessions and free-form journal entries by
+          // timestamp so the journal reads as a single chronology.
+          // Sessions stamp ts off their numeric id (sess-<ts>); entries
+          // carry an explicit ts field.
+          const sessionItems = yourSessions.map(s => {
+            const n = parseInt(String(s?.id || "").replace("sess-", ""), 10);
+            return { kind: "cup", ts: Number.isFinite(n) ? n : 0, ref: s };
+          });
+          const entryItems = (journalEntries || []).map(e => ({
+            kind: e.kind === "haiku" ? "haiku" : "entry",
+            ts: e.ts || 0,
+            ref: e,
+          }));
+          const timeline = [...sessionItems, ...entryItems]
+            .sort((a, b) => b.ts - a.ts);
+
           return (
             <div style={{ marginTop: 4 }}>
               {subTabHeader}
-              {yourSessions.length === 0 ? (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                <button
+                  onClick={() => setJournalComposerOpen(o => !o)}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                    color: theme.terra,
+                    background: "transparent",
+                    border: `1px solid ${theme.terra}`, borderRadius: 999,
+                    padding: "5px 12px", cursor: "pointer",
+                  }}
+                >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
+              </div>
+              {journalComposerOpen && (
+                <JournalComposer
+                  onCancel={() => setJournalComposerOpen(false)}
+                  onSave={(text, kind) => {
+                    if (addJournalEntry) addJournalEntry(text, kind);
+                    setJournalComposerOpen(false);
+                  }}
+                />
+              )}
+
+              {timeline.length === 0 ? (
                 <div style={{
                   marginTop: 18, padding: "14px 16px",
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
                   color: theme.ash, textAlign: "center", lineHeight: 1.5,
                 }}>
-                  Your journal starts with your first cup. Brew, log, and every check-in lands here.
+                  Your journal is open. Brew a cup, log it, or write an entry —
+                  everything lands here in time.
                 </div>
               ) : (
                 <div style={{ marginTop: 6 }}>
-                  {yourSessions.map((s, i) => (
-                    <SessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
-                  ))}
+                  {timeline.map((item, i) => {
+                    if (item.kind === "cup") {
+                      return (
+                        <SessionRow
+                          key={item.ref.id}
+                          s={item.ref}
+                          openBlend={openBlend}
+                          first={i === 0}
+                        />
+                      );
+                    }
+                    return (
+                      <JournalEntryRow
+                        key={item.ref.id}
+                        entry={item.ref}
+                        first={i === 0}
+                        onDelete={deleteJournalEntry}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1604,6 +1664,76 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    save it to the catalogue and brew, brew without saving, or cancel.
    Backdrop tap closes via the cancel handler.
    ────────────────────────────────────────────────────────────── */
+
+/* ──────────────────────────────────────────────────────────────
+   JournalEntryRow — chronological row for a free-form entry or
+   haiku ad-lib in the Journal sub-tab. Visually distinct from
+   SessionRow (which renders cups) so the timeline reads as two
+   things in one stream rather than one homogenous list.
+   ────────────────────────────────────────────────────────────── */
+
+const JournalEntryRow = ({ entry, first, onDelete }) => {
+  const isHaiku = entry.kind === "haiku";
+  const stamp = entry.ts ? new Date(entry.ts) : null;
+  const ago = stamp ? formatAgo(stamp) : "";
+  return (
+    <div style={{
+      padding: "12px 0",
+      borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+      position: "relative",
+    }}>
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        marginBottom: 6,
+      }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>
+          {isHaiku ? "a verse" : "an entry"}
+        </div>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+        }}>{ago}</div>
+      </div>
+      <div style={{
+        fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+        lineHeight: isHaiku ? 1.7 : 1.55,
+        whiteSpace: "pre-line",
+        fontStyle: isHaiku ? "italic" : "normal",
+      }}>{entry.text}</div>
+      {onDelete && (
+        <button
+          onClick={() => {
+            if (window.confirm("Remove this journal entry?")) onDelete(entry.id);
+          }}
+          title="delete entry"
+          style={{
+            position: "absolute", top: 10, right: 0,
+            background: "transparent", border: "none",
+            color: theme.ash, fontSize: 13, lineHeight: 1,
+            padding: "4px 6px", cursor: "pointer",
+            opacity: 0.45,
+          }}
+        >✕</button>
+      )}
+    </div>
+  );
+};
+
+// Tiny date-relative helper for journal entry timestamps. Mirrors the
+// "X minutes ago" convention used in seed-session formatting.
+function formatAgo(date) {
+  const now = Date.now();
+  const diffMin = Math.round((now - date.getTime()) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.round(diffHr / 24);
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) => {
   // Pre-fill with the blend's algorithmic name, but treat the reverse-

@@ -175,6 +175,10 @@ export default function App() {
     "sessions",
     isDev ? materializeSeedSessions(SEED_MODES.power.sessions) : []
   );
+  // Free-form journal entries — text-only entries that live in the
+  // same chronology as cup sessions. Persisted as { id, ts, text, kind }
+  // where kind is "entry" (free) or "haiku" (woven from prompts).
+  const [journalEntries, setJournalEntries] = usePersistedState("journalEntries", []);
   const [savedBlendIds, setSavedBlendIds] = usePersistedState(
     "savedBlendIds",
     isDev ? new Set(SEED_MODES.power.savedBlendIds) : new Set()
@@ -439,6 +443,23 @@ export default function App() {
     }
   };
 
+  // Append a free-form journal entry. Entries live alongside cup
+  // sessions in the chronology and render via JournalEntryRow on the
+  // Compose · Shelf · Journal tab.
+  const addJournalEntry = (text, kind) => {
+    if (!text || !text.trim()) return;
+    const entry = {
+      id: `entry-${Date.now()}`,
+      ts: Date.now(),
+      text: text.trim(),
+      kind: kind === "haiku" ? "haiku" : "entry",
+    };
+    setJournalEntries(prev => [entry, ...(prev || [])]);
+  };
+  const deleteJournalEntry = (id) => {
+    setJournalEntries(prev => (prev || []).filter(e => e.id !== id));
+  };
+
   // Open Compose with a blend pre-selected — used when user taps a favorite
   // on Home or a saved blend in Apothecary. Ensures intent-capture happens
   // before brewing, per the spec's principle.
@@ -555,7 +576,7 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} animisBanished={animisBanished} />}
-        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} />}
+        {tab === "compose" && <ComposeScreen go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} />}
         {tab === "library" && <LibraryScreen go={go} startBrew={startBrew} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} togglePantry={togglePantry} libraryView={libraryView} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} />}
       </div>
