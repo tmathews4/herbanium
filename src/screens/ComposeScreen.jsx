@@ -1009,7 +1009,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             {/* Confirm-before-brew dialog for custom unsaved blends. */}
             {brewAsk && pendingBrew && (
               <BrewSavePrompt
-                defaultName={pendingBrew.candidate.name}
+                defaultName={suggestBlendName(pendingBrew.candidate.ingredients)}
                 onSaveAndBrew={(chosenName) => {
                   if (saveComposedBlend) {
                     const id = saveComposedBlend(pendingBrew.candidate, chosenName);
@@ -1752,7 +1752,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
       {rcBrewAsk && rcPendingBrew && (
         <BrewSavePrompt
-          defaultName={rcPendingBrew.candidate.name}
+          defaultName={suggestBlendName(rcPendingBrew.candidate.ingredients)}
           onSaveAndBrew={(chosenName) => {
             if (saveComposedBlend) {
               const id = saveComposedBlend(rcPendingBrew.candidate, chosenName);
@@ -1908,9 +1908,9 @@ function formatAgo(date) {
 }
 
 const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) => {
-  // Pre-fill with the blend's algorithmic name, but treat the reverse-
-  // compose placeholder ("Untitled blend") as empty so the user is
-  // nudged to write something of their own.
+  // Pre-fill with the suggested name from the ingredients. The
+  // "Untitled blend" fallback (no ingredients) opens empty so the
+  // user is nudged to write something of their own.
   const seed = (defaultName && defaultName !== "Untitled blend") ? defaultName : "";
   const [name, setName] = useState(seed);
   const trimmed = name.trim();
@@ -1950,23 +1950,56 @@ const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) =>
           It isn't in your catalogue yet. Name it to save and brew, or
           skip and brew it without saving.
         </div>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && canSave) onSaveAndBrew(trimmed); }}
-          autoFocus
-          maxLength={48}
-          placeholder="name your blend"
-          style={{
-            width: "100%", boxSizing: "border-box",
-            fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-            background: "transparent",
-            border: "none", borderBottom: `1px solid ${theme.terra}`,
-            padding: "6px 2px", outline: "none",
-            marginBottom: 14,
-          }}
-        />
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+          marginBottom: 6,
+          display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
+        }}>
+          <span>Name</span>
+          <span style={{
+            fontFamily: ff.serif, fontStyle: "italic",
+            fontSize: 10.5, letterSpacing: 0,
+            textTransform: "none", color: theme.terra,
+          }}>— suggested from your ingredients, edit anything below</span>
+        </div>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "8px 10px", borderRadius: 8,
+          background: "rgba(176, 84, 47, 0.05)",
+          border: `1px solid ${theme.terra}`,
+          marginBottom: 14,
+        }}>
+          <Pencil size={14} c={theme.terra} />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && canSave) onSaveAndBrew(trimmed); }}
+            autoFocus
+            onFocus={(e) => e.target.select()}
+            maxLength={48}
+            placeholder="name your blend"
+            style={{
+              flex: 1, minWidth: 0,
+              fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+              background: "transparent", border: "none",
+              padding: "2px 0", outline: "none",
+            }}
+          />
+          {name && (
+            <button
+              onClick={() => setName("")}
+              aria-label="clear name"
+              title="clear"
+              style={{
+                background: "transparent", border: "none",
+                color: theme.ash, fontSize: 14, lineHeight: 1,
+                padding: "2px 4px", cursor: "pointer",
+              }}
+            >×</button>
+          )}
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <button
             onClick={() => canSave && onSaveAndBrew(trimmed)}
