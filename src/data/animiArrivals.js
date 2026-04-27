@@ -41,6 +41,9 @@ const ARRIVAL_VERBS = {
   Newt:          "blinks once and slips into the moss",
   Oriole:        "flits past in orange",
   Owl:           "glides in on soundless wings",
+  Hoopoe:        "crowned head bobs once, then is past",
+  Stork:         "lifts a long bill toward the wind",
+  Octopus:       "eight arms drift around you for a moment",
   Pegasus:       "wings down out of the clouds",
   Pelican:       "wings overhead",
   Phoenix:       "burns once and is whole again",
@@ -53,6 +56,7 @@ const ARRIVAL_VERBS = {
   Swan:          "glides past on still water",
 
   // ── Small creatures, rodents, insects ─────────────────────
+  Beetle:        "scuttles across an open petal",
   Capybara:      "wades in slowly",
   Chipmunk:      "scampers between stones",
   Dormouse:      "tail-curled, half-asleep, pads in",
@@ -62,6 +66,7 @@ const ARRIVAL_VERBS = {
   Mouse:         "scampers across the floorboards",
   Quokka:        "trots up grinning",
   Rabbit:        "lopes into view",
+  Spider:        "drops down on a single bright thread",
   Squirrel:      "darts up the bark",
   Trout:         "rises to the surface, then back down",
   Vole:          "scurries through the grass",
@@ -80,6 +85,7 @@ const ARRIVAL_VERBS = {
   // ── Canines ───────────────────────────────────────────────
   Cerberus:      "all three heads turn to watch you",
   Coyote:        "trots through at dusk",
+  Crow:          "lights on the fence with a single croak",
   "Cu Sith":     "pads silent across the moor",
   Fenrir:        "the great wolf prowls past",
   Fox:           "darts across the path",
@@ -87,6 +93,7 @@ const ARRIVAL_VERBS = {
   Wolverine:     "lumbers past without a glance",
 
   // ── Hooved & equine ───────────────────────────────────────
+  Auroch:        "the great ancestor-bull paces past",
   Bicorn:        "rumbles into view, twin-horned",
   Boar:          "lowers tusks and rumbles past",
   Bonnacon:      "runs by, smoke at its tail",
@@ -121,6 +128,7 @@ const ARRIVAL_VERBS = {
   Mink:          "darts along the bank",
   Mole:          "pushes up a mound and disappears",
   "Mokele-Mbembe":"surfaces in the river-bend",
+  Mongoose:      "coils ready, then darts past",
   Otter:         "rolls out of the river and is gone",
   Sasquatch:     "passes between the cedars",
   Sloth:         "is here. Will be here a while.",
@@ -132,7 +140,9 @@ const ARRIVAL_VERBS = {
   Amphithere:    "glides feathered through the canopy",
   Basilisk:      "passes; you keep your eyes down",
   Cockatrice:    "fixes you with a single eye",
+  Frog:          "blinks once from a wet leaf",
   Knucker:       "ripples in the deep round pool",
+  Lindworm:      "coils slowly past, all body, no wing",
   Naga:          "rises hooded from the spring",
   Ouroboros:     "the circle closes once, then opens",
   Salamander:    "curls inside the ember",
@@ -250,6 +260,7 @@ const ARRIVAL_VERBS = {
   // ── East/South Asian, African, Mesoamerican ───────────────
   Anansi:        "spins a single line and waits",
   "Banyan Spirit":"the tree's roots shift a step closer",
+  Banyan:        "the tree's roots shift a step closer",
   Bodhisattva:   "raises a hand in promise",
   Brahman:       "stands at the river-bank",
   Chajin:        "sets a kettle without a word",

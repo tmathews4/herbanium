@@ -10,7 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { getAnimiDisplayName } from "../data/animiAdjectives";
+import { getAnimiDisplayName, getAnimiDisplayDesc } from "../data/animiAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -145,6 +145,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => ({
     ...a,
     displayName: getAnimiDisplayName(a, animiSeed),
+    desc: getAnimiDisplayDesc(a, animiSeed),
   }));
   // Sort earned by rarity desc — rarest finds bubble up.
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };

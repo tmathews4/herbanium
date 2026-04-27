@@ -283,3 +283,124 @@ export function getAnimiDisplayName(attr, profileSeed) {
   const adj = pickAdjective(seed, pool);
   return `The ${adj} ${creature}`;
 }
+
+// Returns just the random adjective for an attribute (the same one
+// used in getAnimiDisplayName), useful when other code needs to
+// compose something with the adjective separately.
+export function getAnimiAdjective(attr, profileSeed) {
+  if (!attr) return "";
+  const pool = poolFor(attr);
+  const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
+  return pickAdjective(seed, pool);
+}
+
+// Atmospheric one-liner per adjective — keyed by the same pools
+// used to name elementals. Prepended to each elemental's stock
+// description so a user's personal variant ("The Storm Wolf") gets
+// a quick line of flavor unique to that adjective ("Coat charged
+// with cloud.") before the standard creature description.
+const ADJECTIVE_FLAVOR = {
+  // Element pool
+  Mist:        "Veiled in soft fog at the meadow's edge.",
+  Dew:         "Beaded in early-morning light.",
+  Vapor:       "Trailing a curl of warm steam.",
+  Fog:         "Half-lost in low cloud.",
+  Drizzle:     "Coat damp from a slow rain.",
+  Light:       "Pale-edged where the shadow ends.",
+  Sunfire:     "Warm-eyed, sun-touched.",
+  Ember:       "Coal-warm at the heart.",
+  Aurora:      "Trailing pale ribbons of color.",
+  Bloom:       "Garlanded in fresh blossom.",
+  Wind:        "Riding the open air.",
+  Sky:         "Drawn from the blue overhead.",
+  Cloud:       "Soft-edged, slow-moving.",
+  Lightning:   "A flash crackles past.",
+  Daybreak:    "Brightening the still hour.",
+  Fire:        "Coat shot through with warm light.",
+  Sun:         "Standing in clear noon light.",
+  Stone:       "Steady as the old hill.",
+  Glare:       "Bright-eyed, hard to look at.",
+  Blaze:       "Marked by a quick fire.",
+  Earth:       "Smelling of warm soil.",
+  Wood:        "Bark-skinned and patient.",
+  Tide:        "Moves with the slow water.",
+  Meadow:      "Stepping through tall grass.",
+  River:       "Trailing river-smell.",
+  Twilight:    "At home in the lowering light.",
+  Sunset:      "Edged in orange and rust.",
+  Dusk:        "Slipping in at the blue hour.",
+  Rain:        "Wet from a passing shower.",
+  Glow:        "Faintly luminous in the dim.",
+  Shadow:      "Half in shadow, half in light.",
+  Moon:        "Silvered by the moon.",
+  Frost:       "Breath visible in the cold.",
+  Smoke:       "Trailing a thread of smoke.",
+  Midnight:    "Walking out of the late dark.",
+  Void:        "Stepping in from open dark.",
+  Nightshade:  "Berry-dark, quiet.",
+  Star:        "A small light at the brow.",
+  Ash:         "Pale grey, soft underfoot.",
+  Crescent:    "Crescent-marked at the temple.",
+  Storm:       "Coat charged with cloud.",
+  Hush:        "Steps softer than sound.",
+  Brume:       "Wreathed in low mist.",
+  Cinder:      "Coal-edges still warm.",
+  Bramble:     "Barbed and patient.",
+  // Gem pool
+  Pearl:           "Smooth and pale at the edges.",
+  "Rose-Quartz":   "Pink-flushed, gentle.",
+  Opal:            "Iridescent in the right light.",
+  Moonstone:       "Cool, milk-glow at the temple.",
+  Amber:           "Coat the color of trapped sunlight.",
+  Topaz:           "Honey-gold in the eye.",
+  Citrine:         "Bright-yellow, lemon-sharp.",
+  Sunstone:        "A warm coppery flicker.",
+  Garnet:          "Deep-red, ember-bright.",
+  Ruby:            "Marked with deep red.",
+  Carnelian:       "Fire-orange at the heart.",
+  Coral:           "Sea-pink, branching.",
+  Heliodor:        "Pale yellow, sun-clear.",
+  Gold:            "Edged in soft metal-light.",
+  Tigereye:        "Striped gold and brown.",
+  Sandstone:       "Coat the color of warm rock.",
+  Copper:          "Sun-burnished, warm.",
+  Cinnabar:        "Vermilion-red, watchful.",
+  Jasper:          "Streaked dark and warm.",
+  Bloodstone:      "Green flecked with red.",
+  Jade:            "Soft green at the eye.",
+  Aquamarine:      "Pale blue-green like clear water.",
+  Turquoise:       "Sky-blue, faintly veined.",
+  Emerald:         "Deep-green at the heart of the wood.",
+  Onyx:            "Black-polished, watchful.",
+  Slate:           "Grey, even, weather-worn.",
+  Granite:         "Speckled grey, immovable.",
+  Obsidian:        "Black-glassed, sharp.",
+  "Smoky-Quartz":  "Smoke-grey, half-clear.",
+  Hematite:        "Iron-dark, heavy.",
+  Pyrite:          "Catching false-gold light.",
+  Coal:            "Soot-marked from the fire.",
+  Diamond:         "Hard-edged, refracting.",
+  Crystal:         "Clear-cut, light bending past.",
+  Quartz:          "Cloud-clear at the heart.",
+  Marble:          "Veined white and grey.",
+  Agate:           "Banded in soft layers.",
+};
+
+const FLAVOR_FALLBACK = "Marked by something unsaid.";
+
+// Returns the atmospheric one-liner for an adjective.
+export function flavorLineFor(adjective) {
+  return ADJECTIVE_FLAVOR[adjective] || FLAVOR_FALLBACK;
+}
+
+// Compose the user-facing description for an animi: prepends a
+// short flavor line keyed to the adjective so each user's variant
+// gets unique character before the shared body of the desc.
+export function getAnimiDisplayDesc(attr, profileSeed) {
+  if (!attr) return "";
+  const adj = getAnimiAdjective(attr, profileSeed);
+  const flavor = flavorLineFor(adj);
+  const base = (attr.desc || "").trim();
+  if (!base) return flavor;
+  return `${flavor} ${base}`;
+}
