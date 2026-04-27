@@ -108,34 +108,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {showSeededNotice && (
-        <div style={{
-          marginBottom: 14, padding: "10px 12px",
-          borderRadius: 10,
-          background: "rgba(98, 124, 92, 0.08)",
-          border: `1px solid ${theme.sageDeep}`,
-          display: "flex", alignItems: "flex-start", gap: 10,
-        }}>
-          <div style={{
-            flex: 1, minWidth: 0,
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-            color: theme.inkSoft, lineHeight: 1.5,
-          }}>
-            We added a few starter blends to your{" "}
-            <strong style={{ color: theme.terra, fontStyle: "normal" }}>Recipes</strong>{" "}
-            so the shelf isn't empty on day one. Keep what fits, remove what doesn't.
-          </div>
-          <button
-            onClick={dismissSeededFavoritesNotice}
-            aria-label="dismiss"
-            style={{
-              flexShrink: 0,
-              background: "transparent", border: "none", cursor: "pointer",
-              color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",
-            }}
-          >×</button>
-        </div>
-      )}
       {/* Empty-state welcome header — first-time users see this
           before any poem card. Returning users get their greeting
           below the poem instead so the time-of-day moment lands
@@ -261,6 +233,38 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </button>
         ))}
       </div>
+
+      {/* Seeded-favorites notice — sits right above Favorites so the
+          'we added these' framing is adjacent to the rail it's
+          describing. One-time, dismissible. */}
+      {showSeededNotice && (
+        <div style={{
+          marginBottom: 14, padding: "10px 12px",
+          borderRadius: 10,
+          background: "rgba(98, 124, 92, 0.08)",
+          border: `1px solid ${theme.sageDeep}`,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <div style={{
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.inkSoft, lineHeight: 1.5,
+          }}>
+            We added a few starter blends to your{" "}
+            <strong style={{ color: theme.terra, fontStyle: "normal" }}>Recipes</strong>{" "}
+            so the shelf isn't empty on day one. Keep what fits, remove what doesn't.
+          </div>
+          <button
+            onClick={dismissSeededFavoritesNotice}
+            aria-label="dismiss"
+            style={{
+              flexShrink: 0,
+              background: "transparent", border: "none", cursor: "pointer",
+              color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",
+            }}
+          >×</button>
+        </div>
+      )}
 
       {/* Favorites — horizontal scrollable row. Native scrollbar is
           hidden; a soft right-edge fade suggests there's more to scroll
