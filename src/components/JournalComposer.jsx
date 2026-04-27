@@ -42,6 +42,15 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     : mode === "limerick" ? !!limerickPreview
     : false;
 
+  const resetForm = () => {
+    setText("");
+    setSlots({ thing: "", sound: "", color: "", feeling: "" });
+    setHaikuNote("");
+    setLimSlots({ name: "", place: "", action: "", object: "", feeling: "" });
+    setLimNote("");
+    setMode("free");
+  };
+
   const handleSave = () => {
     if (!ready) return;
     if (mode === "haiku") {
@@ -51,6 +60,8 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     } else {
       onSave(text.trim(), "entry");
     }
+    // Wipe the form so the next time the composer opens it's blank.
+    resetForm();
   };
 
   const tabBtnStyle = (active) => ({

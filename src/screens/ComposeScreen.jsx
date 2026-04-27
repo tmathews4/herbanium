@@ -932,8 +932,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             {journalComposerOpen && (
               <JournalComposer
                 onCancel={() => setJournalComposerOpen(false)}
-                onSave={(text, kind) => {
-                  if (addJournalEntry) addJournalEntry(text, kind);
+                onSave={(text, kind, note) => {
+                  if (addJournalEntry) addJournalEntry(text, kind, note);
                   setJournalComposerOpen(false);
                 }}
               />
