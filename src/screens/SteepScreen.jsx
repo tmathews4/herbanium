@@ -42,7 +42,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
-  const [notesOpen, setNotesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
 
   // Past brews of this blend — only meaningful if the blend has an id (saved
@@ -160,44 +159,30 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button
-            onClick={() => setPlannerOpen(true)}
-            title="open today's plan"
-            style={{
-              background: "transparent", border: "none",
-              color: theme.terra,
-              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-              cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 5,
-              padding: 0,
-            }}
-          >
-            <Pencil size={11} c={theme.terra} />
-            <span>planner</span>
-            {plannerItems.length > 0 && (
-              <span style={{
-                fontFamily: ff.serif, fontStyle: "italic",
-                fontSize: 10.5, letterSpacing: 0,
-                textTransform: "none", color: theme.ash,
-              }}>
-                · {plannerItems.filter(i => !i.done).length} open
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => pastNoteSessions.length > 0 && setNotesOpen(true)}
-            disabled={pastNoteSessions.length === 0}
-            style={{
-              background: "transparent", border: "none",
-              color: pastNoteSessions.length === 0 ? theme.ruleSoft : theme.ash,
-              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-              cursor: pastNoteSessions.length === 0 ? "not-allowed" : "pointer",
-            }}
-          >
-            notes{pastNoteSessions.length > 0 && ` (${pastNoteSessions.length})`}
-          </button>
-        </div>
+        <button
+          onClick={() => setPlannerOpen(true)}
+          title="open today's plan and past brew notes"
+          style={{
+            background: "transparent", border: "none",
+            color: theme.terra,
+            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
+            cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 5,
+            padding: 0,
+          }}
+        >
+          <Pencil size={11} c={theme.terra} />
+          <span>planner</span>
+          {plannerItems.length > 0 && (
+            <span style={{
+              fontFamily: ff.serif, fontStyle: "italic",
+              fontSize: 10.5, letterSpacing: 0,
+              textTransform: "none", color: theme.ash,
+            }}>
+              · {plannerItems.filter(i => !i.done).length} open
+            </span>
+          )}
+        </button>
       </div>
 
       {/* countdown ring */}
@@ -441,89 +426,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         />
       )}
 
-      {/* Notes panel — past brews of this blend, viewable without leaving the steep */}
-      {notesOpen && (
-        <div
-          onClick={() => setNotesOpen(false)}
-          style={{
-            position: "absolute", inset: 0, zIndex: 40,
-            background: "rgba(42, 36, 28, 0.35)",
-            display: "flex", alignItems: "flex-end", justifyContent: "center",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%", maxHeight: "75%",
-              background: theme.ivory,
-              borderRadius: "16px 16px 0 0",
-              padding: "16px 20px 22px",
-              display: "flex", flexDirection: "column",
-              boxShadow: "0 -4px 16px rgba(0,0,0,0.12)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div>
-                <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-                  Notes from past brews
-                </div>
-                <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ink, marginTop: 2 }}>
-                  {blend.name}
-                </div>
-              </div>
-              <button
-                onClick={() => setNotesOpen(false)}
-                style={{
-                  background: "transparent", border: "none",
-                  fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
-                  textTransform: "uppercase", color: theme.ash, cursor: "pointer",
-                }}
-              >close</button>
-            </div>
-            <div style={{ overflowY: "auto", flex: 1 }}>
-              {pastNoteSessions.length === 0 ? (
-                <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, padding: "20px 0", textAlign: "center" }}>
-                  No notes from past brews of this cup yet. Whatever you write
-                  in the steep notes field — or in the log after — will land here
-                  for next time.
-                </div>
-              ) : (
-                pastNoteSessions.map((s, i) => {
-                  const intent = (s.intent || "").trim();
-                  const note = (s.note || "").trim();
-                  return (
-                    <div key={s.id} style={{
-                      padding: "12px 0",
-                      borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                    }}>
-                      <div style={{
-                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-                        color: theme.ash, marginBottom: 4,
-                      }}>
-                        {s.ago}
-                      </div>
-                      {intent && (
-                        <div style={{
-                          fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
-                          lineHeight: 1.5, whiteSpace: "pre-line",
-                        }}>{intent}</div>
-                      )}
-                      {note && (
-                        <div style={{
-                          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                          color: theme.inkSoft, lineHeight: 1.5, marginTop: intent ? 6 : 0,
-                          whiteSpace: "pre-line",
-                        }}>{note}</div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       <PlannerModal
         open={plannerOpen}
         onClose={() => setPlannerOpen(false)}
@@ -534,6 +436,10 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           onEdit: editPlannerItem,
           onDelete: deletePlannerItem,
           onClearDone: clearDonePlannerItems,
+        }}
+        pastBrewNotes={{
+          blendName: blend.name,
+          sessions: pastNoteSessions,
         }}
       />
     </div>

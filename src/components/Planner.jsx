@@ -232,10 +232,21 @@ export const Planner = ({
 };
 
 /* PlannerModal — full-screen overlay wrapping Planner. Used from the
-   Apothecary brew page button so the user can glance at / edit
-   their day plan without leaving the brew flow. */
-export const PlannerModal = ({ open, onClose, plannerProps }) => {
+   brewing-timer screen so the user can glance at / edit their day
+   plan without leaving the steep flow.
+
+   Optional pastBrewNotes block surfaces the private note history of
+   the blend currently brewing — written intents and post-brew log
+   notes from past sessions. The notes block sits below the planner
+   so the day-plan stays the primary use of the modal. */
+export const PlannerModal = ({
+  open,
+  onClose,
+  plannerProps,
+  pastBrewNotes,    // optional: { blendName, sessions: [{ id, ago, intent, note }] }
+}) => {
   if (!open) return null;
+  const notes = pastBrewNotes && pastBrewNotes.sessions ? pastBrewNotes.sessions : null;
   return (
     <div
       onClick={onClose}
@@ -275,6 +286,72 @@ export const PlannerModal = ({ open, onClose, plannerProps }) => {
           Today's plan
         </div>
         <Planner {...plannerProps} />
+
+        {pastBrewNotes && (
+          <div style={{ marginTop: 18 }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.sageDeep,
+              marginBottom: 4,
+            }}>
+              Notes from past brews
+            </div>
+            {pastBrewNotes.blendName && (
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                color: theme.ash, marginBottom: 8,
+              }}>
+                {pastBrewNotes.blendName}
+              </div>
+            )}
+            <div style={{
+              padding: "8px 12px", borderRadius: 10,
+              border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
+              maxHeight: 280, overflowY: "auto",
+            }}>
+              {!notes || notes.length === 0 ? (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5,
+                  padding: "8px 0", textAlign: "left",
+                }}>
+                  No notes from past brews of this cup yet. Whatever you write
+                  in the steep notes field — or in the log after — will land here
+                  for next time.
+                </div>
+              ) : (
+                notes.map((s, i) => {
+                  const intent = (s.intent || "").trim();
+                  const note   = (s.note   || "").trim();
+                  return (
+                    <div key={s.id || i} style={{
+                      padding: "10px 0",
+                      borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                    }}>
+                      <div style={{
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                        color: theme.ash, marginBottom: 4,
+                      }}>{s.ago}</div>
+                      {intent && (
+                        <div style={{
+                          fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                          lineHeight: 1.5, whiteSpace: "pre-line",
+                        }}>{intent}</div>
+                      )}
+                      {note && (
+                        <div style={{
+                          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                          color: theme.inkSoft, lineHeight: 1.5,
+                          marginTop: intent ? 6 : 0, whiteSpace: "pre-line",
+                        }}>{note}</div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
