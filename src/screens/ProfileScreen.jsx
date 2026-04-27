@@ -18,6 +18,7 @@ import {
 import { FeedbackModal } from "./FeedbackModal";
 import { OmenCard } from "../components/OmenCard";
 import { AnimiArrivalCard } from "../components/AnimiArrivalCard";
+import { HintCard } from "../components/HintCard";
 import {
   ff, theme,
 } from "../theme";
@@ -27,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -224,6 +225,21 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         <AnimiArrivalCard
           animi={nextArrival}
           onDismiss={() => markAnimiSeen(nextArrival.id)}
+        />
+      )}
+
+      {/* First-visit Profile tutorial — explains what's on this page. */}
+      {!profileHintShown && dismissProfileHint && (
+        <HintCard
+          icon={<Flower size={18} c={theme.terra} />}
+          title="Your kettle, your spirits."
+          body={<>
+            Cups you've brewed, blends you keep, and the animis your
+            patterns attract. Tap any stat to jump in. The
+            <em> Animis Altar</em> below grows as your habits take shape —
+            you can hide it any time from <em>Preferences</em>.
+          </>}
+          onDismiss={dismissProfileHint}
         />
       )}
 

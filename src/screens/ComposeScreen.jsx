@@ -28,6 +28,8 @@ import {
 import { LibraryList, BlendListRow } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
+import { HintCard } from "../components/HintCard";
+import { Sprig, Pencil } from "../components/icons";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -58,7 +60,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry }) => {
+export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -221,6 +223,20 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {/* First-visit Compose tutorial — explains the four tabs. */}
+      {!composeHintShown && dismissComposeHint && (
+        <HintCard
+          icon={<Sprig size={18} c={theme.sageDeep} />}
+          title="Compose, your way."
+          body={<>
+            Four tabs. <em>Blend</em> builds a cup from ingredients you pick.
+            <em> Vibe</em> recommends one from a mood and flavor. <em>Shelf</em>
+            holds your saved blends and the catalogue. <em>Journal</em> is
+            where everything lands in time — cups, notes, and small verses.
+          </>}
+          onDismiss={dismissComposeHint}
+        />
+      )}
       {/* Segmented control */}
       <div style={{
         display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
@@ -910,6 +926,19 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
 
         return (
           <div style={{ marginTop: 4 }}>
+            {!journalHintShown && dismissJournalHint && (
+              <HintCard
+                icon={<Pencil size={16} c={theme.terra} />}
+                title="A space for words and cups."
+                body={<>
+                  Tap <em>+ new entry</em> to journal a thought, or try a
+                  <em> haiku</em> or <em>limerick</em> ad-lib if you'd like a
+                  little help. Brewed cups also land here — the journal is
+                  where the days connect.
+                </>}
+                onDismiss={dismissJournalHint}
+              />
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{
                 fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
