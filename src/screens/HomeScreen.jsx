@@ -37,7 +37,13 @@ const getTimeOfDay = (h) => {
 };
 
 export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, firstCupHintShown, dismissFirstCupHint, animisBanished }) => {
-  const yourSessions = sessions.filter(s => s.who === "you");
+  // Home's recent log is brewed cups only — never the private free
+  // entries / haiku / limericks that live in journalEntries. Those
+  // are only surfaced behind the Shelf > Journal sub-tab where they
+  // can also be hidden per-row. We never receive journalEntries here
+  // by design; the filter also drops any malformed session without a
+  // blendId so the cup log stays clean.
+  const yourSessions = sessions.filter(s => s.who === "you" && s.blendId);
   // Home shows true favorites — the curated tier — and falls back to all
   // saved blends until the user has marked any. Resolve every id through
   // getBlend so user-generated / LOCAL_BLENDS entries (the algorithmic
@@ -120,7 +126,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         <div>
           {isEmpty && (
             <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, opacity: 0.7 }}>
-              to begin your journal
+              to begin your brew log
             </div>
           )}
           <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
@@ -144,7 +150,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: theme.ash,
             marginBottom: 6,
           }}>
-            your journal begins here
+            your brew log begins here
           </div>
           <div style={{
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 14.5,
@@ -237,7 +243,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         color: theme.ash, lineHeight: 1.55,
         borderTop: `1px solid ${theme.ruleSoft}`,
       }}>
-        Your journal lives on this device — no account, no cloud.
+        Your brew log lives on this device — no account, no cloud.
         Whip it out, show a friend, meet eye to eye, brew a cup together.
       </div>
     </div>
