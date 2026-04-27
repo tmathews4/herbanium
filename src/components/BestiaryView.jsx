@@ -327,6 +327,29 @@ const AttributeShelf = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [selecting, setSelecting] = useState(false);
+  // Reserve sort mode — defaults to rarity (high → low), the same
+  // ordering that drives the parent's revealedSorted list. Local to
+  // the shelf so it doesn't leak into pending-arrival ordering.
+  const [reserveSort, setReserveSort] = useState("rarity");
+  const RARITY_RANK = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
+  const sortedReserve = (() => {
+    const xs = [...reserve];
+    const nameOf = (a) => (a.displayName || a.name || "").toLowerCase();
+    if (reserveSort === "name-asc")  return xs.sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+    if (reserveSort === "name-desc") return xs.sort((a, b) => nameOf(b).localeCompare(nameOf(a)));
+    if (reserveSort === "creature") {
+      return xs.sort((a, b) => {
+        const ca = (a.creature || "").toLowerCase();
+        const cb = (b.creature || "").toLowerCase();
+        if (ca !== cb) return ca.localeCompare(cb);
+        return nameOf(a).localeCompare(nameOf(b));
+      });
+    }
+    // rarity
+    return xs.sort((a, b) =>
+      (RARITY_RANK[b.rarity] || 0) - (RARITY_RANK[a.rarity] || 0)
+    );
+  })();
   // swappingId: id of a currently-featured elemental the user has
   // tapped to mark as the swap target. Tapping the same one again
   // cancels; tapping a reserve tile swaps in place.
@@ -617,9 +640,39 @@ const AttributeShelf = ({
         <div style={{
           marginTop: 6, paddingTop: 10,
           borderTop: `1px solid ${theme.ruleSoft}`,
-          display: "flex", flexWrap: "wrap", gap: 6,
         }}>
-          {reserve.map(renderTile)}
+          {reserve.length > 1 && (
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center",
+              marginBottom: 10,
+            }}>
+              {[
+                ["rarity",    "rarity"],
+                ["name-asc",  "A → Z"],
+                ["name-desc", "Z → A"],
+                ["creature",  "creature"],
+              ].map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setReserveSort(k)}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.10em",
+                    textTransform: "uppercase",
+                    color: reserveSort === k ? theme.cream : theme.inkSoft,
+                    background: reserveSort === k ? theme.terra : "transparent",
+                    border: `1px solid ${reserveSort === k ? theme.terra : theme.rule}`,
+                    borderRadius: 999, padding: "4px 10px",
+                    cursor: "pointer",
+                  }}
+                >{label}</button>
+              ))}
+            </div>
+          )}
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 6,
+          }}>
+            {sortedReserve.map(renderTile)}
+          </div>
         </div>
       )}
     </>
