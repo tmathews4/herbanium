@@ -261,23 +261,34 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         </>
       )}
 
-      {/* Your recent cups */}
-      {yourSessions.length > 0 && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-            <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
-            <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
-              background: "transparent", border: "none",
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-              cursor: "pointer",
-            }}>see all →</button>
-          </div>
-          <div>
-            {yourSessions.slice(0, 5).map((s, i) => (
-              <CompactSessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
-            ))}
-          </div>
-        </>
+      {/* Your recent cups — header stays even before any brew so a
+          new user sees this is the window where their cups will land. */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
+        {yourSessions.length > 0 && (
+          <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
+            background: "transparent", border: "none",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+            cursor: "pointer",
+          }}>see all →</button>
+        )}
+      </div>
+      {yourSessions.length > 0 ? (
+        <div>
+          {yourSessions.slice(0, 5).map((s, i) => (
+            <CompactSessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
+          ))}
+        </div>
+      ) : (
+        <div style={{
+          padding: "14px 16px", borderRadius: 10,
+          border: `1px dashed ${theme.ruleSoft}`,
+          background: "transparent",
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          color: theme.ash, lineHeight: 1.5, textAlign: "center",
+        }}>
+          Your last few cups will land here once you've brewed something.
+        </div>
       )}
 
     </div>
