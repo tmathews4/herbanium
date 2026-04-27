@@ -267,6 +267,19 @@ const ARRIVAL_VERBS = {
   Thoth:         "sets a reed against a scroll",
   Yggdrasil:     "the world-tree's roots stir once",
 
+  // ── Journal-spirit creatures ──────────────────────────────
+  Inkling:       "flickers at the edge of a thought",
+  Scrivener:     "settles at the desk with a candle",
+  Annal:         "opens to a marked page",
+  Cicada:        "trills once from the high tree",
+  Wagtail:       "trots along the riverbank in jaunty rhythm",
+  Cricket:       "starts a chirp in the long grass",
+  Linnet:        "chains a few rhymes through the hedgerow",
+  "Owl-Scribe":  "lands silently with a quill in its talons",
+  "Lark-Scribe": "spirals up trailing the morning's first ink",
+  "Margin-Cat":  "curls along the edge of the page",
+  Lapwing:       "circles back to the same field at dusk",
+
   // ── Misc ──────────────────────────────────────────────────
   Alchemist:     "uncorks a small bright bottle",
   Bard:          "tunes a small harp",

@@ -95,7 +95,7 @@ function buildWindow(sessions) {
   return ctx;
 }
 
-export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile }) {
+export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile, journalEntries }) {
   const yourSessions = (sessions || []).filter(s => s.who === "you");
   const recentSessions = yourSessions.slice(0, RECENT_WINDOW);
 
@@ -131,6 +131,31 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
   const composedCount = (generatedBlends || [])
     .filter(b => String(b.id || "").startsWith("local-")).length;
 
+  // Journal-entry analysis. Free entries, haiku, limerick are all
+  // counted; days, hours-of-day, and notes attached are tracked too.
+  const entries = journalEntries || [];
+  const entryByKind = (k) => entries.filter(e => e.kind === k);
+  const journal = {
+    total:      entries.length,
+    free:       entryByKind("entry").length,
+    haiku:      entryByKind("haiku").length,
+    limerick:   entryByKind("limerick").length,
+    withNote:   entries.filter(e => (e.note || "").trim().length > 0).length,
+    daysSet:    new Set(entries.map(e =>
+                  e.ts ? new Date(e.ts).toISOString().slice(0, 10) : null
+                ).filter(Boolean)),
+    nightHours: entries.filter(e => {
+                  if (!e.ts) return false;
+                  const h = new Date(e.ts).getHours();
+                  return h >= 22 || h < 5;
+                }).length,
+    morningHours: entries.filter(e => {
+                  if (!e.ts) return false;
+                  const h = new Date(e.ts).getHours();
+                  return h >= 5 && h < 9;
+                }).length,
+  };
+
   return {
     lifetime, recent, onboarding, daysSinceFirst,
     flowerIngsAll, teaIngsAll, allIngs,
@@ -138,6 +163,7 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     favoriteBlendIds: favoriteBlendIds || new Set(),
     savedBlendIds:   savedBlendIds   || new Set(),
     pantryIds:       pantryIds       || new Set(),
+    journal,
     // Data-flow milestones — stamped on profile by the Export and
     // Import handlers in ProfileScreen.
     exportedAt: profile?.exportedAt || null,
@@ -1162,6 +1188,57 @@ export const ATTRIBUTES = [
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "star",
     desc: "Egyptian heron-form phoenix said to have risen at the world's first sunrise. Drawn by importing a saved journal — the kettle restored to its full memory.",
     earned: ctx => !!ctx.importedAt },
+
+  // ─── Journal spirits — earned through the journal itself, the
+  //     surface that holds cups, free entries, and verses in time. ──
+  { id: "first-entry", name: "The Inkling", rarity: "common", window: "lifetime",
+    glyph: "feather", tint: "ochre", frame: "circle", accent: "none",
+    desc: "Small bright spark at the edge of a thought. Drawn by writing the first entry in your journal.",
+    earned: ctx => (ctx.journal?.total || 0) >= 1 },
+  { id: "ten-entries", name: "The Scrivener", rarity: "uncommon", window: "lifetime",
+    glyph: "scroll", tint: "ochre", frame: "square", accent: "dot",
+    desc: "Cloaked figure bent at a desk with a pale candle. Drawn by ten entries put down in your journal.",
+    earned: ctx => (ctx.journal?.total || 0) >= 10 },
+  { id: "fifty-entries", name: "The Annal", rarity: "rare", window: "lifetime",
+    glyph: "scroll", tint: "plum", frame: "diamond", accent: "star",
+    desc: "Long bound book whose pages have started to dog-ear. Drawn by fifty entries in the journal — a real record now.",
+    earned: ctx => (ctx.journal?.total || 0) >= 50 },
+  { id: "first-haiku", name: "The Cicada", rarity: "common", window: "lifetime",
+    glyph: "leaf", tint: "sage", frame: "circle", accent: "rays",
+    desc: "Pale-shelled singer in the high summer trees. Drawn by your first haiku ad-lib.",
+    earned: ctx => (ctx.journal?.haiku || 0) >= 1 },
+  { id: "first-limerick", name: "The Wagtail", rarity: "common", window: "lifetime",
+    glyph: "uplifting", tint: "ochre", frame: "circle", accent: "dot",
+    desc: "Long-tailed bird that walks the riverbank in jaunty rhythm. Drawn by your first limerick ad-lib.",
+    earned: ctx => (ctx.journal?.limerick || 0) >= 1 },
+  { id: "five-haiku", name: "The Cricket", rarity: "uncommon", window: "lifetime",
+    glyph: "leaf", tint: "sageDeep", frame: "circle", accent: "none",
+    desc: "Hidden-in-the-grass musician, only the chirp visible. Drawn by five haiku ad-libs woven from your prompts.",
+    earned: ctx => (ctx.journal?.haiku || 0) >= 5 },
+  { id: "five-limerick", name: "The Linnet", rarity: "uncommon", window: "lifetime",
+    glyph: "uplifting", tint: "terra", frame: "circle", accent: "rays",
+    desc: "Small finch that chains rhyme into rhyme through hedgerow afternoons. Drawn by five limericks woven from your prompts.",
+    earned: ctx => (ctx.journal?.limerick || 0) >= 5 },
+  { id: "verse-virtuoso", name: "The Octopus", rarity: "rare", window: "lifetime",
+    glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
+    desc: "Eight arms, each writing in a different hand. Drawn by composing in both haiku and limerick modes.",
+    earned: ctx => (ctx.journal?.haiku || 0) >= 1 && (ctx.journal?.limerick || 0) >= 1 },
+  { id: "night-owl-scribe", name: "The Owl-Scribe", rarity: "uncommon", window: "lifetime",
+    glyph: "sleepy", tint: "plum", frame: "diamond", accent: "crescent",
+    desc: "Round-eyed watcher with a quill, awake in the dim. Drawn by writing a journal entry between 10pm and 5am.",
+    earned: ctx => (ctx.journal?.nightHours || 0) >= 1 },
+  { id: "morning-scribe", name: "The Lark-Scribe", rarity: "uncommon", window: "lifetime",
+    glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
+    desc: "Brown bird climbing the morning sky on its own song. Drawn by writing a journal entry before nine in the morning.",
+    earned: ctx => (ctx.journal?.morningHours || 0) >= 1 },
+  { id: "verse-with-note", name: "The Margin-Cat", rarity: "uncommon", window: "lifetime",
+    glyph: "feather", tint: "sage", frame: "square", accent: "dot",
+    desc: "Sleek visitor that curls along the edge of the page where annotations live. Drawn by attaching a note to one of your verses.",
+    earned: ctx => (ctx.journal?.withNote || 0) >= 1 },
+  { id: "journal-streak", name: "The Lapwing", rarity: "rare", window: "lifetime",
+    glyph: "compass", tint: "sageDeep", frame: "diamond", accent: "rays",
+    desc: "Crested wading bird that returns to the same field each evening. Drawn by writing journal entries on seven different days.",
+    earned: ctx => (ctx.journal?.daysSet?.size || 0) >= 7 },
 ];
 
 export function evaluateAttributes(ctx) {

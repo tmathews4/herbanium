@@ -10,6 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
+import { getAnimiDisplayName } from "../data/animiAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -28,7 +29,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -134,12 +135,16 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile });
+  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile, journalEntries });
   const attrEvaluation = evaluateAttributes(attrCtx);
-  const userPrefix = getUserPrefix(attrCtx);
+  // Random adjective + fixed creature, deterministic per (user, attr).
+  // The seed combines profile.createdAt with the attribute id so the
+  // same user always sees the same name for the same animi but
+  // different users get different qualifiers.
+  const animiSeed = profile?.createdAt || profile?.name || "anon";
   const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => ({
     ...a,
-    displayName: isColorable(a) ? applyPrefix(a.name, userPrefix) : a.name,
+    displayName: getAnimiDisplayName(a, animiSeed),
   }));
   // Sort earned by rarity desc — rarest finds bubble up.
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };

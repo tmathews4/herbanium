@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
 import { arrivalVerbFor } from "../data/animiArrivals";
+import { creatureFor } from "../data/animiAdjectives";
 
 const FADE_IN_MS  = 1200;
 const FADE_OUT_MS = 700;
@@ -37,7 +38,10 @@ export const AnimiArrivalCard = ({ animi, onDismiss }) => {
 
   const opacity = phase === "entering" || phase === "leaving" ? 0 : 1;
   const transitionMs = phase === "entering" ? FADE_IN_MS : FADE_OUT_MS;
-  const verb = arrivalVerbFor(animi.name);
+  // Verb is keyed off the creature noun (which is the fixed part of
+  // the new "{adjective} {creature}" naming) so arrivals always read
+  // in-register regardless of the random qualifier.
+  const verb = arrivalVerbFor(creatureFor(animi));
   const displayName = animi.displayName || animi.name;
 
   return (
