@@ -70,6 +70,11 @@ export const BestiaryView = ({
   // stable order, instead of independent per-attr hashing.
   const earned = attrEvaluation.filter(a => a.earned);
   const naming = buildElementalNaming(earned, elementalSeed);
+  // Earned elementals carry the "A {Adjective} {Creature}" indefinite
+  // article — they're a kind, not a singular. Only the user's unique
+  // creation card keeps "The" since it really is one of one. Switches
+  // to "An" before vowel-led adjectives so the read stays grammatical.
+  const articleFor = (word) => /^[aeiou]/i.test(word || "") ? "An" : "A";
   const earnedAttrs = earned.map(a => {
     const n = naming.get(a.id) || {};
     const adj = n.adjective || "";
@@ -79,7 +84,7 @@ export const BestiaryView = ({
     return {
       ...a,
       creature,
-      displayName: `The ${adj} ${creature}`,
+      displayName: `${articleFor(adj)} ${adj} ${creature}`,
       desc: baseDesc ? `${flavor} ${baseDesc}` : flavor,
     };
   });
@@ -141,6 +146,10 @@ export const BestiaryView = ({
     if (titleParts[1]) uniquePieces.push(flavorLineFor(titleParts[1]));
   }
   if (creatureDesc) uniquePieces.push(creatureDesc);
+  // Closing reminder that this elemental belongs to the user alone —
+  // the rest of the bestiary is a kind ("A Mist Heron"), this one is
+  // a singular ("The Twilight Pearl Hare").
+  uniquePieces.push("An elemental no one but you has yet documented.");
   const creationCard = creationTitleName ? {
     id: "_creation",
     name: creationTitleName,

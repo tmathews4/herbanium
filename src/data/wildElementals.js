@@ -179,10 +179,14 @@ export function maybeRollWild({
 
   const desc = `A wild elemental that wandered into the steam between cups. ${trail}`;
   const ts = now;
+  // Wild elementals are a kind, not a singular — same indefinite-article
+  // treatment as the rest of the bestiary. "An" before vowel-led adjectives.
+  const article = /^[aeiou]/i.test(adjective) ? "An" : "A";
+  const display = `${article} ${adjective} ${creature}`;
   return {
     id: `wild-${ts}`,
-    name: `The ${adjective} ${creature}`,
-    displayName: `The ${adjective} ${creature}`,
+    name: display,
+    displayName: display,
     adjective,
     creature,
     rarity: "rare",
