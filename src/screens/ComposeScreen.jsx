@@ -286,10 +286,13 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   const stickySubTabBar = (
     <div style={{
       position: "sticky", bottom: 0, zIndex: 5,
-      background: theme.ivory,
-      borderTop: `1px solid ${theme.ruleSoft}`,
-      padding: "8px 12px",
-      boxShadow: "0 -6px 16px rgba(0,0,0,0.05)",
+      // Match the TabBar's bg/blur so the two read as one continuous
+      // strip. No top-shadow, no extra padding — the sub-tabs sit
+      // flush against the main tab row beneath them.
+      background: "rgba(243,236,220,0.94)",
+      backdropFilter: "blur(8px)",
+      borderTop: `1px solid ${theme.rule}`,
+      padding: "8px 12px 0",
     }}>
       <div style={{
         display: "grid",
