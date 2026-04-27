@@ -65,16 +65,12 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
 
 ## Listings (draft now, paste in later)
 
-- [ ] **Privacy policy.** Hosted at a stable URL. The native-app
-      story is now genuinely "zero outbound network calls" — the
-      feedback form (Formspree POST) is desktop-web only. Discloses:
-      1. Brew sessions, journal entries, blends, pantry, and bestiary
-         data live in localStorage on the device. No account, no
-         cloud sync.
-      2. No third-party data sharing in the iOS / Android builds.
-         (The desktop-web build has a feedback form that POSTs to
-         Formspree; that's outside the scope of the store listings.)
-      3. No analytics, no crash reporting, no advertising IDs.
+- [x] ~~**Privacy policy.** Hosted at a stable URL.~~ Drafted at
+      `public/privacy.html`, deployed automatically with the next
+      Vercel build. Will live at:
+      `https://herbanium.app/privacy.html`. Native-app story is
+      genuinely "zero outbound network calls" so the policy is short:
+      data stays on the device, no third parties, no analytics.
 
 - [ ] **App description, short + long.** A two-sentence pitch and a
       ~200-word longer version. Voice should match the app's
