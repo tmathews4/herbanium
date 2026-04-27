@@ -258,6 +258,16 @@ When the vocabulary changed, existing files need patching. Status:
 
 ---
 
+## Conflict & masking layer
+
+The vocabulary axes interact unevenly — bitter and mint mask other
+flavors much more aggressively than sweet or floral, and energy/sleepy
+contradict more clinically than warming/cooling. The candidate ranker
+in `src/algo/compose.js` reads per-pair masking strengths to grade
+those interactions. See [docs/masking.md](./masking.md) for the
+literature, the strengths, and an implicit dominance hierarchy of
+flavors derived from the table.
+
 ## Appendix: Sources
 
 Tea flavor wheels consulted:

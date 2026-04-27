@@ -729,6 +729,57 @@ const FLAVOR_CONFLICTS = [
   ["savory", "fruity"],    // savory broth and fruit pull apart
 ];
 
+// Per-pair masking strength (0–1). Used by selectionScore in compose.js
+// to grade the conflict-aware tiebreaker — bitter and mint mask much
+// more aggressively than sweet does, so flat 0.5 across all pairs would
+// over-penalize gentle conflicts and under-penalize hard ones. Derived
+// from the literature review in docs/masking.md (Drewnowski 2001 on
+// bitter dominance, Eccles 1994 on TRPM8 cold sensation, and the
+// general phenol-adsorption work that underwrites smoky's persistence).
+//
+// Symmetric: the higher-masking partner sets the value for the pair.
+// Pairs not listed default to 0.5 (matches the previous behavior).
+const FLAVOR_MASK_STRENGTH = {
+  "bitter|sweet":     0.85,
+  "bitter|honeyed":   0.85,
+  "bitter|fruity":    0.85,
+  "minty|spiced":     0.85,  // menthol's TRPM8 hijack overrides palate
+  "smoky|floral":     0.85,  // phenol adsorption is near-total over delicate volatiles
+  "smoky|citrus":     0.85,
+  "vegetal|smoky":    0.80,
+  "roasted|floral":   0.70,  // Maillard pyrazines bury delicate volatiles, slightly less totally than smoke
+  "umami|sweet":      0.40,  // mild — Japanese cooking shows they often complement
+  "tart|umami":       0.55,
+  "tart|savory":      0.55,
+  "nutty|tart":       0.45,
+  "earthy|citrus":    0.55,
+  "savory|fruity":    0.50,
+};
+
+// Per-pair masking strength for moods (0–1). Energy/sleepy and
+// focus/sleepy are clinically strong oppositions; warming/cooling
+// and grounding/uplifting read as sensational/abstract tensions
+// rather than pharmacological cancellations.
+const MOOD_MASK_STRENGTH = {
+  "energy|sleepy":     0.75,
+  "focus|sleepy":      0.75,
+  "energy|soothing":   0.55,
+  "warming|cooling":   0.40,  // sensational rather than pharmacological
+  "grounding|uplifting": 0.40,
+};
+
+function maskKey(a, b) {
+  return [a, b].sort().join("|");
+}
+
+export function flavorMaskStrength(a, b) {
+  return FLAVOR_MASK_STRENGTH[maskKey(a, b)] ?? 0.5;
+}
+
+export function moodMaskStrength(a, b) {
+  return MOOD_MASK_STRENGTH[maskKey(a, b)] ?? 0.5;
+}
+
 // Word banks for naming synthesized blends. The synthetic-blend builder
 // pulls one word from each selected mood's bank and one from each
 // selected flavor's bank, then composes the picks into a name. Roughly

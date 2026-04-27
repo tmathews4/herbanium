@@ -4,7 +4,8 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  BLENDS, FLAVOR_WORDS, MOOD_BLENDS, MOOD_CONFLICTS, FLAVOR_CONFLICTS, MOOD_SINGLE_NAMES,
+  BLENDS, FLAVOR_WORDS, MOOD_BLENDS, MOOD_CONFLICTS, FLAVOR_CONFLICTS,
+  flavorMaskStrength, moodMaskStrength, MOOD_SINGLE_NAMES,
   MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
@@ -351,15 +352,17 @@ function blendEffectStrength(b, mood) {
   return eff ? eff[1] : 0;
 }
 
-// Conflict-aware score: per selection, count a hit (1) and dock 0.5
-// for each conflicting tag also present on the blend (mood at ≥ 3
-// strength, flavors are presence-based). Sums across all selections.
-// Clamps each per-selection contribution at 0 so a heavy-conflict
-// blend can't push the total negative — it just stops contributing.
+// Conflict-aware score: per selection, count a hit (1) and dock a
+// graded amount per conflicting tag present on the blend, where the
+// dock equals the pair's masking strength (see flavorMaskStrength /
+// moodMaskStrength in data/blends.js — bitter and mint at 0.85, soft
+// pairs like umami/sweet at 0.4). Sums across all selections; clamps
+// each per-selection contribution at 0 so heavy-conflict blends just
+// stop contributing rather than going negative.
 //
 // This is the "quiet de-emphasis" layer: matched-count still leads
 // the sort (additive intent preserved), but among ties the cup that
-// pulls in two directions ranks below the cup that doesn't.
+// pulls hard in two directions ranks well below the cup that doesn't.
 function selectionScore(b, moods, flavors) {
   let score = 0;
   for (const m of moods) {
@@ -367,7 +370,7 @@ function selectionScore(b, moods, flavors) {
     for (const [a, c] of MOOD_CONFLICTS) {
       const other = m === a ? c : m === c ? a : null;
       if (!other) continue;
-      if (blendEffectStrength(b, other) >= 3) s -= 0.5;
+      if (blendEffectStrength(b, other) >= 3) s -= moodMaskStrength(m, other);
     }
     score += Math.max(0, s);
   }
@@ -376,7 +379,7 @@ function selectionScore(b, moods, flavors) {
     for (const [a, c] of FLAVOR_CONFLICTS) {
       const other = f === a ? c : f === c ? a : null;
       if (!other) continue;
-      if (blendMatchesFlavor(b, other)) s -= 0.5;
+      if (blendMatchesFlavor(b, other)) s -= flavorMaskStrength(f, other);
     }
     score += Math.max(0, s);
   }
