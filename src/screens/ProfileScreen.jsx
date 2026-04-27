@@ -443,17 +443,24 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             >
               start over
             </button>
-            <button
-              onClick={() => setFeedbackOpen(true)}
-              style={{
-                fontFamily: ff.sans, fontSize: 12, color: theme.terra,
-                padding: "8px 14px", borderRadius: 999,
-                background: "transparent", border: `1px solid ${theme.terra}`,
-                cursor: "pointer",
-              }}
-            >
-              send feedback
-            </button>
+            {/* Feedback form — desktop-web only. Native users have
+                the App Store / Play Store review channels for the
+                same purpose, and the Formspree third-party POST
+                would need its own privacy disclosure on store
+                listings if we surfaced it on phones. */}
+            {!isNativeApp() && (
+              <button
+                onClick={() => setFeedbackOpen(true)}
+                style={{
+                  fontFamily: ff.sans, fontSize: 12, color: theme.terra,
+                  padding: "8px 14px", borderRadius: 999,
+                  background: "transparent", border: `1px solid ${theme.terra}`,
+                  cursor: "pointer",
+                }}
+              >
+                send feedback
+              </button>
+            )}
           </div>
         )}
       </div>

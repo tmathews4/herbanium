@@ -65,13 +65,16 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
 
 ## Listings (draft now, paste in later)
 
-- [ ] **Privacy policy.** Hosted at a stable URL. Discloses:
+- [ ] **Privacy policy.** Hosted at a stable URL. The native-app
+      story is now genuinely "zero outbound network calls" — the
+      feedback form (Formspree POST) is desktop-web only. Discloses:
       1. Brew sessions, journal entries, blends, pantry, and bestiary
          data live in localStorage on the device. No account, no
          cloud sync.
-      2. The feedback form posts to Formspree (third party) when the
-         user submits. Mailto fallback if that fails.
-      3. No analytics, no crash reporting, no advertising IDs (yet).
+      2. No third-party data sharing in the iOS / Android builds.
+         (The desktop-web build has a feedback form that POSTs to
+         Formspree; that's outside the scope of the store listings.)
+      3. No analytics, no crash reporting, no advertising IDs.
 
 - [ ] **App description, short + long.** A two-sentence pitch and a
       ~200-word longer version. Voice should match the app's
@@ -107,5 +110,6 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
       Connect. Review window: 1–3 days typical.
 - [ ] Google — Play Console → upload signed AAB. Review window: 1–2
       days typical.
-- [ ] Pay attention to data-safety form on Google Play; the
-      Formspree disclosure goes there.
+- [ ] Google Play data-safety form: with the feedback form
+      desktop-only, the native answer is "no data collected, no
+      data shared." Confirm that's still true at submission time.
