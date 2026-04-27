@@ -159,7 +159,9 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         </div>
       )}
 
-      {/* Favorites — horizontal scrollable row */}
+      {/* Favorites — horizontal scrollable row. Native scrollbar is
+          hidden; a soft right-edge fade suggests there's more to scroll
+          when the rail overflows. */}
       {favoriteBlends.length > 0 && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
@@ -168,14 +170,28 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
               {favoriteBlends.length} saved
             </span>
           </div>
-          <div style={{
-            display: "flex", gap: 10, overflowX: "auto", marginBottom: 16,
-            paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
-          }}>
-            {favoriteBlends.map(b => (
-              <FavoriteCard key={b.id} b={b} onTap={() => openBlend(b.id)} />
-            ))}
+          <div style={{ position: "relative", marginBottom: 16 }}>
+            <div className="fav-scroll" style={{
+              display: "flex", gap: 10, overflowX: "auto",
+              paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}>
+              {favoriteBlends.map(b => (
+                <FavoriteCard key={b.id} b={b} onTap={() => openBlend(b.id)} />
+              ))}
+            </div>
+            {favoriteBlends.length > 2 && (
+              <div style={{
+                position: "absolute", right: 0, top: 0, bottom: 4,
+                width: 32, pointerEvents: "none",
+                background: `linear-gradient(to right, rgba(232,220,192,0), ${theme.ivory})`,
+              }} />
+            )}
           </div>
+          <style>{`
+            .fav-scroll::-webkit-scrollbar { display: none; }
+          `}</style>
         </>
       )}
 
