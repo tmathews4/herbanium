@@ -1222,14 +1222,17 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         return null;
       })()}
 
-      {/* Compendium — full ingredient reference (renders LibraryScreen
-          inline without its own header). */}
+      {/* Compendium — full ingredient reference. The "only what's in
+          my pantry" filter is hidden here; that filter is reserved for
+          the Shelf · Pantry surface. Compendium always shows every
+          ingredient at full presence. */}
       {mode === "compendium" && (
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
           libraryView={libraryView}
           hideHeader
+          hidePantryToggle
         />
       )}
 
