@@ -78,6 +78,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Deep-links can preset it via composeView.journalFilter (e.g. the
   // Home recent-brews 'see all' link sets it to "cups").
   const [journalFilter, setJournalFilter] = useState("all");
+  // Planner inline collapse — folded by default in the journal so
+  // the timeline reads first. The brew-page modal is independent.
+  const [plannerInlineOpen, setPlannerInlineOpen] = useState(false);
   // Planner props passed inline into the Shelf > Journal section.
   // The brew-time modal trigger lives on SteepScreen, not here.
   const plannerProps = {
@@ -1041,10 +1044,67 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 onDismiss={dismissJournalHint}
               />
             )}
-            {/* Planner — small "today's plan" list above the timeline.
-                Same state is also reachable as a modal from the brew page. */}
+            {/* Planner — collapsed by default; the journal timeline
+                reads first. Click the header to expand. The brew-page
+                modal still opens the same shared state. */}
             <div style={{ marginBottom: 14 }}>
-              <Planner {...plannerProps} />
+              {(() => {
+                const items = plannerProps.items || [];
+                const openCount = items.filter(i => !i.done).length;
+                return (
+                  <div style={{
+                    borderRadius: 10,
+                    border: `1px solid ${theme.ruleSoft}`,
+                    background: theme.cream,
+                    overflow: "hidden",
+                  }}>
+                    <button
+                      onClick={() => setPlannerInlineOpen(o => !o)}
+                      aria-expanded={plannerInlineOpen}
+                      style={{
+                        width: "100%", textAlign: "left",
+                        background: "transparent", border: "none", cursor: "pointer",
+                        padding: "10px 14px",
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        gap: 8,
+                      }}
+                    >
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+                        textTransform: "uppercase", color: theme.sageDeep,
+                      }}>
+                        <span style={{
+                          display: "inline-block",
+                          transform: plannerInlineOpen ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.15s ease",
+                          color: theme.terra,
+                        }}>›</span>
+                        <span>Planner</span>
+                      </div>
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                        color: theme.ash,
+                      }}>
+                        {items.length > 0 ? `${openCount}/${items.length} open` : "empty"}
+                        {openCount > 0 && (
+                          <span style={{
+                            width: 6, height: 6, borderRadius: "50%",
+                            background: theme.terra,
+                            display: "inline-block",
+                          }} />
+                        )}
+                      </div>
+                    </button>
+                    {plannerInlineOpen && (
+                      <div style={{ padding: "0 8px 8px" }}>
+                        <Planner {...plannerProps} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "center",
