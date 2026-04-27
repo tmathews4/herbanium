@@ -18,7 +18,7 @@ import {
 } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
-import { getBlend, iconBtn } from "../helpers/misc";
+import { getBlend, iconBtn, suggestBlendName } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -802,23 +802,56 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 algorithm-suggested one); brew goes straight into Steep. */}
             {savePromptOpen && (
               <div style={{
-                marginTop: 14, padding: "10px 12px", borderRadius: 8,
+                marginTop: 14, padding: "12px 14px", borderRadius: 10,
                 background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-                display: "flex", flexDirection: "column", gap: 8,
+                display: "flex", flexDirection: "column", gap: 10,
               }}>
-                <input
-                  autoFocus
-                  value={saveName}
-                  onChange={(e) => setSaveName(e.target.value)}
-                  placeholder="name your blend"
-                  maxLength={48}
-                  style={{
-                    fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-                    background: "transparent", border: "none",
-                    borderBottom: `1px solid ${theme.terra}`,
-                    padding: "4px 2px", outline: "none",
-                  }}
-                />
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+                  textTransform: "uppercase", color: theme.ash,
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <span>Name</span>
+                  <span style={{
+                    fontFamily: ff.serif, fontStyle: "italic",
+                    fontSize: 10.5, letterSpacing: 0,
+                    textTransform: "none", color: theme.terra,
+                  }}>— suggested from your ingredients, edit anything below</span>
+                </div>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 10px", borderRadius: 8,
+                  background: "rgba(176, 84, 47, 0.05)",
+                  border: `1px solid ${theme.terra}`,
+                }}>
+                  <Pencil size={14} c={theme.terra} />
+                  <input
+                    autoFocus
+                    onFocus={(e) => e.target.select()}
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    placeholder="name your blend"
+                    maxLength={48}
+                    style={{
+                      flex: 1, minWidth: 0,
+                      fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+                      background: "transparent", border: "none",
+                      padding: "2px 0", outline: "none",
+                    }}
+                  />
+                  {saveName && (
+                    <button
+                      onClick={() => setSaveName("")}
+                      aria-label="clear name"
+                      title="clear"
+                      style={{
+                        background: "transparent", border: "none",
+                        color: theme.ash, fontSize: 14, lineHeight: 1,
+                        padding: "2px 4px", cursor: "pointer",
+                      }}
+                    >×</button>
+                  )}
+                </div>
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                   <button
                     onClick={() => { setSavePromptOpen(false); setSaveStatus(null); }}
@@ -863,7 +896,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               <button
                 disabled={blend.empty}
                 onClick={() => {
-                  setSaveName(blend.name || "");
+                  // Auto-suggest a name from the heaviest ingredients
+                  // so the user opens the prompt with something they
+                  // can keep, edit, or replace outright.
+                  setSaveName(suggestBlendName(effectiveIngredients));
                   setSavePromptOpen(true);
                   setSaveStatus(null);
                 }}
