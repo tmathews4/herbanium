@@ -18,7 +18,7 @@ import {
 } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
-import { getBlend, iconBtn, suggestBlendName } from "../helpers/misc";
+import { getBlend, iconBtn, suggestBlendName, formatAgo } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -1848,20 +1848,6 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
     </div>
   );
 };
-
-// Tiny date-relative helper for journal entry timestamps. Mirrors the
-// "X minutes ago" convention used in seed-session formatting.
-function formatAgo(date) {
-  const now = Date.now();
-  const diffMin = Math.round((now - date.getTime()) / 60000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.round(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.round(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
 
 const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) => {
   // Pre-fill with the suggested name from the ingredients. The

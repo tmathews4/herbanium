@@ -18,6 +18,36 @@ export const getBlend = (id) => LOCAL_BLENDS[id] || BLENDS.find(b => b.id === id
 
 export const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 
+// Parse the timestamp baked into a session id ("sess-<ms>"). Returns
+// a Date or null when the id is missing or malformed.
+export function sessionDate(session) {
+  const n = parseInt(String(session?.id || "").replace("sess-", ""), 10);
+  return Number.isFinite(n) ? new Date(n) : null;
+}
+
+// Relative "X ago" string from a Date. Stable formatting: "just now",
+// "5m ago", "3h ago", "2d ago", or a short month-day for older items.
+// Used for both cup sessions and journal entries.
+export function formatAgo(date) {
+  if (!date) return "";
+  const now = Date.now();
+  const diffMin = Math.round((now - date.getTime()) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.round(diffHr / 24);
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+// Convenience: relative time for a brewed-cup session, derived from
+// its id timestamp so the row stays accurate across reloads instead
+// of being frozen at the "just now" string set at create time.
+export function sessionAgo(session) {
+  return formatAgo(sessionDate(session));
+}
+
 export const iconBtn = () => ({
   fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft,
   background: "transparent", border: `1px solid ${theme.rule}`,

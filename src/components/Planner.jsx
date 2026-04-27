@@ -11,6 +11,7 @@
 import React, { useState } from "react";
 import { theme, ff } from "../theme";
 import { Pencil } from "./icons";
+import { sessionAgo } from "../helpers/misc";
 
 export const Planner = ({
   items = [],
@@ -331,7 +332,7 @@ export const PlannerModal = ({
                       <div style={{
                         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
                         color: theme.ash, marginBottom: 4,
-                      }}>{s.ago}</div>
+                      }}>{sessionAgo(s) || s.ago}</div>
                       {intent && (
                         <div style={{
                           fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,

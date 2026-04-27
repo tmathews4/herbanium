@@ -15,7 +15,7 @@ import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/bl
 import {
   EFFECT_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
-import { getBlend } from "../helpers/misc";
+import { getBlend, sessionAgo } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -555,7 +555,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                       </span>
                     </div>
                     <span style={{ fontFamily: ff.sans, fontSize: 10, color: theme.ash, letterSpacing: "0.08em", flexShrink: 0 }}>
-                      {s.ago}
+                      {sessionAgo(s) || s.ago}
                     </span>
                   </div>
                   {s.note && (

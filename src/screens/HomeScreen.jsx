@@ -11,7 +11,7 @@ import {
 } from "../components/layout";
 import { FirstCupHintCard } from "../components/FirstCupHintCard";
 import { BLENDS } from "../data/blends";
-import { getBlend, mmss } from "../helpers/misc";
+import { getBlend, mmss, sessionAgo } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -294,7 +294,7 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
       <span style={{ fontSize: 11, color: theme.terra, letterSpacing: "0.1em" }}>
         {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
       </span>
-      <span style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em" }}>{s.ago}</span>
+      <span style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em" }}>{sessionAgo(s) || s.ago}</span>
     </button>
   );
 };
@@ -334,7 +334,7 @@ export const SessionRow = ({ s, openBlend, first }) => {
           </div>
         )}
       </div>
-      <div style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em", marginTop: 4 }}>{s.ago}</div>
+      <div style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em", marginTop: 4 }}>{sessionAgo(s) || s.ago}</div>
     </button>
   );
 };
