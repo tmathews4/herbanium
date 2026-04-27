@@ -216,7 +216,9 @@ export const BestiaryView = ({
             in different ways and{" "}
             <strong style={{ color: theme.terra }}>Log</strong>{" "}
             specimens to fill the page. Pin five up top, swap any
-            in by tapping it then a reserve.
+            in by tapping it then a reserve. Not your thing? Disable
+            it under{" "}
+            <strong style={{ color: theme.terra }}>Profile → Preferences</strong>.
           </>}
           onDismiss={dismissBestiaryHint}
         />
