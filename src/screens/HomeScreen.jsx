@@ -321,11 +321,16 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
   const flavor = b.flavor
     || (Array.isArray(b.flavors) && b.flavors[0])
     || "";
-  const tempStr = b.tempC
-    ? formatTempShort(b.tempC, b.tempC, unit)
+  // Prefer the session's recorded brew settings — the user may have
+  // pushed the explorer sliders off the recipe defaults — and fall
+  // back to the blend's curated values when nothing was captured.
+  const cupTempC = (typeof s.tempC === "number") ? s.tempC : b.tempC;
+  const cupTimeS = (typeof s.timeS === "number") ? s.timeS : b.timeS;
+  const tempStr = cupTempC
+    ? formatTempShort(cupTempC, cupTempC, unit)
     : "";
-  const timeStr = b.timeS
-    ? `${Math.round(b.timeS / 60)}m`
+  const timeStr = cupTimeS
+    ? `${Math.round(cupTimeS / 60)}m`
     : "";
   const brewParts = [flavor, tempStr, timeStr].filter(Boolean);
 

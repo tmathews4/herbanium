@@ -519,6 +519,13 @@ export default function App() {
       actual,
       taste: taste ?? 4,
       note: note || "",
+      // Capture the user's actual brew settings — the explorer
+      // sliders may have moved the temp/time off the blend's
+      // curated defaults, and downstream views (the home cup row,
+      // blend history) want to show what the user actually did,
+      // not the recipe spec.
+      tempC: blend.tempC,
+      timeS: blend.timeS,
     };
 
     setSessions(prev => [newSession, ...prev]);
