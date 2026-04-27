@@ -1,4 +1,4 @@
-package com.herbanium.app;
+package app.herbanium;
 
 import com.getcapacitor.BridgeActivity;
 

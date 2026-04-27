@@ -11,10 +11,13 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
 
 ## Code-side, before any device test
 
-- [ ] **Pick the real appId.** Currently `com.herbanium.app` in
-      `capacitor.config.ts` — placeholder. Replace with reverse-DNS
-      you actually own (e.g. `com.tmathews.herbanium`). Once
-      submitted, this string is locked to the listing forever.
+- [x] ~~**Pick the real appId.**~~ Set to `app.herbanium`
+      (reverse-DNS from the owned `herbanium.app` domain). Once
+      submitted to either store this string locks to the listing
+      forever, so any further change has to happen *before* first
+      upload. Native projects regenerated with the new id on both
+      platforms (Android Java package: `app.herbanium`, iOS bundle
+      identifier: `app.herbanium`).
 
 - [ ] **Decide what to do with the `?dev` URL flag.** Won't work in a
       WebView wrap (no URL bar). Options:
