@@ -243,6 +243,28 @@ export default function App() {
     setSeedVersion(SEED_VERSION);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // One-shot favorites migration. Onboarding now seeds favoriteBlendIds
+  // with the same starter set as savedBlendIds so the Home rail is
+  // genuinely populated. Users who onboarded before this fix have
+  // savedBlendIds but an empty favoriteBlendIds; the Home rail's
+  // savedBlendIds fallback hides the bug until they add their first
+  // favorite, at which point the rail collapses to that single entry.
+  // Detect that state once and seed favorites from saved so existing
+  // users get the fixed behavior on next load.
+  const [favoritesMigrated, setFavoritesMigrated] = usePersistedState("favoritesMigrated", false);
+  useEffect(() => {
+    if (favoritesMigrated) return;
+    if (!profile) return;
+    if ((favoriteBlendIds?.size || 0) > 0) {
+      setFavoritesMigrated(true);
+      return;
+    }
+    if ((savedBlendIds?.size || 0) > 0) {
+      setFavoriteBlendIds(new Set(savedBlendIds));
+    }
+    setFavoritesMigrated(true);
+  }, [profile, favoritesMigrated]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Pantry hint visibility — one-time card pointing at the pantry toggle.
   // Pantry starts empty for new users; this nudges them toward filling it.
   const [pantryHintShown, setPantryHintShown] = usePersistedState("pantryHintShown", false);
@@ -337,6 +359,10 @@ export default function App() {
     });
     setGeneratedBlends([]);
     setSavedBlendIds(new Set(seedBlendIds));
+    // Seed favorites with the same starter set so the Home rail is
+    // populated from the start and adding the first real favorite
+    // doesn't visually wipe the preloaded ones out from under the user.
+    setFavoriteBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
     setOmenShown(false); // unique animi popup plays on first Profile visit
     setPantryHintShown(false); // ensure pantry hint shows for new users
