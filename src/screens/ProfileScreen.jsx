@@ -429,6 +429,18 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             : "summon elemental"}
         </button>
       </div>
+      {/* Inline explainer right under the grove header so users
+          understand what Summon does before they tap it. Kept short
+          and italic so it reads as a side note, not another tutorial. */}
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+        color: theme.ash, lineHeight: 1.45, marginBottom: 12,
+      }}>
+        A small game laid into the journal — engage with the app in
+        different ways and earn elementals to fill the grove. Tap{" "}
+        <em style={{ color: theme.terra, fontStyle: "normal" }}>Summon</em>{" "}
+        to welcome whichever one is waiting.
+      </div>
       {omenShown && (
       <div style={{
         padding: 14, borderRadius: 10,
