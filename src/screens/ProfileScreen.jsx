@@ -414,7 +414,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
         color: theme.ash, lineHeight: 1.5, marginBottom: 12,
       }}>
-        Tend the kettle with intention, and the elementals — half-glimpsed — may draw near.
+        Tend the kettle and pen with intention, and the elementals may draw near.
       </div>
       {omenShown && (
       <div style={{
