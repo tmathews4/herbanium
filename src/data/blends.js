@@ -75,7 +75,7 @@ const BLENDS = [
   {
     id: "chai",  // mood: warming — cinnamon/cardamom/ginger/clove/pepper define the cup more than caffeine
     name: "Masala Chai",
-    subtitle: "the morning's full house — piperine joins",
+    subtitle: "the morning's full house — black tea, milk, and warm spice",
     ingredients: [
       { id: "assam", g: 2.0 },
       { id: "ginger", g: 0.3 },
@@ -93,7 +93,7 @@ const BLENDS = [
   {
     id: "moroccan",
     name: "Moroccan Mint",
-    subtitle: "Maghrebi gunpowder; carvone over menthol",
+    subtitle: "Maghrebi gunpowder — sweet, green, the gentler mint",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
       { id: "spearmint", g: 1.0, role: "accent" },
@@ -108,7 +108,7 @@ const BLENDS = [
   {
     id: "darj-neat",
     name: "Darjeeling, neat",
-    subtitle: "muscatel without milk — the only flush is first",
+    subtitle: "first-flush Darjeeling — muscatel grape, neat",
     ingredients: [
       { id: "darjeeling", g: 2.5 },
     ],
@@ -121,7 +121,7 @@ const BLENDS = [
   {
     id: "sencha-properly",
     name: "Sencha, properly",
-    subtitle: "steamed Japanese green — 75°C, one minute",
+    subtitle: "steamed Japanese green — vegetal, sweet, briefly steeped",
     ingredients: [
       { id: "sencha", g: 3.0 },
     ],
@@ -149,7 +149,7 @@ const BLENDS = [
   {
     id: "hojicha-evening",
     name: "Hojicha at Dusk",
-    subtitle: "Kyoto roast — caffeine burned off, caramel left",
+    subtitle: "Kyoto roast — caramel-toasted green, almost no caffeine",
     ingredients: [
       { id: "hojicha", g: 3.0 },
     ],
@@ -175,7 +175,7 @@ const BLENDS = [
   {
     id: "wuyi-smoke",
     name: "Wuyi Pine Smoke",
-    subtitle: "the soldier's tea — guaiacol and syringol",
+    subtitle: "the soldier's tea — dark, smoky, pine-fire deep",
     ingredients: [
       { id: "lapsang", g: 2.0 },
     ],
@@ -205,7 +205,7 @@ const BLENDS = [
   {
     id: "golden-milk",
     name: "Golden Milk",
-    subtitle: "haldi doodh — fat and pepper unlock the curcumin",
+    subtitle: "haldi doodh — golden, warming, gently spiced",
     ingredients: [
       { id: "turmeric", g: 0.5 },
       { id: "ginger", g: 0.3, role: "accent" },
@@ -288,7 +288,7 @@ const BLENDS = [
   {
     id: "tulsi-doorstep",
     name: "Tulsi at the Doorstep",
-    subtitle: "Vishnu's plant — clove-pepper warmth and ursolic acid",
+    subtitle: "Vishnu's plant — clove-pepper warmth, lifts and steadies",
     ingredients: [
       { id: "tulsi", g: 1.5 },
       { id: "cardamom", g: 0.3 },
@@ -320,7 +320,7 @@ const BLENDS = [
   {
     id: "holunder-care",
     name: "Holunder Care",
-    subtitle: "elderflower and echinacea — Commission E for the season",
+    subtitle: "elderflower and echinacea — bright and floral for cold-and-flu season",
     ingredients: [
       { id: "elderflower", g: 1.0 },
       { id: "echinacea", g: 1.0 },
@@ -381,7 +381,7 @@ const BLENDS = [
   {
     id: "exp-mint-fennel-settle",
     name: "Mint & Fennel Settle",
-    subtitle: "Anethole and menthol after the plate is cleared",
+    subtitle: "fennel and mint — the cool cup after a heavy meal",
     ingredients: [
       { id: "peppermint", g: 1.0 },
       { id: "fennel",     g: 0.5 },
@@ -457,7 +457,7 @@ const BLENDS = [
   {
     id: "exp-steady-state",
     name: "Steady State",
-    subtitle: "Adaptogen patience — daily, not for tonight",
+    subtitle: "slow-building calm — a daily cup, not a quick fix",
     ingredients: [
       { id: "ashwagandha", g: 0.7 },
       { id: "cinnamon",    g: 0.3, role: "accent" },
@@ -591,7 +591,7 @@ const MOOD_BLENDS = {
 const PAIR_BLENDS = {
   "calm+focus": {
     name: "Stillwater Study",
-    subtitle: "L-theanine plus the lemon-balm exhale",
+    subtitle: "matcha's quiet alertness with a lemon-balm exhale",
     ings: [
       { id: "lemonbalm", g: 1.2, role: "accent" },
       { id: "sencha", g: 0.5 },
@@ -610,7 +610,7 @@ const PAIR_BLENDS = {
   },
   "calm+sleepy": {
     name: "Deepening",
-    subtitle: "the GABA stack, gently",
+    subtitle: "three quiet herbs, no edge",
     ings: [{ id: "chamomile", g: 2.0 }, { id: "passionflower", g: 0.5 }, { id: "lavender", g: 0.3 }, { id: "lemonbalm", g: 0.4 }],
     temp: 95, time: 420,
     effects: [["calm", 4], ["sleepy", 4]],
@@ -624,7 +624,7 @@ const PAIR_BLENDS = {
   },
   "energy+focus": {
     name: "First Light",
-    subtitle: "matcha-caffeine math, two greens deep",
+    subtitle: "two greens deep — bright, vegetal, awake",
     ings: [
       { id: "sencha", g: 1.5 },
       { id: "assam", g: 0.6, role: "accent" },
@@ -674,7 +674,7 @@ const PAIR_BLENDS = {
   },
   "digestive+sleepy": {
     name: "Soft Landing",
-    subtitle: "fennel-anethole and apigenin",
+    subtitle: "fennel and chamomile — sweet, softly settling",
     ings: [{ id: "chamomile", g: 1.4 }, { id: "fennel", g: 0.4 }, { id: "lemonbalm", g: 0.8 }, { id: "lavender", g: 0.3 }],
     temp: 95, time: 360,
     effects: [["sleepy", 3], ["digestive", 4], ["calm", 3]],
