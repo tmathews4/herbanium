@@ -374,7 +374,6 @@ export const BlendExtractionExplorer = ({
                       <VocabInfoCard
                         term={openFlavor}
                         summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
-                        body={FLAVOR_DESCRIPTIONS[openFlavor].body}
                         tone="terra"
                         onClose={() => setOpenFlavor(null)}
                       />
@@ -430,7 +429,6 @@ export const BlendExtractionExplorer = ({
                     <VocabInfoCard
                       term={openEffect}
                       summary={EFFECT_DESCRIPTIONS[openEffect].summary}
-                      body={EFFECT_DESCRIPTIONS[openEffect].body}
                       tone="sage"
                       onClose={() => setOpenEffect(null)}
                     />
