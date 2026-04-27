@@ -1,16 +1,16 @@
 /* ──────────────────────────────────────────────────────────────
    components/JournalComposer.jsx — inline composer for journal
-   entries (free-form text or haiku ad-lib).
+   entries (free-form text or haiku/limerick ad-lib).
 
-   Two modes:
-     - free: a single textarea, save when there's text
-     - haiku: four small prompt fields ("a small thing nearby",
-       "a sound you can hear", "a colour or texture", "a feeling
-       word") which our algo weaves into a 3-line haiku-shaped
-       piece. Live preview; "shuffle" cycles through templates.
+   Three modes plus shared mood capture so the journal reads as a
+   tea-meets-mood log: every entry pairs the writing with how the
+   user felt going in and where they landed after, the same arc
+   we record on cup sessions. Both mood selections are optional —
+   the entry can save with neither, just the start, just the end,
+   or both.
 
-   Saves through `onSave(text, kind)` where kind is "entry" or
-   "haiku" — the caller decides how to persist.
+   Saves through onSave(text, kind, note, currentMoods,
+   landedMoods).
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState } from "react";
@@ -21,6 +21,60 @@ import {
 import {
   LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
 } from "../data/limerickAdlibs";
+
+// Shared mood vocabulary for the journal. Includes the rough-edged
+// states ("anxious", "tired", etc.) since the journal is a venting
+// surface as much as a steady one. Same key set the cup log uses
+// for currentMoods, so entries and cups share the mood timeline.
+const JOURNAL_MOOD_CHIPS = [
+  { key: "calm",      label: "Calm" },
+  { key: "focus",     label: "Focus" },
+  { key: "energy",    label: "Energy" },
+  { key: "sleepy",    label: "Sleepy" },
+  { key: "comfort",   label: "Comfort" },
+  { key: "uplifting", label: "Uplifting" },
+  { key: "soothing",  label: "Soothing" },
+  { key: "anxious",   label: "Anxious" },
+  { key: "stressed",  label: "Stressed" },
+  { key: "tired",     label: "Tired" },
+  { key: "restless",  label: "Restless" },
+];
+
+const MoodChipRow = ({ label, value, setValue }) => {
+  const selected = new Set(value || []);
+  const toggle = (key) => {
+    const cur = value || [];
+    const next = selected.has(key) ? cur.filter(k => k !== key) : [...cur, key];
+    setValue(next);
+  };
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+      }}>{label}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+        {JOURNAL_MOOD_CHIPS.map(c => {
+          const isOn = selected.has(c.key);
+          return (
+            <button
+              key={c.key}
+              onClick={() => toggle(c.key)}
+              style={{
+                fontFamily: ff.serif, fontSize: 11.5,
+                padding: "4px 10px", borderRadius: 999,
+                background: isOn ? theme.terra : "transparent",
+                color: isOn ? theme.cream : theme.inkSoft,
+                border: `1px solid ${isOn ? theme.terra : theme.rule}`,
+                cursor: "pointer", transition: "all 0.15s ease",
+              }}
+            >{c.label}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export const JournalComposer = ({ onSave, onCancel }) => {
   const [mode, setMode] = useState("free");
@@ -35,6 +89,10 @@ export const JournalComposer = ({ onSave, onCancel }) => {
   const [limNote, setLimNote] = useState("");
   const [limAdlib, setLimAdlib] = useState(true);
   const [limOwn, setLimOwn] = useState("");
+  // Shared across all three modes — every entry can record a
+  // before/after mood arc, the same shape cup sessions use.
+  const [currentMoods, setCurrentMoods] = useState([]);
+  const [landedMoods, setLandedMoods] = useState([]);
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
   const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
@@ -58,6 +116,8 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     setLimNote("");
     setLimOwn("");
     setLimAdlib(true);
+    setCurrentMoods([]);
+    setLandedMoods([]);
     setMode("free");
   };
 
@@ -65,12 +125,12 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     if (!ready) return;
     if (mode === "haiku") {
       const finalText = haikuAdlib ? haikuPreview : haikuOwn.trim();
-      onSave(finalText, "haiku", haikuNote.trim());
+      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods);
     } else if (mode === "limerick") {
       const finalText = limAdlib ? limerickPreview : limOwn.trim();
-      onSave(finalText, "limerick", limNote.trim());
+      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods);
     } else {
-      onSave(text.trim(), "entry");
+      onSave(text.trim(), "entry", "", currentMoods, landedMoods);
     }
     // Wipe the form so the next time the composer opens it's blank.
     resetForm();
@@ -120,6 +180,16 @@ export const JournalComposer = ({ onSave, onCancel }) => {
       marginBottom: 14, padding: "12px 14px", borderRadius: 10,
       background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
     }}>
+      {/* Coming-in mood — optional per entry, but the journal is
+          a tea-meets-mood log and we want the act of opening the
+          composer to invite the user to name how they're feeling
+          before they put it on the page. */}
+      <MoodChipRow
+        label="Coming in"
+        value={currentMoods}
+        setValue={setCurrentMoods}
+      />
+
       <div style={{ display: "flex", marginBottom: 10, borderBottom: `1px solid ${theme.ruleSoft}` }}>
         <button onClick={() => setMode("free")} style={tabBtnStyle(mode === "free")}>
           write freely
@@ -386,8 +456,18 @@ export const JournalComposer = ({ onSave, onCancel }) => {
         </>
       )}
 
+      {/* Where-I-landed mood — the close of the arc. Same chip
+          set; user picks how the entry left them. */}
+      <div style={{ marginTop: 14 }}>
+        <MoodChipRow
+          label="Where it left me"
+          value={landedMoods}
+          setValue={setLandedMoods}
+        />
+      </div>
+
       <div style={{
-        marginTop: 12, display: "flex", gap: 8, justifyContent: "flex-end",
+        marginTop: 4, display: "flex", gap: 8, justifyContent: "flex-end",
       }}>
         <button
           onClick={onCancel}

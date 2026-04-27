@@ -541,7 +541,7 @@ export default function App() {
   // Append a free-form journal entry. Entries live alongside cup
   // sessions in the chronology and render via JournalEntryRow on the
   // Compose · Shelf · Journal tab.
-  const addJournalEntry = (text, kind, note) => {
+  const addJournalEntry = (text, kind, note, currentMoods, landedMoods) => {
     if (!text || !text.trim()) return;
     const validKind =
       kind === "haiku" ? "haiku"
@@ -553,6 +553,10 @@ export default function App() {
       text: text.trim(),
       kind: validKind,
       note: note && note.trim ? note.trim() : "",
+      // Mood arc — same shape cup sessions use, so the journal
+      // timeline reads as one mood log across cups + entries.
+      currentMoods: Array.isArray(currentMoods) ? currentMoods : [],
+      landedMoods:  Array.isArray(landedMoods)  ? landedMoods  : [],
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
   };

@@ -1927,6 +1927,22 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
             whiteSpace: "pre-line",
             fontStyle: isVerse ? "italic" : "normal",
           }}>{entry.text}</div>
+          {(() => {
+            const start = (entry.currentMoods || []).join(", ");
+            const end   = (entry.landedMoods  || []).join(", ");
+            if (!start && !end) return null;
+            return (
+              <div style={{
+                marginTop: 8,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: theme.ash, lineHeight: 1.4,
+              }}>
+                {start && (<span>{start}</span>)}
+                <span style={{ margin: "0 6px", color: theme.rule, fontStyle: "normal" }}>→</span>
+                {end && (<span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>)}
+              </div>
+            );
+          })()}
           {entry.note && (
             <div style={{
               marginTop: 8, paddingTop: 6,
