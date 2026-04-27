@@ -95,7 +95,7 @@ function buildWindow(sessions) {
   return ctx;
 }
 
-export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile, journalEntries }) {
+export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile, journalEntries, tabVisits }) {
   const yourSessions = (sessions || []).filter(s => s.who === "you");
   const recentSessions = yourSessions.slice(0, RECENT_WINDOW);
 
@@ -164,12 +164,21 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     savedBlendIds:   savedBlendIds   || new Set(),
     pantryIds:       pantryIds       || new Set(),
     journal,
+    // Lifetime tab-visit counts — fuels the four-corners and
+    // first-tab-visit elemental triggers. tabVisits comes in as a
+    // plain object keyed by tab id; we expose handy aggregates.
+    tabVisits: tabVisits || {},
     // Data-flow milestones — stamped on profile by the Export and
     // Import handlers in ProfileScreen.
     exportedAt: profile?.exportedAt || null,
     importedAt: profile?.importedAt || null,
   };
 }
+
+// Tab-visit predicate helper — returns true when the named tab has
+// been opened at least `n` times. Defaults to `n=1` (first visit).
+const tabVisitedAtLeast = (ctx, tabId, n = 1) =>
+  (ctx.tabVisits?.[tabId] || 0) >= n;
 
 // Use-based pick — fires when the user has actually brewed `threshold`
 // or more recent cups whose blend matches the given mood and (optionally)
@@ -1239,6 +1248,39 @@ export const ATTRIBUTES = [
     glyph: "compass", tint: "sageDeep", frame: "diamond", accent: "rays",
     desc: "Crested wading bird that returns to the same field each evening. Drawn by writing journal entries on seven different days.",
     earned: ctx => (ctx.journal?.daysSet?.size || 0) >= 7 },
+
+  // ─── Tab-visit elementals — basic introductory triggers earned just
+  //     by exploring the four surfaces of the app. Names are mapped to
+  //     creatures via CREATURE_OVERRIDES and surface as
+  //     "The {adjective} {creature}" for each user. ──────────────────
+  { id: "first-apothecary", name: "The Stoat", rarity: "common", window: "lifetime",
+    glyph: "leaf", tint: "ochre", frame: "circle", accent: "none",
+    desc: "Sleek hunter that pokes its head into every burrow at the meadow's edge. Drawn by your first step into the apothecary.",
+    earned: ctx => tabVisitedAtLeast(ctx, "apothecary", 1) },
+  { id: "apothecary-regular", name: "The Mole", rarity: "uncommon", window: "lifetime",
+    glyph: "leaf", tint: "sage", frame: "hex", accent: "dot",
+    desc: "Velvet-coated burrower keeping a dozen tunnels in the same dark soil. Drawn by ten visits back to the apothecary.",
+    earned: ctx => tabVisitedAtLeast(ctx, "apothecary", 10) },
+  { id: "first-shelf", name: "The Magpie-Visitor", rarity: "common", window: "lifetime",
+    glyph: "scroll", tint: "ochre", frame: "circle", accent: "dot",
+    desc: "Black-and-white collector inspecting the small bright objects on the shelf. Drawn by your first visit to the shelf.",
+    earned: ctx => tabVisitedAtLeast(ctx, "shelf", 1) },
+  { id: "shelf-regular", name: "The Squirrel-Keeper", rarity: "uncommon", window: "lifetime",
+    glyph: "scroll", tint: "terra", frame: "square", accent: "dot",
+    desc: "Bushy-tailed hoarder counting through the cache, again and again. Drawn by ten visits back to the shelf.",
+    earned: ctx => tabVisitedAtLeast(ctx, "shelf", 10) },
+  { id: "first-profile", name: "The Mirror-Hare", rarity: "common", window: "lifetime",
+    glyph: "feather", tint: "plum", frame: "circle", accent: "rays",
+    desc: "Long-eared figure pausing at the still pool to read its own reflection. Drawn by your first step into your own profile.",
+    earned: ctx => tabVisitedAtLeast(ctx, "profile", 1) },
+  { id: "four-corners", name: "The Wandering-Fox", rarity: "uncommon", window: "lifetime",
+    glyph: "compass", tint: "ochre", frame: "diamond", accent: "rays",
+    desc: "Russet-coated walker who has set foot in every corner of the wood. Drawn by visiting all four surfaces — home, apothecary, shelf, profile.",
+    earned: ctx =>
+         tabVisitedAtLeast(ctx, "home", 1)
+      && tabVisitedAtLeast(ctx, "apothecary", 1)
+      && tabVisitedAtLeast(ctx, "shelf", 1)
+      && tabVisitedAtLeast(ctx, "profile", 1) },
 ];
 
 export function evaluateAttributes(ctx) {

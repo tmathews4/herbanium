@@ -29,7 +29,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -135,7 +135,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile, journalEntries });
+  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits });
   const attrEvaluation = evaluateAttributes(attrCtx);
   // Random adjective + fixed creature, deterministic per (user, attr).
   // The seed combines profile.createdAt with the attribute id so the

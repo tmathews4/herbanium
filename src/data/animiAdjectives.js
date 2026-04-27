@@ -230,6 +230,16 @@ export const CREATURE_OVERRIDES = {
   "verse-with-note":          { creature: "Margin-Cat",  pool: "element" },
   "journal-streak":           { creature: "Lapwing",     pool: "gem" },
   "morning-scribe":           { creature: "Lark",        pool: "element" },
+
+  // Tab-visit triggers — basic exploration elementals. Creature noun
+  // stays fixed per trigger; the random adjective comes from the
+  // standard element/gem pools so each user sees their own variant.
+  "first-apothecary":         { creature: "Stoat",       pool: "element" },
+  "apothecary-regular":       { creature: "Mole",        pool: "element" },
+  "first-shelf":              { creature: "Magpie",      pool: "element" },
+  "shelf-regular":            { creature: "Squirrel",    pool: "gem" },
+  "first-profile":            { creature: "Hare",        pool: "gem" },
+  "four-corners":             { creature: "Fox",         pool: "gem" },
 };
 
 // Strip a leading "The " from a name. Used to derive a creature

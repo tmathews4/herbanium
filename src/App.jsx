@@ -141,6 +141,12 @@ export default function App() {
 
   // Transient UI state (not persisted — should reset on reload)
   const [tab, setTab] = useState("home");
+  // Persisted lifetime tab-visit counts. Each time the active tab
+  // changes the entry increments by one, fueling the "first time
+  // visiting tab X" / "visited X N times" elemental triggers. Stored
+  // as a plain object keyed by tab id ("home" | "apothecary" | "shelf"
+  // | "profile") so it serializes cleanly without Set/Map gymnastics.
+  const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
   const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend"
   const [ingredientId, setIngredientId] = useState("chamomile");
   const [blendOverlayId, setBlendOverlayId] = useState(null);
@@ -153,6 +159,17 @@ export default function App() {
   // instead of leaving the page entirely. Lateral tab switches stay
   // outside this flow — only the modal screens (steep/log/ingredient/
   // blend detail) participate.
+  // Bump the visit counter every time the active tab changes. Counts
+  // initial mount too (the home tab gets a +1 on first load) — that's
+  // fine, since the "first visit" trigger fires on count >= 1.
+  useEffect(() => {
+    setTabVisits(prev => {
+      const cur = prev || {};
+      return { ...cur, [tab]: (cur[tab] || 0) + 1 };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
   useEffect(() => {
     if (!overlay) return;
     window.history.pushState({ herbaniumOverlay: overlay }, "");
@@ -615,7 +632,7 @@ export default function App() {
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} animisBanished={animisBanished} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} libraryView={libraryView} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} libraryView={libraryView} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} />}
       </div>
 
       <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
