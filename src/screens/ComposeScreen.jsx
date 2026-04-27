@@ -86,6 +86,17 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       : ["reverse", "forward", "compendium"];
     if (!validModes.includes(mode)) setMode(validModes[0]);
   }, [section]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When the user manually clicks the Recipe Book sub-tab, reset the
+  // catalogue filter to "all" so the full stock — traditionals plus
+  // Herbanium's house recipes — is visible by default. (composePreselect
+  // can still flip it to "favorites" when a star is tapped from Home.)
+  const setModeUserAction = (next) => {
+    if (next === "recipes" && mode !== "recipes") {
+      setCatalogueFilter("all");
+    }
+    setMode(next);
+  };
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
@@ -282,7 +293,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             marginBottom: 14, background: theme.cream,
           }}>
             {sectionTabs.map(([k, label]) => (
-              <button key={k} onClick={() => setMode(k)} style={{
+              <button key={k} onClick={() => setModeUserAction(k)} style={{
                 fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
                 padding: "9px 4px", cursor: "pointer",
                 background: mode === k ? theme.ink : "transparent",
@@ -1077,9 +1088,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           } else if (catalogueFilter === "traditional") {
             catVisible = traditional;
             catEmpty = "No traditional blends to show.";
-          } else if (catalogueFilter === "experimental") {
+          } else if (catalogueFilter === "house recipes" || catalogueFilter === "experimental") {
             catVisible = experimental;
-            catEmpty = "No experimental blends to show.";
+            catEmpty = "No house recipes to show.";
           } else {
             catVisible = [...traditional, ...experimental]
               .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
@@ -1091,7 +1102,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               {subTabHeader}
               <div style={{ marginBottom: 10 }}>
                 <ChipRows
-                  items={["favorites", "all", "traditional", "experimental", "calm", "focus", "energy", "comfort"]}
+                  items={["favorites", "all", "traditional", "house recipes", "calm", "focus", "energy", "comfort"]}
                   renderItem={(f) => (
                     <Chip
                       key={f}
@@ -1101,6 +1112,17 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   )}
                 />
               </div>
+
+              {catalogueFilter === "all" && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+                }}>
+                  The full Recipe Book — {traditional.length} traditional preparations
+                  and {experimental.length} Herbanium house recipes, plus any blend
+                  you've composed and saved.
+                </div>
+              )}
 
               {catalogueFilter === "favorites" && (
                 <div style={{
@@ -1122,13 +1144,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 </div>
               )}
 
-              {catalogueFilter === "experimental" && (
+              {catalogueFilter === "house recipes" && (
                 <div style={{
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
                   color: theme.ash, lineHeight: 1.5, marginBottom: 14,
                 }}>
-                  Recipes the catalog's chemistry suggests but no tradition has codified —
-                  Herbanium house experiments. Try, log, judge for yourself.
+                  Herbanium's own recipes — combinations the catalog's chemistry
+                  suggests but no tradition has codified. Try, log, judge for
+                  yourself.
                 </div>
               )}
 
