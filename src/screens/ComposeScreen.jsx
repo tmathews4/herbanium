@@ -249,12 +249,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {section === "apothecary" && !composeHintShown && dismissComposeHint && (
         <HintCard
           icon={<Sprig size={18} c={theme.sageDeep} />}
-          title="The Apothecary."
+          title="Apothecary"
           body={<>
-            Three sub-tabs. <em>Blend</em> builds a cup from ingredients you
-            pick. <em>Vibe</em> recommends one from a mood and flavor.
-            <em> Compendium</em> is the full ingredient reference — every leaf,
-            flower, root, and bark Herbanium tracks.
+            <strong>Blend</strong> — build a cup from ingredients you pick.{" "}
+            <strong>Vibe</strong> — get a recommendation from a mood and flavor.{" "}
+            <strong>Compendium</strong> — browse every ingredient.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -262,13 +261,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {section === "shelf" && !composeHintShown && dismissComposeHint && (
         <HintCard
           icon={<Pencil size={16} c={theme.terra} />}
-          title="The Shelf."
+          title="Shelf"
           body={<>
-            Three sub-tabs. <em>Journal</em> is everything you've kept in
-            time — cups, notes, and verses. <em>Recipe Book</em> is the full
-            catalogue of blends. <em>Pantry</em> opens to the ingredients
-            you've marked on hand; toggle "only what's in my pantry" off to
-            browse and add more.
+            <strong>Journal</strong> — your cups, notes, and verses over time.{" "}
+            <strong>Recipe Book</strong> — every saved blend.{" "}
+            <strong>Pantry</strong> — ingredients you have on hand. Toggle
+            the filter off to browse and add more.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -976,12 +974,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             {!journalHintShown && dismissJournalHint && (
               <HintCard
                 icon={<Pencil size={16} c={theme.terra} />}
-                title="A space for words and cups."
+                title="Journal"
                 body={<>
-                  Tap <em>+ new entry</em> to journal a thought, or try a
-                  <em> haiku</em> or <em>limerick</em> ad-lib if you'd like a
-                  little help. Brewed cups also land here — the journal is
-                  where the days connect.
+                  Tap <strong>+ new entry</strong> to write a note. Use the
+                  <strong> haiku</strong> or <strong>limerick</strong> ad-lib for
+                  a guided prompt. Brewed cups appear here too, sorted by date.
                 </>}
                 onDismiss={dismissJournalHint}
               />

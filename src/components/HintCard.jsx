@@ -42,7 +42,7 @@ export const HintCard = ({ icon, title, body, onDismiss }) => (
           lineHeight: 1.25, marginBottom: 4,
         }}>{title}</div>
         <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          fontFamily: ff.sans, fontSize: 13,
           color: theme.inkSoft, lineHeight: 1.5,
         }}>{body}</div>
       </div>

@@ -35,22 +35,17 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
         <div style={{
           fontFamily: ff.serif, fontSize: 16, color: theme.ink,
           lineHeight: 1.25, marginBottom: 4,
-        }}>The kettle is yours.</div>
+        }}>Welcome.</div>
         <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          fontFamily: ff.sans, fontSize: 13,
           color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
           textAlign: "left",
         }}>
           <div style={{ marginBottom: 6 }}>
-            The <em style={{ color: theme.terra, fontStyle: "normal" }}>Apothecary</em> is where you build a cup — blend by
-            ingredient, follow a vibe, or browse the compendium.
+            <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> — build a blend, browse ingredients, or pick by vibe.
           </div>
           <div style={{ marginBottom: 6 }}>
-            The <em style={{ color: theme.terra, fontStyle: "normal" }}>Shelf</em> keeps everything you've made: your
-            journal, the recipe book, your pantry.
-          </div>
-          <div>
-            Brew cups, lift spirits.
+            <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> — your journal, saved recipes, and pantry.
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-start" }}>
@@ -62,7 +57,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
               background: theme.terra, color: theme.cream,
               border: "none", cursor: "pointer",
             }}
-          >open the apothecary</button>
+          >Go to Apothecary</button>
           <button
             onClick={onApothecary}
             style={{
@@ -72,7 +67,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
               border: `1px solid ${theme.terra}`, borderRadius: 999,
               padding: "8px 14px", cursor: "pointer",
             }}
-          >open the shelf</button>
+          >Go to Shelf</button>
         </div>
       </div>
     </div>

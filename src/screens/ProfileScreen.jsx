@@ -268,12 +268,11 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {!profileHintShown && dismissProfileHint && (
         <HintCard
           icon={<Flower size={18} c={theme.terra} />}
-          title="Your kettle, your spirits."
+          title="Profile"
           body={<>
-            Cups you've brewed, blends you keep, and the elementals your
-            patterns attract. Tap any stat to jump in. The
-            <em> Elementals Grove</em> below grows as your habits take shape —
-            you can hide it any time from <em>Preferences</em>.
+            Your stats, settings, and earned elementals. Tap any stat to
+            open it. Use the <em>Summon</em> button below to reveal each
+            new elemental. Hide elementals any time from <em>Preferences</em>.
           </>}
           onDismiss={dismissProfileHint}
         />

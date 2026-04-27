@@ -41,15 +41,14 @@ export const PantryHintCard = ({ onDismiss }) => {
             fontFamily: ff.serif, fontSize: 16, color: theme.ink,
             lineHeight: 1.25, marginBottom: 4,
           }}>
-            Welcome to the apothecary.
+            Pantry
           </div>
           <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            fontFamily: ff.sans, fontSize: 13,
             color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
           }}>
-            Tap any ingredient and add it to your pantry to mark what you
-            have on hand. Compose and the apothecary can then filter to
-            what you can brew right now — no shopping run needed.
+            Tap the <strong>+</strong> on any ingredient to add it to your pantry.
+            Then filter blends by what you can brew right now.
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
@@ -60,7 +59,7 @@ export const PantryHintCard = ({ onDismiss }) => {
                 background: theme.terra, color: theme.cream,
                 border: "none", cursor: "pointer",
               }}
-            >got it</button>
+            >Got it</button>
           </div>
         </div>
       </div>
