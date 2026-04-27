@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
+import { describeCreationTitle } from "../data/creationTitle";
 
 const FADE_IN_MS  = 1500;
 const FADE_OUT_MS = 800;
@@ -19,9 +20,12 @@ function stripLeadingThe(title) {
   return (title || "").replace(/^The\s+/i, "");
 }
 
-function articleFor(word) {
-  if (!word) return "A";
-  return /[aeiou]/i.test(word.trim().charAt(0)) ? "An" : "A";
+// Lowercase the first letter of a sentence so it can be inlined
+// after an em-dash without reading like a new sentence.
+function inlineLower(s) {
+  if (!s) return "";
+  const trimmed = s.trim().replace(/[.!?]+$/, "");
+  return trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
 }
 
 export const OmenCard = ({ title, onDismiss }) => {
@@ -46,7 +50,10 @@ export const OmenCard = ({ title, onDismiss }) => {
   const opacity = phase === "entering" || phase === "leaving" ? 0 : 1;
   const transitionMs = phase === "entering" ? FADE_IN_MS : FADE_OUT_MS;
   const stripped = stripLeadingThe(title) || "spirit";
-  const article = articleFor(stripped);
+  // Per-creature lore line (e.g. "Grey pack-runner with steady
+  // amber eyes.") — woven into the omen so each user's unique
+  // reads in its own creature's register, not a generic "wisps by".
+  const loreInline = inlineLower(describeCreationTitle(title) || "");
 
   return (
     <div
@@ -95,9 +102,11 @@ export const OmenCard = ({ title, onDismiss }) => {
             color: theme.inkSoft, lineHeight: 1.55, marginBottom: 18,
           }}
         >
-          What was that? {article}{" "}
-          <em style={{ color: theme.terra, fontStyle: "normal" }}>{stripped}</em>
-          {" "}wisps by — an omen of good brews to come…
+          What was that?{" "}
+          <em style={{ color: theme.terra, fontStyle: "normal" }}>The {stripped}</em>
+          {loreInline
+            ? <>{" "}— {loreInline}. An omen of good brews to come…</>
+            : <>{" "}wisps by — an omen of good brews to come…</>}
         </div>
 
         <button
