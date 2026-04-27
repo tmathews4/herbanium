@@ -573,14 +573,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
 
             {/* See all link — only if there are more than 3 */}
             {mySessions.length > 3 && go && (
-              <button onClick={() => { onClose(); go("library"); }} style={{
+              <button onClick={() => { onClose(); go("shelf", { mode: "journal" }); }} style={{
                 marginTop: 4, width: "100%",
                 background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
                 cursor: "pointer", padding: "8px 0 0",
                 textAlign: "right",
               }}>
-                see all {mySessions.length} in Apothecary →
+                see all {mySessions.length} in your Journal →
               </button>
             )}
           </div>

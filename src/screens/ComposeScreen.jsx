@@ -25,7 +25,7 @@ import {
 import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
 } from "../units/units";
-import { LibraryList, BlendListRow } from "./LibraryScreen";
+import { LibraryList, BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { HintCard } from "../components/HintCard";
@@ -60,7 +60,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, libraryView, pantryHintShown, dismissPantryHint }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -74,7 +74,18 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
   const { unit, weightUnit } = useUnit();
-  const [mode, setMode] = useState("reverse"); // reverse | forward | apothecary | journal
+  // Mode universe per section:
+  //   apothecary: reverse (Blend) | forward (Vibe) | compendium
+  //   shelf:      journal | recipes | pantry
+  const initialMode = section === "shelf" ? "journal" : "reverse";
+  const [mode, setMode] = useState(initialMode);
+  // Reset mode when section changes so the user lands on a valid sub-tab.
+  useEffect(() => {
+    const validModes = section === "shelf"
+      ? ["journal", "recipes", "pantry"]
+      : ["reverse", "forward", "compendium"];
+    if (!validModes.includes(mode)) setMode(validModes[0]);
+  }, [section]); // eslint-disable-line react-hooks/exhaustive-deps
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
@@ -88,12 +99,12 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
   const [primaryAxis, setPrimaryAxis] = useState("feel");
 
   // When a favorite is tapped on Home (or a saved blend in Apothecary),
-  // composePreselect arrives here. Switch to the Apothecary sub-tab so the
-  // user sees their saved recipe highlighted, ready to set intent and brew.
+  // composePreselect arrives here. Switch to Recipe Book / favorites so
+  // the user sees their saved recipe highlighted, ready to set intent.
   React.useEffect(() => {
     if (!composePreselect) return;
-    setMode("apothecary");
-    setApothecaryFilter("all");
+    setMode("recipes");
+    setCatalogueFilter("favorites");
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
@@ -223,41 +234,65 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* First-visit Compose tutorial — explains the four tabs. */}
-      {!composeHintShown && dismissComposeHint && (
+      {/* First-visit tutorial — different copy per section. */}
+      {section === "apothecary" && !composeHintShown && dismissComposeHint && (
         <HintCard
           icon={<Sprig size={18} c={theme.sageDeep} />}
-          title="Compose, your way."
+          title="The Apothecary."
           body={<>
-            Four tabs. <em>Blend</em> builds a cup from ingredients you pick.
-            <em> Vibe</em> recommends one from a mood and flavor. <em>Shelf</em>
-            holds your saved blends and the catalogue. <em>Journal</em> is
-            where everything lands in time — cups, notes, and small verses.
+            Three sub-tabs. <em>Blend</em> builds a cup from ingredients you
+            pick. <em>Vibe</em> recommends one from a mood and flavor.
+            <em> Compendium</em> is the full ingredient reference — every leaf,
+            flower, root, and bark Herbanium tracks.
           </>}
           onDismiss={dismissComposeHint}
         />
       )}
-      {/* Segmented control */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
-        border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
-        marginBottom: 14, background: theme.cream,
-      }}>
-        {[
-          ["reverse",    "Blend"],
-          ["forward",    "Vibe"],
-          ["journal",    "Journal"],
-          ["apothecary", "Shelf"],
-        ].map(([k, label]) => (
-          <button key={k} onClick={() => setMode(k)} style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
-            padding: "9px 4px", cursor: "pointer",
-            background: mode === k ? theme.ink : "transparent",
-            color: mode === k ? theme.cream : theme.inkSoft,
-            border: "none",
-          }}>{label}</button>
-        ))}
-      </div>
+      {section === "shelf" && !composeHintShown && dismissComposeHint && (
+        <HintCard
+          icon={<Pencil size={16} c={theme.terra} />}
+          title="The Shelf."
+          body={<>
+            Three sub-tabs. <em>Journal</em> is everything you've kept in
+            time — cups, notes, and verses. <em>Recipe Book</em> is the full
+            catalogue of blends. <em>Pantry</em> is the ingredients you've
+            marked on hand.
+          </>}
+          onDismiss={dismissComposeHint}
+        />
+      )}
+      {/* Segmented control — three sub-tabs per section. */}
+      {(() => {
+        const sectionTabs = section === "shelf"
+          ? [
+              ["journal",    "Journal"],
+              ["recipes",    "Recipe Book"],
+              ["pantry",     "Pantry"],
+            ]
+          : [
+              ["reverse",    "Blend"],
+              ["forward",    "Vibe"],
+              ["compendium", "Compendium"],
+            ];
+        return (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${sectionTabs.length}, 1fr)`,
+            border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
+            marginBottom: 14, background: theme.cream,
+          }}>
+            {sectionTabs.map(([k, label]) => (
+              <button key={k} onClick={() => setMode(k)} style={{
+                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+                padding: "9px 4px", cursor: "pointer",
+                background: mode === k ? theme.ink : "transparent",
+                color: mode === k ? theme.cream : theme.inkSoft,
+                border: "none",
+              }}>{label}</button>
+            ))}
+          </div>
+        );
+      })()}
 
       {mode === "forward" && (
         <>
@@ -1005,77 +1040,21 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         );
       })()}
 
-      {mode === "apothecary" && (() => {
-        // Shelf is your-personal-stuff: blends you've brewed at least
-        // once plus your favorites in Blends, the app's curated recipes
-        // plus your generated/composed experiments in Catalogue, and
-        // check-ins in Journal.
+      {mode === "recipes" && (() => {
+        // Recipe Book — the full catalogue of curated traditional and
+        // experimental blends, plus user-composed local- entries. The
+        // favorites filter gives the user-saved view.
         const hidden = hiddenBlendIds || new Set();
         const traditional = BLENDS.filter(b => b.tradition && !hidden.has(b.id));
         const curatedExperimental = BLENDS.filter(b => b.experimental && !hidden.has(b.id));
-        // Generated/composed experimentals (onboarding-seeded + user-composed),
-        // deduped by id and excluded if already in the curated set.
         const curatedIds = new Set(BLENDS.map(b => b.id));
         const generatedExperimental = (generatedBlends || []).filter(
           b => !curatedIds.has(b.id) && !hidden.has(b.id)
         );
         const experimental = [...curatedExperimental, ...generatedExperimental];
-        const yourSessions = (sessions || []).filter(s => s.who === "you");
 
-        const brewedIds = new Set(yourSessions.map(s => s.blendId).filter(Boolean));
-        const favSet = favoriteBlendIds || new Set();
-        const personalIds = new Set([...brewedIds, ...favSet]);
-        const saved = [...personalIds]
-          .filter(id => !hidden.has(id))
-          .map(id => getBlend(id))
-          .filter(Boolean);
-
-        let visible;
-        let emptyMsg;
-        // Blends sub-tab = brewed-at-least-once ∪ favorites.
-        if (apothecaryFilter === "all") {
-          visible = saved;
-          emptyMsg = "Your Shelf is empty. Brew a cup or favorite a blend from the Catalogue to see it here.";
-        } else if (apothecaryFilter === "favorites") {
-          visible = saved.filter(b => favSet.has(b.id));
-          emptyMsg = "No favorites yet. Tap the star on a blend to mark it as a favorite.";
-        } else if (apothecaryFilter === "what worked") {
-          const wonIds = new Set(
-            yourSessions.filter(s => (s.taste ?? 0) >= 4).map(s => s.blendId)
-          );
-          visible = saved.filter(b => wonIds.has(b.id));
-          emptyMsg = "No blends have earned four stars yet — rate a cup 4+ in your log and it'll surface here.";
-        } else {
-          visible = saved.filter(b => b.mood === apothecaryFilter);
-          emptyMsg = `Nothing on your shelf matches ${apothecaryFilter} yet. Try brewing one.`;
-        }
-
-        const subTabHeader = (
-          <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
-            {[
-              ["blends",    "Your Blends",    saved.length],
-              ["catalogue", "Catalogue", traditional.length + experimental.length],
-            ].map(([k, label, count]) => (
-              <button key={k} onClick={() => setShelfTab(k)} style={{
-                background: "transparent", border: "none",
-                fontFamily: ff.serif, fontSize: 15, color: shelfTab === k ? theme.ink : theme.ash,
-                padding: "6px 0 10px", cursor: "pointer",
-                borderBottom: shelfTab === k ? `2px solid ${theme.terra}` : "2px solid transparent",
-                marginBottom: -1,
-                display: "flex", alignItems: "baseline", gap: 5,
-              }}>
-                {label}
-                {count > 0 && (
-                  <span style={{
-                    fontFamily: ff.mono, fontSize: 10, color: shelfTab === k ? theme.terra : theme.ash, opacity: 0.75,
-                  }}>{count}</span>
-                )}
-              </button>
-            ))}
-          </div>
-        );
-
-        if (shelfTab === "catalogue") {
+        // Recipe Book always shows the catalogue with filter chips.
+        if (true) {
           let catVisible;
           let catEmpty;
           if (catalogueFilter === "all") {
@@ -1217,44 +1196,34 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
             </div>
           );
         }
-
-        return (
-          <div style={{ marginTop: 4 }}>
-            {subTabHeader}
-            <div style={{ marginBottom: 10 }}>
-              <ChipRows
-                items={["favorites", "all", "what worked", "calm", "focus", "energy", "comfort"]}
-                renderItem={(f) => (
-                  <Chip
-                    key={f}
-                    active={apothecaryFilter === f}
-                    onClick={() => setApothecaryFilter(f)}
-                  >{f}</Chip>
-                )}
-              />
-            </div>
-
-            {visible.length === 0 ? (
-              <div style={{
-                marginTop: 18, padding: "14px 16px",
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                color: theme.ash, textAlign: "center", lineHeight: 1.5,
-              }}>
-                {emptyMsg}
-              </div>
-            ) : (
-              <LibraryList
-                blends={visible}
-                highlightId={composePreselect?.blendId}
-                compact
-                go={go}
-                startBrew={startBrew}
-                openBlend={openBlend}
-              />
-            )}
-          </div>
-        );
+        return null;
       })()}
+
+      {/* Compendium — full ingredient reference (renders LibraryScreen
+          inline without its own header). */}
+      {mode === "compendium" && (
+        <LibraryScreen
+          go={go}
+          pantryIds={pantryIds}
+          libraryView={libraryView}
+          hideHeader
+        />
+      )}
+
+      {/* Pantry — same ingredient view, forced to pantry-only with the
+          toggle hidden so the surface stays a single concept. */}
+      {mode === "pantry" && (
+        <LibraryScreen
+          go={go}
+          pantryIds={pantryIds}
+          libraryView={libraryView}
+          forcePantryOnly
+          hidePantryToggle
+          hideHeader
+          pantryHintShown={pantryHintShown}
+          dismissPantryHint={dismissPantryHint}
+        />
+      )}
     </div>
   );
 };

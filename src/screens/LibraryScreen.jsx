@@ -33,10 +33,10 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint }) => {
+export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
-  const [pantryOnly, setPantryOnly] = useState(false);
+  const [pantryOnly, setPantryOnly] = useState(forcePantryOnly);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
@@ -47,6 +47,12 @@ export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dis
     if (!libraryView) return;
     if (typeof libraryView.pantryOnly === "boolean") setPantryOnly(libraryView.pantryOnly);
   }, [libraryView?.at]);
+
+  // Force pantryOnly from parent when this view is hosted inside the
+  // Shelf · Pantry sub-tab, where the toggle would be redundant.
+  React.useEffect(() => {
+    if (forcePantryOnly) setPantryOnly(true);
+  }, [forcePantryOnly]);
 
   // All ingredients, filtered then sorted alphabetically by display name.
   const shelfItems = Object.entries(INGREDIENTS)
@@ -79,15 +85,17 @@ export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dis
       {!pantryHintShown && pantryIds && pantryIds.size === 0 && dismissPantryHint && (
         <PantryHintCard onDismiss={dismissPantryHint} />
       )}
-      <div style={{ marginBottom: 14 }}>
-        <SectionLabel n="i">The Apothecary</SectionLabel>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-          color: theme.ash, marginTop: 4, lineHeight: 1.5,
-        }}>
-          Every leaf, flower, root, and bark Herbanium tracks. Tap any to read its profile.
+      {!hideHeader && (
+        <div style={{ marginBottom: 14 }}>
+          <SectionLabel n="i">The Apothecary</SectionLabel>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, marginTop: 4, lineHeight: 1.5,
+          }}>
+            Every leaf, flower, root, and bark Herbanium tracks. Tap any to read its profile.
+          </div>
         </div>
-      </div>
+      )}
 
       <>
         {/* Search input */}
@@ -217,29 +225,33 @@ export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dis
             />
           </div>
 
-          {/* Pantry-only toggle + count */}
+          {/* Pantry-only toggle + count. Toggle hidden when the
+              parent surface (Shelf · Pantry) already implies pantry-
+              only — the toggle would be redundant and misleading. */}
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
             marginBottom: 12, padding: "2px 0",
           }}>
-            <label style={{
-              display: "flex", alignItems: "center", gap: 8,
-              fontFamily: ff.sans, fontSize: 11.5, color: theme.inkSoft, cursor: "pointer",
-            }}>
-              <span style={{
-                width: 28, height: 16, borderRadius: 999,
-                background: pantryOnly ? theme.sageDeep : theme.rule,
-                position: "relative", transition: "background .2s",
-                flexShrink: 0,
-              }} onClick={() => setPantryOnly(!pantryOnly)}>
+            {hidePantryToggle ? <span /> : (
+              <label style={{
+                display: "flex", alignItems: "center", gap: 8,
+                fontFamily: ff.sans, fontSize: 11.5, color: theme.inkSoft, cursor: "pointer",
+              }}>
                 <span style={{
-                  position: "absolute", top: 2, left: pantryOnly ? 14 : 2,
-                  width: 12, height: 12, borderRadius: "50%", background: theme.cream,
-                  transition: "left .2s",
-                }} />
-              </span>
-              <span onClick={() => setPantryOnly(!pantryOnly)}>only what's in my pantry</span>
-            </label>
+                  width: 28, height: 16, borderRadius: 999,
+                  background: pantryOnly ? theme.sageDeep : theme.rule,
+                  position: "relative", transition: "background .2s",
+                  flexShrink: 0,
+                }} onClick={() => setPantryOnly(!pantryOnly)}>
+                  <span style={{
+                    position: "absolute", top: 2, left: pantryOnly ? 14 : 2,
+                    width: 12, height: 12, borderRadius: "50%", background: theme.cream,
+                    transition: "left .2s",
+                  }} />
+                </span>
+                <span onClick={() => setPantryOnly(!pantryOnly)}>only what's in my pantry</span>
+              </label>
+            )}
             <span style={{
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
             }}>
@@ -328,7 +340,7 @@ export const LibraryList = ({ blends, compact, go, startBrew, openBlend, highlig
         icon={<Leaf size={24} c={theme.sage} />}
         title="No saved blends yet"
         body="The blends you save or adopt from friends will live here."
-        cta={{ label: "compose your first cup →", onClick: () => go("compose") }}
+        cta={{ label: "compose your first cup →", onClick: () => go("apothecary") }}
       />
     );
   }

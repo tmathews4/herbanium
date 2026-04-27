@@ -59,8 +59,8 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       {!firstCupHintShown && profile && yourSessions.length === 0 && (
         <FirstCupHintCard
           onDismiss={dismissFirstCupHint}
-          onCompose={() => { dismissFirstCupHint(); go("compose"); }}
-          onApothecary={() => { dismissFirstCupHint(); go("library"); }}
+          onCompose={() => { dismissFirstCupHint(); go("apothecary"); }}
+          onApothecary={() => { dismissFirstCupHint(); go("apothecary", { mode: "compendium" }); }}
         />
       )}
 
@@ -108,7 +108,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       })()}
 
       {/* CTAs — primary (brew) and secondary (journal) */}
-      <button onClick={() => go("compose")} style={{
+      <button onClick={() => go("apothecary")} style={{
         width: "100%", textAlign: "left",
         background: theme.ink, color: theme.cream,
         border: "none", borderRadius: 14, padding: "14px 18px",
@@ -129,7 +129,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         <Kettle size={24} c={theme.cream} />
       </button>
 
-      <button onClick={() => go("compose", { mode: "journal" })} style={{
+      <button onClick={() => go("shelf", { mode: "journal" })} style={{
         width: "100%", textAlign: "left",
         background: theme.cream, color: theme.ink,
         border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "14px 18px",
@@ -196,7 +196,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
             <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
-            <button onClick={() => go("library")} style={{
+            <button onClick={() => go("shelf", { mode: "pantry" })} style={{
               background: "transparent", border: "none",
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
               cursor: "pointer",
