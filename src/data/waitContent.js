@@ -36,7 +36,7 @@ export const WAIT_FACTS = {
   ],
   lemonbalm: [
     { type: "fact",      text: "Lemon balm (Melissa officinalis) takes its botanical name from the Greek melissa — honeybee. Bees are drawn to it reliably." },
-    { type: "tradition", text: "Medieval monks brewed lemon balm for what they called 'gladness of spirit' — an early recognition of its mild mood-lifting effect. Carmelite Water, a 17th-century French nun's recipe, made the use famous." },
+    { type: "tradition", text: "Medieval European herbalists brewed lemon balm for what they called 'gladness of spirit' — an early recognition of its mild mood-lifting effect. Carmelite Water, a famous 17th-century French recipe, made the use widely known." },
     { type: "fact",      text: "Rosmarinic acid in lemon balm modestly raises GABA in the brain — the calm-without-drowsy register that Paracelsus, who called it the elixir of life, would have recognized." },
   ],
   peppermint: [
@@ -106,7 +106,7 @@ export const WAIT_FACTS = {
     { type: "tradition", text: "Boiling water destroys jasmine's volatile aromatics. Keep the brew below ninety, or the perfume escapes with the steam." },
   ],
   passionflower: [
-    { type: "fact",      text: "Spanish missionaries read the Passion of Christ in passionflower's anatomy — the corona for the crown of thorns, the three styles for the nails." },
+    { type: "fact",      text: "16th-century Spanish naturalists read elaborate symbolism into passionflower's anatomy — the radial corona, the three styles, the five anthers — and the dramatic name stuck." },
     { type: "fact",      text: "Chrysin and apigenin in the leaves bind the same GABA receptors that benzodiazepines do. The folk drowsiness is real and replicated in trials." },
     { type: "tradition", text: "Mid-19th-century American physicians prescribed passionflower for what they called 'nervous restlessness.' The diagnosis aged better than its century." },
   ],
@@ -117,12 +117,12 @@ export const WAIT_FACTS = {
   ],
   fennel: [
     { type: "fact",      text: "Indian restaurants set a small bowl of fennel by the door for after-meal chewing. The seed's anise note is anethole, which finds GABA receptors in the gut." },
-    { type: "tradition", text: "Medieval congregations chewed fennel seeds through long sermons to keep the breath sweet and the stomach quiet." },
+    { type: "tradition", text: "Medieval Europeans chewed fennel seeds through long gatherings to keep the breath sweet and the stomach quiet." },
     { type: "fact",      text: "Both folk traditions — Indian and European — point to the same receptor that science would later name. Anxiety quiets where you didn't know it was hiding." },
   ],
   tulsi: [
-    { type: "tradition", text: "Indian households grow tulsi at the front step — Vishnu's plant, the threshold guardian. Tradition asks permission before harvesting." },
-    { type: "fact",      text: "Ursolic acid in tulsi leaves measurably blunts the day's cortisol rise over weeks of daily use. Sacred botany doing patient work." },
+    { type: "tradition", text: "Indian households grow tulsi at the front step — a threshold plant in daily life. Tradition asks permission before harvesting." },
+    { type: "fact",      text: "Ursolic acid in tulsi leaves measurably blunts the day's cortisol rise over weeks of daily use. Old kitchen botany doing patient work." },
     { type: "fact",      text: "Tulsi is one of the few herbs traditionally classed as both a stimulant and a calming agent. The chemistry shows it modulates rather than pushes — adaptogen behavior." },
   ],
   turmeric: [
@@ -156,9 +156,9 @@ export const WAIT_FACTS = {
     { type: "tradition", text: "Gyokuro brews at 50°C in a tiny kyusu with only 60ml of water. Treating it like sencha will burn the cup." },
   ],
   matcha: [
-    { type: "tradition", text: "The monk Eisai brought powdered tea from Song China to Japanese monasteries in the twelfth century — a cup for keeping zazen." },
+    { type: "tradition", text: "The traveler-scholar Eisai brought powdered tea from Song China to Japan in the twelfth century — a cup for keeping the mind alert through long sitting." },
     { type: "fact",      text: "Drinking the leaf instead of straining it changes the math: every catechin, every theanine, the full L-theanine-to-caffeine ratio that produces calm focus." },
-    { type: "fact",      text: "Modern EEG studies confirm the alpha-wave shift the monks named — the cup measurably increases the brainwaves associated with relaxed alertness." },
+    { type: "fact",      text: "Modern EEG studies confirm the alpha-wave shift the old practitioners named — the cup measurably increases the brainwaves associated with relaxed alertness." },
   ],
   genmaicha: [
     { type: "fact",      text: "Genmaicha was peasant tea by origin — Japanese households stretched scarce leaves with toasted brown rice." },
@@ -173,7 +173,7 @@ export const WAIT_FACTS = {
   hojicha: [
     { type: "fact",      text: "Hojicha is a 1920s Kyoto invention — tea merchants roasted stems and late-season leaves to redeem otherwise-discardable lots. The frugality became canon." },
     { type: "fact",      text: "Fire above 200°C burns off most of the caffeine and caramelizes what's left. Hojicha is the rare true tea you can drink at nine p.m." },
-    { type: "tradition", text: "Roasted teas were originally Buddhist temple drink — the fire turned the cup into something the monks could take after vespers without losing sleep." },
+    { type: "tradition", text: "Roasted teas were originally an evening drink — the fire turned the cup into something workers could take late without losing sleep." },
   ],
   dragonwell: [
     { type: "tradition", text: "West Lake legend says the Qianlong emperor pressed Longjing leaves against his palms while the wok was hot, and the flat shape was born." },
@@ -251,7 +251,7 @@ export const WAIT_FACTS = {
     { type: "fact",      text: "Modern trials show real immune modulation from reishi extracts. The immortality claim remains pending." },
   ],
   "lions-mane": [
-    { type: "tradition", text: "Japan's yamabushi mountain ascetics named lion's mane after themselves — yamabushitake, mountain-priest's mushroom — for its white cascading tufts." },
+    { type: "tradition", text: "Japan's yamabushi mountain wanderers named lion's mane after themselves — yamabushitake, the mountain-walker's mushroom — for its white cascading tufts." },
     { type: "fact",      text: "Hericenones and erinacines inside prompt the brain to produce more nerve growth factor. The folk reputation for sharpening the mind has held up better in the lab than most mushroom claims." },
     { type: "fact",      text: "Lion's mane is the most palatable mushroom in the cabinet — tradition compares it to crab or lobster — with the longest tail of effect when taken daily." },
   ],

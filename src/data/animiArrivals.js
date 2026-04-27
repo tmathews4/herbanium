@@ -194,7 +194,7 @@ const ARRIVAL_VERBS = {
   Atlas:         "shoulders a sky and walks past slow",
   Augur:         "watches the birds with a curved staff",
   Bacchus:       "lifts a vine-crowned cup",
-  Caryatid:      "stands very still under a small temple",
+  Caryatid:      "stands very still under a heavy stone roof",
   Cernunnos:     "ringed by quiet beasts, walks past",
   Cherub:        "wide eyes and small wings appear",
   Comus:         "raises a honey-cup in greeting",

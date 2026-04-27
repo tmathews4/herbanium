@@ -135,7 +135,7 @@ const BLENDS = [
   {
     id: "usucha",
     name: "Usucha",
-    subtitle: "thin matcha — the monastery cup, whisked",
+    subtitle: "thin matcha — the everyday cup, whisked",
     ingredients: [
       { id: "matcha", g: 2.0 },
     ],
@@ -288,7 +288,7 @@ const BLENDS = [
   {
     id: "tulsi-doorstep",
     name: "Tulsi at the Doorstep",
-    subtitle: "Vishnu's plant — clove-pepper warmth, lifts and steadies",
+    subtitle: "the threshold plant — clove-pepper warmth, lifts and steadies",
     ingredients: [
       { id: "tulsi", g: 1.5 },
       { id: "cardamom", g: 0.3 },
@@ -956,7 +956,7 @@ const BLEND_SOURCES = {
     "Soen Nagatani's 1738 sencha-steaming method — the Japanese green-tea innovation that displaced earlier pan-fired styles.",
   ],
   "usucha": [
-    "Eisai (12th c.), the Buddhist monk who introduced whisked powdered green tea (matcha) from China to Japan.",
+    "Eisai (12th c.), the traveler-scholar who introduced whisked powdered green tea (matcha) from China to Japan.",
   ],
   "all-heal": [
     "Cerny A, Schmid K. 1999. Tolerability and efficacy of a valerian/lemon balm fixed-combination preparation in healthy volunteers. Fitoterapia 70:221–228.",
