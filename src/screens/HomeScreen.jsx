@@ -168,7 +168,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       }}>
         {[
           {
-            label: "Brew from a recipe",
+            label: "Brew a recipe",
             onClick: () => go("shelf", { mode: "recipes" }),
             icon: (sz) => <Leaf size={sz} c={theme.sage} />,
           },

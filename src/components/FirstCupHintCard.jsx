@@ -9,7 +9,6 @@
 
 import React from "react";
 import { theme, ff } from "../theme";
-import { Kettle } from "./icons";
 
 export const FirstCupHintCard = ({ onDismiss }) => (
   <div style={{
@@ -19,25 +18,20 @@ export const FirstCupHintCard = ({ onDismiss }) => (
     padding: "12px 16px",
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-      <div style={{ flexShrink: 0, marginTop: 2 }}>
-        <Kettle size={18} c={theme.terra} />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-          lineHeight: 1.25, marginBottom: 2,
-        }}>Welcome.</div>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 12,
-          color: theme.inkSoft, lineHeight: 1.45,
-        }}>
-          <div>
-            <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew, browse, and explore.
-          </div>
-          <div>
-            <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> for your journal, recipes, and pantry.
-          </div>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{
+        fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+        lineHeight: 1.25, marginBottom: 2,
+      }}>Welcome.</div>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 12,
+        color: theme.inkSoft, lineHeight: 1.45,
+      }}>
+        <div>
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew, browse, and explore.
+        </div>
+        <div>
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> for your journal, recipes, and pantry.
         </div>
       </div>
     </div>

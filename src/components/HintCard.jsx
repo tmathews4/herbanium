@@ -2,18 +2,18 @@
    components/HintCard.jsx — generic first-visit tutorial card.
 
    Used at the top of main surfaces (Compose, Profile, the Journal
-   sub-tab) the first time the user lands there. Dismissible to a
-   persisted flag so it never reappears.
+   sub-tab, the Bestiary) the first time the user lands there.
+   Dismissible to a persisted flag so it never reappears.
 
-   Layout: icon + title/body on top, full-width OK button on its
-   own row underneath. The wide button gives the body text the
-   full card width on narrow phones instead of squeezing it.
+   Layout: title + body on top, full-width OK button on its own
+   row underneath. The wide button gives the body text the full
+   card width on narrow phones instead of squeezing it.
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
 import { theme, ff } from "../theme";
 
-export const HintCard = ({ icon, title, body, onDismiss }) => (
+export const HintCard = ({ title, body, onDismiss }) => (
   <div style={{
     marginBottom: 16,
     padding: "12px 14px",
@@ -22,22 +22,17 @@ export const HintCard = ({ icon, title, body, onDismiss }) => (
     border: `1px solid ${theme.ruleSoft}`,
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-      {icon && (
-        <div style={{ flexShrink: 0, marginTop: 2 }}>{icon}</div>
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {title && (
-          <div style={{
-            fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-            lineHeight: 1.25, marginBottom: 2,
-          }}>{title}</div>
-        )}
+    <div>
+      {title && (
         <div style={{
-          fontFamily: ff.sans, fontSize: 12,
-          color: theme.inkSoft, lineHeight: 1.45,
-        }}>{body}</div>
-      </div>
+          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+          lineHeight: 1.25, marginBottom: 2,
+        }}>{title}</div>
+      )}
+      <div style={{
+        fontFamily: ff.sans, fontSize: 12,
+        color: theme.inkSoft, lineHeight: 1.45,
+      }}>{body}</div>
     </div>
     <button
       onClick={onDismiss}
