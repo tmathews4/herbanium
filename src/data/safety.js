@@ -121,15 +121,6 @@ export function checkIngredientInteractions(ingredients) {
   return matched;
 }
 
-// Generator-side check: does the current ingredient set contain any
-// HIGH-severity interaction? Used to validate generated blends.
-export function hasUnsafeCombination(ingredients) {
-  const ids = toIdSet(ingredients);
-  return INGREDIENT_INTERACTIONS
-    .filter(r => r.severity === "high")
-    .some(r => r.test(ids));
-}
-
 // Generator-side check: would adding `newId` to `currentIds` create a
 // HIGH-severity interaction? Used by the candidate-picking helpers to
 // filter out unsafe additions before they're chosen.

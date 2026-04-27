@@ -25,7 +25,7 @@ import {
 import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
 } from "../units/units";
-import { LibraryList, BlendListRow, LibraryScreen } from "./LibraryScreen";
+import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { HintCard } from "../components/HintCard";
@@ -60,7 +60,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, libraryView, pantryHintShown, dismissPantryHint }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -1231,7 +1231,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           go={go}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          libraryView={libraryView}
           hideHeader
           hidePantryToggle
         />
@@ -1246,7 +1245,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           go={go}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          libraryView={libraryView}
           defaultPantryOnly
           hideHeader
           pantryHintShown={pantryHintShown}

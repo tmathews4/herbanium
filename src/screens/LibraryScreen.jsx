@@ -9,8 +9,8 @@ import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  ChipRows, EmptyState, SectionLabel,
-} from "../components/layout";;
+  ChipRows, SectionLabel,
+} from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   ff, theme,
@@ -33,20 +33,13 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds, togglePantry, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
+export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(forcePantryOnly || defaultPantryOnly);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
-
-  // Deep-link from Profile → Pantry stat: arrives with pantryOnly=true
-  // so the user lands on their curated subset.
-  React.useEffect(() => {
-    if (!libraryView) return;
-    if (typeof libraryView.pantryOnly === "boolean") setPantryOnly(libraryView.pantryOnly);
-  }, [libraryView?.at]);
 
   // Force pantryOnly from parent when this view is hosted inside the
   // Shelf · Pantry sub-tab, where the toggle would be redundant.
@@ -343,37 +336,6 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, libraryView, pantry
             </div>
           )}
       </>
-    </div>
-  );
-};
-
-/* ──────────────────────────────────────────────────────────────
-   Saved-blends list (used by Compose > Shelf)
-   ────────────────────────────────────────────────────────────── */
-
-export const LibraryList = ({ blends, compact, go, startBrew, openBlend, highlightId }) => {
-  if (!blends || blends.length === 0) {
-    return (
-      <EmptyState
-        icon={<Leaf size={24} c={theme.sage} />}
-        title="No saved blends yet"
-        body="The blends you save or adopt from friends will live here."
-        cta={{ label: "compose your first cup →", onClick: () => go("apothecary") }}
-      />
-    );
-  }
-  return (
-    <div style={{ marginTop: compact ? 0 : 12 }}>
-      {!compact && <SectionLabel n="i">Your saved blends</SectionLabel>}
-      <div style={{ marginTop: compact ? 0 : 10 }}>
-        {blends.map((b, i) => (
-          <BlendListRow
-            key={b.id} b={b} first={i === 0}
-            highlighted={highlightId === b.id}
-            go={go} startBrew={startBrew} openBlend={openBlend}
-          />
-        ))}
-      </div>
     </div>
   );
 };

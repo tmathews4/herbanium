@@ -9,16 +9,14 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { ComposeScreen } from "./screens/ComposeScreen";
 import { SteepScreen } from "./screens/SteepScreen";
 import { LogScreen } from "./screens/LogScreen";
-import { LibraryScreen } from "./screens/LibraryScreen";
 import { IngredientDetail } from "./screens/IngredientDetail";
 import { BlendDetail } from "./screens/BlendDetail";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
-import { generateExperimentalSeeds, pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
-import { buildSyntheticForSelections } from "./algo/compose";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 
@@ -399,7 +397,6 @@ export default function App() {
   // Per-screen view presets — let other screens deep-link into a
   // specific sub-mode (e.g. Profile → Compose Shelf → Journal).
   const [composeView, setComposeView] = useState(null);
-  const [libraryView, setLibraryView] = useState(null);
 
   const go = (to, arg) => {
     if (to === "ingredient") {
@@ -630,8 +627,8 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} animisBanished={animisBanished} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} libraryView={libraryView} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} libraryView={libraryView} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} />}
       </div>
 
