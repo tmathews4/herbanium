@@ -517,7 +517,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Banish the spirits</span>
+          <span>Disable elementals</span>
           <span
             onClick={() => setAnimisBanished && setAnimisBanished(!animisBanished)}
             style={{
