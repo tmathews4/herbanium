@@ -27,16 +27,16 @@ const TEMPLATES = [
     `A ${thing}, ${color}.\nOutside, the ${sound}.\n${feeling}, and quiet.`,
 
   ({ thing, sound, color, feeling }) =>
-    `Edges of the ${thing} —\n${sound} settles.\n${feeling} in the cup.`,
+    `Edges of the ${color} ${thing} —\n${sound} settles.\n${feeling} in the cup.`,
 
   ({ thing, sound, color, feeling }) =>
-    `The ${thing} on the table.\n${sound}, then ${sound} again.\nStill ${feeling}.`,
+    `The ${color} ${thing} on the table.\n${sound}, then ${sound} again.\nStill ${feeling}.`,
 
   ({ thing, sound, color, feeling }) =>
-    `${color}, just ${color}.\nA ${thing} catches it.\nThe ${sound} keeps time.`,
+    `${color}, just ${color}.\nA ${thing} catches it.\nThe ${sound} keeps ${feeling} time.`,
 
   ({ thing, sound, color, feeling }) =>
-    `The ${thing} doesn't move.\n${sound} fills the room.\n${feeling}.`,
+    `The ${color} ${thing} doesn't move.\n${sound} fills the room.\n${feeling}.`,
 
   ({ thing, sound, color, feeling }) =>
     `Inside: ${thing}, ${color}.\nOutside: ${sound}.\nIn between: ${feeling}.`,
