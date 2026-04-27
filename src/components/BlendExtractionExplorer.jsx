@@ -119,6 +119,9 @@ export const BlendExtractionExplorer = ({
   );
   const [openFlavor, setOpenFlavor] = useState(null);
   const [openEffect, setOpenEffect] = useState(null);
+  // Predicted-taste pill row caps at 6; the rest hide behind an
+  // expand toggle so a long flavor list doesn't dominate the screen.
+  const [flavorsExpanded, setFlavorsExpanded] = useState(false);
 
   const isControlled = tempCProp !== undefined && setTempCProp !== undefined;
   const tempC = isControlled ? tempCProp : tempCInternal;
@@ -307,52 +310,79 @@ export const BlendExtractionExplorer = ({
 
         return (
           <div style={{ marginBottom: 14 }}>
-            {visibleFlavors.length > 0 && (
-              <div style={{ marginBottom: visibleEffects.length > 0 ? 14 : 0 }}>
-                {sectionLabel("predicted taste")}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {visibleFlavors.map(([name, strength]) => {
-                    const known = !!FLAVOR_DESCRIPTIONS[name];
-                    const opened = openFlavor === name;
-                    const isActive = Math.round(strength * 10) / 10 > 0;
-                    const intensity = Math.max(0.35, Math.min(1, strength / 5));
-                    return (
+            {visibleFlavors.length > 0 && (() => {
+              // Always show the top 6 (sorted active-first by strength,
+              // then alphabetical inactives). The remainder lives behind
+              // an expand toggle. Sort runs every render so the top 6
+              // stays live-correct as the brew sliders move.
+              const FLAVOR_HEAD = 6;
+              const headFlavors = visibleFlavors.slice(0, FLAVOR_HEAD);
+              const tailFlavors = visibleFlavors.slice(FLAVOR_HEAD);
+              const shownFlavors = flavorsExpanded ? visibleFlavors : headFlavors;
+              return (
+                <div style={{ marginBottom: visibleEffects.length > 0 ? 14 : 0 }}>
+                  {sectionLabel("predicted taste")}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {shownFlavors.map(([name, strength]) => {
+                      const known = !!FLAVOR_DESCRIPTIONS[name];
+                      const opened = openFlavor === name;
+                      const isActive = Math.round(strength * 10) / 10 > 0;
+                      const intensity = Math.max(0.35, Math.min(1, strength / 5));
+                      return (
+                        <button
+                          key={name}
+                          onClick={() => known && setOpenFlavor(prev => prev === name ? null : name)}
+                          disabled={!known}
+                          style={{
+                            fontFamily: ff.sans, fontSize: 10.5,
+                            color: opened ? theme.cream
+                                  : isActive ? theme.terra
+                                  : theme.ash,
+                            letterSpacing: "0.04em",
+                            padding: "3px 9px",
+                            border: `1px solid ${opened || isActive ? theme.terra : theme.rule}`,
+                            borderRadius: 999,
+                            background: opened ? theme.terra : "transparent",
+                            opacity: opened ? 1 : isActive ? intensity : 0.45,
+                            fontStyle: isActive ? "normal" : "italic",
+                            cursor: known ? "pointer" : "default",
+                            transition: "all 0.15s ease",
+                          }}
+                        >{name}</button>
+                      );
+                    })}
+                    {tailFlavors.length > 0 && (
                       <button
-                        key={name}
-                        onClick={() => known && setOpenFlavor(prev => prev === name ? null : name)}
-                        disabled={!known}
+                        onClick={() => setFlavorsExpanded(v => !v)}
                         style={{
-                          fontFamily: ff.sans, fontSize: 10.5,
-                          color: opened ? theme.cream
-                                : isActive ? theme.terra
-                                : theme.ash,
-                          letterSpacing: "0.04em",
+                          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+                          color: theme.ash,
                           padding: "3px 9px",
-                          border: `1px solid ${opened || isActive ? theme.terra : theme.rule}`,
+                          border: `1px dashed ${theme.rule}`,
                           borderRadius: 999,
-                          background: opened ? theme.terra : "transparent",
-                          opacity: opened ? 1 : isActive ? intensity : 0.45,
-                          fontStyle: isActive ? "normal" : "italic",
-                          cursor: known ? "pointer" : "default",
-                          transition: "all 0.15s ease",
+                          background: "transparent",
+                          cursor: "pointer",
+                          fontStyle: "italic",
                         }}
-                      >{name}</button>
-                    );
-                  })}
-                </div>
-                {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
-                  <div style={{ marginTop: 10 }}>
-                    <VocabInfoCard
-                      term={openFlavor}
-                      summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
-                      body={FLAVOR_DESCRIPTIONS[openFlavor].body}
-                      tone="terra"
-                      onClose={() => setOpenFlavor(null)}
-                    />
+                      >
+                        {flavorsExpanded ? "show fewer" : `+${tailFlavors.length} more`}
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                  {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
+                    <div style={{ marginTop: 10 }}>
+                      <VocabInfoCard
+                        term={openFlavor}
+                        summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
+                        body={FLAVOR_DESCRIPTIONS[openFlavor].body}
+                        tone="terra"
+                        onClose={() => setOpenFlavor(null)}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             {visibleEffects.length > 0 && (() => {
               let activeIdx = 0;
               const colored = visibleEffects.map(([tag, n]) => {
