@@ -584,9 +584,43 @@ export const BlendExtractionExplorer = ({
         </div>
       </div>
 
+      {/* Cup summary — one-line distillation of the dominant 1–2
+          effects and flavors. Threshold-gated in the algorithm so
+          quiet cups don't claim a definite read. */}
+      {(brew.moodSummary || brew.flavorSummary) && (
+        <div style={{
+          marginTop: 4,
+          fontFamily: ff.serif, fontSize: 12.5, lineHeight: 1.5,
+          color: theme.inkSoft,
+        }}>
+          {brew.moodSummary && (
+            <div>
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+                textTransform: "uppercase", color: theme.ash, marginRight: 8,
+              }}>Feels</span>
+              <em style={{ fontStyle: "italic", color: theme.sageDeep }}>
+                {brew.moodSummary}
+              </em>
+            </div>
+          )}
+          {brew.flavorSummary && (
+            <div>
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+                textTransform: "uppercase", color: theme.ash, marginRight: 8,
+              }}>Tastes</span>
+              <em style={{ fontStyle: "italic", color: theme.terra }}>
+                {brew.flavorSummary}
+              </em>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
       {brew.synergyTags && brew.synergyTags.length > 0 && (
-        <div style={{ marginTop: 4 }}>
+        <div style={{ marginTop: 8 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {brew.synergyTags.map(tag => (
               <span key={tag} style={{
