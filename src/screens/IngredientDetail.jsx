@@ -114,9 +114,9 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           <HintCard
             title="Ingredient"
             body={<>
-              <div><strong style={{ color: theme.terra }}>Overview</strong> — what it is and the effects it carries.</div>
-              <div><strong style={{ color: theme.terra }}>Brewing</strong> — modify temp and steep time to see effects on the ingredient.</div>
-              <div><strong style={{ color: theme.terra }}>Pairings</strong> — leaves and herbs that play well with it.</div>
+              <div><strong style={{ color: theme.terra }}>Overview</strong> — What It Is.</div>
+              <div><strong style={{ color: theme.terra }}>Brewing</strong> — Temp and Steep.</div>
+              <div><strong style={{ color: theme.terra }}>Pairings</strong> — What Plays Well.</div>
             </>}
             onDismiss={dismissIngredientHint}
           />

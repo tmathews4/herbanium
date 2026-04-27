@@ -16,7 +16,7 @@ export const PantryHintCard = ({ onDismiss }) => (
     icon={<Sprig size={18} c={theme.sageDeep} />}
     title="Pantry"
     body={<>
-      Tap the <strong>+</strong> on any ingredient to add it. Then filter blends by what you can brew now.
+      What you have on hand.
     </>}
     onDismiss={onDismiss}
   />

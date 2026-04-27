@@ -152,7 +152,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           icon={<Flower size={18} c={theme.terra} />}
           title="Profile"
           body={<>
-            Your stats &amp; settings · tap a stat to jump to its surface.
+            Your stats and settings.
           </>}
           onDismiss={dismissProfileHint}
         />

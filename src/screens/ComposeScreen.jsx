@@ -256,9 +256,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Sprig size={18} c={theme.sageDeep} />}
           title="Apothecary"
           body={<>
-            <div><strong style={{ color: theme.terra }}>Blend</strong> — build a cup from ingredients you choose.</div>
-            <div><strong style={{ color: theme.terra }}>Vibe</strong> — pick a mood and we'll suggest a fit.</div>
-            <div><strong style={{ color: theme.terra }}>Compendium</strong> — every ingredient and how to brew it.</div>
+            <div><strong style={{ color: theme.terra }}>Blend</strong> — Build From Scratch.</div>
+            <div><strong style={{ color: theme.terra }}>Vibe</strong> — Brew For a Mood.</div>
+            <div><strong style={{ color: theme.terra }}>Compendium</strong> — Every Ingredient.</div>
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -268,9 +268,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Pencil size={16} c={theme.terra} />}
           title="Shelf"
           body={<>
-            <div><strong style={{ color: theme.terra }}>Recipes</strong> — every blend you've kept worth returning to.</div>
-            <div><strong style={{ color: theme.terra }}>Pantry</strong> — the ingredients you have on hand at home.</div>
-            <div><strong style={{ color: theme.terra }}>Journal</strong> — brewed cups, written entries, and your bestiary.</div>
+            <div><strong style={{ color: theme.terra }}>Recipes</strong> — Your Saved Cups.</div>
+            <div><strong style={{ color: theme.terra }}>Pantry</strong> — Your Ingredients.</div>
+            <div><strong style={{ color: theme.terra }}>Journal</strong> — Your Brews and Notes.</div>
           </>}
           onDismiss={dismissComposeHint}
         />
