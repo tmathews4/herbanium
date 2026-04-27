@@ -26,23 +26,26 @@ function hash(str) {
 
 const pick = (arr, seed) => arr[hash(seed) % arr.length];
 
-// Element pools by 3-hour windows of the day. Each window has its own
-// flavor of mythic vocabulary so the element feels tied to the time.
+// Element pools by 3-hour windows of the day. Strictly elemental /
+// nature words — sky, water, light, soil, fire, time-of-day phenomena.
+// No concepts (Dream, Whisper, Quiet), no human-made objects (Forge,
+// Hearth), no fabrics (Velvet). Materials that are really gemstones
+// (Crystal, Amber, Copper, Bronze) live in the gem pool instead.
 const ELEMENT_POOLS = {
   // pre-dawn (2-5)
-  predawn:   ["Dream", "Mist", "Crystal", "Whisper", "Quiet"],
+  predawn:   ["Mist", "Dew", "Vapor", "Fog", "Drizzle"],
   // dawn (5-8)
   dawn:      ["Light", "Sunfire", "Ember", "Aurora", "Bloom"],
   // morning (8-11)
   morning:   ["Wind", "Sky", "Cloud", "Lightning", "Daybreak"],
   // midday (11-14)
-  midday:    ["Fire", "Sun", "Stone", "Iron", "Forge"],
+  midday:    ["Fire", "Sun", "Stone", "Glare", "Blaze"],
   // afternoon (14-17)
-  afternoon: ["Earth", "Wood", "Tide", "Bronze", "River"],
+  afternoon: ["Earth", "Wood", "Tide", "Meadow", "River"],
   // evening (17-20)
-  evening:   ["Twilight", "Amber", "Copper", "Rain", "Hearth"],
+  evening:   ["Twilight", "Sunset", "Dusk", "Rain", "Glow"],
   // night (20-23)
-  night:     ["Shadow", "Moon", "Frost", "Smoke", "Velvet"],
+  night:     ["Shadow", "Moon", "Frost", "Smoke", "Midnight"],
   // late-night (23-2)
   latenight: ["Void", "Nightshade", "Star", "Ash", "Crescent"],
 };
@@ -58,19 +61,21 @@ function elementWindow(hour) {
   return "latenight";
 }
 
-// Gem / material pool per flavor family. If user picked multiple
-// flavors, hash picks one flavor first, then a gem from its pool.
+// Gem / ore / crystal pool per flavor family. Strictly gemstones,
+// ores, and minerals — no organics like Bone or sweeteners like Honey.
+// If the user picked multiple flavors, hash picks one flavor first,
+// then a gem from its pool.
 const GEMS_BY_FLAVOR = {
   floral:  ["Pearl", "Rose-Quartz", "Opal", "Moonstone"],
   citrus:  ["Amber", "Topaz", "Citrine", "Sunstone"],
   fruity:  ["Garnet", "Ruby", "Carnelian", "Coral"],
-  sweet:   ["Honey", "Gold", "Tigereye", "Sandstone"],
+  sweet:   ["Heliodor", "Gold", "Tigereye", "Sandstone"],
   spiced:  ["Copper", "Cinnabar", "Jasper", "Bloodstone"],
   minty:   ["Jade", "Aquamarine", "Turquoise", "Emerald"],
   earthy:  ["Onyx", "Slate", "Granite", "Obsidian"],
   smoky:   ["Smoky-Quartz", "Hematite", "Pyrite", "Coal"],
   // Fallback when no flavor was picked at onboarding.
-  _none:   ["Diamond", "Crystal", "Pearl", "Quartz", "Marble", "Bone"],
+  _none:   ["Diamond", "Crystal", "Pearl", "Quartz", "Marble", "Agate"],
 };
 
 // Two creature tiers per category. The picker rolls into the mythical
