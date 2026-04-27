@@ -54,11 +54,16 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
   // anywhere in its extraction range. The slider may zero out entries
   // at one end of the range; we still want them shown so the user can
   // see what's *possible*, dimmed until the slider activates them.
+  // bitterness is a taste, not a mood — it surfaces under the flavor
+  // strip if and when the ingredient's profile carries it, never as a
+  // mood bar.
   const { allFlavors, allEffects } = useMemo(() => {
     const fSet = new Set(), eSet = new Set();
     (EXTRACTION_PROFILES[ingredientId] || []).forEach(p => {
       (p.flavors || []).forEach(f => fSet.add(f));
-      (p.effects || []).forEach(([tag]) => eSet.add(tag));
+      (p.effects || []).forEach(([tag]) => {
+        if (tag !== "bitterness") eSet.add(tag);
+      });
     });
     return { allFlavors: [...fSet], allEffects: [...eSet] };
   }, [ingredientId]);
@@ -72,6 +77,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
   });
   const effectStrengthMap = {};
   (profile.effects || []).forEach(([tag, n]) => {
+    if (tag === "bitterness") return;
     effectStrengthMap[tag] = n || 0;
   });
 
@@ -285,8 +291,6 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
           n: effectStrengthMap[tag] || 0,
         }));
         rows.sort((a, b) => {
-          if (a.tag === "bitterness") return 1;
-          if (b.tag === "bitterness") return -1;
           const aActive = Math.round(a.n * 10) / 10 > 0;
           const bActive = Math.round(b.n * 10) / 10 > 0;
           if (aActive !== bActive) return aActive ? -1 : 1;
@@ -297,11 +301,10 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
         const colored = rows.map(({ tag, n }) => {
           const isActive = Math.round(n * 10) / 10 > 0;
           let color;
-          if (tag === "bitterness")     color = theme.terra;
-          else if (!isActive)           color = theme.ash;
-          else if (activeIdx === 0)   { color = theme.sage;  activeIdx++; }
-          else if (activeIdx === 1)   { color = theme.ochre; activeIdx++; }
-          else                        { color = theme.sky;   activeIdx++; }
+          if (!isActive)              color = theme.ash;
+          else if (activeIdx === 0) { color = theme.sage;  activeIdx++; }
+          else if (activeIdx === 1) { color = theme.ochre; activeIdx++; }
+          else                      { color = theme.sky;   activeIdx++; }
           return { tag, n, isActive, color };
         });
         return (

@@ -109,18 +109,23 @@ export const BlendExtractionExplorer = ({
   // pushes a given entry's strength to zero.
   const possible = useMemo(() => {
     const fSet = new Set(), eSet = new Set();
+    const addEffect = (tag) => {
+      // bitterness lives in the predicted-balance strip, not moods.
+      if (tag === "bitterness") return;
+      eSet.add(tag);
+    };
     (ingredients || []).forEach(({ id }) => {
       const profilePoints = EXTRACTION_PROFILES[id];
       if (profilePoints && profilePoints.length > 0) {
         profilePoints.forEach(p => {
           (p.flavors || []).forEach(f => fSet.add(f));
-          (p.effects || []).forEach(([tag]) => eSet.add(tag));
+          (p.effects || []).forEach(([tag]) => addEffect(tag));
         });
       } else {
         const meta = INGREDIENTS[id];
         if (meta) {
           (meta.flavors || []).forEach(f => fSet.add(f));
-          (meta.effects || []).forEach(([tag]) => eSet.add(tag));
+          (meta.effects || []).forEach(([tag]) => addEffect(tag));
         }
       }
     });
@@ -284,7 +289,10 @@ export const BlendExtractionExplorer = ({
         const flavorMap = {};
         (brew.flavors || []).forEach(([n, s]) => { flavorMap[n] = s || 0; });
         const effectMap = {};
-        (brew.effects || []).forEach(([t, n]) => { effectMap[t] = n || 0; });
+        (brew.effects || []).forEach(([t, n]) => {
+          if (t === "bitterness") return;
+          effectMap[t] = n || 0;
+        });
 
         // Defensive union: any tag the algo currently emits but our
         // static-profile scan missed (e.g. a synergy-derived effect)
