@@ -4,7 +4,7 @@
 
 import React from "react";
 import {
-  Flower, Kettle, Leaf, Ornament, Sprig, MOOD_ICONS,
+  Flower, Kettle, Leaf, Ornament, Pencil, Sprig, MOOD_ICONS,
 } from "../components/icons";
 import {
   FitText, SectionLabel,
@@ -107,13 +107,13 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         );
       })()}
 
-      {/* CTA */}
+      {/* CTAs — primary (brew) and secondary (journal) */}
       <button onClick={() => go("compose")} style={{
         width: "100%", textAlign: "left",
         background: theme.ink, color: theme.cream,
         border: "none", borderRadius: 14, padding: "14px 18px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", marginBottom: 24,
+        cursor: "pointer", marginBottom: 8,
         boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
       }}>
         <div>
@@ -127,6 +127,19 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </div>
         </div>
         <Kettle size={24} c={theme.cream} />
+      </button>
+
+      <button onClick={() => go("compose", { mode: "journal" })} style={{
+        width: "100%", textAlign: "left",
+        background: theme.cream, color: theme.terra,
+        border: `1px solid ${theme.terra}`, borderRadius: 14, padding: "12px 18px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        cursor: "pointer", marginBottom: 24,
+      }}>
+        <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
+          Note a moment →
+        </div>
+        <Pencil size={18} c={theme.terra} />
       </button>
 
       {/* New-user onboarding card */}
