@@ -131,15 +131,15 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
       <button onClick={() => go("compose", { mode: "journal" })} style={{
         width: "100%", textAlign: "left",
-        background: theme.cream, color: theme.terra,
-        border: `1px solid ${theme.terra}`, borderRadius: 14, padding: "12px 18px",
+        background: theme.cream, color: theme.ink,
+        border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "14px 18px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         cursor: "pointer", marginBottom: 24,
       }}>
-        <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
+        <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
           Note a moment →
         </div>
-        <Pencil size={18} c={theme.terra} />
+        <Pencil size={20} c={theme.ink} />
       </button>
 
       {/* New-user onboarding card */}
