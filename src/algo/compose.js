@@ -4,7 +4,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  BLENDS, FLAVOR_WORDS, MOOD_BLENDS, MOOD_CONFLICTS, MOOD_SINGLE_NAMES,
+  BLENDS, FLAVOR_WORDS, MOOD_BLENDS, MOOD_CONFLICTS, FLAVOR_CONFLICTS, MOOD_SINGLE_NAMES,
   MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
@@ -342,6 +342,47 @@ function blendMatchesFlavor(b, flavor) {
   });
 }
 
+// Strength of a mood/effect on a blend, 0 if absent. Used by the
+// conflict-aware scorer below — only effects at strength ≥ 3 count
+// as "loud enough to interfere" with a contradicting selection.
+function blendEffectStrength(b, mood) {
+  if (b.mood === mood) return 5;
+  const eff = (b.effects || []).find(([k]) => k === mood);
+  return eff ? eff[1] : 0;
+}
+
+// Conflict-aware score: per selection, count a hit (1) and dock 0.5
+// for each conflicting tag also present on the blend (mood at ≥ 3
+// strength, flavors are presence-based). Sums across all selections.
+// Clamps each per-selection contribution at 0 so a heavy-conflict
+// blend can't push the total negative — it just stops contributing.
+//
+// This is the "quiet de-emphasis" layer: matched-count still leads
+// the sort (additive intent preserved), but among ties the cup that
+// pulls in two directions ranks below the cup that doesn't.
+function selectionScore(b, moods, flavors) {
+  let score = 0;
+  for (const m of moods) {
+    let s = blendMatchesMood(b, m) ? 1 : 0;
+    for (const [a, c] of MOOD_CONFLICTS) {
+      const other = m === a ? c : m === c ? a : null;
+      if (!other) continue;
+      if (blendEffectStrength(b, other) >= 3) s -= 0.5;
+    }
+    score += Math.max(0, s);
+  }
+  for (const f of flavors) {
+    let s = blendMatchesFlavor(b, f) ? 1 : 0;
+    for (const [a, c] of FLAVOR_CONFLICTS) {
+      const other = f === a ? c : f === c ? a : null;
+      if (!other) continue;
+      if (blendMatchesFlavor(b, other)) s -= 0.5;
+    }
+    score += Math.max(0, s);
+  }
+  return score;
+}
+
 // Score how completely a blend embodies the user's selections.
 // `matched` counts mood-hits + flavor-hits; `fullMatch` is true when
 // every selected mood and every selected flavor finds a match.
@@ -370,6 +411,11 @@ function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
   const matched = moodHits + flavorHits;
   const total = moods.length + flavors.length;
 
+  // Conflict-aware companion score — used as a tiebreaker after the
+  // raw matched count so the additive ordering still leads but
+  // mixed-signal candidates fall behind their cleaner peers.
+  const weighted = selectionScore(b, moods, flavors);
+
   return {
     moodHits,
     flavorHits,
@@ -380,6 +426,7 @@ function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
     passesFilter,
     fullPrimary,
     matched,
+    weighted,
     total,
     fullMatch: total > 0 && matched === total,
   };
@@ -745,6 +792,11 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     .filter(x => x.score.matched > 0)
     .sort((a, b) => {
       if (a.score.matched !== b.score.matched) return b.score.matched - a.score.matched;
+      // Conflict-aware tiebreaker — keeps mixed-signal blends from
+      // claiming the top-of-kind slot in the bucketed pull below.
+      if (Math.abs(a.score.weighted - b.score.weighted) > 0.0001) {
+        return b.score.weighted - a.score.weighted;
+      }
       const aTrad = a.blend.tradition ? 0 : 1;
       const bTrad = b.blend.tradition ? 0 : 1;
       if (aTrad !== bTrad) return aTrad - bTrad;
@@ -908,6 +960,12 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       const aMatched = a._score?.matched || 0;
       const bMatched = b._score?.matched || 0;
       if (aMatched !== bMatched) return bMatched - aMatched;
+      // Conflict-aware tiebreaker — among same-match candidates, the
+      // one that pulls in fewer directions wins. Half-point penalty
+      // per selection-vs-blend conflict accumulates here.
+      const aWeighted = a._score?.weighted || 0;
+      const bWeighted = b._score?.weighted || 0;
+      if (Math.abs(aWeighted - bWeighted) > 0.0001) return bWeighted - aWeighted;
       const aTrad = a.tradition ? 0 : 1;
       const bTrad = b.tradition ? 0 : 1;
       if (aTrad !== bTrad) return aTrad - bTrad;
