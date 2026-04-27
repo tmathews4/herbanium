@@ -310,14 +310,15 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         </div>
 
-        {/* Disable elementals — hides every elemental surface for users
-            who'd rather not engage with the mythic layer. */}
+        {/* Remove Bestiary — hides the Bestiary sub-tab + the
+            Profile stat for users who'd rather not engage with the
+            elementals layer. State persists as elementalsDisabled. */}
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Disable elementals</span>
+          <span>Remove Bestiary</span>
           <span
             onClick={() => setElementalsDisabled && setElementalsDisabled(!elementalsDisabled)}
             style={{

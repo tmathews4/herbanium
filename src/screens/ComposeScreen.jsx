@@ -62,7 +62,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, bestiaryHintShown, dismissBestiaryHint }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -285,8 +285,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           body={<>
             <strong style={{ color: theme.terra }}>Journal</strong> for cups &amp; entries ·{" "}
             <strong style={{ color: theme.terra }}>Recipes</strong> for saved blends ·{" "}
-            <strong style={{ color: theme.terra }}>Pantry</strong> for what's on hand ·{" "}
-            <strong style={{ color: theme.terra }}>Bestiary</strong> for elementals you've observed.
+            <strong style={{ color: theme.terra }}>Pantry</strong> for what's on hand.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -1416,6 +1415,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           setSeenElementalIds={setSeenElementalIds}
           featuredElementals={featuredElementals}
           setFeaturedElementals={setFeaturedElementals}
+          bestiaryHintShown={bestiaryHintShown}
+          dismissBestiaryHint={dismissBestiaryHint}
         />
       )}
 

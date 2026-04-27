@@ -21,6 +21,8 @@ import { ff, theme } from "../theme";
 import { SectionLabel } from "./layout";
 import { OmenCard } from "./OmenCard";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
+import { HintCard } from "./HintCard";
+import { Sprig } from "./icons";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import {
   buildElementalNaming, flavorLineFor,
@@ -51,6 +53,8 @@ export const BestiaryView = ({
   setSeenElementalIds,
   featuredElementals,
   setFeaturedElementals,
+  bestiaryHintShown,
+  dismissBestiaryHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
 
@@ -198,6 +202,21 @@ export const BestiaryView = ({
 
   return (
     <div style={{ marginTop: 4 }}>
+      {!bestiaryHintShown && dismissBestiaryHint && (
+        <HintCard
+          icon={<Sprig size={18} c={theme.sageDeep} />}
+          title="Bestiary"
+          body={<>
+            A side game tucked into the kettle — engage with the app
+            in different ways and{" "}
+            <strong style={{ color: theme.terra }}>Log</strong>{" "}
+            specimens to fill the page. Pin five up top, swap any
+            in by tapping it then a reserve.
+          </>}
+          onDismiss={dismissBestiaryHint}
+        />
+      )}
+
       {summonTarget?.kind === "omen" && profile?.title && (
         <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
       )}
