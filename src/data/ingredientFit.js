@@ -45,6 +45,55 @@ export const CANONICAL_EFFECTS = new Set([
   "bitterness",
 ]);
 
+// Canonical flavor vocabulary — every flavor word allowed on an
+// ingredient must live in this set. Catches typos and silent
+// vocabulary drift the same way CANONICAL_EFFECTS does for moods.
+// Synonyms (citrus/citrusy, mint/minty, smoky/smoked, toasty/toasted)
+// are intentionally both included; if you want to consolidate, do a
+// catalog-wide rename rather than dropping one from this list.
+export const KNOWN_FLAVORS = new Set([
+  "anise", "apple", "aromatic", "bean", "bitter", "bittersweet",
+  "bright", "brisk", "buttery", "campfire", "camphor", "caramel",
+  "caramel-roasted", "chestnut", "citrus", "citrusy", "clove", "cocoa",
+  "coffee-adjacent", "complex", "cool", "cranberry", "creamy", "dark",
+  "delicate", "earthy", "floral", "fruit", "fruity", "grassy", "hay",
+  "heady", "herbaceous", "honey", "honey-sweet", "honeyed", "hot",
+  "leather", "licorice", "lychee", "malty", "marine", "melon",
+  "mineral", "mint", "minty", "muscatel", "mushroomy", "musky",
+  "musty", "numbing", "nutty", "oceanic", "peppery", "pine", "pungent",
+  "roasted", "savory", "seafood-like", "seaweed", "smoked", "smoky",
+  "spiced", "spinach-like", "sweet", "tannic", "tar", "tart", "toasted",
+  "toasty", "umami", "vanilla", "vegetal", "warm", "woody",
+]);
+
+// Effect anchors — for each declared mood/effect axis, the ingredient
+// that *defines* the top of the 1-5 scale. The anchor must hold the
+// declared strength on the declared tag; if it drifts, the rubric
+// invariant breaks (every other ingredient is calibrated relative
+// to these). Add anchors for new axes deliberately, not casually.
+export const EFFECT_ANCHORS = Object.freeze({
+  calm:    { id: "chamomile",  strength: 5 },
+  focus:   { id: "matcha",     strength: 5 },
+  cooling: { id: "peppermint", strength: 5 },
+  warming: { id: "ginger",     strength: 5 },
+  sleepy:  { id: "valerian",   strength: 5 },
+  energy:  { id: "assam",      strength: 5 },
+  uplifting: { id: "darjeeling", strength: 5 },
+  grounding: { id: "reishi",   strength: 5 },
+});
+
+// Flavor anchors — for each declared flavor axis, the ingredient
+// whose flavor list must contain the tag. Same drift-guard as
+// effect anchors but on the taste axis.
+export const FLAVOR_ANCHORS = Object.freeze({
+  smoked:  "lapsang",
+  minty:   "peppermint",
+  earthy:  "puerh",
+  citrus:  "lemongrass",
+  floral:  "chamomile",
+  umami:   "matcha",
+});
+
 /**
  * Convert a qualitative effect spec into the [tag, strength] tuple
  * form ingredients.js stores.
@@ -157,5 +206,97 @@ export function auditIngredient(ing) {
       );
     }
   }
+  for (const f of (ing.flavors || [])) {
+    if (typeof f !== "string") {
+      warnings.push(`flavor entry should be a string, got ${JSON.stringify(f)}`);
+      continue;
+    }
+    if (!KNOWN_FLAVORS.has(f)) {
+      warnings.push(
+        `unknown flavor "${f}" — typo? if intentional, add it to KNOWN_FLAVORS in ingredientFit.js.`
+      );
+    }
+  }
+  for (const pid of (ing.pairs || [])) {
+    if (typeof pid !== "string") {
+      warnings.push(`pairs entry should be an ingredient id string, got ${JSON.stringify(pid)}`);
+      continue;
+    }
+    if (!INGREDIENTS[pid]) {
+      warnings.push(`pairs references unknown ingredient id "${pid}"`);
+    }
+  }
   return warnings;
+}
+
+/**
+ * Validate that every declared anchor still holds. Returns an array
+ * of warnings — empty array means anchors are intact. Run this from
+ * the test suite so a casual edit to chamomile or matcha can't
+ * silently break the catalog's calibration.
+ */
+export function validateCatalogAnchors() {
+  const warnings = [];
+  for (const [tag, anchor] of Object.entries(EFFECT_ANCHORS)) {
+    const ing = INGREDIENTS[anchor.id];
+    if (!ing) {
+      warnings.push(
+        `effect anchor for "${tag}" → "${anchor.id}" is missing from the catalog`
+      );
+      continue;
+    }
+    const entry = (ing.effects || []).find(([t]) => t === tag);
+    if (!entry) {
+      warnings.push(
+        `effect anchor "${anchor.id}" no longer carries the "${tag}" tag — ` +
+        `either restore it at strength ${anchor.strength} or pick a new anchor`
+      );
+      continue;
+    }
+    if (entry[1] !== anchor.strength) {
+      warnings.push(
+        `effect anchor "${anchor.id}" "${tag}" strength is ${entry[1]}, ` +
+        `expected ${anchor.strength} — rubric invariant broken`
+      );
+    }
+  }
+  for (const [flavor, id] of Object.entries(FLAVOR_ANCHORS)) {
+    const ing = INGREDIENTS[id];
+    if (!ing) {
+      warnings.push(
+        `flavor anchor for "${flavor}" → "${id}" is missing from the catalog`
+      );
+      continue;
+    }
+    if (!(ing.flavors || []).includes(flavor)) {
+      warnings.push(
+        `flavor anchor "${id}" no longer lists the "${flavor}" flavor — ` +
+        `either restore it or pick a new anchor`
+      );
+    }
+  }
+  return warnings;
+}
+
+/**
+ * Soft saturation check: returns a map of effect tag → list of
+ * ingredient ids holding strength 5 on that tag. Useful as a yellow
+ * flag — multiple 5s on a tag is allowed but worth reviewing for
+ * grade inflation as the catalog grows.
+ */
+export function findEffectSaturation() {
+  const fives = {};
+  for (const [id, ing] of Object.entries(INGREDIENTS)) {
+    for (const [tag, s] of (ing.effects || [])) {
+      if (s === 5) {
+        if (!fives[tag]) fives[tag] = [];
+        fives[tag].push(id);
+      }
+    }
+  }
+  const out = {};
+  for (const [tag, ids] of Object.entries(fives)) {
+    if (ids.length > 1) out[tag] = ids;
+  }
+  return out;
 }
