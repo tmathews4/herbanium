@@ -25,7 +25,7 @@ const FEATURE_OPTIONS = [
   { key: "shelf",       label: "Shelf" },
   { key: "catalogue",   label: "Catalogue" },
   { key: "journal",     label: "Journal" },
-  { key: "apothecary",  label: "Pantry" },
+  { key: "apothecary",  label: "Apothecary" },
   { key: "brewing",     label: "Brewing science" },
   { key: "directions",  label: "Recommended Preparations" },
 ];
