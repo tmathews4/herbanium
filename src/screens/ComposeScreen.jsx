@@ -254,7 +254,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {section === "apothecary" && !composeHintShown && dismissComposeHint && (
         <HintCard
           icon={<Sprig size={18} c={theme.sageDeep} />}
-          title="Apothecary"
+          title="Pantry"
           body={<>
             <div><strong style={{ color: theme.terra }}>Blend</strong> — Build From Scratch.</div>
             <div><strong style={{ color: theme.terra }}>Vibe</strong> — Brew For a Mood.</div>
@@ -269,7 +269,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           title="Shelf"
           body={<>
             <div><strong style={{ color: theme.terra }}>Recipes</strong> — Your Saved Cups.</div>
-            <div><strong style={{ color: theme.terra }}>Pantry</strong> — Your Ingredients.</div>
+            <div><strong style={{ color: theme.terra }}>Apothecary</strong> — Your Ingredients.</div>
             <div><strong style={{ color: theme.terra }}>Journal</strong> — Your Brews and Notes.</div>
           </>}
           onDismiss={dismissComposeHint}

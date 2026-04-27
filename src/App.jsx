@@ -37,7 +37,7 @@ import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedS
 const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
-    { k: "apothecary", label: "Apothecary", icon: <Flower size={18} /> },
+    { k: "apothecary", label: "Pantry", icon: <Flower size={18} /> },
     { k: "shelf",      label: "Shelf",      icon: <Leaf size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
@@ -48,7 +48,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   const subTabs = tab === "apothecary"
     ? [["reverse", "Blend"], ["forward", "Vibe"], ["compendium", "Compendium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["pantry", "Pantry"], ["journal", "Journal"]]
+      ? [["recipes", "Recipes"], ["pantry", "Apothecary"], ["journal", "Journal"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode
