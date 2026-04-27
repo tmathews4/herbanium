@@ -175,12 +175,12 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           {
             label: "Brew an experiment",
             onClick: () => go("apothecary"),
-            icon: (sz) => <Flask size={sz} c={theme.ochre} />,
+            icon: (sz) => <Flask size={sz} c={theme.plum} />,
           },
           {
             label: "Note a moment",
             onClick: () => go("shelf", { mode: "journal" }),
-            icon: (sz) => <Pencil size={sz} c={theme.plum} />,
+            icon: (sz) => <Pencil size={sz} c={theme.ochre} />,
           },
         ].map((cta, i) => (
           <button
