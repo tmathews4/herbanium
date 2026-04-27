@@ -417,12 +417,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             : "summon elemental"}
         </button>
       </div>
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-        color: theme.ash, lineHeight: 1.5, marginBottom: 12,
-      }}>
-        Tend the kettle and pen with intention, and the elementals may draw near.
-      </div>
       {omenShown && (
       <div style={{
         padding: 14, borderRadius: 10,
