@@ -1,3 +1,4 @@
+
 /* ──────────────────────────────────────────────────────────────
    algo/compose.js — blend composition and candidate-ranking logic. The current implementation is the pre-research placeholder; algorithm phase will rewrite in place.
    ────────────────────────────────────────────────────────────── */

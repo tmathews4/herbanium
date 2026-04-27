@@ -300,13 +300,24 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
 };
 
 // Lean one-line SessionRow used in the Shelf > Journal timeline.
-// Same info as before — blend name, intent → actual, taste dots,
-// relative time — but on a single horizontal row with a smaller
-// title so cup logs sit closer together. The cup's private note
-// is reachable via the row's tap target (opens BlendDetail).
+// Shows blend name, starting → ending moods, taste dots, relative
+// time. When only one side of the mood pair is logged, the arrow
+// hangs on the absent side as a tiny tell — "tired →" for a logged
+// starting mood without a recorded landing, "→ calm" for a logged
+// landing without a recorded start.
 export const SessionRow = ({ s, openBlend, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
+
+  const start = (s.currentMoods || []).join(", ").trim();
+  const endRaw = (s.actual || "").trim();
+  // "brewed" is the placeholder the log writes when no specific
+  // landing-moods were captured — treat it as no ending logged.
+  const end = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const arrow = (
+    <span style={{ margin: "0 4px", color: theme.rule, fontStyle: "normal" }}>→</span>
+  );
+
   return (
     <button onClick={() => openBlend(s.blendId, s)} style={{
       width: "100%", textAlign: "left", background: "transparent",
@@ -326,15 +337,19 @@ export const SessionRow = ({ s, openBlend, first }) => {
           </span>
         )}
       </span>
-      <span style={{
-        flexShrink: 1, minWidth: 0,
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-        color: theme.ash, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-      }}>
-        {s.intent}
-        <span style={{ margin: "0 4px", color: theme.rule, fontStyle: "normal" }}>→</span>
-        <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{s.actual}</span>
-      </span>
+      {(start || end) && (
+        <span style={{
+          flexShrink: 1, minWidth: 0,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+          color: theme.ash, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {start && (<span>{start}</span>)}
+          {arrow}
+          {end && (
+            <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
+          )}
+        </span>
+      )}
       <span style={{
         flexShrink: 0, fontSize: 10, color: theme.terra, letterSpacing: "0.08em",
       }}>
