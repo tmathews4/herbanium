@@ -24,6 +24,7 @@ import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { HintCard } from "./HintCard";
 import { Sprig } from "./icons";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
+import { hapticTap } from "../helpers/native";
 import {
   buildElementalNaming, flavorLineFor,
 } from "../data/elementalAdjectives";
@@ -174,6 +175,7 @@ export const BestiaryView = ({
   const isFeatured = (id) => effectiveFeaturedIds.includes(id);
   const toggleFeatured = (id) => {
     if (!setFeaturedElementals) return;
+    hapticTap();
     const cur = effectiveFeaturedIds.slice();
     if (cur.includes(id)) {
       setFeaturedElementals(cur.filter(x => x !== id));

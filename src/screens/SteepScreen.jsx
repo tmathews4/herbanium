@@ -12,6 +12,9 @@ import {
 } from "../theme";
 import { IngredientSheet } from "./IngredientSheet";
 import { PlannerModal } from "../components/Planner";
+import {
+  scheduleSteepNotification, cancelSteepNotification, hapticDone,
+} from "../helpers/native";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: STEEP (takeover)
@@ -76,6 +79,39 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
     return () => clearInterval(t);
   }, [paused, remaining]);
 
+  // Native steep alarm — schedule a local notification that fires
+  // when the brew finishes, so the user can leave the app or lock
+  // the phone and still get pulled back. Cancelled when the user
+  // pauses, navigates away, or the screen unmounts. No-op on web.
+  const notificationIdRef = useRef(null);
+  useEffect(() => {
+    if (paused || remaining <= 0) {
+      if (notificationIdRef.current != null) {
+        cancelSteepNotification(notificationIdRef.current);
+        notificationIdRef.current = null;
+      }
+      return;
+    }
+    let cancelled = false;
+    scheduleSteepNotification({
+      blendName: blend?.name,
+      secondsFromNow: remaining,
+    }).then(id => {
+      if (cancelled || id == null) return;
+      notificationIdRef.current = id;
+    });
+    return () => {
+      cancelled = true;
+      if (notificationIdRef.current != null) {
+        cancelSteepNotification(notificationIdRef.current);
+        notificationIdRef.current = null;
+      }
+    };
+    // Only re-schedule on pause toggle or fresh mount; the running
+    // countdown shouldn't reschedule every second.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paused, blend?.name]);
+
   // Auto-dismiss the ingredient tile when the brew completes — the user's
   // attention should snap back to the timer at the finish moment.
   useEffect(() => {
@@ -83,6 +119,14 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       setActiveIngredient(null);
     }
   }, [remaining, activeIngredient]);
+
+  // Brew finished — fire a success haptic so the phone in the
+  // user's pocket signals "done" alongside the OS notification.
+  useEffect(() => {
+    if (remaining === 0) {
+      hapticDone();
+    }
+  }, [remaining]);
 
   // Manual advance to the next card — shared by the click handler and
   // the auto-cycle interval. Bumps `lastAdvance` which resets the interval.

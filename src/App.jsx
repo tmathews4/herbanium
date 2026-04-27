@@ -22,6 +22,7 @@ import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
+import { configureStatusBar, hapticTap } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 
@@ -179,6 +180,12 @@ export default function App() {
   // same dev surfaces as the web build.
   const [devModeEnabled, setDevModeEnabled] = usePersistedState("devModeEnabled", false);
   const isDev = urlHasDev || devModeEnabled;
+
+  // Configure native shell once on mount — tints the system status
+  // bar to match the ivory background. No-op on web.
+  useEffect(() => {
+    configureStatusBar();
+  }, []);
 
   // If dev flag, bypass onboarding by synthesizing a stub profile on first render.
   // Only runs if no profile exists yet — doesn't override a real user's profile.
@@ -687,6 +694,7 @@ export default function App() {
       setSavedBlendIds(next);
     }
 
+    hapticTap();
     tryRollWildElemental();
   };
 
@@ -780,6 +788,7 @@ export default function App() {
       next.add(id);
       return next;
     });
+    hapticTap();
     return id;
   };
 

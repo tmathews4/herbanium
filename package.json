@@ -16,6 +16,9 @@
     "cap:assets": "npx capacitor-assets generate --iconBackgroundColor #f3ecdc --splashBackgroundColor #f3ecdc"
   },
   "dependencies": {
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/local-notifications": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
