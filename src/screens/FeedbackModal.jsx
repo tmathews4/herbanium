@@ -39,6 +39,7 @@ function buildMailtoFallback(payload) {
     `Sentiment: ${payload.sentiment}/5\n\n` +
     `Standing out: ${payload.standout.join(", ") || "(none selected)"}\n\n` +
     `Notes:\n${payload.notes || "(none)"}\n\n` +
+    `Recipe submission:\n${payload.recipe || "(none)"}\n\n` +
     `--\nSubmitted: ${payload.submittedAt}`
   );
   return `mailto:${to}?subject=${subject}&body=${body}`;
@@ -50,6 +51,7 @@ export const FeedbackModal = ({ onClose }) => {
   const [sentiment, setSentiment] = useState(0);
   const [standout, setStandout] = useState([]);
   const [notes, setNotes] = useState("");
+  const [recipe, setRecipe] = useState("");
   const [status, setStatus] = useState(null);
 
   const toggle = (key) => {
@@ -58,7 +60,7 @@ export const FeedbackModal = ({ onClose }) => {
 
   const submit = async () => {
     const payload = {
-      sentiment, standout, notes,
+      sentiment, standout, notes, recipe,
       submittedAt: new Date().toISOString(),
     };
 
@@ -80,7 +82,7 @@ export const FeedbackModal = ({ onClose }) => {
     }
   };
 
-  const canSubmit = sentiment > 0 || standout.length > 0 || notes.trim();
+  const canSubmit = sentiment > 0 || standout.length > 0 || notes.trim() || recipe.trim();
 
   return (
     <div style={{
@@ -166,6 +168,33 @@ export const FeedbackModal = ({ onClose }) => {
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
             placeholder="bugs, wishes, anything"
+            style={{
+              width: "100%", padding: "10px 12px", borderRadius: 8,
+              background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+              fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+              boxSizing: "border-box", outline: "none", resize: "vertical",
+              lineHeight: 1.5,
+            }}
+          />
+        </div>
+
+        {/* Recipe submission — open invitation to send your own blend
+            for possible inclusion in the curated catalogue. */}
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8 }}>
+            Submit your own recipe
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: theme.ash, lineHeight: 1.45, marginBottom: 8,
+          }}>
+            Got a blend worth sharing? Ingredients, ratios, brew notes — whatever you'd hand a friend.
+          </div>
+          <textarea
+            value={recipe}
+            onChange={(e) => setRecipe(e.target.value)}
+            rows={4}
+            placeholder="name, ingredients with grams, temp & steep, what it's for"
             style={{
               width: "100%", padding: "10px 12px", borderRadius: 8,
               background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
