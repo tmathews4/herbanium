@@ -30,3 +30,20 @@ dist-ssr
 
 .claude/
 *.tar.gz
+
+# Capacitor native build outputs. The native project folders themselves
+# (android/, ios/App/) are committed once scaffolded; their build
+# artifacts and per-machine local config files are not.
+android/.gradle/
+android/.idea/
+android/app/build/
+android/build/
+android/local.properties
+android/captures/
+android/app/release/
+android/app/debug/
+ios/App/Pods/
+ios/App/build/
+ios/DerivedData/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Herbanium</string>
+    <string name="title_activity_main">Herbanium</string>
+    <string name="package_name">com.herbanium.app</string>
+    <string name="custom_url_scheme">com.herbanium.app</string>
+</resources>
