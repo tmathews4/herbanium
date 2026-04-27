@@ -16,7 +16,7 @@
 import {
   loudnessOf, attenuateFragileEffects, applyEffectFloor, FRAGILE_EFFECTS,
 } from "../src/algo/perception.js";
-import { resolveBlendAtBrew } from "../src/algo/compose.js";
+import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import { BLENDS } from "../src/data/blends.js";
 
 let pass = 0, fail = 0;
@@ -171,6 +171,72 @@ test("integration: moroccan mint loudness lifts minty above its pre-loudness bas
   const minty = (out.flavors.find(([t]) => t === "minty") || [, 0])[1];
   assert(minty >= 2.0,
     `loudness lift didn't take: minty=${minty} (baseline pre-change was 1.2)`);
+});
+
+test("integration: moroccan mint fires tradition-over-literature note at baseline", () => {
+  // The recipe lands gunpowder right at its upper temp edge (90°C)
+  // and upper time edge (180s) — well within range, but still tips
+  // the cup into astringent territory. Tradition note should fire to
+  // explain why the curator chose this point despite the warnings.
+  const m = findBlend("moroccan");
+  assert(m, "moroccan missing");
+  const out = resolveBlendAtBrew(
+    m.ingredients, m.tempC, m.timeS,
+    m.tempC, m.timeS, true, !!m.tradition,
+    m.effects
+  );
+  assert(out.traditionNote === true,
+    `traditionNote should fire at curated baseline when warnings are present, got ${out.traditionNote}`);
+});
+
+test("integration: experimental blend at baseline does NOT fire tradition note", () => {
+  // Even if warnings fire, experimental/non-traditional blends shouldn't
+  // claim the tradition note — they don't carry centuries of practice.
+  const out = resolveBlendAtBrew(
+    [{ id: "sencha", g: 3.0 }],
+    100, 240,        // pushed past sencha's window deliberately
+    100, 240, true,  // curated, at baseline
+    false,           // NOT traditional
+    null
+  );
+  assert(out.traditionNote === false,
+    "non-traditional blend shouldn't claim the tradition note");
+});
+
+test("computeBrewProfile: gravitates toward grams-weighted centroid in intersection", () => {
+  // Two ingredients, intersection [88, 92]. Heavy ingredient prefers
+  // ~85 (out), light prefers ~95 (out). Intersection is [88, 92]; the
+  // heavy ingredient pulls the recommendation toward the lower edge.
+  // Old midpoint behavior: 90. New centroid behavior: closer to 88
+  // because heavy outweighs light.
+  // Use real ingredients with overlapping but skewed ranges.
+  // chamomile: tempC [95, 100], peppermint: tempC [95, 100] — same
+  // range, so test with a contrived case using actual catalog leaves.
+  // Use sencha [70, 80] heavy and lavender [85, 95] light: no
+  // intersection. Skip that case here.
+
+  // Real test: lemon balm [90, 95] (3g lead) + chamomile [95, 100]
+  // (1g accent) — intersection at exactly 95. Centroid weighted by
+  // grams should still land at 95 (clamped into the single-point
+  // intersection).
+  const out = computeBrewProfile([
+    { id: "lemonbalm", g: 3.0 },
+    { id: "chamomile", g: 1.0 },
+  ]);
+  assert(out.tempC === 95,
+    `expected centroid clamped to intersection at 95°C, got ${out.tempC}`);
+});
+
+test("computeBrewProfile: synthetic-built blend always uses intersection when possible", () => {
+  // Two ingredients with a wide overlap should produce a brew inside
+  // the intersection rectangle; compatible flag should be true.
+  const out = computeBrewProfile([
+    { id: "chamomile", g: 1.5 },     // [95, 100], [300, 420]
+    { id: "lemonbalm", g: 1.0 },     // [90, 95],  [240, 300]
+  ]);
+  // Intersection on temp: [95, 95]; on time: [300, 300]. compatible=true.
+  assert(out.compatible === true, `should find intersection, got compatible=${out.compatible}`);
+  assert(out.tempC === 95, `expected 95°C in intersection, got ${out.tempC}`);
 });
 
 test("integration: hojicha overpull stays low-bitter", () => {

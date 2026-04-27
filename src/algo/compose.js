@@ -67,20 +67,31 @@ export function computeBrewProfile(ingredients, opts = {}) {
   const tempIntersects = tIntMin <= tIntMax;
   const timeIntersects = sIntMin <= sIntMax;
 
-  // Round to 1°C precision (matches the slider step). Earlier code
-  // snapped to 5°C "for cleaner numbers" — but on a tight range like
-  // Ceylon Black's [95, 100] that pushes the midpoint (97.5) up to 100,
-  // which is exactly the over-extracted anchor. Round to integers so
-  // the recommendation lands at 98°C — inside the standard-cup window.
+  // Inside an intersection the midpoint isn't always optimal — if four
+  // ingredients prefer ~85°C and one prefers ~95°C, the midpoint of the
+  // intersection sits closer to the lone outlier than the cup wants.
+  // Use the grams-weighted centroid of each ingredient's individual
+  // midpoint, clamped into the intersection. Same idea on time. This
+  // also keeps the cup off the upper edge where the parabolic-decay
+  // and astringent-loudness pressure now bites hardest under the new
+  // perception modifiers.
+  const wTempCentroid = pool.reduce((s, { id, g }) => {
+    const [t1, t2] = INGREDIENTS[id].tempC;
+    return s + ((t1 + t2) / 2) * (g / totalG);
+  }, 0);
+  const wTimeCentroid = pool.reduce((s, { id, g }) => {
+    const [s1, s2] = INGREDIENTS[id].timeS;
+    return s + ((s1 + s2) / 2) * (g / totalG);
+  }, 0);
+
   let tempC;
   if (tempIntersects) {
-    tempC = Math.round((tIntMin + tIntMax) / 2);
+    // Round to 1°C precision (matches the slider step). Earlier code
+    // snapped to 5°C; integer rounding lands recommendations cleanly
+    // inside tight ranges like [95, 100] without nudging to the edge.
+    tempC = Math.round(Math.max(tIntMin, Math.min(tIntMax, wTempCentroid)));
   } else {
-    const wTemp = pool.reduce((s, { id, g }) => {
-      const [t1, t2] = INGREDIENTS[id].tempC;
-      return s + ((t1 + t2) / 2) * (g / totalG);
-    }, 0);
-    tempC = Math.round(wTemp);
+    tempC = Math.round(wTempCentroid);
   }
 
   // Time fallback differs from temp because the warning model is
@@ -93,7 +104,8 @@ export function computeBrewProfile(ingredients, opts = {}) {
   // slider longer if they want them fully drawn.
   let timeS;
   if (timeIntersects) {
-    timeS = Math.round((sIntMin + sIntMax) / 2 / 30) * 30;
+    const clamped = Math.max(sIntMin, Math.min(sIntMax, wTimeCentroid));
+    timeS = Math.round(clamped / 30) * 30;
   } else {
     timeS = Math.round(sIntMax / 30) * 30;
   }
@@ -726,6 +738,12 @@ export function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel"
 
   if (picks.length < 2) return null;
 
+  // Generated blends always seek the optimal temperature/time
+  // intersection between their ingredients via computeBrewProfile —
+  // tightening above (runTemp/runTime) keeps every accent/lead in a
+  // shared brew window, and computeBrewProfile then picks the
+  // grams-weighted centroid clamped into the intersection. Falls
+  // back to the dominant compromise only when intersection is empty.
   const profile = computeBrewProfile(picks, { leadOnly: true });
   const isCleanSweet = !!profile.compatible;
 
@@ -1267,7 +1285,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const individualWarnings = pushedHarder ? allIndividualWarnings : [];
 
   // Tradition-over-literature notice fires when at least one lead
-  // ingredient is meaningfully outside its preferred window. Temp
+  // ingredient is meaningfully outside its preferred window OR a
+  // cup-level warning is firing at the curated baseline. Temp
   // deviations count strictly (any value outside [tMin, tMax]); time
   // deviations only count when they push past the time range by more
   // than the tolerance. Accents and catalysts are skipped — they're
@@ -1282,11 +1301,20 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     if (timeS > sMax + TRADITION_TIME_TOLERANCE_S) return true;
     return false;
   });
+  // A tradition that lands on the *edge* of an ingredient's window
+  // (Moroccan Mint at 90°C/180s, gunpowder's upper edge) doesn't
+  // trigger meaningfulDeviation but still fires astringent / tannin
+  // at the curated baseline — that's the case the original notice
+  // was for. If the recipe is traditional, the user is sitting on
+  // the curator's chosen brew, and the cup is already showing some
+  // form of warning, surface the note.
+  const baselineWarningFires = (cupWarnings || []).length > 0;
   // Tradition-over-literature note only makes sense for actual traditional
   // preparations. Experimental and synthetic blends are still "curated" (we
   // pass a baseline for warning suppression) but they don't carry centuries
   // of practice — firing the note on them would misattribute their brew.
-  const traditionNote = atCuratedBaseline && meaningfulDeviation && isTraditional;
+  const traditionNote = atCuratedBaseline && isTraditional
+    && (meaningfulDeviation || baselineWarningFires);
 
   // Merge cup-level and individual warnings. Drop a cup-level tannin
   // duplicate if any individual warning of the same kind already fires
