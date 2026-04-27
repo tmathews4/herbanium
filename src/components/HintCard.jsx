@@ -5,11 +5,9 @@
    sub-tab) the first time the user lands there. Dismissible to a
    persisted flag so it never reappears.
 
-   Visual matches the FirstCupHintCard banner: a compact horizontal
-   row with a small icon on the left, the title + body in the
-   middle, and a single OK pill on the right. The OK button is the
-   only dismiss target — no × in the corner — so the tap target is
-   thumb-friendly and unambiguous.
+   Layout: icon + title/body on top, full-width OK button on its
+   own row underneath. The wide button gives the body text the
+   full card width on narrow phones instead of squeezing it.
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
@@ -22,30 +20,32 @@ export const HintCard = ({ icon, title, body, onDismiss }) => (
     borderRadius: 12,
     background: theme.cream,
     border: `1px solid ${theme.ruleSoft}`,
-    display: "flex", alignItems: "center", gap: 12,
+    display: "flex", flexDirection: "column", gap: 10,
   }}>
-    {icon && (
-      <div style={{ flexShrink: 0 }}>{icon}</div>
-    )}
-    <div style={{ flex: 1, minWidth: 0 }}>
-      {title && (
-        <div style={{
-          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-          lineHeight: 1.25, marginBottom: 2,
-        }}>{title}</div>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+      {icon && (
+        <div style={{ flexShrink: 0, marginTop: 2 }}>{icon}</div>
       )}
-      <div style={{
-        fontFamily: ff.sans, fontSize: 12,
-        color: theme.inkSoft, lineHeight: 1.45,
-      }}>{body}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {title && (
+          <div style={{
+            fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+            lineHeight: 1.25, marginBottom: 2,
+          }}>{title}</div>
+        )}
+        <div style={{
+          fontFamily: ff.sans, fontSize: 12,
+          color: theme.inkSoft, lineHeight: 1.45,
+        }}>{body}</div>
+      </div>
     </div>
     <button
       onClick={onDismiss}
       style={{
-        flexShrink: 0,
+        width: "100%",
         fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.10em",
         textTransform: "uppercase",
-        padding: "8px 18px", borderRadius: 999,
+        padding: "10px 18px", borderRadius: 999,
         background: theme.terra, color: theme.cream,
         border: "none", cursor: "pointer",
       }}
