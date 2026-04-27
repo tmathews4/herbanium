@@ -317,28 +317,88 @@ export const FavoriteCard = ({ b, onTap }) => {
   );
 };
 
+// Compact 3-line cup card used on Home's recent-brews list.
+// Reads as a small table — each line a different lens on the cup —
+// so the user can scan how it impacted them and why they had it:
+//
+//   Quiet Cup                              ●●●●● · 2h ago
+//   for calm  →  calm
+//   floral · 75°C · 4m
+//
+// Line 1: name · rating · relative time
+// Line 2: blend's intent (b.mood) → actual landed mood
+// Line 3: lead flavor + steep temp + steep time
+//
+// "for X" comes from the blend's primary mood — what the cup is
+// known for, the reason a user reaches for it. "actual" is the
+// joined string of moods that landed for this brew. The "brewed"
+// placeholder (no specific landing) shows as a hanging arrow.
 export const CompactSessionRow = ({ s, openBlend, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
+  const { unit } = useUnit();
+  const desiredMood = b.mood || "";
+  const endRaw = (s.actual || "").trim();
+  const endMood = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const flavor = b.flavor
+    || (Array.isArray(b.flavors) && b.flavors[0])
+    || "";
+  const tempStr = b.tempC
+    ? formatTempShort(b.tempC, b.tempC, unit)
+    : "";
+  const timeStr = b.timeS
+    ? `${Math.round(b.timeS / 60)}m`
+    : "";
+  const brewParts = [flavor, tempStr, timeStr].filter(Boolean);
+
   return (
     <button onClick={() => openBlend(s.blendId, s)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       padding: "10px 2px", cursor: "pointer",
-      display: "grid", gridTemplateColumns: "1fr auto auto", gap: 12, alignItems: "center",
+      display: "flex", flexDirection: "column", gap: 3,
     }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
-        <span style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <div style={{
+        display: "flex", alignItems: "baseline", gap: 10, minWidth: 0,
+      }}>
+        <span style={{
+          flex: 1, minWidth: 0,
+          fontFamily: ff.serif, fontSize: 14.5, color: theme.ink,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
           {b.name}
         </span>
-        <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, whiteSpace: "nowrap" }}>
-          {s.intent} → {s.actual}
+        <span style={{
+          flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
+        }}>
+          {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
         </span>
+        <span style={{
+          flexShrink: 0, fontSize: 10, color: theme.ash, letterSpacing: "0.06em",
+        }}>{sessionAgo(s) || s.ago}</span>
       </div>
-      <span style={{ fontSize: 11, color: theme.terra, letterSpacing: "0.1em" }}>
-        {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
-      </span>
-      <span style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em" }}>{sessionAgo(s) || s.ago}</span>
+
+      {(desiredMood || endMood) && (
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: theme.ash, lineHeight: 1.35,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {desiredMood && (<span>for <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>{desiredMood}</span></span>)}
+          <span style={{ margin: "0 6px", color: theme.rule, fontStyle: "normal" }}>→</span>
+          {endMood && (<span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>)}
+        </div>
+      )}
+
+      {brewParts.length > 0 && (
+        <div style={{
+          fontFamily: ff.sans, fontSize: 10.5,
+          color: theme.ash, letterSpacing: "0.04em",
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {brewParts.join(" · ")}
+        </div>
+      )}
     </button>
   );
 };
