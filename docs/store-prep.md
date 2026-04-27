@@ -32,11 +32,11 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
       - Modal overlays (SteepScreen, LogScreen, ElementalArrivalCard,
         FeedbackModal) — top inset
 
-- [ ] **Test localStorage export/import on a physical device.**
-      Capacitor WebView's file-picker behavior differs from desktop
-      browsers. The `Blob` + `download` flow in
-      `usePersistedState.exportAllPersistedState` may need a Capacitor
-      Filesystem plugin path on iOS specifically.
+- [x] ~~Test localStorage export/import on a physical device.~~
+      Decision: export/import is desktop-web only. Hidden in the
+      native wrap via `isNativeApp()` in `src/helpers/platform.js`
+      so iOS / Android users don't see buttons that wouldn't work
+      cleanly anyway. No store-side work here.
 
 - [ ] **Hardware back button on Android.** Capacitor's default is
       "navigate back in WebView history." The app already pushes

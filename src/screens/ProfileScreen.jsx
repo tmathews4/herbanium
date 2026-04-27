@@ -15,6 +15,7 @@ import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
 } from "../hooks/usePersistedState";
+import { isNativeApp } from "../helpers/platform";
 import { FeedbackModal } from "./FeedbackModal";
 import { HintCard } from "../components/HintCard";
 import {
@@ -353,41 +354,45 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           Clearing your browser data will clear your journal.
         </div>
 
-        {/* Export / Import / Feedback */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12, justifyContent: "center" }}>
-          <button
-            onClick={handleExport}
-            style={{
-              fontFamily: ff.sans, fontSize: 12, color: theme.ink,
-              padding: "8px 14px", borderRadius: 999,
-              background: "transparent", border: `1px solid ${theme.ink}`,
-              cursor: "pointer",
-            }}
-          >
-            export your data
-          </button>
-          <button
-            onClick={() => importInputRef.current?.click()}
-            style={{
-              fontFamily: ff.sans, fontSize: 12, color: theme.ink,
-              padding: "8px 14px", borderRadius: 999,
-              background: "transparent", border: `1px solid ${theme.ink}`,
-              cursor: "pointer",
-            }}
-          >
-            import data
-          </button>
-          <input
-            ref={importInputRef}
-            type="file"
-            accept="application/json,.json"
-            onChange={(e) => {
-              handleImportFile(e.target.files?.[0]);
-              e.target.value = "";
-            }}
-            style={{ display: "none" }}
-          />
-        </div>
+        {/* Export / Import — desktop only. Native WebView wraps
+            on iOS and Android have inconsistent file-picker shims
+            and the workflow really suits a desktop save anyway. */}
+        {!isNativeApp() && (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12, justifyContent: "center" }}>
+            <button
+              onClick={handleExport}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+                padding: "8px 14px", borderRadius: 999,
+                background: "transparent", border: `1px solid ${theme.ink}`,
+                cursor: "pointer",
+              }}
+            >
+              export your data
+            </button>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              style={{
+                fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+                padding: "8px 14px", borderRadius: 999,
+                background: "transparent", border: `1px solid ${theme.ink}`,
+                cursor: "pointer",
+              }}
+            >
+              import data
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={(e) => {
+                handleImportFile(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+              style={{ display: "none" }}
+            />
+          </div>
+        )}
         {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
         {importMessage && (
           <div style={{
