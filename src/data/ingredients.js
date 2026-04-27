@@ -167,7 +167,9 @@ const INGREDIENTS = {
   lemonbalm: {
     name: "Lemon Balm", latin: "Melissa officinalis", category: "herbal",
     caffeine: 0, tempC: [90, 95], timeS: [240, 300],
-    effects: [["calm", 5], ["sleepy", 3], ["cooling", 3], ["uplifting", 3], ["soothing", 3]],
+    // Calm 4: chamomile is the calm anchor at 5; lemon balm's rosmarinic-
+    // acid calm sits below that defining peak even though it's strong.
+    effects: [["calm", 4], ["sleepy", 3], ["cooling", 3], ["uplifting", 3], ["soothing", 3]],
     flavors: ["citrus", "mint", "grassy"],
     pairs: ["chamomile", "peppermint", "rose", "spearmint", "lemongrass", "tulsi", "valerian", "linden", "nettle", "dandelion-leaf"],
     dose: "1 tsp · 200ml",
@@ -194,7 +196,10 @@ const INGREDIENTS = {
   peppermint: {
     name: "Peppermint", latin: "Mentha × piperita", category: "herbal",
     caffeine: 0, tempC: [95, 100], timeS: [300, 420],
-    effects: [["cooling", 5], ["digestive", 5], ["calm", 3], ["focus", 2]],
+    // Digestive 4: peppermint anchors cooling at 5; fennel takes the
+    // digestive anchor at 5 (cleaner anethole-led answer), so peppermint
+    // sits at 4 — still strong, but no longer co-equal.
+    effects: [["cooling", 5], ["digestive", 4], ["calm", 3], ["focus", 2]],
     flavors: ["minty", "cool", "grassy"],
     pairs: ["lemonbalm", "ginger", "rooibos", "fennel", "lemongrass", "yerba-mate", "elderflower", "linden", "nettle", "dandelion-leaf", "licorice-root"],
     dose: "1 tsp · 200ml",
@@ -408,7 +413,9 @@ const INGREDIENTS = {
   ginger: {
     name: "Ginger", latin: "Zingiber officinale", category: "spice",
     caffeine: 0, tempC: [100, 100], timeS: [420, 600],
-    effects: [["warming", 5], ["digestive", 5], ["energy", 2], ["soothing", 3], ["grounding", 1]],
+    // Digestive 4: ginger's signature is warming 5; digestive at 4 reflects
+    // its nausea-targeting register without tying the fennel anchor.
+    effects: [["warming", 5], ["digestive", 4], ["energy", 2], ["soothing", 3], ["grounding", 1]],
     flavors: ["spiced", "warm", "citrus"],
     pairs: ["assam", "rooibos", "peppermint", "cinnamon", "cardamom", "cloves", "lemongrass", "turmeric", "black-pepper", "tulsi", "lemonbalm", "echinacea", "yerba-mate", "elderflower", "licorice-root"],
     dose: "2 coins · 250ml",
@@ -658,7 +665,10 @@ const INGREDIENTS = {
   gyokuro: {
     name: "Gyokuro", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
     caffeine: 45, tempC: [50, 60], timeS: [90, 120],
-    effects: [["focus", 5], ["calm", 5], ["uplifting", 3], ["cooling", 3], ["energy", 2], ["soothing", 3], ["grounding", 1]],
+    // Focus 4 / calm 4: matcha is the focus anchor and chamomile the calm
+    // anchor; gyokuro carries L-theanine richly but sits a notch below both
+    // anchors rather than tying.
+    effects: [["focus", 4], ["calm", 4], ["uplifting", 3], ["cooling", 3], ["energy", 2], ["soothing", 3], ["grounding", 1]],
     flavors: ["umami", "marine", "sweet", "buttery", "seaweed"],
     pairs: ["rose"],
     dose: "1 tbsp (~4 g) · 100ml",
@@ -789,7 +799,10 @@ const INGREDIENTS = {
   hojicha: {
     name: "Hojicha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
     caffeine: 8, tempC: [95, 100], timeS: [30, 60],
-    effects: [["soothing", 5], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
+    // Soothing 4: rooibos becomes the soothing anchor at 5; hojicha's
+    // roasted-comfort soothing sits at 4, expressing the same register
+    // through warmth rather than the rooibos full-body smoothness.
+    effects: [["soothing", 4], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
     flavors: ["roasted", "woody", "caramel", "nutty", "toasted"],
     pairs: ["rooibos", "ginger", "vanilla"],
     dose: "1 tbsp · 250ml",
@@ -961,7 +974,9 @@ const INGREDIENTS = {
   puerh: {
     name: "Shou Pu-erh", latin: "Camellia sinensis", category: "true tea", subcategory: "pu-erh",
     caffeine: 35, tempC: [95, 100], timeS: [60, 180],
-    effects: [["digestive", 5], ["grounding", 3], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
+    // Digestive 4: post-meal traditional but the fennel anchor takes the
+    // defining 5; puerh sits at 4 alongside its grounding/warming register.
+    effects: [["digestive", 4], ["grounding", 3], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
     flavors: ["earthy", "woody", "dark", "leather", "mineral"],
     pairs: [],
     dose: "1 tsp · 200ml · multi-steep",
@@ -1043,7 +1058,9 @@ const INGREDIENTS = {
     subcategory: "root",
     aliases: ["all-heal", "garden heliotrope", "setwall"],
     caffeine: 0, tempC: [85, 95], timeS: [600, 900],
-    effects: [["sleepy", 5], ["calm", 5], ["soothing", 4], ["grounding", 2]],
+    // Calm 4: valerian's signature is sleepy 5; calm sits below the
+    // chamomile anchor at 4 even though the GABAergic register reads strong.
+    effects: [["sleepy", 5], ["calm", 4], ["soothing", 4], ["grounding", 2]],
     flavors: ["earthy", "musky", "pungent", "bitter", "woody"],
     basicTastes: { bitter: 4, astringent: 3, earthy: 4, pungent: 3, sweet: 0 },
     pairs: ["lemonbalm", "chamomile", "lavender", "passionflower"],
@@ -1165,7 +1182,9 @@ const INGREDIENTS = {
     name: "Linden", latin: "Tilia cordata", category: "flower",
     aliases: ["lime flower", "Tilleul", "Tila", "Lipa", "Linde"],
     caffeine: 0, tempC: [85, 95], timeS: [300, 600],
-    effects: [["calm", 5], ["sleepy", 3], ["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["digestive", 1]],
+    // Calm 4: linden's tisane calm reads gentler than chamomile's defining
+    // apigenin peak; the anchor sits at 5 and linden a notch below.
+    effects: [["calm", 4], ["sleepy", 3], ["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["digestive", 1]],
     flavors: ["honey-sweet", "citrusy", "floral", "delicate", "vegetal"],
     basicTastes: { sweet: 3, aromatic: 3, bitter: 0, astringent: 0 },
     pairs: ["chamomile", "lemonbalm", "lavender", "passionflower", "peppermint", "rose", "elderflower"],
@@ -1208,7 +1227,9 @@ const INGREDIENTS = {
     subcategory: "root",
     aliases: ["sweet root", "Gan Cao 甘草", "Mulethi", "Yashtimadhu", "liquorice"],
     caffeine: 0, tempC: [95, 100], timeS: [300, 900],
-    effects: [["soothing", 5], ["digestive", 3], ["warming", 1], ["calm", 1], ["uplifting", 1]],
+    // Soothing 4: rooibos anchors soothing at 5; licorice's throat-coat
+    // soothing is real but more localized than rooibos's full-body register.
+    effects: [["soothing", 4], ["digestive", 3], ["warming", 1], ["calm", 1], ["uplifting", 1]],
     flavors: ["sweet", "anise", "woody", "earthy", "bitter"],
     basicTastes: { sweet: 5, aromatic: 3, bitter: 1, astringent: 1, umami: 1 },
     pairs: ["ginger", "cinnamon", "fennel", "peppermint"],
@@ -1403,7 +1424,9 @@ const INGREDIENTS = {
     subcategory: "fungus",
     aliases: ["Lingzhi 灵芝", "Mannentake 万年茸", "mushroom of immortality"],
     caffeine: 0, tempC: [95, 100], timeS: [1800, 7200],
-    effects: [["grounding", 5], ["sleepy", 4], ["calm", 5], ["soothing", 4], ["warming", 1]],
+    // Calm 4: reishi's signature is grounding 5; calm sits at 4, supporting
+    // rather than co-equal with the chamomile anchor.
+    effects: [["grounding", 5], ["sleepy", 4], ["calm", 4], ["soothing", 4], ["warming", 1]],
     flavors: ["bitter", "earthy", "woody", "mushroomy", "tannic"],
     basicTastes: { bitter: 5, astringent: 3, earthy: 4, umami: 1, sweet: 0 },
     pairs: ["ashwagandha", "cinnamon", "lions-mane"],

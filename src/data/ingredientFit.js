@@ -72,14 +72,23 @@ export const KNOWN_FLAVORS = new Set([
 // invariant breaks (every other ingredient is calibrated relative
 // to these). Add anchors for new axes deliberately, not casually.
 export const EFFECT_ANCHORS = Object.freeze({
-  calm:    { id: "chamomile",  strength: 5 },
-  focus:   { id: "matcha",     strength: 5 },
-  cooling: { id: "peppermint", strength: 5 },
-  warming: { id: "ginger",     strength: 5 },
-  sleepy:  { id: "valerian",   strength: 5 },
-  energy:  { id: "assam",      strength: 5 },
+  calm:      { id: "chamomile",  strength: 5 },
+  focus:     { id: "matcha",     strength: 5 },
+  cooling:   { id: "peppermint", strength: 5 },
+  warming:   { id: "ginger",     strength: 5 },
+  sleepy:    { id: "valerian",   strength: 5 },
+  energy:    { id: "assam",      strength: 5 },
   uplifting: { id: "darjeeling", strength: 5 },
-  grounding: { id: "reishi",   strength: 5 },
+  grounding: { id: "reishi",     strength: 5 },
+  // Anethole's antispasmodic specificity makes fennel the cleanest
+  // single answer for digestive — peppermint and ginger are also strong
+  // but their primary registers are cooling and warming respectively.
+  digestive: { id: "fennel",     strength: 5 },
+  // Rooibos's full-body, caffeine-free, low-tannin smoothness reads as
+  // the most defining "soothing" expression in the catalog. Hojicha
+  // and licorice are runners-up but lean into roasted-comfort and
+  // throat-coat respectively.
+  soothing:  { id: "rooibos",    strength: 5 },
 });
 
 // Flavor anchors — for each declared flavor axis, the ingredient
