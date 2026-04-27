@@ -23,8 +23,7 @@ import { OmenCard } from "./OmenCard";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import {
-  getElementalDisplayName, getElementalDisplayDesc,
-  pickRandomCreature, flavorLineFor,
+  buildElementalNaming, flavorLineFor,
 } from "../data/elementalAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 
@@ -61,13 +60,22 @@ export const BestiaryView = ({
   const attrEvaluation = evaluateAttributes(attrCtx);
   const elementalSeed = profile?.createdAt || profile?.name || "anon";
 
-  const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => {
-    const creature = a.random ? pickRandomCreature(a, elementalSeed) : undefined;
-    const merged = creature ? { ...a, creature } : { ...a };
+  // Per-user naming map: minimizes adjective/creature duplicates by
+  // giving each user a permutation of the pools and assigning by
+  // stable order, instead of independent per-attr hashing.
+  const earned = attrEvaluation.filter(a => a.earned);
+  const naming = buildElementalNaming(earned, elementalSeed);
+  const earnedAttrs = earned.map(a => {
+    const n = naming.get(a.id) || {};
+    const adj = n.adjective || "";
+    const creature = n.creature || "Spirit";
+    const flavor = flavorLineFor(adj);
+    const baseDesc = (a.desc || "").trim();
     return {
-      ...merged,
-      displayName: getElementalDisplayName(merged, elementalSeed),
-      desc: getElementalDisplayDesc(merged, elementalSeed),
+      ...a,
+      creature,
+      displayName: `The ${adj} ${creature}`,
+      desc: baseDesc ? `${flavor} ${baseDesc}` : flavor,
     };
   });
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
@@ -206,10 +214,10 @@ export const BestiaryView = ({
             transition: "all 0.18s ease",
           }}
         >
-          {summonExhausted ? "no elemental waiting"
-            : !omenShown ? "summon your first"
-            : pendingArrivals.length > 1 ? `summon (${pendingArrivals.length} waiting)`
-            : "summon elemental"}
+          {summonExhausted ? "no specimen waiting"
+            : !omenShown ? "log your first"
+            : pendingArrivals.length > 1 ? `log (${pendingArrivals.length} waiting)`
+            : "log elemental"}
         </button>
       </div>
       <div style={{
@@ -217,9 +225,9 @@ export const BestiaryView = ({
         color: theme.ash, lineHeight: 1.45, marginBottom: 12,
       }}>
         Your field notebook of elementals — engage with the kettle in
-        different ways and earn one to sketch into the page. Tap{" "}
-        <em style={{ color: theme.terra, fontStyle: "normal" }}>Summon</em>{" "}
-        to observe the next one waiting and add it to the bestiary.
+        different ways and earn a specimen to log. Tap{" "}
+        <em style={{ color: theme.terra, fontStyle: "normal" }}>Log</em>{" "}
+        to observe the next one waiting and enter it into the bestiary.
       </div>
 
       {omenShown && (

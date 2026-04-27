@@ -303,6 +303,145 @@ export function pickRandomCreature(attr, profileSeed) {
   return RANDOM_CREATURE_POOL[hash(String(seed)) % RANDOM_CREATURE_POOL.length];
 }
 
+// Per-attribute fixed adjective. When set, the creature is rolled
+// at random from the wild pool (the inverse of CREATURE_OVERRIDES,
+// which fixes the creature and randomizes the adjective). This
+// gives some elementals a thematic adjective signature with a
+// per-user creature surprise — half-controlled, half-not — so
+// each user's bestiary reads with mixed schemas.
+export const ADJECTIVE_OVERRIDES = {
+  // Time-of-day & seasonal triggers feel naturally adjective-led.
+  "dawn-steeper":     "Daybreak",
+  "midnight-pourer":  "Midnight",
+  "afternoon-constant": "Sun",
+  "evening-familiar": "Twilight",
+  "snowqueen":        "Frost",
+  "summer-forager":   "Bloom",
+  "autumn-hearth":    "Ember",
+  "spring-riser":     "Meadow",
+  // Mood / flavor anchors with an obvious thematic word.
+  "smokesworn":       "Smoke",
+  "the-mineralist":   "Stone",
+  "the-whitespace":   "Hush",
+  "ginger-hand":      "Cinder",
+  // Multi-condition rares that benefit from a thematic tag.
+  "morning-mountain": "Daybreak",
+  "solstice-soul":    "Star",
+  "witching-hour":    "Midnight",
+};
+
+// Deterministic seeded shuffle (Fisher-Yates with a linear
+// congruential RNG). Returns a fresh array; input is not mutated.
+function shuffleSeeded(arr, seed) {
+  const out = [...arr];
+  let h = hash(String(seed)) | 0;
+  for (let i = out.length - 1; i > 0; i--) {
+    h = (h * 1664525 + 1013904223) | 0;
+    const j = Math.abs(h) % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   buildElementalNaming(attrs, profileSeed)
+
+   Pre-computes a per-user naming map for a list of attributes.
+   Replaces the previous per-attr `hash mod poolSize` approach with
+   a per-user *permutation* so that:
+     - The first poolSize attrs in any pool are guaranteed unique
+       adjectives (or creatures, for the random-creature schemas).
+     - Subsequent attrs cycle through the permutation again, so
+       the worst-case duplicates are minimized and well-spread.
+
+   Three schemas, in priority order:
+     A) attr.random === true       → both adjective AND creature
+        random; both drawn from a per-user permutation of the
+        combined adjective pool / wild creature pool.
+     B) ADJECTIVE_OVERRIDES[id]    → adjective fixed; creature is
+        rolled from a per-user permutation of the wild pool.
+     C) default                    → creature fixed via
+        CREATURE_OVERRIDES (or attr.name fallback); adjective is
+        drawn from a per-user permutation of the appropriate
+        element/gem pool.
+
+   Returns a Map: attr.id → { adjective, creature, displayName,
+   adjectivePoolKey }.
+   ────────────────────────────────────────────────────────────── */
+export function buildElementalNaming(attrs, profileSeed) {
+  const seed = profileSeed || "anon";
+  const out = new Map();
+
+  // Group attrs into the three buckets above with stable ordering
+  // (sorted by id) so each user gets the same permutation slot for
+  // the same attr id.
+  const byElement = [];
+  const byGem     = [];
+  const byAllAdj  = [];   // schema A (random) — uses combined pool
+  const fixedAdj  = [];   // schema B — adjective fixed, creature random
+  const allRandom = [];   // schema A — both random
+
+  attrs.forEach(attr => {
+    if (!attr || !attr.id) return;
+    if (attr.random) {
+      allRandom.push(attr);
+      byAllAdj.push(attr);
+    } else if (ADJECTIVE_OVERRIDES[attr.id]) {
+      fixedAdj.push(attr);
+    } else {
+      const poolKey = poolFor(attr);
+      if (poolKey === "gem") byGem.push(attr);
+      else                   byElement.push(attr);
+    }
+  });
+  byElement.sort((a, b) => a.id.localeCompare(b.id));
+  byGem    .sort((a, b) => a.id.localeCompare(b.id));
+  byAllAdj .sort((a, b) => a.id.localeCompare(b.id));
+  allRandom.sort((a, b) => a.id.localeCompare(b.id));
+  fixedAdj .sort((a, b) => a.id.localeCompare(b.id));
+
+  const elementPerm = shuffleSeeded(ELEMENT_ADJECTIVES, `${seed}|elementAdj`);
+  const gemPerm     = shuffleSeeded(GEM_ADJECTIVES,     `${seed}|gemAdj`);
+  const allAdjPerm  = shuffleSeeded(ALL_ADJECTIVES,     `${seed}|allAdj`);
+  const wildPerm    = shuffleSeeded(RANDOM_CREATURE_POOL, `${seed}|wildCreature`);
+  const wildPermAlt = shuffleSeeded(RANDOM_CREATURE_POOL, `${seed}|wildCreature|alt`);
+
+  // Default schema C — fixed creature, permuted adjective.
+  byElement.forEach((attr, i) => {
+    out.set(attr.id, {
+      adjective: elementPerm[i % elementPerm.length],
+      creature:  creatureFor(attr),
+    });
+  });
+  byGem.forEach((attr, i) => {
+    out.set(attr.id, {
+      adjective: gemPerm[i % gemPerm.length],
+      creature:  creatureFor(attr),
+    });
+  });
+
+  // Schema A — both random. Draw adjective from combined pool,
+  // creature from wild pool. Two independent permutations means a
+  // user gets unique adjectives and unique creatures within their
+  // first ~50 random attrs.
+  allRandom.forEach((attr, i) => {
+    out.set(attr.id, {
+      adjective: allAdjPerm[i % allAdjPerm.length],
+      creature:  wildPerm[i % wildPerm.length],
+    });
+  });
+
+  // Schema B — fixed adjective, random creature from wild pool.
+  fixedAdj.forEach((attr, i) => {
+    out.set(attr.id, {
+      adjective: ADJECTIVE_OVERRIDES[attr.id],
+      creature:  wildPermAlt[i % wildPermAlt.length],
+    });
+  });
+
+  return out;
+}
+
 // Compose the user-facing display name for an elemental:
 // "The {randomAdjective} {creatureNoun}". Deterministic per
 // (profileSeed, attr.id) so the same user keeps the same name for
