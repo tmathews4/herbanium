@@ -362,12 +362,12 @@ const AttributeShelf = ({
         setSelecting(false);
         return;
       }
-      // 2. Swap-in-place: reserve tile click while a featured
-      //    tile is marked → swap.
-      if (swappingId && inReserve && swapFeatured) {
-        swapFeatured(swappingId, a.id);
-        setSwappingId(null);
-        setOpenId(null);
+      // 2. Swap-in-progress: reserve tile click while a featured
+      //    tile is marked → just open the reserve's detail card so
+      //    the user can read it. The swap itself is explicit via
+      //    a button inside the open detail card.
+      if (swappingId && inReserve) {
+        setOpenId(a.id);
         return;
       }
       // 3. Featured tile (non-creation): tap toggles swap mode
@@ -472,23 +472,61 @@ const AttributeShelf = ({
             }}>
               {openAttr.desc}
             </div>
-            {canToggleOpen && (
-              <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => toggleFeatured(openAttr.id)}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, color: theme.terra,
-                    background: "transparent",
-                    border: `1px solid ${theme.terra}`, borderRadius: 999,
-                    padding: "5px 12px", cursor: "pointer",
-                  }}
-                >
-                  {openIsFeatured
-                    ? "remove from bestiary front-page"
-                    : featuredFull ? "swap onto front-page" : "pin to front-page"}
-                </button>
-              </div>
-            )}
+            {(() => {
+              // Swap-in-progress: a featured tile is marked AND the
+              // open detail belongs to a reserve tile (not the marked
+              // one). Replace the standard pin/remove button with an
+              // explicit 'swap with X' so the user can read both
+              // descriptions before committing.
+              const swapPending = swappingId
+                && swappingAttr
+                && openAttr.id !== swappingId
+                && !!reserve.find(a => a.id === openAttr.id)
+                && swapFeatured;
+              if (swapPending) {
+                return (
+                  <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      onClick={() => {
+                        swapFeatured(swappingId, openAttr.id);
+                        setSwappingId(null);
+                        setOpenId(null);
+                      }}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.10em",
+                        textTransform: "uppercase",
+                        color: theme.cream,
+                        background: theme.terra,
+                        border: `1px solid ${theme.terra}`, borderRadius: 999,
+                        padding: "6px 14px", cursor: "pointer",
+                      }}
+                    >
+                      swap in for {swappingAttr.displayName || swappingAttr.name}
+                    </button>
+                  </div>
+                );
+              }
+              if (canToggleOpen) {
+                return (
+                  <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      onClick={() => toggleFeatured(openAttr.id)}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                        background: "transparent",
+                        border: `1px solid ${theme.terra}`, borderRadius: 999,
+                        padding: "5px 12px", cursor: "pointer",
+                      }}
+                    >
+                      {openIsFeatured
+                        ? "remove from bestiary front-page"
+                        : featuredFull ? "swap onto front-page" : "pin to front-page"}
+                    </button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
         );
       })()}
@@ -537,7 +575,9 @@ const AttributeShelf = ({
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
           color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
         }}>
-          Pick a reserve elemental to swap in for{" "}
+          Open a reserve elemental to read it, then tap{" "}
+          <em style={{ color: theme.terra, fontStyle: "normal" }}>swap in</em>{" "}
+          to replace{" "}
           <em style={{ color: theme.terra, fontStyle: "normal" }}>
             {swappingAttr.displayName || swappingAttr.name}
           </em>
