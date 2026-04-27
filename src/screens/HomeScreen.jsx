@@ -107,13 +107,14 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         );
       })()}
 
-      {/* CTAs — primary (brew) and secondary (journal) */}
+      {/* Primary CTA — brew. Secondary "Note a moment" lives under
+          the favorites bar below. */}
       <button onClick={() => go("apothecary")} style={{
         width: "100%", textAlign: "left",
         background: theme.ink, color: theme.cream,
         border: "none", borderRadius: 14, padding: "14px 18px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", marginBottom: 8,
+        cursor: "pointer", marginBottom: 24,
         boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
       }}>
         <div>
@@ -127,19 +128,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </div>
         </div>
         <Kettle size={24} c={theme.cream} />
-      </button>
-
-      <button onClick={() => go("shelf", { mode: "journal" })} style={{
-        width: "100%", textAlign: "left",
-        background: theme.cream, color: theme.ink,
-        border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "14px 18px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", marginBottom: 24,
-      }}>
-        <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
-          Note a moment →
-        </div>
-        <Pencil size={20} c={theme.ink} />
       </button>
 
       {/* New-user onboarding card */}
@@ -181,7 +169,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             </span>
           </div>
           <div style={{
-            display: "flex", gap: 10, overflowX: "auto", marginBottom: 22,
+            display: "flex", gap: 10, overflowX: "auto", marginBottom: 16,
             paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
           }}>
             {favoriteBlends.map(b => (
@@ -190,6 +178,20 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </div>
         </>
       )}
+
+      {/* Secondary CTA — note a moment, lives below the favorites row. */}
+      <button onClick={() => go("shelf", { mode: "journal" })} style={{
+        width: "100%", textAlign: "left",
+        background: theme.cream, color: theme.ink,
+        border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "14px 18px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        cursor: "pointer", marginBottom: 24,
+      }}>
+        <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
+          Note a moment →
+        </div>
+        <Pencil size={20} c={theme.ink} />
+      </button>
 
       {/* Your recent cups */}
       {yourSessions.length > 0 && (
