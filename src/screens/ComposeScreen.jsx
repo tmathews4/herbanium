@@ -62,7 +62,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, bestiaryHintShown, dismissBestiaryHint }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -93,35 +93,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     onClearDone: clearDonePlannerItems,
   };
   const { unit, weightUnit } = useUnit();
-  // Mode universe per section:
+  // Mode universe per section (state lives in App so the bottom
+  // TabBar can render the sub-tabs as part of the same dock):
   //   apothecary: reverse (Blend) | forward (Vibe) | compendium
   //   shelf:      recipes | pantry | journal (bestiary nested under journal)
-  const initialMode = section === "shelf" ? "recipes" : "reverse";
-  const [mode, setMode] = useState(initialMode);
   // Secondary toggle inside the Journal sub-tab — flips between the
   // brew/entry timeline and the elemental Bestiary that used to sit
   // as its own primary tab.
   const [journalSubTab, setJournalSubTab] = useState("journal"); // journal | bestiary
-  // Reset mode when section changes so the user lands on a valid sub-tab.
-  useEffect(() => {
-    const validModes = section === "shelf"
-      ? ["recipes", "pantry", "journal"]
-      : ["reverse", "forward", "compendium"];
-    if (!validModes.includes(mode)) setMode(validModes[0]);
-  }, [section]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // When the user manually clicks the Recipe Book sub-tab, reset the
-  // catalogue filter to "all" so the full stock — traditionals plus
-  // Herbanium's house recipes — is visible by default. (composePreselect
-  // can still flip it to "favorites" when a star is tapped from Home.)
-  const setModeUserAction = (next) => {
-    if (next === "recipes" && mode !== "recipes") {
-      setCatalogueFilter("all");
-    }
-    setMode(next);
-  };
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
-  const [catalogueFilter, setCatalogueFilter] = useState("all");
   const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
@@ -268,53 +248,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     ? checkIngredientInteractions(effectiveIngredients)
     : [];
 
-  // Sub-tab strip — pinned to the bottom of the scroll viewport (just
-  // above the main TabBar) so users on phones don't have to reach to
-  // the top of the screen to switch sub-modes. Lives at the end of
-  // the return tree with position: sticky bottom 0.
-  const sectionTabs = section === "shelf"
-    ? [
-        ["recipes",    "Recipes"],
-        ["pantry",     "Pantry"],
-        ["journal",    "Journal"],
-      ]
-    : [
-        ["reverse",    "Blend"],
-        ["forward",    "Vibe"],
-        ["compendium", "Compendium"],
-      ];
-  const stickySubTabBar = (
-    <div style={{
-      position: "sticky", bottom: 0, zIndex: 5,
-      // Match the TabBar's bg/blur so the two read as one continuous
-      // strip. No top-shadow, no extra padding — the sub-tabs sit
-      // flush against the main tab row beneath them.
-      background: "rgba(243,236,220,0.94)",
-      backdropFilter: "blur(8px)",
-      borderTop: `1px solid ${theme.rule}`,
-      padding: "8px 12px 0",
-    }}>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${sectionTabs.length}, 1fr)`,
-        border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
-        background: theme.cream,
-      }}>
-        {sectionTabs.map(([k, label]) => (
-          <button key={k} onClick={() => setModeUserAction(k)} style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
-            padding: "9px 4px", cursor: "pointer",
-            background: mode === k ? theme.ink : "transparent",
-            color: mode === k ? theme.cream : theme.inkSoft,
-            border: "none",
-          }}>{label}</button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
-    <>
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
       {/* First-visit tutorial — different copy per section. */}
       {section === "apothecary" && !composeHintShown && dismissComposeHint && (
@@ -1460,8 +1394,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       )}
 
     </div>
-    {stickySubTabBar}
-    </>
   );
 };
 

@@ -34,7 +34,7 @@ import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedS
    Tab bar
    ────────────────────────────────────────────────────────────── */
 
-const TabBar = ({ tab, setTab }) => {
+const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
     { k: "apothecary", label: "Apothecary", icon: <Flower size={18} /> },
@@ -42,32 +42,73 @@ const TabBar = ({ tab, setTab }) => {
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
 
+  // Sub-tabs live inside the same dock as the main tabs and only show
+  // up when the user's on a section that has them. They share the
+  // dock's background so the whole bottom bar reads as one GUI unit.
+  const subTabs = tab === "apothecary"
+    ? [["reverse", "Blend"], ["forward", "Vibe"], ["compendium", "Compendium"]]
+    : tab === "shelf"
+      ? [["recipes", "Recipes"], ["pantry", "Pantry"], ["journal", "Journal"]]
+      : null;
+  const subActive = tab === "apothecary" ? apothecaryMode
+                  : tab === "shelf"      ? shelfMode
+                  : null;
+  const onSubClick = tab === "apothecary" ? setApothecaryModeAction
+                   : tab === "shelf"      ? setShelfModeAction
+                   : null;
+
   return (
     <div style={{
       flexShrink: 0,
-      padding: "10px 12px 22px",
       background: "rgba(243,236,220,0.94)",
       backdropFilter: "blur(8px)",
       borderTop: `1px solid ${theme.rule}`,
-      display: "grid", gridTemplateColumns: "1.35fr 1fr 1fr 1fr", gap: 4,
     }}>
-      {tabs.map((t, i) => (
-        <button key={t.k} onClick={() => setTab(t.k)} style={{
-          background: "transparent", border: "none", cursor: "pointer",
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 3,
-          padding: "4px 2px",
-          color: tab === t.k ? theme.terra : theme.ash,
-          minWidth: 0,
-          borderRight: i === 0 ? `1px solid ${theme.ruleSoft}` : "none",
+      {subTabs && onSubClick && (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${subTabs.length}, 1fr)`,
+          gap: 4,
+          padding: "8px 12px 0",
+          borderBottom: `1px solid ${theme.ruleSoft}`,
         }}>
-          {React.cloneElement(t.icon, { c: tab === t.k ? theme.terra : theme.ash })}
-          <span style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase",
-            whiteSpace: "nowrap",
-            display: "inline-block", width: 78, textAlign: "center",
-          }}>{t.label}</span>
-        </button>
-      ))}
+          {subTabs.map(([k, label]) => (
+            <button key={k} onClick={() => onSubClick(k)} style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              padding: "6px 4px 8px",
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: subActive === k ? theme.terra : theme.ash,
+              borderBottom: subActive === k
+                ? `2px solid ${theme.terra}`
+                : `2px solid transparent`,
+              marginBottom: -1,
+            }}>{label}</button>
+          ))}
+        </div>
+      )}
+      <div style={{
+        padding: "10px 12px 22px",
+        display: "grid", gridTemplateColumns: "1.35fr 1fr 1fr 1fr", gap: 4,
+      }}>
+        {tabs.map((t, i) => (
+          <button key={t.k} onClick={() => setTab(t.k)} style={{
+            background: "transparent", border: "none", cursor: "pointer",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 3,
+            padding: "4px 2px",
+            color: tab === t.k ? theme.terra : theme.ash,
+            minWidth: 0,
+            borderRight: i === 0 ? `1px solid ${theme.ruleSoft}` : "none",
+          }}>
+            {React.cloneElement(t.icon, { c: tab === t.k ? theme.terra : theme.ash })}
+            <span style={{
+              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase",
+              whiteSpace: "nowrap",
+              display: "inline-block", width: 78, textAlign: "center",
+            }}>{t.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
@@ -498,6 +539,21 @@ export default function App() {
   // specific sub-mode (e.g. Profile → Compose Shelf → Journal).
   const [composeView, setComposeView] = useState(null);
 
+  // Sub-tab modes for Apothecary and Shelf. Lifted to App so the
+  // TabBar can render them as a row inside the bottom dock — both
+  // surfaces (sub-tab strip + main tabs) belong to the same GUI unit.
+  const [apothecaryMode, setApothecaryMode] = useState("reverse");
+  const [shelfMode, setShelfMode]           = useState("recipes");
+  const [catalogueFilter, setCatalogueFilter] = useState("all");
+  const setApothecaryModeAction = (k) => setApothecaryMode(k);
+  const setShelfModeAction = (k) => {
+    // Manual click on Recipes resets the catalogue filter to "all" so
+    // the user sees the full stock by default; deep-links via
+    // composePreselect can still flip it to "favorites" downstream.
+    if (k === "recipes" && shelfMode !== "recipes") setCatalogueFilter("all");
+    setShelfMode(k);
+  };
+
   const go = (to, arg) => {
     if (to === "ingredient") {
       if (arg) setIngredientId(arg);
@@ -760,8 +816,8 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} />}
       </div>
 
@@ -774,7 +830,14 @@ export default function App() {
         <FirstCupHintCard onDismiss={() => setFirstCupHintShown(true)} />
       )}
 
-      <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />
+      <TabBar
+        tab={tab}
+        setTab={(k) => { setOverlay(null); setTab(k); }}
+        apothecaryMode={apothecaryMode}
+        shelfMode={shelfMode}
+        setApothecaryModeAction={setApothecaryModeAction}
+        setShelfModeAction={setShelfModeAction}
+      />
 
       {overlay === "steep" && session && (
         <SteepScreen
