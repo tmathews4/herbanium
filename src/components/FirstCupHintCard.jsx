@@ -18,7 +18,7 @@ export const FirstCupHintCard = ({ onDismiss }) => (
     padding: "12px 16px",
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div style={{ flex: 1, minWidth: 0 }}>
+    <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
       <div style={{
         fontFamily: ff.serif, fontSize: 14, color: theme.ink,
         lineHeight: 1.25, marginBottom: 2,

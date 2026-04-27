@@ -22,7 +22,7 @@ export const HintCard = ({ title, body, onDismiss }) => (
     border: `1px solid ${theme.ruleSoft}`,
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div>
+    <div style={{ textAlign: "left" }}>
       {title && (
         <div style={{
           fontFamily: ff.serif, fontSize: 14, color: theme.ink,
