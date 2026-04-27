@@ -1026,16 +1026,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
         return (
           <div style={{ marginTop: 4 }}>
-            {!journalHintShown && dismissJournalHint && (
-              <HintCard
-                icon={<Pencil size={16} c={theme.terra} />}
-                title="Journal"
-                body={<>
-                  <strong style={{ color: theme.terra }}>+ new entry</strong> to write · cups appear here too.
-                </>}
-                onDismiss={dismissJournalHint}
-              />
-            )}
             {/* Planner — collapsed by default; the journal timeline
                 reads first. Click the header to expand. The brew-page
                 modal still opens the same shared state. */}
