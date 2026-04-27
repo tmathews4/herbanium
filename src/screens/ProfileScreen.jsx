@@ -353,7 +353,13 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {/* self-knowledge — hidden entirely when the user has banished
           the spirits via Preferences below. */}
       {!animisBanished && (<>
-      <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">Animis Grove</SectionLabel></div>
+      <div style={{ margin: "24px 0 6px" }}><SectionLabel n="i">Animis Grove</SectionLabel></div>
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+        color: theme.ash, lineHeight: 1.5, marginBottom: 12,
+      }}>
+        Spirit-like animal elementals are attracted to those who brew with intention.
+      </div>
       <div style={{
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
