@@ -28,6 +28,7 @@ import {
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
+import { Planner, PlannerModal } from "../components/Planner";
 import { HintCard } from "../components/HintCard";
 import { Sprig, Pencil } from "../components/icons";
 
@@ -60,7 +61,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -73,6 +74,18 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
+  // Planner modal state — opens from a button on the Apothecary brew
+  // page so the user can glance at their day plan without leaving the
+  // brew flow. The same items are also editable inline in Shelf > Journal.
+  const [plannerOpen, setPlannerOpen] = useState(false);
+  const plannerProps = {
+    items: plannerItems || [],
+    onAdd: addPlannerItem,
+    onToggle: togglePlannerItem,
+    onEdit: editPlannerItem,
+    onDelete: deletePlannerItem,
+    onClearDone: clearDonePlannerItems,
+  };
   const { unit, weightUnit } = useUnit();
   // Mode universe per section:
   //   apothecary: reverse (Blend) | forward (Vibe) | compendium
@@ -303,6 +316,43 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           </div>
         );
       })()}
+
+      {/* Planner CTA — small button in the apothecary brew flow that
+          pops up the day plan over the brew window. Hidden in
+          Compendium mode (no brew happening there). */}
+      {section === "apothecary" && (mode === "forward" || mode === "reverse") && (
+        <div style={{
+          display: "flex", justifyContent: "flex-end", alignItems: "center",
+          gap: 6, marginBottom: 12,
+        }}>
+          <button
+            onClick={() => setPlannerOpen(true)}
+            style={{
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: theme.terra,
+              background: "transparent",
+              border: `1px solid ${theme.terra}`,
+              borderRadius: 999, padding: "5px 12px",
+              cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+            }}
+            title="open today's plan"
+          >
+            <Pencil size={11} c={theme.terra} />
+            <span>Planner</span>
+            {(plannerItems || []).length > 0 && (
+              <span style={{
+                fontFamily: ff.serif, fontStyle: "italic",
+                fontSize: 10.5, letterSpacing: 0,
+                textTransform: "none", color: theme.ash,
+              }}>
+                · {(plannerItems || []).filter(i => !i.done).length} open
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {mode === "forward" && (
         <>
@@ -1019,6 +1069,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 onDismiss={dismissJournalHint}
               />
             )}
+            {/* Planner — small "today's plan" list above the timeline.
+                Same state is also reachable as a modal from the brew page. */}
+            <div style={{ marginBottom: 14 }}>
+              <Planner {...plannerProps} />
+            </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{
                 fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
@@ -1284,6 +1339,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           dismissPantryHint={dismissPantryHint}
         />
       )}
+
+      <PlannerModal
+        open={plannerOpen}
+        onClose={() => setPlannerOpen(false)}
+        plannerProps={plannerProps}
+      />
     </div>
   );
 };
