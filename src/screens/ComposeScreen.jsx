@@ -246,8 +246,8 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         {[
           ["reverse",    "Blend"],
           ["forward",    "Vibe"],
-          ["apothecary", "Shelf"],
           ["journal",    "Journal"],
+          ["apothecary", "Shelf"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => setMode(k)} style={{
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
