@@ -29,7 +29,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
-import { padTempRange, padTimeRange } from "../algo/brewBounds";
+import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import {
@@ -38,33 +38,8 @@ import {
 import { EffectBar } from "./EffectBar";
 import { VocabInfoCard } from "./layout";
 
-/**
- * Compute the UNION of all ingredients' temp ranges, then pad with
- * experimentation room (±10°C) clamped to global brew-safe bounds.
- * Used for slider bounds — gives users space to push past the
- * recipe's recommended window without leaving brewing reality.
- */
-function unionTempRange(ingredients) {
-  if (!ingredients?.length) return padTempRange([90, 100]);
-  let lo = Infinity, hi = -Infinity;
-  for (const { id } of ingredients) {
-    const [a, b] = INGREDIENTS[id].tempC;
-    if (a < lo) lo = a;
-    if (b > hi) hi = b;
-  }
-  return padTempRange([lo, hi]);
-}
-
-function unionTimeRange(ingredients) {
-  if (!ingredients?.length) return padTimeRange([120, 600]);
-  let lo = Infinity, hi = -Infinity;
-  for (const { id } of ingredients) {
-    const [a, b] = INGREDIENTS[id].timeS;
-    if (a < lo) lo = a;
-    if (b > hi) hi = b;
-  }
-  return padTimeRange([lo, hi]);
-}
+// Slider bounds — union of every ingredient's range, padded with
+// experimentation room. Single source of truth in algo/brewBounds.
 
 /**
  * Blend-level temp/time explorer with live effect recomputation.
@@ -101,8 +76,8 @@ export const BlendExtractionExplorer = ({
 }) => {
   const { unit } = useUnit();
 
-  const tempCRange = useMemo(() => unionTempRange(ingredients), [ingredients]);
-  const timeSRange = useMemo(() => unionTimeRange(ingredients), [ingredients]);
+  const tempCRange = useMemo(() => unionAndPadTempRange(ingredients, INGREDIENTS), [ingredients]);
+  const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS), [ingredients]);
 
   // Master union of every flavor and effect that any constituent
   // ingredient can ever produce — pulls from EXTRACTION_PROFILES first,

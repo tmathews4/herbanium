@@ -142,7 +142,6 @@ export function applyEffectFloor(effectsMap, declaredEffects) {
 // a profile uses v1 names instead, the matching pair is also covered.
 export const EFFECT_SYNERGIES = [
   { when: ["focus", "calm"],     bonus: { focus: 0.6, calm: 0.4 }, label: "calm focus" },
-  { when: ["warming", "digestive"], bonus: { digestive: 0.5 },           label: "warming digestive" },
   { when: ["warming", "digestive"], bonus: { digestive: 0.5 },     label: "warming digestive" },
   { when: ["sleepy", "calm"],    bonus: { sleepy: 0.4 },           label: "deepens sedation" },
   { when: ["calm", "comfort"],   bonus: { comfort: 0.3 },          label: "settled" },

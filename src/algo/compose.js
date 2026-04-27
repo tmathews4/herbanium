@@ -375,7 +375,7 @@ function blendEffectStrength(b, mood) {
 // This is the "quiet de-emphasis" layer: matched-count still leads
 // the sort (additive intent preserved), but among ties the cup that
 // pulls hard in two directions ranks well below the cup that doesn't.
-function selectionScore(b, moods, flavors) {
+function conflictAwareScore(b, moods, flavors) {
   let score = 0;
   for (const m of moods) {
     let s = blendMatchesMood(b, m) ? 1 : 0;
@@ -399,8 +399,6 @@ function selectionScore(b, moods, flavors) {
 }
 
 // Score how completely a blend embodies the user's selections.
-// `matched` counts mood-hits + flavor-hits; `fullMatch` is true when
-// every selected mood and every selected flavor finds a match.
 // Primary axis sorts; secondary axis filters. On "by feel", mood is
 // the primary sorter and flavor selections act as a strict filter
 // (any flavor mismatch knocks the candidate out of the list). On
@@ -424,12 +422,6 @@ function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
   const passesFilter = secondaryTotal === 0 || secondaryHits > 0;
   const fullPrimary = primaryTotal > 0 && primaryHits === primaryTotal;
   const matched = moodHits + flavorHits;
-  const total = moods.length + flavors.length;
-
-  // Conflict-aware companion score — used as a tiebreaker after the
-  // raw matched count so the additive ordering still leads but
-  // mixed-signal candidates fall behind their cleaner peers.
-  const weighted = selectionScore(b, moods, flavors);
 
   return {
     moodHits,
@@ -441,9 +433,10 @@ function scoreSelections(b, moods, flavors, primaryAxis = "feel") {
     passesFilter,
     fullPrimary,
     matched,
-    weighted,
-    total,
-    fullMatch: total > 0 && matched === total,
+    // Conflict-aware companion score — tiebreaker after the raw
+    // matched count so additive ordering still leads but mixed-
+    // signal candidates fall behind their cleaner peers.
+    weighted: conflictAwareScore(b, moods, flavors),
   };
 }
 

@@ -41,3 +41,32 @@ export function padTimeRange([lo, hi]) {
     Math.min(TIME_HARD_MAX, hi + TIME_PAD),
   ];
 }
+
+/**
+ * Union of every ingredient's temp range, padded with experimentation
+ * room. Used as slider bounds for blend explorers — single source of
+ * truth so the blend and ingredient hosts can't drift in how they
+ * compute slider walls. Pass an INGREDIENTS lookup to keep this
+ * module free of catalog-data imports.
+ */
+export function unionAndPadTempRange(ingredients, INGREDIENTS) {
+  if (!ingredients?.length) return padTempRange([90, 100]);
+  let lo = Infinity, hi = -Infinity;
+  for (const { id } of ingredients) {
+    const [a, b] = INGREDIENTS[id].tempC;
+    if (a < lo) lo = a;
+    if (b > hi) hi = b;
+  }
+  return padTempRange([lo, hi]);
+}
+
+export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
+  if (!ingredients?.length) return padTimeRange([120, 600]);
+  let lo = Infinity, hi = -Infinity;
+  for (const { id } of ingredients) {
+    const [a, b] = INGREDIENTS[id].timeS;
+    if (a < lo) lo = a;
+    if (b > hi) hi = b;
+  }
+  return padTimeRange([lo, hi]);
+}
