@@ -1182,7 +1182,7 @@ export const ATTRIBUTES = [
   //     journal, so the backup workflow becomes its own discovery. ──
   { id: "caladrius", name: "The Caladrius", rarity: "uncommon", window: "lifetime",
     glyph: "feather", tint: "sky", frame: "circle", accent: "rays",
-    desc: "White prophetic bird of Roman lore, said to draw away what ails the patient and carry it skyward into the sun. Drawn by exporting your journal — the cup's record carried out to safekeeping.",
+    desc: "White bird of Roman lore, said to draw away what ails the patient and carry it skyward into the sun. Drawn by exporting your journal — the cup's record carried out to safekeeping.",
     earned: ctx => !!ctx.exportedAt },
   { id: "bennu", name: "The Bennu", rarity: "rare", window: "lifetime",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "star",
