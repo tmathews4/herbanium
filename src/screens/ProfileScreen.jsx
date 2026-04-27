@@ -158,18 +158,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
 
 
-      {/* First-visit Profile tutorial — explains what's on this page. */}
-      {!profileHintShown && dismissProfileHint && (
-        <HintCard
-          icon={<Flower size={18} c={theme.terra} />}
-          title="Profile"
-          body={<>
-            Your stats and settings.
-          </>}
-          onDismiss={dismissProfileHint}
-        />
-      )}
-
       {/* Identity card */}
       <div style={{
         border: `1px solid ${theme.rule}`, borderRadius: 14,

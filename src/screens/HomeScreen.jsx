@@ -77,7 +77,7 @@ const pickHomePoem = (date) => {
   return pool[Math.abs(h) % pool.length];
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice }) => {
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
   // are only surfaced behind the Shelf > Journal sub-tab where they
@@ -97,8 +97,45 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
   const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;
   const name = profile?.name || "friend";
 
+  // Seeded-favorites notice — fires once on Home for fresh users
+  // who got starter blends auto-added at onboarding, so they know
+  // the recipes weren't ones they brewed.
+  const showSeededNotice = !seededFavoritesNoticeShown
+    && dismissSeededFavoritesNotice
+    && profile
+    && favoriteBlends.length > 0
+    && yourSessions.length === 0;
+
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+      {showSeededNotice && (
+        <div style={{
+          marginBottom: 14, padding: "10px 12px",
+          borderRadius: 10,
+          background: "rgba(98, 124, 92, 0.08)",
+          border: `1px solid ${theme.sageDeep}`,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <div style={{
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.inkSoft, lineHeight: 1.5,
+          }}>
+            We added a few starter blends to your{" "}
+            <strong style={{ color: theme.terra, fontStyle: "normal" }}>Recipes</strong>{" "}
+            so the shelf isn't empty on day one. Keep what fits, remove what doesn't.
+          </div>
+          <button
+            onClick={dismissSeededFavoritesNotice}
+            aria-label="dismiss"
+            style={{
+              flexShrink: 0,
+              background: "transparent", border: "none", cursor: "pointer",
+              color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",
+            }}
+          >×</button>
+        </div>
+      )}
       {/* Empty-state welcome header — first-time users see this
           before any poem card. Returning users get their greeting
           below the poem instead so the time-of-day moment lands
