@@ -29,7 +29,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits, themeVariant = "day", setThemeVariant }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -484,42 +484,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             ))}
           </div>
         </div>
-        {/* Theme variant — Day (warm parchment) vs Spellbook (witchier
-            dark leather + gilded ink, mossier greens, candle-ochre,
-            ritual plum). Persists across sessions. */}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
-          fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
-        }}>
-          <span>Theme</span>
-          <div style={{
-            display: "inline-flex", alignItems: "center",
-            border: `1px solid ${theme.rule}`, borderRadius: 999,
-            padding: 2, background: theme.cream,
-          }}>
-            {[
-              ["day",       "Day"],
-              ["spellbook", "Spellbook"],
-            ].map(([val, label]) => (
-              <button key={val} onClick={() => setThemeVariant && setThemeVariant(val)} style={{
-                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-                padding: "4px 12px", borderRadius: 999, border: "none",
-                background: themeVariant === val ? theme.ink : "transparent",
-                color: themeVariant === val ? theme.cream : theme.ash,
-                cursor: "pointer",
-              }}>{label}</button>
-            ))}
-          </div>
-        </div>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-          color: theme.ash, lineHeight: 1.5, padding: "0 0 6px",
-        }}>
-          Spellbook turns the grove into a darker, witchier register —
-          gilded ink, candle ochre, mossier greens. The kettle stays.
-        </div>
-
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
