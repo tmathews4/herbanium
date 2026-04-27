@@ -19,7 +19,7 @@
 // Each row = a "loud" flavor or mouthfeel that suppresses gentler ones.
 // Values 0–1: suppression coefficient at the masker's max strength of 5.
 // At masker strength 2.5, suppression is half the listed value, etc.
-export const MASKING_MATRIX = {
+const MASKING_MATRIX = {
   bitter:     { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7 },
   bitterness: { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7 },
   astringent: { floral: 0.6, fruity: 0.5, sweet: 0.4, umami: 0.4, honey: 0.5, delicate: 0.6 },
@@ -30,7 +30,7 @@ export const MASKING_MATRIX = {
 };
 
 // Amplifiers — small additive bonuses, capped by the soft ceiling later.
-export const AMPLIFIERS = {
+const AMPLIFIERS = {
   sweet: { floral: 0.15, umami: 0.25, honey: 0.2 },
   umami: { sweet: 0.25 },
 };
@@ -50,7 +50,7 @@ const BITTER_SUPPRESSION_BY_SWEET = 0.35;
 //
 // Calibrated against the dominance hierarchy in docs/masking.md.
 // Default for any flavor not listed is 1.0.
-export const FLAVOR_LOUDNESS = {
+const FLAVOR_LOUDNESS = {
   // High — these dominate well above their grams ratio
   bitter: 1.8, bitterness: 1.8,
   smoky: 2.0, smoked: 2.0,
@@ -152,7 +152,7 @@ export const EFFECT_SYNERGIES = [
 
 // Effect pairs that co-exist legitimately rather than canceling.
 // When both are present at meaningful strength, surface a paradox tag.
-export const ALLOWED_PARADOXES = [
+const ALLOWED_PARADOXES = [
   ["warming", "cooling"],
 ];
 
@@ -163,7 +163,7 @@ export const ALLOWED_PARADOXES = [
  * the ceiling" signal lives in the warnings layer (sedative stack
  * pressure), not in a numeric squash of legitimate values.
  */
-export function softCeiling(x) {
+function softCeiling(x) {
   return Math.min(5, Math.max(0, x));
 }
 

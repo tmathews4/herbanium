@@ -240,7 +240,7 @@ export function resolveBlend(moods, flavor) {
 
 // Simple complementary-flavor map: each flavor has a short list of flavors
 // that pair well as accents. Drives axis-aware candidate generation.
-export const FLAVOR_COMPLEMENTS = {
+const FLAVOR_COMPLEMENTS = {
   floral:  ["citrus", "honeyed", "grassy"],
   earthy:  ["spiced", "smoky", "mineral"],
   citrus:  ["floral", "spiced", "grassy"],
@@ -264,7 +264,7 @@ export const FLAVOR_COMPLEMENTS = {
 
 // Simple mood-neighbor map: when flavor is primary, we can suggest an
 // alternate mood that shares a natural affinity with the user's pick.
-export const MOOD_NEIGHBORS = {
+const MOOD_NEIGHBORS = {
   calm:      ["sleepy", "soothing"],
   focus:     ["energy", "calm", "uplifting"],
   energy:    ["focus", "warming", "uplifting"],
@@ -1074,6 +1074,36 @@ import {
  *                     ingredient warnings would have fired)
  *   }
  */
+// Balance-bar axes — each row defines a taste-structure metric and
+// the perceived flavor/effect keys that contribute to it. Capped at
+// 5 by sumCap below. Bitterness uses the same keys the warning layer
+// reads so the bar can't lag behind the over-pull warning it pairs
+// with. Lifting this out of the resolver keeps the function focused
+// on pipeline orchestration rather than enumeration.
+const BALANCE_AXES = [
+  { name: "bitterness",  flavors: ["bitter", "bitterness", "astringent"], effects: ["bitterness"] },
+  { name: "sweetness",   flavors: ["sweet", "honey", "honeyed", "honey-sweet"] },
+  { name: "astringency", flavors: ["astringent", "tannic"] },
+  { name: "tartness",    flavors: ["tart", "bright", "cranberry"] },
+  { name: "menthol",     flavors: ["cool", "cooling", "minty", "mint"] },
+];
+
+function sumCapTo5(...vals) {
+  const total = vals.reduce((a, b) => a + (b || 0), 0);
+  return Math.round(Math.min(5, total) * 10) / 10;
+}
+
+function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
+  const out = [];
+  for (const axis of BALANCE_AXES) {
+    const fVals = (axis.flavors || []).map(k => perceivedFlavorMap[k]);
+    const eVals = (axis.effects || []).map(k => perceivedEffectMap[k]);
+    const v = sumCapTo5(...fVals, ...eVals);
+    if (v > 0) out.push([axis.name, v]);
+  }
+  return out;
+}
+
 export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, declaredEffects = null) {
   if (!ingredients || !ingredients.length) {
     return {
@@ -1110,10 +1140,10 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     return { id, name: meta.name, weight, profile, inRange, role: ingRole };
   });
 
-  // (2) Grams-weighted accumulation into raw flavor + effect maps.
-  // Flavor accumulation is multiplied by perceptual loudness so a
-  // 1g dose of mint reads dominant the way menthol does in real
-  // life — see FLAVOR_LOUDNESS in perception.js.
+  // Perception pipeline:
+  //   raw accumulation → masking → synergies → effect floor → fragile decay.
+  // Loudness multiplier on flavors lets a 1g dose of mint read
+  // dominant the way menthol does (see FLAVOR_LOUDNESS in perception).
   const rawFlavors = {};
   const rawEffects = {};
   for (const { weight, profile } of contributions) {
@@ -1125,24 +1155,19 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     }
   }
 
-  // (3) Masking pass — bitter, smoky, astringent suppress gentler notes.
   const { perceived: perceivedFlavorMap, maskingNotes } = applyMasking(rawFlavors);
 
-  // (4) Synergy + soft-ceiling pass.
   let { effects: perceivedEffectMap, synergyTags, paradoxTags } =
     applyEffectSynergies(rawEffects);
 
-  // (4a) Blend-effect floor — declared blend.effects act as a soft
-  // floor (80% of declared) so a curator's promise about a tag can't
-  // silently disappear when the ingredient extraction profile
-  // doesn't list it (e.g. pu-erh's grounding, hojicha's soothing).
+  // Declared blend.effects soft-floor (80% of declared) so a curator's
+  // promise about a tag can't silently disappear when the ingredient
+  // extraction profile doesn't list it (e.g. pu-erh's grounding).
   perceivedEffectMap = applyEffectFloor(perceivedEffectMap, declaredEffects);
 
-  // (4b) Fragile-effect attenuation — overpulled cups blunt focus /
-  // calm / soothing / uplifting alongside the bitterness they add.
-  // This gives the parabolic curve the monotonic extraction profiles
-  // can't model on their own (sencha at 100°C/240s is sharper to
-  // taste but not sharper in head — focus degrades).
+  // Fragile-effect attenuation — overpulled cups blunt focus / calm /
+  // soothing / uplifting alongside the bitterness they add. The
+  // parabolic curve the monotonic extraction profiles can't model.
   perceivedEffectMap = attenuateFragileEffects(perceivedEffectMap, perceivedFlavorMap);
 
   // Convert maps to sorted tuple arrays for the UI layer.
@@ -1161,47 +1186,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     .filter(([tag, v]) => v > 0 && tag !== "bitterness")
     .sort((a, b) => b[1] - a[1]);
 
-  // Balance bars — taste-structure axes. Each axis sums any flavor or
-  // effect signals that contribute to it, capped at 5. Bitterness uses
-  // the same total-tannin-pressure formula the warning layer checks, so
-  // the bar can't lag behind the over-pull warning it pairs with.
-  const sumCap = (...vals) => {
-    const total = vals.reduce((a, b) => a + (b || 0), 0);
-    return Math.round(Math.min(5, total) * 10) / 10;
-  };
-  const balance = [];
-  const bitterness = sumCap(
-    perceivedEffectMap.bitterness,
-    perceivedFlavorMap.bitter,
-    perceivedFlavorMap.bitterness,
-    perceivedFlavorMap.astringent,
-  );
-  const sweetness = sumCap(
-    perceivedFlavorMap.sweet,
-    perceivedFlavorMap.honey,
-    perceivedFlavorMap.honeyed,
-    perceivedFlavorMap["honey-sweet"],
-  );
-  const astringency = sumCap(
-    perceivedFlavorMap.astringent,
-    perceivedFlavorMap.tannic,
-  );
-  const tartness = sumCap(
-    perceivedFlavorMap.tart,
-    perceivedFlavorMap.bright,
-    perceivedFlavorMap.cranberry,
-  );
-  const menthol = sumCap(
-    perceivedFlavorMap.cool,
-    perceivedFlavorMap.cooling,
-    perceivedFlavorMap.minty,
-    perceivedFlavorMap.mint,
-  );
-  if (bitterness > 0)   balance.push(["bitterness", bitterness]);
-  if (sweetness > 0)    balance.push(["sweetness", sweetness]);
-  if (astringency > 0)  balance.push(["astringency", astringency]);
-  if (tartness > 0)     balance.push(["tartness", tartness]);
-  if (menthol > 0)      balance.push(["menthol", menthol]);
+  // Balance bars — taste-structure axes (BALANCE_AXES at module top).
+  const balance = buildBalanceBars(perceivedFlavorMap, perceivedEffectMap);
 
   const rawFlavorTuples = Object.entries(rawFlavors)
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
