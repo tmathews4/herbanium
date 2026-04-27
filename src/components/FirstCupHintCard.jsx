@@ -65,7 +65,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
               border: `1px solid ${theme.terra}`, borderRadius: 999,
               padding: "8px 14px", cursor: "pointer",
             }}
-          >browse the compendium</button>
+          >open the shelf</button>
         </div>
       </div>
     </div>

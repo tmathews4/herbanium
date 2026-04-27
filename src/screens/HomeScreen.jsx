@@ -60,7 +60,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         <FirstCupHintCard
           onDismiss={dismissFirstCupHint}
           onCompose={() => { dismissFirstCupHint(); go("apothecary"); }}
-          onApothecary={() => { dismissFirstCupHint(); go("apothecary", { mode: "compendium" }); }}
+          onApothecary={() => { dismissFirstCupHint(); go("shelf"); }}
         />
       )}
 
