@@ -22,16 +22,16 @@ export const HintCard = ({ title, body, onDismiss }) => (
     border: `1px solid ${theme.ruleSoft}`,
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div style={{ textAlign: "left" }}>
+    <div>
       {title && (
         <div style={{
           fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-          lineHeight: 1.25, marginBottom: 2,
+          lineHeight: 1.25, marginBottom: 6, textAlign: "center",
         }}>{title}</div>
       )}
       <div style={{
         fontFamily: ff.sans, fontSize: 12,
-        color: theme.inkSoft, lineHeight: 1.45,
+        color: theme.inkSoft, lineHeight: 1.45, textAlign: "left",
       }}>{body}</div>
     </div>
     <button

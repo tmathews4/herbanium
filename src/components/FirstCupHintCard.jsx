@@ -18,14 +18,14 @@ export const FirstCupHintCard = ({ onDismiss }) => (
     padding: "12px 16px",
     display: "flex", flexDirection: "column", gap: 10,
   }}>
-    <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+    <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{
         fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-        lineHeight: 1.25, marginBottom: 2,
+        lineHeight: 1.25, marginBottom: 6, textAlign: "center",
       }}>Welcome.</div>
       <div style={{
         fontFamily: ff.sans, fontSize: 12,
-        color: theme.inkSoft, lineHeight: 1.45,
+        color: theme.inkSoft, lineHeight: 1.45, textAlign: "left",
       }}>
         <div>
           <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew, browse, and explore.
