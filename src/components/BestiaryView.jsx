@@ -167,6 +167,20 @@ export const BestiaryView = ({
     }
     setFeaturedElementals([...cur, id]);
   };
+  // In-place swap: replace `oldId` (currently featured) with
+  // `newId` (from reserve), preserving the slot position so the
+  // user's row order isn't disturbed.
+  const swapFeatured = (oldId, newId) => {
+    if (!setFeaturedElementals) return;
+    const cur = effectiveFeaturedIds.slice();
+    const idx = cur.indexOf(oldId);
+    if (idx < 0) {
+      toggleFeatured(newId);
+      return;
+    }
+    cur[idx] = newId;
+    setFeaturedElementals(cur);
+  };
 
   if (elementalsDisabled) {
     return (
@@ -261,6 +275,7 @@ export const BestiaryView = ({
               featuredLimit={FEATURED_LIMIT}
               isFeatured={isFeatured}
               toggleFeatured={toggleFeatured}
+              swapFeatured={swapFeatured}
               openId={openAttrId}
               setOpenId={setOpenAttrId}
               openAttr={openAttr}
@@ -288,27 +303,65 @@ export const BestiaryView = ({
 
 const AttributeShelf = ({
   creationCard, featured, reserve, featuredLimit,
-  isFeatured, toggleFeatured,
+  isFeatured, toggleFeatured, swapFeatured,
   openId, setOpenId, openAttr,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [selecting, setSelecting] = useState(false);
+  // swappingId: id of a currently-featured elemental the user has
+  // tapped to mark as the swap target. Tapping the same one again
+  // cancels; tapping a reserve tile swaps in place.
+  const [swappingId, setSwappingId] = useState(null);
+  const swappingAttr = swappingId
+    ? featured.find(a => a.id === swappingId)
+    : null;
 
   const hasEmptySlot = featured.length < featuredLimit;
   React.useEffect(() => {
     if (selecting && !hasEmptySlot) setSelecting(false);
   }, [selecting, hasEmptySlot]);
+  // Cancel swap mode if the user dismisses or the swap target
+  // somehow leaves the featured row from underneath us.
+  React.useEffect(() => {
+    if (swappingId && !featured.find(a => a.id === swappingId)) {
+      setSwappingId(null);
+    }
+  }, [swappingId, featured]);
 
   const renderTile = (a) => {
     const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
     const isOpen = openId === a.id;
-    const inReserve = reserve.find(x => x.id === a.id);
+    const inReserve = !!reserve.find(x => x.id === a.id);
+    const isFeaturedTile = !!featured.find(x => x.id === a.id);
+    const isCreation = a.id === "_creation";
+    const isSwapTarget = swappingId === a.id;
     const handleClick = () => {
+      // 1. Filling an empty slot: reserve tile click while in
+      //    selecting-mode adds it to featured.
       if (selecting && inReserve && toggleFeatured) {
         toggleFeatured(a.id);
         setSelecting(false);
         return;
       }
+      // 2. Swap-in-place: reserve tile click while a featured
+      //    tile is marked → swap.
+      if (swappingId && inReserve && swapFeatured) {
+        swapFeatured(swappingId, a.id);
+        setSwappingId(null);
+        setOpenId(null);
+        return;
+      }
+      // 3. Featured tile (non-creation): tap toggles swap mode
+      //    on that slot. Tap same again cancels.
+      if (isFeaturedTile && !isCreation && swapFeatured) {
+        setSwappingId(prev => prev === a.id ? null : a.id);
+        setSelecting(false);
+        // Also surface the detail card while in swap mode so the
+        // user can read what they're swapping out.
+        setOpenId(a.id === swappingId ? null : a.id);
+        return;
+      }
+      // 4. Default: toggle the detail card.
       setOpenId(prev => prev === a.id ? null : a.id);
     };
     return (
@@ -318,11 +371,13 @@ const AttributeShelf = ({
         style={{
           fontFamily: ff.serif, fontSize: 13,
           padding: "6px 12px", borderRadius: 6,
-          background: isOpen ? tone.bg : "transparent",
+          background: isOpen || isSwapTarget ? tone.bg : "transparent",
           color: theme.ink,
-          border: `2px solid ${tone.color}`,
+          border: isSwapTarget
+            ? `2px dashed ${theme.terra}`
+            : `2px solid ${tone.color}`,
           cursor: "pointer",
-          transition: "background 0.15s ease",
+          transition: "background 0.15s ease, border 0.15s ease",
           whiteSpace: "nowrap",
         }}
       >{a.displayName || a.name}</button>
@@ -360,7 +415,7 @@ const AttributeShelf = ({
   const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
   const featuredFull = featured.length >= featuredLimit;
   const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
-  const reserveOpen = expanded || !!openInReserve || selecting;
+  const reserveOpen = expanded || !!openInReserve || selecting || !!swappingId;
 
   return (
     <>
@@ -444,6 +499,32 @@ const AttributeShelf = ({
           {" "}
           <button
             onClick={() => setSelecting(false)}
+            style={{
+              background: "transparent", border: "none", padding: 0,
+              fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
+              color: theme.terra, textDecoration: "underline",
+              textDecorationStyle: "dotted", textUnderlineOffset: 3,
+              cursor: "pointer",
+            }}
+          >cancel</button>
+        </div>
+      )}
+
+      {swappingId && swappingAttr && (
+        <div style={{
+          marginTop: 10, padding: "6px 10px", borderRadius: 6,
+          background: "rgba(176,84,47,0.08)",
+          border: `1px solid rgba(176,84,47,0.22)`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
+        }}>
+          Pick a reserve elemental to swap in for{" "}
+          <em style={{ color: theme.terra, fontStyle: "normal" }}>
+            {swappingAttr.displayName || swappingAttr.name}
+          </em>
+          .{" "}
+          <button
+            onClick={() => setSwappingId(null)}
             style={{
               background: "transparent", border: "none", padding: 0,
               fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
