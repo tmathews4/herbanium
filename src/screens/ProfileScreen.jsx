@@ -467,7 +467,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
           color: theme.ash, lineHeight: 1.5, padding: "0 0 6px",
         }}>
-          Hides the animi omen, the altar, and the animis stat. The cup
+          Hides the animi omen, the grove, and the animis stat. The cup
           stays. You can restore them any time.
         </div>
       </div>
