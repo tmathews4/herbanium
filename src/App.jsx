@@ -331,6 +331,9 @@ export default function App() {
   // because the bestiary is an opt-in side surface — users only
   // see this hint after they tap into the tab.
   const [bestiaryHintShown, setBestiaryHintShown] = usePersistedState("bestiaryHintShown", false);
+  // First-visit hint for the IngredientDetail screen — explains
+  // its three tabs (Overview / Brewing / Pairings).
+  const [ingredientHintShown, setIngredientHintShown] = usePersistedState("ingredientHintShown", false);
   // Unique creation elemental popup — now fires on first Profile visit
   // rather than on Home, so it doesn't hit users right at app entry.
   const [omenShown, setOmenShown] = usePersistedState("omenShown", false);
@@ -746,6 +749,8 @@ export default function App() {
           pantryIds={pantryIds}
           togglePantry={togglePantry}
           onOpenIngredient={(newId) => setIngredientId(newId)}
+          ingredientHintShown={ingredientHintShown}
+          dismissIngredientHint={() => setIngredientHintShown(true)}
         />
       )}
       {overlay === "blend" && blendOverlayId && (

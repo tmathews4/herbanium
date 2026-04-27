@@ -14,6 +14,7 @@ import {
 import {
   SectionLabel, StatCard, VocabInfoCard,
 } from "../components/layout";
+import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -30,7 +31,7 @@ import {
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenIngredient }) => {
+export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
   const { unit, weightUnit } = useUnit();
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   const [tab, setTab] = useState("overview");
@@ -109,6 +110,17 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
       </div>
 
       <div style={{ padding: "18px 22px 130px" }}>
+        {!ingredientHintShown && dismissIngredientHint && (
+          <HintCard
+            title="Ingredient"
+            body={<>
+              <div><strong style={{ color: theme.terra }}>Overview</strong> — what it is and the effects it carries.</div>
+              <div><strong style={{ color: theme.terra }}>Brewing</strong> — temp, steep time, and intent variants.</div>
+              <div><strong style={{ color: theme.terra }}>Pairings</strong> — leaves and herbs that play well with it.</div>
+            </>}
+            onDismiss={dismissIngredientHint}
+          />
+        )}
         {tab === "overview" && (
           <>
             <p style={{
