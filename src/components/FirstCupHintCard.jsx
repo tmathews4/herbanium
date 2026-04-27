@@ -50,7 +50,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
             journal, the recipe book, your pantry.
           </div>
           <div>
-            Brew a cup or note a moment — both land in time.
+            Brew cups, lift spirits.
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-start" }}>
