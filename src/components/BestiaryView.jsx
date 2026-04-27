@@ -221,8 +221,8 @@ export const BestiaryView = ({
           icon={<Sprig size={18} c={theme.sageDeep} />}
           title="Bestiary"
           body={<>
-            A side game in the kettle — earn elementals as you brew.
-            Not your thing? Disable under{" "}
+            A side game in the kettle — earn elementals as you brew
+            and write. Not your thing? Disable under{" "}
             <strong style={{ color: theme.terra }}>Profile → Preferences</strong>.
           </>}
           onDismiss={dismissBestiaryHint}
