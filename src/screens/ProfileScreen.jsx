@@ -383,7 +383,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
           {!animisBanished && (
-            <Stat label="Elementals"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+            <Stat label="Summons"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
           )}
         </div>
       </div>
