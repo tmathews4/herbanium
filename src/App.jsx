@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
-import { SEED_MODES, materializeSeedSessions } from "./data/seeds";
+import {
+  SEED_MODES, materializeSeedSessions,
+  materializeSeedJournalEntries, materializeSeedPlannerItems,
+} from "./data/seeds";
 import { Sprig, Flower, Leaf, Kettle, Ornament } from "./components/icons";
 import { DemoHint } from "./components/DemoHint";
 import { FirstCupHintCard } from "./components/FirstCupHintCard";
@@ -253,26 +256,50 @@ export default function App() {
   // with stale persisted data get refreshed. Without this, an existing
   // dev session keeps its old "y1"-"y9" sessions even after we ship a
   // richer seed, because usePersistedState rehydrates from localStorage.
-  const SEED_VERSION = "3";
+  const SEED_VERSION = "4";
   const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
 
-  // When seed mode changes (dev only), reset the varying state to snapshot.
-  // Includes generatedBlends + favorites + profile so the new richer power
-  // seed populates everything that drives titles. Also force-resets if the
-  // persisted seedVersion doesn't match the current code version.
-  useEffect(() => {
-    if (!isDev) return;
-    const mode = SEED_MODES[seedMode];
+  // Apply a seed mode in full — covers every persisted flow state
+  // we've added since the seeds were first authored. Hint flags,
+  // bestiary state, planner, journal entries, tab visits, etc.
+  // all reset alongside the original sessions/blends/pantry so the
+  // dev seed faithfully represents the user's place in the app.
+  const applySeedMode = (mode) => {
     if (!mode) return;
     setSessions(materializeSeedSessions(mode.sessions));
     setSavedBlendIds(new Set(mode.savedBlendIds || []));
     setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
     setPantryIds(new Set(mode.pantryIds || []));
     setGeneratedBlends(mode.generatedBlends || []);
+    setJournalEntries(materializeSeedJournalEntries(mode.journalEntries));
+    setPlannerItems(materializeSeedPlannerItems(mode.plannerItems));
+    setTabVisits(mode.tabVisits || {});
+    setSeenElementalIds(new Set(mode.seenElementalIds || []));
+    setFeaturedElementals(mode.featuredElementals || []);
+    setOmenShown(!!mode.omenShown);
+    setElementalsDisabled(!!mode.elementalsDisabled);
+    setFavoritesMigrated(!!mode.favoritesMigrated);
+    const hints = mode.hints || {};
+    setFirstCupHintShown(!!hints.firstCupHintShown);
+    setComposeHintShown(!!hints.composeHintShown);
+    setJournalHintShown(!!hints.journalHintShown);
+    setProfileHintShown(!!hints.profileHintShown);
+    setPantryHintShown(!!hints.pantryHintShown);
+    setBestiaryHintShown(!!hints.bestiaryHintShown);
+    setIngredientHintShown(!!hints.ingredientHintShown);
     if (mode.profile) {
       setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
     }
     setSeedVersion(SEED_VERSION);
+  };
+
+  // When seed mode changes (dev only), reset the varying state to
+  // snapshot. Also force-resets if the persisted seedVersion doesn't
+  // match the current code version.
+  useEffect(() => {
+    if (!isDev) return;
+    applySeedMode(SEED_MODES[seedMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seedMode, isDev]);
 
   // First-mount stale-data guard: if dev and persisted seedVersion is
@@ -280,18 +307,9 @@ export default function App() {
   useEffect(() => {
     if (!isDev) return;
     if (seedVersion === SEED_VERSION) return;
-    const mode = SEED_MODES[seedMode];
-    if (!mode) return;
-    setSessions(materializeSeedSessions(mode.sessions));
-    setSavedBlendIds(new Set(mode.savedBlendIds || []));
-    setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
-    setPantryIds(new Set(mode.pantryIds || []));
-    setGeneratedBlends(mode.generatedBlends || []);
-    if (mode.profile) {
-      setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
-    }
-    setSeedVersion(SEED_VERSION);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    applySeedMode(SEED_MODES[seedMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // One-shot favorites migration. Onboarding now seeds favoriteBlendIds
   // with the same starter set as savedBlendIds so the Home rail is

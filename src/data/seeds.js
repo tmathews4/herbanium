@@ -20,6 +20,43 @@
    remain in place as test fixtures even after persistence is added.
    ────────────────────────────────────────────────────────────── */
 
+// Materialize seed journal entries: same idea as sessions — each
+// carries an hoursAgo offset which resolves to a fresh ts +
+// entry-<ts> id at apply time so the entries stay "recent" on
+// every reset.
+export function materializeSeedJournalEntries(rawEntries) {
+  const now = Date.now();
+  return (rawEntries || []).map(e => {
+    const hoursAgo = typeof e.hoursAgo === "number" ? e.hoursAgo : 1;
+    const ts = now - hoursAgo * 3600000;
+    return {
+      id: `entry-${ts}`,
+      ts,
+      kind: e.kind || "entry",
+      text: e.text || "",
+      note: e.note || "",
+      currentMoods: e.currentMoods || [],
+      landedMoods:  e.landedMoods  || [],
+    };
+  });
+}
+
+// Materialize seed planner items: hoursAgo → ts so each item's
+// timestamp shifts forward on reset and the row order stays sane.
+export function materializeSeedPlannerItems(rawItems) {
+  const now = Date.now();
+  return (rawItems || []).map((p, i) => {
+    const hoursAgo = typeof p.hoursAgo === "number" ? p.hoursAgo : (i + 1);
+    const ts = now - hoursAgo * 3600000;
+    return {
+      id: p.id || `plan-${ts}`,
+      text: p.text || "",
+      done: !!p.done,
+      ts,
+    };
+  });
+}
+
 // Materialize seed sessions: each carries an `hoursAgo` offset which
 // resolves to a fresh sess-<ms> id at apply time. Otherwise stored
 // timestamps would drift further into the past on every reset and
@@ -117,6 +154,51 @@ export const SEED_MODES = {
       "passionflower", "valerian", "tulsi", "fennel", "lapsang",
       "puerh", "matcha", "hojicha", "darjeeling",
     ],
+    // Free-form journal entries with the mood-arc shape introduced
+    // when the journal became a tea-meets-mood log. hoursAgo maps
+    // to fresh ts at apply time the same way sessions do.
+    journalEntries: [
+      { hoursAgo: 4,   kind: "entry",
+        text: "Quiet morning at the window. Read for an hour, didn't reach for the phone.",
+        currentMoods: ["tired", "stressed"], landedMoods: ["calm"] },
+      { hoursAgo: 28,  kind: "haiku",
+        text: "amber afternoon —\nthe kettle's slow exhale,\na long, kept thought.",
+        currentMoods: ["scattered", "anxious"], landedMoods: ["focus", "calm"] },
+      { hoursAgo: 72,  kind: "limerick",
+        text: "There once was a kettle in Maine\nWho whistled with each summer rain.\n   It hummed through the dusk\n   And smelled faintly of musk\nAnd softened the longest of days.",
+        currentMoods: ["restless"], landedMoods: ["comfort"], note: "for the porch evening" },
+      { hoursAgo: 192, kind: "entry",
+        text: "Tried the Sencha cold-brewed. Won't go back to hot for July.",
+        currentMoods: [], landedMoods: ["uplifting"] },
+    ],
+    // Planner — a few intentions for the day, mixed done/open so the
+    // counter and clear-done flow have something to show.
+    plannerItems: [
+      { id: "plan-seed-1", text: "Brew a pot of Dusk Lullaby tonight",        done: false, hoursAgo: 1 },
+      { id: "plan-seed-2", text: "Refill the chamomile jar",                  done: true,  hoursAgo: 8 },
+      { id: "plan-seed-3", text: "Note how the morning Assam landed",         done: false, hoursAgo: 12 },
+    ],
+    // Tab-visit counts feed the first-visit / regular-visit
+    // elemental triggers. Power user has logged plenty of laps.
+    tabVisits: { home: 64, apothecary: 38, shelf: 27, profile: 9 },
+    // Bestiary state — power user has welcomed (logged) a handful
+    // of specimens and pinned three to the front page.
+    seenElementalIds: ["first-brew", "ten-cups", "first-favorite", "first-apothecary", "first-shelf", "first-profile", "four-corners", "the-buzzed", "smokesworn", "the-druid"],
+    featuredElementals: ["the-druid", "smokesworn", "the-buzzed"],
+    // Flow flags — power user has seen and dismissed every
+    // tutorial, summoned their unique elemental, and so on.
+    omenShown: true,
+    elementalsDisabled: false,
+    favoritesMigrated: true,
+    hints: {
+      firstCupHintShown: true,
+      composeHintShown:  true,
+      journalHintShown:  true,
+      profileHintShown:  true,
+      pantryHintShown:   true,
+      bestiaryHintShown: true,
+      ingredientHintShown: true,
+    },
     // User-composed blends — make Composer + Self-Repeater fire and
     // give the Catalogue a couple of "your composition" entries.
     generatedBlends: [
@@ -158,7 +240,29 @@ export const SEED_MODES = {
       { id: "my3", who: "you", blendId: "hearth", ago: "3d",    intent: "cold",     actual: "comfort", taste: 3, note: "" },
     ],
     savedBlendIds: ["dusk"],
+    favoriteBlendIds: ["dusk"],
     pantryIds: ["chamomile", "lemonbalm", "lavender", "peppermint", "rooibos", "ginger", "rose"],
+    journalEntries: [
+      { hoursAgo: 6, kind: "entry",
+        text: "First quiet evening of the week. Tried the dusk blend and watched the light go.",
+        currentMoods: ["tired"], landedMoods: ["calm"] },
+    ],
+    plannerItems: [],
+    tabVisits: { home: 14, apothecary: 6, shelf: 4, profile: 2 },
+    seenElementalIds: ["first-brew", "first-apothecary"],
+    featuredElementals: [],
+    omenShown: true,
+    elementalsDisabled: false,
+    favoritesMigrated: true,
+    hints: {
+      firstCupHintShown: true,
+      composeHintShown:  true,
+      journalHintShown:  true,
+      profileHintShown:  false,
+      pantryHintShown:   false,
+      bestiaryHintShown: false,
+      ingredientHintShown: false,
+    },
   },
 
   new: {
@@ -166,6 +270,24 @@ export const SEED_MODES = {
     description: "just opened the app — nothing on any shelf",
     sessions: [],
     savedBlendIds: [],
+    favoriteBlendIds: [],
     pantryIds: [],
+    journalEntries: [],
+    plannerItems: [],
+    tabVisits: {},
+    seenElementalIds: [],
+    featuredElementals: [],
+    omenShown: false,
+    elementalsDisabled: false,
+    favoritesMigrated: false,
+    hints: {
+      firstCupHintShown: false,
+      composeHintShown:  false,
+      journalHintShown:  false,
+      profileHintShown:  false,
+      pantryHintShown:   false,
+      bestiaryHintShown: false,
+      ingredientHintShown: false,
+    },
   },
 };
