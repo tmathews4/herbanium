@@ -734,18 +734,20 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   // (the accent helpers still expect a single flavor or null).
   const flavor = flavors[0] || null;
 
-  // Score the entire catalog and keep the strongest matches in
-  // descending order (full-match → partial-match → no-match), then
-  // shortest recipe wins among ties.
-  // Filter: secondary-axis selections strictly exclude (no flavor
-  // match knocks the candidate out on by-feel; no mood match knocks
-  // it out on by-taste). Sort: primary-axis hits descending, then
-  // secondary-axis hits as tiebreak, then shortest recipe.
+  // Additive matching: any candidate that hits at least one of the
+  // user's selections (mood or flavor, either axis) is in the pool.
+  // Adding a flavor onto an existing mood query *adds* matches to
+  // the list rather than strictly filtering down. Sort: total
+  // selections matched desc → traditions ahead → primary-axis hits
+  // → secondary-axis hits → shortest recipe.
   const scoredPool = BLENDS
     .map(b => ({ blend: b, score: scoreSelections(b, moods, flavors, primaryAxis) }))
-    .filter(x => x.score.passesFilter && x.score.primaryHits > 0)
+    .filter(x => x.score.matched > 0)
     .sort((a, b) => {
-      if (a.score.fullPrimary !== b.score.fullPrimary) return a.score.fullPrimary ? -1 : 1;
+      if (a.score.matched !== b.score.matched) return b.score.matched - a.score.matched;
+      const aTrad = a.blend.tradition ? 0 : 1;
+      const bTrad = b.blend.tradition ? 0 : 1;
+      if (aTrad !== bTrad) return aTrad - bTrad;
       if (a.score.primaryHits !== b.score.primaryHits) return b.score.primaryHits - a.score.primaryHits;
       if (a.score.secondaryHits !== b.score.secondaryHits) return b.score.secondaryHits - a.score.secondaryHits;
       return a.blend.ingredients.length - b.blend.ingredients.length;
@@ -795,11 +797,9 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   const primary = resolveBlend(moods, flavor);
   if (primary) {
     const score = scoreSelections(primary, moods, flavors, primaryAxis);
-    // The primary candidate also respects the secondary-axis filter
-    // — if the user picked flavors and the mood-resolved primary
-    // doesn't hit any of them, it's filtered out the same way the
-    // scored pool would filter it.
-    if (score.passesFilter) {
+    // Additive — primary candidate is included as long as it hits
+    // at least one of the user's selections.
+    if (score.matched > 0) {
       addBlend(primary, "primary", "closest match", score);
     }
   }
@@ -813,7 +813,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       const v = buildAccentVariantByFlavor(primary, comp);
       if (!v) continue;
       const score = scoreSelections(v, moods, flavors, primaryAxis);
-      if (!score.passesFilter) continue;
+      if (score.matched === 0) continue;
       addBlend(v, "accent", `${comp} accent`, score);
       break;
     }
@@ -825,7 +825,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       const v = buildAccentVariantByMood(primaryMood, nb, flavor);
       if (!v) continue;
       const score = scoreSelections(v, moods, flavors, primaryAxis);
-      if (!score.passesFilter) continue;
+      if (score.matched === 0) continue;
       addBlend(v, "accent", `${nb}-leaning`, score);
       break;
     }
@@ -887,14 +887,13 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     }
   }
 
-  // Final order:
-  //   1. Full primary-axis match first (synthetic counts).
-  //   2. Among ties, traditional blends rank ahead of in-house ones —
-  //      the user wants real cultural recipes before Herbanium's
-  //      derived experiments / accents / synthetics.
-  //   3. Among ties, more primary-axis hits wins.
-  //   4. Among ties, more secondary-axis hits wins.
-  //   5. Among further ties, fewer ingredients wins (pure-tea-first).
+  // Final order — additive ranking:
+  //   1. Total selections matched (mood + flavor combined) desc — the
+  //      candidate that satisfies the most picks rides the top.
+  //   2. Traditions get a heightened bias on ties so cultural recipes
+  //      beat in-house derivatives at the same match count.
+  //   3. Among ties, kind priority breaks remaining ambiguity.
+  //   4. Then primary-axis hits, secondary-axis hits, ingredient count.
   const KIND_PRIORITY = {
     primary: 0,
     tradition: 1,
@@ -906,9 +905,12 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   };
   return candidates
     .sort((a, b) => {
-      const aFull = (a._score?.fullPrimary || a.kind === "synthetic") ? 0 : 1;
-      const bFull = (b._score?.fullPrimary || b.kind === "synthetic") ? 0 : 1;
-      if (aFull !== bFull) return aFull - bFull;
+      const aMatched = a._score?.matched || 0;
+      const bMatched = b._score?.matched || 0;
+      if (aMatched !== bMatched) return bMatched - aMatched;
+      const aTrad = a.tradition ? 0 : 1;
+      const bTrad = b.tradition ? 0 : 1;
+      if (aTrad !== bTrad) return aTrad - bTrad;
       const aKind = KIND_PRIORITY[a.kind] ?? 99;
       const bKind = KIND_PRIORITY[b.kind] ?? 99;
       if (aKind !== bKind) return aKind - bKind;
@@ -920,7 +922,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       if (aSec !== bSec) return bSec - aSec;
       return a.ingredients.length - b.ingredients.length;
     })
-    .slice(0, 6);
+    .slice(0, 8);
 }
 
 /* ──────────────────────────────────────────────────────────────
