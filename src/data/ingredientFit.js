@@ -239,6 +239,53 @@ export function auditIngredient(ing) {
 }
 
 /**
+ * Preview where a candidate ingredient would land in the catalog —
+ * authoring aid, not a runtime helper. Takes the same qualitative
+ * spec placeIngredient accepts (`{calm: "strong", sleepy: 3}`) and
+ * returns the resolved tuples plus a per-tag report of who already
+ * sits on each strength rung. Lets an author eyeball "calm 4 puts
+ * me alongside lemon balm, gyokuro, valerian — does that feel
+ * right?" before committing the number.
+ *
+ *   const { tuples, report } = previewPlacement({calm: "strong"});
+ *   // tuples: [["calm", 4]]
+ *   // report[0].rungs[5] => ["chamomile"]   (the anchor)
+ *   // report[0].rungs[4] => ["gyokuro", "lemonbalm", "linden", ...]
+ *
+ * Throws on the same conditions placeIngredient throws on (unknown
+ * tag, unknown tier, out-of-range strength).
+ */
+export function previewPlacement(spec) {
+  const tuples = placeIngredient(spec);
+  const tierFor = (n) => {
+    for (const [tier, value] of Object.entries(STRENGTH_RUBRIC)) {
+      if (value === n) return tier;
+    }
+    return null;
+  };
+
+  const report = [];
+  for (const [tag, suggested] of tuples) {
+    const rungs = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (const [id, ing] of Object.entries(INGREDIENTS)) {
+      const eff = (ing.effects || []).find(([t]) => t === tag);
+      if (!eff) continue;
+      if (rungs[eff[1]]) rungs[eff[1]].push(id);
+    }
+    for (const key of Object.keys(rungs)) rungs[key].sort();
+    const anchor = EFFECT_ANCHORS[tag] || null;
+    report.push({
+      tag,
+      suggested,
+      tierName: tierFor(suggested),
+      anchor,
+      rungs,
+    });
+  }
+  return { tuples, report };
+}
+
+/**
  * Validate that every declared anchor still holds. Returns an array
  * of warnings — empty array means anchors are intact. Run this from
  * the test suite so a casual edit to chamomile or matcha can't
