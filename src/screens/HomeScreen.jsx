@@ -157,57 +157,49 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         );
       })()}
 
-      {/* Primary CTA — brew. Secondary "Note a moment" lives under
-          the favorites bar below. */}
-      <button onClick={() => go("apothecary")} style={{
-        width: "100%", textAlign: "left",
-        background: theme.ink, color: theme.cream,
-        border: "none", borderRadius: 14, padding: "14px 18px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", marginBottom: 24,
-        boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
-      }}>
-        <div>
-          {isEmpty && (
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, opacity: 0.7 }}>
-              to begin your brew log
-            </div>
-          )}
-          <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
-            {isEmpty ? "Brew your first cup →" : "Brew a cup →"}
-          </div>
-        </div>
-        <Kettle size={24} c={theme.cream} />
-      </button>
-
-      {/* New-user onboarding card */}
-      {isEmpty && (
-        <div style={{
-          padding: "18px 20px", borderRadius: 12,
-          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-          marginBottom: 22, textAlign: "center",
+      {/* Three primary actions — each points the user at a lower
+          tab. Stacked vertically with a clear hierarchy: dark-ink
+          for the recipe path (most common), terra-outlined for the
+          experiment path, ink-outlined for the journal path. */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+        <button onClick={() => go("shelf", { mode: "recipes" })} style={{
+          width: "100%", textAlign: "left",
+          background: theme.ink, color: theme.cream,
+          border: "none", borderRadius: 14, padding: "12px 18px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          cursor: "pointer",
+          boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
         }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-            <Ornament w={120} c={theme.ochre} />
+          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
+            Brew from a recipe →
           </div>
-          <div style={{
-            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: theme.ash,
-            marginBottom: 6,
-          }}>
-            your brew log begins here
+          <Leaf size={20} c={theme.cream} />
+        </button>
+        <button onClick={() => go("apothecary")} style={{
+          width: "100%", textAlign: "left",
+          background: "transparent", color: theme.terra,
+          border: `1px solid ${theme.terra}`, borderRadius: 14, padding: "12px 18px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          cursor: "pointer",
+        }}>
+          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
+            Brew an experiment →
           </div>
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 14.5,
-            color: theme.inkSoft, lineHeight: 1.55,
-          }}>
-            Set a cup out. Brew it with intent. Log how it landed.<br />
-            The app learns you cup by cup.
+          <Flower size={20} c={theme.terra} />
+        </button>
+        <button onClick={() => go("shelf", { mode: "journal" })} style={{
+          width: "100%", textAlign: "left",
+          background: "transparent", color: theme.ink,
+          border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "12px 18px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          cursor: "pointer",
+        }}>
+          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
+            Note a moment →
           </div>
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
-            <Ornament w={120} c={theme.ochre} />
-          </div>
-        </div>
-      )}
+          <Pencil size={18} c={theme.ink} />
+        </button>
+      </div>
 
       {/* Favorites — horizontal scrollable row. Native scrollbar is
           hidden; a soft right-edge fade suggests there's more to scroll
@@ -244,20 +236,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           `}</style>
         </>
       )}
-
-      {/* Secondary CTA — note a moment, lives below the favorites row. */}
-      <button onClick={() => go("shelf", { mode: "journal" })} style={{
-        width: "100%", textAlign: "left",
-        background: theme.cream, color: theme.ink,
-        border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "14px 18px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", marginBottom: 24,
-      }}>
-        <div style={{ fontFamily: ff.serif, fontSize: 20 }}>
-          Note a moment →
-        </div>
-        <Pencil size={20} c={theme.ink} />
-      </button>
 
       {/* Your recent cups */}
       {yourSessions.length > 0 && (
