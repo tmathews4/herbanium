@@ -1702,6 +1702,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    ────────────────────────────────────────────────────────────── */
 
 const JournalEntryRow = ({ entry, first, onDelete }) => {
+  const [open, setOpen] = useState(false);
   const isHaiku    = entry.kind === "haiku";
   const isLimerick = entry.kind === "limerick";
   const isVerse    = isHaiku || isLimerick;
@@ -1717,35 +1718,64 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
       borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       position: "relative",
     }}>
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "baseline",
-        marginBottom: 6,
-        paddingRight: onDelete ? 22 : 0,
-      }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          width: "100%", textAlign: "left",
+          background: "transparent", border: "none", padding: 0,
+          cursor: "pointer",
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          marginBottom: 6,
+          paddingRight: onDelete ? 22 : 0,
+        }}
+      >
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
           textTransform: "uppercase", color: theme.ash,
+          display: "flex", alignItems: "baseline", gap: 8,
         }}>
-          {label}
+          <span style={{
+            display: "inline-block",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.15s ease",
+            color: theme.terra,
+          }}>›</span>
+          <span>{label}</span>
         </div>
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
         }}>{ago}</div>
-      </div>
-      <div style={{
-        fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-        lineHeight: isVerse ? 1.7 : 1.55,
-        whiteSpace: "pre-line",
-        fontStyle: isVerse ? "italic" : "normal",
-      }}>{entry.text}</div>
-      {entry.note && (
-        <div style={{
-          marginTop: 8, paddingTop: 6,
-          borderTop: `1px dashed ${theme.ruleSoft}`,
-          fontFamily: ff.serif, fontSize: 12.5,
-          color: theme.inkSoft, lineHeight: 1.5,
-          whiteSpace: "pre-line",
-        }}>{entry.note}</div>
+      </button>
+      {open ? (
+        <>
+          <div style={{
+            fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+            lineHeight: isVerse ? 1.7 : 1.55,
+            whiteSpace: "pre-line",
+            fontStyle: isVerse ? "italic" : "normal",
+          }}>{entry.text}</div>
+          {entry.note && (
+            <div style={{
+              marginTop: 8, paddingTop: 6,
+              borderTop: `1px dashed ${theme.ruleSoft}`,
+              fontFamily: ff.serif, fontSize: 12.5,
+              color: theme.inkSoft, lineHeight: 1.5,
+              whiteSpace: "pre-line",
+            }}>{entry.note}</div>
+          )}
+        </>
+      ) : (
+        <div
+          onClick={() => setOpen(true)}
+          role="button"
+          style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, lineHeight: 1.5, cursor: "pointer",
+          }}
+        >
+          tap to read
+        </div>
       )}
       {onDelete && (
         <button
