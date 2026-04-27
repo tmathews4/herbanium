@@ -299,7 +299,11 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
   );
 };
 
-// Legacy SessionRow — still used in Library history tab.
+// Lean one-line SessionRow used in the Shelf > Journal timeline.
+// Same info as before — blend name, intent → actual, taste dots,
+// relative time — but on a single horizontal row with a smaller
+// title so cup logs sit closer together. The cup's private note
+// is reachable via the row's tap target (opens BlendDetail).
 export const SessionRow = ({ s, openBlend, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
@@ -307,34 +311,38 @@ export const SessionRow = ({ s, openBlend, first }) => {
     <button onClick={() => openBlend(s.blendId, s)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-      padding: "14px 2px", cursor: "pointer",
-      display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 12, alignItems: "start",
+      padding: "8px 2px", cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 10, minWidth: 0,
     }}>
-      <div style={{ marginTop: 2 }}>
-        {(() => {
-          const Icon = MOOD_ICONS[b.mood] || Flower;
-          return <Icon size={22} />;
-        })()}
-      </div>
-      <div>
-        <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2 }}>
-          {b.name}
-          {s.who !== "you" && <span style={{ fontStyle: "italic", fontSize: 12, color: theme.ash, marginLeft: 6 }}>· {s.who}</span>}
-        </div>
-        <div style={{ fontSize: 11.5, color: theme.ash, marginTop: 3, letterSpacing: "0.03em" }}>
-          <span style={{ fontStyle: "italic", fontFamily: ff.serif }}>{s.intent}</span>
-          <span style={{ margin: "0 6px", color: theme.rule }}>→</span>
-          <span style={{ color: theme.sageDeep }}>{s.actual}</span>
-          <span style={{ margin: "0 8px", color: theme.rule }}>·</span>
-          <span>{"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span></span>
-        </div>
-        {s.note && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft, marginTop: 5 }}>
-            "{s.note}"
-          </div>
+      <span style={{
+        flexShrink: 1, minWidth: 0,
+        fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      }}>
+        {b.name}
+        {s.who !== "you" && (
+          <span style={{ fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
+            · {s.who}
+          </span>
         )}
-      </div>
-      <div style={{ fontSize: 10.5, color: theme.ash, letterSpacing: "0.08em", marginTop: 4 }}>{sessionAgo(s) || s.ago}</div>
+      </span>
+      <span style={{
+        flexShrink: 1, minWidth: 0,
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+        color: theme.ash, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      }}>
+        {s.intent}
+        <span style={{ margin: "0 4px", color: theme.rule, fontStyle: "normal" }}>→</span>
+        <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{s.actual}</span>
+      </span>
+      <span style={{
+        flexShrink: 0, fontSize: 10, color: theme.terra, letterSpacing: "0.08em",
+      }}>
+        {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
+      </span>
+      <span style={{
+        flexShrink: 0, fontSize: 10, color: theme.ash, letterSpacing: "0.06em",
+      }}>{sessionAgo(s) || s.ago}</span>
     </button>
   );
 };
