@@ -1093,19 +1093,20 @@ function sumCapTo5(...vals) {
   return Math.round(Math.min(5, total) * 10) / 10;
 }
 
-// Compress a sorted [tag, strength] list into a one-line summary
-// of the cup's dominant register. Two thresholds:
-//   - primary: top entry must be at least this strong to summarize
-//   - secondary: second entry needs this to join with a comma
-// Below primary, returns "" — the cup isn't loud enough on this
+// Compress a sorted [tag, strength] list into a 1–2 entry summary
+// of the cup's dominant register. Returned as an array of tag
+// strings so the renderer can show them as discrete chips.
+//   - primary: top entry must clear this to summarize at all
+//   - secondary: second entry joins if it clears this
+// Below primary, returns [] — the cup isn't loud enough on this
 // axis to make a definite claim.
 function summarizeTopTuples(tuples, { primary, secondary }) {
-  if (!tuples || tuples.length === 0) return "";
+  if (!tuples || tuples.length === 0) return [];
   const top = tuples[0];
-  if (!top || top[1] < primary) return "";
+  if (!top || top[1] < primary) return [];
   const second = tuples[1];
-  if (second && second[1] >= secondary) return `${top[0]}, ${second[0]}`;
-  return top[0];
+  if (second && second[1] >= secondary) return [top[0], second[0]];
+  return [top[0]];
 }
 
 function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {

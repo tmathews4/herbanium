@@ -584,39 +584,41 @@ export const BlendExtractionExplorer = ({
         </div>
       </div>
 
-      {/* Cup summary — one-line distillation of the dominant 1–2
-          effects and flavors. Threshold-gated in the algorithm so
-          quiet cups don't claim a definite read. */}
-      {(brew.moodSummary || brew.flavorSummary) && (
-        <div style={{
-          marginTop: 4,
-          fontFamily: ff.serif, fontSize: 12.5, lineHeight: 1.5,
-          color: theme.inkSoft,
-        }}>
-          {brew.moodSummary && (
-            <div>
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-                textTransform: "uppercase", color: theme.ash, marginRight: 8,
-              }}>Feels</span>
-              <em style={{ fontStyle: "italic", color: theme.sageDeep }}>
-                {brew.moodSummary}
-              </em>
-            </div>
-          )}
-          {brew.flavorSummary && (
-            <div>
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-                textTransform: "uppercase", color: theme.ash, marginRight: 8,
-              }}>Tastes</span>
-              <em style={{ fontStyle: "italic", color: theme.terra }}>
-                {brew.flavorSummary}
-              </em>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Cup summary — dominant 1–2 effects and flavors as small
+          pills matching the predicted-taste row. Threshold-gated
+          in the algorithm so quiet cups don't claim a read. */}
+      {((brew.moodSummary?.length || 0) > 0 || (brew.flavorSummary?.length || 0) > 0) && (() => {
+        const summaryPill = (label, tone) => (
+          <span key={label} style={{
+            fontFamily: ff.sans, fontSize: 10.5,
+            letterSpacing: "0.04em",
+            color: tone, padding: "3px 9px",
+            border: `1px solid ${tone}`, borderRadius: 999,
+            background: "transparent",
+          }}>{label}</span>
+        );
+        const labelStyle = {
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: theme.ash,
+          minWidth: 56,
+        };
+        return (
+          <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
+            {brew.moodSummary?.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={labelStyle}>Feels</span>
+                {brew.moodSummary.map(t => summaryPill(t, theme.sageDeep))}
+              </div>
+            )}
+            {brew.flavorSummary?.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={labelStyle}>Tastes</span>
+                {brew.flavorSummary.map(t => summaryPill(t, theme.terra))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
       {brew.synergyTags && brew.synergyTags.length > 0 && (
