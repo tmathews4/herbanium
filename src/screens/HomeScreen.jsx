@@ -220,7 +220,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
             <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
-            <button onClick={() => go("shelf", { mode: "pantry" })} style={{
+            <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
               background: "transparent", border: "none",
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
               cursor: "pointer",

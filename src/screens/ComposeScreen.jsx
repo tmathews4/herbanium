@@ -74,6 +74,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
+  // Journal timeline filter — default "all" shows cups + entries.
+  // Deep-links can preset it via composeView.journalFilter (e.g. the
+  // Home recent-brews 'see all' link sets it to "cups").
+  const [journalFilter, setJournalFilter] = useState("all");
   // Planner props passed inline into the Shelf > Journal section.
   // The brew-time modal trigger lives on SteepScreen, not here.
   const plannerProps = {
@@ -135,6 +139,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     if (!composeView) return;
     if (composeView.mode) setMode(composeView.mode);
     if (composeView.shelfTab) setShelfTab(composeView.shelfTab);
+    if (composeView.journalFilter) setJournalFilter(composeView.journalFilter);
   }, [composeView?.at]);
 
   const toggleMood = (m) => {
@@ -1013,8 +1018,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           ts: e.ts || 0,
           ref: e,
         }));
-        const timeline = [...sessionItems, ...entryItems]
+        const timelineFull = [...sessionItems, ...entryItems]
           .sort((a, b) => b.ts - a.ts);
+        const timeline = timelineFull.filter(item =>
+          journalFilter === "all"     ? true
+          : journalFilter === "cups"  ? item.kind === "cup"
+          : journalFilter === "entries" ? item.kind === "entry"
+          : true
+        );
 
         return (
           <div style={{ marginTop: 4 }}>
@@ -1035,12 +1046,41 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             <div style={{ marginBottom: 14 }}>
               <Planner {...plannerProps} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                color: theme.ash, lineHeight: 1.5,
-              }}>
-                Cups, verses, and notes — everything in time.
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              gap: 8, marginBottom: 10, flexWrap: "wrap",
+            }}>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {[
+                  ["all",     "All"],
+                  ["cups",    "Cups"],
+                  ["entries", "Entries"],
+                ].map(([key, label]) => {
+                  const active = journalFilter === key;
+                  const count = key === "cups"
+                    ? sessionItems.length
+                    : key === "entries"
+                      ? entryItems.length
+                      : timelineFull.length;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setJournalFilter(key)}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.04em",
+                        padding: "4px 10px", borderRadius: 999, cursor: "pointer",
+                        background: active ? theme.ink : "transparent",
+                        color: active ? theme.cream : theme.ash,
+                        border: `1px solid ${active ? theme.ink : theme.rule}`,
+                      }}
+                    >{label}{count > 0 && (
+                      <span style={{
+                        marginLeft: 5, opacity: 0.7,
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                      }}>{count}</span>
+                    )}</button>
+                  );
+                })}
               </div>
               <button
                 onClick={() => setJournalComposerOpen(o => !o)}
@@ -1050,7 +1090,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   background: "transparent",
                   border: `1px solid ${theme.terra}`, borderRadius: 999,
                   padding: "5px 12px", cursor: "pointer",
-                  flexShrink: 0, marginLeft: 12,
+                  flexShrink: 0,
                 }}
               >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
             </div>
