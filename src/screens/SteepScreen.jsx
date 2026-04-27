@@ -159,30 +159,40 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
-        <button
-          onClick={() => setPlannerOpen(true)}
-          title="open today's plan and past brew notes"
-          style={{
-            background: "transparent", border: "none",
-            color: theme.terra,
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-            cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 5,
-            padding: 0,
-          }}
-        >
-          <Pencil size={11} c={theme.terra} />
-          <span>planner</span>
-          {plannerItems.length > 0 && (
-            <span style={{
-              fontFamily: ff.serif, fontStyle: "italic",
-              fontSize: 10.5, letterSpacing: 0,
-              textTransform: "none", color: theme.ash,
-            }}>
-              · {plannerItems.filter(i => !i.done).length} open
-            </span>
-          )}
-        </button>
+        {(() => {
+          const openCount = plannerItems.filter(i => !i.done).length;
+          return (
+            <button
+              onClick={() => setPlannerOpen(true)}
+              title={openCount > 0
+                ? `open today's plan — ${openCount} unchecked`
+                : "open today's plan and past brew notes"}
+              style={{
+                position: "relative",
+                background: "transparent", border: "none",
+                color: theme.terra,
+                fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 5,
+                padding: 0,
+              }}
+            >
+              <Pencil size={11} c={theme.terra} />
+              <span>planner</span>
+              {openCount > 0 && (
+                <span
+                  aria-label={`${openCount} unchecked`}
+                  style={{
+                    width: 6, height: 6, borderRadius: "50%",
+                    background: theme.terra,
+                    display: "inline-block",
+                    marginLeft: 1,
+                  }}
+                />
+              )}
+            </button>
+          );
+        })()}
       </div>
 
       {/* countdown ring */}
