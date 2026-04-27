@@ -335,6 +335,24 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               })}
             </div>
           )}
+          {/* Pantry-bottom CTA — when the user's looking at their pantry
+              (pantryOnly = true) and the toggle isn't forced on, drop a
+              clear button at the end of the list that flips the filter
+              off so the full ingredient library appears with + buttons. */}
+          {pantryOnly && !forcePantryOnly && (
+            <button
+              onClick={() => setPantryOnly(false)}
+              style={{
+                marginTop: 16, width: "100%",
+                padding: "12px 14px",
+                fontFamily: ff.serif, fontSize: 14,
+                color: theme.terra,
+                background: "transparent",
+                border: `1px dashed ${theme.terra}`,
+                borderRadius: 10, cursor: "pointer",
+              }}
+            >Add ingredients?</button>
+          )}
       </>
     </div>
   );
