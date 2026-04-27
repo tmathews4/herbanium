@@ -88,7 +88,10 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
         </div>
       )}
       <div style={{
-        padding: "10px 12px 22px",
+        // Bottom padding honors iOS home-indicator + Android gesture-pill
+        // safe area when wrapped in Capacitor; falls back to 22px on web
+        // and on devices without an inset.
+        padding: "10px 12px max(22px, env(safe-area-inset-bottom))",
         display: "grid", gridTemplateColumns: "1.35fr 1fr 1fr 1fr", gap: 4,
       }}>
         {tabs.map((t, i) => (
@@ -145,6 +148,9 @@ const PhoneFrame = ({ children }) => {
         // invisible on mobile where width === maxWidth or smaller.
         boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
         background: theme.ivory,
+        // Honor the notch / status-bar inset when wrapped in Capacitor.
+        // No-op on web where the inset is 0.
+        paddingTop: "env(safe-area-inset-top)",
       }}>
         {children}
       </div>
