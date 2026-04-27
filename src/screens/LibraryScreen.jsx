@@ -33,7 +33,7 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
+export const LibraryScreen = ({ go, pantryIds, togglePantry, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
   const [pantryOnly, setPantryOnly] = useState(forcePantryOnly || defaultPantryOnly);
@@ -279,18 +279,36 @@ export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dis
                     background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
                     borderRadius: 10, padding: "12px 12px", textAlign: "left", cursor: "pointer",
                     display: "flex", flexDirection: "column", gap: 4,
-                    opacity: inPantry ? 1 : 0.6,
                     position: "relative",
                   }}>
-                    {/* Pantry badge — only shown for items you own */}
-                    {inPantry && (
-                      <div style={{
-                        position: "absolute", top: 8, right: 8,
-                        width: 18, height: 18, borderRadius: "50%",
-                        background: theme.sage,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        color: theme.cream, fontSize: 10, fontWeight: "bold",
-                      }}>✓</div>
+                    {/* Pantry toggle — clickable +/✓ in the top-right.
+                        Stops propagation so the tile body still routes
+                        to the ingredient detail. */}
+                    {togglePantry && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); togglePantry(id); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            togglePantry(id);
+                          }
+                        }}
+                        title={inPantry ? "in pantry — tap to remove" : "tap to add to pantry"}
+                        style={{
+                          position: "absolute", top: 6, right: 6,
+                          width: 22, height: 22, borderRadius: "50%",
+                          background: inPantry ? theme.sage : "transparent",
+                          border: inPantry ? `1px solid ${theme.sage}` : `1px dashed ${theme.rule}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: inPantry ? theme.cream : theme.ash,
+                          fontSize: 13, fontWeight: "bold", lineHeight: 1,
+                          cursor: "pointer",
+                          transition: "background 0.15s ease, border 0.15s ease",
+                        }}
+                      >{inPantry ? "✓" : "+"}</div>
                     )}
                     {/* Caffeine badge — top-left when applicable */}
                     {hasCaffeine && (
@@ -303,7 +321,7 @@ export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dis
                       }}>caf</div>
                     )}
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: inPantry ? 22 : 0, paddingLeft: hasCaffeine ? 32 : 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: togglePantry ? 26 : 0, paddingLeft: hasCaffeine ? 32 : 0 }}>
                       {ing.category === "flower" && <Flower size={18} c={theme.ochre} />}
                       {ing.category === "herbal" && <Sprig size={18} c={theme.sage} />}
                       {ing.category === "true tea" && <Leaf size={18} c={theme.sageDeep} />}

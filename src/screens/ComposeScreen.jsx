@@ -1230,20 +1230,22 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
+          togglePantry={togglePantry}
           libraryView={libraryView}
           hideHeader
           hidePantryToggle
         />
       )}
 
-      {/* Shelf · Compendium — full ingredient browse defaulted to
-          "only what's in my pantry" (so it lands as a personal stock
-          list), with the toggle visible so the user can flip it off to
-          browse and add new ingredients without leaving the tab. */}
+      {/* Shelf · Pantry — full ingredient browse defaulted to "only
+          what's in my pantry" (so it lands as a personal stock list),
+          with the toggle visible so the user can flip it off to browse
+          and add new ingredients without leaving the tab. */}
       {mode === "pantry" && (
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
+          togglePantry={togglePantry}
           libraryView={libraryView}
           defaultPantryOnly
           hideHeader
