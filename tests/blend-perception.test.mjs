@@ -207,7 +207,12 @@ test("throat-coat: soothing mood, low bitterness, sweetness present", () => {
   assert(getMood(profile, "soothing") > 0 || getMood(profile, "comfort") > 0,
     "throat coat should register soothing or comfort"
   );
-  inRange("bitterness", getBalance(profile, "bitterness"), [0, 2.5]);
+  // Loosened from [0, 2.5] after the loudness pass: at the 100°C/600s
+  // baseline ginger pushes "almost peppery-harsh" by its own profile
+  // character, and astringent now reads at honest perceptual weight
+  // (×1.6) rather than mass-flat. 3.5 still keeps throat coat on the
+  // gentler side of the catalog.
+  inRange("bitterness", getBalance(profile, "bitterness"), [0, 3.5]);
   assert(getBalance(profile, "sweetness") > 0,
     "throat coat should register sweetness from licorice"
   );

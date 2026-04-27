@@ -1022,6 +1022,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
 import { resolveExtractionProfile } from "../data/extractionProfiles.js";
 import {
   applyMasking, applyEffectSynergies, buildWarnings,
+  loudnessOf, attenuateFragileEffects, applyEffectFloor,
 } from "./perception.js";
 
 /**
@@ -1062,7 +1063,7 @@ import {
  *                     ingredient warnings would have fired)
  *   }
  */
-export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false) {
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, declaredEffects = null) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
@@ -1099,11 +1100,14 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   });
 
   // (2) Grams-weighted accumulation into raw flavor + effect maps.
+  // Flavor accumulation is multiplied by perceptual loudness so a
+  // 1g dose of mint reads dominant the way menthol does in real
+  // life — see FLAVOR_LOUDNESS in perception.js.
   const rawFlavors = {};
   const rawEffects = {};
   for (const { weight, profile } of contributions) {
     for (const [name, strength] of profile.flavors) {
-      rawFlavors[name] = (rawFlavors[name] || 0) + strength * weight;
+      rawFlavors[name] = (rawFlavors[name] || 0) + strength * weight * loudnessOf(name);
     }
     for (const [tag, strength] of profile.effects) {
       rawEffects[tag] = (rawEffects[tag] || 0) + strength * weight;
@@ -1114,8 +1118,21 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const { perceived: perceivedFlavorMap, maskingNotes } = applyMasking(rawFlavors);
 
   // (4) Synergy + soft-ceiling pass.
-  const { effects: perceivedEffectMap, synergyTags, paradoxTags } =
+  let { effects: perceivedEffectMap, synergyTags, paradoxTags } =
     applyEffectSynergies(rawEffects);
+
+  // (4a) Blend-effect floor — declared blend.effects act as a soft
+  // floor (80% of declared) so a curator's promise about a tag can't
+  // silently disappear when the ingredient extraction profile
+  // doesn't list it (e.g. pu-erh's grounding, hojicha's soothing).
+  perceivedEffectMap = applyEffectFloor(perceivedEffectMap, declaredEffects);
+
+  // (4b) Fragile-effect attenuation — overpulled cups blunt focus /
+  // calm / soothing / uplifting alongside the bitterness they add.
+  // This gives the parabolic curve the monotonic extraction profiles
+  // can't model on their own (sencha at 100°C/240s is sharper to
+  // taste but not sharper in head — focus degrades).
+  perceivedEffectMap = attenuateFragileEffects(perceivedEffectMap, perceivedFlavorMap);
 
   // Convert maps to sorted tuple arrays for the UI layer.
   // Drop sub-threshold flavors (< 0.5) — they're noise.

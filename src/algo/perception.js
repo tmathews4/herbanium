@@ -39,6 +39,103 @@ export const AMPLIFIERS = {
 // Special-cased because the masking matrix only goes one direction.
 const BITTER_SUPPRESSION_BY_SWEET = 0.35;
 
+// Perceptual loudness — how strongly a flavor reads in the cup
+// relative to its grams contribution. Mint at 1g doesn't taste like
+// 1g of grass; menthol's TRPM8 trigeminal hijack makes it dominant
+// well above its mass ratio. Likewise smoky phenols and bitter
+// alkaloids carry farther than sweet or floral volatiles. These
+// multipliers are applied to the grams-weighted raw-flavor
+// accumulation in resolveBlendAtBrew so a small dose of a loud
+// flavor reads dominant the way it does in real life.
+//
+// Calibrated against the dominance hierarchy in docs/masking.md.
+// Default for any flavor not listed is 1.0.
+export const FLAVOR_LOUDNESS = {
+  // High — these dominate well above their grams ratio
+  bitter: 1.8, bitterness: 1.8,
+  smoky: 2.0, smoked: 2.0,
+  minty: 2.0, mint: 2.0, cool: 1.8, cooling: 1.8,
+  astringent: 1.6, pungent: 1.6, tannic: 1.5,
+  tar: 1.5,
+  // Mid — a touch louder than mass-ratio
+  spiced: 1.2, peppery: 1.4, roasted: 1.1, earthy: 1.1,
+  // Low — easily dominated, read quieter than grams ratio
+  sweet: 0.7, honey: 0.7, honeyed: 0.7, "honey-sweet": 0.7,
+  floral: 0.7, delicate: 0.6,
+  fruity: 0.85, vanilla: 0.85,
+};
+
+export function loudnessOf(flavor) {
+  return FLAVOR_LOUDNESS[flavor] ?? 1.0;
+}
+
+// Effects that get blunted when a cup is overpulled — focus, calm,
+// soothing, uplifting are the "fragile" registers that real overpull
+// degrades along with the bitterness it adds. Warming, energy,
+// digestive, smoky, grounding stay monotonic — they survive overpull
+// (and in some cases intensify with it).
+export const FRAGILE_EFFECTS = ["focus", "calm", "soothing", "uplifting"];
+
+// Threshold above which astringent/bitter starts blunting fragile
+// effects. Below this the cup is "honestly extracted" and fragile
+// effects survive at full strength.
+const OVERPULL_THRESHOLD = 2.0;
+
+// Per-unit-overpull attenuation. At overpull = 3 (e.g. astringent 5),
+// fragile effects get scaled by (1 - 0.15*3) = 0.55 — a clear cliff
+// without zeroing out the underlying signal.
+const ATTENUATION_K = 0.15;
+
+/**
+ * Scale fragile effects (focus, calm, soothing, uplifting) down when
+ * the cup is overpulled. Real teas don't read sharper when burnt —
+ * focus and calm degrade alongside the bitterness that signals the
+ * overpull. This is the parabolic curve the monotonic extraction
+ * profiles can't model on their own.
+ *
+ * Returns a new effects map; does not mutate the input.
+ */
+export function attenuateFragileEffects(effectsMap, flavorsMap) {
+  const astringent = (flavorsMap.astringent || 0) + (flavorsMap.tannic || 0);
+  const bitter     = (flavorsMap.bitter || 0) + (flavorsMap.bitterness || 0)
+                   + (effectsMap.bitterness || 0);
+  const overpull   = Math.max(0, astringent - OVERPULL_THRESHOLD)
+                   + Math.max(0, bitter - OVERPULL_THRESHOLD);
+  if (overpull <= 0) return effectsMap;
+  const factor = Math.max(0, 1 - ATTENUATION_K * overpull);
+  const out = { ...effectsMap };
+  for (const tag of FRAGILE_EFFECTS) {
+    if (out[tag]) out[tag] = out[tag] * factor;
+  }
+  return out;
+}
+
+/**
+ * Apply a blend's declared effects as a soft floor on the perception-
+ * derived effects map. For each declared `[tag, n]`, ensure the
+ * perceived value is at least 80% of n — so a tag the curator
+ * promised on the recipe can't silently disappear because the
+ * ingredient's extraction profile didn't list it. Doesn't lower a
+ * perceived value if it's already above the floor.
+ *
+ * The 80% ceiling lets the perception layer still attenuate at
+ * extreme brew points (post-overpull, post-masking) — the floor is
+ * "this tag should be present", not "this tag is locked at this
+ * strength."
+ */
+export function applyEffectFloor(effectsMap, declaredEffects) {
+  if (!declaredEffects || declaredEffects.length === 0) return effectsMap;
+  const out = { ...effectsMap };
+  for (const [tag, declaredStrength] of declaredEffects) {
+    if (typeof declaredStrength !== "number") continue;
+    const floor = declaredStrength * 0.8;
+    if ((out[tag] || 0) < floor) {
+      out[tag] = floor;
+    }
+  }
+  return out;
+}
+
 // Effect synergies — non-linear bonuses when both effects co-present
 // at meaningful strength. Trigger threshold: each component ≥ 1.5.
 // Uses the ingredient-profile vocabulary (`comfort`, `digestive`) — when
