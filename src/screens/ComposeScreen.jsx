@@ -282,9 +282,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Pencil size={16} c={theme.terra} />}
           title="Shelf"
           body={<>
-            <strong style={{ color: theme.terra }}>Journal</strong> ·{" "}
-            <strong style={{ color: theme.terra }}>Recipe Book</strong> ·{" "}
-            <strong style={{ color: theme.terra }}>Pantry</strong> — your kept work.
+            <strong style={{ color: theme.terra }}>Journal</strong> — cups &amp; entries ·{" "}
+            <strong style={{ color: theme.terra }}>Recipe Book</strong> — saved blends ·{" "}
+            <strong style={{ color: theme.terra }}>Pantry</strong> — what's on hand.
           </>}
           onDismiss={dismissComposeHint}
         />
