@@ -1281,6 +1281,38 @@ export const ATTRIBUTES = [
       && tabVisitedAtLeast(ctx, "apothecary", 1)
       && tabVisitedAtLeast(ctx, "shelf", 1)
       && tabVisitedAtLeast(ctx, "profile", 1) },
+
+  // ─── Wild-pool elementals — `random: true` means BOTH the
+  //     adjective and the creature noun are drawn from the wild
+  //     pools (no controlled aspect). The user gets a different
+  //     surprise per trigger; same user always sees the same
+  //     surprise for the same trigger. Predicates fire on first-
+  //     time small actions distributed across the app. ─────────────
+  { id: "wild-rated", name: "Wild-Rated", rarity: "uncommon", window: "lifetime",
+    glyph: "compass", tint: "ochre", frame: "circle", accent: "star",
+    random: true,
+    desc: "An elemental from the wild pool — neither chosen nor named beforehand. Drawn by the first rating you set on a cup.",
+    earned: ctx => (ctx.lifetime?.ratings || []).length >= 1 },
+  { id: "wild-noted", name: "Wild-Noted", rarity: "uncommon", window: "lifetime",
+    glyph: "feather", tint: "sage", frame: "circle", accent: "star",
+    random: true,
+    desc: "An elemental drawn from no roster — only what the kettle's edge offered. Drawn by the first note you tied to a cup.",
+    earned: ctx => ctx.lifetime?.sessions?.some?.(s => (s.note || "").trim().length > 0) || false },
+  { id: "wild-pantry", name: "Wild-Pantry", rarity: "uncommon", window: "lifetime",
+    glyph: "sprig", tint: "sageDeep", frame: "hex", accent: "star",
+    random: true,
+    desc: "An elemental pulled from the wild pool, shape settled at the first reach into the cupboard. Drawn by your first ingredient marked on hand.",
+    earned: ctx => (ctx.pantryIds?.size || 0) >= 1 },
+  { id: "wild-composed", name: "Wild-Composed", rarity: "rare", window: "lifetime",
+    glyph: "focus", tint: "plum", frame: "diamond", accent: "star",
+    random: true,
+    desc: "An elemental of unknown bearing — the kettle's surprise return for your own blend. Drawn by your first composed cup.",
+    earned: ctx => (ctx.composedCount || 0) >= 1 },
+  { id: "wild-tradition", name: "Wild-Tradition", rarity: "uncommon", window: "lifetime",
+    glyph: "scroll", tint: "ochre", frame: "diamond", accent: "star",
+    random: true,
+    desc: "An elemental from elsewhere — neither named nor chosen, only met. Drawn by your first cup from a tradition's lineage.",
+    earned: ctx => (ctx.lifetime?.distinctTraditions || 0) >= 1 },
 ];
 
 export function evaluateAttributes(ctx) {

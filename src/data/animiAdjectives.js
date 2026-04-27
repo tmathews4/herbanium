@@ -249,10 +249,34 @@ function stripThe(name) {
   return (name || "").replace(/^The\s+/i, "").trim();
 }
 
-// Returns the creature noun for an attribute. Override first, fall
-// back to the existing name.
+// Wild-elemental creature pool — drawn from when an attribute is
+// flagged `random: true`. Both the creature noun AND the adjective
+// are randomized for these triggers so the resulting elemental has
+// no controlled aspect: a Storm Bear one user, a Pearl Mantis the
+// next. Deterministic per (profileSeed, attr.id), so the same user
+// keeps the same surprise.
+export const RANDOM_CREATURE_POOL = [
+  "Wolf", "Hare", "Owl", "Stag", "Otter", "Hawk", "Phoenix",
+  "Bee", "Moth", "Cricket", "Salamander", "Crow", "Fox", "Tortoise",
+  "Heron", "Lark", "Bat", "Cat", "Squirrel", "Mole", "Bear",
+  "Hummingbird", "Magpie", "Robin", "Boar", "Beaver", "Crane",
+  "Dove", "Falcon", "Lynx", "Doe", "Hedgehog", "Frog", "Beetle",
+  "Spider", "Octopus", "Newt", "Camel", "Stork", "Mongoose",
+  "Mantis", "Tanuki", "Tiger", "Hound", "Marmot", "Ermine",
+  "Pyralis", "Hobgoblin", "Dryad", "Sprite", "Wisp",
+];
+
+// Combined pool used for the adjective on random elementals. Mixes
+// element + gem so the variety reads as broad as possible.
+const ALL_ADJECTIVES = [...ELEMENT_ADJECTIVES, ...GEM_ADJECTIVES];
+
+// Returns the creature noun for an attribute. Pre-resolved
+// `attr.creature` first (set by ProfileScreen for random attrs so
+// downstream consumers like AnimiArrivalCard don't need a seed),
+// then CREATURE_OVERRIDES, then the attribute's own name.
 export function creatureFor(attr) {
   if (!attr) return "Spirit";
+  if (attr.creature) return attr.creature;
   const ov = CREATURE_OVERRIDES[attr.id];
   if (ov && ov.creature) return ov.creature;
   return stripThe(attr.name) || "Spirit";
@@ -271,16 +295,30 @@ export function pickAdjective(seed, poolKey = "element") {
   return pool[hash(String(seed)) % pool.length];
 }
 
+// Picks a random creature from the wild pool for a fully-random
+// elemental — deterministic per (profileSeed, attr.id) so the same
+// user always sees the same rolled creature for the same trigger.
+export function pickRandomCreature(attr, profileSeed) {
+  const seed = `${profileSeed || "anon"}|creature|${attr?.id || ""}`;
+  return RANDOM_CREATURE_POOL[hash(String(seed)) % RANDOM_CREATURE_POOL.length];
+}
+
 // Compose the user-facing display name for an animi:
 // "The {randomAdjective} {creatureNoun}". Deterministic per
 // (profileSeed, attr.id) so the same user keeps the same name for
 // the same animi but different users get different prefixes.
+//
+// For attributes flagged `random: true`, both the adjective and the
+// creature noun come from random pools — no controlled aspect.
 export function getAnimiDisplayName(attr, profileSeed) {
   if (!attr) return "";
-  const creature = creatureFor(attr);
-  const pool = poolFor(attr);
+  const creature = attr.random
+    ? pickRandomCreature(attr, profileSeed)
+    : creatureFor(attr);
   const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
-  const adj = pickAdjective(seed, pool);
+  const adj = attr.random
+    ? ALL_ADJECTIVES[hash(seed) % ALL_ADJECTIVES.length]
+    : pickAdjective(seed, poolFor(attr));
   return `The ${adj} ${creature}`;
 }
 
@@ -289,9 +327,9 @@ export function getAnimiDisplayName(attr, profileSeed) {
 // compose something with the adjective separately.
 export function getAnimiAdjective(attr, profileSeed) {
   if (!attr) return "";
-  const pool = poolFor(attr);
   const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
-  return pickAdjective(seed, pool);
+  if (attr.random) return ALL_ADJECTIVES[hash(seed) % ALL_ADJECTIVES.length];
+  return pickAdjective(seed, poolFor(attr));
 }
 
 // Atmospheric one-liner per adjective — keyed by the same pools

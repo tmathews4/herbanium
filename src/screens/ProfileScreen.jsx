@@ -10,7 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { getAnimiDisplayName, getAnimiDisplayDesc } from "../data/animiAdjectives";
+import { getAnimiDisplayName, getAnimiDisplayDesc, pickRandomCreature } from "../data/animiAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -142,11 +142,18 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // same user always sees the same name for the same animi but
   // different users get different qualifiers.
   const animiSeed = profile?.createdAt || profile?.name || "anon";
-  const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => ({
-    ...a,
-    displayName: getAnimiDisplayName(a, animiSeed),
-    desc: getAnimiDisplayDesc(a, animiSeed),
-  }));
+  const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => {
+    // For wild-pool elementals (attr.random), resolve the random
+    // creature once and attach it so AnimiArrivalCard / creatureFor
+    // can look up the verb without needing the seed.
+    const creature = a.random ? pickRandomCreature(a, animiSeed) : undefined;
+    const merged = creature ? { ...a, creature } : { ...a };
+    return {
+      ...merged,
+      displayName: getAnimiDisplayName(merged, animiSeed),
+      desc: getAnimiDisplayDesc(merged, animiSeed),
+    };
+  });
   // Sort earned by rarity desc — rarest finds bubble up.
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
   const sortedEarned = [...earnedAttrs].sort((a, b) =>
