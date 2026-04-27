@@ -95,13 +95,17 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   const { unit, weightUnit } = useUnit();
   // Mode universe per section:
   //   apothecary: reverse (Blend) | forward (Vibe) | compendium
-  //   shelf:      journal | recipes | pantry
-  const initialMode = section === "shelf" ? "journal" : "reverse";
+  //   shelf:      recipes | pantry | journal (bestiary nested under journal)
+  const initialMode = section === "shelf" ? "recipes" : "reverse";
   const [mode, setMode] = useState(initialMode);
+  // Secondary toggle inside the Journal sub-tab — flips between the
+  // brew/entry timeline and the elemental Bestiary that used to sit
+  // as its own primary tab.
+  const [journalSubTab, setJournalSubTab] = useState("journal"); // journal | bestiary
   // Reset mode when section changes so the user lands on a valid sub-tab.
   useEffect(() => {
     const validModes = section === "shelf"
-      ? ["journal", "recipes", "pantry"]
+      ? ["recipes", "pantry", "journal"]
       : ["reverse", "forward", "compendium"];
     if (!validModes.includes(mode)) setMode(validModes[0]);
   }, [section]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -144,6 +148,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     if (composeView.mode) setMode(composeView.mode);
     if (composeView.shelfTab) setShelfTab(composeView.shelfTab);
     if (composeView.journalFilter) setJournalFilter(composeView.journalFilter);
+    if (composeView.journalSubTab) setJournalSubTab(composeView.journalSubTab);
   }, [composeView?.at]);
 
   const toggleMood = (m) => {
@@ -283,9 +288,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Pencil size={16} c={theme.terra} />}
           title="Shelf"
           body={<>
-            <div><strong style={{ color: theme.terra }}>Journal</strong> — brewed cups and written entries in time.</div>
             <div><strong style={{ color: theme.terra }}>Recipes</strong> — every blend you've kept worth returning to.</div>
             <div><strong style={{ color: theme.terra }}>Pantry</strong> — the ingredients you have on hand at home.</div>
+            <div><strong style={{ color: theme.terra }}>Journal</strong> — brewed cups, written entries, and your bestiary.</div>
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -294,10 +299,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {(() => {
         const sectionTabs = section === "shelf"
           ? [
-              ["journal",    "Journal"],
               ["recipes",    "Recipes"],
               ["pantry",     "Pantry"],
-              ["bestiary",   "Bestiary"],
+              ["journal",    "Journal"],
             ]
           : [
               ["reverse",    "Blend"],
@@ -1007,7 +1011,48 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
-      {mode === "journal" && (() => {
+      {mode === "journal" && (
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr",
+          border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
+          marginBottom: 14, background: theme.cream,
+        }}>
+          {[
+            ["journal",  "Journal"],
+            ["bestiary", "Bestiary"],
+          ].map(([k, label]) => (
+            <button key={k} onClick={() => setJournalSubTab(k)} style={{
+              fontFamily: ff.serif, fontSize: 13, fontStyle: "italic",
+              padding: "9px 4px", cursor: "pointer",
+              background: journalSubTab === k ? theme.terra : "transparent",
+              color: journalSubTab === k ? theme.cream : theme.inkSoft,
+              border: "none",
+            }}>{label}</button>
+          ))}
+        </div>
+      )}
+
+      {mode === "journal" && journalSubTab === "bestiary" && (
+        <BestiaryView
+          profile={profile}
+          sessions={sessions}
+          savedBlendIds={savedBlendIds}
+          pantryIds={pantryIds}
+          journalEntries={journalEntries}
+          tabVisits={tabVisits}
+          elementalsDisabled={elementalsDisabled}
+          omenShown={omenShown}
+          dismissOmen={dismissOmen}
+          seenElementalIds={seenElementalIds}
+          setSeenElementalIds={setSeenElementalIds}
+          featuredElementals={featuredElementals}
+          setFeaturedElementals={setFeaturedElementals}
+          bestiaryHintShown={bestiaryHintShown}
+          dismissBestiaryHint={dismissBestiaryHint}
+        />
+      )}
+
+      {mode === "journal" && journalSubTab === "journal" && (() => {
         // Merge cup sessions and free-form journal entries by
         // timestamp so the journal reads as a single chronology.
         // Sessions stamp ts off their numeric id (sess-<ts>); entries
@@ -1397,26 +1442,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           hideHeader
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}
-        />
-      )}
-
-      {mode === "bestiary" && (
-        <BestiaryView
-          profile={profile}
-          sessions={sessions}
-          savedBlendIds={savedBlendIds}
-          pantryIds={pantryIds}
-          journalEntries={journalEntries}
-          tabVisits={tabVisits}
-          elementalsDisabled={elementalsDisabled}
-          omenShown={omenShown}
-          dismissOmen={dismissOmen}
-          seenElementalIds={seenElementalIds}
-          setSeenElementalIds={setSeenElementalIds}
-          featuredElementals={featuredElementals}
-          setFeaturedElementals={setFeaturedElementals}
-          bestiaryHintShown={bestiaryHintShown}
-          dismissBestiaryHint={dismissBestiaryHint}
         />
       )}
 
