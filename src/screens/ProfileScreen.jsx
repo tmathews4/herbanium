@@ -152,14 +152,23 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
 
-  // Arrival queue — earned animis whose ids the user hasn't been
-  // shown a popup for. Limited to one popup at a time so a user with
-  // many new animis isn't bombarded; dismissing reveals the next.
+  // Arrival queue — earned elementals whose ids the user hasn't yet
+  // had a fade card for. Only ONE card per profile visit; once the
+  // card fades through, that elemental joins the grove. Other pending
+  // ones stay hidden from the grove until the user leaves and comes
+  // back for their next welcome.
   const seenIds = seenAnimiIds || new Set();
-  const arrivalQueue = !animisBanished
+  const pendingArrivals = !animisBanished
     ? sortedEarned.filter(a => !seenIds.has(a.id))
     : [];
-  const nextArrival = arrivalQueue[0] || null;
+  const [arrivalShownThisVisit, setArrivalShownThisVisit] = useState(false);
+  const nextArrival = !arrivalShownThisVisit
+    ? (pendingArrivals[0] || null)
+    : null;
+  // Pending = earned but not yet welcomed. Hide them from the grove
+  // so each elemental's card fades through before it appears below.
+  const pendingIds = new Set(pendingArrivals.map(a => a.id));
+  const revealedSorted = sortedEarned.filter(a => !pendingIds.has(a.id));
   const markAnimiSeen = (id) => {
     if (!setSeenAnimiIds) return;
     setSeenAnimiIds(prev => {
@@ -180,22 +189,24 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     rarity: "legendary",
     desc: creatureDesc || "",
   } : null;
-  const allCards = creationCard ? [creationCard, ...sortedEarned] : sortedEarned;
+  const allCards = creationCard ? [creationCard, ...revealedSorted] : revealedSorted;
   const [openAttrId, setOpenAttrId] = useState(null);
   const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
 
-  // Featured altar slots — up to 5 ids the user surfaces below their
+  // Featured grove slots — up to 5 ids the user surfaces below their
   // unique spirit. Falls back to top-5-by-rarity until the user picks.
+  // Sourced from revealedSorted so an elemental whose arrival card
+  // hasn't faded through yet can't be placed on the grove.
   const FEATURED_LIMIT = 5;
   const validFeatured = (featuredAnimis || []).filter(id =>
-    sortedEarned.find(a => a.id === id));
+    revealedSorted.find(a => a.id === id));
   const effectiveFeaturedIds = validFeatured.length > 0
     ? validFeatured.slice(0, FEATURED_LIMIT)
-    : sortedEarned.slice(0, FEATURED_LIMIT).map(a => a.id);
+    : revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
   const featured = effectiveFeaturedIds
-    .map(id => sortedEarned.find(a => a.id === id))
+    .map(id => revealedSorted.find(a => a.id === id))
     .filter(Boolean);
-  const reserve = sortedEarned.filter(a => !effectiveFeaturedIds.includes(a.id));
+  const reserve = revealedSorted.filter(a => !effectiveFeaturedIds.includes(a.id));
   const isFeatured = (id) => effectiveFeaturedIds.includes(id);
   const toggleFeatured = (id) => {
     if (!setFeaturedAnimis) return;
@@ -229,7 +240,10 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {omenShown && !animisBanished && nextArrival && (
         <AnimiArrivalCard
           animi={nextArrival}
-          onDismiss={() => markAnimiSeen(nextArrival.id)}
+          onDismiss={() => {
+            markAnimiSeen(nextArrival.id);
+            setArrivalShownThisVisit(true);
+          }}
         />
       )}
 
@@ -239,9 +253,9 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           icon={<Flower size={18} c={theme.terra} />}
           title="Your kettle, your spirits."
           body={<>
-            Cups you've brewed, blends you keep, and the animis your
+            Cups you've brewed, blends you keep, and the elementals your
             patterns attract. Tap any stat to jump in. The
-            <em> Animis Grove</em> below grows as your habits take shape —
+            <em> Elementals Grove</em> below grows as your habits take shape —
             you can hide it any time from <em>Preferences</em>.
           </>}
           onDismiss={dismissProfileHint}
@@ -345,7 +359,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
           {!animisBanished && (
-            <Stat label="Animis"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+            <Stat label="Elementals"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
           )}
         </div>
       </div>
@@ -353,12 +367,12 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {/* self-knowledge — hidden entirely when the user has banished
           the spirits via Preferences below. */}
       {!animisBanished && (<>
-      <div style={{ margin: "24px 0 6px" }}><SectionLabel n="i">Animis Grove</SectionLabel></div>
+      <div style={{ margin: "24px 0 6px" }}><SectionLabel n="i">Elementals Grove</SectionLabel></div>
       <div style={{
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
         color: theme.ash, lineHeight: 1.5, marginBottom: 12,
       }}>
-        Tend the kettle with intention, and the spirits — animal, elemental, half-glimpsed — draw near.
+        Tend the kettle with intention, and the elementals — half-glimpsed — may draw near.
       </div>
       <div style={{
         padding: 14, borderRadius: 10,
@@ -371,7 +385,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
         {cupCount > 0 && cupCount < 3 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            Different vibes attract different animis.
+            Different vibes attract different elementals.
           </div>
         )}
         {creationCard && (
@@ -389,7 +403,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         )}
         {!creationCard && cupCount === 0 && (
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
-            Different vibes attract different animis.
+            Different vibes attract different elementals.
           </div>
         )}
       </div>
@@ -473,7 +487,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
           color: theme.ash, lineHeight: 1.5, padding: "0 0 6px",
         }}>
-          Hides the animi omen, the grove, and the animis stat. The cup
+          Hides the elemental omen, the grove, and the elementals stat. The cup
           stays. You can restore them any time.
         </div>
       </div>
@@ -947,8 +961,8 @@ const AttributeShelf = ({
                   }}
                 >
                   {openIsFeatured
-                    ? "remove from altar"
-                    : featuredFull ? "swap onto altar" : "place on altar"}
+                    ? "remove from grove"
+                    : featuredFull ? "swap onto grove" : "place on grove"}
                 </button>
               </div>
             )}
@@ -981,7 +995,7 @@ const AttributeShelf = ({
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
           color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
         }}>
-          Pick an animi from the reserve to place it on the altar.
+          Pick an elemental from the reserve to place it on the grove.
           {" "}
           <button
             onClick={() => setSelecting(false)}
