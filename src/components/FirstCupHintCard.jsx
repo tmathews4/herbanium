@@ -42,11 +42,11 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
         }}>
           The <em>Apothecary</em> is where you build a cup — blend by
           ingredient, follow a vibe, or browse the compendium. The
-          <em> Shelf</em> keeps everything you've made: your journal of
-          cups and notes, the recipe book, your pantry. Brew a cup or
-          note a moment — both land in time.
+          <em> Shelf</em> keeps everything you've made: your journal,
+          the recipe book, your pantry. Brew a cup or note a moment —
+          both land in time.
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           <button
             onClick={onCompose}
             style={{
