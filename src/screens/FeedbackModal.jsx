@@ -40,6 +40,7 @@ function buildMailtoFallback(payload) {
     `Standing out: ${payload.standout.join(", ") || "(none selected)"}\n\n` +
     `Notes:\n${payload.notes || "(none)"}\n\n` +
     `Recipe submission:\n${payload.recipe || "(none)"}\n\n` +
+    `Ingredient suggestion:\n${payload.ingredient || "(none)"}\n\n` +
     `--\nSubmitted: ${payload.submittedAt}`
   );
   return `mailto:${to}?subject=${subject}&body=${body}`;
@@ -52,6 +53,7 @@ export const FeedbackModal = ({ onClose }) => {
   const [standout, setStandout] = useState([]);
   const [notes, setNotes] = useState("");
   const [recipe, setRecipe] = useState("");
+  const [ingredient, setIngredient] = useState("");
   const [status, setStatus] = useState(null);
 
   const toggle = (key) => {
@@ -60,7 +62,7 @@ export const FeedbackModal = ({ onClose }) => {
 
   const submit = async () => {
     const payload = {
-      sentiment, standout, notes, recipe,
+      sentiment, standout, notes, recipe, ingredient,
       submittedAt: new Date().toISOString(),
     };
 
@@ -82,7 +84,7 @@ export const FeedbackModal = ({ onClose }) => {
     }
   };
 
-  const canSubmit = sentiment > 0 || standout.length > 0 || notes.trim() || recipe.trim();
+  const canSubmit = sentiment > 0 || standout.length > 0 || notes.trim() || recipe.trim() || ingredient.trim();
 
   return (
     <div style={{
@@ -195,6 +197,33 @@ export const FeedbackModal = ({ onClose }) => {
             onChange={(e) => setRecipe(e.target.value)}
             rows={4}
             placeholder="name, ingredients with grams, temp & steep, what it's for"
+            style={{
+              width: "100%", padding: "10px 12px", borderRadius: 8,
+              background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+              fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+              boxSizing: "border-box", outline: "none", resize: "vertical",
+              lineHeight: 1.5,
+            }}
+          />
+        </div>
+
+        {/* Ingredient suggestion — nominate a single herb/leaf/root for
+            the compendium, separate from a full recipe submission. */}
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8 }}>
+            Suggest an ingredient
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: theme.ash, lineHeight: 1.45, marginBottom: 8,
+          }}>
+            Missing a herb, leaf, or root you reach for? Tell us what it is and how you use it.
+          </div>
+          <textarea
+            value={ingredient}
+            onChange={(e) => setIngredient(e.target.value)}
+            rows={3}
+            placeholder="name, latin if known, what it's good for, how you brew it"
             style={{
               width: "100%", padding: "10px 12px", borderRadius: 8,
               background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
