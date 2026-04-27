@@ -17,6 +17,10 @@ import {
   loudnessOf, attenuateFragileEffects, applyEffectFloor, FRAGILE_EFFECTS,
 } from "../src/algo/perception.js";
 import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
+import {
+  padTempRange, padTimeRange,
+  TEMP_HARD_MIN, TEMP_HARD_MAX, TIME_HARD_MIN, TIME_HARD_MAX, TEMP_PAD, TIME_PAD,
+} from "../src/algo/brewBounds.js";
 import { BLENDS } from "../src/data/blends.js";
 
 let pass = 0, fail = 0;
@@ -237,6 +241,35 @@ test("computeBrewProfile: synthetic-built blend always uses intersection when po
   // Intersection on temp: [95, 95]; on time: [300, 300]. compatible=true.
   assert(out.compatible === true, `should find intersection, got compatible=${out.compatible}`);
   assert(out.tempC === 95, `expected 95°C in intersection, got ${out.tempC}`);
+});
+
+// ── 6. Brew-bound padding ────────────────────────────────────────
+test("padTempRange: pads ±10°C inside hard bounds", () => {
+  const out = padTempRange([85, 95]);
+  assert(out[0] === 75 && out[1] === 100,
+    `expected [75, 100] (85-10, 95+10 clamped to TEMP_HARD_MAX), got [${out}]`);
+});
+test("padTempRange: clamps low side to TEMP_HARD_MIN", () => {
+  const out = padTempRange([65, 75]);
+  assert(out[0] === TEMP_HARD_MIN, `low side should clamp to ${TEMP_HARD_MIN}, got ${out[0]}`);
+  assert(out[1] === 85, `high side: 75+10=85, got ${out[1]}`);
+});
+test("padTempRange: clamps high side to TEMP_HARD_MAX", () => {
+  const out = padTempRange([95, 100]);
+  assert(out[1] === TEMP_HARD_MAX, `high side should clamp to ${TEMP_HARD_MAX}, got ${out[1]}`);
+});
+test("padTimeRange: pads ±2 min inside hard bounds", () => {
+  const out = padTimeRange([180, 360]);
+  assert(out[0] === 60 && out[1] === 480,
+    `expected [60, 480], got [${out}]`);
+});
+test("padTimeRange: clamps low side to TIME_HARD_MIN", () => {
+  const out = padTimeRange([30, 60]);
+  assert(out[0] === TIME_HARD_MIN, `low side should clamp to ${TIME_HARD_MIN}, got ${out[0]}`);
+});
+test("padTimeRange: clamps high side to TIME_HARD_MAX", () => {
+  const out = padTimeRange([1500, 1800]);
+  assert(out[1] === TIME_HARD_MAX, `high side should clamp to ${TIME_HARD_MAX}, got ${out[1]}`);
 });
 
 test("integration: hojicha overpull stays low-bitter", () => {

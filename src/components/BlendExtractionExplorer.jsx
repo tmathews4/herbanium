@@ -29,6 +29,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
+import { padTempRange, padTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import {
@@ -38,29 +39,31 @@ import { EffectBar } from "./EffectBar";
 import { VocabInfoCard } from "./layout";
 
 /**
- * Compute the UNION of all ingredients' temp ranges. Used for slider bounds.
- * Returns [min, max] in Celsius.
+ * Compute the UNION of all ingredients' temp ranges, then pad with
+ * experimentation room (±10°C) clamped to global brew-safe bounds.
+ * Used for slider bounds — gives users space to push past the
+ * recipe's recommended window without leaving brewing reality.
  */
 function unionTempRange(ingredients) {
-  if (!ingredients?.length) return [90, 100];
+  if (!ingredients?.length) return padTempRange([90, 100]);
   let lo = Infinity, hi = -Infinity;
   for (const { id } of ingredients) {
     const [a, b] = INGREDIENTS[id].tempC;
     if (a < lo) lo = a;
     if (b > hi) hi = b;
   }
-  return [lo, hi];
+  return padTempRange([lo, hi]);
 }
 
 function unionTimeRange(ingredients) {
-  if (!ingredients?.length) return [120, 600];
+  if (!ingredients?.length) return padTimeRange([120, 600]);
   let lo = Infinity, hi = -Infinity;
   for (const { id } of ingredients) {
     const [a, b] = INGREDIENTS[id].timeS;
     if (a < lo) lo = a;
     if (b > hi) hi = b;
   }
-  return [lo, hi];
+  return padTimeRange([lo, hi]);
 }
 
 /**

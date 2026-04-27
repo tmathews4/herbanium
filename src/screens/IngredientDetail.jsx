@@ -15,6 +15,7 @@ import {
   SectionLabel, StatCard, VocabInfoCard,
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
+import { padTempRange, padTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -264,8 +265,8 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
             {hasExtractionProfile(id) && (
               <ExtractionExplorer
                 ingredientId={id}
-                tempCRange={ing.tempC}
-                timeSRange={ing.timeS}
+                tempCRange={padTempRange(ing.tempC)}
+                timeSRange={padTimeRange(ing.timeS)}
               />
             )}
 
