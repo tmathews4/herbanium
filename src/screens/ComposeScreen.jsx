@@ -30,6 +30,7 @@ import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { Planner } from "../components/Planner";
 import { HintCard } from "../components/HintCard";
+import { BestiaryView } from "../components/BestiaryView";
 import { Sprig, Pencil } from "../components/icons";
 
 // Stable signature for an ingredient list — same ids with same grams,
@@ -61,7 +62,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -283,8 +284,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           title="Shelf"
           body={<>
             <strong style={{ color: theme.terra }}>Journal</strong> for cups &amp; entries ·{" "}
-            <strong style={{ color: theme.terra }}>Recipe Book</strong> for saved blends ·{" "}
-            <strong style={{ color: theme.terra }}>Pantry</strong> for what's on hand.
+            <strong style={{ color: theme.terra }}>Recipes</strong> for saved blends ·{" "}
+            <strong style={{ color: theme.terra }}>Pantry</strong> for what's on hand ·{" "}
+            <strong style={{ color: theme.terra }}>Bestiary</strong> for elementals you've observed.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -294,8 +296,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         const sectionTabs = section === "shelf"
           ? [
               ["journal",    "Journal"],
-              ["recipes",    "Recipe Book"],
+              ["recipes",    "Recipes"],
               ["pantry",     "Pantry"],
+              ["bestiary",   "Bestiary"],
             ]
           : [
               ["reverse",    "Blend"],
@@ -1395,6 +1398,24 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           hideHeader
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}
+        />
+      )}
+
+      {mode === "bestiary" && (
+        <BestiaryView
+          profile={profile}
+          sessions={sessions}
+          savedBlendIds={savedBlendIds}
+          pantryIds={pantryIds}
+          journalEntries={journalEntries}
+          tabVisits={tabVisits}
+          elementalsDisabled={elementalsDisabled}
+          omenShown={omenShown}
+          dismissOmen={dismissOmen}
+          seenElementalIds={seenElementalIds}
+          setSeenElementalIds={setSeenElementalIds}
+          featuredElementals={featuredElementals}
+          setFeaturedElementals={setFeaturedElementals}
         />
       )}
 

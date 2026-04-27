@@ -10,15 +10,12 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { getElementalDisplayName, getElementalDisplayDesc, pickRandomCreature, flavorLineFor } from "../data/elementalAdjectives";
-import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
+import { generateCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
   exportAllPersistedState, importAllPersistedState,
 } from "../hooks/usePersistedState";
 import { FeedbackModal } from "./FeedbackModal";
-import { OmenCard } from "../components/OmenCard";
-import { ElementalArrivalCard } from "../components/ElementalArrivalCard";
 import { HintCard } from "../components/HintCard";
 import {
   ff, theme,
@@ -29,7 +26,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredElementals, setFeaturedElementals, elementalsDisabled, setElementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -140,151 +137,14 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // Random adjective + fixed creature, deterministic per (user, attr).
   // The seed combines profile.createdAt with the attribute id so the
   // same user always sees the same name for the same elemental but
-  // different users get different qualifiers.
-  const elementalSeed = profile?.createdAt || profile?.name || "anon";
-  const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => {
-    // For wild-pool elementals (attr.random), resolve the random
-    // creature once and attach it so ElementalArrivalCard / creatureFor
-    // can look up the verb without needing the seed.
-    const creature = a.random ? pickRandomCreature(a, elementalSeed) : undefined;
-    const merged = creature ? { ...a, creature } : { ...a };
-    return {
-      ...merged,
-      displayName: getElementalDisplayName(merged, elementalSeed),
-      desc: getElementalDisplayDesc(merged, elementalSeed),
-    };
-  });
-  // Sort earned by rarity desc — rarest finds bubble up.
-  const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
-  const sortedEarned = [...earnedAttrs].sort((a, b) =>
-    (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
-  );
-
-  // Arrival queue — earned elementals whose ids the user hasn't yet
-  // welcomed via the Summon button. Pending = earned but not yet
-  // welcomed; those stay hidden from the grove so each elemental
-  // appears only after its fade card has played through.
-  const seenIds = seenElementalIds || new Set();
-  const pendingArrivals = !elementalsDisabled
-    ? sortedEarned.filter(a => !seenIds.has(a.id))
-    : [];
-  const pendingIds = new Set(pendingArrivals.map(a => a.id));
-  const revealedSorted = sortedEarned.filter(a => !pendingIds.has(a.id));
-  const markElementalSeen = (id) => {
-    if (!setSeenElementalIds) return;
-    setSeenElementalIds(prev => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-  };
-
-  // Summon flow — clicking the Summon button cycles through queued
-  // elementals one at a time. First click ever fires the unique
-  // creation OmenCard; subsequent clicks fire ElementalArrivalCard for
-  // the next pending arrival. When the queue is empty the button
-  // greys out until a new elemental is earned.
-  const [summonTarget, setSummonTarget] = useState(null);
-  const summonExhausted = !elementalsDisabled && omenShown && pendingArrivals.length === 0;
-  const summonReady     = !elementalsDisabled && (!omenShown || pendingArrivals.length > 0);
-  const onSummonClick = () => {
-    if (!summonReady || summonTarget) return;
-    if (!omenShown) {
-      setSummonTarget({ kind: "omen" });
-      return;
-    }
-    const next = pendingArrivals[0];
-    if (next) setSummonTarget({ kind: "arrival", elemental: next });
-  };
-  const onOmenDismiss = () => {
-    if (dismissOmen) dismissOmen();
-    setSummonTarget(null);
-  };
-  const onArrivalDismiss = (id) => {
-    markElementalSeen(id);
-    setSummonTarget(null);
-  };
-  // The unique creation title — granted at signup, never re-evaluates.
-  // Always rendered when a profile exists; the AttributeShelf prepends
-  // it as the first card so users see their identity title immediately.
-  const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
-  const creatureDesc = describeCreationTitle(creationTitleName);
-  // Match the other elementals' description shape: prepend the
-  // adjective-keyed flavor line(s) onto the creature lore so the
-  // unique reads as dynamic as the rest of the grove. Title shape
-  // is "The {element} {gem} {creature}", so we pull the element
-  // and gem words and weave both flavor sentences in front.
-  const titleParts = (creationTitleName || "").replace(/^The\s+/i, "").split(/\s+/);
-  const uniqueDescPieces = [];
-  if (titleParts.length >= 3) {
-    const elementWord = titleParts[0];
-    const gemWord     = titleParts[1];
-    if (elementWord) uniqueDescPieces.push(flavorLineFor(elementWord));
-    if (gemWord)     uniqueDescPieces.push(flavorLineFor(gemWord));
-  }
-  if (creatureDesc) uniqueDescPieces.push(creatureDesc);
-  const creationCard = creationTitleName ? {
-    id: "_creation",
-    name: creationTitleName,
-    displayName: creationTitleName,
-    rarity: "legendary",
-    desc: uniqueDescPieces.join(" "),
-  } : null;
-  const allCards = creationCard ? [creationCard, ...revealedSorted] : revealedSorted;
-  const [openAttrId, setOpenAttrId] = useState(null);
-  const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
-
-  // Featured grove slots — up to 5 ids the user surfaces below their
-  // unique spirit. Falls back to top-5-by-rarity until the user picks.
-  // Sourced from revealedSorted so an elemental whose arrival card
-  // hasn't faded through yet can't be placed on the grove.
-  const FEATURED_LIMIT = 5;
-  const validFeatured = (featuredElementals || []).filter(id =>
-    revealedSorted.find(a => a.id === id));
-  const effectiveFeaturedIds = validFeatured.length > 0
-    ? validFeatured.slice(0, FEATURED_LIMIT)
-    : revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
-  const featured = effectiveFeaturedIds
-    .map(id => revealedSorted.find(a => a.id === id))
-    .filter(Boolean);
-  const reserve = revealedSorted.filter(a => !effectiveFeaturedIds.includes(a.id));
-  const isFeatured = (id) => effectiveFeaturedIds.includes(id);
-  const toggleFeatured = (id) => {
-    if (!setFeaturedElementals) return;
-    const cur = effectiveFeaturedIds.slice();
-    if (cur.includes(id)) {
-      setFeaturedElementals(cur.filter(x => x !== id));
-      return;
-    }
-    if (cur.length >= FEATURED_LIMIT) {
-      // Replace the last (lowest-priority) slot so the swap is one tap.
-      setFeaturedElementals([...cur.slice(0, FEATURED_LIMIT - 1), id]);
-      return;
-    }
-    setFeaturedElementals([...cur, id]);
-  };
-
+  // Bestiary itself lives under Shelf > Bestiary now; here we only
+  // need the count for the Summons stat that deep-links there.
+  const earnedCount = attrEvaluation.filter(a => a.earned).length;
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Unique creation popup — only fires when the user clicks the
-          Summon button for the first time (first-ever click). The
-          card fades through, then on dismiss omenShown flips true and
-          the grove begins to populate. */}
-      {summonTarget?.kind === "omen" && !elementalsDisabled && profile?.title && (
-        <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
-      )}
 
-      {/* Newly-earned elemental arrival — fires only when the user
-          clicks Summon and there's a pending elemental queued. Each
-          click handles one; dismiss adds it to the grove. */}
-      {summonTarget?.kind === "arrival" && !elementalsDisabled && summonTarget.elemental && (
-        <ElementalArrivalCard
-          elemental={summonTarget.elemental}
-          onDismiss={() => onArrivalDismiss(summonTarget.elemental.id)}
-        />
-      )}
 
       {/* First-visit Profile tutorial — explains what's on this page. */}
       {!profileHintShown && dismissProfileHint && (
@@ -292,7 +152,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           icon={<Flower size={18} c={theme.terra} />}
           title="Profile"
           body={<>
-            Stats, settings, elementals · tap <strong style={{ color: theme.terra }}>Summon</strong> to reveal new ones.
+            Your stats &amp; settings · tap a stat to jump to its surface.
           </>}
           onDismiss={dismissProfileHint}
         />
@@ -395,88 +255,10 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
           {!elementalsDisabled && (
-            <Stat label="Summons"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
+            <Stat label="Summons"  value={earnedCount + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} onClick={() => go("shelf", { mode: "bestiary" })} />
           )}
         </div>
       </div>
-
-      {/* self-knowledge — hidden entirely when the user has banished
-          the spirits via Preferences below. */}
-      {!elementalsDisabled && (<>
-      <div style={{
-        display: "flex", alignItems: "baseline", justifyContent: "space-between",
-        gap: 10, margin: "24px 0 6px",
-      }}>
-        <SectionLabel n="i">Elementals Grove</SectionLabel>
-        <button
-          onClick={onSummonClick}
-          disabled={!summonReady || !!summonTarget}
-          style={{
-            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: summonExhausted ? theme.ash : theme.cream,
-            background: summonExhausted ? "transparent" : theme.terra,
-            border: `1px solid ${summonExhausted ? theme.rule : theme.terra}`,
-            borderRadius: 999, padding: "6px 12px",
-            cursor: summonExhausted ? "default" : "pointer",
-            opacity: summonExhausted ? 0.55 : 1,
-            transition: "all 0.18s ease",
-          }}
-        >
-          {summonExhausted ? "no elemental waiting"
-            : !omenShown ? "summon your first"
-            : pendingArrivals.length > 1 ? `summon (${pendingArrivals.length} waiting)`
-            : "summon elemental"}
-        </button>
-      </div>
-      {/* Inline explainer right under the grove header so users
-          understand what Summon does before they tap it. Kept short
-          and italic so it reads as a side note, not another tutorial. */}
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-        color: theme.ash, lineHeight: 1.45, marginBottom: 12,
-      }}>
-        A small game laid into the journal — engage with the app in
-        different ways and earn elementals to fill the grove. Tap{" "}
-        <em style={{ color: theme.terra, fontStyle: "normal" }}>Summon</em>{" "}
-        to welcome whichever one is waiting.
-      </div>
-      {omenShown && (
-      <div style={{
-        padding: 14, borderRadius: 10,
-        border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
-      }}>
-        {cupCount >= 3 && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            Practice your brew craft to attract spirits.
-          </div>
-        )}
-        {cupCount > 0 && cupCount < 3 && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55, marginBottom: earnedAttrs.length > 0 ? 14 : 0 }}>
-            Different vibes attract different elementals.
-          </div>
-        )}
-        {creationCard && (
-          <AttributeShelf
-            creationCard={creationCard}
-            featured={featured}
-            reserve={reserve}
-            featuredLimit={FEATURED_LIMIT}
-            isFeatured={isFeatured}
-            toggleFeatured={toggleFeatured}
-            openId={openAttrId}
-            setOpenId={setOpenAttrId}
-            openAttr={openAttr}
-          />
-        )}
-        {!creationCard && cupCount === 0 && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, lineHeight: 1.55 }}>
-            Different vibes attract different elementals.
-          </div>
-        )}
-      </div>
-      )}
-      </>)}
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -977,239 +759,5 @@ const SourcesPanel = () => {
         </div>
       )}
     </div>
-  );
-};
-
-/* ──────────────────────────────────────────────────────────────
-   AttributeShelf — earned-only name cards, border colored by rarity.
-   Tap any card to expand its description. No icons, no totals —
-   the locked set stays a mystery.
-   ────────────────────────────────────────────────────────────── */
-
-const RARITY_TONE = {
-  common:    { color: theme.ash,      label: "common",    bg: "rgba(140,140,140,0.05)" },
-  uncommon:  { color: theme.sageDeep, label: "uncommon",  bg: "rgba(98,124,92,0.07)" },
-  rare:      { color: theme.ochre,    label: "rare",      bg: "rgba(165,120,54,0.10)" },
-  legendary: { color: theme.terra,    label: "legendary", bg: "rgba(176,84,47,0.10)" },
-  mythic:    { color: theme.plum,     label: "mythic",    bg: "rgba(120,72,140,0.12)" },
-};
-
-// AttributeShelf altar:
-//   row 1 — the unique creation elemental, alone and centered
-//   row 2 — up to 5 "featured" earned elementals, with empty pip-slots for
-//           the rest of the row when the user has fewer
-//   below — collapsible reserve grid containing every other earned
-//           elemental, with a feature/unfeature button on each detail card
-//
-// Slot-pick interaction: tap an empty pip to enter "selecting" mode;
-// the reserve auto-opens and prompts a pick. The next reserve tile
-// tapped fills the next available slot. Tap the empty pip again or
-// the prompt's cancel to leave selecting mode.
-const AttributeShelf = ({
-  creationCard, featured, reserve, featuredLimit,
-  isFeatured, toggleFeatured,
-  openId, setOpenId, openAttr,
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const [selecting, setSelecting] = useState(false);
-
-  // Selecting mode only makes sense when there's an empty slot to fill.
-  // If the user fills the last slot or removes a featured one, reset.
-  const hasEmptySlot = featured.length < featuredLimit;
-  React.useEffect(() => {
-    if (selecting && !hasEmptySlot) setSelecting(false);
-  }, [selecting, hasEmptySlot]);
-
-  const renderTile = (a) => {
-    const tone = RARITY_TONE[a.rarity] || RARITY_TONE.common;
-    const isOpen = openId === a.id;
-    const inReserve = reserve.find(x => x.id === a.id);
-    const handleClick = () => {
-      if (selecting && inReserve && toggleFeatured) {
-        // Fill the next empty slot with this elemental.
-        toggleFeatured(a.id);
-        setSelecting(false);
-        return;
-      }
-      setOpenId(prev => prev === a.id ? null : a.id);
-    };
-    return (
-      <button
-        key={a.id}
-        onClick={handleClick}
-        style={{
-          fontFamily: ff.serif, fontSize: 13,
-          padding: "6px 12px", borderRadius: 6,
-          background: isOpen ? tone.bg : "transparent",
-          color: theme.ink,
-          border: `2px solid ${tone.color}`,
-          cursor: "pointer",
-          transition: "background 0.15s ease",
-          whiteSpace: "nowrap",
-        }}
-      >{a.displayName || a.name}</button>
-    );
-  };
-
-  const emptySlot = (i) => {
-    const onClick = () => {
-      if (!toggleFeatured) return;
-      setSelecting(prev => !prev);
-    };
-    const active = selecting;
-    return (
-      <button
-        key={`empty-${i}`}
-        onClick={onClick}
-        style={{
-          padding: "6px 14px", borderRadius: 6,
-          border: active
-            ? `2px dashed ${theme.terra}`
-            : `2px dashed ${theme.ruleSoft}`,
-          color: active ? theme.terra : theme.ash,
-          background: "transparent",
-          fontFamily: ff.serif, fontSize: 12,
-          fontStyle: "italic",
-          cursor: "pointer",
-          opacity: active ? 1 : 0.7,
-        }}
-      >{active ? "pick…" : "empty"}</button>
-    );
-  };
-
-  const isCreationOpen = openAttr && openAttr.id === "_creation";
-  const canToggleOpen = openAttr && !isCreationOpen && toggleFeatured;
-  const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
-  const featuredFull = featured.length >= featuredLimit;
-
-  // Auto-expand reserve when the user opens an elemental that lives there
-  // so the highlighted tile is visible alongside its detail card,
-  // and whenever they're in slot-pick mode so the reserve is on screen.
-  const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
-  const reserveOpen = expanded || !!openInReserve || selecting;
-
-  return (
-    <>
-      {/* Detail card — sits above the rest when one is open */}
-      {openAttr && (() => {
-        const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
-        return (
-          <div style={{
-            marginBottom: 12, padding: "12px 14px", borderRadius: 10,
-            background: tone.bg,
-            border: `2px solid ${tone.color}`,
-            position: "relative",
-          }}>
-            <button onClick={() => setOpenId(null)} aria-label="close" style={{
-              position: "absolute", top: 4, right: 8,
-              background: "transparent", border: "none", cursor: "pointer",
-              color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
-            }}>×</button>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap", marginRight: 18 }}>
-              <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
-                {openAttr.displayName || openAttr.name}
-              </span>
-              <span style={{
-                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-                textTransform: "uppercase", color: tone.color, fontWeight: 600,
-              }}>
-                {tone.label}
-              </span>
-            </div>
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-              color: theme.inkSoft, lineHeight: 1.5,
-            }}>
-              {openAttr.desc}
-            </div>
-            {canToggleOpen && (
-              <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => toggleFeatured(openAttr.id)}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, color: theme.terra,
-                    background: "transparent",
-                    border: `1px solid ${theme.terra}`, borderRadius: 999,
-                    padding: "5px 12px", cursor: "pointer",
-                  }}
-                >
-                  {openIsFeatured
-                    ? "remove from grove"
-                    : featuredFull ? "swap onto grove" : "place on grove"}
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* Row 1 — the unique creation elemental, alone and centered */}
-      {creationCard && (
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-          {renderTile(creationCard)}
-        </div>
-      )}
-
-      {/* Row 2 — up to five featured slots */}
-      <div style={{
-        display: "flex", flexWrap: "wrap", gap: 6,
-        justifyContent: "center",
-      }}>
-        {Array.from({ length: featuredLimit }).map((_, i) =>
-          featured[i] ? renderTile(featured[i]) : emptySlot(i))}
-      </div>
-
-      {/* Slot-pick prompt — appears under the row while selecting */}
-      {selecting && (
-        <div style={{
-          marginTop: 10, padding: "6px 10px", borderRadius: 6,
-          background: "rgba(176,84,47,0.08)",
-          border: `1px solid rgba(176,84,47,0.22)`,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-          color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
-        }}>
-          Pick an elemental from the reserve to place it on the grove.
-          {" "}
-          <button
-            onClick={() => setSelecting(false)}
-            style={{
-              background: "transparent", border: "none", padding: 0,
-              fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
-              color: theme.terra, textDecoration: "underline",
-              textDecorationStyle: "dotted", textUnderlineOffset: 3,
-              cursor: "pointer",
-            }}
-          >cancel</button>
-        </div>
-      )}
-
-      {reserve.length > 0 && (
-        <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
-          <button
-            onClick={() => setExpanded(prev => !prev)}
-            style={{
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: theme.terra,
-              background: "transparent", border: "none",
-              cursor: "pointer", padding: "4px 8px",
-            }}
-          >
-            {reserveOpen
-              ? "hide reserve"
-              : `show reserve · ${reserve.length}`}
-          </button>
-        </div>
-      )}
-
-      {reserveOpen && reserve.length > 0 && (
-        <div style={{
-          marginTop: 6, paddingTop: 10,
-          borderTop: `1px solid ${theme.ruleSoft}`,
-          display: "flex", flexWrap: "wrap", gap: 6,
-        }}>
-          {reserve.map(renderTile)}
-        </div>
-      )}
-    </>
   );
 };
