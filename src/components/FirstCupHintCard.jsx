@@ -31,7 +31,7 @@ export const FirstCupHintCard = ({ onDismiss }) => (
           <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> — Experiment and Discover.
         </div>
         <div>
-          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> — Your Journal, Your Vibes.
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> — Your Recipes, Your Journal, Your Ingredients.
         </div>
       </div>
     </div>
