@@ -4,7 +4,7 @@
 
 import React from "react";
 import {
-  Flower, Kettle, Leaf, MoodEnergy, Ornament, Pencil, Sprig, MOOD_ICONS,
+  Flask, Flower, Kettle, Leaf, Ornament, Pencil, Sprig, MOOD_ICONS,
 } from "../components/icons";
 import {
   FitText, SectionLabel,
@@ -175,7 +175,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           {
             label: "Brew an experiment",
             onClick: () => go("apothecary"),
-            icon: (sz) => <MoodEnergy size={sz} c={theme.ochre} />,
+            icon: (sz) => <Flask size={sz} c={theme.ochre} />,
           },
           {
             label: "Note a moment",

@@ -61,6 +61,17 @@ export const Leaf = ({ size = 20, c = theme.sageDeep }) => (
   </svg>
 );
 
+// Erlenmeyer-shaped flask — narrow neck, sloped shoulders, wide
+// flat base. Used for the "experiment" CTA on Home so the icon
+// reads as lab/blending work.
+export const Flask = ({ size = 22, c = theme.ochre }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 3 H15" />
+    <path d="M10 3 V9 L5 19 C4.5 20 5 21 6 21 H18 C19 21 19.5 20 19 19 L14 9 V3" />
+    <path d="M7.5 15 H16.5" />
+  </svg>
+);
+
 export const Kettle = ({ size = 22, c = theme.ink }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 11 H19 L18 19 C17.8 20 17 20.5 16 20.5 H8 C7 20.5 6.2 20 6 19 Z" />
