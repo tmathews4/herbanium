@@ -266,7 +266,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           body={<>
             Three sub-tabs. <em>Journal</em> is everything you've kept in
             time — cups, notes, and verses. <em>Recipe Book</em> is the full
-            catalogue of blends. <em>Compendium</em> opens to the ingredients
+            catalogue of blends. <em>Pantry</em> opens to the ingredients
             you've marked on hand; toggle "only what's in my pantry" off to
             browse and add more.
           </>}
@@ -279,7 +279,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           ? [
               ["journal",    "Journal"],
               ["recipes",    "Recipe Book"],
-              ["pantry",     "Compendium"],
+              ["pantry",     "Pantry"],
             ]
           : [
               ["reverse",    "Blend"],
