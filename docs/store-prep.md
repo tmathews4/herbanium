@@ -19,21 +19,17 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
       platforms (Android Java package: `app.herbanium`, iOS bundle
       identifier: `app.herbanium`).
 
-- [ ] **Decide what to do with the `?dev` URL flag.** Won't work in a
-      WebView wrap (no URL bar). Options:
-      1. Gate dev mode on a long-press of a logo or hidden tap area.
-      2. Hide it under a Profile → Settings entry that appears only
-         on dev builds.
-      3. Accept that dev mode is web-only.
+- [x] ~~Decide what to do with the `?dev` URL flag.~~ Hidden
+      Profile-footer toggle: tap the version line at the bottom of
+      Profile five times within 3 seconds to reveal a "Developer
+      mode" switch. `isDev` resolves as `urlHasDev || devModeEnabled`,
+      so web `?dev=1` still works unchanged.
 
-- [ ] **Safe-area CSS.** Add `env(safe-area-inset-*)` padding so
-      content clears the iPhone notch / dynamic island and Android's
-      gesture-pill area. Touchpoints:
-      - `PhoneFrame` outer container — top inset
-      - `TabBar` — bottom inset (the existing 22px hardcoded bottom
-        padding should become `max(22px, env(safe-area-inset-bottom))`)
-      - Modal overlays (SteepScreen, LogScreen, ElementalArrivalCard,
-        FeedbackModal) — top inset
+- [x] ~~Safe-area CSS.~~ Done in `App.jsx`:
+      - PhoneFrame inner column: `paddingTop: env(safe-area-inset-top)`
+      - TabBar dock: `padding-bottom: max(22px, env(safe-area-inset-bottom))`
+      - Modal overlays not yet patched — revisit if device test
+        shows them clipping under the notch.
 
 - [x] ~~Test localStorage export/import on a physical device.~~
       Decision: export/import is desktop-web only. Hidden in the
@@ -75,21 +71,19 @@ See `docs/native-build.md` for the day-to-day Capacitor workflow.
       genuinely "zero outbound network calls" so the policy is short:
       data stays on the device, no third parties, no analytics.
 
-- [ ] **App description, short + long.** A two-sentence pitch and a
-      ~200-word longer version. Voice should match the app's
-      apothecary-poet register.
+- [x] ~~**App description, short + long.**~~ Drafted in
+      `docs/listing-copy.md` along with subtitle/short-description
+      variants for both stores.
 
-- [ ] **Keywords / tags.** Apple gives 100 chars; Google uses
-      categories + the description for keyword surfacing. Examples:
-      tea, brewing, journal, herbs, apothecary, pu-erh, sencha,
-      meditation, ritual.
+- [x] ~~**Keywords / tags.**~~ Drafted in `docs/listing-copy.md`
+      (99 chars within Apple's 100-char budget).
 
-- [ ] **App categories.** Apple: Lifestyle (or Food & Drink, both
-      defensible). Google: Lifestyle.
+- [x] ~~**App categories.**~~ Apple: Lifestyle / Food & Drink.
+      Google: Lifestyle. Reasoning in `docs/listing-copy.md`.
 
-- [ ] **Age rating questionnaire answers.** Mostly tea content; the
-      mythic side-game (bestiary, wild elementals) is gentle. Expect
-      4+ on iOS, Everyone on Google Play.
+- [x] ~~**Age rating questionnaire answers.**~~ Pre-answered in
+      `docs/listing-copy.md`. Expected: 4+ on iOS, Everyone on
+      Google Play.
 
 ## Account-bound steps (last)
 
