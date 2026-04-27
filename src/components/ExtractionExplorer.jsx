@@ -21,7 +21,7 @@
    The UI deliberately shows "Experimental" tag until real data lands.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
 import {
@@ -49,7 +49,31 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
   const [openEffect, setOpenEffect] = useState(null);
 
   const profile = resolveExtractionProfile(ingredientId, tempC, timeS);
+
+  // Master union of every flavor and effect this ingredient can produce
+  // anywhere in its extraction range. The slider may zero out entries
+  // at one end of the range; we still want them shown so the user can
+  // see what's *possible*, dimmed until the slider activates them.
+  const { allFlavors, allEffects } = useMemo(() => {
+    const fSet = new Set(), eSet = new Set();
+    (EXTRACTION_PROFILES[ingredientId] || []).forEach(p => {
+      (p.flavors || []).forEach(f => fSet.add(f));
+      (p.effects || []).forEach(([tag]) => eSet.add(tag));
+    });
+    return { allFlavors: [...fSet], allEffects: [...eSet] };
+  }, [ingredientId]);
+
   if (!profile) return null;
+
+  const flavorStrengthMap = {};
+  (profile.flavors || []).forEach(entry => {
+    const [name, strength] = Array.isArray(entry) ? entry : [entry, 3];
+    flavorStrengthMap[name] = strength || 0;
+  });
+  const effectStrengthMap = {};
+  (profile.effects || []).forEach(([tag, n]) => {
+    effectStrengthMap[tag] = n || 0;
+  });
 
   // Run the profile through the warnings layer so single-ingredient
   // brewing surfaces the same tannin/ceiling/paradox nudges as the
@@ -194,18 +218,11 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
         </div>
       )}
 
-      {/* Flavor tags. Drop entries whose strength rounds to 0 — slider
-          motion can interpolate a flavor down to nothing, in which case
-          we want it to disappear from the strip rather than render as
-          a faded zero. The entry comes back as soon as the slider
-          pushes its strength above 0 again. */}
-      {(() => {
-        const visibleFlavors = profile.flavors.filter(entry => {
-          const [, strength] = Array.isArray(entry) ? entry : [entry, 3];
-          return Math.round((strength || 0) * 10) / 10 > 0;
-        });
-        if (visibleFlavors.length === 0) return null;
-        return (
+      {/* Flavor tags. Render the full set of flavors this ingredient can
+          ever produce across its extraction range — entries at zero
+          strength stay visible but dimmed, so the user can see what's
+          *possible* and watch them activate as the slider moves. */}
+      {allFlavors.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
@@ -214,13 +231,11 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             flavor
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {visibleFlavors.map(entry => {
-              // Profile flavors are [name, strength] tuples after the
-              // perception refactor. Older callers passed bare strings —
-              // tolerate both for safety.
-              const [f, strength] = Array.isArray(entry) ? entry : [entry, 3];
+            {allFlavors.map(f => {
+              const strength = flavorStrengthMap[f] || 0;
+              const isActive = Math.round(strength * 10) / 10 > 0;
               const known = !!FLAVOR_DESCRIPTIONS[f];
-              const active = openFlavor === f;
+              const opened = openFlavor === f;
               const intensity = Math.max(0.4, Math.min(1, strength / 5));
               return (
                 <button
@@ -229,11 +244,16 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
                   disabled={!known}
                   style={{
                     fontFamily: ff.sans, fontSize: 10.5,
-                    color: active ? theme.cream : theme.terra, letterSpacing: "0.04em",
+                    color: opened ? theme.cream
+                          : isActive ? theme.terra
+                          : theme.ash,
+                    letterSpacing: "0.04em",
                     padding: "3px 9px",
-                    border: `1px solid ${theme.terra}`, borderRadius: 999,
-                    background: active ? theme.terra : "transparent",
-                    opacity: active ? 1 : intensity,
+                    border: `1px solid ${opened || isActive ? theme.terra : theme.rule}`,
+                    borderRadius: 999,
+                    background: opened ? theme.terra : "transparent",
+                    opacity: opened ? 1 : isActive ? intensity : 0.45,
+                    fontStyle: isActive ? "normal" : "italic",
                     cursor: known ? "pointer" : "default",
                     transition: "all 0.15s ease",
                   }}
@@ -251,16 +271,39 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             />
           )}
         </div>
-        );
-      })()}
+      )}
 
-      {/* Effect bars. Same zero-strength filter as flavors — bars
-          worth 0 hide, bars worth >0 (rounded to 1dp) show. */}
-      {(() => {
-        const visibleEffects = profile.effects.filter(([, n]) =>
-          Math.round((n || 0) * 10) / 10 > 0
-        );
-        if (visibleEffects.length === 0) return null;
+      {/* Effect bars. Render every effect this ingredient can produce
+          across its extraction range; bars at zero strength stay in the
+          list but dim, so the user sees what's *possible* and watches
+          each row fill in as the slider moves into its territory.
+          Sort: active effects first (by strength desc), then inactive
+          (alphabetical) below the line they're waiting to cross. */}
+      {allEffects.length > 0 && (() => {
+        const rows = allEffects.map(tag => ({
+          tag,
+          n: effectStrengthMap[tag] || 0,
+        }));
+        rows.sort((a, b) => {
+          if (a.tag === "bitterness") return 1;
+          if (b.tag === "bitterness") return -1;
+          const aActive = Math.round(a.n * 10) / 10 > 0;
+          const bActive = Math.round(b.n * 10) / 10 > 0;
+          if (aActive !== bActive) return aActive ? -1 : 1;
+          if (aActive) return b.n - a.n;
+          return a.tag.localeCompare(b.tag);
+        });
+        let activeIdx = 0;
+        const colored = rows.map(({ tag, n }) => {
+          const isActive = Math.round(n * 10) / 10 > 0;
+          let color;
+          if (tag === "bitterness")     color = theme.terra;
+          else if (!isActive)           color = theme.ash;
+          else if (activeIdx === 0)   { color = theme.sage;  activeIdx++; }
+          else if (activeIdx === 1)   { color = theme.ochre; activeIdx++; }
+          else                        { color = theme.sky;   activeIdx++; }
+          return { tag, n, isActive, color };
+        });
         return (
         <div>
           <div style={{
@@ -270,14 +313,9 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             effect
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {visibleEffects.map(([tag, n], i) => {
+            {colored.map(({ tag, n, isActive, color }) => {
               const known = !!EFFECT_DESCRIPTIONS[tag];
-              const active = openEffect === tag;
-              const color =
-                tag === "bitterness" ? theme.terra
-                : i === 0           ? theme.sage
-                : i === 1           ? theme.ochre
-                : theme.sky;
+              const opened = openEffect === tag;
               return (
                 <div
                   key={tag}
@@ -292,12 +330,12 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
                   } : undefined}
                   style={{
                     padding: "2px 4px", borderRadius: 4,
-                    background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                    background: opened ? "rgba(98, 124, 92, 0.10)" : "transparent",
                     cursor: known ? "pointer" : "default",
                     outline: "none",
                   }}
                 >
-                  <EffectBar label={tag} value={n} color={color} />
+                  <EffectBar label={tag} value={n} color={color} dim={!isActive} />
                 </div>
               );
             })}

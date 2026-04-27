@@ -30,6 +30,7 @@ import { theme, ff } from "../theme";
 import { useUnit, cToF } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { INGREDIENTS } from "../data/ingredients";
+import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
@@ -99,6 +100,32 @@ export const BlendExtractionExplorer = ({
 
   const tempCRange = useMemo(() => unionTempRange(ingredients), [ingredients]);
   const timeSRange = useMemo(() => unionTimeRange(ingredients), [ingredients]);
+
+  // Master union of every flavor and effect that any constituent
+  // ingredient can ever produce — pulls from EXTRACTION_PROFILES first,
+  // and falls back to INGREDIENTS[id].flavors / .effects for ingredients
+  // without authored profile points. Used to render the full set in the
+  // predicted-taste / predicted-mood strips, dimmed when the slider
+  // pushes a given entry's strength to zero.
+  const possible = useMemo(() => {
+    const fSet = new Set(), eSet = new Set();
+    (ingredients || []).forEach(({ id }) => {
+      const profilePoints = EXTRACTION_PROFILES[id];
+      if (profilePoints && profilePoints.length > 0) {
+        profilePoints.forEach(p => {
+          (p.flavors || []).forEach(f => fSet.add(f));
+          (p.effects || []).forEach(([tag]) => eSet.add(tag));
+        });
+      } else {
+        const meta = INGREDIENTS[id];
+        if (meta) {
+          (meta.flavors || []).forEach(f => fSet.add(f));
+          (meta.effects || []).forEach(([tag]) => eSet.add(tag));
+        }
+      }
+    });
+    return { flavors: [...fSet], effects: [...eSet] };
+  }, [ingredients]);
 
   // Internal state — only used when parent hasn't supplied controlled values.
   const [tempCInternal, setTempCInternal] = useState(() =>
@@ -246,18 +273,42 @@ export const BlendExtractionExplorer = ({
       )}
 
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
-          bars) below. Either section hides itself when its dataset is
-          empty. Both filter zero-strength entries so ghost rows don't
-          leak through slider motion. */}
+          bars) below. Each section renders the FULL set of entries any
+          constituent ingredient can produce; entries the slider has
+          pushed to zero stay in the list but render dim, so the user
+          can see what's *possible* and watch each pill or bar fill in
+          as the brew conditions move into its territory. Balance keeps
+          its zero-strength filter — those metrics (bitterness, tartness)
+          are diagnostic, not constants of the blend's identity. */}
       {(() => {
-        const visibleEffects = (brew.effects || []).filter(([, n]) =>
-          Math.round((n || 0) * 10) / 10 > 0
-        );
+        const flavorMap = {};
+        (brew.flavors || []).forEach(([n, s]) => { flavorMap[n] = s || 0; });
+        const effectMap = {};
+        (brew.effects || []).forEach(([t, n]) => { effectMap[t] = n || 0; });
+
+        // Defensive union: any tag the algo currently emits but our
+        // static-profile scan missed (e.g. a synergy-derived effect)
+        // joins the master set so it isn't dropped from view.
+        const fNames = new Set([...possible.flavors, ...Object.keys(flavorMap)]);
+        const eTags  = new Set([...possible.effects, ...Object.keys(effectMap)]);
+        const flavorEntries = [...fNames].map(name => [name, flavorMap[name] || 0]);
+        const effectEntries = [...eTags].map(tag => [tag, effectMap[tag] || 0]);
+
+        // Sort each: active first (by strength desc), inactive after (alphabetical).
+        const sortMixed = (entries) => entries.sort(([a, an], [b, bn]) => {
+          const aActive = Math.round(an * 10) / 10 > 0;
+          const bActive = Math.round(bn * 10) / 10 > 0;
+          if (aActive !== bActive) return aActive ? -1 : 1;
+          if (aActive) return bn - an;
+          return a.localeCompare(b);
+        });
+        sortMixed(flavorEntries);
+        sortMixed(effectEntries);
+
+        const visibleFlavors = flavorEntries;
+        const visibleEffects = effectEntries;
         const visibleBalance = (brew.balance || []).filter(([, n]) =>
           Math.round((n || 0) * 10) / 10 > 0
-        );
-        const visibleFlavors = (brew.flavors || []).filter(([, s]) =>
-          Math.round((s || 0) * 10) / 10 > 0
         );
         if (visibleEffects.length === 0 && visibleBalance.length === 0 && visibleFlavors.length === 0) return null;
 
@@ -276,7 +327,8 @@ export const BlendExtractionExplorer = ({
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {visibleFlavors.map(([name, strength]) => {
                     const known = !!FLAVOR_DESCRIPTIONS[name];
-                    const active = openFlavor === name;
+                    const opened = openFlavor === name;
+                    const isActive = Math.round(strength * 10) / 10 > 0;
                     const intensity = Math.max(0.35, Math.min(1, strength / 5));
                     return (
                       <button
@@ -285,11 +337,16 @@ export const BlendExtractionExplorer = ({
                         disabled={!known}
                         style={{
                           fontFamily: ff.sans, fontSize: 10.5,
-                          color: active ? theme.cream : theme.terra, letterSpacing: "0.04em",
+                          color: opened ? theme.cream
+                                : isActive ? theme.terra
+                                : theme.ash,
+                          letterSpacing: "0.04em",
                           padding: "3px 9px",
-                          border: `1px solid ${theme.terra}`, borderRadius: 999,
-                          background: active ? theme.terra : "transparent",
-                          opacity: active ? 1 : intensity,
+                          border: `1px solid ${opened || isActive ? theme.terra : theme.rule}`,
+                          borderRadius: 999,
+                          background: opened ? theme.terra : "transparent",
+                          opacity: opened ? 1 : isActive ? intensity : 0.45,
+                          fontStyle: isActive ? "normal" : "italic",
                           cursor: known ? "pointer" : "default",
                           transition: "all 0.15s ease",
                         }}
@@ -310,17 +367,24 @@ export const BlendExtractionExplorer = ({
                 )}
               </div>
             )}
-            {visibleEffects.length > 0 && (
+            {visibleEffects.length > 0 && (() => {
+              let activeIdx = 0;
+              const colored = visibleEffects.map(([tag, n]) => {
+                const isActive = Math.round(n * 10) / 10 > 0;
+                let color;
+                if (!isActive)              color = theme.ash;
+                else if (activeIdx === 0) { color = theme.sage;  activeIdx++; }
+                else if (activeIdx === 1) { color = theme.ochre; activeIdx++; }
+                else                      { color = theme.sky;   activeIdx++; }
+                return { tag, n, isActive, color };
+              });
+              return (
               <div style={{ marginBottom: visibleBalance.length > 0 ? 14 : 0 }}>
                 {sectionLabel("predicted mood")}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {visibleEffects.map(([tag, n], i) => {
+                  {colored.map(({ tag, n, isActive, color }) => {
                     const known = !!EFFECT_DESCRIPTIONS[tag];
-                    const active = openEffect === tag;
-                    const color =
-                      i === 0 ? theme.sage
-                      : i === 1 ? theme.ochre
-                      : theme.sky;
+                    const opened = openEffect === tag;
                     return (
                       <div
                         key={tag}
@@ -335,12 +399,12 @@ export const BlendExtractionExplorer = ({
                         } : undefined}
                         style={{
                           padding: "2px 4px", borderRadius: 4,
-                          background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
+                          background: opened ? "rgba(98, 124, 92, 0.10)" : "transparent",
                           cursor: known ? "pointer" : "default",
                           outline: "none",
                         }}
                       >
-                        <EffectBar label={tag} value={n} color={color} />
+                        <EffectBar label={tag} value={n} color={color} dim={!isActive} />
                       </div>
                     );
                   })}
@@ -357,7 +421,8 @@ export const BlendExtractionExplorer = ({
                   </div>
                 )}
               </div>
-            )}
+              );
+            })()}
             {visibleBalance.length > 0 && (
               <div>
                 {sectionLabel("predicted balance")}

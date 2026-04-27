@@ -24,13 +24,22 @@ const VISUAL_GAMMA = 0.7;
 const visualPosition = (v) =>
   5 * Math.pow(Math.max(0, v) / 5, VISUAL_GAMMA);
 
-export const EffectBar = ({ label, value, color = theme.sage }) => {
+export const EffectBar = ({ label, value, color = theme.sage, dim = false }) => {
   const v = Number(value) || 0;
   const visualV = visualPosition(v);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: ff.sans }}>
-      <div style={{ fontSize: 11.5, color: theme.inkSoft, width: 72, letterSpacing: "0.04em" }}>{label}</div>
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10, fontFamily: ff.sans,
+      opacity: dim ? 0.45 : 1,
+      transition: "opacity 0.15s ease",
+    }}>
+      <div style={{
+        fontSize: 11.5,
+        color: dim ? theme.ash : theme.inkSoft,
+        width: 72, letterSpacing: "0.04em",
+        fontStyle: dim ? "italic" : "normal",
+      }}>{label}</div>
       <div style={{ display: "flex", gap: 3, flex: 1 }}>
         {[1,2,3,4,5].map(i => {
           const fill = Math.max(0, Math.min(1, visualV - (i - 1)));
