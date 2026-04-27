@@ -40,6 +40,11 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
   const [openEffect, setOpenEffect] = useState(null);
   const [openFlavor, setOpenFlavor] = useState(null);
   const [openIntent, setOpenIntent] = useState(null);
+  // Pairing preview — id of a paired ingredient currently being shown
+  // in a floating quick-look card. null = no preview open. Lets users
+  // peek at a pairing's effects/flavors without leaving this ingredient.
+  const [previewPairId, setPreviewPairId] = useState(null);
+  const previewIng = previewPairId ? INGREDIENTS[previewPairId] : null;
 
   return (
     <div style={{
@@ -328,7 +333,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
             <SectionLabel n="i">Pairs well with</SectionLabel>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
               {(ing.pairs || []).map(pid => INGREDIENTS[pid] && (
-                <button key={pid} onClick={() => onOpenIngredient && onOpenIngredient(pid)} style={{
+                <button key={pid} onClick={() => setPreviewPairId(pid)} style={{
                   fontFamily: ff.serif, fontSize: 14, color: theme.inkSoft,
                   padding: "8px 14px", borderRadius: 999,
                   background: theme.cream, border: `1px solid ${theme.rule}`, cursor: "pointer",
@@ -339,7 +344,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                   {INGREDIENTS[pid].category === "true tea"  && <Leaf   size={14} c={theme.sageDeep} />}
                   {INGREDIENTS[pid].category === "spice"     && <Flower size={14} c={theme.terra} />}
                   {INGREDIENTS[pid].category === "adaptogen" && <Sprig  size={14} c={theme.plum} />}
-                  {INGREDIENTS[pid].name} ↗
+                  {INGREDIENTS[pid].name}
                 </button>
               ))}
             </div>
@@ -356,6 +361,111 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           </>
         )}
       </div>
+
+      {/* Pairing quick-look — a floating card with the paired
+          ingredient's effects + flavor profile. Tapping the backdrop
+          or the × dismisses; the user stays on the current ingredient. */}
+      {previewIng && (
+        <div
+          onClick={() => setPreviewPairId(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 60,
+            background: "rgba(40, 30, 20, 0.45)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: theme.ivory,
+              borderRadius: 12, maxWidth: 380, width: "100%",
+              padding: "20px 22px 22px",
+              boxShadow: "0 8px 28px rgba(0,0,0,0.18)",
+              position: "relative",
+              fontFamily: ff.sans,
+            }}
+          >
+            <button
+              onClick={() => setPreviewPairId(null)}
+              aria-label="close"
+              style={{
+                position: "absolute", top: 8, right: 12,
+                background: "transparent", border: "none", color: theme.ash,
+                fontSize: 22, lineHeight: 1, cursor: "pointer", padding: "4px 8px",
+              }}
+            >×</button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+              {previewIng.category === "flower"    && <Flower size={16} c={theme.ochre} />}
+              {previewIng.category === "herbal"    && <Sprig  size={16} c={theme.sage} />}
+              {previewIng.category === "true tea"  && <Leaf   size={16} c={theme.sageDeep} />}
+              {previewIng.category === "spice"     && <Flower size={16} c={theme.terra} />}
+              {previewIng.category === "adaptogen" && <Sprig  size={16} c={theme.plum} />}
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+                textTransform: "uppercase", color: theme.ash,
+              }}>
+                {previewIng.subcategory || previewIng.category}
+              </span>
+            </div>
+            <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink, lineHeight: 1.2 }}>
+              {previewIng.name}
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+              marginTop: 2, marginBottom: 14,
+            }}>
+              {previewIng.latin}
+            </div>
+
+            {(previewIng.effects && previewIng.effects.length > 0) && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+                  textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8,
+                }}>Mood profile</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {previewIng.effects.map(([tag, str]) => (
+                    <span key={tag} style={{
+                      fontFamily: ff.serif, fontSize: 13,
+                      padding: "4px 10px", borderRadius: 999,
+                      background: theme.cream,
+                      border: `1px solid ${theme.ruleSoft}`,
+                      color: theme.inkSoft,
+                    }}>
+                      {tag}{" "}
+                      <span style={{ color: theme.ash, fontFamily: ff.mono, fontSize: 11 }}>
+                        {"●".repeat(str)}{"○".repeat(Math.max(0, 5 - str))}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(previewIng.flavors && previewIng.flavors.length > 0) && (
+              <div>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+                  textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8,
+                }}>Flavor profile</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {previewIng.flavors.map(f => (
+                    <span key={f} style={{
+                      fontFamily: ff.serif, fontSize: 13,
+                      padding: "4px 10px", borderRadius: 999,
+                      background: "transparent",
+                      border: `1px solid ${theme.ruleSoft}`,
+                      color: theme.inkSoft,
+                    }}>{f}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
