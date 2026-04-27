@@ -10,6 +10,7 @@ import {
   FitText, SectionLabel,
 } from "../components/layout";
 import { BLENDS } from "../data/blends";
+import { WAIT_POEMS } from "../data/waitContent";
 import { getBlend, mmss, sessionAgo } from "../helpers/misc";
 import {
   ff, theme,
@@ -22,17 +23,58 @@ import {
    Screen: HOME
    ────────────────────────────────────────────────────────────── */
 
-// Contextual line based on the hour. Returns { label, note }.
-// Kept quiet and observational — not commanding, not whimsical.
+// Contextual line based on the hour. Returns { label, todTags }
+// where todTags carry the time-of-day keywords used to pick a
+// matching public-domain poem. The poem replaces the older
+// hand-written one-liner.
 const getTimeOfDay = (h) => {
-  if (h >= 5  && h <  8) return { label: "Early morning",  note: "the kettle is the first voice" };
-  if (h >= 8  && h < 11) return { label: "Morning",        note: "something awake, something bright" };
-  if (h >= 11 && h < 13) return { label: "Late morning",   note: "the light is clear, the day still open" };
-  if (h >= 13 && h < 16) return { label: "Afternoon",      note: "a cup between the hours" };
-  if (h >= 16 && h < 19) return { label: "Late afternoon", note: "slow the hand, steep the thought" };
-  if (h >= 19 && h < 22) return { label: "Evening",        note: "the kettle softens the room" };
-  if (h >= 22 || h <  2) return { label: "Late evening",   note: "a cup to lower the lights" };
-  return                         { label: "Small hours",   note: "when the kettle is a companion" };
+  if (h >= 5  && h <  8) return { label: "Early morning",  todTags: ["morning", "dawn"] };
+  if (h >= 8  && h < 11) return { label: "Morning",        todTags: ["morning"] };
+  if (h >= 11 && h < 13) return { label: "Late morning",   todTags: ["morning", "noon"] };
+  if (h >= 13 && h < 16) return { label: "Afternoon",      todTags: ["noon", "stillness"] };
+  if (h >= 16 && h < 19) return { label: "Late afternoon", todTags: ["evening"] };
+  if (h >= 19 && h < 22) return { label: "Evening",        todTags: ["evening", "night"] };
+  if (h >= 22 || h <  2) return { label: "Late evening",   todTags: ["night", "moon"] };
+  return                         { label: "Small hours",   todTags: ["night", "moon", "stillness"] };
+};
+
+// Northern-hemisphere season buckets keyed off month index. Used to
+// bias the home poem pick toward seasonal lines when one of the
+// candidate poems happens to share the season tag. Southern-hemi
+// users will see a mismatched season bias — acceptable for now,
+// no locale data available locally.
+const seasonOf = (m) => {
+  if (m === 11 || m <= 1) return "winter";
+  if (m >= 2 && m <= 4)  return "spring";
+  if (m >= 5 && m <= 7)  return "summer";
+  return "autumn";
+};
+
+// Pick a public-domain poem from WAIT_POEMS that fits the current
+// hour and (when possible) season. Stable per day so the user
+// gets one quiet line that holds, not a new one on every render.
+const pickHomePoem = (date) => {
+  const tod = getTimeOfDay(date.getHours());
+  const season = seasonOf(date.getMonth());
+  const todSet = new Set(tod.todTags);
+
+  const candidates = (WAIT_POEMS || []).filter(p => {
+    const tags = p.tags || [];
+    return tags.some(t => todSet.has(t));
+  });
+  // Prefer ones that also match the season; fall back to time-only.
+  const seasonMatched = candidates.filter(p => (p.tags || []).includes(season));
+  const pool = seasonMatched.length > 0 ? seasonMatched : candidates;
+  if (pool.length === 0) return null;
+
+  // Stable hash by the calendar day so the same poem holds for
+  // the whole day. Different users on the same day see the same
+  // poem — fine since the pool is curated public-domain and the
+  // content is impersonal.
+  const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${tod.label}`;
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h << 5) - h + key.charCodeAt(i) | 0;
+  return pool[Math.abs(h) % pool.length];
 };
 
 export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled }) => {
@@ -71,7 +113,9 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
       {/* Time-of-day contextual card (returning users only) */}
       {!isEmpty && (() => {
-        const tod = getTimeOfDay(new Date().getHours());
+        const now = new Date();
+        const tod = getTimeOfDay(now.getHours());
+        const poem = pickHomePoem(now);
         return (
           <div style={{
             marginBottom: 16,
@@ -86,16 +130,29 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             </div>
             <div style={{
               fontFamily: ff.serif, fontSize: 17, color: theme.ink,
-              lineHeight: 1.25, marginBottom: 3,
+              lineHeight: 1.25, marginBottom: poem ? 8 : 3,
             }}>
               {tod.label}.
             </div>
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-              color: theme.ash, lineHeight: 1.5,
-            }}>
-              {tod.note}
-            </div>
+            {poem ? (
+              <>
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                  color: theme.inkSoft, lineHeight: 1.5,
+                  whiteSpace: "pre-line",
+                }}>
+                  {poem.text}
+                </div>
+                {poem.attribution && (
+                  <div style={{
+                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+                    color: theme.ash, marginTop: 6,
+                  }}>
+                    {poem.attribution}
+                  </div>
+                )}
+              </>
+            ) : null}
           </div>
         );
       })()}

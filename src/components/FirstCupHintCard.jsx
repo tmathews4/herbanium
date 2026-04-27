@@ -32,8 +32,12 @@ export const FirstCupHintCard = ({ onDismiss }) => (
         fontFamily: ff.sans, fontSize: 12,
         color: theme.inkSoft, lineHeight: 1.45,
       }}>
-        <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew ·{" "}
-        <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> for journal, recipes, pantry &amp; bestiary.
+        <div>
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew, browse, and explore.
+        </div>
+        <div>
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> for your journal, recipes, and pantry.
+        </div>
       </div>
     </div>
     <button
