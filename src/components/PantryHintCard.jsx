@@ -14,7 +14,7 @@ import { HintCard } from "./HintCard";
 export const PantryHintCard = ({ onDismiss }) => (
   <HintCard
     icon={<Sprig size={18} c={theme.sageDeep} />}
-    title="Garden"
+    title="Cabinet"
     body={<>
       What you have on hand.
     </>}

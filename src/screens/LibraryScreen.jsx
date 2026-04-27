@@ -242,7 +242,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                     transition: "left .2s",
                   }} />
                 </span>
-                <span onClick={() => setPantryOnly(!pantryOnly)}>only what's in my garden</span>
+                <span onClick={() => setPantryOnly(!pantryOnly)}>only what's in my cabinet</span>
               </label>
             )}
             <span style={{
@@ -289,7 +289,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                             togglePantry(id);
                           }
                         }}
-                        title={inPantry ? "in garden — tap to remove" : "tap to add to garden"}
+                        title={inPantry ? "in cabinet — tap to remove" : "tap to add to cabinet"}
                         style={{
                           position: "absolute", top: 6, right: 6,
                           width: 22, height: 22, borderRadius: "50%",
