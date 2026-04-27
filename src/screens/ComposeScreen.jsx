@@ -188,7 +188,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     name: "—",
     subtitle: onlyPantry
       ? (pantryIds && pantryIds.size === 0
-          ? "add ingredients to your pantry first"
+          ? "add ingredients to your garden first"
           : "no blends from what you have on hand")
       : "pick a mood to begin",
     ingredients: [], tempC: 95, timeS: 300, effects: [],
@@ -269,7 +269,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           title="Shelf"
           body={<>
             <div><strong style={{ color: theme.terra }}>Recipes</strong> — Your Saved Cups.</div>
-            <div><strong style={{ color: theme.terra }}>Pantry</strong> — Your Ingredients.</div>
+            <div><strong style={{ color: theme.terra }}>Garden</strong> — Your Ingredients.</div>
             <div><strong style={{ color: theme.terra }}>Journal</strong> — Your Brews and Notes.</div>
           </>}
           onDismiss={dismissComposeHint}
@@ -415,7 +415,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 transition: "left .2s",
               }} />
             </span>
-            only use what's in my pantry
+            only use what's in my garden
           </label>
 
           {/* Candidate selector — only shown when there are multiple suggestions */}

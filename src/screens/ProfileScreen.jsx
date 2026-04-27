@@ -253,7 +253,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         <div style={{ marginTop: 6, display: "flex", gap: 16, justifyContent: "center" }}>
           <Stat label="Cups"      value={cupCount}    onClick={() => go("shelf", { mode: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
-          <Stat label="Pantry"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
+          <Stat label="Garden"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
           {!elementalsDisabled && (
             <Stat label="Bestiary"  value={earnedCount + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} onClick={() => go("shelf", { mode: "journal", journalSubTab: "bestiary" })} />
           )}
