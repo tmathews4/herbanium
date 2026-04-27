@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Variant 3 — Apothecary stamp.
+  Same H shape inside a soft-cornered rectangle border, like a
+  hand-pressed wax-and-ink mark on a label. Terra strokes against
+  ivory; the border reads as the shop sign or jar label. Most
+  obviously "apothecary" of the three.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#F3ECDC"/>
+
+  <!-- soft-cornered border, like a stamped seal -->
+  <rect x="160" y="160" width="704" height="704" rx="64" ry="64"
+        fill="none" stroke="#B0542F" stroke-width="14"/>
+
+  <!-- the H itself, terra on ivory -->
+  <g stroke="#B0542F" stroke-width="58" stroke-linecap="round" fill="none">
+    <line x1="370" y1="280" x2="392" y2="744"/>
+    <line x1="654" y1="280" x2="632" y2="744"/>
+    <line x1="398" y1="608" x2="626" y2="416"/>
+  </g>
+
+  <!-- two small ochre dots at the top corners — the wax beads -->
+  <circle cx="218" cy="218" r="10" fill="#A57836"/>
+  <circle cx="806" cy="218" r="10" fill="#A57836"/>
+  <circle cx="218" cy="806" r="10" fill="#A57836"/>
+  <circle cx="806" cy="806" r="10" fill="#A57836"/>
+</svg>
