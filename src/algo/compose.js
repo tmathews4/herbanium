@@ -758,8 +758,29 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   const candidates = [];
   const seenNames = new Set();
 
+  // Lead-ingredient signature — sorted IDs of every non-accent
+  // ingredient. Two blends with the same signature and a near-equal
+  // brew profile are effectively the same recipe; we suppress the
+  // later one so the user doesn't see e.g. an algorithmic synth
+  // shadowing the curated tradition that already covers the combo.
+  function leadSignature(b) {
+    return (b.ingredients || [])
+      .filter(i => i.role !== "accent")
+      .map(i => i.id)
+      .sort()
+      .join("|");
+  }
+  function profileNear(a, b) {
+    return Math.abs((a.tempC || 0) - (b.tempC || 0)) <= 5
+        && Math.abs((a.timeS || 0) - (b.timeS || 0)) <= 30;
+  }
+
   function addBlend(b, kind, kindLabel, score) {
     if (seenNames.has(b.name)) return;
+    const sig = leadSignature(b);
+    if (sig && candidates.some(c => leadSignature(c) === sig && profileNear(c, b))) {
+      return;
+    }
     seenNames.add(b.name);
     candidates.push({ ...b, kind, kindLabel, _score: score });
   }
