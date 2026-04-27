@@ -448,6 +448,211 @@ export const WAIT_POEMS = [
     attribution: "— Anonymous (app-original, in the traditional style)",
     tags: ["whimsy", "comfort", "kettle", "tea"],
   },
+
+  // — Expansion set: additional public-domain poems and fragments
+  //   to give the home time/season picker more variety. All
+  //   pre-1929 (US public domain) or earlier ancient/classical. —
+
+  // Morning / dawn
+  {
+    text: "I'll tell you how the Sun rose, —\nA Ribbon at a time.\nThe Steeples swam in Amethyst,\nThe news, like Squirrels, ran.",
+    attribution: "— Emily Dickinson",
+    tags: ["morning", "dawn", "energy", "focus"],
+  },
+  {
+    text: "Wake! For the Sun, who scattered into flight\nThe Stars before him from the Field of Night,\nDrives Night along with them from Heav'n, and strikes\nThe Sultan's Turret with a Shaft of Light.",
+    attribution: "— Edward FitzGerald (Rubaiyat)",
+    tags: ["dawn", "morning", "energy"],
+  },
+  {
+    text: "I'm going out to clean the pasture spring;\nI'll only stop to rake the leaves away.\nI sha'n't be gone long. — You come too.",
+    attribution: "— Robert Frost",
+    tags: ["morning", "spring", "calm", "reflection"],
+  },
+  {
+    text: "Now the bright morning star, day's harbinger,\nComes dancing from the East, and leads with her\nThe flowery May.",
+    attribution: "— John Milton",
+    tags: ["dawn", "morning", "spring"],
+  },
+  {
+    text: "The breeze at dawn has secrets to tell you.\nDon't go back to sleep.\nYou must ask for what you really want.",
+    attribution: "— Rumi",
+    tags: ["dawn", "morning", "focus", "energy"],
+  },
+  {
+    text: "Morning glory —\neven the well-bucket\nis taken.",
+    attribution: "— Chiyo-ni",
+    tags: ["morning", "summer", "stillness", "calm"],
+  },
+
+  // Noon / stillness
+  {
+    text: "A noiseless patient spider,\nI mark'd where on a little promontory it stood isolated,\nMark'd how to explore the vacant vast surrounding.",
+    attribution: "— Walt Whitman",
+    tags: ["stillness", "noon", "reflection", "focus"],
+  },
+  {
+    text: "Heard melodies are sweet, but those unheard\nAre sweeter; therefore, ye soft pipes, play on.",
+    attribution: "— John Keats",
+    tags: ["stillness", "noon", "reflection"],
+  },
+  {
+    text: "Sweet day, so cool, so calm, so bright,\nThe bridal of the earth and sky.",
+    attribution: "— George Herbert",
+    tags: ["noon", "stillness", "calm", "spring", "summer"],
+  },
+  {
+    text: "Stillness —\nthe cicada's cry\ndrills into the rocks.",
+    attribution: "— Bashō",
+    tags: ["summer", "noon", "stillness"],
+  },
+
+  // Evening / night
+  {
+    text: "The woods are lovely, dark and deep,\nBut I have promises to keep,\nAnd miles to go before I sleep,\nAnd miles to go before I sleep.",
+    attribution: "— Robert Frost",
+    tags: ["evening", "winter", "reflection", "solitude"],
+  },
+  {
+    text: "I have been one acquainted with the night.\nI have walked out in rain — and back in rain.\nI have outwalked the furthest city light.",
+    attribution: "— Robert Frost",
+    tags: ["night", "rain", "solitude", "reflection"],
+  },
+  {
+    text: "Look at the stars! look, look up at the skies!\nO look at all the fire-folk sitting in the air!",
+    attribution: "— Gerard Manley Hopkins",
+    tags: ["night", "moon", "reflection"],
+  },
+  {
+    text: "Slowly, silently, now the moon\nWalks the night in her silver shoon;\nThis way, and that, she peers, and sees\nSilver fruit upon silver trees.",
+    attribution: "— Walter de la Mare",
+    tags: ["night", "moon", "stillness", "sleepy"],
+  },
+  {
+    text: "The moon has set,\nand the Pleiades; it is midnight,\ntime is going by, and I sleep alone.",
+    attribution: "— Sappho (trans.)",
+    tags: ["night", "moon", "solitude", "sleepy"],
+  },
+  {
+    text: "Lighting one candle\nwith another candle —\nspring evening.",
+    attribution: "— Yosa Buson",
+    tags: ["evening", "spring", "calm"],
+  },
+  {
+    text: "Lying ill on a journey:\nmy dreams go wandering\nover withered fields.",
+    attribution: "— Bashō",
+    tags: ["winter", "night", "solitude", "reflection"],
+  },
+
+  // Spring
+  {
+    text: "Loveliest of trees, the cherry now\nIs hung with bloom along the bough,\nAnd stands about the woodland ride\nWearing white for Eastertide.",
+    attribution: "— A.E. Housman",
+    tags: ["spring", "morning", "calm", "flower"],
+  },
+  {
+    text: "From you have I been absent in the spring,\nWhen proud-pied April, dressed in all his trim,\nHath put a spirit of youth in every thing.",
+    attribution: "— William Shakespeare",
+    tags: ["spring", "reflection"],
+  },
+  {
+    text: "Spring rain leaking through the roof,\ndripping from the wasps' nest.",
+    attribution: "— Bashō",
+    tags: ["spring", "rain", "calm"],
+  },
+  {
+    text: "What a strange thing! —\nto be alive\nbeneath cherry blossoms.",
+    attribution: "— Issa",
+    tags: ["spring", "reflection", "morning"],
+  },
+
+  // Summer
+  {
+    text: "Shall I compare thee to a summer's day?\nThou art more lovely and more temperate.",
+    attribution: "— William Shakespeare",
+    tags: ["summer", "reflection", "calm"],
+  },
+  {
+    text: "Summer is icumen in,\nLhude sing cuccu!\nGroweth sed, and bloweth med,\nAnd springth the wde nu.",
+    attribution: "— Anonymous (medieval)",
+    tags: ["summer", "morning", "energy"],
+  },
+  {
+    text: "A summer river being crossed —\nhow pleasing,\nwith sandals in my hand!",
+    attribution: "— Buson",
+    tags: ["summer", "calm"],
+  },
+
+  // Autumn
+  {
+    text: "Season of mists and mellow fruitfulness,\nClose bosom-friend of the maturing sun;\nConspiring with him how to load and bless\nWith fruit the vines that round the thatch-eaves run.",
+    attribution: "— John Keats",
+    tags: ["autumn", "morning", "reflection"],
+  },
+  {
+    text: "Autumn deepens —\nthe man next door,\nwhat does he do?",
+    attribution: "— Bashō",
+    tags: ["autumn", "evening", "reflection", "solitude"],
+  },
+  {
+    text: "The cricket's song\nin the morning frost\nis ending.",
+    attribution: "— Issa",
+    tags: ["autumn", "morning", "stillness"],
+  },
+
+  // Winter
+  {
+    text: "The first snow,\nthe leaves of the daffodil\nbending together.",
+    attribution: "— Bashō",
+    tags: ["winter", "morning", "stillness"],
+  },
+  {
+    text: "First winter rain —\neven the monkey\nseems to want a raincoat.",
+    attribution: "— Bashō",
+    tags: ["winter", "rain", "comfort"],
+  },
+  {
+    text: "Stopping a moment to listen —\nthe snow on the pine\nshakes loose at last.",
+    attribution: "— Anonymous (traditional, Japanese style)",
+    tags: ["winter", "stillness", "calm"],
+  },
+
+  // General reflection / quiet
+  {
+    text: "I'm Nobody! Who are you?\nAre you — Nobody — too?\nThen there's a pair of us!\nDon't tell! they'd advertise — you know!",
+    attribution: "— Emily Dickinson",
+    tags: ["solitude", "comfort", "reflection"],
+  },
+  {
+    text: "Tell all the truth but tell it slant —\nSuccess in Circuit lies.",
+    attribution: "— Emily Dickinson",
+    tags: ["reflection", "stillness"],
+  },
+  {
+    text: "There is no Frigate like a Book\nTo take us Lands away.",
+    attribution: "— Emily Dickinson",
+    tags: ["comfort", "reflection", "solitude"],
+  },
+  {
+    text: "When you do things from your soul,\nyou feel a river moving in you, a joy.",
+    attribution: "— Rumi",
+    tags: ["calm", "reflection", "comfort"],
+  },
+  {
+    text: "Don't worry, spiders,\nI keep house\ncasually.",
+    attribution: "— Issa",
+    tags: ["calm", "comfort", "stillness"],
+  },
+  {
+    text: "Even with insects —\nsome can sing,\nsome can't.",
+    attribution: "— Issa",
+    tags: ["summer", "reflection", "calm"],
+  },
+  {
+    text: "Whoever brought me here\nwill have to take me home.",
+    attribution: "— Rumi",
+    tags: ["evening", "comfort", "reflection"],
+  },
 ];
 
 // Brew-companion writing prompts. Short, sensory, low-friction —
