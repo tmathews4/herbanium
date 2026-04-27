@@ -267,19 +267,27 @@ export const SEED_MODES = {
 
   new: {
     label: "new user",
-    description: "just opened the app — nothing on any shelf",
+    description: "just onboarded — favorites seeded, nothing logged yet",
+    // freshlyOnboarded tells applySeedMode to materialize savedBlendIds,
+    // favoriteBlendIds, and pantryIds via the same helpers handleOnboardingComplete
+    // uses (pickSeedBlends + ONBOARDING_PANTRY), so this mode stays a faithful
+    // mirror of what a real user sees the moment they finish onboarding.
+    freshlyOnboarded: true,
+    profile: {
+      name: "Tommy",
+      timeOfDay: ["evening"],
+      draw: ["calm"],
+      flavors: ["floral"],
+    },
     sessions: [],
-    savedBlendIds: [],
-    favoriteBlendIds: [],
-    pantryIds: [],
     journalEntries: [],
     plannerItems: [],
     tabVisits: {},
     seenElementalIds: [],
     featuredElementals: [],
+    generatedBlends: [],
     omenShown: false,
     elementalsDisabled: false,
-    favoritesMigrated: false,
     hints: {
       firstCupHintShown: false,
       composeHintShown:  false,

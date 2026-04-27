@@ -256,7 +256,7 @@ export default function App() {
   // with stale persisted data get refreshed. Without this, an existing
   // dev session keeps its old "y1"-"y9" sessions even after we ship a
   // richer seed, because usePersistedState rehydrates from localStorage.
-  const SEED_VERSION = "4";
+  const SEED_VERSION = "5";
   const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
 
   // Apply a seed mode in full — covers every persisted flow state
@@ -267,9 +267,25 @@ export default function App() {
   const applySeedMode = (mode) => {
     if (!mode) return;
     setSessions(materializeSeedSessions(mode.sessions));
-    setSavedBlendIds(new Set(mode.savedBlendIds || []));
-    setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
-    setPantryIds(new Set(mode.pantryIds || []));
+    // Freshly-onboarded seeds derive saved/favorites/pantry from the same
+    // helpers handleOnboardingComplete uses, so the dev "new" mode stays
+    // a faithful mirror of what a real user sees right after sign-up
+    // rather than drifting as the onboarding logic evolves.
+    if (mode.freshlyOnboarded) {
+      const seedBlendIds = pickSeedBlends({
+        timeOfDay: mode.profile?.timeOfDay,
+        draw: mode.profile?.draw,
+      });
+      setSavedBlendIds(new Set(seedBlendIds));
+      setFavoriteBlendIds(new Set(seedBlendIds));
+      setPantryIds(new Set(ONBOARDING_PANTRY));
+      setFavoritesMigrated(true);
+    } else {
+      setSavedBlendIds(new Set(mode.savedBlendIds || []));
+      setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
+      setPantryIds(new Set(mode.pantryIds || []));
+      setFavoritesMigrated(!!mode.favoritesMigrated);
+    }
     setGeneratedBlends(mode.generatedBlends || []);
     setJournalEntries(materializeSeedJournalEntries(mode.journalEntries));
     setPlannerItems(materializeSeedPlannerItems(mode.plannerItems));
@@ -278,7 +294,6 @@ export default function App() {
     setFeaturedElementals(mode.featuredElementals || []);
     setOmenShown(!!mode.omenShown);
     setElementalsDisabled(!!mode.elementalsDisabled);
-    setFavoritesMigrated(!!mode.favoritesMigrated);
     const hints = mode.hints || {};
     setFirstCupHintShown(!!hints.firstCupHintShown);
     setComposeHintShown(!!hints.composeHintShown);
@@ -288,7 +303,19 @@ export default function App() {
     setBestiaryHintShown(!!hints.bestiaryHintShown);
     setIngredientHintShown(!!hints.ingredientHintShown);
     if (mode.profile) {
-      setProfile(prev => ({ ...(prev || {}), ...mode.profile, isDev: true, createdAt: prev?.createdAt || Date.now() }));
+      setProfile(prev => {
+        const merged = {
+          ...(prev || {}),
+          ...mode.profile,
+          isDev: true,
+          createdAt: prev?.createdAt || Date.now(),
+        };
+        if (mode.freshlyOnboarded) {
+          merged.title = generateCreationTitle(merged);
+          merged.synthsVersion = "3";
+        }
+        return merged;
+      });
     }
     setSeedVersion(SEED_VERSION);
   };
