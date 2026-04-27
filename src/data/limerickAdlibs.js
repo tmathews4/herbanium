@@ -21,8 +21,8 @@ export const LIMERICK_PROMPTS = [
 ];
 
 const TEMPLATES = [
-  ({ action, feeling, object, place }) =>
-    `A traveler once ${action} away,\n` +
+  ({ name, action, feeling, object, place }) =>
+    `${name} once ${action} away,\n` +
     `And ended up ${feeling} that day.\n` +
     `   With a ${object} and song,\n` +
     `   They wandered along,\n` +
@@ -63,8 +63,8 @@ const TEMPLATES = [
     `   And found it quite perfect,\n` +
     `Then sailed off to the eastern lee.`,
 
-  ({ feeling, place, action, object }) =>
-    `A kettle once whistled in ${place},\n` +
+  ({ name, feeling, place, action, object }) =>
+    `${name}'s kettle once whistled in ${place},\n` +
     `At a ${feeling} and deliberate pace.\n` +
     `   It would not stop ${action},\n` +
     `   The poor little thing,\n` +
