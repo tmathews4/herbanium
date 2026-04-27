@@ -272,7 +272,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           body={<>
             <strong style={{ color: theme.terra }}>Blend</strong> ·{" "}
             <strong style={{ color: theme.terra }}>Vibe</strong> ·{" "}
-            <strong style={{ color: theme.terra }}>Compendium</strong> — three ways to find a cup.
+            <strong style={{ color: theme.terra }}>Compendium</strong> — three ways to understand your cup.
           </>}
           onDismiss={dismissComposeHint}
         />
