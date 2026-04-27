@@ -26,7 +26,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -139,7 +139,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // same user always sees the same name for the same elemental but
   // Bestiary itself lives under Shelf > Bestiary now; here we only
   // need the count for the Summons stat that deep-links there.
-  const earnedCount = attrEvaluation.filter(a => a.earned).length;
+  const earnedCount = attrEvaluation.filter(a => a.earned).length + (wildElementals?.length || 0);
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
   return (

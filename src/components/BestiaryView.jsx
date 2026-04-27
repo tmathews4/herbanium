@@ -53,6 +53,7 @@ export const BestiaryView = ({
   setSeenElementalIds,
   featuredElementals,
   setFeaturedElementals,
+  wildElementals = [],
   bestiaryHintShown,
   dismissBestiaryHint,
 }) => {
@@ -82,8 +83,12 @@ export const BestiaryView = ({
       desc: baseDesc ? `${flavor} ${baseDesc}` : flavor,
     };
   });
+  // Wild elementals (chance rolls on brews / journal entries) carry
+  // their own displayName + creature + desc + rarity, so they merge
+  // straight in alongside the named attribute-based earned set.
+  const earnedAttrsAll = [...earnedAttrs, ...(wildElementals || [])];
   const rarityOrder = { mythic: 5, legendary: 4, rare: 3, uncommon: 2, common: 1 };
-  const sortedEarned = [...earnedAttrs].sort((a, b) =>
+  const sortedEarned = [...earnedAttrsAll].sort((a, b) =>
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
 

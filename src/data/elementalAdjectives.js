@@ -17,7 +17,7 @@
    name with "The " stripped.
    ────────────────────────────────────────────────────────────── */
 
-const ELEMENT_ADJECTIVES = [
+export const ELEMENT_ADJECTIVES = [
   "Mist", "Dew", "Vapor", "Fog", "Drizzle",
   "Light", "Sunfire", "Ember", "Aurora", "Bloom",
   "Wind", "Sky", "Cloud", "Lightning", "Daybreak",
@@ -29,7 +29,7 @@ const ELEMENT_ADJECTIVES = [
   "Storm", "Hush", "Brume", "Cinder", "Bramble",
 ];
 
-const GEM_ADJECTIVES = [
+export const GEM_ADJECTIVES = [
   "Pearl", "Rose-Quartz", "Opal", "Moonstone",
   "Amber", "Topaz", "Citrine", "Sunstone",
   "Garnet", "Ruby", "Carnelian", "Coral",
@@ -268,7 +268,7 @@ export const RANDOM_CREATURE_POOL = [
 
 // Combined pool used for the adjective on random elementals. Mixes
 // element + gem so the variety reads as broad as possible.
-const ALL_ADJECTIVES = [...ELEMENT_ADJECTIVES, ...GEM_ADJECTIVES];
+export const ALL_ADJECTIVES = [...ELEMENT_ADJECTIVES, ...GEM_ADJECTIVES];
 
 // Returns the creature noun for an attribute. Pre-resolved
 // `attr.creature` first (set by ProfileScreen for random attrs so

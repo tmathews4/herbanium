@@ -21,6 +21,7 @@ import { OnboardingScreen } from "./screens/OnboardingScreen";
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
+import { maybeRollWild } from "./data/wildElementals";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 
@@ -292,6 +293,8 @@ export default function App() {
     setTabVisits(mode.tabVisits || {});
     setSeenElementalIds(new Set(mode.seenElementalIds || []));
     setFeaturedElementals(mode.featuredElementals || []);
+    setWildElementals(mode.wildElementals || []);
+    setLastWildAt(mode.lastWildAt || 0);
     setOmenShown(!!mode.omenShown);
     setElementalsDisabled(!!mode.elementalsDisabled);
     const hints = mode.hints || {};
@@ -393,6 +396,13 @@ export default function App() {
   // back to top-5-by-rarity in ProfileScreen. Persisted key kept as
   // the legacy "featuredAnimis" for migration safety.
   const [featuredElementals, setFeaturedElementals] = usePersistedState("featuredAnimis", []);
+  // Wild elementals — chance-rolled spirits earned ad-hoc on brews
+  // and journal entries (1/15 per event, throttled to one per week).
+  // Stored as full objects (id, displayName, creature, rarity, desc,
+  // ts) so they're self-contained and don't depend on the attribute
+  // evaluator. Read-and-merged into the bestiary alongside earned attrs.
+  const [wildElementals, setWildElementals] = usePersistedState("wildElementals", []);
+  const [lastWildAt, setLastWildAt] = usePersistedState("lastWildAt", 0);
   // Disable elementals — hides every elemental surface (creation omen,
   // grove, profile stat) for users who'd rather not engage with the
   // mythic layer. Persisted key kept as legacy "animisBanished".
@@ -531,6 +541,25 @@ export default function App() {
   // Append a newly-logged cup to the sessions list. Called when the user
   // completes a brew+log cycle. This is what makes newly-brewed cups show
   // up in Home's "Your cups, lately" and Apothecary's history.
+  // Wild-elemental roll. Called from every brew and journal entry.
+  // Honors the elementalsDisabled preference (no rolls for users who
+  // turned the mythic layer off) and the once-per-week throttle. On
+  // a hit, the new spirit is appended to wildElementals and lastWildAt
+  // is bumped. The bestiary surfaces it via the existing arrival flow
+  // (id won't be in seenElementalIds, so it queues up naturally).
+  const tryRollWildElemental = () => {
+    if (elementalsDisabled) return;
+    const wild = maybeRollWild({
+      lastWildAt,
+      sessions,
+      journalEntries,
+      getBlend,
+    });
+    if (!wild) return;
+    setWildElementals(prev => [...(prev || []), wild]);
+    setLastWildAt(wild.ts);
+  };
+
   const addSession = ({ blend, intent, targetMoods, currentMoods, landed, extra, taste, note, save, rename }) => {
     // A blend composed via forward-compose won't have an id; stash it under
     // a synthetic id so the session can reference it via getBlend().
@@ -584,6 +613,8 @@ export default function App() {
       next.add(blendId);
       setSavedBlendIds(next);
     }
+
+    tryRollWildElemental();
   };
 
   // Append a free-form journal entry. Entries live alongside cup
@@ -607,6 +638,7 @@ export default function App() {
       landedMoods:  Array.isArray(landedMoods)  ? landedMoods  : [],
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
+    tryRollWildElemental();
   };
   const deleteJournalEntry = (id) => {
     setJournalEntries(prev => (prev || []).filter(e => e.id !== id));
@@ -728,9 +760,9 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} />}
       </div>
 
       {/* First-visit welcome hint — anchored just above the tab bar
