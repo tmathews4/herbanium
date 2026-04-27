@@ -10,7 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { getAnimiDisplayName, getAnimiDisplayDesc, pickRandomCreature } from "../data/animiAdjectives";
+import { getElementalDisplayName, getElementalDisplayDesc, pickRandomCreature } from "../data/elementalAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -18,7 +18,7 @@ import {
 } from "../hooks/usePersistedState";
 import { FeedbackModal } from "./FeedbackModal";
 import { OmenCard } from "../components/OmenCard";
-import { AnimiArrivalCard } from "../components/AnimiArrivalCard";
+import { ElementalArrivalCard } from "../components/ElementalArrivalCard";
 import { HintCard } from "../components/HintCard";
 import {
   ff, theme,
@@ -29,7 +29,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredAnimis, setFeaturedAnimis, animisBanished, setAnimisBanished, omenShown, dismissOmen, seenAnimiIds, setSeenAnimiIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, featuredElementals, setFeaturedElementals, elementalsDisabled, setElementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, profileHintShown, dismissProfileHint, journalEntries, tabVisits }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -74,7 +74,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
     a.download = `herbanium-backup-${stamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    // Stamp the profile so the Caladrius animi unlocks.
+    // Stamp the profile so the Caladrius elemental unlocks.
     if (profile && !profile.exportedAt) {
       setProfile({ ...profile, exportedAt: Date.now() });
     }
@@ -91,7 +91,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           setImportMessage({ kind: "error", text: `Import failed: ${result.error}` });
           return;
         }
-        // Stamp the imported profile so the Bennu animi unlocks. Import
+        // Stamp the imported profile so the Bennu elemental unlocks. Import
         // wipes localStorage, so we mutate the freshly-written profile
         // entry directly before the page reloads to pick it up.
         try {
@@ -139,19 +139,19 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const attrEvaluation = evaluateAttributes(attrCtx);
   // Random adjective + fixed creature, deterministic per (user, attr).
   // The seed combines profile.createdAt with the attribute id so the
-  // same user always sees the same name for the same animi but
+  // same user always sees the same name for the same elemental but
   // different users get different qualifiers.
-  const animiSeed = profile?.createdAt || profile?.name || "anon";
+  const elementalSeed = profile?.createdAt || profile?.name || "anon";
   const earnedAttrs = attrEvaluation.filter(a => a.earned).map(a => {
     // For wild-pool elementals (attr.random), resolve the random
-    // creature once and attach it so AnimiArrivalCard / creatureFor
+    // creature once and attach it so ElementalArrivalCard / creatureFor
     // can look up the verb without needing the seed.
-    const creature = a.random ? pickRandomCreature(a, animiSeed) : undefined;
+    const creature = a.random ? pickRandomCreature(a, elementalSeed) : undefined;
     const merged = creature ? { ...a, creature } : { ...a };
     return {
       ...merged,
-      displayName: getAnimiDisplayName(merged, animiSeed),
-      desc: getAnimiDisplayDesc(merged, animiSeed),
+      displayName: getElementalDisplayName(merged, elementalSeed),
+      desc: getElementalDisplayDesc(merged, elementalSeed),
     };
   });
   // Sort earned by rarity desc — rarest finds bubble up.
@@ -164,15 +164,15 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // welcomed via the Summon button. Pending = earned but not yet
   // welcomed; those stay hidden from the grove so each elemental
   // appears only after its fade card has played through.
-  const seenIds = seenAnimiIds || new Set();
-  const pendingArrivals = !animisBanished
+  const seenIds = seenElementalIds || new Set();
+  const pendingArrivals = !elementalsDisabled
     ? sortedEarned.filter(a => !seenIds.has(a.id))
     : [];
   const pendingIds = new Set(pendingArrivals.map(a => a.id));
   const revealedSorted = sortedEarned.filter(a => !pendingIds.has(a.id));
-  const markAnimiSeen = (id) => {
-    if (!setSeenAnimiIds) return;
-    setSeenAnimiIds(prev => {
+  const markElementalSeen = (id) => {
+    if (!setSeenElementalIds) return;
+    setSeenElementalIds(prev => {
       const next = new Set(prev);
       next.add(id);
       return next;
@@ -181,12 +181,12 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
   // Summon flow — clicking the Summon button cycles through queued
   // elementals one at a time. First click ever fires the unique
-  // creation OmenCard; subsequent clicks fire AnimiArrivalCard for
+  // creation OmenCard; subsequent clicks fire ElementalArrivalCard for
   // the next pending arrival. When the queue is empty the button
   // greys out until a new elemental is earned.
   const [summonTarget, setSummonTarget] = useState(null);
-  const summonExhausted = !animisBanished && omenShown && pendingArrivals.length === 0;
-  const summonReady     = !animisBanished && (!omenShown || pendingArrivals.length > 0);
+  const summonExhausted = !elementalsDisabled && omenShown && pendingArrivals.length === 0;
+  const summonReady     = !elementalsDisabled && (!omenShown || pendingArrivals.length > 0);
   const onSummonClick = () => {
     if (!summonReady || summonTarget) return;
     if (!omenShown) {
@@ -194,14 +194,14 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       return;
     }
     const next = pendingArrivals[0];
-    if (next) setSummonTarget({ kind: "arrival", animi: next });
+    if (next) setSummonTarget({ kind: "arrival", elemental: next });
   };
   const onOmenDismiss = () => {
     if (dismissOmen) dismissOmen();
     setSummonTarget(null);
   };
   const onArrivalDismiss = (id) => {
-    markAnimiSeen(id);
+    markElementalSeen(id);
     setSummonTarget(null);
   };
   // The unique creation title — granted at signup, never re-evaluates.
@@ -225,7 +225,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // Sourced from revealedSorted so an elemental whose arrival card
   // hasn't faded through yet can't be placed on the grove.
   const FEATURED_LIMIT = 5;
-  const validFeatured = (featuredAnimis || []).filter(id =>
+  const validFeatured = (featuredElementals || []).filter(id =>
     revealedSorted.find(a => a.id === id));
   const effectiveFeaturedIds = validFeatured.length > 0
     ? validFeatured.slice(0, FEATURED_LIMIT)
@@ -236,18 +236,18 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   const reserve = revealedSorted.filter(a => !effectiveFeaturedIds.includes(a.id));
   const isFeatured = (id) => effectiveFeaturedIds.includes(id);
   const toggleFeatured = (id) => {
-    if (!setFeaturedAnimis) return;
+    if (!setFeaturedElementals) return;
     const cur = effectiveFeaturedIds.slice();
     if (cur.includes(id)) {
-      setFeaturedAnimis(cur.filter(x => x !== id));
+      setFeaturedElementals(cur.filter(x => x !== id));
       return;
     }
     if (cur.length >= FEATURED_LIMIT) {
       // Replace the last (lowest-priority) slot so the swap is one tap.
-      setFeaturedAnimis([...cur.slice(0, FEATURED_LIMIT - 1), id]);
+      setFeaturedElementals([...cur.slice(0, FEATURED_LIMIT - 1), id]);
       return;
     }
-    setFeaturedAnimis([...cur, id]);
+    setFeaturedElementals([...cur, id]);
   };
 
   const isEmptyUser = cupCount === 0 && blendCount === 0;
@@ -258,17 +258,17 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           Summon button for the first time (first-ever click). The
           card fades through, then on dismiss omenShown flips true and
           the grove begins to populate. */}
-      {summonTarget?.kind === "omen" && !animisBanished && profile?.title && (
+      {summonTarget?.kind === "omen" && !elementalsDisabled && profile?.title && (
         <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
       )}
 
       {/* Newly-earned elemental arrival — fires only when the user
           clicks Summon and there's a pending elemental queued. Each
           click handles one; dismiss adds it to the grove. */}
-      {summonTarget?.kind === "arrival" && !animisBanished && summonTarget.animi && (
-        <AnimiArrivalCard
-          animi={summonTarget.animi}
-          onDismiss={() => onArrivalDismiss(summonTarget.animi.id)}
+      {summonTarget?.kind === "arrival" && !elementalsDisabled && summonTarget.elemental && (
+        <ElementalArrivalCard
+          elemental={summonTarget.elemental}
+          onDismiss={() => onArrivalDismiss(summonTarget.elemental.id)}
         />
       )}
 
@@ -382,7 +382,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           <Stat label="Cups"      value={cupCount}    onClick={() => go("shelf", { mode: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           <Stat label="Pantry"    value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
-          {!animisBanished && (
+          {!elementalsDisabled && (
             <Stat label="Summons"  value={earnedAttrs.length + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} />
           )}
         </div>
@@ -390,7 +390,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
       {/* self-knowledge — hidden entirely when the user has banished
           the spirits via Preferences below. */}
-      {!animisBanished && (<>
+      {!elementalsDisabled && (<>
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "space-between",
         gap: 10, margin: "24px 0 6px",
@@ -504,7 +504,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         </div>
 
-        {/* Banish the spirits — hides every animis surface for users
+        {/* Disable elementals — hides every elemental surface for users
             who'd rather not engage with the mythic layer. */}
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -513,16 +513,16 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         }}>
           <span>Disable elementals</span>
           <span
-            onClick={() => setAnimisBanished && setAnimisBanished(!animisBanished)}
+            onClick={() => setElementalsDisabled && setElementalsDisabled(!elementalsDisabled)}
             style={{
               width: 34, height: 20, borderRadius: 999,
-              background: animisBanished ? theme.terra : theme.rule,
+              background: elementalsDisabled ? theme.terra : theme.rule,
               position: "relative", cursor: "pointer",
               transition: "background .2s",
             }}
           >
             <span style={{
-              position: "absolute", top: 2, left: animisBanished ? 16 : 2,
+              position: "absolute", top: 2, left: elementalsDisabled ? 16 : 2,
               width: 16, height: 16, borderRadius: "50%", background: theme.cream,
               transition: "left .2s",
             }} />
@@ -971,11 +971,11 @@ const RARITY_TONE = {
 };
 
 // AttributeShelf altar:
-//   row 1 — the unique creation animi, alone and centered
-//   row 2 — up to 5 "featured" earned animis, with empty pip-slots for
+//   row 1 — the unique creation elemental, alone and centered
+//   row 2 — up to 5 "featured" earned elementals, with empty pip-slots for
 //           the rest of the row when the user has fewer
 //   below — collapsible reserve grid containing every other earned
-//           animi, with a feature/unfeature button on each detail card
+//           elemental, with a feature/unfeature button on each detail card
 //
 // Slot-pick interaction: tap an empty pip to enter "selecting" mode;
 // the reserve auto-opens and prompts a pick. The next reserve tile
@@ -1002,7 +1002,7 @@ const AttributeShelf = ({
     const inReserve = reserve.find(x => x.id === a.id);
     const handleClick = () => {
       if (selecting && inReserve && toggleFeatured) {
-        // Fill the next empty slot with this animi.
+        // Fill the next empty slot with this elemental.
         toggleFeatured(a.id);
         setSelecting(false);
         return;
@@ -1058,7 +1058,7 @@ const AttributeShelf = ({
   const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
   const featuredFull = featured.length >= featuredLimit;
 
-  // Auto-expand reserve when the user opens an animi that lives there
+  // Auto-expand reserve when the user opens an elemental that lives there
   // so the highlighted tile is visible alongside its detail card,
   // and whenever they're in slot-pick mode so the reserve is on screen.
   const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
@@ -1119,7 +1119,7 @@ const AttributeShelf = ({
         );
       })()}
 
-      {/* Row 1 — the unique creation animi, alone and centered */}
+      {/* Row 1 — the unique creation elemental, alone and centered */}
       {creationCard && (
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
           {renderTile(creationCard)}

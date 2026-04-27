@@ -36,7 +36,7 @@ const getTimeOfDay = (h) => {
   return                         { label: "Small hours",   note: "when the kettle is a companion" };
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, firstCupHintShown, dismissFirstCupHint, animisBanished }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, firstCupHintShown, dismissFirstCupHint, elementalsDisabled }) => {
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
   // are only surfaced behind the Shelf > Journal sub-tab where they
@@ -59,7 +59,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
       {/* First-cup hint — tutorial card pointing at Compose / Apothecary.
-          Replaces the old animi-omen popup; the unique animi reveal now
+          Replaces the old elemental-omen popup; the unique elemental reveal now
           fires on first Profile visit instead. Auto-hides once the user
           has logged any cup. */}
       {!firstCupHintShown && profile && yourSessions.length === 0 && (

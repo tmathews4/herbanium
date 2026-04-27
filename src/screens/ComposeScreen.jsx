@@ -1726,7 +1726,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           const candidate = { name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS };
           // Skip the prompt when the catalogue already holds a blend
           // with the same temp + ingredients — brew the saved record so
-          // repeats count toward animis like the Self-Repeater.
+          // repeats count toward elementals like the Self-Repeater.
           const allCatalogue = [
             ...BLENDS,
             ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),

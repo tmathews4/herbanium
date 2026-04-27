@@ -326,21 +326,24 @@ export default function App() {
   const [composeHintShown, setComposeHintShown] = usePersistedState("composeHintShown", false);
   const [journalHintShown, setJournalHintShown] = usePersistedState("journalHintShown", false);
   const [profileHintShown, setProfileHintShown] = usePersistedState("profileHintShown", false);
-  // Unique creation animi popup — now fires on first Profile visit
+  // Unique creation elemental popup — now fires on first Profile visit
   // rather than on Home, so it doesn't hit users right at app entry.
   const [omenShown, setOmenShown] = usePersistedState("omenShown", false);
-  // Set of animi attribute ids the user has been shown an arrival
-  // popup for. Newly-earned animis whose ids aren't in here trigger
-  // an AnimiArrivalCard on the next Profile visit.
-  const [seenAnimiIds, setSeenAnimiIds] = usePersistedState("seenAnimiIds", new Set());
-  // Featured animis on the altar — up to 5 ids the user keeps in the
-  // surfaced row below their unique spirit. Empty default falls back to
-  // top-5-by-rarity in ProfileScreen.
-  const [featuredAnimis, setFeaturedAnimis] = usePersistedState("featuredAnimis", []);
-  // Banish the spirits — disables every animis surface (creation omen,
-  // altar, profile stat) for users who'd rather not engage with the
-  // mythic layer.
-  const [animisBanished, setAnimisBanished] = usePersistedState("animisBanished", false);
+  // Set of elemental attribute ids the user has been shown an arrival
+  // popup for. Newly-earned elementals whose ids aren't in here
+  // trigger an ElementalArrivalCard on the next Profile visit. The
+  // localStorage key is left as the legacy "seenAnimiIds" so existing
+  // users keep their seen-set across the rename.
+  const [seenElementalIds, setSeenElementalIds] = usePersistedState("seenAnimiIds", new Set());
+  // Featured elementals on the grove — up to 5 ids the user keeps in
+  // the surfaced row below their unique spirit. Empty default falls
+  // back to top-5-by-rarity in ProfileScreen. Persisted key kept as
+  // the legacy "featuredAnimis" for migration safety.
+  const [featuredElementals, setFeaturedElementals] = usePersistedState("featuredAnimis", []);
+  // Disable elementals — hides every elemental surface (creation omen,
+  // grove, profile stat) for users who'd rather not engage with the
+  // mythic layer. Persisted key kept as legacy "animisBanished".
+  const [elementalsDisabled, setElementalsDisabled] = usePersistedState("animisBanished", false);
 
   // User-generated experimental blends, seeded at onboarding from the
   // user's draw selections. Persisted as full blend objects (not just
@@ -413,13 +416,13 @@ export default function App() {
     // doesn't visually wipe the preloaded ones out from under the user.
     setFavoriteBlendIds(new Set(seedBlendIds));
     setPantryIds(new Set(ONBOARDING_PANTRY));
-    setOmenShown(false); // unique animi popup plays on first Profile visit
+    setOmenShown(false); // unique elemental popup plays on first Profile visit
     setPantryHintShown(false); // ensure pantry hint shows for new users
     setFirstCupHintShown(false); // first-cup tutorial card on Home
     setComposeHintShown(false); // first-visit Compose tutorial
     setJournalHintShown(false); // first-visit Journal tutorial
     setProfileHintShown(false); // first-visit Profile tutorial
-    setSeenAnimiIds(new Set()); // arrival popups start fresh
+    setSeenElementalIds(new Set()); // arrival popups start fresh
   };
 
   // Full reset — wipes localStorage and reloads to restart from onboarding
@@ -660,10 +663,10 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} animisBanished={animisBanished} />}
+        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} firstCupHintShown={firstCupHintShown} dismissFirstCupHint={() => setFirstCupHintShown(true)} elementalsDisabled={elementalsDisabled} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
-        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredAnimis={featuredAnimis} setFeaturedAnimis={setFeaturedAnimis} animisBanished={animisBanished} setAnimisBanished={setAnimisBanished} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenAnimiIds={seenAnimiIds} setSeenAnimiIds={setSeenAnimiIds} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} />}
+        {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} />}
       </div>
 
       <TabBar tab={tab} setTab={(k) => { setOverlay(null); setTab(k); }} />

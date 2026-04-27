@@ -1,11 +1,11 @@
 /* ──────────────────────────────────────────────────────────────
-   data/animiArrivals.js — arrival verb-phrases for animi pop-ups.
+   data/elementalArrivals.js — arrival verb-phrases for elemental pop-ups.
 
    When a new elemental is summoned, the pop-up reads:
-     "{animi.name} {arrival verb}."
+     "{elemental.name} {arrival verb}."
 
    Each entry maps a creature/spirit name (the last word of the
-   animi title, or the full stripped name for compound spirits) to a
+   elemental title, or the full stripped name for compound spirits) to a
    short phrase describing the small corner of the grove it picks
    out as its own. The voice is consistent: each elemental finds a
    patch that suits its nature and settles in.
@@ -305,7 +305,7 @@ const ARRIVAL_VERBS = {
 
 const FALLBACK_VERB = "drifts to a corner of the grove and settles in";
 
-// Returns the arrival verb-phrase for a given animi name. Tries the
+// Returns the arrival verb-phrase for a given elemental name. Tries the
 // full stripped name first ("Banyan Spirit", "Yuki-Onna"), then falls
 // back to the last word ("The Caladrius" → "Caladrius"). Anything not
 // in the map gets the gentle FALLBACK_VERB.

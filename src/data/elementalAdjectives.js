@@ -1,15 +1,15 @@
 /* ──────────────────────────────────────────────────────────────
-   data/animiAdjectives.js — random qualifier for earned animis.
+   data/elementalAdjectives.js — random qualifier for earned elementals.
 
-   Every earned animi gets a name in the form "The {adjective}
+   Every earned elemental gets a name in the form "The {adjective}
    {creature}" where the noun (creature) is fixed for the trigger
    and the adjective is randomly drawn from a pool, deterministic
    per (user, attribute) so the same user always sees the same
-   adjective for the same animi but different users get different
-   ones.
+   adjective for the same elemental but different users get
+   different ones.
 
-   Adjectives are pulled from the same elemental and gemstone pools
-   that name the unique creation animi, so the whole system reads
+   Adjectives are pulled from the element and gemstone pools that
+   name the unique creation elemental, so the whole system reads
    as one mythic vocabulary.
 
    CREATURE_OVERRIDES keeps the mapping from attribute id → creature
@@ -61,7 +61,7 @@ function hash(str) {
 // the attribute's own name (minus "The "), so existing creature
 // names like "The Sparrow", "The Sphinx", "The Phoenix" carry over.
 //
-// Pool key marks which adjective pool to draw from for that animi.
+// Pool key marks which adjective pool to draw from for that elemental.
 export const CREATURE_OVERRIDES = {
   // Lifetime milestones
   "year-walker":              { creature: "Stag",        pool: "element" },
@@ -272,7 +272,7 @@ const ALL_ADJECTIVES = [...ELEMENT_ADJECTIVES, ...GEM_ADJECTIVES];
 
 // Returns the creature noun for an attribute. Pre-resolved
 // `attr.creature` first (set by ProfileScreen for random attrs so
-// downstream consumers like AnimiArrivalCard don't need a seed),
+// downstream consumers like ElementalArrivalCard don't need a seed),
 // then CREATURE_OVERRIDES, then the attribute's own name.
 export function creatureFor(attr) {
   if (!attr) return "Spirit";
@@ -303,14 +303,14 @@ export function pickRandomCreature(attr, profileSeed) {
   return RANDOM_CREATURE_POOL[hash(String(seed)) % RANDOM_CREATURE_POOL.length];
 }
 
-// Compose the user-facing display name for an animi:
+// Compose the user-facing display name for an elemental:
 // "The {randomAdjective} {creatureNoun}". Deterministic per
 // (profileSeed, attr.id) so the same user keeps the same name for
-// the same animi but different users get different prefixes.
+// the same elemental but different users get different prefixes.
 //
 // For attributes flagged `random: true`, both the adjective and the
 // creature noun come from random pools — no controlled aspect.
-export function getAnimiDisplayName(attr, profileSeed) {
+export function getElementalDisplayName(attr, profileSeed) {
   if (!attr) return "";
   const creature = attr.random
     ? pickRandomCreature(attr, profileSeed)
@@ -323,9 +323,9 @@ export function getAnimiDisplayName(attr, profileSeed) {
 }
 
 // Returns just the random adjective for an attribute (the same one
-// used in getAnimiDisplayName), useful when other code needs to
+// used in getElementalDisplayName), useful when other code needs to
 // compose something with the adjective separately.
-export function getAnimiAdjective(attr, profileSeed) {
+export function getElementalAdjective(attr, profileSeed) {
   if (!attr) return "";
   const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
   if (attr.random) return ALL_ADJECTIVES[hash(seed) % ALL_ADJECTIVES.length];
@@ -431,12 +431,12 @@ export function flavorLineFor(adjective) {
   return ADJECTIVE_FLAVOR[adjective] || FLAVOR_FALLBACK;
 }
 
-// Compose the user-facing description for an animi: prepends a
+// Compose the user-facing description for an elemental: prepends a
 // short flavor line keyed to the adjective so each user's variant
 // gets unique character before the shared body of the desc.
-export function getAnimiDisplayDesc(attr, profileSeed) {
+export function getElementalDisplayDesc(attr, profileSeed) {
   if (!attr) return "";
-  const adj = getAnimiAdjective(attr, profileSeed);
+  const adj = getElementalAdjective(attr, profileSeed);
   const flavor = flavorLineFor(adj);
   const base = (attr.desc || "").trim();
   if (!base) return flavor;

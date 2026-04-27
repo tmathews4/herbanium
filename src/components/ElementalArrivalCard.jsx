@@ -1,23 +1,23 @@
 /* ──────────────────────────────────────────────────────────────
-   components/AnimiArrivalCard.jsx — newly-earned animi pop-up.
+   components/ElementalArrivalCard.jsx — newly-earned elemental pop-up.
 
    Mirrors the OmenCard's centered-modal pattern but pulls the
-   arrival verb from animiArrivals so each animi appears in its
-   own register (birds alight, rodents scamper, fae wisp). The
-   description body reuses the attribute's existing `desc` field
-   (appearance + "Drawn by..." trigger).
+   arrival verb from elementalArrivals so each elemental appears
+   in its own register (birds alight, rodents scamper, fae wisp).
+   The description body reuses the attribute's existing `desc`
+   field (appearance + "Drawn by..." trigger).
    ────────────────────────────────────────────────────────────── */
 
 import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
-import { arrivalVerbFor } from "../data/animiArrivals";
-import { creatureFor } from "../data/animiAdjectives";
+import { arrivalVerbFor } from "../data/elementalArrivals";
+import { creatureFor } from "../data/elementalAdjectives";
 
 const FADE_IN_MS  = 1200;
 const FADE_OUT_MS = 700;
 
-export const AnimiArrivalCard = ({ animi, onDismiss }) => {
+export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
   const [phase, setPhase] = useState("entering");
 
   useEffect(() => {
@@ -34,15 +34,15 @@ export const AnimiArrivalCard = ({ animi, onDismiss }) => {
     }, FADE_OUT_MS);
   };
 
-  if (phase === "gone" || !animi) return null;
+  if (phase === "gone" || !elemental) return null;
 
   const opacity = phase === "entering" || phase === "leaving" ? 0 : 1;
   const transitionMs = phase === "entering" ? FADE_IN_MS : FADE_OUT_MS;
   // Verb is keyed off the creature noun (which is the fixed part of
-  // the new "{adjective} {creature}" naming) so arrivals always read
+  // the "{adjective} {creature}" naming) so arrivals always read
   // in-register regardless of the random qualifier.
-  const verb = arrivalVerbFor(creatureFor(animi));
-  const displayName = animi.displayName || animi.name;
+  const verb = arrivalVerbFor(creatureFor(elemental));
+  const displayName = elemental.displayName || elemental.name;
 
   return (
     <div
@@ -88,7 +88,7 @@ export const AnimiArrivalCard = ({ animi, onDismiss }) => {
         <div style={{
           fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.22em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 10,
-        }}>A spirit finds you</div>
+        }}>An elemental finds you</div>
 
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 18,

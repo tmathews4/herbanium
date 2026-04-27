@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────
-   components/OmenCard.jsx — first-visit animi omen popup.
+   components/OmenCard.jsx — first-visit elemental omen popup.
 
    Renders as a centered modal over Home on first visit after
    onboarding. Fades in slowly so the line lands as a moment, then
