@@ -153,20 +153,13 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   );
 
   // Arrival queue — earned elementals whose ids the user hasn't yet
-  // had a fade card for. Only ONE card per profile visit; once the
-  // card fades through, that elemental joins the grove. Other pending
-  // ones stay hidden from the grove until the user leaves and comes
-  // back for their next welcome.
+  // welcomed via the Summon button. Pending = earned but not yet
+  // welcomed; those stay hidden from the grove so each elemental
+  // appears only after its fade card has played through.
   const seenIds = seenAnimiIds || new Set();
   const pendingArrivals = !animisBanished
     ? sortedEarned.filter(a => !seenIds.has(a.id))
     : [];
-  const [arrivalShownThisVisit, setArrivalShownThisVisit] = useState(false);
-  const nextArrival = !arrivalShownThisVisit
-    ? (pendingArrivals[0] || null)
-    : null;
-  // Pending = earned but not yet welcomed. Hide them from the grove
-  // so each elemental's card fades through before it appears below.
   const pendingIds = new Set(pendingArrivals.map(a => a.id));
   const revealedSorted = sortedEarned.filter(a => !pendingIds.has(a.id));
   const markAnimiSeen = (id) => {
@@ -176,6 +169,32 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       next.add(id);
       return next;
     });
+  };
+
+  // Summon flow — clicking the Summon button cycles through queued
+  // elementals one at a time. First click ever fires the unique
+  // creation OmenCard; subsequent clicks fire AnimiArrivalCard for
+  // the next pending arrival. When the queue is empty the button
+  // greys out until a new elemental is earned.
+  const [summonTarget, setSummonTarget] = useState(null);
+  const summonExhausted = !animisBanished && omenShown && pendingArrivals.length === 0;
+  const summonReady     = !animisBanished && (!omenShown || pendingArrivals.length > 0);
+  const onSummonClick = () => {
+    if (!summonReady || summonTarget) return;
+    if (!omenShown) {
+      setSummonTarget({ kind: "omen" });
+      return;
+    }
+    const next = pendingArrivals[0];
+    if (next) setSummonTarget({ kind: "arrival", animi: next });
+  };
+  const onOmenDismiss = () => {
+    if (dismissOmen) dismissOmen();
+    setSummonTarget(null);
+  };
+  const onArrivalDismiss = (id) => {
+    markAnimiSeen(id);
+    setSummonTarget(null);
   };
   // The unique creation title — granted at signup, never re-evaluates.
   // Always rendered when a profile exists; the AttributeShelf prepends
@@ -227,23 +246,21 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Unique animi creation popup — fires once on first Profile
-          visit. Skipped entirely when the user has banished spirits. */}
-      {!omenShown && !animisBanished && profile?.title && dismissOmen && (
-        <OmenCard title={profile.title} onDismiss={dismissOmen} />
+      {/* Unique creation popup — only fires when the user clicks the
+          Summon button for the first time (first-ever click). The
+          card fades through, then on dismiss omenShown flips true and
+          the grove begins to populate. */}
+      {summonTarget?.kind === "omen" && !animisBanished && profile?.title && (
+        <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
       )}
 
-      {/* Newly-earned animi arrival popup. Once the omen has been
-          dismissed (or if it's already been seen), surface the next
-          unseen earned animi with its arrival verb. Dismiss → mark
-          seen → next one in the queue surfaces on next render. */}
-      {omenShown && !animisBanished && nextArrival && (
+      {/* Newly-earned elemental arrival — fires only when the user
+          clicks Summon and there's a pending elemental queued. Each
+          click handles one; dismiss adds it to the grove. */}
+      {summonTarget?.kind === "arrival" && !animisBanished && summonTarget.animi && (
         <AnimiArrivalCard
-          animi={nextArrival}
-          onDismiss={() => {
-            markAnimiSeen(nextArrival.id);
-            setArrivalShownThisVisit(true);
-          }}
+          animi={summonTarget.animi}
+          onDismiss={() => onArrivalDismiss(summonTarget.animi.id)}
         />
       )}
 
@@ -367,13 +384,39 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {/* self-knowledge — hidden entirely when the user has banished
           the spirits via Preferences below. */}
       {!animisBanished && (<>
-      <div style={{ margin: "24px 0 6px" }}><SectionLabel n="i">Elementals Grove</SectionLabel></div>
+      <div style={{
+        display: "flex", alignItems: "baseline", justifyContent: "space-between",
+        gap: 10, margin: "24px 0 6px",
+      }}>
+        <SectionLabel n="i">Elementals Grove</SectionLabel>
+        <button
+          onClick={onSummonClick}
+          disabled={!summonReady || !!summonTarget}
+          style={{
+            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: summonExhausted ? theme.ash : theme.cream,
+            background: summonExhausted ? "transparent" : theme.terra,
+            border: `1px solid ${summonExhausted ? theme.rule : theme.terra}`,
+            borderRadius: 999, padding: "6px 12px",
+            cursor: summonExhausted ? "default" : "pointer",
+            opacity: summonExhausted ? 0.55 : 1,
+            transition: "all 0.18s ease",
+          }}
+        >
+          {summonExhausted ? "no elemental waiting"
+            : !omenShown ? "summon your first"
+            : pendingArrivals.length > 1 ? `summon (${pendingArrivals.length} waiting)`
+            : "summon elemental"}
+        </button>
+      </div>
       <div style={{
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
         color: theme.ash, lineHeight: 1.5, marginBottom: 12,
       }}>
         Tend the kettle with intention, and the elementals — half-glimpsed — may draw near.
       </div>
+      {omenShown && (
       <div style={{
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
@@ -407,6 +450,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           </div>
         )}
       </div>
+      )}
       </>)}
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
