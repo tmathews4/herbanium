@@ -157,48 +157,69 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
         );
       })()}
 
-      {/* Three primary actions — each points the user at a lower
-          tab. Stacked vertically with a clear hierarchy: dark-ink
-          for the recipe path (most common), terra-outlined for the
-          experiment path, ink-outlined for the journal path. */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
-        <button onClick={() => go("shelf", { mode: "recipes" })} style={{
-          width: "100%", textAlign: "left",
-          background: theme.ink, color: theme.cream,
-          border: "none", borderRadius: 14, padding: "12px 18px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer",
-          boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
-        }}>
-          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
-            Brew from a recipe →
-          </div>
-          <Leaf size={20} c={theme.cream} />
-        </button>
-        <button onClick={() => go("apothecary")} style={{
-          width: "100%", textAlign: "left",
-          background: "transparent", color: theme.terra,
-          border: `1px solid ${theme.terra}`, borderRadius: 14, padding: "12px 18px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer",
-        }}>
-          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
-            Brew an experiment →
-          </div>
-          <Flower size={20} c={theme.terra} />
-        </button>
-        <button onClick={() => go("shelf", { mode: "journal" })} style={{
-          width: "100%", textAlign: "left",
-          background: "transparent", color: theme.ink,
-          border: `1px solid ${theme.ink}`, borderRadius: 14, padding: "12px 18px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer",
-        }}>
-          <div style={{ fontFamily: ff.serif, fontSize: 17 }}>
-            Note a moment →
-          </div>
-          <Pencil size={18} c={theme.ink} />
-        </button>
+      {/* Three primary actions as a row of side-by-side cards.
+          Same visual hierarchy as before — ink-filled for the
+          recipe path (most common), terra-outlined for the
+          experiment path, ink-outlined for the journal path —
+          but laid out as three equal squares so the whole CTA
+          block reads as a single navigator at a glance. */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: 8, marginBottom: 24,
+      }}>
+        {[
+          {
+            label: "Brew from a recipe",
+            onClick: () => go("shelf", { mode: "recipes" }),
+            icon: (c) => <Leaf size={26} c={c} />,
+            primary: true,
+          },
+          {
+            label: "Brew an experiment",
+            onClick: () => go("apothecary"),
+            icon: (c) => <Flower size={26} c={c} />,
+            color: theme.terra,
+          },
+          {
+            label: "Note a moment",
+            onClick: () => go("shelf", { mode: "journal" }),
+            icon: (c) => <Pencil size={22} c={c} />,
+            color: theme.ink,
+          },
+        ].map((cta, i) => {
+          const fg = cta.primary ? theme.cream : (cta.color || theme.ink);
+          const bg = cta.primary ? theme.ink : "transparent";
+          const borderColor = cta.primary ? theme.ink : (cta.color || theme.ink);
+          return (
+            <button
+              key={i}
+              onClick={cta.onClick}
+              style={{
+                aspectRatio: "1 / 1",
+                background: bg,
+                color: fg,
+                border: `1px solid ${borderColor}`,
+                borderRadius: 14,
+                padding: "12px 10px",
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+                gap: 8,
+                cursor: "pointer",
+                textAlign: "center",
+                boxShadow: cta.primary ? "0 8px 24px -12px rgba(30,24,18,0.4)" : "none",
+              }}
+            >
+              {cta.icon(fg)}
+              <div style={{
+                fontFamily: ff.serif, fontSize: 13,
+                lineHeight: 1.2,
+              }}>
+                {cta.label}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Favorites — horizontal scrollable row. Native scrollbar is
