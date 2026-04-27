@@ -99,61 +99,74 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
-            {isEmpty
-              ? <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
-              : <>What's the tea, <em style={{ color: theme.terra }}>{name}</em>?</>
-            }
-          </FitText>
+      {/* Empty-state welcome header — first-time users see this
+          before any poem card. Returning users get their greeting
+          below the poem instead so the time-of-day moment lands
+          first. */}
+      {isEmpty && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
+              <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
+            </FitText>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Time-of-day contextual card (returning users only) */}
+      {/* Time-of-day contextual card + greeting (returning users only) */}
       {!isEmpty && (() => {
         const now = new Date();
         const tod = getTimeOfDay(now.getHours());
         const poem = pickHomePoem(now);
         return (
-          <div style={{
-            marginBottom: 16,
-            padding: "14px 22px 16px",
-            borderRadius: 12,
-            background: theme.cream,
-            border: `1px solid ${theme.ruleSoft}`,
-            textAlign: "center",
-          }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
-              <Ornament w={80} c={theme.ochre} />
-            </div>
+          <>
             <div style={{
-              fontFamily: ff.serif, fontSize: 17, color: theme.ink,
-              lineHeight: 1.25, marginBottom: poem ? 8 : 3,
+              marginBottom: 14,
+              padding: "14px 22px 16px",
+              borderRadius: 12,
+              background: theme.cream,
+              border: `1px solid ${theme.ruleSoft}`,
+              textAlign: "center",
             }}>
-              {tod.label}.
-            </div>
-            {poem ? (
-              <>
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                  color: theme.inkSoft, lineHeight: 1.5,
-                  whiteSpace: "pre-line",
-                }}>
-                  {poem.text}
-                </div>
-                {poem.attribution && (
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
+                <Ornament w={80} c={theme.ochre} />
+              </div>
+              <div style={{
+                fontFamily: ff.serif, fontSize: 17, color: theme.ink,
+                lineHeight: 1.25, marginBottom: poem ? 8 : 3,
+              }}>
+                {tod.label}.
+              </div>
+              {poem ? (
+                <>
                   <div style={{
-                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
-                    color: theme.ash, marginTop: 6,
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                    color: theme.inkSoft, lineHeight: 1.5,
+                    whiteSpace: "pre-line",
                   }}>
-                    {poem.attribution}
+                    {poem.text}
                   </div>
-                )}
-              </>
-            ) : null}
-          </div>
+                  {poem.attribution && (
+                    <div style={{
+                      fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+                      color: theme.ash, marginTop: 6,
+                    }}>
+                      {poem.attribution}
+                    </div>
+                  )}
+                </>
+              ) : null}
+            </div>
+
+            {/* Greeting moves below the poem so the time-of-day
+                moment leads the page; the user's name lands as a
+                follow-on rather than a top banner. */}
+            <div style={{ marginBottom: 16 }}>
+              <FitText style={{ fontFamily: ff.serif, fontSize: 26, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
+                <>What's the tea, <em style={{ color: theme.terra }}>{name}</em>?</>
+              </FitText>
+            </div>
+          </>
         );
       })()}
 
