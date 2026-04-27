@@ -730,55 +730,130 @@ const SOURCES = [
   {
     heading: "Pharmacopoeia & monographs",
     items: [
-      "European Medicines Agency — Traditional Herbal Medicinal Products register",
-      "European Scientific Cooperative on Phytotherapy (ESCOP) monographs",
-      "German Commission E monographs (Bundesinstitut für Arzneimittel)",
-      "United States Pharmacopoeia (USP) — botanical monographs and standardised assays",
-      "Memorial Sloan Kettering Cancer Center — \"About Herbs\" integrative-medicine database",
+      {
+        summary: "European Medicines Agency — Traditional Herbal Medicinal Products register",
+        full: "European Medicines Agency, Committee on Herbal Medicinal Products (HMPC). Community herbal monographs and assessment reports for traditional herbal medicinal products. London / Amsterdam: EMA; 2008–present. Available at ema.europa.eu/en/human-regulatory/herbal-medicinal-products.",
+      },
+      {
+        summary: "European Scientific Cooperative on Phytotherapy (ESCOP) monographs",
+        full: "European Scientific Cooperative on Phytotherapy. ESCOP Monographs: The Scientific Foundation for Herbal Medicinal Products. 2nd ed. plus 2009 supplement. Stuttgart: Georg Thieme Verlag; 2003 / 2009. Updated online via escop.com/monographs.",
+      },
+      {
+        summary: "German Commission E monographs (Bundesinstitut für Arzneimittel)",
+        full: "Blumenthal M, Goldberg A, Brinckmann J (eds.). Herbal Medicine: Expanded Commission E Monographs. Newton, MA: Integrative Medicine Communications / American Botanical Council; 2000. Translates the Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM) Commission E approvals.",
+      },
+      {
+        summary: "United States Pharmacopeia (USP) — botanical monographs and standardised assays",
+        full: "United States Pharmacopeial Convention. USP–NF: Dietary Supplements Compendium and Botanical Monographs (current revision). Rockville, MD: USP. Identity, purity, strength, and assay specifications for botanical articles.",
+      },
+      {
+        summary: "Memorial Sloan Kettering Cancer Center — \"About Herbs\" database",
+        full: "Memorial Sloan Kettering Cancer Center, Integrative Medicine Service. About Herbs, Botanicals & Other Products. mskcc.org/cancer-care/integrative-medicine/herbs. Continuously updated, peer-reviewed integrative-medicine database covering mechanism, clinical evidence, interactions, and adverse events.",
+      },
     ],
   },
   {
     heading: "Traditional texts",
     items: [
-      "Charaka Samhita (~100 BCE – 200 CE) — foundational Ayurvedic compendium",
-      "Bhava Prakasha (16th century) — Ayurvedic materia medica",
-      "Shen Nong Ben Cao Jing (~100 BCE) — earliest surviving Chinese herbal pharmacopeia",
-      "Compendium of Materia Medica / Bencao Gangmu (Li Shizhen, 1578)",
-      "Hildegard von Bingen — Physica & Causae et Curae (12th century)",
-      "Dioscorides — De Materia Medica (~50–70 CE)",
+      {
+        summary: "Charaka Samhita (~100 BCE – 200 CE) — foundational Ayurvedic compendium",
+        full: "Sharma RK, Dash B (trans.). Caraka Saṃhitā: Text with English Translation & Critical Exposition Based on Cakrapāṇi Datta's Āyurveda Dīpikā. 7 vols. Varanasi: Chowkhamba Sanskrit Series; 1976–2002. Original Sanskrit text dated to approximately 100 BCE – 200 CE.",
+      },
+      {
+        summary: "Bhava Prakasha (16th century) — Ayurvedic materia medica",
+        full: "Bhāvamiśra. Bhāvaprakāśa Nighaṇṭu (Indian Materia Medica). 16th century CE. Sitaram B (trans.). Varanasi: Chaukhambha Orientalia; 2006.",
+      },
+      {
+        summary: "Shen Nong Ben Cao Jing (~100 BCE) — earliest surviving Chinese herbal pharmacopeia",
+        full: "Yang S (trans.). The Divine Farmer's Materia Medica: A Translation of the Shen Nong Ben Cao Jing. Boulder, CO: Blue Poppy Press; 1998. Original Han-dynasty compilation, c. 100 BCE – 200 CE.",
+      },
+      {
+        summary: "Compendium of Materia Medica / Bencao Gangmu (Li Shizhen, 1578)",
+        full: "Li Shizhen (李時珍). Bencao Gangmu (本草綱目, Compendium of Materia Medica). 1578. Luo XW (trans.), 6 vols. Beijing: Foreign Languages Press; 2003. ISBN 9787119032603.",
+      },
+      {
+        summary: "Hildegard von Bingen — Physica & Causae et Curae (12th century)",
+        full: "Hildegard of Bingen. Physica: The Complete English Translation of Her Classic Work on Health and Healing. Throop P (trans.). Rochester, VT: Healing Arts Press; 1998. Plus: Causae et Curae (Berger MM trans., Cambridge: D.S. Brewer; 1999).",
+      },
+      {
+        summary: "Dioscorides — De Materia Medica (~50–70 CE)",
+        full: "Pedanius Dioscorides of Anazarbus. De Materia Medica. Beck LY (trans.). Altertumswissenschaftliche Texte und Studien, vol. 38. Hildesheim: Olms-Weidmann; 2nd ed., 2011. Original Greek work composed c. 50–70 CE.",
+      },
     ],
   },
   {
     heading: "Brewing & extraction chemistry",
     items: [
-      "Tea catechin and L-theanine extraction kinetics (peer-reviewed food-chemistry literature)",
-      "Chamomile apigenin extraction kinetics — first-order release across 57–100 °C",
-      "Hibiscus anthocyanin cold- and hot-brew comparative extraction studies",
-      "Yerba mate decoction and gourd-temperature studies",
-      "Curcumin bioavailability and piperine synergy literature",
+      {
+        summary: "Tea catechin and L-theanine extraction kinetics",
+        full: "Vuong QV, Bowyer MC, Roach PD. L-Theanine: properties, synthesis and isolation from tea. J Sci Food Agric. 2011;91(11):1931–9. Astill C, Birch MR, Dacombe C, Humphrey PG, Martin PT. Factors affecting the caffeine and polyphenol contents of black and green tea infusions. J Agric Food Chem. 2001;49(11):5340–7.",
+      },
+      {
+        summary: "Chamomile apigenin extraction — first-order release across 57–100 °C",
+        full: "Srivastava JK, Shankar E, Gupta S. Chamomile: A herbal medicine of the past with bright future. Mol Med Rep. 2010;3(6):895–901. Mulinacci N, Romani A, Pinelli P, Vincieri FF, Prucher D. Polyphenolic content in five tuscany chamomile products. J Agric Food Chem. 2000;48(5):1973–8.",
+      },
+      {
+        summary: "Hibiscus anthocyanin cold- and hot-brew extraction studies",
+        full: "Ramirez-Rodrigues MM, Plaza ML, Azeredo A, Balaban MO, Marshall MR. Physicochemical and phytochemical properties of cold and hot water extraction from Hibiscus sabdariffa. J Food Sci. 2011;76(3):C428–35.",
+      },
+      {
+        summary: "Yerba mate decoction and gourd-temperature studies",
+        full: "Heck CI, de Mejia EG. Yerba Mate Tea (Ilex paraguariensis): a comprehensive review on chemistry, health implications, and technological considerations. J Food Sci. 2007;72(9):R138–51. Bracesco N, Sanchez AG, Contreras V, Menini T, Gugliucci A. Recent advances on Ilex paraguariensis research. J Ethnopharmacol. 2011;136(3):378–84.",
+      },
+      {
+        summary: "Curcumin bioavailability and piperine synergy",
+        full: "Shoba G, Joy D, Joseph T, Majeed M, Rajendran R, Srinivas PS. Influence of piperine on the pharmacokinetics of curcumin in animals and human volunteers. Planta Med. 1998;64(4):353–6. Anand P, Kunnumakkara AB, Newman RA, Aggarwal BB. Bioavailability of curcumin: problems and promises. Mol Pharm. 2007;4(6):807–18.",
+      },
     ],
   },
   {
     heading: "Clinical evidence base",
     items: [
-      "Systematic reviews and randomized controlled trials for chamomile, valerian, ashwagandha, ginger, hibiscus, peppermint, lion's mane, reishi, and others",
-      "Mechanism papers — apigenin / GABA, valerenic acid, withanolides, glycyrrhizin / 11β-HSD2, hericenones / NGF, gingerol / TRPV1",
-      "Pharmacovigilance and interaction case reports (warfarin / vitamin K, licorice / pseudoaldosteronism, ashwagandha / thyroid medication, etc.)",
+      {
+        summary: "Systematic reviews and randomized controlled trials",
+        full: "Representative trials: Amsterdam JD et al. A randomized, double-blind, placebo-controlled trial of oral Matricaria recutita (chamomile) extract for generalized anxiety. J Clin Psychopharmacol. 2009;29(4):378–82. Bent S et al. Valerian for sleep: a systematic review and meta-analysis. Am J Med. 2006;119(12):1005–12. Lopresti AL, Smith SJ, Malvi H, Kodgule R. An investigation into the stress-relieving and pharmacological actions of an ashwagandha (Withania somnifera) extract. Medicine (Baltimore). 2019;98(37):e17186.",
+      },
+      {
+        summary: "Mechanism papers — GABA, NGF, TRPV1, 11β-HSD2",
+        full: "Jäger AK, Saaby L. Flavonoids and the central nervous system. Molecules. 2011;16(2):1471–85 (apigenin/GABA). Mori K, Inatomi S, Ouchi K, Azumi Y, Tuchida T. Improving effects of the mushroom Yamabushitake on mild cognitive impairment. Phytother Res. 2009;23(3):367–72 (hericenones/NGF). Bartels EM et al. Efficacy and safety of ginger in osteoarthritis. Osteoarthritis Cartilage. 2015;23(1):13–21 (gingerol/TRPV1). Sigurjónsdóttir HÁ et al. Liquorice-induced rise in blood pressure. J Hum Hypertens. 2003;17(2):125–31 (glycyrrhizin / 11β-HSD2).",
+      },
+      {
+        summary: "Pharmacovigilance and interaction case reports",
+        full: "Posadzki P, Watson L, Ernst E. Herb-drug interactions: an overview of systematic reviews. Br J Clin Pharmacol. 2013;75(3):603–18. Targeted: warfarin/vitamin-K (Heck AM et al. Potential interactions between alternative therapies and warfarin. Am J Health Syst Pharm. 2000;57(13):1221–7); licorice/pseudoaldosteronism (Sigurjónsdóttir 2003, supra); ashwagandha/thyroid (van der Hooft CS et al. Hyperthyroidism associated with the use of an Ayurvedic preparation. Ned Tijdschr Geneeskd. 2005;149(47):2637–8).",
+      },
     ],
   },
   {
     heading: "Cultural & culinary references",
     items: [
-      "Tea-tradition primary sources: Japanese chajin manuals, Chinese gongfu cha texts, North African mint-tea ritual, Argentine yerba mate cebada practice",
-      "European folk-herbal lineage — wise-woman infusion traditions, Provençal lavender & herbal practice",
-      "South Asian masala chai household preparation; Egyptian and West African karkadé / bissap traditions",
-      "Indigenous American plant medicine — Lakota, Cheyenne, Cherokee, and Andean uses, where the relevant ingredient draws on those lineages",
+      {
+        summary: "Tea-tradition primary sources",
+        full: "Lu Yu (陸羽). Cha Jing (茶經, The Classic of Tea). c. 760 CE. Carpenter F (trans.). New York: Ecco; 1995. Sen Sōshitsu XV. The Japanese Way of Tea: From Its Origins in China to Sen Rikyū. Honolulu: University of Hawai'i Press; 1998. Heiss ML, Heiss RJ. The Tea Enthusiast's Handbook. Berkeley: Ten Speed Press; 2010. Yerba mate primary sources via colonial-era Jesuit missionary records and Folch C. Stimulating consumption: Yerba mate myths, markets, and meanings. Comp Stud Soc Hist. 2010;52(1):6–36.",
+      },
+      {
+        summary: "European folk-herbal lineage",
+        full: "Tobyn G, Denham A, Whitelegg M. The Western Herbal Tradition: 2000 Years of Medicinal Plant Knowledge. Edinburgh: Churchill Livingstone Elsevier; 2011. Covers the wise-woman / cunning-folk lineage, monastic gardens, and Provençal regional practice.",
+      },
+      {
+        summary: "South Asian and African household traditions",
+        full: "Saberi H. Tea: A Global History. London: Reaktion Books; 2010 (masala chai household practice). Da-Costa-Rocha I, Bonnlaender B, Sievers H, Pischel I, Heinrich M. Hibiscus sabdariffa L. – a phytochemical and pharmacological review. Food Chem. 2014;165:424–43 (karkadé / bissap traditions).",
+      },
+      {
+        summary: "Indigenous American plant medicine",
+        full: "Moerman DE. Native American Ethnobotany. Portland, OR: Timber Press; 1998. Foster S, Duke JA. A Field Guide to Medicinal Plants and Herbs of Eastern and Central North America. 3rd ed., Boston: Houghton Mifflin Harcourt; 2014. Andean / South American uses via Bussmann RW, Sharon D. Traditional medicinal plant use in northern Peru: tracking two thousand years of healing culture. J Ethnobiol Ethnomed. 2006;2:47.",
+      },
     ],
   },
 ];
 
 const SourcesPanel = () => {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(() => new Set());
+  const toggle = (key) => setExpanded(prev => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
   return (
     <div style={{
       padding: 14, borderRadius: 10,
@@ -815,25 +890,61 @@ const SourcesPanel = () => {
             research files.
           </div>
           {SOURCES.map(group => (
-            <div key={group.heading} style={{ marginBottom: 14 }}>
+            <div key={group.heading} style={{ marginBottom: 14, textAlign: "left" }}>
               <div style={{
                 fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
                 textTransform: "uppercase", color: theme.sageDeep,
-                marginBottom: 6,
+                marginBottom: 6, textAlign: "left",
               }}>{group.heading}</div>
               <ul style={{
                 listStyle: "none", padding: 0, margin: 0,
               }}>
-                {group.items.map(item => (
-                  <li
-                    key={item}
-                    style={{
-                      fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
-                      lineHeight: 1.5, padding: "4px 0",
-                      borderBottom: `1px solid ${theme.ruleSoft}`,
-                    }}
-                  >{item}</li>
-                ))}
+                {group.items.map((item, i) => {
+                  const key = `${group.heading}::${i}`;
+                  const isOpen = expanded.has(key);
+                  return (
+                    <li
+                      key={key}
+                      style={{
+                        borderBottom: `1px solid ${theme.ruleSoft}`,
+                        textAlign: "left",
+                      }}
+                    >
+                      <button
+                        onClick={() => toggle(key)}
+                        aria-expanded={isOpen}
+                        style={{
+                          width: "100%", textAlign: "left",
+                          background: "transparent", border: "none",
+                          padding: "8px 0", cursor: "pointer",
+                          display: "flex", alignItems: "flex-start",
+                          gap: 8,
+                          fontFamily: ff.serif, fontSize: 13,
+                          color: theme.inkSoft, lineHeight: 1.5,
+                        }}
+                      >
+                        <span style={{
+                          flexShrink: 0, marginTop: 1,
+                          fontFamily: ff.sans, fontSize: 11, color: theme.terra,
+                          width: 10, textAlign: "left",
+                          transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.15s ease",
+                        }}>›</span>
+                        <span style={{ flex: 1, textAlign: "left" }}>{item.summary}</span>
+                      </button>
+                      {isOpen && (
+                        <div style={{
+                          padding: "4px 0 12px 18px",
+                          fontFamily: ff.serif, fontSize: 12.5,
+                          color: theme.ash, lineHeight: 1.55,
+                          textAlign: "left",
+                        }}>
+                          {item.full}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
