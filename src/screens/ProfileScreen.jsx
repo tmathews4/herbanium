@@ -26,7 +26,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
+export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -60,6 +60,18 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
 
   // Feedback modal
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  // Hidden dev-mode reveal — five taps on the version footer flips
+  // the dev toggle into view. Counts within a 3-second window so
+  // accidental taps don't accumulate forever.
+  const [versionTaps, setVersionTaps] = useState(0);
+  const versionTapTimer = useRef(null);
+  const tapVersion = () => {
+    if (versionTapTimer.current) clearTimeout(versionTapTimer.current);
+    setVersionTaps(prev => prev + 1);
+    versionTapTimer.current = setTimeout(() => setVersionTaps(0), 3000);
+  };
+  const devToggleVisible = devModeEnabled || versionTaps >= 5;
 
   const handleExport = () => {
     const payload = exportAllPersistedState();
@@ -514,6 +526,63 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         color: theme.terra, lineHeight: 1.55,
       }}>
         Herbanium is a brewing companion and journal — <em>not</em> medical advice. Effects, traditional uses, and ingredient warnings reflect common literature and should never replace a clinician. If you're pregnant, nursing, taking prescription medication, or managing a health condition, verify any herb with a qualified professional before use. Trust your body; trust the cup; verify the science.
+      </div>
+
+      {/* Version footer — quiet line at the bottom. Tap five times in
+          three seconds to reveal the dev toggle. Once enabled, the
+          toggle stays visible (the user clearly wants it). */}
+      {devToggleVisible && setDevModeEnabled && (
+        <div style={{
+          marginTop: 22, padding: "10px 12px", borderRadius: 8,
+          border: `1px dashed ${theme.rule}`,
+          background: "rgba(181,130,89,0.04)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 12,
+        }}>
+          <div>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: theme.inkSoft,
+            }}>Developer mode</div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+              color: theme.ash, marginTop: 2, lineHeight: 1.4,
+            }}>
+              Reveals seed-data tools below. Off by default.
+            </div>
+          </div>
+          <button
+            onClick={() => setDevModeEnabled(!devModeEnabled)}
+            aria-label={devModeEnabled ? "disable developer mode" : "enable developer mode"}
+            style={{
+              flexShrink: 0,
+              width: 36, height: 20, borderRadius: 999,
+              border: "none", cursor: "pointer",
+              background: devModeEnabled ? theme.terra : theme.rule,
+              position: "relative",
+            }}
+          >
+            <span style={{
+              position: "absolute", top: 2,
+              left: devModeEnabled ? 18 : 2,
+              width: 16, height: 16, borderRadius: "50%",
+              background: theme.cream,
+              transition: "left 0.18s ease",
+            }} />
+          </button>
+        </div>
+      )}
+      <div
+        onClick={tapVersion}
+        style={{
+          marginTop: 18, paddingBottom: 4,
+          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: theme.ash, textAlign: "center",
+          cursor: "default", userSelect: "none",
+        }}
+      >
+        Herbanium · v0.1.0
       </div>
     </div>
   );
