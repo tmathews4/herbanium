@@ -241,7 +241,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           body={<>
             Cups you've brewed, blends you keep, and the animis your
             patterns attract. Tap any stat to jump in. The
-            <em> Animis Altar</em> below grows as your habits take shape —
+            <em> Animis Grove</em> below grows as your habits take shape —
             you can hide it any time from <em>Preferences</em>.
           </>}
           onDismiss={dismissProfileHint}
@@ -353,7 +353,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
       {/* self-knowledge — hidden entirely when the user has banished
           the spirits via Preferences below. */}
       {!animisBanished && (<>
-      <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">Animis Altar</SectionLabel></div>
+      <div style={{ margin: "24px 0 12px" }}><SectionLabel n="i">Animis Grove</SectionLabel></div>
       <div style={{
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.ruleSoft}`, background: theme.cream,
