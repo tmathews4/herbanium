@@ -268,8 +268,51 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     ? checkIngredientInteractions(effectiveIngredients)
     : [];
 
+  // Sub-tab strip — pinned to the bottom of the scroll viewport (just
+  // above the main TabBar) so users on phones don't have to reach to
+  // the top of the screen to switch sub-modes. Lives at the end of
+  // the return tree with position: sticky bottom 0.
+  const sectionTabs = section === "shelf"
+    ? [
+        ["recipes",    "Recipes"],
+        ["pantry",     "Pantry"],
+        ["journal",    "Journal"],
+      ]
+    : [
+        ["reverse",    "Blend"],
+        ["forward",    "Vibe"],
+        ["compendium", "Compendium"],
+      ];
+  const stickySubTabBar = (
+    <div style={{
+      position: "sticky", bottom: 0, zIndex: 5,
+      background: theme.ivory,
+      borderTop: `1px solid ${theme.ruleSoft}`,
+      padding: "8px 12px",
+      boxShadow: "0 -6px 16px rgba(0,0,0,0.05)",
+    }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${sectionTabs.length}, 1fr)`,
+        border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
+        background: theme.cream,
+      }}>
+        {sectionTabs.map(([k, label]) => (
+          <button key={k} onClick={() => setModeUserAction(k)} style={{
+            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+            padding: "9px 4px", cursor: "pointer",
+            background: mode === k ? theme.ink : "transparent",
+            color: mode === k ? theme.cream : theme.inkSoft,
+            border: "none",
+          }}>{label}</button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
+    <>
+    <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
       {/* First-visit tutorial — different copy per section. */}
       {section === "apothecary" && !composeHintShown && dismissComposeHint && (
         <HintCard
@@ -295,39 +338,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           onDismiss={dismissComposeHint}
         />
       )}
-      {/* Segmented control — three sub-tabs per section. */}
-      {(() => {
-        const sectionTabs = section === "shelf"
-          ? [
-              ["recipes",    "Recipes"],
-              ["pantry",     "Pantry"],
-              ["journal",    "Journal"],
-            ]
-          : [
-              ["reverse",    "Blend"],
-              ["forward",    "Vibe"],
-              ["compendium", "Compendium"],
-            ];
-        return (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${sectionTabs.length}, 1fr)`,
-            border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
-            marginBottom: 14, background: theme.cream,
-          }}>
-            {sectionTabs.map(([k, label]) => (
-              <button key={k} onClick={() => setModeUserAction(k)} style={{
-                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
-                padding: "9px 4px", cursor: "pointer",
-                background: mode === k ? theme.ink : "transparent",
-                color: mode === k ? theme.cream : theme.inkSoft,
-                border: "none",
-              }}>{label}</button>
-            ))}
-          </div>
-        );
-      })()}
-
       {mode === "forward" && (
         <>
           {/* Primary-axis toggle — "by feel" (mood leads) vs "by taste" (flavor leads).
@@ -1447,6 +1457,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       )}
 
     </div>
+    {stickySubTabBar}
+    </>
   );
 };
 
