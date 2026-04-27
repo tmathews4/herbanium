@@ -1053,7 +1053,7 @@ export const ComposeScreen = ({ go, startBrew, savedBlendIds, favoriteBlendIds, 
         const subTabHeader = (
           <div style={{ display: "flex", gap: 16, marginBottom: 14, borderBottom: `1px solid ${theme.ruleSoft}` }}>
             {[
-              ["blends",    "Blends",    saved.length],
+              ["blends",    "Your Blends",    saved.length],
               ["catalogue", "Catalogue", traditional.length + experimental.length],
             ].map(([k, label, count]) => (
               <button key={k} onClick={() => setShelfTab(k)} style={{
