@@ -534,13 +534,6 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
             }} />
           </span>
         </div>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-          color: theme.ash, lineHeight: 1.5, padding: "0 0 6px",
-        }}>
-          Hides the elemental omen, the grove, and the elementals stat. The cup
-          stays. You can restore them any time.
-        </div>
       </div>
 
       {/* Reset — available to all users */}
