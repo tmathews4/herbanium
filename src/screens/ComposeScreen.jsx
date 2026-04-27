@@ -266,8 +266,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           body={<>
             Three sub-tabs. <em>Journal</em> is everything you've kept in
             time — cups, notes, and verses. <em>Recipe Book</em> is the full
-            catalogue of blends. <em>Pantry</em> is the ingredients you've
-            marked on hand.
+            catalogue of blends. <em>Compendium</em> opens to the ingredients
+            you've marked on hand; toggle "only what's in my pantry" off to
+            browse and add more.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -278,7 +279,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           ? [
               ["journal",    "Journal"],
               ["recipes",    "Recipe Book"],
-              ["pantry",     "Pantry"],
+              ["pantry",     "Compendium"],
             ]
           : [
               ["reverse",    "Blend"],
@@ -1232,15 +1233,16 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         />
       )}
 
-      {/* Pantry — same ingredient view, forced to pantry-only with the
-          toggle hidden so the surface stays a single concept. */}
+      {/* Shelf · Compendium — full ingredient browse defaulted to
+          "only what's in my pantry" (so it lands as a personal stock
+          list), with the toggle visible so the user can flip it off to
+          browse and add new ingredients without leaving the tab. */}
       {mode === "pantry" && (
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
           libraryView={libraryView}
-          forcePantryOnly
-          hidePantryToggle
+          defaultPantryOnly
           hideHeader
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}

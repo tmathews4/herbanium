@@ -33,10 +33,10 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
-export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
+export const LibraryScreen = ({ go, pantryIds, libraryView, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
-  const [pantryOnly, setPantryOnly] = useState(forcePantryOnly);
+  const [pantryOnly, setPantryOnly] = useState(forcePantryOnly || defaultPantryOnly);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
