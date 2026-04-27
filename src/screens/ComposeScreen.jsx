@@ -1727,6 +1727,7 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "baseline",
         marginBottom: 6,
+        paddingRight: onDelete ? 22 : 0,
       }}>
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
