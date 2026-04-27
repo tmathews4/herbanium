@@ -358,7 +358,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
         color: theme.ash, lineHeight: 1.5, marginBottom: 12,
       }}>
-        Spirit-like animal elementals are attracted to those who brew with intention.
+        Tend the kettle with intention, and the spirits — animal, elemental, half-glimpsed — draw near.
       </div>
       <div style={{
         padding: 14, borderRadius: 10,
