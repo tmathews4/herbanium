@@ -10,7 +10,7 @@ import {
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
 import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
-import { getElementalDisplayName, getElementalDisplayDesc, pickRandomCreature } from "../data/elementalAdjectives";
+import { getElementalDisplayName, getElementalDisplayDesc, pickRandomCreature, flavorLineFor } from "../data/elementalAdjectives";
 import { generateCreationTitle, describeCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -209,12 +209,26 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
   // it as the first card so users see their identity title immediately.
   const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
   const creatureDesc = describeCreationTitle(creationTitleName);
+  // Match the other elementals' description shape: prepend the
+  // adjective-keyed flavor line(s) onto the creature lore so the
+  // unique reads as dynamic as the rest of the grove. Title shape
+  // is "The {element} {gem} {creature}", so we pull the element
+  // and gem words and weave both flavor sentences in front.
+  const titleParts = (creationTitleName || "").replace(/^The\s+/i, "").split(/\s+/);
+  const uniqueDescPieces = [];
+  if (titleParts.length >= 3) {
+    const elementWord = titleParts[0];
+    const gemWord     = titleParts[1];
+    if (elementWord) uniqueDescPieces.push(flavorLineFor(elementWord));
+    if (gemWord)     uniqueDescPieces.push(flavorLineFor(gemWord));
+  }
+  if (creatureDesc) uniqueDescPieces.push(creatureDesc);
   const creationCard = creationTitleName ? {
     id: "_creation",
     name: creationTitleName,
     displayName: creationTitleName,
     rarity: "legendary",
-    desc: creatureDesc || "",
+    desc: uniqueDescPieces.join(" "),
   } : null;
   const allCards = creationCard ? [creationCard, ...revealedSorted] : revealedSorted;
   const [openAttrId, setOpenAttrId] = useState(null);
