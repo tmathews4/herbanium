@@ -1099,7 +1099,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           }
           return (
             <div style={{ marginTop: 4 }}>
-              {subTabHeader}
               <div style={{ marginBottom: 10 }}>
                 <ChipRows
                   items={["favorites", "all", "traditional", "house recipes", "calm", "focus", "energy", "comfort"]}
