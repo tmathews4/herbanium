@@ -72,12 +72,6 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* First-visit pantry hint — shown once, only while the pantry
-          is still empty. Explains how to mark ingredients on hand so
-          Compose and the apothecary can filter to what you can brew. */}
-      {!pantryHintShown && pantryIds && pantryIds.size === 0 && dismissPantryHint && (
-        <PantryHintCard onDismiss={dismissPantryHint} />
-      )}
       {!hideHeader && (
         <div style={{ marginBottom: 14 }}>
           <SectionLabel n="i">The Apothecary</SectionLabel>
