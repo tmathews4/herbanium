@@ -1,9 +1,9 @@
 /* ──────────────────────────────────────────────────────────────
    components/FirstCupHintCard.jsx — first-visit tutorial card.
 
-   Replaces the old animi-omen popup at the top of Home for new
-   users. Points at the two ways to make a first cup — Compose
-   (build your own blend) or Apothecary (browse a tradition).
+   Sits at the top of Home for new users. Points at the two big
+   CTAs on Home — "Brew a cup" (Apothecary) and "Note a moment"
+   (Shelf · Journal) — and explains the four-tab layout briefly.
    Dismisses to a persisted flag so it doesn't reappear.
    ────────────────────────────────────────────────────────────── */
 
@@ -40,9 +40,11 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
           color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
         }}>
-          Build a custom blend in <em>Compose</em>, or browse traditional
-          preparations in the <em>Apothecary</em>. Every cup brewed becomes
-          part of your journal.
+          The <em>Apothecary</em> is where you build a cup — blend by
+          ingredient, follow a vibe, or browse the compendium. The
+          <em> Shelf</em> keeps everything you've made: your journal of
+          cups and notes, the recipe book, your pantry. Brew a cup or
+          note a moment — both land in time.
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button
@@ -53,7 +55,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
               background: theme.terra, color: theme.cream,
               border: "none", cursor: "pointer",
             }}
-          >open compose</button>
+          >open the apothecary</button>
           <button
             onClick={onApothecary}
             style={{
@@ -63,7 +65,7 @@ export const FirstCupHintCard = ({ onCompose, onApothecary, onDismiss }) => (
               border: `1px solid ${theme.terra}`, borderRadius: 999,
               padding: "8px 14px", cursor: "pointer",
             }}
-          >browse apothecary</button>
+          >browse the compendium</button>
         </div>
       </div>
     </div>
