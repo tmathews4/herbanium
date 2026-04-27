@@ -96,7 +96,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Mode universe per section (state lives in App so the bottom
   // TabBar can render the sub-tabs as part of the same dock):
   //   apothecary: reverse (Blend) | forward (Vibe) | compendium
-  //   shelf:      recipes | pantry | journal (bestiary nested under journal)
+  //   shelf:      recipes | journal | pantry (bestiary nested under journal)
   // Secondary toggle inside the Journal sub-tab — flips between the
   // brew/entry timeline and the elemental Bestiary that used to sit
   // as its own primary tab.
