@@ -28,10 +28,10 @@ export const FirstCupHintCard = ({ onDismiss }) => (
         color: theme.inkSoft, lineHeight: 1.45, textAlign: "left",
       }}>
         <div>
-          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> to brew, browse, and explore.
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> · Experiment and Discover.
         </div>
         <div>
-          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> for your journal, recipes, and pantry.
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Shelf</strong> · Your Journal, Your Vibes.
         </div>
       </div>
     </div>
