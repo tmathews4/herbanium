@@ -680,6 +680,12 @@ export default function App() {
           sessions={sessions}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
+          plannerItems={plannerItems}
+          addPlannerItem={addPlannerItem}
+          togglePlannerItem={togglePlannerItem}
+          editPlannerItem={editPlannerItem}
+          deletePlannerItem={deletePlannerItem}
+          clearDonePlannerItems={clearDonePlannerItems}
           onDone={() => setOverlay("log")}
           onCancel={() => { setOverlay(null); setSession(null); }}
         />

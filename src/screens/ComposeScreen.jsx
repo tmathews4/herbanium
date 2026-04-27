@@ -28,7 +28,7 @@ import {
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
-import { Planner, PlannerModal } from "../components/Planner";
+import { Planner } from "../components/Planner";
 import { HintCard } from "../components/HintCard";
 import { Sprig, Pencil } from "../components/icons";
 
@@ -74,10 +74,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
-  // Planner modal state — opens from a button on the Apothecary brew
-  // page so the user can glance at their day plan without leaving the
-  // brew flow. The same items are also editable inline in Shelf > Journal.
-  const [plannerOpen, setPlannerOpen] = useState(false);
+  // Planner props passed inline into the Shelf > Journal section.
+  // The brew-time modal trigger lives on SteepScreen, not here.
   const plannerProps = {
     items: plannerItems || [],
     onAdd: addPlannerItem,
@@ -316,43 +314,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           </div>
         );
       })()}
-
-      {/* Planner CTA — small button in the apothecary brew flow that
-          pops up the day plan over the brew window. Hidden in
-          Compendium mode (no brew happening there). */}
-      {section === "apothecary" && (mode === "forward" || mode === "reverse") && (
-        <div style={{
-          display: "flex", justifyContent: "flex-end", alignItems: "center",
-          gap: 6, marginBottom: 12,
-        }}>
-          <button
-            onClick={() => setPlannerOpen(true)}
-            style={{
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.10em",
-              textTransform: "uppercase",
-              color: theme.terra,
-              background: "transparent",
-              border: `1px solid ${theme.terra}`,
-              borderRadius: 999, padding: "5px 12px",
-              cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 6,
-            }}
-            title="open today's plan"
-          >
-            <Pencil size={11} c={theme.terra} />
-            <span>Planner</span>
-            {(plannerItems || []).length > 0 && (
-              <span style={{
-                fontFamily: ff.serif, fontStyle: "italic",
-                fontSize: 10.5, letterSpacing: 0,
-                textTransform: "none", color: theme.ash,
-              }}>
-                · {(plannerItems || []).filter(i => !i.done).length} open
-              </span>
-            )}
-          </button>
-        </div>
-      )}
 
       {mode === "forward" && (
         <>
@@ -1340,11 +1301,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         />
       )}
 
-      <PlannerModal
-        open={plannerOpen}
-        onClose={() => setPlannerOpen(false)}
-        plannerProps={plannerProps}
-      />
     </div>
   );
 };

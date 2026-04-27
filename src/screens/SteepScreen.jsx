@@ -3,14 +3,15 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Leaf } from "../components/icons";
+import { Leaf, Pencil } from "../components/icons";
 import { INGREDIENTS } from "../data/ingredients";
 import { buildWaitCards } from "../data/waitContent";
-import { iconBtn, mmss } from "../helpers/misc";;
+import { iconBtn, mmss } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
 import { IngredientSheet } from "./IngredientSheet";
+import { PlannerModal } from "../components/Planner";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: STEEP (takeover)
@@ -36,12 +37,13 @@ const CURRENT_MOOD_CHIPS = [
   { key: "restless",  label: "Restless" },
 ];
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [plannerOpen, setPlannerOpen] = useState(false);
 
   // Past brews of this blend — only meaningful if the blend has an id (saved
   // or previously-logged). Freshly-composed blends won't have prior sessions.
@@ -158,18 +160,44 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
-        <button
-          onClick={() => pastNoteSessions.length > 0 && setNotesOpen(true)}
-          disabled={pastNoteSessions.length === 0}
-          style={{
-            background: "transparent", border: "none",
-            color: pastNoteSessions.length === 0 ? theme.ruleSoft : theme.ash,
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-            cursor: pastNoteSessions.length === 0 ? "not-allowed" : "pointer",
-          }}
-        >
-          notes{pastNoteSessions.length > 0 && ` (${pastNoteSessions.length})`}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={() => setPlannerOpen(true)}
+            title="open today's plan"
+            style={{
+              background: "transparent", border: "none",
+              color: theme.terra,
+              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
+              cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 5,
+              padding: 0,
+            }}
+          >
+            <Pencil size={11} c={theme.terra} />
+            <span>planner</span>
+            {plannerItems.length > 0 && (
+              <span style={{
+                fontFamily: ff.serif, fontStyle: "italic",
+                fontSize: 10.5, letterSpacing: 0,
+                textTransform: "none", color: theme.ash,
+              }}>
+                · {plannerItems.filter(i => !i.done).length} open
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => pastNoteSessions.length > 0 && setNotesOpen(true)}
+            disabled={pastNoteSessions.length === 0}
+            style={{
+              background: "transparent", border: "none",
+              color: pastNoteSessions.length === 0 ? theme.ruleSoft : theme.ash,
+              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
+              cursor: pastNoteSessions.length === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            notes{pastNoteSessions.length > 0 && ` (${pastNoteSessions.length})`}
+          </button>
+        </div>
       </div>
 
       {/* countdown ring */}
@@ -495,6 +523,19 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           </div>
         </div>
       )}
+
+      <PlannerModal
+        open={plannerOpen}
+        onClose={() => setPlannerOpen(false)}
+        plannerProps={{
+          items: plannerItems,
+          onAdd: addPlannerItem,
+          onToggle: togglePlannerItem,
+          onEdit: editPlannerItem,
+          onDelete: deletePlannerItem,
+          onClearDone: clearDonePlannerItems,
+        }}
+      />
     </div>
   );
 };
