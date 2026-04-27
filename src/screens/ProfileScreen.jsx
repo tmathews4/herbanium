@@ -278,9 +278,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           icon={<Flower size={18} c={theme.terra} />}
           title="Profile"
           body={<>
-            Your stats, settings, and earned elementals. Tap any stat to
-            open it. Use the <em>Summon</em> button below to reveal each
-            new elemental. Hide elementals any time from <em>Preferences</em>.
+            Stats, settings, elementals · tap <strong style={{ color: theme.terra }}>Summon</strong> to reveal new ones.
           </>}
           onDismiss={dismissProfileHint}
         />

@@ -5,9 +5,11 @@
    sub-tab) the first time the user lands there. Dismissible to a
    persisted flag so it never reappears.
 
-   Surface-specific copy lives at the call site — this component
-   just provides the consistent visual treatment: cream card, small
-   icon at the top-left, serif title, italic body, × in the corner.
+   Visual matches the FirstCupHintCard banner: a compact horizontal
+   row with a small icon on the left, the title + body in the
+   middle, and a single OK pill on the right. The OK button is the
+   only dismiss target — no × in the corner — so the tap target is
+   thumb-friendly and unambiguous.
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
@@ -16,36 +18,37 @@ import { theme, ff } from "../theme";
 export const HintCard = ({ icon, title, body, onDismiss }) => (
   <div style={{
     marginBottom: 16,
-    padding: "14px 16px",
+    padding: "12px 14px",
     borderRadius: 12,
     background: theme.cream,
     border: `1px solid ${theme.ruleSoft}`,
-    position: "relative",
+    display: "flex", alignItems: "center", gap: 12,
   }}>
+    {icon && (
+      <div style={{ flexShrink: 0 }}>{icon}</div>
+    )}
+    <div style={{ flex: 1, minWidth: 0 }}>
+      {title && (
+        <div style={{
+          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+          lineHeight: 1.25, marginBottom: 2,
+        }}>{title}</div>
+      )}
+      <div style={{
+        fontFamily: ff.sans, fontSize: 12,
+        color: theme.inkSoft, lineHeight: 1.45,
+      }}>{body}</div>
+    </div>
     <button
       onClick={onDismiss}
-      aria-label="dismiss"
       style={{
-        position: "absolute", top: 6, right: 10,
-        background: "transparent", border: "none", cursor: "pointer",
-        color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
+        flexShrink: 0,
+        fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.10em",
+        textTransform: "uppercase",
+        padding: "8px 18px", borderRadius: 999,
+        background: theme.terra, color: theme.cream,
+        border: "none", cursor: "pointer",
       }}
-    >×</button>
-
-    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-      {icon && (
-        <div style={{ flexShrink: 0, marginTop: 2 }}>{icon}</div>
-      )}
-      <div style={{ flex: 1, minWidth: 0, paddingRight: 16 }}>
-        <div style={{
-          fontFamily: ff.serif, fontSize: 15.5, color: theme.ink,
-          lineHeight: 1.25, marginBottom: 4,
-        }}>{title}</div>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 13,
-          color: theme.inkSoft, lineHeight: 1.5,
-        }}>{body}</div>
-      </div>
-    </div>
+    >OK</button>
   </div>
 );

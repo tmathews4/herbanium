@@ -270,9 +270,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Sprig size={18} c={theme.sageDeep} />}
           title="Apothecary"
           body={<>
-            <strong>Blend</strong> — build a cup from ingredients you pick.{" "}
-            <strong>Vibe</strong> — get a recommendation from a mood and flavor.{" "}
-            <strong>Compendium</strong> — browse every ingredient.
+            <strong style={{ color: theme.terra }}>Blend</strong> ·{" "}
+            <strong style={{ color: theme.terra }}>Vibe</strong> ·{" "}
+            <strong style={{ color: theme.terra }}>Compendium</strong> — three ways to find a cup.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -282,10 +282,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           icon={<Pencil size={16} c={theme.terra} />}
           title="Shelf"
           body={<>
-            <strong>Journal</strong> — your cups, notes, and verses over time.{" "}
-            <strong>Recipe Book</strong> — every saved blend.{" "}
-            <strong>Pantry</strong> — ingredients you have on hand. Toggle
-            the filter off to browse and add more.
+            <strong style={{ color: theme.terra }}>Journal</strong> ·{" "}
+            <strong style={{ color: theme.terra }}>Recipe Book</strong> ·{" "}
+            <strong style={{ color: theme.terra }}>Pantry</strong> — your kept work.
           </>}
           onDismiss={dismissComposeHint}
         />
@@ -1037,9 +1036,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 icon={<Pencil size={16} c={theme.terra} />}
                 title="Journal"
                 body={<>
-                  Tap <strong>+ new entry</strong> to write a note. Use the
-                  <strong> haiku</strong> or <strong>limerick</strong> ad-lib for
-                  a guided prompt. Brewed cups appear here too, sorted by date.
+                  <strong style={{ color: theme.terra }}>+ new entry</strong> to write · cups appear here too.
                 </>}
                 onDismiss={dismissJournalHint}
               />
