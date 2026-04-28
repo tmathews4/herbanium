@@ -140,7 +140,20 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.15 }}>
+            {/* Subtitle stays on one line at any width — overflow
+                clipped with an ellipsis rather than wrapping, since
+                a wrapped two-line subtitle pushes the signal tags
+                and recipe down inconsistently across blends. */}
+            <div
+              title={b.subtitle}
+              style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, marginTop: 4, lineHeight: 1.15,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {b.subtitle}
             </div>
 
