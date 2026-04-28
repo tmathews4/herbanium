@@ -222,7 +222,12 @@ const INGREDIENTS = {
   },
   spearmint: {
     name: "Spearmint", latin: "Mentha spicata", category: "herbal",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // tempC lower bound at 85°C: spearmint is carvone-dominant (~50-70%
+    // of essential oil), with virtually no menthol. Carvone is more
+    // delicate than peppermint's menthol and more readily driven off
+    // by aggressive heat. Maghrebi tradition (Moroccan Mint) brews
+    // spearmint at 85-90°C for exactly this reason.
+    caffeine: 0, tempC: [85, 100], timeS: [300, 420],
     effects: [["cooling", 4], ["digestive", 4], ["uplifting", 3], ["calm", 3]],
     flavors: ["minty", "sweet", "grassy", "cool"],
     pairs: ["lemonbalm", "sencha", "rose", "chamomile", "gunpowder"],
