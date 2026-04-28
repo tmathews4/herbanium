@@ -2,7 +2,62 @@
    screens/BlendDetail.jsx — full-screen blend detail page.
    ────────────────────────────────────────────────────────────── */
 
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
+
+/**
+ * Renders one line of text that auto-shrinks its font-size to fit
+ * its container's width. Better than ellipsis truncation for
+ * short labels (subtitles, taglines) where the whole text matters.
+ *
+ * baseSize  — starting font size in px
+ * minSize   — floor; won't shrink below this
+ * Uses ResizeObserver to re-fit on viewport changes.
+ */
+function FitOneLine({ text, baseSize = 14, minSize = 10, style }) {
+  const wrapRef = useRef(null);
+  const textRef = useRef(null);
+  const [size, setSize] = useState(baseSize);
+
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const t = textRef.current;
+    if (!wrap || !t) return;
+    const fit = () => {
+      let s = baseSize;
+      t.style.fontSize = `${s}px`;
+      // Step down by 0.5px until the text fits or we hit minSize.
+      while (t.scrollWidth > wrap.clientWidth && s > minSize) {
+        s -= 0.5;
+        t.style.fontSize = `${s}px`;
+      }
+      setSize(s);
+    };
+    fit();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(fit);
+      ro.observe(wrap);
+      return () => ro.disconnect();
+    }
+  }, [text, baseSize, minSize]);
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{ width: "100%", overflow: "hidden", ...style }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          display: "inline-block",
+          whiteSpace: "nowrap",
+          fontSize: size,
+        }}
+      >
+        {text}
+      </span>
+    </div>
+  );
+}
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
   Flower, Kettle, MOOD_ICONS,
@@ -140,22 +195,21 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
-            {/* Subtitle stays on one line at any width — overflow
-                clipped with an ellipsis rather than wrapping, since
-                a wrapped two-line subtitle pushes the signal tags
-                and recipe down inconsistently across blends. */}
-            <div
-              title={b.subtitle}
+            {/* Subtitle stays on one line at any width by auto-
+                shrinking the font-size to fit. Avoids both wrapping
+                (which pushes the signal tags and recipe down
+                inconsistently) and ellipsis truncation (which hid
+                content). Falls back to no shrink on browsers
+                without ResizeObserver. */}
+            <FitOneLine
+              text={b.subtitle}
+              baseSize={13}
+              minSize={9.5}
               style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                fontFamily: ff.serif, fontStyle: "italic",
                 color: theme.ash, marginTop: 4, lineHeight: 1.15,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
               }}
-            >
-              {b.subtitle}
-            </div>
+            />
 
             {/* Signal tag tiles — centered under the name/subtitle column,
                 not the full hero, so they read as belonging to the title. */}
