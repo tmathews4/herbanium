@@ -27,5 +27,12 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <!-- AndroidManifest applies this theme to MainActivity, so the
+             inset attributes need to live here too — not just on the
+             AppTheme.NoActionBar style above (which the activity
+             never actually uses). Keep the duplication for now. -->
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:statusBarColor">#F3ECDC</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
