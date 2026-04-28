@@ -314,81 +314,151 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
-      {/* Temp + time sliders. Sit ABOVE the predicted-profile bars
-          so they stay in a fixed position even as bars/pills below
-          populate during a slider drag. Putting them under the
-          predicted profile meant the bars could expand mid-drag and
-          shove the sliders downward under the user's finger. */}
-      <div style={{ marginTop: 14, marginBottom: 14 }}>
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          marginBottom: 6,
-        }}>
-          <label style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: theme.inkSoft,
-          }}>
-            Water
-          </label>
-          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-            {displayTemp}
-          </div>
-        </div>
-        <input
-          type="range"
-          min={tempCRange[0]}
-          max={tempCRange[1]}
-          step={1}
-          value={tempC}
-          onChange={(e) => setTempC(Number(e.target.value))}
-          style={{
-            width: "100%",
-            accentColor: theme.terra,
-          }}
-        />
-        <div style={{
-          display: "flex", justifyContent: "space-between",
-          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-        }}>
-          <span>{tempMinDisplay}°</span>
-          <span>{tempMaxDisplay}°</span>
-        </div>
-      </div>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          marginBottom: 6,
-        }}>
-          <label style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: theme.inkSoft,
-          }}>
-            Steep
-          </label>
-          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-            {displayTime}
-          </div>
-        </div>
-        <input
-          type="range"
-          min={timeSRange[0]}
-          max={timeSRange[1]}
-          step={15}
-          value={timeS}
-          onChange={(e) => setTimeS(Number(e.target.value))}
-          style={{
-            width: "100%",
-            accentColor: theme.sage,
-          }}
-        />
-        <div style={{
-          display: "flex", justifyContent: "space-between",
-          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-        }}>
-          <span>{Math.round(timeSRange[0] / 60)} min</span>
-          <span>{Math.round(timeSRange[1] / 60)} min</span>
-        </div>
-      </div>
+      {/* Range bands — show each lead ingredient's preferred window
+          as a faint sage-green band behind each slider, accents as
+          thinner dashed bands. Where bands stack, the green gets
+          denser → the darkest zone is the natural sweet spot
+          without the user having to drag and watch warnings. */}
+      {(() => {
+        // Collect window data once; reuse for both sliders.
+        const bandData = ingredients
+          .map(({ id, role }) => {
+            const meta = INGREDIENTS[id];
+            if (!meta) return null;
+            if (role === "catalyst") return null;  // trace dose, no signal
+            return {
+              id,
+              name: meta.name,
+              role: role || "lead",
+              tempC: meta.tempC,
+              timeS: meta.timeS,
+            };
+          })
+          .filter(Boolean);
+
+        const RangeBands = ({ rangeMin, rangeMax, axis }) => {
+          const span = rangeMax - rangeMin;
+          if (span <= 0) return null;
+          return (
+            <div style={{
+              position: "relative",
+              height: 6,
+              marginTop: 2, marginBottom: 2,
+            }}>
+              {bandData.map((ing, i) => {
+                const [iMin, iMax] = ing[axis] || [];
+                if (iMin == null || iMax == null) return null;
+                const lo = Math.max(iMin, rangeMin);
+                const hi = Math.min(iMax, rangeMax);
+                if (hi <= lo) return null;
+                const left = ((lo - rangeMin) / span) * 100;
+                const width = ((hi - lo) / span) * 100;
+                const isLead = ing.role === "lead";
+                return (
+                  <div
+                    key={`${ing.id}-${i}`}
+                    title={`${ing.name} ${ing.role}: ${iMin}–${iMax}${axis === "tempC" ? "°C" : "s"}`}
+                    style={{
+                      position: "absolute",
+                      left: `${left}%`,
+                      width: `${width}%`,
+                      top: 0, bottom: 0,
+                      background: isLead
+                        ? "rgba(109,126,85,0.18)"
+                        : "rgba(109,126,85,0.10)",
+                      borderTop: isLead ? "none" : `1px dashed rgba(109,126,85,0.35)`,
+                      borderBottom: isLead ? "none" : `1px dashed rgba(109,126,85,0.35)`,
+                      borderRadius: 2,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          );
+        };
+
+        return (
+          <>
+            {/* Temp + time sliders. Sit ABOVE the predicted-profile bars
+                so they stay in a fixed position even as bars/pills below
+                populate during a slider drag. Putting them under the
+                predicted profile meant the bars could expand mid-drag and
+                shove the sliders downward under the user's finger. */}
+            <div style={{ marginTop: 14, marginBottom: 14 }}>
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                marginBottom: 6,
+              }}>
+                <label style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+                  textTransform: "uppercase", color: theme.inkSoft,
+                }}>
+                  Water
+                </label>
+                <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+                  {displayTemp}
+                </div>
+              </div>
+              <input
+                type="range"
+                min={tempCRange[0]}
+                max={tempCRange[1]}
+                step={1}
+                value={tempC}
+                onChange={(e) => setTempC(Number(e.target.value))}
+                style={{
+                  width: "100%",
+                  accentColor: theme.terra,
+                }}
+              />
+              <RangeBands rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC" />
+              <div style={{
+                display: "flex", justifyContent: "space-between",
+                fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
+              }}>
+                <span>{tempMinDisplay}°</span>
+                <span>{tempMaxDisplay}°</span>
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                marginBottom: 6,
+              }}>
+                <label style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+                  textTransform: "uppercase", color: theme.inkSoft,
+                }}>
+                  Steep
+                </label>
+                <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+                  {displayTime}
+                </div>
+              </div>
+              <input
+                type="range"
+                min={timeSRange[0]}
+                max={timeSRange[1]}
+                step={15}
+                value={timeS}
+                onChange={(e) => setTimeS(Number(e.target.value))}
+                style={{
+                  width: "100%",
+                  accentColor: theme.sage,
+                }}
+              />
+              <RangeBands rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS" />
+              <div style={{
+                display: "flex", justifyContent: "space-between",
+                fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
+              }}>
+                <span>{Math.round(timeSRange[0] / 60)} min</span>
+                <span>{Math.round(timeSRange[1] / 60)} min</span>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Each section renders the FULL set of entries any
