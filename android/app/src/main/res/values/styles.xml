@@ -13,6 +13,15 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Reserve insets for the status bar / nav gestures so the
+             WebView starts below them rather than extending edge-to-
+             edge under the system icons. The runtime
+             setOverlaysWebView call in src/helpers/native.js doesn't
+             work reliably in Capacitor 8; this is the durable fix. -->
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:statusBarColor">#F3ECDC</item>
+        <!-- Dark icons on the light ivory bar (API 23+). -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 
