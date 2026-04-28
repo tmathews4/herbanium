@@ -109,13 +109,15 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         <div style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
           {/* Icon + 'for {mood}' label column. The column stretches to
               match the title/subtitle/tags column on the right; icon
-              floats to the top to sit alongside the title, the label
-              floats to the bottom so it aligns with the tag row. Icon
+              floats to the top to sit alongside the title; the label
+              uses margin: auto on top and bottom so it lands at the
+              vertical center of the remaining space — that places it
+              alongside the single tag row when there's one, and
+              between the two tag rows when there are two. Icon
               circle resized down so its visual weight matches the
               title's row height rather than dominating. */}
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "space-between",
             flexShrink: 0,
           }}>
             <div style={{
@@ -132,6 +134,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               <button
                 onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
                 style={{
+                  marginTop: "auto", marginBottom: "auto",
                   background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
                   border: "none", padding: "2px 6px", borderRadius: 4,
                   fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
@@ -141,7 +144,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 for {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
               </button>
             ) : (
-              <span style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: theme.ash }}>
+              <span style={{
+                marginTop: "auto", marginBottom: "auto",
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
+                textTransform: "uppercase", color: theme.ash,
+              }}>
                 for {b.mood}
               </span>
             )}
@@ -245,12 +252,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           const hiddenCount = Math.max(0, tags.length - TAG_HEAD);
           return (
             <div style={{ marginTop: 10 }}>
-              {/* Strict 3-column grid so rows stay even regardless
-                  of label length. Two rows visible by default; the
-                  rest hide behind a +N more pill. */}
+              {/* Three-per-row layout via flex with each pill taking
+                  one-third of the row width. Partial rows center
+                  themselves (one extra pill lands in the middle of
+                  its own row, two extra pills bracket the center). */}
               <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
                 gap: 5,
                 maxWidth: 360, marginLeft: "auto", marginRight: "auto",
               }}>
@@ -261,6 +270,10 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                       key={i}
                       onClick={() => setOpenTag(prev => prev?.label === t.label ? null : t)}
                       style={{
+                        // 1/3 of the row width minus 2/3 of the gap, so 3 fit
+                        // exactly per row regardless of label length and
+                        // partial rows center via the flex parent.
+                        flex: "0 0 calc((100% - 10px) / 3)",
                         fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
                         textTransform: "uppercase",
                         color: t.fg, background: t.bg,
