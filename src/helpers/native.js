@@ -127,8 +127,16 @@ export async function cancelSteepNotification(id) {
 }
 
 /**
- * Set the system status bar to dark icons on the ivory background.
- * Fired once on app mount. No-op on web.
+ * Configure the system status bar:
+ *   - Dark icons on the ivory background (style)
+ *   - Ivory bar background to match the app shell (Android only)
+ *   - Don't overlay the WebView (Android only) — by default
+ *     Capacitor extends the WebView behind the status bar, which
+ *     makes our content render under the system icons. Disabling
+ *     overlay reserves a proper inset.
+ *
+ * Fired once on app mount. iOS-only setters (setBackgroundColor,
+ * setOverlaysWebView) silently no-op on iOS. No-op on web.
  */
 export async function configureStatusBar() {
   if (!isNativeApp()) return;
@@ -139,5 +147,15 @@ export async function configureStatusBar() {
     // Naming is confusing — Style.Dark means "you have a Dark style for
     // a Light background", per Capacitor's docs.
     await StatusBar.setStyle({ style: Style?.Dark ?? "DARK" });
+    // Android only: paint the system bar so it blends with the app
+    // shell's ivory.
+    if (typeof StatusBar.setBackgroundColor === "function") {
+      try { await StatusBar.setBackgroundColor({ color: "#F3ECDC" }); } catch {}
+    }
+    // Android only: stop the WebView from extending under the bar.
+    // Without this, the bar icons render on top of the app content.
+    if (typeof StatusBar.setOverlaysWebView === "function") {
+      try { await StatusBar.setOverlaysWebView({ overlay: false }); } catch {}
+    }
   } catch {}
 }
