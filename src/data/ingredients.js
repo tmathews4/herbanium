@@ -1000,7 +1000,30 @@ const INGREDIENTS = {
   },
   cloves: {
     name: "Cloves", latin: "Syzygium aromaticum", category: "spice",
+    // Powerful aromatic — eugenol releases fast and goes medicinal
+    // hard past 7 min; less is always more.
     caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90], character: "spice quiet, perfume below the surface.", moodImpact: "warming barely lifts" },
+      { id: "cool",  tempC: [90, 95], character: "soft clove top, gentle warmth.", moodImpact: "warming gentle; calm settles" },
+      { id: "warm",  tempC: [95, 99], character: "full clove perfume, clean warmth.", moodImpact: "warming and digestive in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, eugenol forward.", moodImpact: "warming peaks; cup tightens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "spice top only, no body.", moodImpact: "warmth barely registers" },
+      { id: "short",  timeS: [180, 300], character: "bright clove top.", moodImpact: "warming and digestive lift" },
+      { id: "medium", timeS: [300, 420], character: "the chai-clove household register.", moodImpact: "warming, digestive, calm in balance" },
+      { id: "long",   timeS: [420, 480], character: "deep clove, edge sharpening.", moodImpact: "warming heavy; calm strained" },
+      { id: "over",   timeS: [480, 540], character: "medicinal-numbing — eugenol overstaying.", moodImpact: "warming overshadowed by edge" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright clove top, perfume forward.", moodImpact: "warming gentle; uplifting present" },
+      { id: "balanced",   character: "the chai-spice clove cup.", moodImpact: "warming, digestive, calm in balance" },
+      { id: "tonic",      character: "deep eugenol, full warmth.", moodImpact: "warming deep; cup grounds" },
+      { id: "overpulled", character: "medicinal and numbing — too much clove.", moodImpact: "warming gone aggressive" },
+    ],
+    overPull: { timeS: 540, reason: "eugenol turns medicinal-numbing" },
     effects: [["warming", 4], ["digestive", 4], ["grounding", 2], ["soothing", 3]],
     flavors: ["spiced", "pungent", "warm", "numbing"],
     pairs: ["assam", "cinnamon", "cardamom", "ginger", "rooibos", "black-pepper"],
@@ -1024,7 +1047,31 @@ const INGREDIENTS = {
   },
   vanilla: {
     name: "Vanilla Bean", latin: "Vanilla planifolia", category: "spice",
+    // Slow-extracting bean — vanillin is fat-soluble and patient;
+    // tolerates long steeps without going off, but never delivers
+    // big flavor at quick brews.
     caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90], character: "vanillin barely surfaces.", moodImpact: "comfort held back" },
+      { id: "cool",  tempC: [90, 95], character: "soft sweet-cream top.", moodImpact: "comfort gentle; calm settles" },
+      { id: "warm",  tempC: [95, 99], character: "full vanilla character — sweet, round.", moodImpact: "comfort and soothing in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fullest body.", moodImpact: "comfort deep; soothing solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely steeped, faint sweet.", moodImpact: "comfort barely registers" },
+      { id: "short",  timeS: [180, 300], character: "light vanilla top.", moodImpact: "comfort settling in" },
+      { id: "medium", timeS: [300, 420], character: "the dessert-spice register.", moodImpact: "comfort and soothing in balance" },
+      { id: "long",   timeS: [420, 600], character: "deep vanilla, body rich.", moodImpact: "comfort peak; soothing deep" },
+      { id: "over",   timeS: [600, 900], character: "very strong but still smooth — vanilla forgives.", moodImpact: "comfort heavy; cup is dessert-thick" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "light cream-sweet, soft top.", moodImpact: "comfort gentle" },
+      { id: "balanced",   character: "the household sweet-bean cup.", moodImpact: "comfort and soothing in balance" },
+      { id: "tonic",      character: "deep, dessert-rich, full sweet body.", moodImpact: "comfort peak; soothing deep" },
+      { id: "overpulled", character: "very heavy but smooth — vanilla rarely turns.", moodImpact: "comfort holds; cup is rich" },
+    ],
+    overPull: { timeS: 900, reason: "the cup is past dessert into thick syrup" },
     effects: [["soothing", 4], ["calm", 3], ["uplifting", 3], ["warming", 1], ["sleepy", 1]],
     flavors: ["sweet", "creamy", "floral", "warm"],
     pairs: ["rooibos", "assam", "cinnamon", "cardamom", "rose", "lions-mane", "dandelion-root"],
@@ -1093,7 +1140,31 @@ const INGREDIENTS = {
 
   white: {
     name: "White Tea", latin: "Camellia sinensis", category: "true tea", subcategory: "white",
+    // Most delicate of the true teas — silver needle's character
+    // is held back by hot water; cool brewing preserves the
+    // honey-melon top notes.
     caffeine: 18, tempC: [75, 85], timeS: [120, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 70], character: "delicate, barely extracting.", moodImpact: "calm only as a hint" },
+      { id: "cool",  tempC: [70, 78], character: "honey-melon top, very gentle.", moodImpact: "calm forward; uplifting clean" },
+      { id: "warm",  tempC: [78, 83], character: "full white tea character, clean lift.", moodImpact: "calm and uplifting in balance" },
+      { id: "hot",   tempC: [83, 95], character: "delicate notes scorched, body bitter.", moodImpact: "the lift lost to bitter edge" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],    character: "barely steeped, top-aroma only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [60, 120],  character: "lightest white-tea top.", moodImpact: "calm gentle; uplifting present" },
+      { id: "medium", timeS: [120, 240], character: "the canonical silver-needle cup.", moodImpact: "calm and uplifting in clean balance" },
+      { id: "long",   timeS: [240, 360], character: "deeper body, slight tannin creep.", moodImpact: "calm deepens; uplifting fades" },
+      { id: "over",   timeS: [360, 480], character: "tannin overtakes the delicate notes.", moodImpact: "the gentleness is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "honey-melon top, light and clean.", moodImpact: "calm gentle; uplifting clean" },
+      { id: "balanced",   character: "the canonical silver-needle white tea.", moodImpact: "calm and uplifting in clean balance" },
+      { id: "tonic",      character: "deeper body, fuller white-tea register.", moodImpact: "calm deepens; uplifting holds" },
+      { id: "overpulled", character: "tannin dominates, the delicate gone.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 480, reason: "tannin overtakes the delicate top notes" },
     effects: [["calm", 4], ["uplifting", 4], ["focus", 3], ["cooling", 3]],
     flavors: ["sweet", "hay", "honey", "delicate", "melon"],
     pairs: ["jasmine", "rose"],
@@ -1117,7 +1188,31 @@ const INGREDIENTS = {
   },
   sencha: {
     name: "Sencha Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    // Steamed Japanese green — delicate and tannin-prone. Cooler
+    // water and short steeps keep the umami sweet; aggressive heat
+    // or long pulls scorch the leaf into harsh grass.
     caffeine: 25, tempC: [70, 80], timeS: [60, 120],
+    tempZones: [
+      { id: "under", tempC: [50, 65], character: "umami barely lifting.", moodImpact: "focus held back" },
+      { id: "cool",  tempC: [65, 72], character: "soft umami top, sweet body.", moodImpact: "focus crisp; calm settles" },
+      { id: "warm",  tempC: [72, 78], character: "full sencha character, clean grass.", moodImpact: "focus and calm in balance" },
+      { id: "hot",   tempC: [78, 90], character: "tannin biting, umami scorched.", moodImpact: "focus muddied by bitter" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 30],    character: "barely steeped, top-grass only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [30, 90],   character: "the canonical Japanese cup.", moodImpact: "focus and calm in clean balance" },
+      { id: "medium", timeS: [90, 150],  character: "fuller body, slight grip.", moodImpact: "focus solid; calm deepens" },
+      { id: "long",   timeS: [150, 240], character: "tannin climbing, umami fading.", moodImpact: "focus muddied; calm fades" },
+      { id: "over",   timeS: [240, 360], character: "harsh grass-bitter, the sweet gone.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "the canonical Japanese cup — umami and grass-sweet.", moodImpact: "focus crisp; calm clean" },
+      { id: "balanced",   character: "fuller sencha character.", moodImpact: "focus and calm in clean balance" },
+      { id: "tonic",      character: "deeper body, more grip.", moodImpact: "focus solid; calm holds" },
+      { id: "overpulled", character: "harsh grass-bitter — the sweet umami burned off.", moodImpact: "the focus muddied by edge" },
+    ],
+    overPull: { timeS: 360, reason: "tannin overtakes umami, leaf scorched" },
     effects: [["focus", 4], ["energy", 3], ["calm", 4], ["cooling", 3]],
     flavors: ["grassy", "marine", "umami"],
     pairs: ["peppermint", "lemonbalm", "jasmine", "spearmint"],
@@ -1275,7 +1370,31 @@ const INGREDIENTS = {
   },
   gunpowder: {
     name: "Gunpowder Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    // Pellet-rolled green — opens up gradually, gentler than sencha
+    // but still tannin-prone past 4 min. Smoky-toasted register
+    // anchors Maghrebi mint preparations.
     caffeine: 30, tempC: [80, 90], timeS: [90, 180],
+    tempZones: [
+      { id: "under", tempC: [50, 75], character: "pellets barely opening.", moodImpact: "focus held back" },
+      { id: "cool",  tempC: [75, 82], character: "soft toasted top, gentle body.", moodImpact: "focus gentle; calm settles" },
+      { id: "warm",  tempC: [82, 88], character: "full gunpowder character, clean lift.", moodImpact: "focus and uplifting in balance" },
+      { id: "hot",   tempC: [88, 95], character: "deepest pull, smoke forward, tannin climbing.", moodImpact: "focus solid; cup tightens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],    character: "barely opening, color light.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [60, 120],  character: "bright Maghrebi-style top.", moodImpact: "focus crisp; uplifting clean" },
+      { id: "medium", timeS: [120, 180], character: "full gunpowder body — toasted, clean.", moodImpact: "focus and uplifting in balance" },
+      { id: "long",   timeS: [180, 240], character: "deeper, tannin climbing.", moodImpact: "focus solid; calm fades" },
+      { id: "over",   timeS: [240, 360], character: "harsh tannin, smoke turned acrid.", moodImpact: "the brightness lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "Maghrebi-bright toasted-green top.", moodImpact: "focus crisp; uplifting clean" },
+      { id: "balanced",   character: "the canonical gunpowder cup.", moodImpact: "focus and uplifting in clean balance" },
+      { id: "tonic",      character: "deeper smoke, fuller body.", moodImpact: "focus deep; cup grounds" },
+      { id: "overpulled", character: "tannin-acrid, the toasted character lost.", moodImpact: "the lift is gone" },
+    ],
+    overPull: { timeS: 360, reason: "tannin and acrid smoke overtake the toasted top" },
     effects: [["focus", 3], ["energy", 3], ["cooling", 3], ["uplifting", 3], ["digestive", 3]],
     flavors: ["smoky", "toasted", "vegetal", "brisk"],
     pairs: ["spearmint", "peppermint", "rose"],
@@ -1478,7 +1597,31 @@ const INGREDIENTS = {
   },
   ceylon: {
     name: "Ceylon Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    // Bright black tea — citrus-forward, less malty than Assam.
+    // The Earl Grey base and Russian-tea backbone. Tannins climb
+    // hard past 4 min.
     caffeine: 45, tempC: [95, 100], timeS: [180, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "polyphenols barely extracting.", moodImpact: "energy held back" },
+      { id: "cool",  tempC: [90, 95],  character: "softer body, citrus-bright top.", moodImpact: "energy moderate; uplifting present" },
+      { id: "warm",  tempC: [95, 99],  character: "full ceylon character — bright, clean grip.", moodImpact: "energy and uplifting in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fully boiled.", moodImpact: "energy at peak; focus solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "color but not body yet.", moodImpact: "the cup hasn't woken up" },
+      { id: "short",  timeS: [90, 180],  character: "bright ceylon top.", moodImpact: "energy lifting; uplifting clean" },
+      { id: "medium", timeS: [180, 240], character: "the canonical Ceylon cup.", moodImpact: "energy and uplifting in clean balance" },
+      { id: "long",   timeS: [240, 300], character: "deeper body, tannin climbing.", moodImpact: "energy holds; cup tightens" },
+      { id: "over",   timeS: [300, 420], character: "biting tannin, brightness gone.", moodImpact: "energy fades into bitter edge" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright citrus-forward top.", moodImpact: "energy moderate; uplifting clean" },
+      { id: "balanced",   character: "the everyday Ceylon cup — bright, clean grip.", moodImpact: "energy and uplifting in clean balance" },
+      { id: "tonic",      character: "deeper, full-bodied black tea.", moodImpact: "energy steady; focus deep" },
+      { id: "overpulled", character: "biting tannin, the brightness lost.", moodImpact: "energy lost in the bite" },
+    ],
+    overPull: { timeS: 420, reason: "tannin overtakes the citrus-bright top" },
     effects: [["energy", 3], ["uplifting", 4], ["warming", 3], ["focus", 2], ["digestive", 3]],
     flavors: ["citrus", "bright", "brisk", "woody"],
     pairs: ["ginger", "lemongrass", "cinnamon", "cardamom", "rose"],

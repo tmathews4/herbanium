@@ -249,21 +249,21 @@ test("accent ingredients DO fire over-pull warnings, tagged with role:accent", (
 });
 
 test("accent ingredients DO appear in outsider warnings, tagged with role:accent", () => {
-  // Use Apfeltee — has cloves accent that still uses the legacy
-  // single-window model. Pushing timeS down to 240s puts cloves
-  // (envelope [300, 420]s) below its floor, firing the legacy
-  // outsider warning that the test is asserting.
+  // Use Apfeltee — has orange-peel accent that still uses the
+  // legacy single-window model. Pushing timeS down to 120s puts
+  // orange-peel (envelope [180, 360]s) below its floor, firing
+  // the legacy outsider warning that the test is asserting.
   const hk = blends.find(b => b.name === "Apfeltee");
   assert(hk, "Apfeltee fixture not found");
-  const moved = resolveBlendAtBrew(hk.ings, hk.t, 240, hk.t, hk.s, true);
+  const moved = resolveBlendAtBrew(hk.ings, hk.t, 120, hk.t, hk.s, true);
   const accentOutsiders = moved.warnings
     .filter(w => w.kind === "outsider")
-    .filter(w => /Cloves/.test(w.text));
+    .filter(w => /Orange Peel/.test(w.text));
   assert(accentOutsiders.length > 0,
     `expected accent outsider warnings to surface; got none`);
   // The outsider records on brew.outsiders should also be role-tagged.
   const accentOutsiderRecords = moved.outsiders.filter(o =>
-    typeof o === "object" && /Cloves/i.test(o.name)
+    typeof o === "object" && /Orange Peel/i.test(o.name)
   );
   for (const o of accentOutsiderRecords) {
     assert(o.role === "accent",

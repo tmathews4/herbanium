@@ -57,19 +57,13 @@ moodImpact in apothecary-poet voice; full register-coverage maps
 all 4×5 = 20 axis pairings to one of {faint, aromatic, balanced,
 tonic, overpulled}.
 
-### ⏳ Pending — second tier (9)
+### ⏳ Pending — second tier (3)
 
 Common ingredients in curated blends, less frequent than tier-1.
 
-- [ ] vanilla
-- [ ] cloves
-- [ ] sencha
 - [ ] gyokuro
-- [ ] white
-- [ ] gunpowder
 - [ ] hojicha
 - [ ] oolong
-- [ ] ceylon
 
 ### ✅ Recently migrated (second-tier batch 1)
 

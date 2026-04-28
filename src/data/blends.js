@@ -396,7 +396,7 @@ const BLENDS = [
     subtitle: "Bavarian winter staple — dried apple, orange peel, cinnamon, clove",
     ingredients: [
       { id: "dried-apple", g: 1.5 },
-      { id: "orange-peel", g: 0.5 },
+      { id: "orange-peel", g: 0.5, role: "accent" },
       { id: "cinnamon",    g: 0.3, role: "accent" },
       { id: "cloves",      g: 0.05, role: "accent" },
     ],
