@@ -106,19 +106,26 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           ) : <div style={{ width: 40 }} />}
         </div>
 
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
+          {/* Icon + 'for {mood}' label column. The column stretches to
+              match the title/subtitle/tags column on the right; icon
+              floats to the top to sit alongside the title, the label
+              floats to the bottom so it aligns with the tag row. Icon
+              circle resized down so its visual weight matches the
+              title's row height rather than dominating. */}
           <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+            display: "flex", flexDirection: "column", alignItems: "center",
+            justifyContent: "space-between",
             flexShrink: 0,
           }}>
             <div style={{
-              width: 72, height: 72, borderRadius: "50%",
+              width: 56, height: 56, borderRadius: "50%",
               background: theme.ivory, border: `1px solid ${theme.rule}`,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               {(() => {
                 const Icon = MOOD_ICONS[b.mood] || Flower;
-                return <Icon size={40} />;
+                return <Icon size={32} />;
               })()}
             </div>
             {EFFECT_DESCRIPTIONS[b.mood] ? (
