@@ -322,15 +322,26 @@ export const BlendExtractionExplorer = ({
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: theme.ash, lineHeight: 1.5,
                 }}>
-                  <span style={{
-                    color: inRange ? theme.sageDeep : theme.terra,
-                    fontStyle: "normal", fontWeight: 500,
-                  }}>{selected.name}</span>
-                  {" "}
-                  <span style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
-                    {tempStr}{steepStr ? ` · ${steepStr}` : ""}
-                  </span>
-                  {!inRange && out && phraseFor(out)}
+                  <div>
+                    <span style={{
+                      color: inRange ? theme.sageDeep : theme.terra,
+                      fontStyle: "normal", fontWeight: 500,
+                    }}>{selected.name}</span>
+                    {" "}
+                    <span style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
+                      {tempStr}{steepStr ? ` · ${steepStr}` : ""}
+                    </span>
+                  </div>
+                  {!inRange && out && (() => {
+                    const t = tempFragment(out.tempDir);
+                    const s = timeFragment(out.timeDir);
+                    let body;
+                    if (t && s) body = <>{t} and {s}</>;
+                    else if (t) body = t;
+                    else if (s) body = s;
+                    else body = <Axis>outside its preferred range</Axis>;
+                    return <div style={{ marginTop: 1 }}>{body}</div>;
+                  })()}
                 </div>
               );
             })()}
