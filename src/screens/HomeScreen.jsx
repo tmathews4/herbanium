@@ -7,7 +7,7 @@ import {
   Flask, Flower, Kettle, Leaf, Ornament, Pencil, Sprig, MOOD_ICONS,
 } from "../components/icons";
 import {
-  FitText, SectionLabel,
+  FitText, SectionLabel, FitOneLine,
 } from "../components/layout";
 import { BLENDS } from "../data/blends";
 import { WAIT_POEMS } from "../data/waitContent";
@@ -361,9 +361,15 @@ export const FavoriteCard = ({ b, onTap }) => {
       <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, lineHeight: 1.15 }}>
         {b.name}
       </div>
-      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, lineHeight: 1.3 }}>
-        {b.subtitle}
-      </div>
+      <FitOneLine
+        text={b.subtitle}
+        baseSize={11}
+        minSize={8.5}
+        style={{
+          fontFamily: ff.serif, fontStyle: "italic",
+          color: theme.ash, lineHeight: 1.3,
+        }}
+      />
       <div style={{ fontFamily: ff.mono, fontSize: 10, color: theme.inkSoft, marginTop: 2 }}>
         {formatTempShort(b.tempC, b.tempC, unit)} · {mmss(b.timeS)}
       </div>

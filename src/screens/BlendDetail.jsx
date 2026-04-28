@@ -2,68 +2,13 @@
    screens/BlendDetail.jsx — full-screen blend detail page.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useLayoutEffect, useRef, useState } from "react";
-
-/**
- * Renders one line of text that auto-shrinks its font-size to fit
- * its container's width. Better than ellipsis truncation for
- * short labels (subtitles, taglines) where the whole text matters.
- *
- * baseSize  — starting font size in px
- * minSize   — floor; won't shrink below this
- * Uses ResizeObserver to re-fit on viewport changes.
- */
-function FitOneLine({ text, baseSize = 14, minSize = 10, style }) {
-  const wrapRef = useRef(null);
-  const textRef = useRef(null);
-  const [size, setSize] = useState(baseSize);
-
-  useLayoutEffect(() => {
-    const wrap = wrapRef.current;
-    const t = textRef.current;
-    if (!wrap || !t) return;
-    const fit = () => {
-      let s = baseSize;
-      t.style.fontSize = `${s}px`;
-      // Step down by 0.5px until the text fits or we hit minSize.
-      while (t.scrollWidth > wrap.clientWidth && s > minSize) {
-        s -= 0.5;
-        t.style.fontSize = `${s}px`;
-      }
-      setSize(s);
-    };
-    fit();
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(fit);
-      ro.observe(wrap);
-      return () => ro.disconnect();
-    }
-  }, [text, baseSize, minSize]);
-
-  return (
-    <div
-      ref={wrapRef}
-      style={{ width: "100%", overflow: "hidden", ...style }}
-    >
-      <span
-        ref={textRef}
-        style={{
-          display: "inline-block",
-          whiteSpace: "nowrap",
-          fontSize: size,
-        }}
-      >
-        {text}
-      </span>
-    </div>
-  );
-}
+import React from "react";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
   Flower, Kettle, MOOD_ICONS,
 } from "../components/icons";
 import {
-  SectionLabel, VocabInfoCard,
+  SectionLabel, VocabInfoCard, FitOneLine,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
 import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";

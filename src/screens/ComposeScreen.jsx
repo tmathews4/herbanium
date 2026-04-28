@@ -11,7 +11,7 @@ import {
   Flower, Kettle,
 } from "../components/icons";
 import {
-  Chip, ChipRows, Rule, SectionLabel,
+  Chip, ChipRows, Rule, SectionLabel, FitOneLine,
 } from "../components/layout";
 import {
   BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
@@ -493,9 +493,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             <div style={{ fontFamily: ff.serif, fontSize: 26, color: theme.ink, lineHeight: 1.1 }}>
               {blend.name}
             </div>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 2 }}>
-              {blend.subtitle}
-            </div>
+            <FitOneLine
+              text={blend.subtitle}
+              baseSize={13}
+              minSize={9.5}
+              style={{
+                fontFamily: ff.serif, fontStyle: "italic",
+                color: theme.ash, marginTop: 2,
+              }}
+            />
 
             <div style={{ margin: "14px 0", height: 1, background: theme.ruleSoft }} />
 
