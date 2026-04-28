@@ -549,16 +549,63 @@ export const BlendExtractionExplorer = ({
                 pulling the cup off; otherwise the merged mood +
                 flavor profile shows what the cup is shaping into. */}
             {currentId === "__blend__" && (() => {
-              const reds = pills.filter(p => p.severity === "red");
-              const yellows = pills.filter(p => p.severity === "yellow");
-              const blendSev = reds.length ? "red" : yellows.length ? "yellow" : "green";
-              const borderColor = blendSev === "green" ? theme.sage
+              // Aggregate per-axis state across all ingredients.
+              // Priority: any over → "over"; else any under → "under";
+              // else "good." This is the "oversteep trumps perfect
+              // trumps understeep" rule the user asked for.
+              const aggregateAxis = (axisKind) => {
+                const zoneKey = axisKind === "temp" ? "tempZone" : "timeZone";
+                const dirKey  = axisKind === "temp" ? "tempDir"  : "timeDir";
+                let overs = [], unders = [];
+                for (const p of pills) {
+                  // overpull (steep-axis severe state) is treated as over.
+                  if (axisKind === "steep" && p.isOverPulled) {
+                    overs.push(p.name);
+                    continue;
+                  }
+                  const z = p[zoneKey];
+                  if (z) {
+                    if (z.id === "over") overs.push(p.name);
+                    else if (z.id === "under") unders.push(p.name);
+                  } else {
+                    const d = p[dirKey];
+                    if (d === "high" || d === "over")  overs.push(p.name);
+                    else if (d === "low" || d === "under") unders.push(p.name);
+                  }
+                }
+                if (overs.length)  return { state: "over",  offenders: overs };
+                if (unders.length) return { state: "under", offenders: unders };
+                return { state: "good", offenders: [] };
+              };
+              const tempAgg  = aggregateAxis("temp");
+              const steepAgg = aggregateAxis("steep");
+
+              // Composite blend register from the aggregate temp +
+              // steep states. Same priority — over trumps under
+              // trumps good.
+              const compositeRegister = (tA, sA) =>
+                (tA.state === "over"  || sA.state === "over")  ? "overpulled"
+                : (tA.state === "under" || sA.state === "under") ? "faint"
+                : "balanced";
+              const blendRegister = compositeRegister(tempAgg, steepAgg);
+              const blendSev = blendRegister === "overpulled" ? "red"
+                : blendRegister === "faint" ? "yellow"
+                : "green";
+              const borderColor = blendSev === "red" ? theme.terra
                 : blendSev === "yellow" ? theme.ochre
-                : theme.terra;
-              const headColor = blendSev === "green" ? theme.sageDeep
+                : theme.sage;
+              const sevColor = blendSev === "red" ? theme.terra
                 : blendSev === "yellow" ? theme.ochre
-                : theme.terra;
-              const Row = ({ label, body, headColor: hc }) => (
+                : theme.sageDeep;
+              const stateColor = (s) =>
+                s === "over"  ? theme.terra
+                : s === "under" ? theme.ochre
+                : theme.sageDeep;
+
+              const moods = brew.moodSummary || [];
+              const flavors = brew.flavorSummary || [];
+
+              const AxisRow = ({ label, state, offenders, body }) => (
                 <div style={{
                   display: "flex", marginTop: 2, alignItems: "baseline",
                   whiteSpace: "nowrap", overflow: "hidden",
@@ -566,17 +613,29 @@ export const BlendExtractionExplorer = ({
                   <span style={{
                     flex: "0 0 auto", marginRight: 8,
                     color: theme.inkSoft, fontStyle: "normal",
-                  }}>{label}</span>
+                  }}>
+                    {label}{" "}
+                    <span style={{ color: stateColor(state), fontStyle: "normal", fontWeight: 500 }}>
+                      ({state})
+                    </span>
+                  </span>
                   <span style={{
                     flex: 1, minWidth: 0,
                     overflow: "hidden", textOverflow: "ellipsis",
-                    color: hc || theme.ash,
-                  }}>{body}</span>
+                    color: theme.ash,
+                  }}>
+                    {body || (offenders && offenders.length > 0 ? offenders.join(", ") : "")}
+                  </span>
                 </div>
               );
 
-              const moods = brew.moodSummary || [];
-              const flavors = brew.flavorSummary || [];
+              const composite = blendRegister === "overpulled"
+                ? <>pull back — <span style={{ color: theme.terra, fontWeight: 500 }}>over-pulled</span></>
+                : blendRegister === "faint"
+                ? <>under-extracted — the cup is faint</>
+                : moods.length > 0 || flavors.length > 0
+                  ? <>{[moods.join(", "), flavors.join(", ")].filter(Boolean).join(" · ")}</>
+                  : <>quiet — no dominant register yet</>;
 
               return (
                 <div style={{
@@ -586,58 +645,34 @@ export const BlendExtractionExplorer = ({
                   color: theme.ash, lineHeight: 1.5,
                   textAlign: "left",
                 }}>
-                  {reds.length > 0 && (
-                    <>
-                      <div style={{ marginTop: 1 }}>
-                        <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
-                          {reds.length === 1
-                            ? `${reds[0].name} is overwhelming the cup`
-                            : `${reds.length} ingredients overwhelming the cup`}
+                  <AxisRow label="temp"  state={tempAgg.state}  offenders={tempAgg.offenders} />
+                  <AxisRow label="steep" state={steepAgg.state} offenders={steepAgg.offenders} />
+                  <div style={{
+                    marginTop: 8, paddingTop: 6,
+                    borderTop: `1px dashed ${theme.ruleSoft}`,
+                  }}>
+                    <div style={{
+                      display: "flex", marginTop: 2, alignItems: "baseline",
+                      whiteSpace: "nowrap", overflow: "hidden",
+                    }}>
+                      <span style={{
+                        flex: "0 0 auto", marginRight: 8,
+                        color: theme.inkSoft, fontStyle: "normal",
+                      }}>
+                        blend{" "}
+                        <span style={{ color: sevColor, fontStyle: "normal", fontWeight: 500 }}>
+                          ({blendRegister})
                         </span>
-                      </div>
-                      {reds.map((p, i) => {
-                        const out = outsiderMap.get(p.name);
-                        let detail = null;
-                        if (p.state === "over-pull") detail = "over-pulled";
-                        else if (p.state && p.state.startsWith("standalone-")) detail = `${p.state.replace("standalone-", "")} edge climbing`;
-                        else if (out) {
-                          const t = tempFragment(out.tempDir);
-                          const s = timeFragment(out.timeDir);
-                          if (t && s) detail = <>{t} and {s}</>;
-                          else if (t) detail = t;
-                          else if (s) detail = s;
-                        }
-                        return (
-                          <Row
-                            key={i}
-                            label={p.name}
-                            body={detail || "out of optimum"}
-                            headColor={theme.terra}
-                          />
-                        );
-                      })}
-                    </>
-                  )}
-                  {reds.length === 0 && (
-                    <>
-                      <div style={{ marginTop: 1 }}>
-                        <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
-                          {blendSev === "yellow"
-                            ? <>drifting → <span style={{ color: theme.ash, fontWeight: 400 }}>{yellows.map(y => y.name).join(", ")}</span></>
-                            : "merged profile"}
-                        </span>
-                      </div>
-                      {moods.length > 0 && (
-                        <Row label="moods" body={moods.join(" · ")} />
-                      )}
-                      {flavors.length > 0 && (
-                        <Row label="flavors" body={flavors.join(" · ")} />
-                      )}
-                      {moods.length === 0 && flavors.length === 0 && (
-                        <Row label="cup" body="quiet — no dominant register yet" />
-                      )}
-                    </>
-                  )}
+                      </span>
+                      <span style={{
+                        flex: 1, minWidth: 0,
+                        overflow: "hidden", textOverflow: "ellipsis",
+                        color: theme.ash,
+                      }}>
+                        {composite}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               );
             })()}
