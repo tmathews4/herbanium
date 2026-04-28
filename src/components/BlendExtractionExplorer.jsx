@@ -314,16 +314,21 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
-      {/* Sweet-spot band — the intersection of every non-catalyst
-          ingredient's preferred window. The single sage band marks
-          the zone where every ingredient is in range simultaneously.
-          If the intersection is empty (windows don't overlap), no
-          band shows — which is itself the signal that this blend
-          can't satisfy every ingredient at once. Catalysts skip;
-          their trace dose doesn't constrain the brew. */}
+      {/* Range bands — three states:
+          1. Full intersection (every non-catalyst in range): GREEN.
+             The blend's natural sweet spot.
+          2. No full intersection but the primary lead overlaps with
+             at least one other ingredient: YELLOW. The compromise
+             zone — primary plus as many others as overlap with it
+             at peak coverage. Honest signal that the blend can't
+             satisfy every ingredient but here's where it's least
+             stretched.
+          3. Primary lead's window doesn't overlap with any other
+             ingredient at all: no band. Nothing useful to show.
+          Catalysts always skip — trace dose carries no signal. */}
       {(() => {
         const bandData = ingredients
-          .map(({ id, role }) => {
+          .map(({ id, role, g }) => {
             const meta = INGREDIENTS[id];
             if (!meta) return null;
             if (role === "catalyst") return null;
@@ -331,13 +336,22 @@ export const BlendExtractionExplorer = ({
               id,
               name: meta.name,
               role: role || "lead",
+              g: g || 0,
               tempC: meta.tempC,
               timeS: meta.timeS,
             };
           })
           .filter(Boolean);
 
-        // Intersection across all non-catalyst ingredients on a given axis.
+        // Pick the heaviest lead as the primary anchor for the
+        // yellow-fallback. If no explicit leads, fall back to the
+        // heaviest non-catalyst.
+        const leads = bandData.filter(b => b.role === "lead");
+        const primary = (leads.length > 0 ? leads : bandData)
+          .slice()
+          .sort((a, b) => b.g - a.g)[0];
+
+        // Full intersection across all non-catalyst windows.
         const intersect = (axis) => {
           let lo = -Infinity, hi = Infinity;
           for (const ing of bandData) {
@@ -350,42 +364,115 @@ export const BlendExtractionExplorer = ({
           return [lo, hi];
         };
 
+        // Best-coverage band within primary lead's window. Sweep
+        // events at each ingredient's range endpoints (clipped to
+        // primary), count overlapping ranges per segment, return
+        // the longest contiguous segment at peak coverage.
+        const bestCoverageZone = (axis) => {
+          if (!primary) return null;
+          const [pMin, pMax] = primary[axis] || [];
+          if (pMin == null || pMax == null) return null;
+          // Build clipped ranges from every non-catalyst ingredient.
+          const ranges = [];
+          for (const ing of bandData) {
+            const [iMin, iMax] = ing[axis] || [];
+            if (iMin == null || iMax == null) continue;
+            const lo = Math.max(iMin, pMin);
+            const hi = Math.min(iMax, pMax);
+            if (hi > lo) ranges.push([lo, hi]);
+          }
+          if (ranges.length < 2) return null;  // need primary + at least one other
+          // Sweep: collect unique boundary points within [pMin, pMax].
+          const points = new Set([pMin, pMax]);
+          for (const [a, b] of ranges) { points.add(a); points.add(b); }
+          const sorted = [...points].sort((a, b) => a - b);
+          // Walk segments, count coverage. Track max-coverage segments.
+          const segments = [];
+          for (let i = 0; i < sorted.length - 1; i++) {
+            const a = sorted[i], b = sorted[i + 1];
+            if (b <= a) continue;
+            const mid = (a + b) / 2;
+            let count = 0;
+            for (const [rA, rB] of ranges) {
+              if (mid >= rA && mid <= rB) count++;
+            }
+            segments.push({ a, b, count });
+          }
+          if (segments.length === 0) return null;
+          const maxCount = Math.max(...segments.map(s => s.count));
+          if (maxCount < 2) return null;  // primary alone isn't a "zone"
+          // Merge contiguous segments at maxCount; return the longest run.
+          let best = null, run = null;
+          for (const seg of segments) {
+            if (seg.count === maxCount) {
+              if (run && run.b === seg.a) {
+                run.b = seg.b;
+              } else {
+                run = { a: seg.a, b: seg.b };
+              }
+              if (!best || (run.b - run.a) > (best.b - best.a)) {
+                best = { a: run.a, b: run.b };
+              }
+            } else {
+              run = null;
+            }
+          }
+          if (!best) return null;
+          return { range: [best.a, best.b], coverage: maxCount, total: bandData.length };
+        };
+
         const RangeBands = ({ rangeMin, rangeMax, axis }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
+          const empty = <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+          const renderBand = (lo, hi, color, tooltip) => {
+            const cLo = Math.max(lo, rangeMin);
+            const cHi = Math.min(hi, rangeMax);
+            if (cHi <= cLo) return empty;
+            const left = ((cLo - rangeMin) / span) * 100;
+            const width = ((cHi - cLo) / span) * 100;
+            return (
+              <div style={{
+                position: "relative",
+                height: 6,
+                marginTop: 2, marginBottom: 2,
+              }}>
+                <div
+                  title={tooltip}
+                  style={{
+                    position: "absolute",
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    top: 0, bottom: 0,
+                    background: color,
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
+            );
+          };
+
           const ix = intersect(axis);
-          if (!ix) {
-            return <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+          if (ix) {
+            const tooltip = axis === "tempC"
+              ? `Sweet spot: ${ix[0]}–${ix[1]}°C`
+              : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
+            return renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip);
           }
-          const lo = Math.max(ix[0], rangeMin);
-          const hi = Math.min(ix[1], rangeMax);
-          if (hi <= lo) {
-            return <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+
+          const fallback = bestCoverageZone(axis);
+          if (fallback) {
+            const [a, b] = fallback.range;
+            const tooltip = axis === "tempC"
+              ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range)`
+              : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range)`;
+            // Soft amber — calls attention without alarming. Using
+            // theme.ochre family at ~30% opacity to match the green
+            // band's visual weight while reading distinctly.
+            return renderBand(a, b, "rgba(189,148,76,0.32)", tooltip);
           }
-          const left = ((lo - rangeMin) / span) * 100;
-          const width = ((hi - lo) / span) * 100;
-          const tooltip = axis === "tempC"
-            ? `Sweet spot: ${ix[0]}–${ix[1]}°C`
-            : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
-          return (
-            <div style={{
-              position: "relative",
-              height: 6,
-              marginTop: 2, marginBottom: 2,
-            }}>
-              <div
-                title={tooltip}
-                style={{
-                  position: "absolute",
-                  left: `${left}%`,
-                  width: `${width}%`,
-                  top: 0, bottom: 0,
-                  background: "rgba(109,126,85,0.30)",
-                  borderRadius: 2,
-                }}
-              />
-            </div>
-          );
+
+          return empty;
         };
 
         return (
