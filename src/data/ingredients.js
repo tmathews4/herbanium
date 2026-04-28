@@ -371,13 +371,36 @@ const INGREDIENTS = {
 
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
-    // timeS floor 120s: 2-min cup is a deliberately permissive lower
-    // bound — eugenol and methyl chavicol release fast enough that a
-    // very-short steep is still a real cup, and the bound keeps
-    // low-temp blends like Tom Foolery in range without tripping an
-    // under-steep warning. Longer end (5-7) still pulls more
-    // rosmarinic and ursolic acid for the chronic-tonic register.
-    caffeine: 0, tempC: [95, 100], timeS: [120, 420],
+    // POC ingredient for the multi-zone brewing model. The outer
+    // tempC/timeS is the envelope — anywhere inside is a real cup,
+    // just a different register. Zones describe what each register
+    // pulls; overPull names the boundary past which the cup turns
+    // unpleasant (the only assertive-warning trigger).
+    caffeine: 0, tempC: [85, 100], timeS: [60, 600],
+    zones: [
+      {
+        id: "aromatic",
+        tempC: [85, 95], timeS: [60, 180],
+        pulls: ["eugenol", "methyl chavicol", "β-caryophyllene"],
+        character: "Bright, perfumed — the volatile register; misses the polyphenol body.",
+        source: "ref-1",
+      },
+      {
+        id: "balanced",
+        tempC: [90, 100], timeS: [180, 360],
+        pulls: ["volatile oils", "rosmarinic acid", "moderate tannin"],
+        character: "The everyday cup — full character, polyphenol body, moderate astringency.",
+        source: "ref-2",
+      },
+      {
+        id: "tonic",
+        tempC: [95, 100], timeS: [360, 600],
+        pulls: ["polyphenols", "ursolic acid", "ocimumosides"],
+        character: "Ayurvedic chronic-tonic register — deeper, more astringent, fully extracted.",
+        source: "ref-3",
+      },
+    ],
+    overPull: { timeS: 720, reason: "tannins dominate, eugenol turns medicinal" },
     effects: [["calm", 4], ["soothing", 4], ["grounding", 3], ["uplifting", 3], ["digestive", 3], ["warming", 2]],
     flavors: ["spiced", "clove", "peppery", "sweet"],
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],

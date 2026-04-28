@@ -315,32 +315,71 @@ export const BlendExtractionExplorer = ({
               const steepStr = meta.timeS ? formatSteepRangeShort(meta.timeS) : null;
               const out = outsiderMap.get(selected.name);
               const inRange = selected.inRange;
+              const zone = selected.activeZone;       // multi-zone model
+              const isOverPulled = selected.isOverPulled;
+              const hasZones = Array.isArray(meta.zones) && meta.zones.length > 0;
               return (
                 <div style={{
                   marginTop: 8, paddingLeft: 10,
-                  borderLeft: `2px solid ${inRange ? theme.sage : theme.terra}`,
+                  borderLeft: `2px solid ${
+                    isOverPulled ? theme.terra
+                    : inRange ? theme.sage
+                    : theme.terra
+                  }`,
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: theme.ash, lineHeight: 1.5,
                 }}>
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
                     {tempStr}{steepStr ? ` · ${steepStr}` : ""}
                   </div>
-                  {inRange ? (
+
+                  {/* Status line: over-pull is most assertive; zone
+                      name when an active zone is found; "between
+                      registers" when in envelope but between zones;
+                      directional warning when outside envelope;
+                      "Perfect" fallback for no-zone ingredients. */}
+                  {isOverPulled ? (
                     <div style={{ marginTop: 1 }}>
-                      <span style={{
-                        color: theme.sageDeep, fontStyle: "normal", fontWeight: 500,
-                      }}>Perfect</span>
+                      <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+                        over-pulled
+                      </span>
+                      <span style={{ color: theme.ash }}>
+                        {" "}— {meta.overPull?.reason || "tannins dominate"}
+                      </span>
                     </div>
-                  ) : out && (() => {
-                    const t = tempFragment(out.tempDir);
-                    const s = timeFragment(out.timeDir);
-                    let body;
-                    if (t && s) body = <>{t} and {s}</>;
-                    else if (t) body = t;
-                    else if (s) body = s;
-                    else body = <Axis>outside its preferred range</Axis>;
-                    return <div style={{ marginTop: 1 }}>{body}</div>;
-                  })()}
+                  ) : !inRange && out ? (
+                    (() => {
+                      const t = tempFragment(out.tempDir);
+                      const s = timeFragment(out.timeDir);
+                      let body;
+                      if (t && s) body = <>{t} and {s}</>;
+                      else if (t) body = t;
+                      else if (s) body = s;
+                      else body = <Axis>outside its preferred range</Axis>;
+                      return <div style={{ marginTop: 1 }}>{body}</div>;
+                    })()
+                  ) : zone ? (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                          {zone.id} register
+                        </span>
+                      </div>
+                      <div style={{ marginTop: 1, color: theme.ash }}>
+                        pulls {zone.pulls?.slice(0, 3).join(", ")}
+                      </div>
+                    </>
+                  ) : hasZones ? (
+                    <div style={{ marginTop: 1, color: theme.ash }}>
+                      between registers — adjust temp or steep to land in one
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: 1 }}>
+                      <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                        Perfect
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })()}

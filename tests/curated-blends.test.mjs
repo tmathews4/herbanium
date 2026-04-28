@@ -249,10 +249,12 @@ test("accent ingredients DO fire over-pull warnings, tagged with role:accent", (
 });
 
 test("accent ingredients DO appear in outsider warnings, tagged with role:accent", () => {
-  // Same policy on the outsider axis.
+  // Same policy on the outsider axis. Push timeS down to 60s to put
+  // spearmint (envelope [120, 420]s) below its floor; gunpowder lead
+  // is fine at 80°C/60s. Spearmint should fire as accent outsider.
   const tf = blends.find(b => b.name === "Tom Foolery");
   assert(tf, "Tom Foolery fixture not found");
-  const moved = resolveBlendAtBrew(tf.ings, tf.t + 5, tf.s, tf.t, tf.s, true);
+  const moved = resolveBlendAtBrew(tf.ings, tf.t, 60, tf.t, tf.s, true);
   const accentOutsiders = moved.warnings
     .filter(w => w.kind === "outsider")
     .filter(w => /Spearmint|Tulsi/.test(w.text));

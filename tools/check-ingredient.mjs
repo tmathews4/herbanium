@@ -131,6 +131,57 @@ for (const id of ids) {
     }
   }
 
+  // ── Zone validation (multi-register brewing model) ───────────
+  // For ingredients that declare zones[], confirm:
+  //   - Each zone fits inside the outer envelope (tempC/timeS).
+  //   - Zones don't overlap (the zone resolver uses first-match;
+  //     overlapping zones make the resolution non-deterministic).
+  //   - overPull (if declared) sits *outside* every zone.
+  if (Array.isArray(ing.zones) && ing.zones.length > 0) {
+    console.log(`\n  zones (${ing.zones.length}):`);
+    const [eT0, eT1] = ing.tempC || [];
+    const [eS0, eS1] = ing.timeS || [];
+    for (const z of ing.zones) {
+      const [zT0, zT1] = z.tempC || [];
+      const [zS0, zS1] = z.timeS || [];
+      console.log(`    ${z.id || "?"}: ${zT0}–${zT1}°C · ${zS0}–${zS1}s`);
+      if (z.character) console.log(`      → ${z.character}`);
+      if (Array.isArray(z.pulls)) console.log(`      pulls: ${z.pulls.join(", ")}`);
+      if (eT0 != null && (zT0 < eT0 || zT1 > eT1)) {
+        issues.push(`zone "${z.id}" tempC [${zT0}, ${zT1}] outside envelope [${eT0}, ${eT1}]`);
+      }
+      if (eS0 != null && (zS0 < eS0 || zS1 > eS1)) {
+        issues.push(`zone "${z.id}" timeS [${zS0}, ${zS1}] outside envelope [${eS0}, ${eS1}]`);
+      }
+    }
+    // Pairwise overlap check — zones may share boundaries (touching)
+    // but should not overlap on both axes simultaneously by more than a
+    // single boundary point.
+    for (let i = 0; i < ing.zones.length; i++) {
+      for (let j = i + 1; j < ing.zones.length; j++) {
+        const a = ing.zones[i], b = ing.zones[j];
+        const [aT0, aT1] = a.tempC, [aS0, aS1] = a.timeS;
+        const [bT0, bT1] = b.tempC, [bS0, bS1] = b.timeS;
+        const tempOverlap = Math.min(aT1, bT1) - Math.max(aT0, bT0);
+        const timeOverlap = Math.min(aS1, bS1) - Math.max(aS0, bS0);
+        if (tempOverlap > 0 && timeOverlap > 0) {
+          notes.push(`zones "${a.id}" and "${b.id}" overlap in both temp and time — first-match resolver may behave ambiguously`);
+        }
+      }
+    }
+    if (ing.overPull) {
+      const op = ing.overPull;
+      for (const z of ing.zones) {
+        const [zT0, zT1] = z.tempC || [];
+        const [zS0, zS1] = z.timeS || [];
+        if (op.tempC != null && op.tempC <= zT1 && op.tempC >= zT0 &&
+            op.timeS != null && op.timeS <= zS1 && op.timeS >= zS0) {
+          issues.push(`overPull threshold sits inside zone "${z.id}" — assertive warning would fire on a valid register`);
+        }
+      }
+    }
+  }
+
   // ── Pair resolution ──────────────────────────────────────────
   console.log(`\n  pairs:`);
   const badPairs = [];

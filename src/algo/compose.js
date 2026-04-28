@@ -1161,7 +1161,35 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const tempDir = tempC < tMin ? "low" : tempC > tMax ? "high" : null;
     const timeDir = timeS < sMin ? "under" : timeS > sMax ? "over" : null;
 
-    return { id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange, tempDir, timeDir, role: ingRole };
+    // Zone resolution — multi-register brewing model. If the
+    // ingredient declares zones[], find which one (if any) the
+    // current brew falls inside. activeZone === null means the
+    // brew is in the envelope but between declared zones.
+    let activeZone = null;
+    if (Array.isArray(meta.zones)) {
+      for (const z of meta.zones) {
+        const [zT0, zT1] = z.tempC || [];
+        const [zS0, zS1] = z.timeS || [];
+        if (zT0 == null || zS0 == null) continue;
+        if (tempC >= zT0 && tempC <= zT1 && timeS >= zS0 && timeS <= zS1) {
+          activeZone = z;
+          break;
+        }
+      }
+    }
+    // Over-pull is the assertive-warning boundary. Crossing it past
+    // any declared limit means the cup has turned unpleasant
+    // (tannins dominant, off-aromatic register). Independent of zones.
+    const op = meta.overPull;
+    const isOverPulled = op
+      ? ((op.tempC != null && tempC > op.tempC) || (op.timeS != null && timeS > op.timeS))
+      : false;
+
+    return {
+      id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange,
+      tempDir, timeDir, role: ingRole,
+      activeZone, isOverPulled,
+    };
   });
 
   // Perception pipeline:
