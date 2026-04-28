@@ -133,7 +133,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
           <div style={{
             gridColumn: 1, gridRow: 3,
-            justifySelf: "center", alignSelf: "center",
+            justifySelf: "center", alignSelf: "start",
+            // Pin to the top of the tag block (where the first tag
+            // row sits) rather than centering in the block, so the
+            // label tracks tag row 1 even when a second row exists.
+            // Small marginTop nudges the label's center onto the
+            // first row's center line (label half-height ≈ 7,
+            // tag-row half-height ≈ 8.5 → 1.5px tweak).
+            marginTop: 1.5,
           }}>
             {EFFECT_DESCRIPTIONS[b.mood] ? (
               <button
