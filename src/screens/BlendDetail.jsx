@@ -36,6 +36,10 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
   const [openMood, setOpenMood] = React.useState(null);
   const [openTag, setOpenTag] = React.useState(null);
   const [directionsOpen, setDirectionsOpen] = React.useState(false);
+  // Section collapse state. Defaults to open so the first-time
+  // view still shows everything; the user can collapse to focus.
+  const [recipeOpen, setRecipeOpen] = React.useState(true);
+  const [brewingOpen, setBrewingOpen] = React.useState(true);
   // Tradition-over-literature note — lifted out of the explorer so
   // it can render right above the preparations dropdown rather than
   // at the top of the brewing card. Payload is null when the note
@@ -268,9 +272,31 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
         )}
 
-        {/* Ingredients */}
-        <SectionLabel n="i">The recipe</SectionLabel>
-        {(() => {
+        {/* Ingredients — collapsible header. Default open. */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setRecipeOpen(o => !o)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setRecipeOpen(o => !o);
+            }
+          }}
+          style={{
+            display: "flex", alignItems: "baseline", gap: 8,
+            cursor: "pointer", userSelect: "none",
+          }}
+        >
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9, color: theme.ash,
+            transition: "transform 0.15s ease",
+            transform: recipeOpen ? "rotate(90deg)" : "rotate(0deg)",
+            display: "inline-block",
+          }}>▶</span>
+          <SectionLabel n="i">The recipe</SectionLabel>
+        </div>
+        {recipeOpen && (() => {
           const accents = BLEND_TABLE_ACCENTS[b.id] || [];
           const hasAccents = accents.length > 0;
           return (
@@ -378,27 +404,56 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           );
         })()}
 
-        {/* Brewing — interactive explorer */}
-        <div style={{ margin: "22px 0 10px" }}>
+        {/* Brewing — collapsible header + interactive explorer.
+            Default open; collapsing hides the slider explorer and
+            volume tag so the user can read just the recipe and
+            preparations. The Brew CTA stays outside the collapse
+            so the action is always one tap away. */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setBrewingOpen(o => !o)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setBrewingOpen(o => !o);
+            }
+          }}
+          style={{
+            margin: "22px 0 10px",
+            display: "flex", alignItems: "baseline", gap: 8,
+            cursor: "pointer", userSelect: "none",
+          }}
+        >
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9, color: theme.ash,
+            transition: "transform 0.15s ease",
+            transform: brewingOpen ? "rotate(90deg)" : "rotate(0deg)",
+            display: "inline-block",
+          }}>▶</span>
           <SectionLabel n="ii">Brewing</SectionLabel>
         </div>
-        <BlendExtractionExplorer
-          ingredients={b.ingredients}
-          defaultTempC={b.tempC}
-          defaultTimeS={b.timeS}
-          curated
-          isTraditional={!!b.tradition}
-          hideTraditionNote
-          onTraditionNoteChange={setTraditionInfo}
-        />
-        {b.ml && (
-          <div style={{
-            marginTop: 8,
-            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: theme.ash, textAlign: "right",
-          }}>
-            Volume · {b.ml} ml
-          </div>
+        {brewingOpen && (
+          <>
+            <BlendExtractionExplorer
+              ingredients={b.ingredients}
+              defaultTempC={b.tempC}
+              defaultTimeS={b.timeS}
+              curated
+              isTraditional={!!b.tradition}
+              hideTraditionNote
+              onTraditionNoteChange={setTraditionInfo}
+            />
+            {b.ml && (
+              <div style={{
+                marginTop: 8,
+                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
+                textTransform: "uppercase", color: theme.ash, textAlign: "right",
+              }}>
+                Volume · {b.ml} ml
+              </div>
+            )}
+          </>
         )}
 
         {/* Brew CTA — sits above Recommended Preparations so the action
