@@ -716,6 +716,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 setTimeS={setBrewTimeS}
                 compact
                 curated
+                isTraditional={!!blend.tradition}
               />
             )}
 
@@ -1243,6 +1244,24 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   )}
                 />
               </div>
+
+              {/* Add-recipe CTA — sends the user to the Apothecary's
+                  Blend (reverse-compose) page where they can build
+                  one of their own from ingredients. */}
+              <button
+                onClick={() => go("apothecary", { mode: "reverse" })}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  marginBottom: 14,
+                  fontFamily: ff.serif, fontSize: 14,
+                  color: theme.terra,
+                  background: "transparent",
+                  border: `1px dashed ${theme.terra}`,
+                  borderRadius: 10,
+                  cursor: "pointer",
+                }}
+              >+ add a recipe</button>
 
               {catalogueFilter === "all" && (
                 <div style={{
