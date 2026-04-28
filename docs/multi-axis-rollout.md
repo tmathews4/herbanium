@@ -31,30 +31,31 @@ and above the envelope; the resolver handles the gap.
 
 ## Status
 
-### ✅ Complete (10 / 47)
+### ✅ Complete — anchors all done (15 / 47)
 
-| ingredient | tempZones | timeZones | registerZones | overPull |
-|---|---|---|---|---|
-| tulsi | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
-| chamomile | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
-| lavender | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 360s |
-| peppermint | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 540s |
-| ginger | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
-| rooibos | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 900s |
-| hibiscus | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
-| fennel | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 660s |
-| lemonbalm | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 420s |
-| spearmint | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 540s |
+| ingredient | anchor? | overPull |
+|---|---|---|
+| tulsi | adaptogen / uplifting 3 | 720s |
+| chamomile | **calm 5** | 720s |
+| lavender | calm 4 | 360s |
+| peppermint | **cooling 5** | 540s |
+| ginger | **warming 5** | 720s |
+| rooibos | **soothing 5** | 900s |
+| hibiscus | cooling 4 | 720s |
+| fennel | **digestive 5** | 660s |
+| lemonbalm | calm 4 | 420s |
+| spearmint | cooling 3 | 540s |
+| matcha | **focus 5** | 120s |
+| assam | **energy 5** | 420s |
+| darjeeling | **uplifting 5** | 360s |
+| valerian | **sleepy 5** | 1500s |
+| reishi | **grounding 5** | 10800s |
 
-### ⏳ Pending — high priority (5)
-
-Remaining catalog anchors.
-
-- [ ] matcha — focus anchor (5)
-- [ ] valerian — sleepy anchor (5)
-- [ ] assam — energy anchor (5)
-- [ ] darjeeling — uplifting anchor (5)
-- [ ] reishi — grounding anchor (5)
+All 10 catalog anchors now have full multi-axis coverage. Every
+register/temp/steep band carries a hand-tuned character +
+moodImpact in apothecary-poet voice; full register-coverage maps
+all 4×5 = 20 axis pairings to one of {faint, aromatic, balanced,
+tonic, overpulled}.
 
 ### ⏳ Pending — second tier (15)
 

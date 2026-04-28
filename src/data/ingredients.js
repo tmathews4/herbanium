@@ -1052,7 +1052,31 @@ const INGREDIENTS = {
   matcha: {
     name: "Matcha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
     aliases: ["抹茶", "tencha (pre-ground)", "usucha", "koicha"],
+    // Focus anchor (5). Whisked, not steeped — the time axis here
+    // is "from whisk to sip." Heat past 80°C scorches; sit too long
+    // and the ground tea oxidizes and goes flat.
     caffeine: 60, tempC: [70, 80], timeS: [15, 30],
+    tempZones: [
+      { id: "under", tempC: [40, 65],  character: "ceremony temp lost; theanine forward, no bite.", moodImpact: "calm forward; focus quieter" },
+      { id: "cool",  tempC: [65, 72],  character: "the cold-whisk register — clean, sweet.", moodImpact: "calm and focus in clean balance" },
+      { id: "warm",  tempC: [72, 78],  character: "the canonical chanoyu whisk.", moodImpact: "focus at anchor strength; calm holds" },
+      { id: "hot",   tempC: [78, 85],  character: "scorching the leaf — bitter rises fast.", moodImpact: "focus muddied by bitter edge" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 10],   character: "particles still settling.", moodImpact: "the cup hasn't found itself" },
+      { id: "short",  timeS: [10, 20],  character: "usucha consistency — thin and bright.", moodImpact: "focus crisp; energy lifts" },
+      { id: "medium", timeS: [20, 30],  character: "the canonical sip — thicker, fuller.", moodImpact: "focus and energy in clean balance" },
+      { id: "long",   timeS: [30, 60],  character: "sitting past optimal, color softening.", moodImpact: "focus dulling; calm holds" },
+      { id: "over",   timeS: [60, 120], character: "fully oxidized, gone flat.", moodImpact: "the brightness lost" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely whisked.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "thin, sweet usucha.", moodImpact: "focus and energy crisp" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the canonical chanoyu cup.", moodImpact: "focus at anchor strength; calm and energy in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "thicker koicha territory — full body, less brightness.", moodImpact: "focus deep; energy steady" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "the bright tea has gone flat.", moodImpact: "focus and brightness both fade" },
+    ],
+    overPull: { timeS: 120, reason: "the whisked tea has fully oxidized and gone flat" },
     effects: [["focus", 5], ["energy", 4], ["calm", 4], ["uplifting", 3], ["soothing", 1]],
     flavors: ["umami", "vegetal", "grassy", "sweet", "oceanic"],
     basicTastes: { umami: 5, sweet: 2, bitter: 2, astringent: 1 },
@@ -1233,7 +1257,31 @@ const INGREDIENTS = {
   },
   assam: {
     name: "Assam Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    // Energy anchor (5). Robust, malt-forward black tea — needs
+    // full boil for proper extraction. Tannins climb hard past
+    // 5 minutes; the cup turns biting at the over-pull edge.
     caffeine: 60, tempC: [95, 100], timeS: [180, 300],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "polyphenols barely extracting.", moodImpact: "energy held back" },
+      { id: "cool",  tempC: [90, 95],  character: "softer body, tannins kept gentle.", moodImpact: "energy moderate; warming present" },
+      { id: "warm",  tempC: [95, 99],  character: "full malty character, clean tannin.", moodImpact: "energy at anchor strength; warming solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fully boiled.", moodImpact: "energy at peak; warming and focus lifted" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "color but no body.", moodImpact: "the cup hasn't woken up" },
+      { id: "short",  timeS: [120, 180], character: "lighter Assam, malt-bright.", moodImpact: "energy lifting; warming present" },
+      { id: "medium", timeS: [180, 300], character: "the breakfast Assam — full malt, clean grip.", moodImpact: "the everyday energizing cup" },
+      { id: "long",   timeS: [300, 360], character: "deeper malt, body forming, tannin climbing.", moodImpact: "energy holds; tannin starting to grip" },
+      { id: "over",   timeS: [360, 420], character: "biting tannin overtakes the malt.", moodImpact: "energy fades into bitter edge" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "lighter Assam, malt-bright.", moodImpact: "energy moderate; warming present" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the breakfast cup — full malt, robust grip.", moodImpact: "energy at peak; warming and focus solid" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, full-bodied, robust tannin.", moodImpact: "energy steady; warming deep" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "biting tannin, malt mostly buried.", moodImpact: "energy lost in the bite" },
+    ],
+    overPull: { timeS: 420, reason: "tannins overtake the malt, the cup turns biting" },
     effects: [["energy", 5], ["focus", 3], ["warming", 4]],
     flavors: ["malty", "woody", "cocoa"],
     pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper"],
@@ -1257,7 +1305,31 @@ const INGREDIENTS = {
   },
   darjeeling: {
     name: "Darjeeling", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    // Uplifting anchor (5). Delicate first-flush register — light,
+    // muscatel, floral. Goes tannic fast past 4 minutes; bitter
+    // grip is the failure mode.
     caffeine: 40, tempC: [85, 90], timeS: [180, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "the muscatel barely lifting.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [80, 85], character: "soft floral top, light body.", moodImpact: "uplifting bright; calm gentle" },
+      { id: "warm",  tempC: [85, 88], character: "full muscatel character, clean.", moodImpact: "uplifting at anchor strength" },
+      { id: "hot",   tempC: [88, 90], character: "deepest pull, more grip.", moodImpact: "uplifting lifts; focus solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "color only, perfume not yet here.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [120, 180], character: "first-flush bright, the perfume forward.", moodImpact: "uplifting forward; energy clean" },
+      { id: "medium", timeS: [180, 240], character: "the canonical Darjeeling cup — muscatel and floral married.", moodImpact: "uplifting at peak; energy and focus both lifted" },
+      { id: "long",   timeS: [240, 300], character: "tannin starting to grip, perfume retreating.", moodImpact: "uplifting fading; cup tightens" },
+      { id: "over",   timeS: [300, 360], character: "biting tannin, the muscatel mostly gone.", moodImpact: "the brightness lost to grip" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "first-flush bright — perfume and muscatel.", moodImpact: "uplifting forward; energy crisp" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the canonical Darjeeling cup.", moodImpact: "uplifting at peak; focus and energy in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "fuller body, perfume backgrounded.", moodImpact: "uplifting moderates; warming arrives" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "biting tannin, the perfume lost.", moodImpact: "uplifting overshadowed by bitter grip" },
+    ],
+    overPull: { timeS: 360, reason: "tannins overtake the muscatel" },
     effects: [["uplifting", 5], ["energy", 3], ["focus", 3], ["warming", 3], ["calm", 3]],
     flavors: ["muscatel", "floral", "fruit", "bright"],
     pairs: ["rose"],
@@ -1417,7 +1489,31 @@ const INGREDIENTS = {
     name: "Valerian", latin: "Valeriana officinalis", category: "herbal",
     subcategory: "root",
     aliases: ["all-heal", "garden heliotrope", "setwall"],
+    // Sleepy anchor (5). Long-decoction root — needs the slow
+    // simmer to release the valepotriates. The famous "sock smell"
+    // arrives right around the canonical brew.
     caffeine: 0, tempC: [85, 95], timeS: [600, 900],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "valepotriates barely surfacing.", moodImpact: "sleepy held back" },
+      { id: "cool",  tempC: [80, 88], character: "soft, gentle root extraction.", moodImpact: "sleepy gentle; calm settles" },
+      { id: "warm",  tempC: [88, 93], character: "full valerian character — earthy, sock-musk, sedative.", moodImpact: "sleepy at anchor strength" },
+      { id: "hot",   tempC: [93, 100], character: "deepest extraction, maximum sedation.", moodImpact: "sleepy at peak; calm and soothing both deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],   character: "barely simmered, root-water only.", moodImpact: "the cup hasn't found itself" },
+      { id: "short",  timeS: [300, 600], character: "lighter valerian, sedation gentler.", moodImpact: "sleepy starting to settle" },
+      { id: "medium", timeS: [600, 900], character: "the canonical sleep tea — earthy, sedating.", moodImpact: "sleepy at anchor strength; calm and soothing solid" },
+      { id: "long",   timeS: [900, 1200], character: "deepest extraction, body heavy.", moodImpact: "sleepy peak; grounding lifts" },
+      { id: "over",   timeS: [1200, 1500], character: "muddied, the medicine flat.", moodImpact: "the sedation peaks, then dulls" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "lighter root, the bedtime herbal cup.", moodImpact: "sleepy gentle; calm settles" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the canonical valerian sleep tea.", moodImpact: "sleepy at anchor strength; calm and soothing both solid" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, heavy, full sedative weight.", moodImpact: "sleepy peak; grounding deep" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "muddied — the medicine has flattened.", moodImpact: "sleepy still strong but the cup is heavy" },
+    ],
+    overPull: { timeS: 1500, reason: "the cup turns flat and muddy, the valerian register dulled" },
     // Calm 4: valerian's signature is sleepy 5; calm sits below the
     // chamomile anchor at 4 even though the GABAergic register reads strong.
     effects: [["sleepy", 5], ["calm", 4], ["soothing", 4], ["grounding", 2]],
@@ -1949,7 +2045,31 @@ const INGREDIENTS = {
     name: "Reishi", latin: "Ganoderma lucidum", category: "herbal",
     subcategory: "fungus",
     aliases: ["Lingzhi 灵芝", "Mannentake 万年茸", "mushroom of immortality"],
+    // Grounding anchor (5). Long-decoction fungus — the triterpenes
+    // are fat-soluble and slow. Anything under 30 minutes barely
+    // pulls the medicine; the canonical brew is hours, not minutes.
     caffeine: 0, tempC: [95, 100], timeS: [1800, 7200],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "the bitter-sweet barely surfaces.", moodImpact: "grounding held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft mushroom water, body forming slowly.", moodImpact: "grounding gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full triterpene release, deep cup.", moodImpact: "grounding forward; soothing solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, the medicine fully out.", moodImpact: "grounding at anchor strength; sleepy and calm both deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 900],     character: "mushroom-water, no real body.", moodImpact: "the cup hasn't found its medicine" },
+      { id: "short",  timeS: [900, 1800],  character: "lighter reishi, body forming.", moodImpact: "grounding starting to settle" },
+      { id: "medium", timeS: [1800, 4200], character: "the canonical decoction — bitter, earthy, full.", moodImpact: "grounding at anchor strength; soothing and calm both deep" },
+      { id: "long",   timeS: [4200, 7200], character: "deepest decoction, mushroom fully drawn.", moodImpact: "grounding deep; sleepy and soothing both peak" },
+      { id: "over",   timeS: [7200, 10800], character: "very long brew, water absorbed, body thick.", moodImpact: "grounding heavy; calm holds" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "lighter mushroom water, the medicine still arriving.", moodImpact: "grounding gentle" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the canonical reishi decoction — bitter, earthy, full.", moodImpact: "grounding at anchor strength; calm and soothing solid" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deepest decoction — the full Ling Zhi register.", moodImpact: "grounding deep; sleepy arrives; calm at peak" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "very heavy, body almost broth-thick.", moodImpact: "grounding holds; cup is meditative-heavy" },
+    ],
+    overPull: { timeS: 10800, reason: "the cup is too thick — past brew, into broth" },
     // Calm 4: reishi's signature is grounding 5; calm sits at 4, supporting
     // rather than co-equal with the chamomile anchor.
     effects: [["grounding", 5], ["sleepy", 4], ["calm", 4], ["soothing", 4], ["warming", 1]],
