@@ -1221,9 +1221,17 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // Only lead-role ingredients can fire outsider warnings. Accents and
   // catalysts are stylistic adjuncts — a 0.05g pinch of black pepper at
   // the wrong temp isn't a problem worth surfacing.
+  // Each outsider carries a `reason` so the UI can name the actual
+  // axis the user pushed past (temp / time / both) instead of always
+  // saying "outside preferred temp."
   const rawOutsiders = contributions
     .filter(c => !c.inRange && c.role === "lead")
-    .map(c => c.name);
+    .map(c => ({
+      name: c.name,
+      reason: !c.inTempRange && !c.inTimeRange ? "both"
+            : !c.inTempRange ? "temp"
+            : "time",
+    }));
 
   // For curated blends sitting exactly on the curator's chosen brew,
   // suppress cup-level outsider warnings — the curator already accepted

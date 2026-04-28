@@ -232,17 +232,29 @@ export const BlendExtractionExplorer = ({
               </div>
             ))}
           </div>
-          {!compatible && (
-            <div style={{
-              marginTop: 6,
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.ash, lineHeight: 1.4,
-            }}>
-              {brew.outsiders.length === 1
-                ? `${brew.outsiders[0]} is outside its preferred temp — will extract unevenly.`
-                : `${brew.outsiders.join(", ")} are outside their preferred temps.`}
-            </div>
-          )}
+          {!compatible && (() => {
+            const phraseFor = (reason) =>
+              reason === "both" ? "outside its preferred temperature and steep time"
+              : reason === "time" ? "steeped past its preferred range"
+              : "outside its preferred temperature";
+            const items = brew.outsiders.map(o =>
+              typeof o === "object" && o
+                ? { name: o.name, reason: o.reason }
+                : { name: o, reason: "temp" }
+            );
+            const text = items.length === 1
+              ? `${items[0].name} is ${phraseFor(items[0].reason)} — will extract unevenly.`
+              : items.map(it => `${it.name} is ${phraseFor(it.reason)}`).join("; ") + ".";
+            return (
+              <div style={{
+                marginTop: 6,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: theme.ash, lineHeight: 1.4,
+              }}>
+                {text}
+              </div>
+            );
+          })()}
         </div>
       )}
 

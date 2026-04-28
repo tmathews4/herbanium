@@ -269,7 +269,8 @@ export function applyEffectSynergies(rawEffects) {
  * buildWarnings — converts the various perception artifacts into
  * user-facing notes for the UI's confidence layer.
  *
- *   outsiders        — array of ingredient names brewed outside their range
+ *   outsiders        — array of either bare ingredient names (legacy)
+ *                       or { name, reason: "temp"|"time"|"both" } records
  *   maskingNotes     — from applyMasking
  *   perceivedEffects — final effect map after synergies + ceiling
  *   synergyTags      — from applyEffectSynergies (passed through, not warned)
@@ -284,8 +285,15 @@ export function buildWarnings({
 } = {}) {
   const warnings = [];
 
-  for (const name of outsiders) {
-    warnings.push({ kind: "outsider", text: `${name} is outside its preferred temp — will extract unevenly.` });
+  for (const o of outsiders) {
+    const isObj = o && typeof o === "object";
+    const name = isObj ? o.name : o;
+    const reason = isObj ? o.reason : "temp";
+    const phrase =
+      reason === "both" ? "outside its preferred temperature and steep time"
+      : reason === "time" ? "steeped past its preferred range"
+      : "outside its preferred temperature";
+    warnings.push({ kind: "outsider", text: `${name} is ${phrase} — will extract unevenly.` });
   }
 
   // Coalesce masking notes by masker for cleaner copy
