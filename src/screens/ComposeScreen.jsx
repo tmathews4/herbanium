@@ -1688,7 +1688,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}><SectionLabel n="ii">This will likely be…</SectionLabel></div>
+      <div style={{ marginTop: 20 }}><SectionLabel n="ii">The blender — see how it brews</SectionLabel></div>
       {ingsForProfile.length === 0 ? (
         <div style={{
           marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
