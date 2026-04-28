@@ -407,38 +407,41 @@ export const BlendExtractionExplorer = ({
                       overflow:hidden enforces single-line layout. */}
                   {state === "in-zones" && (() => {
                     const registerZone = selected.registerZone;
-                    // Each axis row reads "<label> (<band>) — <character>"
-                    // with band in parens. Three axes total: register,
-                    // temp, steep — all parallel in structure.
+                    // Each axis row reads "<label> (<band>)  <character>"
+                    // with the (band) tight to the label, not in a
+                    // separate column. The description starts after a
+                    // small gap so it reads as the row's content
+                    // rather than a neighbor cell.
                     const AxisRow = ({ label, bandId, character, headColor }) => (
                       <div style={{
-                        display: "flex", marginTop: 2,
+                        display: "flex", marginTop: 2, alignItems: "baseline",
                         whiteSpace: "nowrap", overflow: "hidden",
                       }}>
                         <span style={{
-                          flex: "0 0 56px",
+                          flex: "0 0 auto", marginRight: 8,
                           color: theme.inkSoft, fontStyle: "normal",
-                        }}>{label}</span>
+                        }}>
+                          {label}{" "}
+                          <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                            ({bandId})
+                          </span>
+                        </span>
                         <span style={{
                           flex: 1, minWidth: 0,
                           overflow: "hidden", textOverflow: "ellipsis",
                           color: theme.ash,
                         }}>
-                          <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                            ({bandId})
-                          </span>
-                          {character ? <> — {character}</> : null}
+                          {character}
                         </span>
                       </div>
                     );
                     const MoodRow = ({ text }) => (
                       <div style={{
-                        display: "flex", marginTop: 1,
+                        display: "flex", marginTop: 1, alignItems: "baseline",
                         whiteSpace: "nowrap", overflow: "hidden",
                       }}>
                         <span style={{
-                          flex: "0 0 56px",
-                          paddingLeft: 14,
+                          flex: "0 0 auto", marginRight: 8, paddingLeft: 14,
                           color: theme.ash, fontStyle: "normal",
                         }}>↳ mood</span>
                         <span style={{
