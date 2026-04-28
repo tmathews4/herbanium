@@ -589,37 +589,40 @@ export const BlendExtractionExplorer = ({
       {/* Cup summary — dominant 1–2 effects and flavors as small
           pills matching the predicted-taste row's exact dimensions.
           Threshold-gated in the algorithm so quiet cups don't claim
-          a read. Eyebrow label sits above each row so the pills
-          start at the same left margin as the predicted-taste pills,
-          giving the two surfaces a consistent visual rhythm. */}
+          a read. Pills render as <button> elements to inherit the
+          same UA reset (font-size, line-height) as the predicted-
+          taste row's buttons — using <span> here picked up parent
+          line-height and made the pills visibly taller. Eyebrow
+          label sits inline to the left of each row. */}
       {((brew.moodSummary?.length || 0) > 0 || (brew.flavorSummary?.length || 0) > 0) && (() => {
         const summaryPill = (label, tone) => (
-          <span key={label} style={{
+          <button key={label} type="button" disabled style={{
             fontFamily: ff.sans, fontSize: 10.5,
             color: tone, letterSpacing: "0.04em",
             padding: "3px 9px",
             border: `1px solid ${tone}`, borderRadius: 999,
             background: "transparent",
-          }}>{label}</span>
+            cursor: "default",
+          }}>{label}</button>
         );
         const labelStyle = {
           fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.ash,
-          marginBottom: 6,
+          flexShrink: 0,
         };
         return (
-          <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 8 }}>
             {brew.moodSummary?.length > 0 && (
-              <div>
-                <div style={labelStyle}>Mood Profile</div>
+              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                <span style={labelStyle}>Highlighted Mood</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {brew.moodSummary.map(t => summaryPill(t, theme.sageDeep))}
                 </div>
               </div>
             )}
             {brew.flavorSummary?.length > 0 && (
-              <div>
-                <div style={labelStyle}>Flavor Profile</div>
+              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                <span style={labelStyle}>Highlighted Flavors</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {brew.flavorSummary.map(t => summaryPill(t, theme.terra))}
                 </div>
