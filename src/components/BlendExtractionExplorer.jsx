@@ -365,9 +365,28 @@ export const BlendExtractionExplorer = ({
                           {zone.id} register
                         </span>
                       </div>
-                      <div style={{ marginTop: 1, color: theme.ash }}>
-                        pulls {zone.pulls?.slice(0, 3).join(", ")}
-                      </div>
+                      {zone.character && (
+                        <div style={{ marginTop: 1, color: theme.ash }}>
+                          {zone.character}
+                        </div>
+                      )}
+                      {Array.isArray(zone.pulls) && zone.pulls.length > 0 && (
+                        <div style={{ marginTop: 1, color: theme.ash }}>
+                          pulls {zone.pulls.slice(0, 3).join(", ")}
+                        </div>
+                      )}
+                      {zone.bestFor && (
+                        <div style={{ marginTop: 1, color: theme.ash }}>
+                          <span style={{ color: theme.inkSoft }}>best for </span>
+                          {zone.bestFor}
+                        </div>
+                      )}
+                      {zone.tradeoff && (
+                        <div style={{ marginTop: 1, color: theme.ash }}>
+                          <span style={{ color: theme.inkSoft }}>trade-off </span>
+                          {zone.tradeoff}
+                        </div>
+                      )}
                     </>
                   ) : hasZones ? (
                     <div style={{ marginTop: 1, color: theme.ash }}>
