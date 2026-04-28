@@ -51,7 +51,7 @@ const INGREDIENTS = {
     facts: [
       "Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine.",
       "There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter).",
-      "Chamomile reduces anxiety in clinical trials, but the exact brain mechanism is still debated — early papers thought it acted like a mild benzodiazepine; later research found the picture more complicated.",
+      "Clinical trials have measured anxiety reductions with chamomile, but the exact brain mechanism is still debated — early papers thought it acted like a mild benzodiazepine; later research found the picture more complicated.",
       "The Latin name Matricaria comes from matrix, meaning womb — Romans used it as a gynecological remedy.",
       "Chamomile — the Greek name chamaemelon means 'earth apple' — the scent of crushed leaves genuinely recalls fresh apple.",
       "Cultivated since the Bronze Age — chamomile pollen turns up in European archaeological sites from the period forward.",
@@ -78,7 +78,7 @@ const INGREDIENTS = {
     headsUp: null,
     blurb: "The Latin lavare means 'to wash' — Romans bathed in it, medieval housewives tucked it into linen chests, and Provençal harvesters still cut it by hand. The active calmer is linalool, which reaches the brain through scent as efficiently as through liquid. By the time you sip, the perfume has already done half the work.",
     facts: [
-      "In Germany, a standardized lavender oil preparation (Silexan) is approved as a prescription anxiolytic — clinical trials show effects comparable to a low dose of lorazepam.",
+      "In Germany, a standardized lavender oil preparation (Silexan) is approved as a prescription anxiolytic — its clinical trial program is part of why lavender's calming reputation has institutional backing in Europe.",
       "Lavender's calming work likely runs through voltage-dependent calcium channels, not GABA — which fits its mild, wakeful calm rather than sedation.",
       "Culinary lavender is almost always the Hidcote or Munstead cultivar of Lavandula angustifolia — lower in camphor and less soapy than ornamentals.",
       "Lavender takes its name from the Latin lavare, 'to wash' — Romans scented their bathwater with it, and the association with linen and bathing has persisted two thousand years.",
@@ -100,7 +100,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lavender", "hibiscus", "cardamom", "tulsi", "vanilla", "white", "oolong", "linden", "elderflower"],
     dose: "1 tsp · 200ml",
     headsUp: "Source food-grade petals — ornamental roses may carry pesticide residue.",
-    blurb: "Tenth-century Persian distillers invented attar of rose chasing the soul of the flower; the petals you brew today are the gentler form. Modern trials confirm what Unani physicians have prescribed for a thousand years — rose modestly modulates cortisol and eases mild anxiety without sedation. The cup forgives nothing about hard water; use filtered if you can.",
+    blurb: "Tenth-century Persian distillers invented attar of rose chasing the soul of the flower; the petals you brew today are the gentler form. Modern trials echo what Unani physicians valued for a thousand years — rose has shown modest cortisol-modulating and anxiety-easing effects without sedation. The cup forgives nothing about hard water; use filtered if you can.",
     facts: [
       "In Iran, the Damask rose is called Gole Mohammadi — 'Flower of the Prophet Muhammad' — and the annual rose harvest in Kashan draws pilgrims and distillers from across the region.",
       "More than a dozen clinical trials have shown that Damask rose aromatherapy reduces anxiety and improves sleep — in burn patients, cardiac patients, operating-room staff, and women in labor.",
@@ -159,7 +159,7 @@ const INGREDIENTS = {
       "How passionflower tea is prepared changes what's in it — cold extraction preserves GABA itself, while hot water extracts more flavonoids. Some studies found cold and hot extracts had opposite effects.",
       "Passionflower was first formally described in 1620, but Aztec physicians had used it as a sedative centuries earlier — the 'discovery' was a renaming.",
       "The plant is a vigorous climber — wild Passiflora incarnata can reach 25 feet in a single growing season, dying back to the root each winter.",
-      "Passionflower — mild but real effect on generalized anxiety in randomized trials — comparable to oxazepam at standard doses, with fewer side effects in the studies that ran the comparison.",
+      "Passionflower — mild but real effect on generalized anxiety in randomized trials, with fewer reported side effects than the prescription anxiolytics it's been tested alongside.",
       "Passionflower tea is reliably bitter — the bitterness is the flavonoids, and pulling them out is what the cup is for.",
       "In Victorian Europe, passionflower was used as a respiratory remedy — for whooping cough specifically — though modern evidence for that use is thin.",
     ],
@@ -177,7 +177,7 @@ const INGREDIENTS = {
     blurb: "The Greeks named her Melissa — honeybee — for the way the plant draws hives to the garden. Paracelsus called her the elixir of life and wore a tincture in his belt. Modern trials show rosmarinic acid raises GABA in the brain, exactly as the herbalists promised: a quiet lift, no caffeine required.",
     facts: [
       "The Greeks called lemon balm Melissa — honeybee — for the way the plant draws hives. Paracelsus called her the elixir of life.",
-      "Lemon balm is one of the few herbs whose calming effect has been replicated in randomized trials — measurable reductions in stress and anxiety at standard tea doses.",
+      "Lemon balm is one of the few herbs whose calming effect has been replicated across randomized trials — measured reductions in stress and anxiety markers at typical tea concentrations.",
       "Lemon balm — its calming work is GABA transaminase inhibition — slowing the brain's breakdown of its own quieting neurotransmitter.",
       "Avicenna, in 11th-century Persia, prescribed lemon balm for melancholy. Modern psychiatry quietly agrees, though the prescription pad has changed hands.",
       "Lemon balm — the lemon scent comes from citral, citronellal, and geranial — the same essential-oil profile as lemongrass, just at a lower concentration.",
@@ -232,7 +232,7 @@ const INGREDIENTS = {
     facts: [
       "Where peppermint borrows menthol, spearmint goes with carvone — softer, sweeter, the cool pulled back a step.",
       "Spearmint is older than peppermint by millennia. Egyptian medical papyri list it; peppermint, the hybrid, didn't exist yet.",
-      "Studies in women with PCOS show spearmint tea twice daily measurably lowers free testosterone — one of the few clear hormonal effects of an everyday tea.",
+      "Studies in women with PCOS have observed lower free testosterone levels with regular spearmint tea consumption — one of the few documented hormonal effects of an everyday tea.",
       "Mediterranean kitchens have always treated spearmint as the more polite cousin: the one you serve to anyone, anytime.",
       "Moroccan mint tea uses spearmint, not peppermint — a substitution most non-Moroccan recipes get wrong. Carvone, not menthol, is the local cool.",
       "Spearmint — the Greek word for mint, minthe, comes from a nymph who was turned into the plant by Persephone — Greek myth's explanation for the smell.",
@@ -300,7 +300,7 @@ const INGREDIENTS = {
     pairs: ["rose", "rooibos", "ginger", "lemongrass"],
     dose: "1 tsp · 200ml",
     headsUp: "May lower blood pressure — sip modestly if relevant.",
-    blurb: "Karkadé in Cairo, sorrel in the Caribbean, agua de jamaica at a Mexican lunch — the red flower travels under many names. Pharaohs drank it as a royal beverage; modern trials show it modestly lowers blood pressure, with the active anthocyanins being the same pigments that color blueberries. Ruby in the cup, real medicine in the body.",
+    blurb: "Karkadé in Cairo, sorrel in the Caribbean, agua de jamaica at a Mexican lunch — the red flower travels under many names. Pharaohs drank it as a royal beverage; modern trials report modest blood-pressure reductions in adults with mild hypertension, with the active anthocyanins being the same pigments that color blueberries. Ruby in the cup, real chemistry on the tongue.",
     facts: [
       "What looks like a red hibiscus flower in your cup is actually the calyx — the fleshy casing under the flower, not the petals.",
       "Clinical trials have shown hibiscus tea to modestly lower blood pressure in adults with mild hypertension — three cups a day for six weeks produced a measurable drop. Not a substitute for medical care.",
@@ -311,7 +311,7 @@ const INGREDIENTS = {
       "Hibiscus contains the highest concentration of anthocyanin pigments of any common food plant — the same family of compounds that color blueberries and red cabbage, just much more concentrated.",
       "In the Caribbean, hibiscus is sometimes called 'sorrel' — confusingly, since European sorrel is a completely different plant. Hibiscus sorrel goes into winter-holiday drinks across the islands.",
       "Hibiscus's flowers bloom for a single day each, opening at dawn and wilting by dusk. Commercial harvest is fast — flowers are picked daily through the season.",
-      "Hibiscus is one of the few plants where the medicinal evidence runs ahead of the folk reputation — the BP-lowering effect was confirmed by clinical trials before most herbalists started recommending it specifically for blood pressure.",
+      "Hibiscus is one of the few plants where the research runs ahead of the folk reputation — the blood-pressure findings were documented in clinical trials before most herbalists framed the cup that way.",
       "The fiber from hibiscus stems (kenaf) is used in industrial paper and rope. Same plant, different part — and a different industry.",
       "Most commercial hibiscus tea uses Hibiscus sabdariffa specifically; ornamental hibiscus species (Rosa sinensis, the showy garden variety) make weak, inferior tea.",
     ],
@@ -351,11 +351,11 @@ const INGREDIENTS = {
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],
     dose: "1 tsp · 200ml",
     headsUp: "May affect blood sugar and thyroid function — verify interactions if relevant.",
-    blurb: "Indian households grow it at the front step — a threshold plant in daily life, asked permission before harvesting. The clove-pepper warmth is what the tongue notices; ursolic acid in the leaves measurably blunts cortisol over weeks. Old kitchen botany doing patient work that the chemistry confirms.",
+    blurb: "Indian households grow it at the front step — a threshold plant in daily life, asked permission before harvesting. The clove-pepper warmth is what the tongue notices; ursolic acid in the leaves has been associated with cortisol-lowering effects in multi-week studies. Old kitchen botany doing patient work the chemistry slowly catches up to.",
     facts: [
       "Indian households grow tulsi at the front step — a threshold plant, asked permission before harvesting. Old kitchen botany planted into daily life.",
       "Tulsi — the clove-pepper warmth is what the tongue notices; what the body notices is ursolic acid, which softens the day's cortisol rise.",
-      "Tulsi is one of the few herbs studied for adaptogenic effect in randomized trials — six weeks of daily tulsi reduced perceived stress and improved cognitive function.",
+      "Tulsi is one of the few herbs studied for adaptogenic effect in randomized trials — six-week studies have reported reductions in perceived stress and improvements on cognitive measures.",
       "Three botanical varieties — Rama, Krishna, Vana — are all called tulsi; each has a slightly different flavor and a slightly different traditional role.",
       "Across Indian household tradition, every part of the tulsi plant gets used — leaves in cooking and infusions, stems and wood whittled into keepsake beads and carvings.",
       "Tulsi is also called 'Holy Basil' — but it's not the basil you cook with. Different species, different chemistry, different culinary purpose entirely.",
@@ -381,7 +381,7 @@ const INGREDIENTS = {
     blurb: "Ashva-gandha is Sanskrit for 'smell of horse' — the root has a musky scent and Ayurveda taught that drinking it would grant a horse's strength. The withanolides inside won't quite manage that, but trials running six to eight weeks have reported modest cortisol reductions and improved sleep quality. Strength in this telling is patience.",
     facts: [
       "Ashwagandha — ashva-gandha in Sanskrit means 'smell of horse' — the root smells musky and was thought to grant a horse's strength.",
-      "Ashwagandha — withanolides don't promise horse-strength, but in clinical trials they measurably blunt cortisol over six to eight weeks of daily use.",
+      "Ashwagandha — withanolides don't promise horse-strength, but multi-week trials have reported cortisol reductions in groups taking standardized extracts.",
       "Ashwagandha is one of the few herbs to graduate from Ayurveda into U.S. clinical trial registries — over thirty randomized studies, mostly for stress and sleep.",
       "Ashwagandha — traditionally taken with milk and ghee, not water — the active compounds are fat-soluble, and the milk vehicle is older than the chemistry that explains it.",
       "The ashwagandha plant is also called 'Indian ginseng,' though it's botanically unrelated to true ginseng (Panax). The naming reflects similar adaptogenic use, not shared chemistry.",
@@ -424,7 +424,7 @@ const INGREDIENTS = {
     facts: [
       "The Silk Road carried ginger before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against the swell.",
       "Drying turns gingerol into shogaol — sharper, more warming — which is why dried ginger and fresh taste like cousins, not twins.",
-      "Ginger has strong clinical evidence for nausea — randomized trials confirm effect in pregnancy, motion sickness, and post-chemotherapy.",
+      "Ginger has a substantial clinical evidence base for nausea — randomized trials have reported effects across pregnancy-related, motion-related, and post-chemotherapy contexts.",
       "The 'root' is actually a rhizome — an underground stem. Most of the world's culinary 'roots' (turmeric, galangal, ginger) are stems pretending.",
       "Ginger's heat is not capsaicin (which is in chili) — it's a different family of pungent compounds called gingerols. The receptors they activate (TRPV1) are the same.",
       "Ancient China used candied ginger as currency in some periods — the high preservation cost made it a portable store of value before paper money.",
@@ -433,7 +433,7 @@ const INGREDIENTS = {
       "Ginger essential oil contains over 100 distinct compounds, but the warming pungency is dominated by just three: gingerol, shogaol, and zingerone.",
       "Pickled ginger between sushi pieces (gari) isn't decoration — it's a palate cleanser, used to restore the tongue's neutrality between different fish. Eat it as instructed.",
       "Ginger plants are propagated entirely by rhizome division — every commercial ginger is essentially a clone, with very little genetic variation across the global supply.",
-      "Modern trials have found ginger reduces menstrual pain comparably to ibuprofen at standard doses — one of the strongest pain-relief evidence bases for any kitchen herb.",
+      "Modern trials have observed reductions in menstrual pain with ginger that researchers compared favorably to standard analgesic doses — one of the strongest evidence bases for any kitchen herb in this register.",
     ],
   },
   turmeric: {
