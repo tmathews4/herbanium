@@ -46,20 +46,29 @@ function assert(cond, msg) {
 
 function gatherAll() {
   // All blend stores use object-form ingredients now [{ id, g, role? }].
+  // `isTraditional` flag mirrors the runtime: a `tradition` field on the
+  // blend marks it as a codified preparation that gets baseline
+  // suppression. MOOD/PAIR blends are synthesized — never traditional.
   const all = [];
   for (const b of BLENDS) {
-    all.push({ label: "BLEND", name: b.name, ings: b.ingredients, t: b.tempC, s: b.timeS, style: b.style });
+    all.push({
+      label: "BLEND", name: b.name, ings: b.ingredients,
+      t: b.tempC, s: b.timeS, style: b.style,
+      isTraditional: !!b.tradition,
+    });
   }
   for (const [mood, b] of Object.entries(MOOD_BLENDS)) {
     all.push({
       label: `MOOD:${mood}`, name: `${mood} (single-mood)`,
       ings: b.ings.map(i => ({ ...i })), t: b.temp, s: b.time, style: b.style,
+      isTraditional: false,
     });
   }
   for (const [key, b] of Object.entries(PAIR_BLENDS)) {
     all.push({
       label: `PAIR:${key}`, name: b.name,
       ings: b.ings.map(i => ({ ...i })), t: b.temp, s: b.time, style: b.style,
+      isTraditional: false,
     });
   }
   return all;
@@ -76,18 +85,29 @@ console.log(`Curated blends — clean-default audit (${blends.length} blends)\n`
 function outsiderWarnings(brew) {
   return brew.warnings.filter(w => w.kind === "outsider");
 }
+function tanninWarnings(brew) {
+  return brew.warnings.filter(w => w.kind === "tannin");
+}
+function aromaticWarnings(brew) {
+  return brew.warnings.filter(w => w.kind === "aromatic");
+}
 
 for (const b of blends) {
   test(`${b.label} ${b.name} clean at default brew`, () => {
-    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true);
+    // Pass isTraditional through — traditionals get baseline suppression
+    // for tannin/aromatic/outsider; experimentals do not.
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true, b.isTraditional);
     const overs = overPullWarnings(brew);
     const outs = outsiderWarnings(brew);
-    const issues = [...overs, ...outs];
+    const tans = tanninWarnings(brew);
+    const aros = aromaticWarnings(brew);
+    const issues = [...overs, ...outs, ...tans, ...aros];
     assert(issues.length === 0,
-      `${b.name} fires ${issues.length} warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
-      issues.map(o => o.text).join("\n        - "));
-    assert(brew.outsiders.length === 0,
-      `${b.name} still lists outsiders at curated baseline: ${brew.outsiders.join(", ")}`);
+      `${b.name} (${b.isTraditional ? "tradition" : "custom"}) fires ${issues.length} warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
+      issues.map(o => `[${o.kind}] ${o.text}`).join("\n        - "));
+    const outsiderNames = brew.outsiders.map(o => typeof o === "object" ? o.name : o);
+    assert(outsiderNames.length === 0,
+      `${b.name} still lists outsiders at curated baseline: ${outsiderNames.join(", ")}`);
   });
 
   // Track which blends would over-pull or flag outsiders if the baseline
@@ -99,6 +119,41 @@ for (const b of blends) {
     if (issues.length > 0) audit.push({ ...b, overs: issues });
   }
 }
+
+// Strict pass: every CUSTOM (non-traditional) blend must be clean at
+// its baseline *without* the suppression crutch. This is the rule the
+// user imposed: experimentals must be tuned correctly, while
+// traditionals get the suppression because the practice predates the
+// modern recommendation.
+for (const b of blends.filter(x => !x.isTraditional)) {
+  test(`${b.label} ${b.name} clean at default brew WITHOUT suppression`, () => {
+    // No baseline passed → no suppression even though the curator chose this brew.
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s);
+    const overs = overPullWarnings(brew);
+    const outs = outsiderWarnings(brew);
+    const tans = tanninWarnings(brew);
+    const aros = aromaticWarnings(brew);
+    const issues = [...overs, ...outs, ...tans, ...aros];
+    assert(issues.length === 0,
+      `${b.name} (custom) is not naturally clean — retune the baseline:\n        - ` +
+      issues.map(o => `[${o.kind}] ${o.text}`).join("\n        - "));
+  });
+}
+
+// Traditionals: warnings re-fire when the slider moves away from
+// baseline. Pick one with a tannin warning at baseline to verify.
+test("traditional warnings re-fire when slider moves off baseline", () => {
+  const wuyi = blends.find(b => b.name === "Wuyi Pine Smoke");
+  assert(wuyi, "Wuyi Pine Smoke fixture not found");
+  // At baseline, tannin/aromatic suppressed.
+  const at = resolveBlendAtBrew(wuyi.ings, wuyi.t, wuyi.s, wuyi.t, wuyi.s, true, true);
+  const atTans = at.warnings.filter(w => w.kind === "tannin" || w.kind === "aromatic");
+  // Push 60s past baseline; suppression no longer applies.
+  const past = resolveBlendAtBrew(wuyi.ings, wuyi.t, wuyi.s + 60, wuyi.t, wuyi.s, true, true);
+  const pastTans = past.warnings.filter(w => w.kind === "tannin" || w.kind === "aromatic");
+  assert(pastTans.length > atTans.length || past.warnings.length > at.warnings.length,
+    "expected tannin/aromatic warnings to re-fire past baseline; suppression appears too broad");
+});
 
 // Sanity: pushing past baseline still fires warnings. Uses Spring
 // Tonic (leads at 300-900s, curator at 1800s — already past, so any

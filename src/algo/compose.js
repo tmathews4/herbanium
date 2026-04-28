@@ -1234,22 +1234,33 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     }));
 
   // For curated blends sitting exactly on the curator's chosen brew,
-  // suppress cup-level outsider warnings — the curator already accepted
-  // that an ingredient lives at the edge of its window. The moment the
-  // user moves either slider, fall back to the honest list.
+  // suppress warnings — the curator already accepted that brew.
+  // The moment the user moves either slider, fall back to the honest
+  // list. Suppression is *traditional-only*: experimental/custom blends
+  // must be tuned so they pass cleanly without the suppression crutch.
+  // Tradition's whole point is that the modern algorithm flags it as
+  // past-optimum, but the practice predates the algorithm — that's why
+  // the tradition-over-literature note exists.
   const atCuratedBaseline = curated
     && baselineTempC != null && baselineTimeS != null
     && tempC === baselineTempC && timeS === baselineTimeS;
-  const outsiders = atCuratedBaseline ? [] : rawOutsiders;
+  const suppressAtBaseline = atCuratedBaseline && isTraditional;
+  const outsiders = suppressAtBaseline ? [] : rawOutsiders;
 
   // (5a) Cup-level warnings — what the average reads.
-  const cupWarnings = buildWarnings({
+  const rawCupWarnings = buildWarnings({
     outsiders,
     maskingNotes,
     perceivedEffects: perceivedEffectMap,
     perceivedFlavors: perceivedFlavorMap,
     paradoxTags,
   });
+  // Traditionals at baseline also drop tannin/aromatic cup warnings —
+  // the whole purpose of the tradition note is to acknowledge the
+  // recipe lives past where modern analysis would call optimal.
+  const cupWarnings = suppressAtBaseline
+    ? rawCupWarnings.filter(w => w.kind !== "tannin" && w.kind !== "aromatic")
+    : rawCupWarnings;
 
   // (5b) Per-ingredient over-pull check. The mass-weighted sum dilutes
   // each ingredient's failure mode by everything else in the cup — so
@@ -1320,7 +1331,10 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // was for. If the recipe is traditional, the user is sitting on
   // the curator's chosen brew, and the cup is already showing some
   // form of warning, surface the note.
-  const baselineWarningFires = (cupWarnings || []).length > 0;
+  // Use the unfiltered set so the tradition note still fires when the
+  // baseline genuinely had something to suppress (otherwise the note
+  // would never appear, since cupWarnings is empty after suppression).
+  const baselineWarningFires = (rawCupWarnings || []).length > 0;
   // Tradition-over-literature note only makes sense for actual traditional
   // preparations. Experimental and synthetic blends are still "curated" (we
   // pass a baseline for warning suppression) but they don't carry centuries
