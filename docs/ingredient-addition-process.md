@@ -159,14 +159,34 @@ Use the standard checklist:
 **Profile → Sources panel**:
 - [ ] Any new source items are visible under the right heading
 
-### 8. Suggest blend follow-ups
-Once the ingredient lands, propose:
-- **Existing-blend rewrites** — does any current curated blend
-  improve by adding this ingredient? (Garden Court → add bergamot for
-  Earl Grey character; Quiet Apple → add dried apple for body.)
-- **New experimentals** — what 2–4 obvious-pairing blends does this
-  ingredient unlock? Wire as `experimental: true, house: true` in
-  `src/data/blends.js`.
+### 8. Suggest blend follow-ups (automated)
+Once the ingredient lands, run:
+
+```
+npm run suggest-blends -- <id>
+```
+
+Three reports come back:
+- **REWRITE candidates** — existing curated blends whose ingredient
+  list overlaps with the new entry's `pairs[]`. Adding the new
+  ingredient to one of these often improves the cup (Garden Court +
+  bergamot for Earl Grey character; Quiet Apple + dried apple for body).
+- **NEW 2-INGREDIENT combinations** — every pair-mate × the new id
+  not already curated together. The cleanest first-blend candidates,
+  annotated with shared effect axes and a likely mood guess.
+- **NEW 3-INGREDIENT combinations** — triplets from `pairs[]` not
+  yet curated, sorted by 3-way shared effect axis (so the strongest
+  mood-coherent triplets surface first).
+
+Pick 2–4 of the surfaced candidates and wire them as
+`experimental: true, house: true` in `src/data/blends.js`. The tool
+won't pick *for* you — it surfaces the obvious moves so you can decide
+which fit the catalog's voice.
+
+After wiring, run `npm test` again. The strict experimental rule
+(custom blends pass without baseline suppression) will catch any
+combination that needs ingredient-role tweaks (mark partners as
+`role: "accent"`) or temp/time adjustment.
 
 This step is what turns a single ingredient into a catalog improvement
 rather than a lone entry.
