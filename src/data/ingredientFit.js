@@ -52,7 +52,7 @@ export const CANONICAL_EFFECTS = new Set([
 // are intentionally both included; if you want to consolidate, do a
 // catalog-wide rename rather than dropping one from this list.
 export const KNOWN_FLAVORS = new Set([
-  "anise", "apple", "aromatic", "bean", "bitter", "bittersweet",
+  "anise", "apple", "aromatic", "bean", "bergamot", "bitter", "bittersweet",
   "bright", "brisk", "buttery", "campfire", "camphor", "caramel",
   "caramel-roasted", "chestnut", "citrus", "citrusy", "clove", "cocoa",
   "coffee-adjacent", "complex", "cool", "cranberry", "creamy", "dark",

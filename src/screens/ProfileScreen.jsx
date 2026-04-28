@@ -675,6 +675,14 @@ const SOURCES = [
         summary: "Curcumin bioavailability and piperine synergy",
         full: "Shoba G, Joy D, Joseph T, Majeed M, Rajendran R, Srinivas PS. Influence of piperine on the pharmacokinetics of curcumin in animals and human volunteers. Planta Med. 1998;64(4):353–6. Anand P, Kunnumakkara AB, Newman RA, Aggarwal BB. Bioavailability of curcumin: problems and promises. Mol Pharm. 2007;4(6):807–18.",
       },
+      {
+        summary: "Citrus peel volatile-oil chemistry — limonene, linalool, citral, bergapten",
+        full: "Navarra M, Mannucci C, Delbò M, Calapai G. Citrus bergamia essential oil: from basic research to clinical application. Front Pharmacol. 2015;6:36. Calvarano I et al. Quality and chemical composition of Calabrian bergamot essential oil. Italian Journal of Food Science. 2007;19(1):75–83. Klimek-Szczykutowicz M et al. Citrus limon (lemon) phenomenon — a review of the chemistry, pharmacological properties, applications. Plants. 2020;9(1):119. Sun J. D-Limonene: safety and clinical applications. Altern Med Rev. 2007;12(3):259–64.",
+      },
+      {
+        summary: "Dried-fruit infusion chemistry — anthocyanins, pectin, organic acids",
+        full: "Pappas E, Schaich KM. Phytochemicals of cranberries and cranberry products. Crit Rev Food Sci Nutr. 2009;49(9):741–81. Boyer J, Liu RH. Apple phytochemicals and their health benefits. Nutr J. 2004;3:5. Howell AB. Bioactive compounds in cranberries and their role in prevention of urinary tract infections. Mol Nutr Food Res. 2007;51(6):732–7.",
+      },
     ],
   },
   {
@@ -690,7 +698,7 @@ const SOURCES = [
       },
       {
         summary: "Pharmacovigilance and interaction case reports",
-        full: "Posadzki P, Watson L, Ernst E. Herb-drug interactions: an overview of systematic reviews. Br J Clin Pharmacol. 2013;75(3):603–18. Targeted: warfarin/vitamin-K (Heck AM et al. Potential interactions between alternative therapies and warfarin. Am J Health Syst Pharm. 2000;57(13):1221–7); licorice/pseudoaldosteronism (Sigurjónsdóttir 2003, supra); ashwagandha/thyroid (van der Hooft CS et al. Hyperthyroidism associated with the use of an Ayurvedic preparation. Ned Tijdschr Geneeskd. 2005;149(47):2637–8).",
+        full: "Posadzki P, Watson L, Ernst E. Herb-drug interactions: an overview of systematic reviews. Br J Clin Pharmacol. 2013;75(3):603–18. Targeted: warfarin/vitamin-K (Heck AM et al. Potential interactions between alternative therapies and warfarin. Am J Health Syst Pharm. 2000;57(13):1221–7); cranberry/warfarin (Suvarna R et al. Possible interaction between warfarin and cranberry juice. BMJ. 2003;327(7429):1454); licorice/pseudoaldosteronism (Sigurjónsdóttir 2003, supra); ashwagandha/thyroid (van der Hooft CS et al. Hyperthyroidism associated with the use of an Ayurvedic preparation. Ned Tijdschr Geneeskd. 2005;149(47):2637–8).",
       },
     ],
   },
