@@ -409,7 +409,7 @@ const INGREDIENTS = {
       {
         id: "short",
         timeS: [60, 180],
-        character: "Top-notes only, the aromatic register.",
+        character: "Top-notes only, body hasn't formed yet.",
         pulls: ["the perfumed clove-spice top", "no body yet"],
         moodImpact: "uplifting forward; calm and soothing still thin",
       },
@@ -423,22 +423,38 @@ const INGREDIENTS = {
       {
         id: "long",
         timeS: [360, 600],
-        character: "Full body, the tonic register arrives.",
+        character: "Full body, perfume receding into the depths.",
         pulls: ["the slow herb-medicine register", "full astringent grip", "perfume receding"],
         moodImpact: "grounding and soothing deepen; the cup turns meditative",
       },
     ],
-    // Notable combinations — when the temp/time pairing produces a
-    // recognizable register, name it. Optional layer; the per-axis
-    // descriptions stand on their own without it.
-    combinations: {
-      "cool+short":   { register: "aromatic", note: "All bouquet — bright, perfumed, light on the tongue." },
-      "warm+short":   { register: "aromatic", note: "Bright with a touch of warmth — the daytime lift." },
-      "warm+medium":  { register: "balanced", note: "The everyday cup — perfume married to a steady tonic body." },
-      "hot+medium":   { register: "balanced", note: "Hotter than the household standard — same balance, more grip." },
-      "warm+long":    { register: "tonic",    note: "Drifting toward Ayurvedic tonic — body deep, perfume backgrounded." },
-      "hot+long":     { register: "tonic",    note: "Full Ayurvedic chronic-tonic — heavy, grounding, astringent." },
-    },
+    // Register is the holistic third axis — what kind of cup the
+    // temp×steep pairing produces. Each registerZone names which
+    // pairings (tempZone+timeZone IDs) yield that register, and
+    // describes the resulting cup in its own voice.
+    registerZones: [
+      {
+        id: "aromatic",
+        when: ["cool+short", "cool+medium", "warm+short", "hot+short"],
+        character: "Bright, perfumed, light on the tongue.",
+        pulls: ["bouquet forward", "minimal body", "no astringent grip"],
+        moodImpact: "uplifting forward; calm and soothing held back",
+      },
+      {
+        id: "balanced",
+        when: ["cool+long", "warm+medium", "hot+medium"],
+        character: "The everyday cup — perfume married to a steady tonic body.",
+        pulls: ["full aroma", "moderate body", "gentle astringency"],
+        moodImpact: "uplifting, calm, and digestive in balance",
+      },
+      {
+        id: "tonic",
+        when: ["warm+long", "hot+long"],
+        character: "Heavy, grounding, astringent — Ayurvedic chronic-tonic.",
+        pulls: ["full body", "polyphenol depth", "full astringent grip"],
+        moodImpact: "grounding and soothing dominant; the cup turns meditative",
+      },
+    ],
     overPull: { timeS: 720, reason: "the cup turns harshly astringent and the spice goes medicinal" },
     edges: {
       underTemp: "Cool extraction — character's quiet, perfume blooms slowly.",

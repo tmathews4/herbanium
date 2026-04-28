@@ -1177,10 +1177,28 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     };
     const tempZone = resolveAxisZone(meta.tempZones, tempC, "tempC");
     const timeZone = resolveAxisZone(meta.timeZones, timeS, "timeS");
+    // Register is a third axis derived from the temp+time pairing.
+    // Each registerZone declares which pair-keys ("cool+short", etc.)
+    // yield that register; the resolver picks the first matching
+    // zone.
+    let registerZone = null;
+    if (tempZone && timeZone && Array.isArray(meta.registerZones)) {
+      const key = `${tempZone.id}+${timeZone.id}`;
+      registerZone = meta.registerZones.find(z => Array.isArray(z.when) && z.when.includes(key)) || null;
+    }
+    // Backwards compat: older `combinations` table maps to a thin
+    // shim with id + character so legacy code doesn't break during
+    // migration.
     let combination = null;
     if (tempZone && timeZone && meta.combinations) {
       const key = `${tempZone.id}+${timeZone.id}`;
-      combination = meta.combinations[key] || null;
+      const entry = meta.combinations[key];
+      if (entry) combination = { register: entry.register, note: entry.note };
+    }
+    // If we got a registerZone but no legacy combination, synthesize
+    // a combination shape so existing UI fallbacks still work.
+    if (!combination && registerZone) {
+      combination = { register: registerZone.id, note: registerZone.character };
     }
     // Legacy 2D-zone fallback (any ingredient still declaring `zones`
     // gets resolved the old way — additive migration).
@@ -1259,7 +1277,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     return {
       id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange,
       tempDir, timeDir, role: ingRole,
-      activeZone, tempZone, timeZone, combination,
+      activeZone, tempZone, timeZone, registerZone, combination,
       isOverPulled, standaloneOverPull,
       state, severity,
     };

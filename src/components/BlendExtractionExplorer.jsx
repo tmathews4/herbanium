@@ -406,7 +406,11 @@ export const BlendExtractionExplorer = ({
                       regardless of label length. whiteSpace:nowrap +
                       overflow:hidden enforces single-line layout. */}
                   {state === "in-zones" && (() => {
-                    const Row = ({ label, body }) => (
+                    const registerZone = selected.registerZone;
+                    // Each axis row reads "<label> (<band>) — <character>"
+                    // with band in parens. Three axes total: register,
+                    // temp, steep — all parallel in structure.
+                    const AxisRow = ({ label, bandId, character, headColor }) => (
                       <div style={{
                         display: "flex", marginTop: 2,
                         whiteSpace: "nowrap", overflow: "hidden",
@@ -419,12 +423,14 @@ export const BlendExtractionExplorer = ({
                           flex: 1, minWidth: 0,
                           overflow: "hidden", textOverflow: "ellipsis",
                           color: theme.ash,
-                        }}>{body}</span>
+                        }}>
+                          <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                            ({bandId})
+                          </span>
+                          {character ? <> — {character}</> : null}
+                        </span>
                       </div>
                     );
-                    // Mood-impact subrow uses an indent + "↳" glyph
-                    // to read as "consequence of the above" without
-                    // adding a redundant label column.
                     const MoodRow = ({ text }) => (
                       <div style={{
                         display: "flex", marginTop: 1,
@@ -444,20 +450,15 @@ export const BlendExtractionExplorer = ({
                     );
                     return (
                       <div style={{ marginTop: 4 }}>
-                        {combination && (
-                          <Row
-                            label="register"
-                            body={
-                              <>
-                                <span style={{ color: theme.sageDeep, fontWeight: 500 }}>{combination.register}</span>
-                                {combination.note && <span style={{ color: theme.ash }}> — {combination.note}</span>}
-                              </>
-                            }
-                          />
+                        {registerZone && (
+                          <>
+                            <AxisRow label="register" bandId={registerZone.id} character={registerZone.character} />
+                            {registerZone.moodImpact && <MoodRow text={registerZone.moodImpact} />}
+                          </>
                         )}
-                        <Row label="temp" body={<><span style={{ color: theme.inkSoft }}>{tempZone.id}</span> — {tempZone.character}</>} />
+                        <AxisRow label="temp" bandId={tempZone.id} character={tempZone.character} headColor={theme.inkSoft} />
                         {tempZone.moodImpact && <MoodRow text={tempZone.moodImpact} />}
-                        <Row label="steep" body={<><span style={{ color: theme.inkSoft }}>{timeZone.id}</span> — {timeZone.character}</>} />
+                        <AxisRow label="steep" bandId={timeZone.id} character={timeZone.character} headColor={theme.inkSoft} />
                         {timeZone.moodImpact && <MoodRow text={timeZone.moodImpact} />}
                       </div>
                     );
