@@ -118,7 +118,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               mood graphically, so the label can stand on its own. */}
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center",
-            flexShrink: 0, gap: 14,
+            flexShrink: 0, gap: 6,
           }}>
             <div style={{
               width: 56, height: 56, borderRadius: "50%",
