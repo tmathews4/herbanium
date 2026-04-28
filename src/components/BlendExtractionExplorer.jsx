@@ -322,15 +322,8 @@ export const BlendExtractionExplorer = ({
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: theme.ash, lineHeight: 1.5,
                 }}>
-                  <div>
-                    <span style={{
-                      color: inRange ? theme.sageDeep : theme.terra,
-                      fontStyle: "normal", fontWeight: 500,
-                    }}>{selected.name}</span>
-                    {" "}
-                    <span style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
-                      {tempStr}{steepStr ? ` · ${steepStr}` : ""}
-                    </span>
+                  <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
+                    {tempStr}{steepStr ? ` · ${steepStr}` : ""}
                   </div>
                   {!inRange && out && (() => {
                     const t = tempFragment(out.tempDir);
