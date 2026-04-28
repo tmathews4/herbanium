@@ -148,7 +148,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
     dose: "1 tsp · 200ml",
     headsUp: "Strong calming herb — talk to your doctor before combining with sedative medications or alcohol, and skip driving after. Not for use during pregnancy.",
-    blurb: "16th-century Spanish naturalists read elaborate symbolism into its anatomy — the radial corona, the three styles, the five anthers — and the dramatic name stuck. The cup is quieter than the imagery: chrysin and apigenin in the leaves bind GABA receptors and reliably ease anxiety. The folk drowsiness is real and replicated in trials.",
+    blurb: "16th-century Spanish naturalists read elaborate symbolism into its anatomy — the radial corona, the three styles, the five anthers — and the dramatic name stuck. The cup is quieter than the imagery: chrysin and apigenin in the leaves bind GABA receptors, and trials report reductions in mild anxiety. The folk drowsiness is real and replicated in studies.",
     facts: [
       "Passionflower is indigenous to the southeastern United States — used by Cherokee, Houma, and Seminole peoples long before European contact.",
       "Passionflower — the name was given by 16th-century Spanish naturalists who read elaborate symbolism into the flower's anatomy: the radial corona, the three styles, the five anthers, all numerically loaded.",
@@ -276,10 +276,10 @@ const INGREDIENTS = {
     pairs: ["peppermint", "ginger", "chamomile", "lemonbalm", "rooibos", "licorice-root"],
     dose: "1 tsp crushed · 200ml",
     headsUp: "Heavy doses cautioned in pregnancy — verify.",
-    blurb: "Indian restaurants set a small bowl by the door for after-meal chewing; medieval Europeans worked through fennel seeds at long gatherings to keep the breath sweet. The anise note is anethole, which finds GABA receptors in the gut — anxiety quiets where you didn't know it was hiding. Both folk traditions point to the same receptor science would later name.",
+    blurb: "Indian restaurants set a small bowl by the door for after-meal chewing; medieval Europeans worked through fennel seeds at long gatherings to keep the breath sweet. The anise note is anethole, which finds GABA receptors in the gut — a quiet softens where you didn't know it was tight. Both folk traditions point to the same receptor science would later name.",
     facts: [
       "Indian restaurants set a small bowl of fennel seeds by the door; medieval Europeans chewed them through long gatherings.",
-      "Fennel seed's anise note is anethole, which finds GABA receptors in the gut — anxiety quiets where you didn't know it was hiding.",
+      "Fennel seed's anise note is anethole, which finds GABA receptors in the gut — a quiet softens where you didn't know it was tight.",
       "Roman gladiators were given fennel for courage; the Greek root marathon (the place) means 'fennel field' — Pheidippides ran through one to deliver news.",
       "Leaf, stalk, bulb, pollen, and seed of fennel are each a separate kitchen ingredient. Each tastes faintly of the others.",
       "Fennel pollen, sold by the gram in some specialty groceries, is one of the most concentrated forms of the plant's flavor — and one of the most expensive seasonings in Italian cooking.",
@@ -303,7 +303,7 @@ const INGREDIENTS = {
     blurb: "Karkadé in Cairo, sorrel in the Caribbean, agua de jamaica at a Mexican lunch — the red flower travels under many names. Pharaohs drank it as a royal beverage; modern trials show it modestly lowers blood pressure, with the active anthocyanins being the same pigments that color blueberries. Ruby in the cup, real medicine in the body.",
     facts: [
       "What looks like a red hibiscus flower in your cup is actually the calyx — the fleshy casing under the flower, not the petals.",
-      "Hibiscus tea genuinely lowers blood pressure in mild hypertension. Three cups a day for six weeks produced a measurable drop in clinical trials.",
+      "Clinical trials have shown hibiscus tea to modestly lower blood pressure in adults with mild hypertension — three cups a day for six weeks produced a measurable drop. Not a substitute for medical care.",
       "Egyptian karkadé, Mexican jamaica, and West African bissap are the same plant prepared in three traditions across three continents.",
       "Cold-brewed hibiscus (4 hours cold) extracts the same anthocyanins as a 16-minute hot brew — the only ingredient in the catalog where cold matches hot for potency.",
       "The tartness comes mostly from hibiscus acid — a compound named for this plant because it's found almost nowhere else.",

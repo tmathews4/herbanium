@@ -118,7 +118,7 @@ export const WAIT_FACTS = {
   fennel: [
     { type: "fact",      text: "Indian restaurants set a small bowl of fennel by the door for after-meal chewing. The seed's anise note is anethole, which finds GABA receptors in the gut." },
     { type: "tradition", text: "Medieval Europeans chewed fennel seeds through long gatherings to keep the breath sweet and the stomach quiet." },
-    { type: "fact",      text: "Both folk traditions — Indian and European — point to the same receptor that science would later name. Anxiety quiets where you didn't know it was hiding." },
+    { type: "fact",      text: "Both folk traditions — Indian and European — point to the same receptor that science would later name. A quiet softens where you didn't know it was tight." },
   ],
   tulsi: [
     { type: "tradition", text: "Indian households grow tulsi at the front step — a threshold plant in daily life. Tradition asks permission before harvesting." },
