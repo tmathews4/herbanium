@@ -106,30 +106,35 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           ) : <div style={{ width: 40 }} />}
         </div>
 
-        <div style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
-          {/* Icon + 'for {mood}' label column. The column stretches to
-              match the title/subtitle/tags column on the right; icon
-              floats to the top to sit alongside the title; the mood
-              label sits a fixed gap below the icon so it lines up
-              with the first row of tags on the right. Icon circle
-              sized so its visual weight matches the title's row
-              height rather than dominating. The 'for' prefix was
-              dropped — the icon directly above already declares the
-              mood graphically, so the label can stand on its own. */}
+        {/* Header grid — three rows × two columns. Icon spans rows
+            1-2 in the left column (alongside title + subtitle on the
+            right). Mood label lives in row 3 of the left column,
+            which is the same grid row as the tag tiles on the right
+            — so the label and the first tag row share a row line and
+            naturally align without pixel-level math. */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          columnGap: 14,
+          rowGap: 0,
+          alignItems: "start",
+        }}>
           <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            flexShrink: 0, gap: 6,
+            gridColumn: 1, gridRow: "1 / span 2",
+            justifySelf: "center", alignSelf: "start",
+            width: 56, height: 56, borderRadius: "50%",
+            background: theme.ivory, border: `1px solid ${theme.rule}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: "50%",
-              background: theme.ivory, border: `1px solid ${theme.rule}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              {(() => {
-                const Icon = MOOD_ICONS[b.mood] || Flower;
-                return <Icon size={32} />;
-              })()}
-            </div>
+            {(() => {
+              const Icon = MOOD_ICONS[b.mood] || Flower;
+              return <Icon size={32} />;
+            })()}
+          </div>
+          <div style={{
+            gridColumn: 1, gridRow: 3,
+            justifySelf: "center", alignSelf: "center",
+          }}>
             {EFFECT_DESCRIPTIONS[b.mood] ? (
               <button
                 onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
@@ -151,16 +156,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               </span>
             )}
           </div>
-          <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
+          <div style={{ gridColumn: 2, gridRow: 1, textAlign: "center", minWidth: 0 }}>
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
-            {/* Subtitle stays on one line at any width by auto-
-                shrinking the font-size to fit. Avoids both wrapping
-                (which pushes the signal tags and recipe down
-                inconsistently) and ellipsis truncation (which hid
-                content). Falls back to no shrink on browsers
-                without ResizeObserver. */}
+          </div>
+          {/* Subtitle stays on one line at any width by auto-
+              shrinking the font-size to fit. Avoids both wrapping
+              (which pushes the signal tags and recipe down
+              inconsistently) and ellipsis truncation (which hid
+              content). Falls back to no shrink on browsers
+              without ResizeObserver. */}
+          <div style={{ gridColumn: 2, gridRow: 2, textAlign: "center", minWidth: 0 }}>
             <FitOneLine
               text={b.subtitle}
               baseSize={13}
@@ -170,7 +177,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 color: theme.ash, marginTop: 4, lineHeight: 1.15,
               }}
             />
-
+          </div>
+          {/* Tag row sits at gridRow 3 alongside the mood label so
+              the two share a row baseline. The wrapping div takes
+              the grid placement; the tag content lives inside. */}
+          <div style={{ gridColumn: 2, gridRow: 3, textAlign: "center", minWidth: 0 }}>
             {/* Signal tag tiles — centered under the name/subtitle column,
                 not the full hero, so they read as belonging to the title. */}
             {(() => {
