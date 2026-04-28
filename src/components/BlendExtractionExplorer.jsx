@@ -629,16 +629,11 @@ export const BlendExtractionExplorer = ({
                     <>
                       <div style={{ marginTop: 1 }}>
                         <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
-                          {blendSev === "yellow" ? "drifting" : "merged profile"}
+                          {blendSev === "yellow"
+                            ? <>drifting → <span style={{ color: theme.ash, fontWeight: 400 }}>{yellows.map(y => y.name).join(", ")}</span></>
+                            : "merged profile"}
                         </span>
                       </div>
-                      {yellows.length > 0 && (
-                        <Row
-                          label="drifting"
-                          body={yellows.map(y => y.name).join(", ")}
-                          headColor={theme.ochre}
-                        />
-                      )}
                       {moods.length > 0 && (
                         <Row label="moods" body={moods.join(" · ")} />
                       )}
