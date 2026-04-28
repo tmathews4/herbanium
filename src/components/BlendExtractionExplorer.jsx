@@ -340,6 +340,22 @@ export const BlendExtractionExplorer = ({
               const combination = selected.combination;
               const legacyZone = selected.activeZone;
 
+              // Single-word axis flags rendered in-line with the
+              // numeric values: "(over)" / "(under)" tells the user
+              // which axis is past its bound without taking a whole
+              // line. overPull collapses into the steep flag too —
+              // it's logically a steeper-than-over-steep state.
+              const tempFlag = (state === "over-temp" ? "over"
+                : state === "under-temp" ? "under" : null);
+              const timeFlag = (state === "over-pull" ? "over-pulled"
+                : state === "over-steep" ? "over"
+                : state === "under-steep" ? "under" : null);
+              const Flag = ({ children }) => (
+                <span style={{
+                  color: theme.terra, fontStyle: "normal", fontWeight: 500,
+                  fontFamily: ff.sans, fontSize: 10.5,
+                }}>{" "}({children})</span>
+              );
               return (
                 <div style={{
                   marginTop: 8, paddingLeft: 10,
@@ -349,45 +365,27 @@ export const BlendExtractionExplorer = ({
                   textAlign: "left",
                 }}>
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
-                    {tempStr}{steepStr ? ` · ${steepStr}` : ""}
+                    {tempStr}{tempFlag && <Flag>{tempFlag}</Flag>}
+                    {steepStr ? ` · ${steepStr}` : ""}
+                    {timeFlag && <Flag>{timeFlag}</Flag>}
                   </div>
 
-                  {/* State-driven cascade. Per-axis detail (when both
-                      axis zones resolve) replaces the cross-register
-                      framing — temp says one thing, time says another,
-                      and a combination[] entry names the emergent
-                      register if notable. */}
+                  {/* Edge descriptions when an axis is out of bounds.
+                      Parens above carry the "what" — these give the
+                      "what's happening as a result." */}
                   {state === "over-pull" && (
-                    <>
-                      <div style={{ marginTop: 1 }}>
-                        <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-                          over-pulled
-                        </span>
-                      </div>
-                      <div style={{ marginTop: 1, color: theme.ash }}>
-                        {meta.overPull?.reason || "the cup has crossed into unpleasant"}
-                      </div>
-                    </>
+                    <div style={{ marginTop: 1, color: theme.ash }}>
+                      {meta.overPull?.reason || "the cup has crossed into unpleasant"}
+                    </div>
                   )}
                   {(state === "over-temp" || state === "under-temp" ||
-                    state === "over-steep" || state === "under-steep") && (
-                    <>
-                      <div style={{ marginTop: 1 }}>
-                        <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-                          {state === "over-temp" ? "above its window"
-                           : state === "under-temp" ? "below its window"
-                           : state === "over-steep" ? "over-steeped" : "under-steeped"}
-                        </span>
-                      </div>
-                      {(() => {
-                        const edge = state === "over-temp" ? edges.overTemp
-                          : state === "under-temp" ? edges.underTemp
-                          : state === "over-steep" ? edges.overSteep
-                          : edges.underSteep;
-                        return edge ? <div style={{ marginTop: 1 }}>{edge}</div> : null;
-                      })()}
-                    </>
-                  )}
+                    state === "over-steep" || state === "under-steep") && (() => {
+                    const edge = state === "over-temp" ? edges.overTemp
+                      : state === "under-temp" ? edges.underTemp
+                      : state === "over-steep" ? edges.overSteep
+                      : edges.underSteep;
+                    return edge ? <div style={{ marginTop: 1 }}>{edge}</div> : null;
+                  })()}
                   {state && state.startsWith("standalone-") && (
                     <>
                       <div style={{ marginTop: 1 }}>
