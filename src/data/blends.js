@@ -415,7 +415,7 @@ const BLENDS = [
   {
     id: "exp-tom-foolery",
     name: "Tom Foolery",
-    subtitle: "Moroccan Mint with a tulsi exhale — focus where focus wasn't promised",
+    subtitle: "The maker's sneaky cup",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
       { id: "spearmint", g: 0.5, role: "accent" },
