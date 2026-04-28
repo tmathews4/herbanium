@@ -614,7 +614,7 @@ export const BlendExtractionExplorer = ({
           <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 8 }}>
             {brew.moodSummary?.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                <span style={labelStyle}>Primary Mood</span>
+                <span style={labelStyle}>Blended Mood</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {brew.moodSummary.map(t => summaryPill(t, theme.sageDeep))}
                 </div>
@@ -622,7 +622,7 @@ export const BlendExtractionExplorer = ({
             )}
             {brew.flavorSummary?.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                <span style={labelStyle}>Primary Flavors</span>
+                <span style={labelStyle}>Blended Flavor</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {brew.flavorSummary.map(t => summaryPill(t, theme.terra))}
                 </div>
