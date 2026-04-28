@@ -25,6 +25,7 @@ import { HintCard } from "./HintCard";
 import { Sprig } from "./icons";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
+import { usePersistedState } from "../hooks/usePersistedState";
 import {
   buildElementalNaming, flavorLineFor,
 } from "../data/elementalAdjectives";
@@ -59,6 +60,11 @@ export const BestiaryView = ({
   dismissBestiaryHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
+  // Swap-mode toggle. When on, tapping a featured tile enters
+  // "swap-in-progress" mode (the existing behavior). When off,
+  // tapping a featured tile just opens the description card —
+  // simpler read-only browsing for users who've finished pinning.
+  const [swapMode, setSwapMode] = usePersistedState("bestiarySwapMode", true);
 
   const attrCtx = buildAttributeContext({
     sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
@@ -267,6 +273,37 @@ export const BestiaryView = ({
             : "log elemental"}
         </button>
       </div>
+      {/* Swap-mode toggle — small switch right under the header.
+          Off = tapping a featured tile just opens its description.
+          On  = tapping a featured tile enters swap-in-progress so
+          the user can replace it from the reserve. */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
+        gap: 8, marginBottom: 6,
+      }}>
+        <span style={{
+          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>Swap mode</span>
+        <button
+          onClick={() => setSwapMode(!swapMode)}
+          aria-label={swapMode ? "disable swap mode" : "enable swap mode"}
+          style={{
+            width: 32, height: 18, borderRadius: 999,
+            border: "none", cursor: "pointer", padding: 0,
+            background: swapMode ? theme.terra : theme.rule,
+            position: "relative",
+          }}
+        >
+          <span style={{
+            position: "absolute", top: 2,
+            left: swapMode ? 16 : 2,
+            width: 14, height: 14, borderRadius: "50%",
+            background: theme.cream,
+            transition: "left 0.18s ease",
+          }} />
+        </button>
+      </div>
       <div style={{
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
         color: theme.ash, lineHeight: 1.45, marginBottom: 12,
@@ -309,6 +346,7 @@ export const BestiaryView = ({
               isFeatured={isFeatured}
               toggleFeatured={toggleFeatured}
               swapFeatured={swapFeatured}
+              swapMode={swapMode}
               openId={openAttrId}
               setOpenId={setOpenAttrId}
               openAttr={openAttr}
@@ -336,7 +374,7 @@ export const BestiaryView = ({
 
 const AttributeShelf = ({
   creationCard, featured, reserve, featuredLimit,
-  isFeatured, toggleFeatured, swapFeatured,
+  isFeatured, toggleFeatured, swapFeatured, swapMode = true,
   openId, setOpenId, openAttr,
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -408,8 +446,11 @@ const AttributeShelf = ({
         return;
       }
       // 3. Featured tile (non-creation): tap toggles swap mode
-      //    on that slot. Tap same again cancels.
-      if (isFeaturedTile && !isCreation && swapFeatured) {
+      //    on that slot. Tap same again cancels. Skipped entirely
+      //    when swap mode is off — falls through to default detail
+      //    open behavior, so users in read-only browsing don't
+      //    accidentally arm a swap.
+      if (swapMode && isFeaturedTile && !isCreation && swapFeatured) {
         setSwappingId(prev => prev === a.id ? null : a.id);
         setSelecting(false);
         // Also surface the detail card while in swap mode so the
