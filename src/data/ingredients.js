@@ -238,9 +238,11 @@ const INGREDIENTS = {
     // delicate than peppermint's menthol and more readily driven off
     // by aggressive heat. Maghrebi tradition (Moroccan Mint) brews
     // spearmint at 85-90°C for exactly this reason.
-    // timeS floor 180s: light spearmint is a real cup; carvone
-    // releases as quickly as menthol does.
-    caffeine: 0, tempC: [85, 100], timeS: [180, 420],
+    // timeS floor 120s: 2-min cup is a deliberately permissive lower
+    // bound — accepts the very-light Maghrebi short-pour register and
+    // keeps low-temp blends like Tom Foolery in range without tripping
+    // an under-steep warning.
+    caffeine: 0, tempC: [85, 100], timeS: [120, 420],
     effects: [["cooling", 4], ["digestive", 4], ["uplifting", 3], ["calm", 3]],
     flavors: ["minty", "sweet", "grassy", "cool"],
     pairs: ["lemonbalm", "sencha", "rose", "chamomile", "gunpowder"],
@@ -369,11 +371,13 @@ const INGREDIENTS = {
 
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
-    // timeS floor 180s: Indian household practice and most packaged
-    // tulsi labels say 3-5 min; eugenol and methyl chavicol release
-    // fast. The longer end (5-7) pulls more rosmarinic and ursolic
-    // acid for the chronic-tonic register.
-    caffeine: 0, tempC: [95, 100], timeS: [180, 420],
+    // timeS floor 120s: 2-min cup is a deliberately permissive lower
+    // bound — eugenol and methyl chavicol release fast enough that a
+    // very-short steep is still a real cup, and the bound keeps
+    // low-temp blends like Tom Foolery in range without tripping an
+    // under-steep warning. Longer end (5-7) still pulls more
+    // rosmarinic and ursolic acid for the chronic-tonic register.
+    caffeine: 0, tempC: [95, 100], timeS: [120, 420],
     effects: [["calm", 4], ["soothing", 4], ["grounding", 3], ["uplifting", 3], ["digestive", 3], ["warming", 2]],
     flavors: ["spiced", "clove", "peppery", "sweet"],
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],
