@@ -333,6 +333,79 @@ const BLENDS = [
     tradition: "European cold-care",
     effects: [["soothing", 3], ["warming", 2], ["uplifting", 2]],
   },
+  {
+    id: "earl-grey",
+    name: "Earl Grey",
+    subtitle: "Calabrian bergamot over Ceylon — the British perfume cup",
+    ingredients: [
+      { id: "ceylon",   g: 2.2 },
+      { id: "bergamot", g: 0.25, role: "accent" },
+    ],
+    tempC: 95, timeS: 240, ml: 250,
+    mood: "uplifting", flavor: "citrus",
+    public: true,
+    tradition: "British",
+    effects: [["uplifting", 4], ["energy", 3], ["focus", 3], ["calm", 2]],
+  },
+  {
+    id: "lady-grey",
+    name: "Lady Grey",
+    subtitle: "bergamot softened with lemon and orange — Earl Grey, lighter on its feet",
+    ingredients: [
+      { id: "ceylon",      g: 2.0 },
+      { id: "bergamot",    g: 0.15, role: "accent" },
+      { id: "lemon-peel",  g: 0.2, role: "accent" },
+      { id: "orange-peel", g: 0.2, role: "accent" },
+    ],
+    tempC: 95, timeS: 240, ml: 250,
+    mood: "uplifting", flavor: "citrus",
+    public: true,
+    tradition: "British (Twinings, 1992)",
+    effects: [["uplifting", 4], ["energy", 3], ["focus", 2], ["digestive", 2]],
+  },
+  {
+    id: "russian-lemon",
+    name: "Russian Tea with Lemon",
+    subtitle: "chai s limonom — strong black tea cut with citrus, samovar-style",
+    ingredients: [
+      { id: "ceylon",     g: 2.5 },
+      { id: "lemon-peel", g: 0.4, role: "accent" },
+    ],
+    tempC: 100, timeS: 300, ml: 250,
+    mood: "energy", flavor: "citrus",
+    public: true,
+    tradition: "Russian",
+    effects: [["energy", 4], ["uplifting", 3], ["digestive", 2], ["warming", 2]],
+  },
+  {
+    id: "canarino",
+    name: "Canarino",
+    subtitle: "the Italian after-dinner cup — lemon peel, hot water, that's the whole thing",
+    ingredients: [
+      { id: "lemon-peel", g: 1.5 },
+    ],
+    tempC: 95, timeS: 240, ml: 200,
+    mood: "digestive", flavor: "citrus",
+    public: true,
+    tradition: "Italian household",
+    effects: [["digestive", 3], ["uplifting", 3], ["cooling", 2]],
+  },
+  {
+    id: "apfeltee",
+    name: "Apfeltee",
+    subtitle: "Bavarian winter staple — dried apple, orange peel, cinnamon, clove",
+    ingredients: [
+      { id: "dried-apple", g: 1.5 },
+      { id: "orange-peel", g: 0.5 },
+      { id: "cinnamon",    g: 0.3, role: "accent" },
+      { id: "cloves",      g: 0.05, role: "accent" },
+    ],
+    tempC: 97, timeS: 360, ml: 250,
+    mood: "comfort", flavor: "sweet",
+    public: true,
+    tradition: "Bavarian / Austrian",
+    effects: [["comfort", 4], ["warming", 3], ["soothing", 3]],
+  },
 
   // ── Experimental house customs ─────────────────────────────
   // Not traditional — recipes the catalog's chemistry suggests but
@@ -500,35 +573,6 @@ const BLENDS = [
     mood: "calm", flavor: "floral",
     public: true, experimental: true, house: true,
     effects: [["calm", 4], ["uplifting", 3], ["soothing", 3]],
-  },
-
-  {
-    id: "exp-apfeltee",
-    name: "Apfeltee",
-    subtitle: "Bavarian winter staple — dried apple, orange peel, cinnamon, clove",
-    ingredients: [
-      { id: "dried-apple", g: 1.5 },
-      { id: "orange-peel", g: 0.5 },
-      { id: "cinnamon",    g: 0.3, role: "accent" },
-      { id: "cloves",      g: 0.05, role: "accent" },
-    ],
-    tempC: 97, timeS: 360, ml: 250,
-    mood: "comfort", flavor: "sweet",
-    public: true, experimental: true, house: true,
-    effects: [["comfort", 4], ["warming", 3], ["soothing", 3]],
-  },
-
-  {
-    id: "exp-canarino",
-    name: "Canarino",
-    subtitle: "Italian after-dinner cup — lemon peel, plain hot water, that's the whole thing",
-    ingredients: [
-      { id: "lemon-peel", g: 1.5 },
-    ],
-    tempC: 95, timeS: 240, ml: 200,
-    mood: "digestive", flavor: "citrus",
-    public: true, experimental: true, house: true,
-    effects: [["digestive", 3], ["uplifting", 3], ["cooling", 2]],
   },
 
   {
