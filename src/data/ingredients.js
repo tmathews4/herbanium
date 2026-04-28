@@ -204,7 +204,7 @@ const INGREDIENTS = {
     pairs: ["lemonbalm", "ginger", "rooibos", "fennel", "lemongrass", "yerba-mate", "elderflower", "linden", "nettle", "dandelion-leaf", "licorice-root"],
     dose: "1 tsp · 200ml",
     headsUp: "Can worsen acid reflux for some.",
-    blurb: "Greek and Roman tables ended with mint long before anyone knew about TRPM8 — the cold-sensing receptor that menthol hijacks. The cool isn't temperature; it's a lie the tongue happily believes. The gut, separately, gets real antispasmodic relief, which is why folk medicine prescribed mint after meals across two thousand years.",
+    blurb: "Greek and Roman tables ended with mint long before anyone knew about TRPM8 — the cold-sensing receptor that menthol hijacks. The cool isn't temperature; it's a lie the tongue happily believes. The gut, separately, settles real cramping, which is why folk medicine prescribed mint after meals across two thousand years.",
     facts: [
       "Peppermint isn't an ancient species — it's a natural hybrid of water mint and spearmint, first formally identified in an English mint field in 1696.",
       "Peppermint oil has one of the strongest clinical evidence bases of any herbal medicine — meta-analyses of 12 trials in 835 patients show it reduces irritable bowel syndrome symptoms more than placebo, with a number-needed-to-treat of 4.",

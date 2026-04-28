@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node tests/literature.test.mjs && node tests/curated-blends.test.mjs && node tests/ingredient-fit.test.mjs && node tests/blend-perception.test.mjs && node tests/calibration.test.mjs && node tests/perception-extras.test.mjs",
+    "test": "node tests/literature.test.mjs && node tests/curated-blends.test.mjs && node tests/ingredient-fit.test.mjs && node tests/blend-perception.test.mjs && node tests/calibration.test.mjs && node tests/perception-extras.test.mjs && node tests/tone-guardrails.test.mjs",
     "preview-ingredient": "node tools/preview-ingredient.mjs",
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
