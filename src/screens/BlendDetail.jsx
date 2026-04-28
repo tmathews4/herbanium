@@ -243,15 +243,28 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           }
           if (b.experimental) {
             const isHouse = b.id === "exp-tom-foolery";
-            tags.push({
-              label: isHouse ? "house staple" : "experiment",
-              summary: isHouse ? "Herbanium house signature." : "Algorithmic experiment.",
-              body: isHouse
-                ? "The one experimental treated as a permanent catalogue staple — undeletable, always present."
-                : "The catalog's chemistry suggests this combination but no tradition has codified it. Try, log, judge for yourself.",
-              tone: "terra",
-              fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
-            });
+            if (b.twist) {
+              // Herbanium Twist tag takes precedence — same experimental
+              // status, but the user-facing framing is "tradition with a
+              // deliberate deviation," which is the more useful story.
+              tags.push({
+                label: "twist",
+                summary: "Herbanium Twist — a tradition with one or two intentional changes.",
+                body: b.twistNote || "A traditional preparation reframed with one or two accent additions or brewing changes. The notes panel on this blend explains why the change works.",
+                tone: "terra",
+                fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
+              });
+            } else {
+              tags.push({
+                label: isHouse ? "house staple" : "experiment",
+                summary: isHouse ? "Herbanium house signature." : "Algorithmic experiment.",
+                body: isHouse
+                  ? "The one experimental treated as a permanent catalogue staple — undeletable, always present."
+                  : "The catalog's chemistry suggests this combination but no tradition has codified it. Try, log, judge for yourself.",
+                tone: "terra",
+                fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
+              });
+            }
           }
           if (flagged) {
             tags.push({

@@ -1227,6 +1227,13 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           } else if (catalogueFilter === "traditional") {
             catVisible = traditional;
             catEmpty = "No traditional blends to show.";
+          } else if (catalogueFilter === "twists") {
+            // Herbanium Twists — experimentals that deviate from a
+            // traditional with one or two accent additions or
+            // brewing changes. Marked twist:true with a twistNote
+            // explaining why the deviation works.
+            catVisible = experimental.filter(b => b.twist);
+            catEmpty = "No Herbanium Twists to show.";
           } else if (catalogueFilter === "house recipes" || catalogueFilter === "experimental") {
             catVisible = experimental;
             catEmpty = "No house recipes to show.";
@@ -1240,7 +1247,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             <div style={{ marginTop: 4 }}>
               <div style={{ marginBottom: 10 }}>
                 <ChipRows
-                  items={["favorites", "all", "traditional", "house recipes", "calm", "focus", "energy", "comfort"]}
+                  items={["favorites", "all", "traditional", "twists", "house recipes", "calm", "focus", "energy", "comfort"]}
                   renderItem={(f) => (
                     <Chip
                       key={f}
@@ -1308,6 +1315,18 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   Herbanium's own recipes — combinations the catalog's chemistry
                   suggests but no tradition has codified. Try, log, judge for
                   yourself.
+                </div>
+              )}
+
+              {catalogueFilter === "twists" && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+                }}>
+                  Traditional preparations with one or two intentional
+                  deviations — a layered accent, a swapped base, a tighter
+                  steep. Each twist comes with a short note on why the
+                  change works.
                 </div>
               )}
 
