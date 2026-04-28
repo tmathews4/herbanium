@@ -128,6 +128,12 @@ only time varies at a fixed temp. The four-part structure captures
 both dimensions without requiring a full 2D temp×time grid per
 ingredient.
 
+> **Note (May 2026):** This section is supplemented by the multi-axis
+> brewing model in section 6e below — `tempZones`, `timeZones`,
+> `registerZones`. The four-part structure here remains useful as
+> chemistry / extraction reference; the zones in 6e are what the
+> live UI surfaces.
+
 ### 6a. GENTLE (low temp / short time)
 
 | Field | Value |
@@ -217,6 +223,66 @@ time shifts should apply relative to each anchor's timeS rather than
 a global value.
 
 sources: [ref-id-1, ref-id-2]
+
+---
+
+### 6e. Multi-axis brewing model — what surfaces in the live UI
+
+Three independent inflection axes. Every band needs a `character`
+(one short lowercase sentence describing the qualitative impact)
+and a `moodImpact` (one short phrase naming what shifts on the
+catalog mood vocabulary). No chemistry compound names in either —
+volatiles become "the perfumed top," polyphenols become "a slow
+herbal depth," etc.
+
+#### tempZones (4 bands)
+
+| id | tempC range | character | moodImpact |
+|---|---|---|---|
+| under | [pad-low, cool-min] | | |
+| cool  | | | |
+| warm  | | | |
+| hot   | [hot-min, hard-max] | | |
+
+#### timeZones (5 bands)
+
+| id | timeS range | character | moodImpact |
+|---|---|---|---|
+| under  | [0, short-min] | | |
+| short  | | | |
+| medium | | | |
+| long   | | | |
+| over   | [long-max, overPull] | | |
+
+#### registerZones (5 holistic registers)
+
+Map every (tempBand+steepBand) pairing to one of: `faint`, `aromatic`,
+`balanced`, `tonic`, `overpulled`. Coverage must be exhaustive across
+all 4×5 = 20 pairings.
+
+**Default register mapping** (use unless ingredient-specific reason
+to deviate):
+
+| temp \ steep | under | short | medium | long | over |
+|---|---|---|---|---|---|
+| under | faint | faint | faint | faint | faint |
+| cool | faint | aromatic | aromatic | balanced | overpulled |
+| warm | faint | aromatic | balanced | tonic | overpulled |
+| hot | faint | aromatic | balanced | tonic | overpulled |
+
+For each register, write `character` + `moodImpact` describing the
+holistic cup at that register.
+
+#### overPull threshold
+
+| Field | Value |
+|---|---|
+| timeS | (the steep beyond which the cup turns unpleasant) |
+| reason | (one short clause — "tannins dominate, eugenol turns medicinal") |
+
+This is the ONLY assertive-warning trigger in the new model. Past
+this threshold, the pill turns red and the warning fires regardless
+of zone resolution.
 
 ---
 

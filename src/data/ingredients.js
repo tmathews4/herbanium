@@ -41,10 +41,33 @@ const INGREDIENTS = {
 
   chamomile: {
     name: "Chamomile", latin: "Matricaria chamomilla", category: "flower",
-    // timeS [240, 420]: most packaged chamomile labels say 4–6 min; the
-    // light end captures the everyday cup, the long end the apigenin-
-    // forward sleep cup.
+    // Envelope stays narrow [95-100]°C / [240-420]s — that's where
+    // the centroid-math (computeBrewProfile) expects the canonical
+    // brewing window. tempZones/timeZones below extend wider for
+    // explorer pill descriptions; outsider warnings are suppressed
+    // when zone resolution covers the brew.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "honey notes barely release.", moodImpact: "calm only as a hint" },
+      { id: "cool",  tempC: [85, 92], character: "honey-floral tops, gentle body.", moodImpact: "calm forward; sleepy held back" },
+      { id: "warm",  tempC: [92, 97], character: "full chamomile character, apigenin extracting cleanly.", moodImpact: "calm and soothing both fully present" },
+      { id: "hot",   tempC: [97, 100], character: "deepest extraction, apigenin maxed.", moodImpact: "sleepy amplifies; calm at full anchor strength" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, top-floral only.", moodImpact: "the cup barely registers" },
+      { id: "short",  timeS: [120, 240], character: "honey and apple notes lift.", moodImpact: "calm starts to settle" },
+      { id: "medium", timeS: [240, 420], character: "full character, apigenin pulled.", moodImpact: "the household calming cup arrives" },
+      { id: "long",   timeS: [420, 600], character: "deeper apigenin, slight hay-bitter.", moodImpact: "sleepy deepens; calm holds" },
+      { id: "over",   timeS: [600, 720], character: "hay-bitter sharpening past the floral.", moodImpact: "calm strained as bitter rises" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "flavor and effect both held back.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "honey-floral lift, light on the tongue.", moodImpact: "calm only as a quiet promise" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the household calming cup — full character without weight.", moodImpact: "calm and soothing in clean balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, sleep-leaning, apigenin-forward.", moodImpact: "sleepy comes forward; calm at anchor strength" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "hay-bitter dominates.", moodImpact: "the calm is gone, replaced by edge" },
+    ],
+    overPull: { timeS: 720, reason: "hay-bitter and astringency dominate" },
     effects: [["calm", 5], ["sleepy", 3], ["soothing", 4]],
     flavors: ["honey", "apple", "floral", "hay"],
     pairs: ["lavender", "lemonbalm", "rose", "passionflower", "fennel", "linden"],
@@ -73,7 +96,32 @@ const INGREDIENTS = {
   },
   lavender: {
     name: "Lavender", latin: "Lavandula angustifolia", category: "flower",
+    // Envelope stays at the canonical lavender brewing window
+    // (perfume blooms cleanest 90-95°C / 3-4 min). Zones below
+    // extend wider for the live explorer; overPull at 360s where
+    // the cup turns soapy.
     caffeine: 0, tempC: [90, 95], timeS: [180, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "linalool barely lifts.", moodImpact: "calm only as a hint" },
+      { id: "cool",  tempC: [80, 90], character: "soft floral perfume, no soapiness.", moodImpact: "calm forward; soothing gentle" },
+      { id: "warm",  tempC: [90, 95], character: "full lavender perfume.", moodImpact: "calm and soothing in clean balance" },
+      { id: "hot",   tempC: [95, 100], character: "perfume strong but soap edge starting.", moodImpact: "calm holds; cup risks tipping" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, just a wash.", moodImpact: "the cup barely registers" },
+      { id: "short",  timeS: [120, 180], character: "soft top-perfume.", moodImpact: "calm starts to settle" },
+      { id: "medium", timeS: [180, 240], character: "full lavender bouquet.", moodImpact: "calm at its cleanest" },
+      { id: "long",   timeS: [240, 300], character: "perfume deepening; soap-edge approaching.", moodImpact: "calm strong but cup tightens" },
+      { id: "over",   timeS: [300, 360], character: "soapy and camphor-medicinal.", moodImpact: "the calm is overshadowed by aggression" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "flavor and effect both held back.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "soft, perfumed, light.", moodImpact: "calm forward; soothing held back" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "lavender at its cleanest — bouquet without aggression.", moodImpact: "calm and soothing in clean balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, sleep-leaning, perfume-saturated.", moodImpact: "sleepy creeps in; calm holds at peak" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "soapy and medicinal — the perfume turned aggressive.", moodImpact: "the calm is gone, edges replace it" },
+    ],
+    overPull: { timeS: 360, reason: "lavender turns soapy, the perfume overwhelms" },
     effects: [["calm", 4], ["sleepy", 2], ["soothing", 3]],
     flavors: ["floral", "pine", "camphor"],
     pairs: ["chamomile", "rose", "lemonbalm", "passionflower", "linden"],

@@ -1358,8 +1358,14 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   //   - role: "lead" or "accent" — the UI can render leads more
   //     prominently; the test layer uses this to enforce stricter
   //     rules on leads while accepting accent stretches.
+  // Outsider warnings fire only when an ingredient's brew is
+  // outside its envelope AND the multi-axis zone resolver doesn't
+  // cover the value. Ingredients with full zone coverage describe
+  // every reachable slider point through the in-zones cascade,
+  // so the older outsider warning would double-report the same
+  // information.
   const rawOutsiders = contributions
-    .filter(c => !c.inRange && c.role !== "catalyst")
+    .filter(c => !c.inRange && c.role !== "catalyst" && !(c.tempZone && c.timeZone))
     .map(c => ({
       name: c.name,
       role: c.role,

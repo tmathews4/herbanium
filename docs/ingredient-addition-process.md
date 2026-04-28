@@ -36,6 +36,93 @@ Reach for the **deeper schema** (safetyFlags/confidenceMarkers/
 preparationPattern/variants) only for medicinal-mushroom or root-decoction
 ingredients where evidence levels matter.
 
+#### Multi-axis brewing model (REQUIRED for all new ingredients)
+
+Every ingredient carries three independent inflection axes that the
+explorer pill detail surfaces live as the user drags the sliders:
+
+```
+register (faint/aromatic/balanced/tonic/overpulled)
+  ↳ <character>
+  ↳ <moodImpact>
+temp (under/cool/warm/hot)
+  ↳ <character>
+  ↳ <moodImpact>
+steep (under/short/medium/long/over)
+  ↳ <character>
+  ↳ <moodImpact>
+```
+
+Required fields on the ingredient:
+
+```js
+{
+  // Outer envelope — must include slider padding (±10°C / ±120s)
+  // so any reachable value lands in some band on each axis.
+  tempC: [outerMin, outerMax],
+  timeS: [outerMin, outerMax],
+
+  tempZones: [
+    // 4 bands: under / cool / warm / hot. Each covers a contiguous
+    // tempC range. "under" should extend down to the slider's pad
+    // floor (typically envelopeMin - 10).
+    { id: "under", tempC: [...], character: "...", moodImpact: "..." },
+    { id: "cool",  tempC: [...], character: "...", moodImpact: "..." },
+    { id: "warm",  tempC: [...], character: "...", moodImpact: "..." },
+    { id: "hot",   tempC: [...], character: "...", moodImpact: "..." },
+  ],
+
+  timeZones: [
+    // 5 bands: under / short / medium / long / over. "over" sits
+    // between the long band and the overPull threshold; over-pull
+    // is a more severe state that fires the assertive warning.
+    { id: "under",  timeS: [...], character: "...", moodImpact: "..." },
+    { id: "short",  timeS: [...], character: "...", moodImpact: "..." },
+    { id: "medium", timeS: [...], character: "...", moodImpact: "..." },
+    { id: "long",   timeS: [...], character: "...", moodImpact: "..." },
+    { id: "over",   timeS: [...], character: "...", moodImpact: "..." },
+  ],
+
+  registerZones: [
+    // 5 holistic registers. Each lists the (tempBand+steepBand)
+    // pairings that yield it via the `when` array. Coverage must
+    // be exhaustive across all 4×5 = 20 pairings.
+    { id: "faint",      when: [...], character: "...", moodImpact: "..." },
+    { id: "aromatic",   when: [...], character: "...", moodImpact: "..." },
+    { id: "balanced",   when: [...], character: "...", moodImpact: "..." },
+    { id: "tonic",      when: [...], character: "...", moodImpact: "..." },
+    { id: "overpulled", when: [...], character: "...", moodImpact: "..." },
+  ],
+
+  overPull: { timeS: <threshold>, reason: "..." },  // assertive warning past this
+}
+```
+
+**Voice rules for character + moodImpact:**
+
+- `character` — a single short sentence in lowercase, just the
+  qualitative impact. The band id in `(parens)` does the framing,
+  so don't repeat it ("cool extraction" → "perfume releases gently").
+- `moodImpact` — a single phrase naming what shifts on the cup's
+  effect axes. Use catalog mood vocabulary (calm, soothing, uplifting,
+  grounding, focus, energy, digestive, warming, cooling).
+- No chemistry compound names anywhere user-visible. Eugenol becomes
+  "the perfumed clove-spice top"; rosmarinic acid becomes "a slow
+  herbal depth."
+
+**Standard register coverage (use as the default mapping unless the
+ingredient has a specific reason to deviate):**
+
+| temp \ steep | under | short | medium | long | over |
+|---|---|---|---|---|---|
+| under | faint | faint | faint | faint | faint |
+| cool | faint | aromatic | aromatic | balanced | overpulled |
+| warm | faint | aromatic | balanced | tonic | overpulled |
+| hot | faint | aromatic | balanced | tonic | overpulled |
+
+The reference implementation lives on `tulsi` in `src/data/ingredients.js` —
+copy its shape when authoring new ingredients.
+
 **Voice & tone guardrails** — match the existing catalog:
 - `headsUp`: short, plain English. "Talk to your doctor if…" beats "Consult
   a clinician regarding…". Name the practical risk first, the mechanism
