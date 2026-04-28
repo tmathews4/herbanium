@@ -121,6 +121,11 @@ export const BlendExtractionExplorer = ({
   );
   const [openFlavor, setOpenFlavor] = useState(null);
   const [openEffect, setOpenEffect] = useState(null);
+  // Ingredient pill currently selected for the under-row detail
+  // line. Default behavior is to show the first ingredient's window
+  // unless the user clicks another pill — see ensureValidSelection
+  // and the inline default below.
+  const [selectedIngId, setSelectedIngId] = useState(null);
   // Predicted-taste pill row caps at 6; the rest hide behind an
   // expand toggle so a long flavor list doesn't dominate the screen.
   const [flavorsExpanded, setFlavorsExpanded] = useState(false);
@@ -205,87 +210,133 @@ export const BlendExtractionExplorer = ({
       background: theme.cream,
       border: `1px solid ${theme.ruleSoft}`,
     }}>
-      {/* Per-ingredient range indicators */}
-      {brew.perIngredient && brew.perIngredient.length > 0 && (
-        <div style={{ marginBottom: 14 }}>
-          <div style={{
-            display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center",
-          }}>
-            {brew.perIngredient.map(({ id, name, inRange }) => (
-              <div key={id} style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: "3px 9px", borderRadius: 999,
-                background: inRange ? "rgba(109,126,85,0.10)" : "rgba(176,84,47,0.08)",
-                border: `1px solid ${inRange ? theme.sage : theme.terra}`,
-                opacity: inRange ? 1 : 0.75,
-              }}>
-                <span style={{
-                  width: 6, height: 6, borderRadius: "50%",
-                  background: inRange ? theme.sage : theme.terra,
-                }} />
-                <span style={{
-                  fontFamily: ff.sans, fontSize: 10.5,
-                  color: inRange ? theme.sageDeep : theme.terra,
+      {/* Per-ingredient range indicators — pills are clickable; the
+          selected pill's window (and any warning) renders inline
+          below the row. Default selection is the first ingredient,
+          so a window always shows on render and the user knows
+          others can be tapped. */}
+      {brew.perIngredient && brew.perIngredient.length > 0 && (() => {
+        const pills = brew.perIngredient;
+        // Resolve current selection — fall back to first ingredient
+        // if user hasn't picked one or their pick is no longer
+        // present (e.g., ingredients changed).
+        const currentId = (selectedIngId && pills.some(p => p.id === selectedIngId))
+          ? selectedIngId
+          : pills[0]?.id;
+        const selected = pills.find(p => p.id === currentId);
+        const outsiderMap = new Map(
+          (brew.outsiders || []).map(o => [
+            typeof o === "object" ? o.name : o,
+            typeof o === "object" ? o : { name: o, tempDir: "high", timeDir: null },
+          ])
+        );
+
+        // Format helpers for the inline detail line.
+        const formatTempRangeShort = ([lo, hi]) =>
+          unit === "F" ? `${cToF(lo)}–${cToF(hi)}°F` : `${lo}–${hi}°C`;
+        const formatSteepRangeShort = ([lo, hi]) => {
+          if (hi < 60) return `${lo}–${hi}s`;
+          if (lo < 60) return `${lo}s–${Math.round(hi / 60)} min`;
+          const a = lo / 60, b = hi / 60;
+          return `${Number.isInteger(a) ? a : a.toFixed(1)}–${Number.isInteger(b) ? b : b.toFixed(1)} min`;
+        };
+
+        // Highlight helpers used in the warning copy.
+        const Axis = ({ children }) => (
+          <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>{children}</span>
+        );
+        const tempFragment = (dir) =>
+          dir === "low"  ? <Axis>below its preferred temperature</Axis>
+          : dir === "high" ? <Axis>above its preferred temperature</Axis>
+          : null;
+        const timeFragment = (dir) =>
+          dir === "under" ? <Axis>under-steeped</Axis>
+          : dir === "over"  ? <Axis>over-steeped</Axis>
+          : null;
+        const phraseFor = (o) => {
+          const t = tempFragment(o.tempDir);
+          const s = timeFragment(o.timeDir);
+          if (t && s) return <> — {t} and {s}</>;
+          if (t)      return <> — {t}</>;
+          if (s)      return <> — {s}</>;
+          return null;
+        };
+
+        return (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center",
+            }}>
+              {pills.map(({ id, name, inRange }) => {
+                const isSelected = id === currentId;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setSelectedIngId(id)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      padding: "3px 9px", borderRadius: 999,
+                      // Selected pill gets a denser fill so the user
+                      // knows which one is showing in the detail row.
+                      background: inRange
+                        ? (isSelected ? "rgba(109,126,85,0.22)" : "rgba(109,126,85,0.10)")
+                        : (isSelected ? "rgba(176,84,47,0.18)" : "rgba(176,84,47,0.08)"),
+                      border: `1px solid ${inRange ? theme.sage : theme.terra}`,
+                      borderWidth: isSelected ? 1.5 : 1,
+                      opacity: inRange ? 1 : (isSelected ? 1 : 0.75),
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  >
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: inRange ? theme.sage : theme.terra,
+                    }} />
+                    <span style={{
+                      fontFamily: ff.sans, fontSize: 10.5,
+                      color: inRange ? theme.sageDeep : theme.terra,
+                    }}>
+                      {name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Inline detail line for the selected pill — its window,
+                and a warning if it's out of range. Always renders
+                something so the row never feels empty. */}
+            {selected && (() => {
+              const meta = INGREDIENTS[selected.id];
+              if (!meta) return null;
+              const tempStr = formatTempRangeShort(meta.tempC);
+              const steepStr = meta.timeS ? formatSteepRangeShort(meta.timeS) : null;
+              const out = outsiderMap.get(selected.name);
+              const inRange = selected.inRange;
+              return (
+                <div style={{
+                  marginTop: 8, paddingLeft: 10,
+                  borderLeft: `2px solid ${inRange ? theme.sage : theme.terra}`,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: theme.ash, lineHeight: 1.5,
                 }}>
-                  {name}
-                </span>
-              </div>
-            ))}
+                  <span style={{
+                    color: inRange ? theme.sageDeep : theme.terra,
+                    fontStyle: "normal", fontWeight: 500,
+                  }}>{selected.name}</span>
+                  {" "}
+                  <span style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
+                    {tempStr}{steepStr ? ` · ${steepStr}` : ""}
+                  </span>
+                  {!inRange && out && phraseFor(out)}
+                </div>
+              );
+            })()}
           </div>
-          {!compatible && (() => {
-            const items = brew.outsiders.map(o =>
-              typeof o === "object" && o
-                ? { name: o.name, tempDir: o.tempDir, timeDir: o.timeDir }
-                : { name: o, tempDir: "high", timeDir: null }  // legacy bare-string
-            );
-            // Highlights — sage green for ingredient names, terracotta
-            // for the out-of-range descriptor (direction + axis). The
-            // descriptor names which way to nudge: "too cool" vs "too
-            // hot," "under-steeped" vs "over-steeped" — so the user
-            // doesn't have to guess which direction to drag.
-            const Axis = ({ children }) => (
-              <span style={{
-                color: theme.terra, fontStyle: "normal", fontWeight: 500,
-              }}>{children}</span>
-            );
-            const Ing = ({ children }) => (
-              <span style={{
-                color: theme.sageDeep, fontStyle: "normal", fontWeight: 500,
-              }}>{children}</span>
-            );
-            const tempFragment = (dir) =>
-              dir === "low"  ? <Axis>below its preferred temperature</Axis>
-              : dir === "high" ? <Axis>above its preferred temperature</Axis>
-              : null;
-            const timeFragment = (dir) =>
-              dir === "under" ? <Axis>under-steeped</Axis>
-              : dir === "over"  ? <Axis>over-steeped</Axis>
-              : null;
-            const phraseFor = (it) => {
-              const t = tempFragment(it.tempDir);
-              const s = timeFragment(it.timeDir);
-              if (t && s) return <>is {t} and {s}</>;
-              if (t)      return <>is {t}</>;
-              if (s)      return <>is {s}</>;
-              return <>is <Axis>outside its preferred range</Axis></>;
-            };
-            return (
-              <div style={{
-                marginTop: 6,
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                color: theme.ash, lineHeight: 1.5,
-                display: "flex", flexDirection: "column", gap: 3,
-              }}>
-                {items.map((it, i) => (
-                  <div key={i}>
-                    <Ing>{it.name}</Ing> {phraseFor(it)} — will extract unevenly.
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Tradition-over-literature notice — appears on curated blends
           that brew outside what the studies prescribe. The curator
