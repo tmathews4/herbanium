@@ -289,11 +289,12 @@ export function buildWarnings({
     const isObj = o && typeof o === "object";
     const name = isObj ? o.name : o;
     const reason = isObj ? o.reason : "temp";
+    const role = isObj ? (o.role || "lead") : "lead";
     const phrase =
       reason === "both" ? "outside its preferred temperature and steep time"
       : reason === "time" ? "steeped past its preferred range"
       : "outside its preferred temperature";
-    warnings.push({ kind: "outsider", text: `${name} is ${phrase} — will extract unevenly.` });
+    warnings.push({ kind: "outsider", role, text: `${name} is ${phrase} — will extract unevenly.` });
   }
 
   // Coalesce masking notes by masker for cleaner copy

@@ -85,29 +85,47 @@ console.log(`Curated blends — clean-default audit (${blends.length} blends)\n`
 function outsiderWarnings(brew) {
   return brew.warnings.filter(w => w.kind === "outsider");
 }
+// Cup-level tannin/aromatic only — per-ingredient over-pull warnings
+// inherit kind: "tannin"/"aromatic" but carry the ingredient name in
+// the text. Those are classified as overPullWarnings instead so the
+// role-aware filter can distinguish lead from accent stretches.
 function tanninWarnings(brew) {
-  return brew.warnings.filter(w => w.kind === "tannin");
+  return brew.warnings.filter(w => w.kind === "tannin" && !/is being over-pulled/.test(w.text));
 }
 function aromaticWarnings(brew) {
-  return brew.warnings.filter(w => w.kind === "aromatic");
+  return brew.warnings.filter(w => w.kind === "aromatic" && !/is being over-pulled/.test(w.text));
+}
+
+// A warning is "strict" only if it concerns a lead-role ingredient.
+// Accent stretches are deliberate by the curator and surface as
+// honest information, not as a baseline failure.
+function isLeadWarning(w) {
+  return !w.role || w.role === "lead";
+}
+function isLeadOutsider(o) {
+  return typeof o !== "object" || !o.role || o.role === "lead";
 }
 
 for (const b of blends) {
   test(`${b.label} ${b.name} clean at default brew`, () => {
     // Pass isTraditional through — traditionals get baseline suppression
-    // for tannin/aromatic/outsider; experimentals do not.
+    // for tannin/aromatic/outsider; experimentals do not. Accent
+    // warnings can fire at baseline (the curator stretched the accent
+    // on purpose); only LEAD warnings count toward "clean" here.
     const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true, b.isTraditional);
-    const overs = overPullWarnings(brew);
-    const outs = outsiderWarnings(brew);
+    const overs = overPullWarnings(brew).filter(isLeadWarning);
+    const outs = outsiderWarnings(brew).filter(isLeadWarning);
     const tans = tanninWarnings(brew);
     const aros = aromaticWarnings(brew);
     const issues = [...overs, ...outs, ...tans, ...aros];
     assert(issues.length === 0,
-      `${b.name} (${b.isTraditional ? "tradition" : "custom"}) fires ${issues.length} warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
+      `${b.name} (${b.isTraditional ? "tradition" : "custom"}) fires ${issues.length} lead-role warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
       issues.map(o => `[${o.kind}] ${o.text}`).join("\n        - "));
-    const outsiderNames = brew.outsiders.map(o => typeof o === "object" ? o.name : o);
-    assert(outsiderNames.length === 0,
-      `${b.name} still lists outsiders at curated baseline: ${outsiderNames.join(", ")}`);
+    const leadOutsiderNames = brew.outsiders
+      .filter(isLeadOutsider)
+      .map(o => typeof o === "object" ? o.name : o);
+    assert(leadOutsiderNames.length === 0,
+      `${b.name} still lists lead outsiders at curated baseline: ${leadOutsiderNames.join(", ")}`);
   });
 
   // Track which blends would over-pull or flag outsiders if the baseline
@@ -128,9 +146,11 @@ for (const b of blends) {
 for (const b of blends.filter(x => !x.isTraditional)) {
   test(`${b.label} ${b.name} clean at default brew WITHOUT suppression`, () => {
     // No baseline passed → no suppression even though the curator chose this brew.
+    // Accent-role outsider/over-pull warnings are deliberate stretches
+    // and don't fail this rule; only LEAD warnings count.
     const brew = resolveBlendAtBrew(b.ings, b.t, b.s);
-    const overs = overPullWarnings(brew);
-    const outs = outsiderWarnings(brew);
+    const overs = overPullWarnings(brew).filter(isLeadWarning);
+    const outs = outsiderWarnings(brew).filter(isLeadWarning);
     const tans = tanninWarnings(brew);
     const aros = aromaticWarnings(brew);
     const issues = [...overs, ...outs, ...tans, ...aros];
@@ -206,32 +226,46 @@ test("traditionNote stays off when nothing was suppressed", () => {
     `${clean.name} has nothing to suppress — traditionNote should be false`);
 });
 
-test("accent ingredients don't fire over-pull warnings", () => {
-  // Pissenlit Café: dandelion-root lead, cinnamon/cardamom/vanilla all
-  // accent. Push past baseline so warnings could fire — accents must
-  // still stay quiet.
+test("accent ingredients DO fire over-pull warnings, tagged with role:accent", () => {
+  // Policy: accents are intentional stretches by the curator — they
+  // surface as honest information so the user sees what's being
+  // pushed past its window. The role tag lets the UI render leads
+  // more prominently.
   const pissenlit = blends.find(b => b.name === "Pissenlit Café");
   assert(pissenlit, "Pissenlit Café fixture not found");
   const pushed = resolveBlendAtBrew(pissenlit.ings, pissenlit.t, pissenlit.s + 60, pissenlit.t, pissenlit.s, true);
   const accentWarnings = pushed.warnings.filter(w =>
     /Cinnamon|Cardamom|Vanilla/.test(w.text) && /over-pulled/.test(w.text)
   );
-  assert(accentWarnings.length === 0,
-    `accents should not fire over-pull warnings — got: ${accentWarnings.map(w => w.text).join("; ")}`);
+  // At least one of those accents should be visible in warnings now.
+  assert(accentWarnings.length > 0,
+    `expected accent over-pull warnings to surface; got none`);
+  // Each must be tagged with role:"accent" so the UI/test layer can
+  // distinguish it from a lead-role warning.
+  for (const w of accentWarnings) {
+    assert(w.role === "accent",
+      `expected accent warning to carry role:"accent"; got role:"${w.role}" on "${w.text}"`);
+  }
 });
 
-test("accent ingredients don't fire outsider warnings", () => {
-  // Tom Foolery: gunpowder lead at 80°C/150s; spearmint and tulsi
-  // accent. Move slider so accents would be outsiders if they counted.
+test("accent ingredients DO appear in outsider warnings, tagged with role:accent", () => {
+  // Same policy on the outsider axis.
   const tf = blends.find(b => b.name === "Tom Foolery");
   assert(tf, "Tom Foolery fixture not found");
   const moved = resolveBlendAtBrew(tf.ings, tf.t + 5, tf.s, tf.t, tf.s, true);
-  const accentLeak = moved.warnings
+  const accentOutsiders = moved.warnings
     .filter(w => w.kind === "outsider")
-    .map(w => w.text)
-    .filter(t => /Spearmint|Tulsi/.test(t));
-  assert(accentLeak.length === 0,
-    `accent ingredients should not appear in outsider warnings — got: ${accentLeak.join("; ")}`);
+    .filter(w => /Spearmint|Tulsi/.test(w.text));
+  assert(accentOutsiders.length > 0,
+    `expected accent outsider warnings to surface; got none`);
+  // The outsider records on brew.outsiders should also be role-tagged.
+  const accentOutsiderRecords = moved.outsiders.filter(o =>
+    typeof o === "object" && /Spearmint|Tulsi/i.test(o.name)
+  );
+  for (const o of accentOutsiderRecords) {
+    assert(o.role === "accent",
+      `expected outsider record to carry role:"accent"; got role:"${o.role}" on ${o.name}`);
+  }
 });
 
 test("traditionNote stays off when lead deviation is only sub-tolerance time", async () => {

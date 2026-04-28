@@ -1218,16 +1218,21 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
     .sort((a, b) => b[1] - a[1]);
 
-  // Only lead-role ingredients can fire outsider warnings. Accents and
-  // catalysts are stylistic adjuncts — a 0.05g pinch of black pepper at
-  // the wrong temp isn't a problem worth surfacing.
-  // Each outsider carries a `reason` so the UI can name the actual
-  // axis the user pushed past (temp / time / both) instead of always
-  // saying "outside preferred temp."
+  // Outsider warnings fire for any out-of-range ingredient that's
+  // not a catalyst (catalysts are bioavailability adjuncts at trace
+  // weight — a 0.05g pinch of black pepper at the wrong temp isn't
+  // a problem worth surfacing). Both leads and accents trigger so
+  // the user sees the full picture of what's being stretched.
+  // Each outsider carries:
+  //   - reason: which axis is out (temp / time / both)
+  //   - role: "lead" or "accent" — the UI can render leads more
+  //     prominently; the test layer uses this to enforce stricter
+  //     rules on leads while accepting accent stretches.
   const rawOutsiders = contributions
-    .filter(c => !c.inRange && c.role === "lead")
+    .filter(c => !c.inRange && c.role !== "catalyst")
     .map(c => ({
       name: c.name,
+      role: c.role,
       reason: !c.inTempRange && !c.inTimeRange ? "both"
             : !c.inTempRange ? "temp"
             : "time",
@@ -1277,16 +1282,16 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const pushedHarder = !baselineKnown
     || tempC > baselineTempC
     || timeS > baselineTimeS;
-  // Walk every lead ingredient — we need to know what *would* fire
-  // even when suppressed, so the tradition-over-literature notice can
-  // mention only the blends where suppression actually carried weight.
-  // Accent and catalyst ingredients skip this entirely: their "abuse"
-  // is the point of the recipe (a pinch of cardamom in a 20-min
-  // decoction isn't being over-pulled — it's flavoring a broth).
+  // Walk every lead and accent ingredient — both can fire over-pull
+  // warnings. Catalysts (e.g. a 0.05g pinch of black pepper for
+  // turmeric bioavailability) skip this; their dose is too low to
+  // matter. Each warning carries the `role` so downstream layers can
+  // render leads more prominently and the test layer can enforce
+  // stricter rules on leads.
   const allIndividualWarnings = [];
   const seenIndividual = new Set();
   for (const { name, profile, role } of contributions) {
-    if (role !== "lead") continue;
+    if (role === "catalyst") continue;
     const fMap = Object.fromEntries(profile.flavors);
     const eMap = Object.fromEntries(profile.effects);
     const ingWarnings = buildWarnings({
@@ -1301,6 +1306,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       const lc = w.text.charAt(0).toLowerCase() + w.text.slice(1);
       allIndividualWarnings.push({
         kind: w.kind,
+        role: role || "lead",
         text: `${name} is being over-pulled — ${lc}`,
       });
     }
