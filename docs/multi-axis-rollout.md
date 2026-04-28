@@ -68,16 +68,14 @@ tonic, overpulled}.
 - [x] cinnamon
 - [x] cardamom
 
-### ⏳ Pending — third tier (14)
+### ⏳ Pending — third tier (8)
 
 Less frequent or niche.
 
 - [ ] black-pepper (catalyst — may skip)
 - [ ] genmaicha, dragonwell, lapsang, puerh (specialty teas)
 - [ ] yerba-mate
-- [ ] linden, nettle (tonic herbals)
-- [ ] dandelion-leaf, dandelion-root, licorice-root
-- [ ] ashwagandha, lions-mane (long-decoction adaptogens)
+- [ ] lions-mane (long-decoction mushroom)
 - [ ] bergamot, orange-peel, lemon-peel, dried-apple, cranberry, sage (recent additions)
 
 ---

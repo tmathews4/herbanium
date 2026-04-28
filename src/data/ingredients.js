@@ -778,7 +778,30 @@ const INGREDIENTS = {
     name: "Ashwagandha", latin: "Withania somnifera", category: "adaptogen",
     subcategory: "root",
     aliases: ["asgandh", "asvagandha", "winter cherry"],
+    // Adaptogenic root — bitter, slow-acting; the long-decoction
+    // preparation pulls withanolides over 10-20 min.
     caffeine: 0, tempC: [95, 100], timeS: [600, 1200],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely extracting, faint root.", moodImpact: "grounding held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft root top, gentle bitter.", moodImpact: "grounding gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full ashwagandha character — earthy, bitter, full.", moodImpact: "grounding and calm in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full withanolide pull.", moodImpact: "grounding peak; soothing deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],   character: "barely simmered.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [300, 600], character: "lighter ashwagandha cup.", moodImpact: "grounding starting to settle" },
+      { id: "medium", timeS: [600, 1200], character: "the canonical Ayurvedic decoction.", moodImpact: "grounding and calm in clean balance" },
+      { id: "long",   timeS: [1200, 1800], character: "deepest decoction, full body.", moodImpact: "grounding deep; soothing peak" },
+      { id: "over",   timeS: [1800, 3600], character: "very heavy — past peak, slightly muddied.", moodImpact: "grounding holds; cup is dense" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely simmered.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter root cup, top-bitter only.", moodImpact: "grounding gentle" },
+      { id: "balanced",   character: "the canonical Ayurvedic ashwagandha cup.", moodImpact: "grounding and calm in clean balance" },
+      { id: "tonic",      character: "deepest decoction, full withanolide register.", moodImpact: "grounding peak; soothing deep" },
+      { id: "overpulled", character: "very heavy, past peak.", moodImpact: "grounding holds; cup is dense" },
+    ],
+    overPull: { timeS: 3600, reason: "past full decoction, body over-thick" },
     effects: [["grounding", 4], ["calm", 4], ["sleepy", 3], ["soothing", 4], ["warming", 2]],
     flavors: ["earthy", "musty", "bitter", "woody"],
     basicTastes: { bitter: 3, astringent: 3, earthy: 5, sweet: 1, umami: 1 },
@@ -2044,8 +2067,28 @@ const INGREDIENTS = {
   linden: {
     name: "Linden", latin: "Tilia cordata", category: "flower",
     aliases: ["lime flower", "Tilleul", "Tila", "Lipa", "Linde"],
-    // timeS floor 240s: light tisane register at 4 min — linden's
-    // honey-floral notes don't need long extraction.
+    // Honey-floral tisane, gentler-cousin of chamomile.
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "honey notes barely surface.", moodImpact: "calm held back" },
+      { id: "cool",  tempC: [80, 88], character: "soft honey-floral top.", moodImpact: "calm forward; soothing gentle" },
+      { id: "warm",  tempC: [88, 93], character: "full linden character, gentle perfume.", moodImpact: "calm and soothing in balance" },
+      { id: "hot",   tempC: [93, 98], character: "deepest extraction, fullest body.", moodImpact: "calm peak; sleepy arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, top-honey only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [120, 240], character: "light Tilleul cup.", moodImpact: "calm gentle; soothing settles" },
+      { id: "medium", timeS: [240, 480], character: "the canonical evening tisane.", moodImpact: "calm and soothing in clean balance" },
+      { id: "long",   timeS: [480, 600], character: "deeper body, fuller honey.", moodImpact: "calm deep; sleepy creeps in" },
+      { id: "over",   timeS: [600, 900], character: "perfume softens, bitter slowly creeps.", moodImpact: "calm holds; cup tightens" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright honey-floral, light cup.", moodImpact: "calm gentle; soothing clean" },
+      { id: "balanced",   character: "the canonical European evening tisane.", moodImpact: "calm and soothing in clean balance" },
+      { id: "tonic",      character: "fuller body, deeper honey-floral.", moodImpact: "calm deep; sleepy arrives" },
+      { id: "overpulled", character: "perfume softens, bitter creeping.", moodImpact: "calm holds; cup heavy" },
+    ],
+    overPull: { timeS: 900, reason: "perfume softens past peak, slight bitter rises" },
     caffeine: 0, tempC: [85, 95], timeS: [240, 600],
     // Calm 4: linden's tisane calm reads gentler than chamomile's defining
     // apigenin peak; the anchor sits at 5 and linden a notch below.
@@ -2091,7 +2134,31 @@ const INGREDIENTS = {
     name: "Licorice Root", latin: "Glycyrrhiza glabra", category: "herbal",
     subcategory: "root",
     aliases: ["sweet root", "Gan Cao 甘草", "Mulethi", "Yashtimadhu", "liquorice"],
+    // Throat-coat root — sweet glycyrrhizin builds slowly. Long
+    // simmer is the canonical preparation; quick brews barely
+    // touch its character.
     caffeine: 0, tempC: [95, 100], timeS: [300, 900],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "the sweet barely surfaces.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft licorice top, gentle body.", moodImpact: "soothing gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full sweet-root character.", moodImpact: "soothing and digestive in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full sweetness.", moodImpact: "soothing deep; warming arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely brewed, top-water only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [180, 300], character: "lighter sweet-root cup.", moodImpact: "soothing settling in" },
+      { id: "medium", timeS: [300, 720], character: "the canonical Throat Coat register.", moodImpact: "soothing and digestive in clean balance" },
+      { id: "long",   timeS: [720, 900], character: "deepest sweet, body full.", moodImpact: "soothing peak; warming clear" },
+      { id: "over",   timeS: [900, 1500], character: "very long simmer — sweet starts to dull.", moodImpact: "soothing holds; cup heavy" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter sweet-root top.", moodImpact: "soothing gentle" },
+      { id: "balanced",   character: "the household Throat Coat preparation.", moodImpact: "soothing and digestive in clean balance" },
+      { id: "tonic",      character: "deepest decoction — full sweet, full body.", moodImpact: "soothing peak; warming clear" },
+      { id: "overpulled", character: "very heavy, the sweet starts to dull.", moodImpact: "soothing holds but cup is dense" },
+    ],
+    overPull: { timeS: 1500, reason: "the sweet root past peak, body too heavy" },
     // Soothing 4: rooibos anchors soothing at 5; licorice's throat-coat
     // soothing is real but more localized than rooibos's full-body register.
     effects: [["soothing", 4], ["digestive", 3], ["warming", 1], ["calm", 1], ["uplifting", 1]],
@@ -2146,7 +2213,30 @@ const INGREDIENTS = {
     name: "Nettle", latin: "Urtica dioica", category: "herbal",
     subcategory: "leaf",
     aliases: ["stinging nettle", "common nettle", "Bichu butti"],
+    // Mineral-rich tonic herb — long-infusion preparation pulls
+    // chlorophyll, minerals, and a green tannic body.
     caffeine: 0, tempC: [95, 100], timeS: [300, 900],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely extracting.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft green top.", moodImpact: "soothing gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full nettle character — deep green, minerally.", moodImpact: "soothing and grounding solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full mineral body.", moodImpact: "grounding deep; soothing solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely brewed.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [180, 300], character: "lighter spring-tonic cup.", moodImpact: "soothing settles" },
+      { id: "medium", timeS: [300, 720], character: "the canonical wise-woman infusion.", moodImpact: "soothing and grounding in clean balance" },
+      { id: "long",   timeS: [720, 1800], character: "long-infusion — deepest mineral pull.", moodImpact: "grounding deep; soothing peak" },
+      { id: "over",   timeS: [1800, 3600], character: "very long Susun-Weed style — heavy, dense.", moodImpact: "the cup is fully drawn, body thick" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter green top.", moodImpact: "soothing gentle" },
+      { id: "balanced",   character: "the canonical spring-tonic cup.", moodImpact: "soothing and grounding in clean balance" },
+      { id: "tonic",      character: "deepest mineral pull, the wise-woman infusion.", moodImpact: "grounding peak; soothing deep" },
+      { id: "overpulled", character: "very long-pulled — the leaf has surrendered all.", moodImpact: "grounding holds; cup is dense" },
+    ],
+    overPull: { timeS: 3600, reason: "past long-infusion peak, body over-thick" },
     effects: [["soothing", 4], ["grounding", 2], ["digestive", 3], ["uplifting", 1], ["calm", 1], ["warming", 1]],
     flavors: ["earthy", "grassy", "mineral", "spinach-like", "sweet"],
     basicTastes: { earthy: 3, mineral: 3, umami: 2, bitter: 1, sweet: 1 },
@@ -2192,6 +2282,29 @@ const INGREDIENTS = {
     subcategory: "root",
     aliases: ["roasted dandelion root", "dandelion coffee", "Pissenlit", "lion's tooth", "Pu Gong Ying 蒲公英"],
     relatedIngredient: "dandelion-leaf",
+    // Coffee-substitute root — roasted, bittersweet, slow-extracting.
+    // Long simmer is the canonical preparation.
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely extracting, faint root.", moodImpact: "digestive held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft roasted top.", moodImpact: "digestive gentle; warming present" },
+      { id: "warm",  tempC: [95, 99],  character: "full dandelion character, coffee-bitter body.", moodImpact: "digestive forward; grounding settles" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fullest body.", moodImpact: "digestive peak; grounding deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],   character: "barely simmered.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [300, 600], character: "lighter Pissenlit cup.", moodImpact: "digestive settles in" },
+      { id: "medium", timeS: [600, 1200], character: "the canonical coffee-substitute simmer.", moodImpact: "digestive and grounding in balance" },
+      { id: "long",   timeS: [1200, 3600], character: "deep root infusion, full coffee-adjacent register.", moodImpact: "grounding deep; soothing arrives" },
+      { id: "over",   timeS: [3600, 14400], character: "long-infusion preparation, heavy mineral body.", moodImpact: "grounding peak; cup is dense" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely simmered.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter roasted-root top.", moodImpact: "digestive gentle; warming present" },
+      { id: "balanced",   character: "the household Pissenlit cup.", moodImpact: "digestive and grounding in clean balance" },
+      { id: "tonic",      character: "deep coffee-adjacent simmer.", moodImpact: "grounding peak; digestive deep" },
+      { id: "overpulled", character: "long-infusion — heavy, mineral-dense.", moodImpact: "grounding holds; cup is dense" },
+    ],
+    overPull: { timeS: 14400, reason: "past long-infusion peak, body over-thick" },
     caffeine: 0, tempC: [95, 100], timeS: [600, 1800],
     effects: [["digestive", 4], ["warming", 2], ["grounding", 2], ["soothing", 1], ["energy", 1], ["focus", 1]],
     flavors: ["caramel-roasted", "bittersweet", "nutty", "earthy", "coffee-adjacent"],
@@ -2237,6 +2350,28 @@ const INGREDIENTS = {
     subcategory: "leaf",
     aliases: ["dandelion greens", "Pissenlit", "lion's tooth", "Taraxaci folium"],
     relatedIngredient: "dandelion-root",
+    // Spring-tonic green — bitter, mineral-rich, diuretic.
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely extracting.", moodImpact: "digestive held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft green top.", moodImpact: "digestive gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full dandelion-leaf character — green, bitter.", moodImpact: "digestive forward; soothing settles" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full mineral pull.", moodImpact: "digestive deep; grounding arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely brewed, light green.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [180, 300], character: "lighter spring-tonic cup.", moodImpact: "digestive settles" },
+      { id: "medium", timeS: [300, 720], character: "the canonical bitter-green tonic.", moodImpact: "digestive and soothing in balance" },
+      { id: "long",   timeS: [720, 1800], character: "long-infusion mineral pull.", moodImpact: "grounding deep; soothing peak" },
+      { id: "over",   timeS: [1800, 3600], character: "very long-pulled, body dense.", moodImpact: "the cup is fully drawn" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter green-bitter top.", moodImpact: "digestive gentle" },
+      { id: "balanced",   character: "the canonical bitter-green tonic.", moodImpact: "digestive and soothing in balance" },
+      { id: "tonic",      character: "deep mineral pull, full body.", moodImpact: "grounding peak; soothing deep" },
+      { id: "overpulled", character: "very long-pulled — body dense.", moodImpact: "grounding holds; cup is heavy" },
+    ],
+    overPull: { timeS: 3600, reason: "past long-infusion peak, body over-thick" },
     caffeine: 0, tempC: [90, 100], timeS: [300, 900],
     effects: [["digestive", 4], ["cooling", 3], ["soothing", 3], ["grounding", 1], ["uplifting", 1]],
     flavors: ["bitter", "grassy", "mineral", "vegetal"],
