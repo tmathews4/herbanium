@@ -64,7 +64,7 @@ export const BestiaryView = ({
   // "swap-in-progress" mode (the existing behavior). When off,
   // tapping a featured tile just opens the description card —
   // simpler read-only browsing for users who've finished pinning.
-  const [swapMode, setSwapMode] = usePersistedState("bestiarySwapMode", true);
+  const [swapMode, setSwapMode] = usePersistedState("bestiarySwapMode", false);
 
   const attrCtx = buildAttributeContext({
     sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
