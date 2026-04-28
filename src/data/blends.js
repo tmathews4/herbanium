@@ -366,11 +366,12 @@ const BLENDS = [
   {
     id: "exp-quiet-apple",
     name: "Quiet Apple",
-    subtitle: "Chamomile's apple, vanilla's sweetness, cardamom's lift",
+    subtitle: "chamomile and dried apple — soft sweetness, no sugar required",
     ingredients: [
-      { id: "chamomile", g: 1.5 },
-      { id: "vanilla",   g: 0.3, role: "accent" },
-      { id: "cardamom",  g: 0.2, role: "accent" },
+      { id: "chamomile",   g: 1.2 },
+      { id: "dried-apple", g: 0.5 },
+      { id: "vanilla",     g: 0.2, role: "accent" },
+      { id: "cardamom",    g: 0.2, role: "accent" },
     ],
     tempC: 97, timeS: 360, ml: 250,
     mood: "calm", flavor: "sweet",
@@ -413,11 +414,12 @@ const BLENDS = [
   {
     id: "exp-crimson-glow",
     name: "Crimson Glow",
-    subtitle: "Hibiscus ruby meets the red bush — caffeine-free brightness",
+    subtitle: "hibiscus ruby with cranberry and red bush — caffeine-free brightness",
     ingredients: [
-      { id: "hibiscus", g: 1.5 },
-      { id: "rooibos",  g: 1.0 },
-      { id: "ginger",   g: 0.3, role: "accent" },
+      { id: "hibiscus",  g: 1.2 },
+      { id: "cranberry", g: 0.5 },
+      { id: "rooibos",   g: 0.8 },
+      { id: "ginger",    g: 0.3, role: "accent" },
     ],
     tempC: 100, timeS: 420, ml: 250,
     mood: "cooling", flavor: "tart",
@@ -428,10 +430,11 @@ const BLENDS = [
   {
     id: "exp-garden-court",
     name: "Garden Court",
-    subtitle: "Muscatel grape with rose — drinks like champagne",
+    subtitle: "muscatel Darjeeling with bergamot and rose — Earl Grey, gone botanical",
     ingredients: [
-      { id: "darjeeling", g: 2.0 },
-      { id: "rose",       g: 0.3, role: "accent" },
+      { id: "darjeeling", g: 1.8 },
+      { id: "bergamot",   g: 0.2, role: "accent" },
+      { id: "rose",       g: 0.2, role: "accent" },
     ],
     tempC: 90, timeS: 240, ml: 200,
     mood: "uplifting", flavor: "floral",
@@ -482,6 +485,81 @@ const BLENDS = [
     mood: "uplifting", flavor: "spiced",
     public: true, experimental: true, house: true,
     effects: [["uplifting", 4], ["focus", 3], ["warming", 3]],
+  },
+
+  {
+    id: "exp-calabrian-dawn",
+    name: "Calabrian Dawn",
+    subtitle: "bergamot and lavender over chamomile — Earl Grey's calm without the tea",
+    ingredients: [
+      { id: "chamomile", g: 1.2 },
+      { id: "bergamot",  g: 0.2, role: "accent" },
+      { id: "lavender",  g: 0.2, role: "accent" },
+    ],
+    tempC: 95, timeS: 240, ml: 250,
+    mood: "calm", flavor: "floral",
+    public: true, experimental: true, house: true,
+    effects: [["calm", 4], ["uplifting", 3], ["soothing", 3]],
+  },
+
+  {
+    id: "exp-apfeltee",
+    name: "Apfeltee",
+    subtitle: "Bavarian winter staple — dried apple, orange peel, cinnamon, clove",
+    ingredients: [
+      { id: "dried-apple", g: 1.5 },
+      { id: "orange-peel", g: 0.5 },
+      { id: "cinnamon",    g: 0.3, role: "accent" },
+      { id: "cloves",      g: 0.05, role: "accent" },
+    ],
+    tempC: 97, timeS: 360, ml: 250,
+    mood: "comfort", flavor: "sweet",
+    public: true, experimental: true, house: true,
+    effects: [["comfort", 4], ["warming", 3], ["soothing", 3]],
+  },
+
+  {
+    id: "exp-canarino",
+    name: "Canarino",
+    subtitle: "Italian after-dinner cup — lemon peel, plain hot water, that's the whole thing",
+    ingredients: [
+      { id: "lemon-peel", g: 1.5 },
+    ],
+    tempC: 95, timeS: 240, ml: 200,
+    mood: "digestive", flavor: "citrus",
+    public: true, experimental: true, house: true,
+    effects: [["digestive", 3], ["uplifting", 3], ["cooling", 2]],
+  },
+
+  {
+    id: "exp-cranberry-hearth",
+    name: "Cranberry Hearth",
+    subtitle: "tart cranberry with rose and orange peel — drier than hibiscus alone",
+    ingredients: [
+      { id: "cranberry",   g: 1.0 },
+      { id: "hibiscus",    g: 0.8 },
+      { id: "orange-peel", g: 0.3, role: "accent" },
+      { id: "rose",        g: 0.2, role: "accent" },
+    ],
+    tempC: 100, timeS: 360, ml: 250,
+    mood: "uplifting", flavor: "tart",
+    public: true, experimental: true, house: true,
+    effects: [["uplifting", 3], ["cooling", 3], ["digestive", 2]],
+  },
+
+  {
+    id: "exp-lemon-ginger-settle",
+    name: "Lemon-Ginger Settle",
+    subtitle: "the cross-cultural digestive — citrus brightness over warming root",
+    ingredients: [
+      { id: "lemon-peel", g: 0.8 },
+      { id: "ginger",     g: 0.5 },
+      { id: "lemongrass", g: 0.5, role: "accent" },
+    ],
+    tempC: 100, timeS: 360, ml: 250,
+    mood: "digestive", flavor: "citrus",
+    public: true, experimental: true, house: true,
+    effects: [["digestive", 4], ["warming", 3], ["uplifting", 3]],
   },
 
   // ── Customs (Herbanium house blends) ──────────────────────
