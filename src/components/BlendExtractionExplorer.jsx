@@ -406,7 +406,7 @@ export const BlendExtractionExplorer = ({
                       regardless of label length. whiteSpace:nowrap +
                       overflow:hidden enforces single-line layout. */}
                   {state === "in-zones" && (() => {
-                    const Row = ({ label, body, headColor: hc }) => (
+                    const Row = ({ label, body }) => (
                       <div style={{
                         display: "flex", marginTop: 2,
                         whiteSpace: "nowrap", overflow: "hidden",
@@ -418,8 +418,28 @@ export const BlendExtractionExplorer = ({
                         <span style={{
                           flex: 1, minWidth: 0,
                           overflow: "hidden", textOverflow: "ellipsis",
-                          color: hc || theme.ash,
+                          color: theme.ash,
                         }}>{body}</span>
+                      </div>
+                    );
+                    // Mood-impact subrow uses an indent + "↳" glyph
+                    // to read as "consequence of the above" without
+                    // adding a redundant label column.
+                    const MoodRow = ({ text }) => (
+                      <div style={{
+                        display: "flex", marginTop: 1,
+                        whiteSpace: "nowrap", overflow: "hidden",
+                      }}>
+                        <span style={{
+                          flex: "0 0 56px",
+                          paddingLeft: 14,
+                          color: theme.ash, fontStyle: "normal",
+                        }}>↳ mood</span>
+                        <span style={{
+                          flex: 1, minWidth: 0,
+                          overflow: "hidden", textOverflow: "ellipsis",
+                          color: theme.ash,
+                        }}>{text}</span>
                       </div>
                     );
                     return (
@@ -436,7 +456,9 @@ export const BlendExtractionExplorer = ({
                           />
                         )}
                         <Row label="temp" body={<><span style={{ color: theme.inkSoft }}>{tempZone.id}</span> — {tempZone.character}</>} />
+                        {tempZone.moodImpact && <MoodRow text={tempZone.moodImpact} />}
                         <Row label="steep" body={<><span style={{ color: theme.inkSoft }}>{timeZone.id}</span> — {timeZone.character}</>} />
+                        {timeZone.moodImpact && <MoodRow text={timeZone.moodImpact} />}
                       </div>
                     );
                   })()}

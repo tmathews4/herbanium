@@ -388,18 +388,21 @@ const INGREDIENTS = {
         tempC: [85, 92],
         character: "Perfume releases gently, less astringency.",
         pulls: ["the delicate top of the spice", "softer body"],
+        moodImpact: "uplifting forward; calm held gently",
       },
       {
         id: "warm",
         tempC: [92, 97],
         character: "Full aromatic release, controlled tannin.",
         pulls: ["the full perfume", "moderate body", "a gentle astringent edge"],
+        moodImpact: "uplifting + calm + digestive in balance",
       },
       {
         id: "hot",
         tempC: [97, 100],
         character: "Fast extraction, deeper compounds, more grip.",
         pulls: ["maximum aromatic", "polyphenol body", "tannin grip"],
+        moodImpact: "grounding and warming amplify; calm dims as tannin rises",
       },
     ],
     timeZones: [
@@ -408,18 +411,21 @@ const INGREDIENTS = {
         timeS: [60, 180],
         character: "Top-notes only, the aromatic register.",
         pulls: ["the perfumed clove-spice top", "no body yet"],
+        moodImpact: "uplifting forward; calm and soothing still thin",
       },
       {
         id: "medium",
         timeS: [180, 360],
         character: "Full character, moderate body forming.",
         pulls: ["full aroma", "the herbal middle", "modest astringency"],
+        moodImpact: "the full effect profile arrives in balance",
       },
       {
         id: "long",
         timeS: [360, 600],
         character: "Full body, the tonic register arrives.",
         pulls: ["the slow herb-medicine register", "full astringent grip", "perfume receding"],
+        moodImpact: "grounding and soothing deepen; the cup turns meditative",
       },
     ],
     // Notable combinations — when the temp/time pairing produces a
