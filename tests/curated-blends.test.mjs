@@ -249,20 +249,22 @@ test("accent ingredients DO fire over-pull warnings, tagged with role:accent", (
 });
 
 test("accent ingredients DO appear in outsider warnings, tagged with role:accent", () => {
-  // Same policy on the outsider axis. Push timeS down to 60s to put
-  // spearmint (envelope [120, 420]s) below its floor; gunpowder lead
-  // is fine at 80°C/60s. Spearmint should fire as accent outsider.
-  const tf = blends.find(b => b.name === "Tom Foolery");
-  assert(tf, "Tom Foolery fixture not found");
-  const moved = resolveBlendAtBrew(tf.ings, tf.t, 60, tf.t, tf.s, true);
+  // Use Hearth Kindler — rooibos lead (zone-covered, no outsider
+  // possible) plus assam/cinnamon/cardamom accents that haven't
+  // migrated to the multi-axis model yet, so the legacy envelope
+  // outsider check still fires for them. Pushing timeS down to
+  // 240s puts cinnamon (envelope [300, 600]s) below its floor.
+  const hk = blends.find(b => b.name === "Hearth Kindler");
+  assert(hk, "Hearth Kindler fixture not found");
+  const moved = resolveBlendAtBrew(hk.ings, hk.t, 240, hk.t, hk.s, true);
   const accentOutsiders = moved.warnings
     .filter(w => w.kind === "outsider")
-    .filter(w => /Spearmint|Tulsi/.test(w.text));
+    .filter(w => /Cinnamon|Cardamom|Assam/.test(w.text));
   assert(accentOutsiders.length > 0,
     `expected accent outsider warnings to surface; got none`);
   // The outsider records on brew.outsiders should also be role-tagged.
   const accentOutsiderRecords = moved.outsiders.filter(o =>
-    typeof o === "object" && /Spearmint|Tulsi/i.test(o.name)
+    typeof o === "object" && /Cinnamon|Cardamom|Assam/i.test(o.name)
   );
   for (const o of accentOutsiderRecords) {
     assert(o.role === "accent",

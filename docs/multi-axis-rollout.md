@@ -31,31 +31,30 @@ and above the envelope; the resolver handles the gap.
 
 ## Status
 
-### ✅ Complete (3 / 47)
+### ✅ Complete (10 / 47)
 
 | ingredient | tempZones | timeZones | registerZones | overPull |
 |---|---|---|---|---|
 | tulsi | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
 | chamomile | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
 | lavender | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 360s |
+| peppermint | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 540s |
+| ginger | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
+| rooibos | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 900s |
+| hibiscus | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 720s |
+| fennel | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 660s |
+| lemonbalm | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 420s |
+| spearmint | ✓ 4 bands | ✓ 5 bands | ✓ 5 (full coverage) | ✓ 540s |
 
-### ⏳ Pending — high priority (12)
+### ⏳ Pending — high priority (5)
 
-These get the next pass. Ordered by user-impact (anchors first,
-then most-used herbs in curated blends).
+Remaining catalog anchors.
 
-- [ ] peppermint — cooling anchor (5)
-- [ ] ginger — warming anchor (5)
-- [ ] rooibos — soothing anchor (5)
-- [ ] fennel — digestive anchor (5)
 - [ ] matcha — focus anchor (5)
 - [ ] valerian — sleepy anchor (5)
 - [ ] assam — energy anchor (5)
 - [ ] darjeeling — uplifting anchor (5)
 - [ ] reishi — grounding anchor (5)
-- [ ] hibiscus — high-traffic herbal
-- [ ] spearmint — Moroccan Mint backbone
-- [ ] lemonbalm — frequent calm/digestive accent
 
 ### ⏳ Pending — second tier (15)
 

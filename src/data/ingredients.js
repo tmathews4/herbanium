@@ -221,9 +221,30 @@ const INGREDIENTS = {
   },
   lemonbalm: {
     name: "Lemon Balm", latin: "Melissa officinalis", category: "herbal",
-    // timeS floor 180s: lemon balm reads as a light citrus-herb at 3 min;
-    // longer steeps deepen toward the calming herbal register.
+    // Light citrus-herb register at short steeps, calming-herbal
+    // register at longer. Tannins climb past 360s.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "citral barely lifting.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [85, 90], character: "soft lemon top, gentle herbal body.", moodImpact: "uplifting bright; calm gentle" },
+      { id: "warm",  tempC: [90, 93], character: "full lemon-balm character, clean cup.", moodImpact: "uplifting and calm in balance" },
+      { id: "hot",   tempC: [93, 95], character: "deepest extraction, fullest body.", moodImpact: "calm forward; cup deepens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "just citrus top, no body.", moodImpact: "the cup barely registers" },
+      { id: "short",  timeS: [120, 180], character: "bright lemon, gentle herb.", moodImpact: "uplifting forward; calm starting" },
+      { id: "medium", timeS: [180, 300], character: "the everyday calming-bright cup.", moodImpact: "uplifting and calm in clean balance" },
+      { id: "long",   timeS: [300, 360], character: "herbal middle deepening, perfume receding.", moodImpact: "calm deep; uplifting fading" },
+      { id: "over",   timeS: [360, 420], character: "tannins climbing, perfume mostly gone.", moodImpact: "calm strained as bitter rises" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely steeped.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "bright lemon, soft herbal lift.", moodImpact: "uplifting forward; calm gentle" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the everyday calming-bright cup.", moodImpact: "uplifting, calm, and soothing in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, herbal, the calming side full.", moodImpact: "calm deepens; sleepy creeps in" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "the brightness lost to tannin.", moodImpact: "calm strained; uplifting gone" },
+    ],
+    overPull: { timeS: 420, reason: "tannins overtake the citrus brightness" },
     // Calm 4: chamomile is the calm anchor at 5; lemon balm's rosmarinic-
     // acid calm sits below that defining peak even though it's strong.
     effects: [["calm", 4], ["sleepy", 3], ["cooling", 3], ["uplifting", 3], ["soothing", 3]],
@@ -252,9 +273,30 @@ const INGREDIENTS = {
 
   peppermint: {
     name: "Peppermint", latin: "Mentha × piperita", category: "herbal",
-    // timeS floor 180s: most packaged peppermint instructs 3-5 min;
-    // menthol releases fast, longer steeps just intensify the cool.
+    // Cooling anchor (5). Multi-axis: menthol releases fast and
+    // tolerates near-boil; over-pull past 8 min turns harsh.
     caffeine: 0, tempC: [95, 100], timeS: [180, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90], character: "menthol slow to release.", moodImpact: "cooling held back" },
+      { id: "cool",  tempC: [90, 95], character: "soft mint, gentle cool.", moodImpact: "cooling lifts; calm settles" },
+      { id: "warm",  tempC: [95, 98], character: "full menthol release, clean cool.", moodImpact: "the full cooling cup" },
+      { id: "hot",   tempC: [98, 100], character: "aggressive menthol, sharp cool.", moodImpact: "cooling at peak; focus lifts with the sting" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "menthol just starting to surface.", moodImpact: "the cooling barely registers" },
+      { id: "short",  timeS: [90, 180],  character: "bright mint top.", moodImpact: "cooling forward, focus clear" },
+      { id: "medium", timeS: [180, 360], character: "full mint character, clean cool.", moodImpact: "the household digestive cooling cup" },
+      { id: "long",   timeS: [360, 480], character: "deeper menthol, slight bitter creep.", moodImpact: "cooling deep but cup tightens" },
+      { id: "over",   timeS: [480, 540], character: "harsh menthol, bitter dominating.", moodImpact: "cooling overdone; calm strained" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed; menthol whispering.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "bright, clean mint.", moodImpact: "cooling forward; focus clear" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the full digestive-cooling household cup.", moodImpact: "cooling, digestive, calm in clean balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, sharp, menthol-saturated.", moodImpact: "cooling at peak; focus and digestive both lifted" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "harsh, bitter, the mint turned aggressive.", moodImpact: "cooling lost to bitter edge" },
+    ],
+    overPull: { timeS: 540, reason: "menthol turns harsh and bitter takes over" },
     // Digestive 4: peppermint anchors cooling at 5; fennel takes the
     // digestive anchor at 5 (cleaner anethole-led answer), so peppermint
     // sits at 4 — still strong, but no longer co-equal.
@@ -281,16 +323,31 @@ const INGREDIENTS = {
   },
   spearmint: {
     name: "Spearmint", latin: "Mentha spicata", category: "herbal",
-    // tempC lower bound at 85°C: spearmint is carvone-dominant (~50-70%
-    // of essential oil), with virtually no menthol. Carvone is more
-    // delicate than peppermint's menthol and more readily driven off
-    // by aggressive heat. Maghrebi tradition (Moroccan Mint) brews
-    // spearmint at 85-90°C for exactly this reason.
-    // timeS floor 120s: 2-min cup is a deliberately permissive lower
-    // bound — accepts the very-light Maghrebi short-pour register and
-    // keeps low-temp blends like Tom Foolery in range without tripping
-    // an under-steep warning.
+    // Carvone-dominant — no menthol like peppermint, gentler cool.
+    // Maghrebi-tradition cooler temp 85-90°C preserves the delicate
+    // sweet-mint top.
     caffeine: 0, tempC: [85, 100], timeS: [120, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 80],  character: "carvone barely lifting.", moodImpact: "cooling held back" },
+      { id: "cool",  tempC: [80, 90],  character: "soft sweet-mint top, no aggression.", moodImpact: "cooling gentle; calm settles" },
+      { id: "warm",  tempC: [90, 95],  character: "full carvone release, clean cool.", moodImpact: "cooling balanced; uplifting clear" },
+      { id: "hot",   tempC: [95, 100], character: "deepest extraction, perfume saturated.", moodImpact: "cooling at peak; cup deepens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],    character: "barely steeped, top-mint only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [60, 180],  character: "Maghrebi-style bright cup.", moodImpact: "cooling forward; uplifting present" },
+      { id: "medium", timeS: [180, 300], character: "full sweet-mint character.", moodImpact: "cooling and calm in clean balance" },
+      { id: "long",   timeS: [300, 420], character: "deep mint, body forming.", moodImpact: "cooling deep; calm holds" },
+      { id: "over",   timeS: [420, 540], character: "carvone receding, slight bitter creep.", moodImpact: "cooling fading; cup tightens" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "Maghrebi-bright sweet mint.", moodImpact: "cooling gentle; uplifting forward" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the household mint cup — clean, sweet, refreshing.", moodImpact: "cooling, calm, uplifting in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep mint, sweet body, perfume-full.", moodImpact: "cooling deep; calm settles in" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "the carvone perfume gone, bitter remains.", moodImpact: "cooling lost; cup turns flat" },
+    ],
+    overPull: { timeS: 540, reason: "the sweet mint character fades, bitter remains" },
     effects: [["cooling", 4], ["digestive", 4], ["uplifting", 3], ["calm", 3]],
     flavors: ["minty", "sweet", "grassy", "cool"],
     pairs: ["lemonbalm", "sencha", "rose", "chamomile", "gunpowder"],
@@ -340,9 +397,30 @@ const INGREDIENTS = {
   },
   fennel: {
     name: "Fennel Seed", latin: "Foeniculum vulgare", category: "spice",
-    // timeS floor 240s: bruised fennel seeds release anethole quickly;
-    // 4-min household digestive cup is real, longer steeps deepen.
+    // Digestive anchor (5). Bruised seeds release the licorice-anise
+    // top fast; longer steeps deepen the cooling-digestive register.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "anethole barely surfaces.", moodImpact: "digestive held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft licorice top, gentle aroma.", moodImpact: "digestive gentle; cooling present" },
+      { id: "warm",  tempC: [95, 99],  character: "full anethole pull, clean licorice.", moodImpact: "digestive forward; cooling solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, sweet-anise full.", moodImpact: "digestive at anchor strength" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely steeped, top-aroma only.", moodImpact: "the cup barely settles" },
+      { id: "short",  timeS: [180, 300], character: "bright licorice top, sweet edge.", moodImpact: "digestive clean; cooling present" },
+      { id: "medium", timeS: [300, 420], character: "the household after-dinner cup.", moodImpact: "digestive at peak; soothing arrives" },
+      { id: "long",   timeS: [420, 540], character: "deeper licorice, body forming.", moodImpact: "digestive deep; cooling solid" },
+      { id: "over",   timeS: [540, 660], character: "anise heavy, slight bitter creep.", moodImpact: "digestive heavy; cup tightens" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "bright licorice top.", moodImpact: "digestive gentle; cooling clean" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the after-dinner Italian household cup.", moodImpact: "digestive, cooling, soothing in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, full-bodied, the licorice-anise full.", moodImpact: "digestive at peak; cooling and soothing both deep" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "anise turning bitter, body heavy.", moodImpact: "digestive overdone; cooling fades" },
+    ],
+    overPull: { timeS: 660, reason: "anise turns bitter, sweetness gone" },
     effects: [["digestive", 5], ["cooling", 3], ["soothing", 3], ["calm", 1]],
     flavors: ["licorice", "sweet", "aromatic"],
     pairs: ["peppermint", "ginger", "chamomile", "lemonbalm", "rooibos", "licorice-root"],
@@ -366,9 +444,31 @@ const INGREDIENTS = {
   },
   hibiscus: {
     name: "Hibiscus", latin: "Hibiscus sabdariffa", category: "flower",
-    // timeS floor 240s: light tart hibiscus at 4 min is a real cup;
-    // anthocyanins give color fast, full body needs the 5-7 min range.
+    // High-traffic herbal — tart-cooling base of karkadé, jamaica,
+    // bissap. Anthocyanins extract fast, color comes early; longer
+    // steeps deepen tartness without going bitter.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely staining red, faint tart.", moodImpact: "cooling barely lifts" },
+      { id: "cool",  tempC: [90, 95],  character: "ruby color, gentle tart.", moodImpact: "cooling gentle; energy present" },
+      { id: "warm",  tempC: [95, 99],  character: "full hibiscus tart, deep ruby.", moodImpact: "cooling forward; digestive solid" },
+      { id: "hot",   tempC: [99, 100], character: "sharpest extraction, full grip.", moodImpact: "cooling at peak; energy lifts" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "color only, no tart yet.", moodImpact: "the cup hasn't found its edge" },
+      { id: "short",  timeS: [120, 240], character: "bright ruby, soft tart.", moodImpact: "cooling forward; uplifting" },
+      { id: "medium", timeS: [240, 420], character: "full karkadé character — sharp, ruby, tart.", moodImpact: "the household tart-cooling cup" },
+      { id: "long",   timeS: [420, 600], character: "deep tart, color saturated.", moodImpact: "cooling deepens; energy solid" },
+      { id: "over",   timeS: [600, 720], character: "aggressively tart, color past saturation.", moodImpact: "cooling heavy; cup pushes toward astringent" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "color but no character.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "ruby-bright, soft tart.", moodImpact: "cooling gentle; uplifting present" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the household karkadé cup — sharp, tart, refreshing.", moodImpact: "cooling and digestive in clean balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep ruby, sharp-tart, fully saturated.", moodImpact: "cooling at peak; energy and digestive both lifted" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "aggressively tart, the cup losing its lift.", moodImpact: "cooling overdone; uplifting fades" },
+    ],
+    overPull: { timeS: 720, reason: "tartness turns into astringent grip" },
     effects: [["cooling", 4], ["energy", 2], ["digestive", 3]],
     flavors: ["tart", "fruity", "cranberry"],
     pairs: ["rose", "rooibos", "ginger", "lemongrass"],
@@ -392,7 +492,31 @@ const INGREDIENTS = {
   },
   rooibos: {
     name: "Rooibos", latin: "Aspalathus linearis", category: "herbal",
+    // Soothing anchor (5). Famously over-steep-tolerant — tannins
+    // stay low, the cup keeps deepening rather than turning bitter.
+    // overPull pushed to 900s reflecting that forgiveness.
     caffeine: 0, tempC: [100, 100], timeS: [300, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90],   character: "aspalathin barely lifting.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [90, 95],   character: "soft red-bush body, honey faint.", moodImpact: "soothing gentle" },
+      { id: "warm",  tempC: [95, 99],   character: "full body, honey-vanilla notes lift.", moodImpact: "soothing forward" },
+      { id: "hot",   tempC: [99, 100],  character: "deepest extraction, full red color.", moodImpact: "soothing at anchor strength; grounding present" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely red, top-honey only.", moodImpact: "the soothing barely registers" },
+      { id: "short",  timeS: [180, 300], character: "lighter red bush, gentle body.", moodImpact: "soothing settling in" },
+      { id: "medium", timeS: [300, 420], character: "the household rooibos cup — full character.", moodImpact: "soothing at peak; digestive present" },
+      { id: "long",   timeS: [420, 600], character: "deep red, more body, still smooth.", moodImpact: "soothing deepens; grounding arrives" },
+      { id: "over",   timeS: [600, 900], character: "very strong but still smooth — rooibos forgives.", moodImpact: "soothing heavy; the cup grounds" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "lighter red bush, honey-bright.", moodImpact: "soothing gentle; calm starting" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the household rooibos cup — soothing at full.", moodImpact: "soothing at anchor strength; digestive solid" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep, full-bodied, honey-warmth.", moodImpact: "soothing deep; grounding lifted" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "very strong but smooth — rooibos rarely turns harsh.", moodImpact: "soothing heavy; the cup is grounding" },
+    ],
+    overPull: { timeS: 900, reason: "the cup is muddy and tannic past the rooibos sweet spot" },
     effects: [["soothing", 5], ["digestive", 3], ["grounding", 2]],
     flavors: ["honey", "woody", "vanilla"],
     pairs: ["cinnamon", "ginger", "vanilla", "cloves", "rose", "lemongrass", "ashwagandha", "nettle", "lemonbalm"],
@@ -617,10 +741,31 @@ const INGREDIENTS = {
 
   ginger: {
     name: "Ginger", latin: "Zingiber officinale", category: "spice",
-    // timeS floor 300s: dried ginger powder/slice steeps faster than
-    // fresh root in decoction; 5-min cup is a real everyday brew.
-    // Long end stays for the slow-decoction medicinal preparation.
+    // Warming anchor (5). Decoction-friendly root — needs full
+    // boil, tolerates long simmer up to ~12 min before the gingerol
+    // turns harshly biting.
     caffeine: 0, tempC: [100, 100], timeS: [300, 600],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "gingerol barely extracting.", moodImpact: "warming held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft warmth, gentle bite.", moodImpact: "warming gentle; digestive present" },
+      { id: "warm",  tempC: [95, 99],  character: "full gingerol pull, clean heat.", moodImpact: "warming forward; digestive solid" },
+      { id: "hot",   tempC: [99, 100], character: "aggressive extraction, sharp bite.", moodImpact: "warming at peak; some grip on digestive" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely warming, soft top-spice.", moodImpact: "the warmth hasn't arrived" },
+      { id: "short",  timeS: [180, 300], character: "the everyday quick ginger cup.", moodImpact: "warming and digestive lift together" },
+      { id: "medium", timeS: [300, 480], character: "full ginger character, clean heat and body.", moodImpact: "warming at full; digestive at peak" },
+      { id: "long",   timeS: [480, 600], character: "deep decoction, body thick.", moodImpact: "warming deep; soothing arrives" },
+      { id: "over",   timeS: [600, 720], character: "harsh gingerol bite, body heavy.", moodImpact: "warming overdone; the cup turns aggressive" },
+    ],
+    registerZones: [
+      { id: "faint",      when: ["under+under","under+short","under+medium","under+long","under+over","cool+under","warm+under","hot+under"], character: "barely warming.", moodImpact: "all moods muted" },
+      { id: "aromatic",   when: ["cool+short","cool+medium","warm+short","hot+short"], character: "bright, clean ginger top.", moodImpact: "warming gentle; digestive present" },
+      { id: "balanced",   when: ["cool+long","warm+medium","hot+medium"], character: "the everyday warming cup — clean heat and body.", moodImpact: "warming and digestive in balance" },
+      { id: "tonic",      when: ["warm+long","hot+long"], character: "deep ginger decoction, slow-burn warmth.", moodImpact: "warming at peak; soothing and digestive deepen" },
+      { id: "overpulled", when: ["cool+over","warm+over","hot+over"], character: "harsh, biting, the heat turned aggressive.", moodImpact: "warming lost to harsh edge" },
+    ],
+    overPull: { timeS: 720, reason: "gingerol turns biting and harsh" },
     // Digestive 4: ginger's signature is warming 5; digestive at 4 reflects
     // its nausea-targeting register without tying the fennel anchor.
     effects: [["warming", 5], ["digestive", 4], ["energy", 2], ["soothing", 3], ["grounding", 1]],
