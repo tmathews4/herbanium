@@ -213,6 +213,33 @@ export default function App() {
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
   const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend"
   const [ingredientId, setIngredientId] = useState("chamomile");
+  // Overlay history stack — back-button returns to the previous
+  // overlay rather than dropping the user all the way out. Supports
+  // mobile expectations: blend → tap ingredient → back returns to
+  // the blend instead of closing both overlays.
+  const [overlayHistory, setOverlayHistory] = useState([]);
+  const pushOverlayHistory = (kind, payload = {}) => {
+    setOverlayHistory(prev => [...prev, { kind, ...payload }]);
+  };
+  const popOverlayHistory = () => {
+    setOverlayHistory(prev => {
+      if (prev.length === 0) {
+        setOverlay(null);
+        return prev;
+      }
+      const next = prev.slice(0, -1);
+      const top = next[next.length - 1];
+      if (top) {
+        if (top.kind === "ingredient" && top.ingredientId) setIngredientId(top.ingredientId);
+        if (top.kind === "blend" && top.blendId) setBlendOverlayId(top.blendId);
+        setOverlay(top.kind);
+      } else {
+        setOverlay(null);
+      }
+      return next;
+    });
+  };
+  const clearOverlayHistory = () => setOverlayHistory([]);
   const [blendOverlayId, setBlendOverlayId] = useState(null);
   const [session, setSession] = useState(null);
   const [composePreselect, setComposePreselect] = useState(null);
@@ -238,7 +265,9 @@ export default function App() {
     if (!overlay) return;
     window.history.pushState({ herbaniumOverlay: overlay }, "");
     const onPop = () => {
-      setOverlay(null);
+      // Browser/system back: pop one level instead of dropping
+      // out of the overlay stack entirely.
+      popOverlayHistory();
       setSession(null);
     };
     window.addEventListener("popstate", onPop);
@@ -581,6 +610,7 @@ export default function App() {
   const go = (to, arg) => {
     if (to === "ingredient") {
       if (arg) setIngredientId(arg);
+      pushOverlayHistory("ingredient", { ingredientId: arg || ingredientId });
       setOverlay("ingredient");
       return;
     }
@@ -603,6 +633,7 @@ export default function App() {
 
   const openBlend = (blendId) => {
     setBlendOverlayId(blendId);
+    pushOverlayHistory("blend", { blendId });
     setOverlay("blend");
   };
 
@@ -858,7 +889,7 @@ export default function App() {
 
       <TabBar
         tab={tab}
-        setTab={(k) => { setOverlay(null); setTab(k); }}
+        setTab={(k) => { setOverlay(null); clearOverlayHistory(); setTab(k); }}
         apothecaryMode={apothecaryMode}
         shelfMode={shelfMode}
         setApothecaryModeAction={setApothecaryModeAction}
@@ -884,7 +915,7 @@ export default function App() {
           deletePlannerItem={deletePlannerItem}
           clearDonePlannerItems={clearDonePlannerItems}
           onDone={() => setOverlay("log")}
-          onCancel={() => { setOverlay(null); setSession(null); }}
+          onCancel={() => { setOverlay(null); clearOverlayHistory(); setSession(null); }}
         />
       )}
       {overlay === "log" && session && (
@@ -902,19 +933,23 @@ export default function App() {
               ...logData,
             });
             setOverlay(null);
+            clearOverlayHistory();
             setSession(null);
             setTab("home");
           }}
-          onCancel={() => setOverlay(null)}
+          onCancel={() => { setOverlay(null); clearOverlayHistory(); }}
         />
       )}
       {overlay === "ingredient" && (
         <IngredientDetail
           id={ingredientId}
-          onClose={() => setOverlay(null)}
+          onClose={popOverlayHistory}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          onOpenIngredient={(newId) => setIngredientId(newId)}
+          onOpenIngredient={(newId) => {
+            pushOverlayHistory("ingredient", { ingredientId: newId });
+            setIngredientId(newId);
+          }}
           ingredientHintShown={ingredientHintShown}
           dismissIngredientHint={() => setIngredientHintShown(true)}
         />
@@ -926,8 +961,9 @@ export default function App() {
           onToggleFavorite={() => toggleFavorite(blendOverlayId)}
           sessions={sessions}
           go={go}
-          onClose={() => setOverlay(null)}
+          onClose={popOverlayHistory}
           onOpenIngredient={(ingId) => {
+            pushOverlayHistory("ingredient", { ingredientId: ingId });
             setIngredientId(ingId);
             setOverlay("ingredient");
           }}
