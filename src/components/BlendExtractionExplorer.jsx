@@ -400,39 +400,46 @@ export const BlendExtractionExplorer = ({
                   )}
 
                   {/* Per-axis status — preferred path when an
-                      ingredient declares tempZones + timeZones. */}
-                  {state === "in-zones" && (
-                    <>
-                      {combination && (
-                        <div style={{ marginTop: 1 }}>
-                          <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                            {combination.register} register
-                          </span>
-                          {combination.note && (
-                            <span style={{ color: theme.ash }}> — {combination.note}</span>
-                          )}
-                        </div>
-                      )}
-                      <div style={{ marginTop: 3, color: theme.ash }}>
-                        <div>
-                          <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>temp · {tempZone.id} </span>
-                          {tempZone.character}
-                        </div>
-                        {Array.isArray(tempZone.pulls) && tempZone.pulls.length > 0 && (
-                          <div style={{ paddingLeft: 12 }}>pulls {tempZone.pulls.slice(0, 3).join(", ")}</div>
-                        )}
+                      ingredient declares tempZones + timeZones.
+                      Each line uses a fixed-width label column so
+                      the description text aligns at the same indent
+                      regardless of label length. whiteSpace:nowrap +
+                      overflow:hidden enforces single-line layout. */}
+                  {state === "in-zones" && (() => {
+                    const Row = ({ label, body, headColor: hc }) => (
+                      <div style={{
+                        display: "flex", marginTop: 2,
+                        whiteSpace: "nowrap", overflow: "hidden",
+                      }}>
+                        <span style={{
+                          flex: "0 0 56px",
+                          color: theme.inkSoft, fontStyle: "normal",
+                        }}>{label}</span>
+                        <span style={{
+                          flex: 1, minWidth: 0,
+                          overflow: "hidden", textOverflow: "ellipsis",
+                          color: hc || theme.ash,
+                        }}>{body}</span>
                       </div>
-                      <div style={{ marginTop: 2, color: theme.ash }}>
-                        <div>
-                          <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>steep · {timeZone.id} </span>
-                          {timeZone.character}
-                        </div>
-                        {Array.isArray(timeZone.pulls) && timeZone.pulls.length > 0 && (
-                          <div style={{ paddingLeft: 12 }}>pulls {timeZone.pulls.slice(0, 3).join(", ")}</div>
+                    );
+                    return (
+                      <div style={{ marginTop: 4 }}>
+                        {combination && (
+                          <Row
+                            label="register"
+                            body={
+                              <>
+                                <span style={{ color: theme.sageDeep, fontWeight: 500 }}>{combination.register}</span>
+                                {combination.note && <span style={{ color: theme.ash }}> — {combination.note}</span>}
+                              </>
+                            }
+                          />
                         )}
+                        <Row label="temp" body={<><span style={{ color: theme.inkSoft }}>{tempZone.id}</span> — {tempZone.character}</>} />
+                        <Row label="steep" body={<><span style={{ color: theme.inkSoft }}>{timeZone.id}</span> — {timeZone.character}</>} />
                       </div>
-                    </>
-                  )}
+                    );
+                  })()}
 
                   {/* Legacy 2D zone path (ingredients still on the
                       old zones[] structure). */}
