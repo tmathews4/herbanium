@@ -377,43 +377,68 @@ const INGREDIENTS = {
     // pulls; overPull names the boundary past which the cup turns
     // unpleasant (the only assertive-warning trigger).
     caffeine: 0, tempC: [85, 100], timeS: [60, 600],
-    zones: [
+    // Per-axis zones — each band describes what THAT axis is doing
+    // independently. The pill detail shows both axes side by side so
+    // the user sees what temperature contributes vs. what steep time
+    // contributes; the combinations[] table names the notable
+    // emergent pairings (balanced / aromatic / tonic).
+    tempZones: [
       {
-        id: "aromatic",
-        tempC: [85, 95], timeS: [60, 180],
-        pulls: ["the perfumed clove-spice top", "a bright anise lift", "a soft peppery warmth"],
-        character: "Bright, perfumed — light on the tongue, all top-note.",
-        bestFor: "Morning cup, daytime focus, when you want lift without weight.",
-        tradeoff: "Misses the deeper herbal body the longer steeps unlock.",
+        id: "cool",
+        tempC: [85, 92],
+        character: "Restrained heat — perfume releases gently, less astringency.",
+        pulls: ["the delicate top of the spice", "softer body"],
       },
       {
-        id: "balanced",
-        tempC: [90, 100], timeS: [180, 360],
-        pulls: ["the full aromatic body", "a slow herbal depth", "a gentle astringent backbone"],
-        character: "The everyday cup — perfumed top notes married to a steady tonic body.",
-        bestFor: "Anytime sipping, the household-staple register.",
-        tradeoff: "Takes longer than the bright cup; not as deep as the long-steeped tonic.",
+        id: "warm",
+        tempC: [92, 97],
+        character: "Comfortable extraction — full aromatic release, controlled tannin.",
+        pulls: ["the full perfume", "moderate body", "a gentle astringent edge"],
       },
       {
-        id: "tonic",
-        tempC: [95, 100], timeS: [360, 600],
-        pulls: ["a deep tonic resonance", "the slow herb-medicine register", "a full astringent grip"],
-        character: "Ayurvedic chronic-tonic — heavy, grounding, astringent.",
-        bestFor: "Evening grounding cup, daily-tonic practice, recovery from illness.",
-        tradeoff: "Heavy on the tongue; the bright clove-spice lift fades into the background.",
+        id: "hot",
+        tempC: [97, 100],
+        character: "Aggressive — fast extraction, deeper compounds, more grip.",
+        pulls: ["maximum aromatic", "polyphenol body", "tannin grip"],
       },
     ],
+    timeZones: [
+      {
+        id: "short",
+        timeS: [60, 180],
+        character: "Quick wash — top-notes only, the aromatic register.",
+        pulls: ["the perfumed clove-spice top", "no body yet"],
+      },
+      {
+        id: "medium",
+        timeS: [180, 360],
+        character: "Standard pull — full character, moderate body forming.",
+        pulls: ["full aroma", "the herbal middle", "modest astringency"],
+      },
+      {
+        id: "long",
+        timeS: [360, 600],
+        character: "Long extraction — full body, the tonic register arrives.",
+        pulls: ["the slow herb-medicine register", "full astringent grip", "perfume receding"],
+      },
+    ],
+    // Notable combinations — when the temp/time pairing produces a
+    // recognizable register, name it. Optional layer; the per-axis
+    // descriptions stand on their own without it.
+    combinations: {
+      "cool+short":   { register: "aromatic", note: "All bouquet — bright, perfumed, light on the tongue." },
+      "warm+short":   { register: "aromatic", note: "Bright with a touch of warmth — the daytime lift." },
+      "warm+medium":  { register: "balanced", note: "The everyday cup — perfume married to a steady tonic body." },
+      "hot+medium":   { register: "balanced", note: "Hotter than the household standard — same balance, more grip." },
+      "warm+long":    { register: "tonic",    note: "Drifting toward Ayurvedic tonic — body deep, perfume backgrounded." },
+      "hot+long":     { register: "tonic",    note: "Full Ayurvedic chronic-tonic — heavy, grounding, astringent." },
+    },
     overPull: { timeS: 720, reason: "the cup turns harshly astringent and the spice goes medicinal" },
-    // Edge states — what's happening when the brew is in the envelope
-    // but outside an active zone, or just past the envelope. The UI
-    // surfaces these so the user always sees a description of the
-    // current state, not just a warning when something's wrong.
     edges: {
-      underTemp: "Cool extraction — character's quiet and gentler, perfume blooms slowly.",
+      underTemp: "Cool extraction — character's quiet, perfume blooms slowly.",
       overTemp: "Pushed past comfortable — bitter compounds racing to the surface.",
-      underSteep: "Just a wash — the aromatics haven't fully released yet.",
-      overSteep: "Drifting toward the tonic register — body deepens, perfume recedes.",
-      betweenZones: "Crossing registers — the balance is shifting as you wait.",
+      underSteep: "Just a wash — the aromatics haven't fully released.",
+      overSteep: "Long-haul extraction — past the tonic register and into the over-steep edge.",
     },
     effects: [["calm", 4], ["soothing", 4], ["grounding", 3], ["uplifting", 3], ["digestive", 3], ["warming", 2]],
     flavors: ["spiced", "clove", "peppery", "sweet"],

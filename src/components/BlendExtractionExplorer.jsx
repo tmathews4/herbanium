@@ -332,47 +332,12 @@ export const BlendExtractionExplorer = ({
               const headColor = sev === "green" ? theme.sageDeep
                 : sev === "yellow" ? theme.ochre
                 : theme.terra;
-              const zone = selected.activeZone;
               const edges = meta.edges || {};
               const state = selected.state;
-
-              // Resolve the headline + sub-description for the
-              // current state. The pill is always saying *something*
-              // about what's happening — never just "warning."
-              let headline, sublines = [];
-              if (state === "over-pull") {
-                headline = "over-pulled";
-                sublines.push(meta.overPull?.reason || "the cup has crossed into unpleasant");
-              } else if (state === "over-temp") {
-                headline = "above its window";
-                if (edges.overTemp) sublines.push(edges.overTemp);
-              } else if (state === "under-temp") {
-                headline = "below its window";
-                if (edges.underTemp) sublines.push(edges.underTemp);
-              } else if (state === "over-steep") {
-                headline = "over-steeped";
-                if (edges.overSteep) sublines.push(edges.overSteep);
-              } else if (state === "under-steep") {
-                headline = "under-steeped";
-                if (edges.underSteep) sublines.push(edges.underSteep);
-              } else if (state && state.startsWith("standalone-")) {
-                const kind = state.replace("standalone-", "");
-                headline = `${kind} edge climbing`;
-                sublines.push("the leaf is being pushed past where it tastes right");
-              } else if (zone) {
-                headline = `${zone.id} register`;
-                if (zone.character) sublines.push({ kind: "character", text: zone.character });
-                if (Array.isArray(zone.pulls) && zone.pulls.length > 0) {
-                  sublines.push({ kind: "pulls", text: `pulls ${zone.pulls.slice(0, 3).join(", ")}` });
-                }
-                if (zone.bestFor) sublines.push({ kind: "bestFor", text: zone.bestFor });
-                if (zone.tradeoff) sublines.push({ kind: "tradeoff", text: zone.tradeoff });
-              } else if (state === "between-zones") {
-                headline = "between registers";
-                if (edges.betweenZones) sublines.push(edges.betweenZones);
-              } else {
-                headline = "Perfect";
-              }
+              const tempZone = selected.tempZone;
+              const timeZone = selected.timeZone;
+              const combination = selected.combination;
+              const legacyZone = selected.activeZone;
 
               return (
                 <div style={{
@@ -384,23 +349,114 @@ export const BlendExtractionExplorer = ({
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
                     {tempStr}{steepStr ? ` · ${steepStr}` : ""}
                   </div>
-                  <div style={{ marginTop: 1 }}>
-                    <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
-                      {headline}
-                    </span>
-                  </div>
-                  {sublines.map((line, i) => {
-                    const isObj = typeof line === "object";
-                    const text = isObj ? line.text : line;
-                    const labelMap = { bestFor: "best for ", tradeoff: "trade-off " };
-                    const label = isObj ? labelMap[line.kind] : null;
-                    return (
-                      <div key={i} style={{ marginTop: 1, color: theme.ash }}>
-                        {label && <span style={{ color: theme.inkSoft }}>{label}</span>}
-                        {text}
+
+                  {/* State-driven cascade. Per-axis detail (when both
+                      axis zones resolve) replaces the cross-register
+                      framing — temp says one thing, time says another,
+                      and a combination[] entry names the emergent
+                      register if notable. */}
+                  {state === "over-pull" && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+                          over-pulled
+                        </span>
                       </div>
-                    );
-                  })}
+                      <div style={{ marginTop: 1, color: theme.ash }}>
+                        {meta.overPull?.reason || "the cup has crossed into unpleasant"}
+                      </div>
+                    </>
+                  )}
+                  {(state === "over-temp" || state === "under-temp" ||
+                    state === "over-steep" || state === "under-steep") && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+                          {state === "over-temp" ? "above its window"
+                           : state === "under-temp" ? "below its window"
+                           : state === "over-steep" ? "over-steeped" : "under-steeped"}
+                        </span>
+                      </div>
+                      {(() => {
+                        const edge = state === "over-temp" ? edges.overTemp
+                          : state === "under-temp" ? edges.underTemp
+                          : state === "over-steep" ? edges.overSteep
+                          : edges.underSteep;
+                        return edge ? <div style={{ marginTop: 1 }}>{edge}</div> : null;
+                      })()}
+                    </>
+                  )}
+                  {state && state.startsWith("standalone-") && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+                          {state.replace("standalone-", "")} edge climbing
+                        </span>
+                      </div>
+                      <div style={{ marginTop: 1 }}>
+                        the leaf is being pushed past where it tastes right
+                      </div>
+                    </>
+                  )}
+
+                  {/* Per-axis status — preferred path when an
+                      ingredient declares tempZones + timeZones. */}
+                  {state === "in-zones" && (
+                    <>
+                      {combination && (
+                        <div style={{ marginTop: 1 }}>
+                          <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                            {combination.register} register
+                          </span>
+                          {combination.note && (
+                            <span style={{ color: theme.ash }}> — {combination.note}</span>
+                          )}
+                        </div>
+                      )}
+                      <div style={{ marginTop: 3, color: theme.ash }}>
+                        <div>
+                          <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>temp · {tempZone.id} </span>
+                          {tempZone.character}
+                        </div>
+                        {Array.isArray(tempZone.pulls) && tempZone.pulls.length > 0 && (
+                          <div style={{ paddingLeft: 12 }}>pulls {tempZone.pulls.slice(0, 3).join(", ")}</div>
+                        )}
+                      </div>
+                      <div style={{ marginTop: 2, color: theme.ash }}>
+                        <div>
+                          <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>steep · {timeZone.id} </span>
+                          {timeZone.character}
+                        </div>
+                        {Array.isArray(timeZone.pulls) && timeZone.pulls.length > 0 && (
+                          <div style={{ paddingLeft: 12 }}>pulls {timeZone.pulls.slice(0, 3).join(", ")}</div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Legacy 2D zone path (ingredients still on the
+                      old zones[] structure). */}
+                  {legacyZone && state !== "in-zones" && !state.startsWith("over-") && !state.startsWith("under-") && !state.startsWith("standalone-") && state !== "over-pull" && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                          {legacyZone.id} register
+                        </span>
+                      </div>
+                      {legacyZone.character && <div style={{ marginTop: 1 }}>{legacyZone.character}</div>}
+                    </>
+                  )}
+
+                  {state === "between-zones" && (
+                    <div style={{ marginTop: 1 }}>between registers — adjust to land in one</div>
+                  )}
+                  {state === "in-range" && (
+                    <div style={{ marginTop: 1 }}>
+                      <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                        Perfect
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })()}

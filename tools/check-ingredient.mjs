@@ -131,7 +131,48 @@ for (const id of ids) {
     }
   }
 
-  // ── Zone validation (multi-register brewing model) ───────────
+  // ── Per-axis zone validation (preferred multi-register model) ─
+  // Each axis (tempZones, timeZones) should have non-overlapping
+  // bands inside the outer envelope. Bands may touch at boundaries.
+  const validateAxis = (zoneArr, axisKey, label, envelope) => {
+    if (!Array.isArray(zoneArr) || zoneArr.length === 0) return;
+    console.log(`\n  ${label} (${zoneArr.length}):`);
+    const [eMin, eMax] = envelope || [];
+    for (const z of zoneArr) {
+      const [zMin, zMax] = z[axisKey] || [];
+      console.log(`    ${z.id || "?"}: ${zMin}–${zMax}${axisKey === "tempC" ? "°C" : "s"}`);
+      if (z.character) console.log(`      → ${z.character}`);
+      if (Array.isArray(z.pulls)) console.log(`      pulls: ${z.pulls.join(", ")}`);
+      if (eMin != null && (zMin < eMin || zMax > eMax)) {
+        issues.push(`${label} "${z.id}" ${axisKey} [${zMin}, ${zMax}] outside envelope [${eMin}, ${eMax}]`);
+      }
+    }
+    for (let i = 0; i < zoneArr.length; i++) {
+      for (let j = i + 1; j < zoneArr.length; j++) {
+        const a = zoneArr[i], b = zoneArr[j];
+        const [aMin, aMax] = a[axisKey], [bMin, bMax] = b[axisKey];
+        const overlap = Math.min(aMax, bMax) - Math.max(aMin, bMin);
+        if (overlap > 0) {
+          notes.push(`${label} "${a.id}" and "${b.id}" overlap on ${axisKey} — first-match resolver may behave ambiguously`);
+        }
+      }
+    }
+  };
+  validateAxis(ing.tempZones, "tempC", "tempZones", ing.tempC);
+  validateAxis(ing.timeZones, "timeS", "timeZones", ing.timeS);
+
+  // Combination keys must reference declared axis zones.
+  if (ing.combinations) {
+    const tIds = new Set((ing.tempZones || []).map(z => z.id));
+    const sIds = new Set((ing.timeZones || []).map(z => z.id));
+    for (const key of Object.keys(ing.combinations)) {
+      const [tId, sId] = key.split("+");
+      if (!tIds.has(tId)) issues.push(`combination key "${key}" references unknown tempZone "${tId}"`);
+      if (!sIds.has(sId)) issues.push(`combination key "${key}" references unknown timeZone "${sId}"`);
+    }
+  }
+
+  // ── Legacy 2D zone validation (older multi-register model) ────
   // For ingredients that declare zones[], confirm:
   //   - Each zone fits inside the outer envelope (tempC/timeS).
   //   - Zones don't overlap (the zone resolver uses first-match;

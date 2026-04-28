@@ -1161,10 +1161,29 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const tempDir = tempC < tMin ? "low" : tempC > tMax ? "high" : null;
     const timeDir = timeS < sMin ? "under" : timeS > sMax ? "over" : null;
 
-    // Zone resolution — multi-register brewing model. If the
-    // ingredient declares zones[], find which one (if any) the
-    // current brew falls inside. activeZone === null means the
-    // brew is in the envelope but between declared zones.
+    // Per-axis zone resolution — each axis names its own state
+    // independently, and a notable combination (if declared) names
+    // the emergent register. This replaces the older 2D zones[]
+    // rectangle model so the user can think about temp and time
+    // separately.
+    const resolveAxisZone = (zoneArr, value, axis) => {
+      if (!Array.isArray(zoneArr)) return null;
+      for (const z of zoneArr) {
+        const range = z[axis];
+        if (!range) continue;
+        if (value >= range[0] && value <= range[1]) return z;
+      }
+      return null;
+    };
+    const tempZone = resolveAxisZone(meta.tempZones, tempC, "tempC");
+    const timeZone = resolveAxisZone(meta.timeZones, timeS, "timeS");
+    let combination = null;
+    if (tempZone && timeZone && meta.combinations) {
+      const key = `${tempZone.id}+${timeZone.id}`;
+      combination = meta.combinations[key] || null;
+    }
+    // Legacy 2D-zone fallback (any ingredient still declaring `zones`
+    // gets resolved the old way — additive migration).
     let activeZone = null;
     if (Array.isArray(meta.zones)) {
       for (const z of meta.zones) {
@@ -1211,10 +1230,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       else if (triggeredOff) standaloneOverPull = triggeredOff;
     }
 
-    // Compute a unified state — the UI uses this to pick a color
-    // and a description in one place. State priority (most severe first):
-    //   over-pull > over-temp > over-steep > under-temp > under-steep
-    //   > standalone-overpull > active-zone > between-zones
+    // Compute a unified state. Priority (most severe first):
+    //   over-pull > out-of-envelope > standalone-overpull > active
     let state, severity;
     if (isOverPulled) {
       state = "over-pull"; severity = "red";
@@ -1228,7 +1245,10 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       state = "under-steep"; severity = "red";
     } else if (standaloneOverPull) {
       state = `standalone-${standaloneOverPull}`; severity = "red";
+    } else if (tempZone && timeZone) {
+      state = "in-zones"; severity = "green";
     } else if (activeZone) {
+      // Legacy 2D zone path
       state = `zone-${activeZone.id}`; severity = "green";
     } else if (Array.isArray(meta.zones) && meta.zones.length > 0) {
       state = "between-zones"; severity = "yellow";
@@ -1239,7 +1259,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     return {
       id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange,
       tempDir, timeDir, role: ingRole,
-      activeZone, isOverPulled, standaloneOverPull,
+      activeZone, tempZone, timeZone, combination,
+      isOverPulled, standaloneOverPull,
       state, severity,
     };
   });
