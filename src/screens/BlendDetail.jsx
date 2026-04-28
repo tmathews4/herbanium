@@ -109,16 +109,16 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         <div style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
           {/* Icon + 'for {mood}' label column. The column stretches to
               match the title/subtitle/tags column on the right; icon
-              floats to the top to sit alongside the title; the label
-              uses margin: auto on top and bottom so it lands at the
-              vertical center of the remaining space — that places it
-              alongside the single tag row when there's one, and
-              between the two tag rows when there are two. Icon
-              circle resized down so its visual weight matches the
-              title's row height rather than dominating. */}
+              floats to the top to sit alongside the title; the mood
+              label sits a fixed gap below the icon so it lines up
+              with the first row of tags on the right. Icon circle
+              sized so its visual weight matches the title's row
+              height rather than dominating. The 'for' prefix was
+              dropped — the icon directly above already declares the
+              mood graphically, so the label can stand on its own. */}
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center",
-            flexShrink: 0,
+            flexShrink: 0, gap: 14,
           }}>
             <div style={{
               width: 56, height: 56, borderRadius: "50%",
@@ -134,22 +134,20 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               <button
                 onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
                 style={{
-                  marginTop: "auto", marginBottom: "auto",
                   background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
                   border: "none", padding: "2px 6px", borderRadius: 4,
                   fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
                   textTransform: "uppercase", color: theme.ash, cursor: "pointer",
                 }}
               >
-                for {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
+                {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
               </button>
             ) : (
               <span style={{
-                marginTop: "auto", marginBottom: "auto",
                 fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
                 textTransform: "uppercase", color: theme.ash,
               }}>
-                for {b.mood}
+                {b.mood}
               </span>
             )}
           </div>
