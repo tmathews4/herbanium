@@ -378,7 +378,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "cardamom", "ginger", "rooibos", "tulsi", "reishi"],
     dose: "½–1 tsp powder · 250ml",
     headsUp: "Talk to your doctor before using if pregnant, on thyroid or sedative medications, or living with an autoimmune condition. Effects build over weeks, not from a single cup.",
-    blurb: "Ashva-gandha is Sanskrit for 'smell of horse' — the root has a musky scent and Ayurveda taught that drinking it would grant a horse's strength. The withanolides inside won't quite manage that, but trials confirm they reduce cortisol and improve sleep over six to eight weeks of daily use. Strength in this telling is patience.",
+    blurb: "Ashva-gandha is Sanskrit for 'smell of horse' — the root has a musky scent and Ayurveda taught that drinking it would grant a horse's strength. The withanolides inside won't quite manage that, but trials running six to eight weeks have reported modest cortisol reductions and improved sleep quality. Strength in this telling is patience.",
     facts: [
       "Ashwagandha — ashva-gandha in Sanskrit means 'smell of horse' — the root smells musky and was thought to grant a horse's strength.",
       "Ashwagandha — withanolides don't promise horse-strength, but in clinical trials they measurably blunt cortisol over six to eight weeks of daily use.",
