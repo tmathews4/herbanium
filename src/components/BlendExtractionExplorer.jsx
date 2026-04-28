@@ -515,7 +515,7 @@ export const BlendExtractionExplorer = ({
             })()}
             {visibleBalance.length > 0 && (
               <div>
-                {sectionLabel("predicted balance")}
+                {sectionLabel("predicted palate")}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {visibleBalance.map(([tag, n]) => {
                     const known = !!EFFECT_DESCRIPTIONS[tag];
