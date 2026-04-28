@@ -376,13 +376,23 @@ const INGREDIENTS = {
     // just a different register. Zones describe what each register
     // pulls; overPull names the boundary past which the cup turns
     // unpleasant (the only assertive-warning trigger).
-    caffeine: 0, tempC: [85, 100], timeS: [60, 600],
-    // Per-axis zones — each band describes what THAT axis is doing
-    // independently. The pill detail shows both axes side by side so
-    // the user sees what temperature contributes vs. what steep time
-    // contributes; the combinations[] table names the notable
-    // emergent pairings (balanced / aromatic / tonic).
+    // Envelope widened to cover the full under-/in-/over- band span
+    // so the slider always lands in some named band on each axis.
+    // Over-pull threshold past the over band marks the unpleasant
+    // territory the cup crosses into.
+    caffeine: 0, tempC: [70, 100], timeS: [30, 720],
+    // Each axis is fully partitioned: under band at the bottom,
+    // named in-envelope bands, and over band at the top (where
+    // physically reachable). Every brew resolves to a band on each
+    // axis so the detail card always describes all three.
     tempZones: [
+      {
+        id: "under",
+        tempC: [70, 85],
+        character: "Below extraction temp — perfume barely releases.",
+        pulls: ["faint top notes", "no body"],
+        moodImpact: "everything held back; the cup barely lifts",
+      },
       {
         id: "cool",
         tempC: [85, 92],
@@ -407,6 +417,13 @@ const INGREDIENTS = {
     ],
     timeZones: [
       {
+        id: "under",
+        timeS: [30, 60],
+        character: "Just a wash — barely any extraction yet.",
+        pulls: ["faint perfume", "no body"],
+        moodImpact: "uplifting only as a hint; calm and soothing not yet present",
+      },
+      {
         id: "short",
         timeS: [60, 180],
         character: "Top-notes only, body hasn't formed yet.",
@@ -427,12 +444,28 @@ const INGREDIENTS = {
         pulls: ["the slow herb-medicine register", "full astringent grip", "perfume receding"],
         moodImpact: "grounding and soothing deepen; the cup turns meditative",
       },
+      {
+        id: "over",
+        timeS: [600, 720],
+        character: "Past the tonic register — astringency starting to bite.",
+        pulls: ["heavy astringency", "muddied perfume", "compounded bitterness"],
+        moodImpact: "grounding heavy; calm strained as bitterness rises",
+      },
     ],
-    // Register is the holistic third axis — what kind of cup the
-    // temp×steep pairing produces. Each registerZone names which
-    // pairings (tempZone+timeZone IDs) yield that register, and
-    // describes the resulting cup in its own voice.
+    // Register is the holistic third axis. Every (temp+steep) band
+    // pairing resolves to a register including the under and over
+    // edge cases. Coverage is exhaustive across all 4×5 = 20 pairings.
     registerZones: [
+      {
+        id: "underextracted",
+        when: [
+          "under+under", "under+short", "under+medium", "under+long", "under+over",
+          "cool+under", "warm+under", "hot+under",
+        ],
+        character: "Faint cup — flavor and effect both held back.",
+        pulls: ["whisper of perfume", "no body", "minimal effect"],
+        moodImpact: "all moods muted; the cup barely registers",
+      },
       {
         id: "aromatic",
         when: ["cool+short", "cool+medium", "warm+short", "hot+short"],
@@ -453,6 +486,13 @@ const INGREDIENTS = {
         character: "Heavy, grounding, astringent — Ayurvedic chronic-tonic.",
         pulls: ["full body", "polyphenol depth", "full astringent grip"],
         moodImpact: "grounding and soothing dominant; the cup turns meditative",
+      },
+      {
+        id: "overpulled",
+        when: ["cool+over", "warm+over", "hot+over"],
+        character: "Pushed past pleasant — bitter and astringent dominate.",
+        pulls: ["harsh astringency", "lost perfume", "muddied body"],
+        moodImpact: "all the brightness gone; only the heavy bitter half remains",
       },
     ],
     overPull: { timeS: 720, reason: "the cup turns harshly astringent and the spice goes medicinal" },

@@ -1249,10 +1249,20 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     }
 
     // Compute a unified state. Priority (most severe first):
-    //   over-pull > out-of-envelope > standalone-overpull > active
+    //   over-pull > standalone-overpull > zone resolution > envelope
+    // direction (legacy ingredients without zones).
     let state, severity;
+    const driftBands = new Set(["under", "over"]);
     if (isOverPulled) {
       state = "over-pull"; severity = "red";
+    } else if (standaloneOverPull) {
+      state = `standalone-${standaloneOverPull}`; severity = "red";
+    } else if (tempZone && timeZone) {
+      // Zone resolution covers the full slider span (including under
+      // and over edges) — every brew resolves to bands on both axes.
+      state = "in-zones";
+      const drifting = driftBands.has(tempZone.id) || driftBands.has(timeZone.id);
+      severity = drifting ? "yellow" : "green";
     } else if (tempDir === "high") {
       state = "over-temp"; severity = "red";
     } else if (timeDir === "over") {
@@ -1261,10 +1271,6 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       state = "under-temp"; severity = "red";
     } else if (timeDir === "under") {
       state = "under-steep"; severity = "red";
-    } else if (standaloneOverPull) {
-      state = `standalone-${standaloneOverPull}`; severity = "red";
-    } else if (tempZone && timeZone) {
-      state = "in-zones"; severity = "green";
     } else if (activeZone) {
       // Legacy 2D zone path
       state = `zone-${activeZone.id}`; severity = "green";
