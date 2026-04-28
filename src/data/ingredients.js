@@ -377,10 +377,11 @@ const INGREDIENTS = {
     // pulls; overPull names the boundary past which the cup turns
     // unpleasant (the only assertive-warning trigger).
     // Envelope widened to cover the full under-/in-/over- band span
-    // so the slider always lands in some named band on each axis.
-    // Over-pull threshold past the over band marks the unpleasant
-    // territory the cup crosses into.
-    caffeine: 0, tempC: [70, 100], timeS: [30, 720],
+    // PLUS the slider's experimentation padding (±10°C / ±120s)
+    // so the user can drag to any reachable value and the resolver
+    // still finds a band. Hard floors at 50°C / 0s are well below
+    // any sensible brew but cover slider-pad territory.
+    caffeine: 0, tempC: [50, 100], timeS: [0, 720],
     // Each axis is fully partitioned: under band at the bottom,
     // named in-envelope bands, and over band at the top (where
     // physically reachable). Every brew resolves to a band on each
@@ -388,7 +389,7 @@ const INGREDIENTS = {
     tempZones: [
       {
         id: "under",
-        tempC: [70, 85],
+        tempC: [50, 85],
         character: "Below extraction temp — perfume barely releases.",
         pulls: ["faint top notes", "no body"],
         moodImpact: "everything held back; the cup barely lifts",
@@ -418,7 +419,7 @@ const INGREDIENTS = {
     timeZones: [
       {
         id: "under",
-        timeS: [30, 60],
+        timeS: [0, 60],
         character: "Just a wash — barely any extraction yet.",
         pulls: ["faint perfume", "no body"],
         moodImpact: "uplifting only as a hint; calm and soothing not yet present",
