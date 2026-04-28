@@ -235,12 +235,14 @@ export const BlendExtractionExplorer = ({
           {!compatible && (() => {
             const items = brew.outsiders.map(o =>
               typeof o === "object" && o
-                ? { name: o.name, reason: o.reason }
-                : { name: o, reason: "temp" }
+                ? { name: o.name, tempDir: o.tempDir, timeDir: o.timeDir }
+                : { name: o, tempDir: "high", timeDir: null }  // legacy bare-string
             );
-            // Out-of-range axis words highlighted in terracotta;
-            // ingredient names highlighted in sage green so a glance
-            // picks up both "what" and "why" instantly.
+            // Highlights — sage green for ingredient names, terracotta
+            // for the out-of-range descriptor (direction + axis). The
+            // descriptor names which way to nudge: "too cool" vs "too
+            // hot," "under-steeped" vs "over-steeped" — so the user
+            // doesn't have to guess which direction to drag.
             const Axis = ({ children }) => (
               <span style={{
                 color: theme.terra, fontStyle: "normal", fontWeight: 500,
@@ -251,16 +253,21 @@ export const BlendExtractionExplorer = ({
                 color: theme.sageDeep, fontStyle: "normal", fontWeight: 500,
               }}>{children}</span>
             );
-            const phraseFor = (reason) => {
-              if (reason === "both") return (
-                <>is outside its preferred <Axis>temperature</Axis> and <Axis>steep time</Axis></>
-              );
-              if (reason === "time") return (
-                <>is <Axis>steeped past its preferred range</Axis></>
-              );
-              return (
-                <>is outside its preferred <Axis>temperature</Axis></>
-              );
+            const tempFragment = (dir) =>
+              dir === "low"  ? <Axis>below its preferred temperature</Axis>
+              : dir === "high" ? <Axis>above its preferred temperature</Axis>
+              : null;
+            const timeFragment = (dir) =>
+              dir === "under" ? <Axis>under-steeped</Axis>
+              : dir === "over"  ? <Axis>over-steeped</Axis>
+              : null;
+            const phraseFor = (it) => {
+              const t = tempFragment(it.tempDir);
+              const s = timeFragment(it.timeDir);
+              if (t && s) return <>is {t} and {s}</>;
+              if (t)      return <>is {t}</>;
+              if (s)      return <>is {s}</>;
+              return <>is <Axis>outside its preferred range</Axis></>;
             };
             return (
               <div style={{
@@ -271,7 +278,7 @@ export const BlendExtractionExplorer = ({
               }}>
                 {items.map((it, i) => (
                   <div key={i}>
-                    <Ing>{it.name}</Ing> {phraseFor(it.reason)} — will extract unevenly.
+                    <Ing>{it.name}</Ing> {phraseFor(it)} — will extract unevenly.
                   </div>
                 ))}
               </div>

@@ -1155,8 +1155,13 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const inTempRange = tempC >= tMin && tempC <= tMax;
     const inTimeRange = timeS >= sMin && timeS <= sMax;
     const inRange = inTempRange && inTimeRange;
+    // Direction lets the UI tell the user which way to nudge the
+    // slider — "too cool" vs "too hot", "under-steeped" vs
+    // "over-steeped". Null means the axis is in range.
+    const tempDir = tempC < tMin ? "low" : tempC > tMax ? "high" : null;
+    const timeDir = timeS < sMin ? "under" : timeS > sMax ? "over" : null;
 
-    return { id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange, role: ingRole };
+    return { id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange, tempDir, timeDir, role: ingRole };
   });
 
   // Perception pipeline:
@@ -1236,6 +1241,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       reason: !c.inTempRange && !c.inTimeRange ? "both"
             : !c.inTempRange ? "temp"
             : "time",
+      tempDir: c.tempDir,  // "low" | "high" | null
+      timeDir: c.timeDir,  // "under" | "over" | null
     }));
 
   // For curated blends sitting exactly on the curator's chosen brew,

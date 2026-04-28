@@ -288,13 +288,27 @@ export function buildWarnings({
   for (const o of outsiders) {
     const isObj = o && typeof o === "object";
     const name = isObj ? o.name : o;
-    const reason = isObj ? o.reason : "temp";
     const role = isObj ? (o.role || "lead") : "lead";
-    const phrase =
-      reason === "both" ? "outside its preferred temperature and steep time"
-      : reason === "time" ? "steeped past its preferred range"
-      : "outside its preferred temperature";
-    warnings.push({ kind: "outsider", role, text: `${name} is ${phrase} — will extract unevenly.` });
+    const tempDir = isObj ? o.tempDir : null;
+    const timeDir = isObj ? o.timeDir : null;
+    const tempPhrase =
+      tempDir === "low" ? "below its preferred temperature"
+      : tempDir === "high" ? "above its preferred temperature"
+      : null;
+    const timePhrase =
+      timeDir === "under" ? "under-steeped"
+      : timeDir === "over" ? "over-steeped"
+      : null;
+    let phrase;
+    if (tempPhrase && timePhrase) phrase = `${tempPhrase} and ${timePhrase}`;
+    else if (tempPhrase)          phrase = tempPhrase;
+    else if (timePhrase)          phrase = timePhrase;
+    else                          phrase = "outside its preferred range";  // legacy fallback
+    warnings.push({
+      kind: "outsider", role,
+      tempDir, timeDir,
+      text: `${name} is ${phrase} — will extract unevenly.`,
+    });
   }
 
   // Coalesce masking notes by masker for cleaner copy
