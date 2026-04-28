@@ -415,40 +415,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           Brew this cup →
         </button>
 
-        {/* Tradition-over-literature notice — relocated from the
-            top of the brewing card to here so it sits adjacent to
-            the preparations it's contextualizing. Fires when a
-            curated traditional brew lands outside research-aligned
-            ranges or trips warnings at the curator's chosen point. */}
-        {traditionInfo && (
-          <div style={{
-            margin: "22px 0 10px",
-            padding: "10px 12px", borderRadius: 8,
-            background: "rgba(165, 120, 54, 0.08)",
-            border: `1px solid rgba(165, 120, 54, 0.22)`,
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-            color: theme.inkSoft, lineHeight: 1.45,
-          }}>
-            <em style={{
-              color: theme.ochre, fontStyle: "normal",
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
-              textTransform: "uppercase", marginRight: 6,
-            }}>tradition over literature</em>
-            This brew sits outside the ranges current research
-            recommends. The science matters; the centuries of
-            practice that found this cup matter too — and sometimes
-            practice knows what science hasn't measured yet.
-            {traditionInfo.sciDiffers && (
-              <div style={{ marginTop: 6, color: theme.ash }}>
-                If you'd like the research-aligned version, try{" "}
-                <em style={{ fontStyle: "normal", color: theme.inkSoft }}>
-                  {traditionInfo.sciTempDisplay} · {traditionInfo.sciTimeDisplay}
-                </em>.
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Recommended Preparations — tradition-specific steps when curated,
             generic template otherwise. Sits after the predicted-mood/balance
             bars so the brewing science reads first, the ritual second. */}
@@ -528,6 +494,41 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             </div>
           );
         })()}
+
+        {/* Tradition-over-literature notice — sits below the
+            preparations dropdown so the user reads the steps
+            first, then sees the caveat about why those steps
+            push past the ranges modern research suggests. Fires
+            when a curated traditional brew trips warnings at the
+            curator's chosen point. */}
+        {traditionInfo && (
+          <div style={{
+            margin: "16px 0 10px",
+            padding: "10px 12px", borderRadius: 8,
+            background: "rgba(165, 120, 54, 0.08)",
+            border: `1px solid rgba(165, 120, 54, 0.22)`,
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: theme.inkSoft, lineHeight: 1.45,
+          }}>
+            <em style={{
+              color: theme.ochre, fontStyle: "normal",
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+              textTransform: "uppercase", marginRight: 6,
+            }}>tradition over literature</em>
+            This brew sits outside the ranges current research
+            recommends. The science matters; the centuries of
+            practice that found this cup matter too — and sometimes
+            practice knows what science hasn't measured yet.
+            {traditionInfo.sciDiffers && (
+              <div style={{ marginTop: 6, color: theme.ash }}>
+                If you'd like the research-aligned version, try{" "}
+                <em style={{ fontStyle: "normal", color: theme.inkSoft }}>
+                  {traditionInfo.sciTempDisplay} · {traditionInfo.sciTimeDisplay}
+                </em>.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>
