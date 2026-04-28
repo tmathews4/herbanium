@@ -233,25 +233,53 @@ export const BlendExtractionExplorer = ({
             ))}
           </div>
           {!compatible && (() => {
-            const phraseFor = (reason) =>
-              reason === "both" ? "outside its preferred temperature and steep time"
-              : reason === "time" ? "steeped past its preferred range"
-              : "outside its preferred temperature";
             const items = brew.outsiders.map(o =>
               typeof o === "object" && o
                 ? { name: o.name, reason: o.reason }
                 : { name: o, reason: "temp" }
             );
-            const text = items.length === 1
-              ? `${items[0].name} is ${phraseFor(items[0].reason)} — will extract unevenly.`
-              : items.map(it => `${it.name} is ${phraseFor(it.reason)}`).join("; ") + ".";
+            // Highlight the out-of-range axis words in terracotta so a
+            // quick glance picks up "temperature" / "steep time" without
+            // reading the whole sentence.
+            const Hi = ({ children }) => (
+              <span style={{
+                color: theme.terra, fontStyle: "normal", fontWeight: 500,
+              }}>{children}</span>
+            );
+            const phraseFor = (reason) => {
+              if (reason === "both") return (
+                <>is outside its preferred <Hi>temperature</Hi> and <Hi>steep time</Hi></>
+              );
+              if (reason === "time") return (
+                <>is <Hi>steeped past its preferred range</Hi></>
+              );
+              return (
+                <>is outside its preferred <Hi>temperature</Hi></>
+              );
+            };
+            const renderOne = (it, i) => (
+              <React.Fragment key={i}>
+                {it.name} {phraseFor(it.reason)}
+              </React.Fragment>
+            );
             return (
               <div style={{
                 marginTop: 6,
                 fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                 color: theme.ash, lineHeight: 1.4,
               }}>
-                {text}
+                {items.length === 1 ? (
+                  <>{renderOne(items[0], 0)} — will extract unevenly.</>
+                ) : (
+                  <>
+                    {items.map((it, i) => (
+                      <React.Fragment key={i}>
+                        {i > 0 && "; "}{renderOne(it, i)}
+                      </React.Fragment>
+                    ))}
+                    .
+                  </>
+                )}
               </div>
             );
           })()}
