@@ -239,6 +239,36 @@ A balanced 10-fact list looks like:
 
 ---
 
+## Off-note flavor gotcha (read before declaring flavors)
+
+When an ingredient's `flavors` array uses bare strings (`["aromatic",
+"savory", ...]`), `compose.js:normalizeFlavors` assigns positional
+strengths: position 0 → 4, 1 → 3, 2 → 2, 3+ → 1.
+
+This collides with off-note thresholds in `perception.js:buildWarnings`:
+- `camphor` ≥ 1.8 → warning
+- `soapy` ≥ 0.5 → warning
+- `muddy`, `harsh`, `acrid`, `burnt`, `medicinal` ≥ 1–1.5 → warning
+
+If any off-note word appears at position 0, 1, or 2 in your bare-string
+flavor list, the ingredient will trip an over-pull warning *every time
+it is a lead in a blend*, regardless of brew window.
+
+**Two ways to handle off-notes:**
+
+1. **Reorder them later in the bare-string array** — put the off-note
+   at position 3 or later (which gives it default strength 1, below
+   every threshold). Lightest touch; works when the off-note is
+   genuinely a tertiary flavor at tea strength.
+2. **Declare flavors as tuples**: `flavors: [["aromatic", 3],
+   ["camphor", 1]]`. Required when the off-note is structurally
+   important to the ingredient's character but you need explicit
+   strength control.
+
+`npm run check-ingredient -- <id>` catches this automatically — it
+simulates the default normalizer and flags any off-note that would
+land above its threshold.
+
 ## Common mistakes to avoid
 
 1. **Inflated effect numbers.** Flavor ingredients shouldn't claim 4 or 5

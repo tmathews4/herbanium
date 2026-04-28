@@ -592,6 +592,37 @@ const BLENDS = [
   },
 
   {
+    id: "exp-sage-throat",
+    name: "Sage & Lemon",
+    subtitle: "Mediterranean throat cup — sage, lemon peel, a spoon of honey",
+    ingredients: [
+      { id: "sage",       g: 0.8 },
+      { id: "lemon-peel", g: 0.4, role: "accent" },
+      { id: "ginger",     g: 0.2, role: "accent" },
+    ],
+    tempC: 95, timeS: 300, ml: 250,
+    mood: "soothing", flavor: "savory",
+    public: true, experimental: true, house: true,
+    effects: [["soothing", 3], ["digestive", 3], ["cooling", 2]],
+  },
+
+  {
+    id: "exp-four-thieves",
+    name: "Four Thieves",
+    subtitle: "sage and rosemary's quieter cousins — the plague-doctor's tea, gentled",
+    ingredients: [
+      { id: "sage",       g: 0.6 },
+      { id: "lemonbalm",  g: 0.6, role: "accent" },
+      { id: "lavender",   g: 0.2, role: "accent" },
+      { id: "lemon-peel", g: 0.3, role: "accent" },
+    ],
+    tempC: 95, timeS: 300, ml: 250,
+    mood: "focus", flavor: "aromatic",
+    public: true, experimental: true, house: true,
+    effects: [["focus", 3], ["soothing", 2], ["calm", 2]],
+  },
+
+  {
     id: "exp-lemon-ginger-settle",
     name: "Lemon-Ginger Settle",
     subtitle: "the cross-cultural digestive — citrus brightness over warming root",

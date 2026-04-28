@@ -99,6 +99,38 @@ for (const id of ids) {
     issues.push(`unknown flavors: ${unknownFlavors.join(", ")} — add to KNOWN_FLAVORS or fix typo`);
   }
 
+  // ── Standalone profile off-note check ────────────────────────
+  // Simulate the default normalizer used in compose.js when no
+  // extraction profile is declared — positional strength is
+  // max(1, 4 - i). If any of these flavor words land above their
+  // off-note threshold, this ingredient will trip an over-pull
+  // warning every time it's a lead in a blend.
+  const OFF_NOTE_THRESHOLDS = {
+    camphor: 1.8, soapy: 0.5, muddy: 1, medicinal: 1.5,
+    harsh: 1.5, acrid: 1, burnt: 1,
+  };
+  const flavorList = (ing.flavors || []).map(f => Array.isArray(f) ? f : null);
+  const usingTuples = flavorList.every(f => f !== null) && flavorList.length > 0;
+  if (!usingTuples) {
+    const offNoteHazards = [];
+    for (let i = 0; i < (ing.flavors || []).length; i++) {
+      const f = ing.flavors[i];
+      if (Array.isArray(f)) continue;
+      const defaultStrength = Math.max(1, 4 - i);
+      if (OFF_NOTE_THRESHOLDS[f] !== undefined && defaultStrength >= OFF_NOTE_THRESHOLDS[f]) {
+        offNoteHazards.push(
+          `"${f}" at position ${i} → default strength ${defaultStrength} >= threshold ${OFF_NOTE_THRESHOLDS[f]}`
+        );
+      }
+    }
+    if (offNoteHazards.length > 0) {
+      issues.push(
+        `off-note flavor would over-pull at default strength — reorder later in the array, or declare flavors as [name, strength] tuples:\n        ` +
+        offNoteHazards.join("\n        ")
+      );
+    }
+  }
+
   // ── Pair resolution ──────────────────────────────────────────
   console.log(`\n  pairs:`);
   const badPairs = [];

@@ -1421,6 +1421,33 @@ const INGREDIENTS = {
     ],
   },
 
+  /* ── savory-aromatic herbs ────────────────────────────────── */
+
+  sage: {
+    name: "Sage", latin: "Salvia officinalis", category: "herbal",
+    subcategory: "leaf",
+    aliases: ["common sage", "garden sage", "salvia", "sauge", "Salbei"],
+    caffeine: 0, tempC: [90, 100], timeS: [240, 360],
+    effects: [["focus", 2], ["soothing", 2], ["cooling", 2], ["digestive", 2]],
+    flavors: ["aromatic", "savory", "herbaceous", "bitter", "camphor"],
+    pairs: ["chamomile", "lemon-peel", "rose", "fennel", "ginger", "lemonbalm"],
+    dose: "1 tsp · 200ml",
+    headsUp: "Skip if pregnant or breastfeeding. Talk to your doctor first if you have epilepsy, take medication that lowers seizure threshold, or are on hormone-sensitive treatments — sage's thujones are a real concern at concentrated doses. Tea-level use a few times a week is generally fine.",
+    blurb: "The Latin salvere — 'to save' — is the etymological root of sage's name. Charlemagne ordered it planted in every royal garden in 812 CE; the medical school of Salerno asked why a man should die when sage grows in his garden. The leaves carry thujone, 1,8-cineole, and camphor — the same bright-aromatic family as rosemary and eucalyptus, riding a quietly bitter rosmarinic-acid backbone. Two persistent traditional uses: a sore-throat gargle and a memory aid. Both are real but mild at tea level — the cup is flavor with a small lift, not therapy.",
+    facts: [
+      "The Latin salvere — 'to save' or 'to heal' — is the root of the English name 'sage.' The medical school of Salerno's couplet 'Cur moriatur homo cui salvia crescit in horto?' — 'Why should a man die when sage grows in his garden?' — survives in half a dozen languages.",
+      "Sage is one of the four herbs in the medieval vinaigre des quatre voleurs — 'four thieves vinegar' — the legendary plague-era infusion that grave robbers reportedly used to avoid catching the disease from their victims.",
+      "Small clinical trials have measured modest acute improvements in memory and attention from sage extracts in healthy adults. The mechanism is similar to early Alzheimer's drugs — both block the same enzyme — but sage's effect is much weaker, and tea-level doses are well below what those trials used.",
+      "Sage's volatile oil is dominated by thujone — the same compound that made absinthe famous and feared. At cup-level doses thujone is fine; at concentrated extract doses it can lower seizure threshold, which is why pregnancy and epilepsy are real cautions.",
+      "Sage gargle is one of the oldest continuously practiced throat treatments in European folk herbalism — used for sore throats and mouth inflammation since at least the medieval period. The astringent rosmarinic acid genuinely tightens mucous-membrane tissue, which is the mechanism behind the centuries-old practice.",
+      "The Romans considered sage so important they performed a small ceremony around its harvest — only iron-free tools, and only after the right offerings. Pliny the Elder wrote about it in the 1st century.",
+      "The 'common sage' English speakers know is Salvia officinalis — distinct from white sage (the smudge stick), Spanish sage, and clary sage. There are over 900 species in the Salvia genus, but only a handful are used in food or tea.",
+      "In medieval English folk tradition, eating sage in May was said to grant longevity — 'He that would live for aye must eat sage in May.' The May timing tracked the leaf's peak volatile-oil content before summer flowering.",
+      "Sage contains both 1,8-cineole and camphor — the same compounds that give rosemary and eucalyptus their bright, slightly cooling register. This shared chemistry is why sage and rosemary so often appear together in Mediterranean cooking.",
+      "Charlemagne ordered sage planted in every royal estate's garden in his 812 CE Capitulare de villis — a list of 90+ herbs the empire considered essential. Sage's place in European herbalism has been continuous ever since.",
+    ],
+  },
+
   /* ── fruits & citrus peels ────────────────────────────────── */
 
   bergamot: {
