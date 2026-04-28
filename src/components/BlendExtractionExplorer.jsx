@@ -1217,43 +1217,10 @@ export const BlendExtractionExplorer = ({
           taste row's buttons — using <span> here picked up parent
           line-height and made the pills visibly taller. Eyebrow
           label sits inline to the left of each row. */}
-      {((brew.moodSummary?.length || 0) > 0 || (brew.flavorSummary?.length || 0) > 0) && (() => {
-        const summaryPill = (label, tone) => (
-          <button key={label} type="button" disabled style={{
-            fontFamily: ff.sans, fontSize: 10.5,
-            color: tone, letterSpacing: "0.04em",
-            padding: "3px 9px",
-            border: `1px solid ${tone}`, borderRadius: 999,
-            background: "transparent",
-            cursor: "default",
-          }}>{label}</button>
-        );
-        const labelStyle = {
-          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
-          textTransform: "uppercase", color: theme.ash,
-          flexShrink: 0,
-        };
-        return (
-          <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 8 }}>
-            {brew.moodSummary?.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                <span style={labelStyle}>Blended Mood</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {brew.moodSummary.map(t => summaryPill(t, theme.sageDeep))}
-                </div>
-              </div>
-            )}
-            {brew.flavorSummary?.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                <span style={labelStyle}>Blended Flavor</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {brew.flavorSummary.map(t => summaryPill(t, theme.terra))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
+      {/* Blended Mood / Blended Flavor summary removed — the
+          dashed "blend" pill at the top of the ingredient row now
+          carries the merged-profile view (under "moods" and
+          "flavors" labels in its detail card). */}
 
       {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
       {brew.synergyTags && brew.synergyTags.length > 0 && (
