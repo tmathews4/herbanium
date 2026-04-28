@@ -871,6 +871,30 @@ const INGREDIENTS = {
     name: "Turmeric", latin: "Curcuma longa", category: "spice",
     subcategory: "rhizome",
     aliases: ["haridra", "haldi", "golden spice"],
+    // Decoction-style root — curcumin is fat-soluble and slow.
+    // Without fat or pepper, water only pulls a fraction; long
+    // simmer is the canonical brew.
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "color but no real warmth.", moodImpact: "warming held back" },
+      { id: "cool",  tempC: [90, 95],  character: "gentle gold extraction.", moodImpact: "warming gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full turmeric character, golden body.", moodImpact: "warming and digestive in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fully simmering.", moodImpact: "warming peak; soothing arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],   character: "color but no body.", moodImpact: "warmth barely registers" },
+      { id: "short",  timeS: [300, 600], character: "lighter golden cup.", moodImpact: "warming starts to settle" },
+      { id: "medium", timeS: [600, 900], character: "the canonical haldi simmer.", moodImpact: "warming and digestive solid" },
+      { id: "long",   timeS: [900, 1200], character: "deepest decoction, full body.", moodImpact: "warming deep; soothing peak" },
+      { id: "over",   timeS: [1200, 1800], character: "very long simmer, slightly bitter root.", moodImpact: "warming heavy; cup is thick" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely simmered.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter golden cup, gentle warmth.", moodImpact: "warming gentle; comfort settles" },
+      { id: "balanced",   character: "the canonical haldi simmer — golden, warming.", moodImpact: "warming, digestive, soothing in balance" },
+      { id: "tonic",      character: "deepest decoction — full body, full warmth.", moodImpact: "warming deep; soothing at peak" },
+      { id: "overpulled", character: "the root has surrendered all it can give.", moodImpact: "warming heavy; cup is dense" },
+    ],
+    overPull: { timeS: 1800, reason: "the root past peak — bitter and over-thick" },
     caffeine: 0, tempC: [95, 100], timeS: [600, 900],
     effects: [["warming", 3], ["soothing", 3], ["grounding", 2], ["digestive", 3]],
     flavors: ["earthy", "bitter", "musky", "woody"],
@@ -1236,7 +1260,30 @@ const INGREDIENTS = {
   },
   gyokuro: {
     name: "Gyokuro", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    // Shaded green tea — extreme low temp / short pour. Anything
+    // hot scorches the high theanine; anything long pulls bitter.
     caffeine: 45, tempC: [50, 60], timeS: [90, 120],
+    tempZones: [
+      { id: "under", tempC: [40, 48], character: "umami barely surfaces.", moodImpact: "focus held back" },
+      { id: "cool",  tempC: [48, 55], character: "the canonical jade-green cup.", moodImpact: "focus crisp; calm clean" },
+      { id: "warm",  tempC: [55, 60], character: "fuller umami body.", moodImpact: "focus and calm in balance" },
+      { id: "hot",   tempC: [60, 80], character: "umami scorched, bitter forward.", moodImpact: "the focus is muddied" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],    character: "barely steeped, no umami yet.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [60, 90],   character: "first-pour gyokuro, sweet and clean.", moodImpact: "focus crisp" },
+      { id: "medium", timeS: [90, 150],  character: "the canonical Uji jade cup.", moodImpact: "focus and calm in clean balance" },
+      { id: "long",   timeS: [150, 210], character: "umami fading, tannin climbing.", moodImpact: "focus muddied" },
+      { id: "over",   timeS: [210, 300], character: "harsh-bitter, the sweet gone.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "first-pour gyokuro — sweet umami top.", moodImpact: "focus crisp; calm clean" },
+      { id: "balanced",   character: "the canonical Uji jade-green cup.", moodImpact: "focus and calm in clean balance" },
+      { id: "tonic",      character: "fuller body, more theanine pull.", moodImpact: "focus deep; calm settles" },
+      { id: "overpulled", character: "harsh-bitter, the sweet umami burned off.", moodImpact: "focus lost in the bite" },
+    ],
+    overPull: { timeS: 300, reason: "umami collapses into harsh-bitter" },
     // Focus 4 / calm 4: matcha is the focus anchor and chamomile the calm
     // anchor; gyokuro carries L-theanine richly but sits a notch below both
     // anchors rather than tying.
@@ -1418,7 +1465,31 @@ const INGREDIENTS = {
   },
   hojicha: {
     name: "Hojicha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    // Roasted green — needs full boil but very short pour. The
+    // caramel-toasted character is forgiving but past 90s the
+    // toasted register flattens into char.
     caffeine: 8, tempC: [95, 100], timeS: [30, 60],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "the roast top barely surfaces.", moodImpact: "comfort held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft caramel-toasted, gentle.", moodImpact: "comfort gentle; soothing settles" },
+      { id: "warm",  tempC: [95, 99],  character: "full hojicha character — caramel, woody.", moodImpact: "comfort and soothing in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest pull, fully boiled.", moodImpact: "comfort peak; calm deepens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 15],   character: "barely steeped, color light.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [15, 30],  character: "the canonical hojicha pour.", moodImpact: "comfort and soothing in balance" },
+      { id: "medium", timeS: [30, 60],  character: "fuller body, deeper caramel.", moodImpact: "comfort deep; calm settles" },
+      { id: "long",   timeS: [60, 90],  character: "the toasted register starts to flatten.", moodImpact: "comfort holds; cup tightens" },
+      { id: "over",   timeS: [90, 180], character: "char-bitter, the caramel gone.", moodImpact: "the warmth lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "the canonical Kyoto evening cup.", moodImpact: "comfort gentle; soothing clean" },
+      { id: "balanced",   character: "fuller hojicha — caramel-toasted body.", moodImpact: "comfort and soothing in clean balance" },
+      { id: "tonic",      character: "deeper roast, more body.", moodImpact: "comfort peak; calm deep" },
+      { id: "overpulled", character: "char-bitter, the toasted character lost.", moodImpact: "the warmth gone" },
+    ],
+    overPull: { timeS: 180, reason: "the toasted register collapses into char" },
     // Soothing 4: rooibos becomes the soothing anchor at 5; hojicha's
     // roasted-comfort soothing sits at 4, expressing the same register
     // through warmth rather than the rooibos full-body smoothness.
@@ -1473,7 +1544,31 @@ const INGREDIENTS = {
   },
   oolong: {
     name: "Oolong", latin: "Camellia sinensis", category: "true tea", subcategory: "oolong",
+    // Partial-oxidation tea — sits between green and black on
+    // every axis. Multi-steepable; the canonical gongfu cup uses
+    // short pours that develop across re-steeps.
     caffeine: 37, tempC: [85, 95], timeS: [90, 180],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "fragrance barely lifting.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [80, 87], character: "soft floral-fruit top.", moodImpact: "uplifting bright; calm settles" },
+      { id: "warm",  tempC: [87, 92], character: "full oolong character, complex top.", moodImpact: "uplifting and focus in balance" },
+      { id: "hot",   tempC: [92, 100], character: "deepest extraction, fragrance full.", moodImpact: "uplifting peak; warming arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],   character: "first-pour barely brewed.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [60, 120], character: "gongfu-style bright top.", moodImpact: "uplifting and focus crisp" },
+      { id: "medium", timeS: [120, 180], character: "the canonical oolong cup.", moodImpact: "uplifting, focus, and calm in balance" },
+      { id: "long",   timeS: [180, 240], character: "deeper body, fragrance receding.", moodImpact: "warming arrives; calm holds" },
+      { id: "over",   timeS: [240, 360], character: "tannin overtakes the floral-fruit top.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "gongfu-bright floral-fruit top.", moodImpact: "uplifting forward; focus clean" },
+      { id: "balanced",   character: "the canonical oolong cup.", moodImpact: "uplifting, focus, calm in clean balance" },
+      { id: "tonic",      character: "deeper body, fuller register.", moodImpact: "warming and calm both deep" },
+      { id: "overpulled", character: "tannin-bitter, the fragrance lost.", moodImpact: "the lift is gone" },
+    ],
+    overPull: { timeS: 360, reason: "tannin overtakes the floral-fruit top" },
     effects: [["focus", 4], ["uplifting", 4], ["energy", 3], ["warming", 2], ["calm", 3], ["soothing", 3]],
     flavors: ["floral", "fruit", "toasted", "honey"],
     pairs: ["rose", "jasmine"],
@@ -1822,7 +1917,31 @@ const INGREDIENTS = {
     name: "Echinacea", latin: "Echinacea purpurea", category: "herbal",
     subcategory: "flower",
     aliases: ["purple coneflower", "Black Sampson"],
+    // Cold-care herb — daisy-family root + flower. The
+    // immune-support character builds slowly; quick brews barely
+    // capture it.
     caffeine: 0, tempC: [90, 100], timeS: [300, 900],
+    tempZones: [
+      { id: "under", tempC: [50, 85],  character: "barely extracting, faint earth.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [85, 92],  character: "soft earthy top, root forming.", moodImpact: "soothing gentle" },
+      { id: "warm",  tempC: [92, 98],  character: "full echinacea character — root and flower.", moodImpact: "soothing forward; warming present" },
+      { id: "hot",   tempC: [98, 100], character: "deepest extraction, slight tingle on tongue.", moodImpact: "soothing peak; cup grounds" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely brewed, no real body.", moodImpact: "the cup hasn't settled" },
+      { id: "short",  timeS: [180, 300], character: "lighter cold-care cup.", moodImpact: "soothing starting to settle" },
+      { id: "medium", timeS: [300, 600], character: "full cold-care register — full body.", moodImpact: "soothing and warming solid" },
+      { id: "long",   timeS: [600, 900], character: "deep echinacea, characteristic tingle.", moodImpact: "soothing deep; grounding arrives" },
+      { id: "over",   timeS: [900, 1200], character: "muddied, the medicine flat.", moodImpact: "soothing holds but cup is heavy" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter cold-care cup.", moodImpact: "soothing gentle" },
+      { id: "balanced",   character: "the household cold-care preparation.", moodImpact: "soothing and warming in clean balance" },
+      { id: "tonic",      character: "deep echinacea — full body, characteristic tingle.", moodImpact: "soothing peak; grounding deep" },
+      { id: "overpulled", character: "the medicine is muddied; root flat.", moodImpact: "soothing holds; cup is heavy" },
+    ],
+    overPull: { timeS: 1200, reason: "the cold-care register flattens past peak" },
     effects: [["soothing", 3], ["warming", 1], ["uplifting", 1], ["digestive", 1]],
     flavors: ["earthy", "grassy", "bitter", "floral", "numbing"],
     basicTastes: { bitter: 2, astringent: 2, aromatic: 2, sweet: 1, tingling: 2 },
@@ -1861,9 +1980,31 @@ const INGREDIENTS = {
   elderflower: {
     name: "Elderflower", latin: "Sambucus nigra", category: "flower",
     aliases: ["black elder", "Holunder", "Sureau", "Sambuco", "Saúco"],
-    // timeS floor 240s: light cold-care cup at 4 min is real;
-    // longer pulls more flavonoid for the immune-support register.
+    // Honey-floral cold-care herb. Light infusion captures the
+    // perfume; longer pulls the flavonoid body that supports the
+    // traditional cold-and-flu use.
     caffeine: 0, tempC: [85, 95], timeS: [240, 600],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "honey-floral barely lifting.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [80, 88], character: "soft honey-floral top.", moodImpact: "soothing gentle; uplifting clean" },
+      { id: "warm",  tempC: [88, 93], character: "full elderflower bouquet.", moodImpact: "soothing and uplifting in balance" },
+      { id: "hot",   tempC: [93, 98], character: "deepest extraction, perfume saturated.", moodImpact: "soothing peak; calm settles" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, top-perfume only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [120, 240], character: "bright Holunder top.", moodImpact: "uplifting forward; soothing present" },
+      { id: "medium", timeS: [240, 480], character: "the canonical cold-care cup.", moodImpact: "soothing and uplifting in clean balance" },
+      { id: "long",   timeS: [480, 600], character: "deep flavonoid pull, body fuller.", moodImpact: "soothing deep; calm arrives" },
+      { id: "over",   timeS: [600, 900], character: "perfume gone flat, tannin climbing.", moodImpact: "the brightness lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright honey-floral top.", moodImpact: "uplifting forward; soothing gentle" },
+      { id: "balanced",   character: "the cold-care Holunder cup.", moodImpact: "soothing and uplifting in clean balance" },
+      { id: "tonic",      character: "deeper flavonoid body, fuller cup.", moodImpact: "soothing peak; calm and warming arrive" },
+      { id: "overpulled", character: "perfume flat, tannin overtaking.", moodImpact: "the brightness lost" },
+    ],
+    overPull: { timeS: 900, reason: "perfume flattens past the cold-care peak" },
     effects: [["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
     flavors: ["floral", "muscatel", "lychee", "sweet", "delicate"],
     basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },

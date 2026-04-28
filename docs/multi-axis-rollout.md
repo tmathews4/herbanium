@@ -57,13 +57,7 @@ moodImpact in apothecary-poet voice; full register-coverage maps
 all 4×5 = 20 axis pairings to one of {faint, aromatic, balanced,
 tonic, overpulled}.
 
-### ⏳ Pending — second tier (3)
-
-Common ingredients in curated blends, less frequent than tier-1.
-
-- [ ] gyokuro
-- [ ] hojicha
-- [ ] oolong
+### ✅ Second tier complete
 
 ### ✅ Recently migrated (second-tier batch 1)
 
@@ -74,14 +68,14 @@ Common ingredients in curated blends, less frequent than tier-1.
 - [x] cinnamon
 - [x] cardamom
 
-### ⏳ Pending — third tier (17)
+### ⏳ Pending — third tier (14)
 
 Less frequent or niche.
 
-- [ ] turmeric, black-pepper (decoction adjuncts)
+- [ ] black-pepper (catalyst — may skip)
 - [ ] genmaicha, dragonwell, lapsang, puerh (specialty teas)
 - [ ] yerba-mate
-- [ ] echinacea, elderflower, linden, nettle (cold-care + tonic)
+- [ ] linden, nettle (tonic herbals)
 - [ ] dandelion-leaf, dandelion-root, licorice-root
 - [ ] ashwagandha, lions-mane (long-decoction adaptogens)
 - [ ] bergamot, orange-peel, lemon-peel, dried-apple, cranberry, sage (recent additions)
