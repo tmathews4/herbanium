@@ -145,9 +145,30 @@ const INGREDIENTS = {
   },
   rose: {
     name: "Rose Petal", latin: "Rosa × damascena", category: "flower",
-    // timeS floor 180s: rose can read as a light floral at 3 min and
-    // a fuller perfume at 5; the geraniol/citronellol release fast.
+    // Floral perfume — geraniol/citronellol release fast, but past
+    // 6 min the cup goes flat-floral and the lift fades.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "perfume barely surfaces.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [85, 90], character: "soft floral top, gentle aroma.", moodImpact: "uplifting bright; calm settles" },
+      { id: "warm",  tempC: [90, 93], character: "full rose perfume, clean lift.", moodImpact: "uplifting and calm in clean balance" },
+      { id: "hot",   tempC: [93, 95], character: "deepest extraction, perfume saturated.", moodImpact: "uplifting at peak; calm holds" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "perfume just lifting.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [90, 180],  character: "light floral top.", moodImpact: "uplifting forward; calm gentle" },
+      { id: "medium", timeS: [180, 300], character: "full rose bouquet.", moodImpact: "uplifting and calm in balance" },
+      { id: "long",   timeS: [300, 360], character: "perfume deep, slight tannin creep.", moodImpact: "calm deepens; uplifting fades" },
+      { id: "over",   timeS: [360, 420], character: "the bouquet flattens, tannin dominates.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "light, perfumed, the floral lift forward.", moodImpact: "uplifting forward; calm gentle" },
+      { id: "balanced",   character: "full rose bouquet, calm and bright in balance.", moodImpact: "uplifting and calm in clean balance" },
+      { id: "tonic",      character: "deep perfume, full body, the cup richer.", moodImpact: "calm deepens; uplifting holds" },
+      { id: "overpulled", character: "the bouquet flattens, tannin overtakes the lift.", moodImpact: "the lift is gone, tannin remains" },
+    ],
+    overPull: { timeS: 420, reason: "the floral lift collapses into tannin" },
     effects: [["calm", 4], ["soothing", 4], ["sleepy", 2]],
     flavors: ["floral", "sweet", "fruity"],
     pairs: ["chamomile", "lavender", "hibiscus", "cardamom", "tulsi", "vanilla", "white", "oolong", "linden", "elderflower"],
@@ -171,7 +192,30 @@ const INGREDIENTS = {
   },
   jasmine: {
     name: "Jasmine", latin: "Jasminum sambac", category: "flower",
+    // Delicate white floral — needs cooler water than most herbs;
+    // boiling scorches the perfume into something heavy and indolic.
     caffeine: 0, tempC: [75, 85], timeS: [120, 180],
+    tempZones: [
+      { id: "under", tempC: [50, 70], character: "the perfume hasn't lifted.", moodImpact: "calm only as a hint" },
+      { id: "cool",  tempC: [70, 78], character: "soft white-floral top.", moodImpact: "calm forward; focus quieter" },
+      { id: "warm",  tempC: [78, 83], character: "full jasmine bouquet, clean lift.", moodImpact: "calm and focus in balance" },
+      { id: "hot",   tempC: [83, 95], character: "perfume turning heavy, indolic edge.", moodImpact: "calm strained; focus dulled" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],    character: "barely steeped, top-perfume only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [60, 120],  character: "light, bright jasmine.", moodImpact: "calm gentle; focus crisp" },
+      { id: "medium", timeS: [120, 180], character: "full bouquet, the canonical scented cup.", moodImpact: "calm and focus in clean balance" },
+      { id: "long",   timeS: [180, 240], character: "perfume deepening; slight bitter creep.", moodImpact: "calm deep; focus dulling" },
+      { id: "over",   timeS: [240, 300], character: "indolic and bitter, perfume gone harsh.", moodImpact: "calm overshadowed by edge" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "light, white-floral, perfume forward.", moodImpact: "calm gentle; focus clean" },
+      { id: "balanced",   character: "the canonical scented jasmine cup.", moodImpact: "calm and focus in clean balance" },
+      { id: "tonic",      character: "deeper perfume, fuller body.", moodImpact: "calm deeper; focus holds" },
+      { id: "overpulled", character: "indolic, bitter — the perfume has turned heavy.", moodImpact: "the lift is gone" },
+    ],
+    overPull: { timeS: 300, reason: "perfume turns indolic and bitter" },
     effects: [["calm", 4], ["energy", 2], ["focus", 2]],
     flavors: ["floral", "sweet", "honeyed", "heady"],
     pairs: ["sencha", "white", "rose"],
@@ -195,9 +239,30 @@ const INGREDIENTS = {
   },
   passionflower: {
     name: "Passionflower", latin: "Passiflora incarnata", category: "herbal",
-    // timeS floor 300s: 5-min cup is real (lighter); the long end stays
-    // for the chrysin-forward sleep extract.
+    // Sleep-leaning herbal — gentle calm at short steeps, deeper
+    // sedation at long. Past 12 min the cup goes hay-flat.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely extracting.", moodImpact: "calm held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft hay-grassy top.", moodImpact: "calm gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full character, sedation building.", moodImpact: "calm forward; sleepy settling" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full sedative pull.", moodImpact: "calm and sleepy both deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "just hay-grassy water.", moodImpact: "the cup barely registers" },
+      { id: "short",  timeS: [180, 300], character: "lighter passionflower, gentle.", moodImpact: "calm starts to settle" },
+      { id: "medium", timeS: [300, 480], character: "full character — quiet, hay-soft.", moodImpact: "calm and sleepy both arrive" },
+      { id: "long",   timeS: [480, 600], character: "deeper sedation, body forming.", moodImpact: "sleepy deep; calm holds" },
+      { id: "over",   timeS: [600, 720], character: "hay-flat, the medicine dulled.", moodImpact: "the sedation peaks then dulls" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "light, hay-soft, gentle on the tongue.", moodImpact: "calm gentle; sleepy quiet" },
+      { id: "balanced",   character: "the everyday calming cup — quiet and slow.", moodImpact: "calm and soothing in clean balance" },
+      { id: "tonic",      character: "deep, sedative, the sleep cup arrives.", moodImpact: "sleepy forward; calm at peak" },
+      { id: "overpulled", character: "hay-flat, the medicine has dulled.", moodImpact: "the calm holds but the cup is flat" },
+    ],
+    overPull: { timeS: 720, reason: "the cup turns hay-flat, sedation dulled" },
     effects: [["calm", 4], ["sleepy", 3], ["soothing", 3]],
     flavors: ["grassy", "hay", "delicate"],
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
@@ -371,9 +436,30 @@ const INGREDIENTS = {
   },
   lemongrass: {
     name: "Lemongrass", latin: "Cymbopogon citratus", category: "herbal",
-    // timeS floor 240s: 4-min cup captures the citral lift; longer
-    // pulls the soft body and tisane-grade aromatic depth.
+    // Bright citrus-grass — citral releases fast; longer steeps
+    // pull a softer aromatic body before turning grassy-flat.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "citrus barely lifting.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft citrus-grass top.", moodImpact: "uplifting gentle; cooling clean" },
+      { id: "warm",  tempC: [95, 99],  character: "full citral lift, clean grass.", moodImpact: "uplifting and cooling in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, fullest body.", moodImpact: "uplifting at peak; digestive solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely brewed, top-citrus only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [120, 240], character: "bright lemongrass top.", moodImpact: "uplifting forward; cooling clean" },
+      { id: "medium", timeS: [240, 420], character: "full citrus-grass character.", moodImpact: "the bright everyday cup" },
+      { id: "long",   timeS: [420, 540], character: "deeper body, citrus receding.", moodImpact: "uplifting fades; soothing arrives" },
+      { id: "over",   timeS: [540, 660], character: "grass-flat, the citrus mostly gone.", moodImpact: "the brightness lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright citrus-grass, lift forward.", moodImpact: "uplifting forward; cooling crisp" },
+      { id: "balanced",   character: "the everyday lemongrass cup — bright, clean.", moodImpact: "uplifting, cooling, digestive in balance" },
+      { id: "tonic",      character: "deeper grass body, citrus quieter.", moodImpact: "soothing arrives; uplifting moderates" },
+      { id: "overpulled", character: "grass-flat, the citrus gone.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 660, reason: "citrus collapses into flat grass" },
     effects: [["cooling", 4], ["uplifting", 4], ["digestive", 3], ["calm", 3]],
     flavors: ["citrus", "grassy", "bright"],
     pairs: ["ginger", "peppermint", "lemonbalm", "rose", "rooibos", "hibiscus", "yerba-mate"],
@@ -820,10 +906,30 @@ const INGREDIENTS = {
   },
   cinnamon: {
     name: "Cinnamon", latin: "Cinnamomum verum", category: "spice",
-    // timeS floor 300s: ground cinnamon in chai-style brews releases
-    // cinnamaldehyde fast; 5-min cup is real. Stick cinnamon needs
-    // the long end for the same flavor intensity.
+    // Sweet-warm spice — releases fast as ground, slower as stick.
+    // Past 12 min the cinnamon turns hot-and-numbing.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "barely warm, spice quiet.", moodImpact: "warming held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft sweet-bark top.", moodImpact: "warming gentle; comfort settles" },
+      { id: "warm",  tempC: [95, 99],  character: "full cinnamon character, sweet warmth.", moodImpact: "warming forward; comfort solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full sweet-burn.", moodImpact: "warming at peak; digestive lifts" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "spice top only, no body.", moodImpact: "warmth barely registers" },
+      { id: "short",  timeS: [180, 300], character: "bright cinnamon top, sweet edge.", moodImpact: "warming and comfort settle in" },
+      { id: "medium", timeS: [300, 480], character: "the chai-style cinnamon cup.", moodImpact: "warming and digestive in balance" },
+      { id: "long",   timeS: [480, 600], character: "deep cinnamon, body forming.", moodImpact: "warming deep; soothing arrives" },
+      { id: "over",   timeS: [600, 720], character: "spice turning hot and numbing.", moodImpact: "warming heavy; cup tightens" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright sweet-cinnamon top.", moodImpact: "warming gentle; comfort present" },
+      { id: "balanced",   character: "the everyday spice cup — sweet, warm, clean.", moodImpact: "warming, comfort, digestive in balance" },
+      { id: "tonic",      character: "deep, full body, sweet-burn forward.", moodImpact: "warming peak; soothing deep" },
+      { id: "overpulled", character: "hot and numbing — the spice has turned aggressive.", moodImpact: "warming overdone; comfort lost" },
+    ],
+    overPull: { timeS: 720, reason: "cinnamon turns hot and numbing past sweet" },
     effects: [["warming", 4], ["digestive", 4], ["uplifting", 3], ["soothing", 3], ["grounding", 1]],
     flavors: ["spiced", "sweet", "woody", "warm"],
     pairs: ["assam", "rooibos", "ginger", "cardamom", "cloves", "vanilla", "turmeric", "black-pepper", "ashwagandha", "lions-mane", "dandelion-root", "reishi", "licorice-root", "elderflower"],
@@ -847,7 +953,30 @@ const INGREDIENTS = {
   },
   cardamom: {
     name: "Cardamom", latin: "Elettaria cardamomum", category: "spice",
+    // Bright-floral spice — needs full heat for the volatile oils;
+    // past 10 min the cup picks up an aggressive camphor-medicinal edge.
     caffeine: 0, tempC: [95, 100], timeS: [300, 480],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "the floral top barely surfaces.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft cardamom perfume.", moodImpact: "uplifting gentle; warming present" },
+      { id: "warm",  tempC: [95, 99],  character: "full bright-spice character.", moodImpact: "uplifting and digestive solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, perfume-full.", moodImpact: "uplifting at peak; digestive deep" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 180],   character: "barely warming, top-spice only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [180, 300], character: "bright cardamom top.", moodImpact: "uplifting and warming settle" },
+      { id: "medium", timeS: [300, 480], character: "the chai-style cardamom cup.", moodImpact: "uplifting, digestive, warming in balance" },
+      { id: "long",   timeS: [480, 600], character: "deeper spice, body forming.", moodImpact: "warming deepens; uplifting holds" },
+      { id: "over",   timeS: [600, 720], character: "camphor-medicinal edge climbing.", moodImpact: "the brightness lost to medicine" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright cardamom top, perfume forward.", moodImpact: "uplifting forward; warming gentle" },
+      { id: "balanced",   character: "the everyday chai-spice cup.", moodImpact: "uplifting, digestive, warming in balance" },
+      { id: "tonic",      character: "deep, full-bodied spice.", moodImpact: "warming deep; digestive at peak" },
+      { id: "overpulled", character: "camphor-medicinal — the brightness gone aggressive.", moodImpact: "uplifting lost to harsh edge" },
+    ],
+    overPull: { timeS: 720, reason: "cardamom turns camphor-medicinal" },
     effects: [["digestive", 4], ["warming", 3], ["uplifting", 4], ["cooling", 3], ["soothing", 3]],
     flavors: ["spiced", "floral", "citrus", "complex"],
     pairs: ["assam", "rose", "ginger", "cinnamon", "cloves", "vanilla", "tulsi", "ashwagandha", "turmeric", "black-pepper", "dandelion-root"],
