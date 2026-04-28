@@ -406,11 +406,22 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 {b.ingredients.map((ing, i) => {
                   const meta = INGREDIENTS[ing.id];
                   if (!meta) return null;
-                  // Compact metadata line: temp range, top 2 flavors, top effect
+                  // Compact metadata line: temp range, steep range, top 2 flavors, top effect.
+                  // Steep range formatted in minutes when both bounds are
+                  // multiples of 60s (most ingredients); falls back to seconds
+                  // for the few that brew sub-minute (matcha 30s, hojicha 30–60s).
+                  const formatSteepRange = ([sMin, sMax]) => {
+                    if (sMax < 60) return `${sMin}–${sMax}s`;
+                    if (sMin < 60) return `${sMin}s–${Math.round(sMax / 60)} min`;
+                    const lo = sMin / 60, hi = sMax / 60;
+                    return `${Number.isInteger(lo) ? lo : lo.toFixed(1)}–${Number.isInteger(hi) ? hi : hi.toFixed(1)} min`;
+                  };
+                  const steepRange = meta.timeS ? formatSteepRange(meta.timeS) : null;
                   const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
                   const topEffect = (meta.effects || []).filter(([t]) => t !== "bitterness")[0];
                   const metaParts = [
                     formatTempRange(meta.tempC[0], meta.tempC[1], unit),
+                    steepRange,
                     topFlavors,
                     topEffect ? topEffect[0] : null,
                   ].filter(Boolean);
