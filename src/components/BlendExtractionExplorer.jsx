@@ -57,6 +57,8 @@ import { VocabInfoCard } from "./layout";
  */
 export const BlendExtractionExplorer = ({
   ingredients,              // [{id, g}, ...]
+  hideTraditionNote = false,  // suppress the inline note (caller renders elsewhere)
+  onTraditionNoteChange,    // optional callback fired with the note payload
   defaultTempC,             // from computeBrewProfile (algorithm's recommendation)
   defaultTimeS,             // from computeBrewProfile
   tempC: tempCProp,         // optional controlled
@@ -178,6 +180,24 @@ export const BlendExtractionExplorer = ({
 
   const compatible = brew.outsiders.length === 0;
 
+  // When a parent caller wants to render the tradition note in
+  // its own slot (BlendDetail places it above the preparations
+  // dropdown), notify it whenever the note's payload changes.
+  // The render here is also suppressed via hideTraditionNote.
+  useEffect(() => {
+    if (!onTraditionNoteChange) return;
+    if (brew.traditionNote) {
+      onTraditionNoteChange({
+        sciDiffers,
+        sciTempDisplay,
+        sciTimeDisplay,
+      });
+    } else {
+      onTraditionNoteChange(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brew.traditionNote, sciDiffers, sciTempDisplay, sciTimeDisplay]);
+
   return (
     <div style={{
       padding: compact ? "14px 14px 16px" : "16px 16px 18px",
@@ -229,8 +249,10 @@ export const BlendExtractionExplorer = ({
       {/* Tradition-over-literature notice — appears on curated blends
           that brew outside what the studies prescribe. The curator
           chose this point on purpose; the note acknowledges that the
-          warning system has been silenced here, and explains why. */}
-      {brew.traditionNote && (
+          warning system has been silenced here, and explains why.
+          Suppressed when the caller has lifted rendering out (e.g.
+          BlendDetail places it above the preparations dropdown). */}
+      {!hideTraditionNote && brew.traditionNote && (
         <div style={{
           marginBottom: 12, padding: "8px 10px", borderRadius: 6,
           background: "rgba(165, 120, 54, 0.08)",
