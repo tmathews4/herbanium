@@ -404,6 +404,17 @@ const INGREDIENTS = {
       },
     ],
     overPull: { timeS: 720, reason: "the cup turns harshly astringent and the spice goes medicinal" },
+    // Edge states — what's happening when the brew is in the envelope
+    // but outside an active zone, or just past the envelope. The UI
+    // surfaces these so the user always sees a description of the
+    // current state, not just a warning when something's wrong.
+    edges: {
+      underTemp: "Cool extraction — character's quiet and gentler, perfume blooms slowly.",
+      overTemp: "Pushed past comfortable — bitter compounds racing to the surface.",
+      underSteep: "Just a wash — the aromatics haven't fully released yet.",
+      overSteep: "Drifting toward the tonic register — body deepens, perfume recedes.",
+      betweenZones: "Crossing registers — the balance is shifting as you wait.",
+    },
     effects: [["calm", 4], ["soothing", 4], ["grounding", 3], ["uplifting", 3], ["digestive", 3], ["warming", 2]],
     flavors: ["spiced", "clove", "peppery", "sweet"],
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],

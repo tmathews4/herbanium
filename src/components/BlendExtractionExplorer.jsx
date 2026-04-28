@@ -267,8 +267,24 @@ export const BlendExtractionExplorer = ({
             <div style={{
               display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center",
             }}>
-              {pills.map(({ id, name, inRange }) => {
+              {pills.map((p) => {
+                const { id, name } = p;
                 const isSelected = id === currentId;
+                // Pill color follows the unified state severity:
+                //   green = active zone (or no-zones-declared in-range)
+                //   yellow = between zones, drifting
+                //   red = out of envelope OR standalone over-pull OR overPull
+                const sev = p.severity || (p.inRange ? "green" : "red");
+                const palette = sev === "green" ? {
+                  border: theme.sage, dot: theme.sage, text: theme.sageDeep,
+                  bgIdle: "rgba(109,126,85,0.10)", bgSel: "rgba(109,126,85,0.22)",
+                } : sev === "yellow" ? {
+                  border: theme.ochre, dot: theme.ochre, text: theme.ochre,
+                  bgIdle: "rgba(189,148,76,0.10)", bgSel: "rgba(189,148,76,0.22)",
+                } : {
+                  border: theme.terra, dot: theme.terra, text: theme.terra,
+                  bgIdle: "rgba(176,84,47,0.08)", bgSel: "rgba(176,84,47,0.18)",
+                };
                 return (
                   <button
                     key={id}
@@ -277,14 +293,10 @@ export const BlendExtractionExplorer = ({
                     style={{
                       display: "flex", alignItems: "center", gap: 5,
                       padding: "3px 9px", borderRadius: 999,
-                      // Selected pill gets a denser fill so the user
-                      // knows which one is showing in the detail row.
-                      background: inRange
-                        ? (isSelected ? "rgba(109,126,85,0.22)" : "rgba(109,126,85,0.10)")
-                        : (isSelected ? "rgba(176,84,47,0.18)" : "rgba(176,84,47,0.08)"),
-                      border: `1px solid ${inRange ? theme.sage : theme.terra}`,
+                      background: isSelected ? palette.bgSel : palette.bgIdle,
+                      border: `1px solid ${palette.border}`,
                       borderWidth: isSelected ? 1.5 : 1,
-                      opacity: inRange ? 1 : (isSelected ? 1 : 0.75),
+                      opacity: sev === "green" ? 1 : (isSelected ? 1 : 0.75),
                       cursor: "pointer",
                       fontFamily: "inherit",
                       outline: "none",
@@ -292,11 +304,11 @@ export const BlendExtractionExplorer = ({
                   >
                     <span style={{
                       width: 6, height: 6, borderRadius: "50%",
-                      background: inRange ? theme.sage : theme.terra,
+                      background: palette.dot,
                     }} />
                     <span style={{
                       fontFamily: ff.sans, fontSize: 10.5,
-                      color: inRange ? theme.sageDeep : theme.terra,
+                      color: palette.text,
                     }}>
                       {name}
                     </span>
@@ -313,92 +325,82 @@ export const BlendExtractionExplorer = ({
               if (!meta) return null;
               const tempStr = formatTempRangeShort(meta.tempC);
               const steepStr = meta.timeS ? formatSteepRangeShort(meta.timeS) : null;
-              const out = outsiderMap.get(selected.name);
-              const inRange = selected.inRange;
-              const zone = selected.activeZone;       // multi-zone model
-              const isOverPulled = selected.isOverPulled;
-              const hasZones = Array.isArray(meta.zones) && meta.zones.length > 0;
+              const sev = selected.severity || (selected.inRange ? "green" : "red");
+              const borderColor = sev === "green" ? theme.sage
+                : sev === "yellow" ? theme.ochre
+                : theme.terra;
+              const headColor = sev === "green" ? theme.sageDeep
+                : sev === "yellow" ? theme.ochre
+                : theme.terra;
+              const zone = selected.activeZone;
+              const edges = meta.edges || {};
+              const state = selected.state;
+
+              // Resolve the headline + sub-description for the
+              // current state. The pill is always saying *something*
+              // about what's happening — never just "warning."
+              let headline, sublines = [];
+              if (state === "over-pull") {
+                headline = "over-pulled";
+                sublines.push(meta.overPull?.reason || "the cup has crossed into unpleasant");
+              } else if (state === "over-temp") {
+                headline = "above its window";
+                if (edges.overTemp) sublines.push(edges.overTemp);
+              } else if (state === "under-temp") {
+                headline = "below its window";
+                if (edges.underTemp) sublines.push(edges.underTemp);
+              } else if (state === "over-steep") {
+                headline = "over-steeped";
+                if (edges.overSteep) sublines.push(edges.overSteep);
+              } else if (state === "under-steep") {
+                headline = "under-steeped";
+                if (edges.underSteep) sublines.push(edges.underSteep);
+              } else if (state && state.startsWith("standalone-")) {
+                const kind = state.replace("standalone-", "");
+                headline = `${kind} edge climbing`;
+                sublines.push("the leaf is being pushed past where it tastes right");
+              } else if (zone) {
+                headline = `${zone.id} register`;
+                if (zone.character) sublines.push({ kind: "character", text: zone.character });
+                if (Array.isArray(zone.pulls) && zone.pulls.length > 0) {
+                  sublines.push({ kind: "pulls", text: `pulls ${zone.pulls.slice(0, 3).join(", ")}` });
+                }
+                if (zone.bestFor) sublines.push({ kind: "bestFor", text: zone.bestFor });
+                if (zone.tradeoff) sublines.push({ kind: "tradeoff", text: zone.tradeoff });
+              } else if (state === "between-zones") {
+                headline = "between registers";
+                if (edges.betweenZones) sublines.push(edges.betweenZones);
+              } else {
+                headline = "Perfect";
+              }
+
               return (
                 <div style={{
                   marginTop: 8, paddingLeft: 10,
-                  borderLeft: `2px solid ${
-                    isOverPulled ? theme.terra
-                    : inRange ? theme.sage
-                    : theme.terra
-                  }`,
+                  borderLeft: `2px solid ${borderColor}`,
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: theme.ash, lineHeight: 1.5,
                 }}>
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
                     {tempStr}{steepStr ? ` · ${steepStr}` : ""}
                   </div>
-
-                  {/* Status line: over-pull is most assertive; zone
-                      name when an active zone is found; "between
-                      registers" when in envelope but between zones;
-                      directional warning when outside envelope;
-                      "Perfect" fallback for no-zone ingredients. */}
-                  {isOverPulled ? (
-                    <div style={{ marginTop: 1 }}>
-                      <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-                        over-pulled
-                      </span>
-                      <span style={{ color: theme.ash }}>
-                        {" "}— {meta.overPull?.reason || "tannins dominate"}
-                      </span>
-                    </div>
-                  ) : !inRange && out ? (
-                    (() => {
-                      const t = tempFragment(out.tempDir);
-                      const s = timeFragment(out.timeDir);
-                      let body;
-                      if (t && s) body = <>{t} and {s}</>;
-                      else if (t) body = t;
-                      else if (s) body = s;
-                      else body = <Axis>outside its preferred range</Axis>;
-                      return <div style={{ marginTop: 1 }}>{body}</div>;
-                    })()
-                  ) : zone ? (
-                    <>
-                      <div style={{ marginTop: 1 }}>
-                        <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                          {zone.id} register
-                        </span>
+                  <div style={{ marginTop: 1 }}>
+                    <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
+                      {headline}
+                    </span>
+                  </div>
+                  {sublines.map((line, i) => {
+                    const isObj = typeof line === "object";
+                    const text = isObj ? line.text : line;
+                    const labelMap = { bestFor: "best for ", tradeoff: "trade-off " };
+                    const label = isObj ? labelMap[line.kind] : null;
+                    return (
+                      <div key={i} style={{ marginTop: 1, color: theme.ash }}>
+                        {label && <span style={{ color: theme.inkSoft }}>{label}</span>}
+                        {text}
                       </div>
-                      {zone.character && (
-                        <div style={{ marginTop: 1, color: theme.ash }}>
-                          {zone.character}
-                        </div>
-                      )}
-                      {Array.isArray(zone.pulls) && zone.pulls.length > 0 && (
-                        <div style={{ marginTop: 1, color: theme.ash }}>
-                          pulls {zone.pulls.slice(0, 3).join(", ")}
-                        </div>
-                      )}
-                      {zone.bestFor && (
-                        <div style={{ marginTop: 1, color: theme.ash }}>
-                          <span style={{ color: theme.inkSoft }}>best for </span>
-                          {zone.bestFor}
-                        </div>
-                      )}
-                      {zone.tradeoff && (
-                        <div style={{ marginTop: 1, color: theme.ash }}>
-                          <span style={{ color: theme.inkSoft }}>trade-off </span>
-                          {zone.tradeoff}
-                        </div>
-                      )}
-                    </>
-                  ) : hasZones ? (
-                    <div style={{ marginTop: 1, color: theme.ash }}>
-                      between registers — adjust temp or steep to land in one
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: 1 }}>
-                      <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                        Perfect
-                      </span>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               );
             })()}
@@ -913,7 +915,13 @@ export const BlendExtractionExplorer = ({
           shown inline above with the per-ingredient pills; filter here
           to avoid duplication. */}
       {(() => {
-        const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
+        // Cup-level warnings only — per-ingredient outsider and
+        // over-pull warnings now surface in the selected-pill detail
+        // box. Cup-level tannin/aromatic (no ingredient-name prefix)
+        // and masking/paradox/ceiling stay here.
+        const filtered = (brew.warnings || []).filter(w =>
+          w.kind !== "outsider" && !/is being over-pulled/.test(w.text || "")
+        );
         if (filtered.length === 0) return null;
         // Per-ingredient over-pull warnings always start with the
         // ingredient name and " is being over-pulled — ". Split on

@@ -1185,10 +1185,62 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
       ? ((op.tempC != null && tempC > op.tempC) || (op.timeS != null && timeS > op.timeS))
       : false;
 
+    // Per-ingredient over-pull check (standalone-profile tannin/aromatic).
+    // Walks the ingredient alone at the current brew and asks "would
+    // this leaf, if brewed by itself this way, fire its over-pull
+    // ceiling?" If yes, the pill should reflect that even before the
+    // cup-level total trips. Catalysts skip — trace dose.
+    let standaloneOverPull = null;
+    if (ingRole !== "catalyst" && profile?.flavors) {
+      const fMap = Object.fromEntries(profile.flavors);
+      const eMap = Object.fromEntries(profile.effects || []);
+      const bitter = (fMap.bitter || 0) + (fMap.bitterness || 0) + (eMap.bitterness || 0);
+      const astringent = fMap.astringent || 0;
+      // Off-notes from the standalone profile.
+      const offThresholds = { camphor: 1.8, soapy: 0.5, muddy: 1, medicinal: 1.5, harsh: 1.5, acrid: 1, burnt: 1 };
+      let triggeredOff = null;
+      for (const [name, threshold] of Object.entries(offThresholds)) {
+        if ((fMap[name] || 0) >= threshold) {
+          triggeredOff = name;
+          break;
+        }
+      }
+      if (bitter + astringent >= 4) standaloneOverPull = "tannic";
+      else if (astringent >= 2) standaloneOverPull = "astringent";
+      else if (bitter >= 2.5) standaloneOverPull = "bitter";
+      else if (triggeredOff) standaloneOverPull = triggeredOff;
+    }
+
+    // Compute a unified state — the UI uses this to pick a color
+    // and a description in one place. State priority (most severe first):
+    //   over-pull > over-temp > over-steep > under-temp > under-steep
+    //   > standalone-overpull > active-zone > between-zones
+    let state, severity;
+    if (isOverPulled) {
+      state = "over-pull"; severity = "red";
+    } else if (tempDir === "high") {
+      state = "over-temp"; severity = "red";
+    } else if (timeDir === "over") {
+      state = "over-steep"; severity = "red";
+    } else if (tempDir === "low") {
+      state = "under-temp"; severity = "red";
+    } else if (timeDir === "under") {
+      state = "under-steep"; severity = "red";
+    } else if (standaloneOverPull) {
+      state = `standalone-${standaloneOverPull}`; severity = "red";
+    } else if (activeZone) {
+      state = `zone-${activeZone.id}`; severity = "green";
+    } else if (Array.isArray(meta.zones) && meta.zones.length > 0) {
+      state = "between-zones"; severity = "yellow";
+    } else {
+      state = "in-range"; severity = "green";
+    }
+
     return {
       id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange,
       tempDir, timeDir, role: ingRole,
-      activeZone, isOverPulled,
+      activeZone, isOverPulled, standaloneOverPull,
+      state, severity,
     };
   });
 
