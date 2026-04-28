@@ -217,13 +217,16 @@ export const BlendExtractionExplorer = ({
           others can be tapped. */}
       {brew.perIngredient && brew.perIngredient.length > 0 && (() => {
         const pills = brew.perIngredient;
-        // Resolve current selection — fall back to first ingredient
-        // if user hasn't picked one or their pick is no longer
-        // present (e.g., ingredients changed).
-        const currentId = (selectedIngId && pills.some(p => p.id === selectedIngId))
-          ? selectedIngId
-          : pills[0]?.id;
-        const selected = pills.find(p => p.id === currentId);
+        // Resolve current selection. Special id "__blend__" selects
+        // the blend-summary card at the end of the row; otherwise
+        // pick the named ingredient or fall back to the first.
+        const currentId = (
+          selectedIngId === "__blend__"
+            || (selectedIngId && pills.some(p => p.id === selectedIngId))
+        ) ? selectedIngId : pills[0]?.id;
+        const selected = currentId === "__blend__"
+          ? null  // blend-card detail is rendered separately
+          : pills.find(p => p.id === currentId);
         const outsiderMap = new Map(
           (brew.outsiders || []).map(o => [
             typeof o === "object" ? o.name : o,
@@ -316,6 +319,59 @@ export const BlendExtractionExplorer = ({
                   </button>
                 );
               })}
+
+              {/* Blend pill — sits at the end of the ingredient row.
+                  Severity = worst across the ingredient set so the
+                  user can see at a glance whether any single leaf is
+                  overwhelming the cup. Selecting it shows either the
+                  list of red-flagged ingredients (when a warning is
+                  carrying weight) or the merged mood/flavor profile
+                  of everything still in range. */}
+              {(() => {
+                const blendSev = pills.some(p => p.severity === "red") ? "red"
+                  : pills.some(p => p.severity === "yellow") ? "yellow"
+                  : "green";
+                const isSelected = currentId === "__blend__";
+                const palette = blendSev === "green" ? {
+                  border: theme.sage, dot: theme.sage, text: theme.sageDeep,
+                  bgIdle: "rgba(109,126,85,0.10)", bgSel: "rgba(109,126,85,0.22)",
+                } : blendSev === "yellow" ? {
+                  border: theme.ochre, dot: theme.ochre, text: theme.ochre,
+                  bgIdle: "rgba(189,148,76,0.10)", bgSel: "rgba(189,148,76,0.22)",
+                } : {
+                  border: theme.terra, dot: theme.terra, text: theme.terra,
+                  bgIdle: "rgba(176,84,47,0.08)", bgSel: "rgba(176,84,47,0.18)",
+                };
+                return (
+                  <button
+                    key="__blend__"
+                    type="button"
+                    onClick={() => setSelectedIngId("__blend__")}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      padding: "3px 9px", borderRadius: 999,
+                      background: isSelected ? palette.bgSel : palette.bgIdle,
+                      border: `1.5px dashed ${palette.border}`,
+                      borderWidth: isSelected ? 2 : 1.5,
+                      opacity: blendSev === "green" ? 1 : (isSelected ? 1 : 0.75),
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  >
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: palette.dot,
+                    }} />
+                    <span style={{
+                      fontFamily: ff.sans, fontSize: 10.5, fontStyle: "italic",
+                      color: palette.text,
+                    }}>
+                      blend
+                    </span>
+                  </button>
+                );
+              })()}
             </div>
 
             {/* Inline detail line for the selected pill — its window,
@@ -489,6 +545,110 @@ export const BlendExtractionExplorer = ({
                         Perfect
                       </span>
                     </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Blend-summary card — shown when the user has selected
+                the blend pill at the end of the row. Red ingredient
+                states list inline so the user sees which leaf is
+                pulling the cup off; otherwise the merged mood +
+                flavor profile shows what the cup is shaping into. */}
+            {currentId === "__blend__" && (() => {
+              const reds = pills.filter(p => p.severity === "red");
+              const yellows = pills.filter(p => p.severity === "yellow");
+              const blendSev = reds.length ? "red" : yellows.length ? "yellow" : "green";
+              const borderColor = blendSev === "green" ? theme.sage
+                : blendSev === "yellow" ? theme.ochre
+                : theme.terra;
+              const headColor = blendSev === "green" ? theme.sageDeep
+                : blendSev === "yellow" ? theme.ochre
+                : theme.terra;
+              const Row = ({ label, body, headColor: hc }) => (
+                <div style={{
+                  display: "flex", marginTop: 2, alignItems: "baseline",
+                  whiteSpace: "nowrap", overflow: "hidden",
+                }}>
+                  <span style={{
+                    flex: "0 0 auto", marginRight: 8,
+                    color: theme.inkSoft, fontStyle: "normal",
+                  }}>{label}</span>
+                  <span style={{
+                    flex: 1, minWidth: 0,
+                    overflow: "hidden", textOverflow: "ellipsis",
+                    color: hc || theme.ash,
+                  }}>{body}</span>
+                </div>
+              );
+
+              const moods = brew.moodSummary || [];
+              const flavors = brew.flavorSummary || [];
+
+              return (
+                <div style={{
+                  marginTop: 8, paddingLeft: 10,
+                  borderLeft: `2px solid ${borderColor}`,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  color: theme.ash, lineHeight: 1.5,
+                  textAlign: "left",
+                }}>
+                  {reds.length > 0 && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
+                          {reds.length === 1
+                            ? `${reds[0].name} is overwhelming the cup`
+                            : `${reds.length} ingredients overwhelming the cup`}
+                        </span>
+                      </div>
+                      {reds.map((p, i) => {
+                        const out = outsiderMap.get(p.name);
+                        let detail = null;
+                        if (p.state === "over-pull") detail = "over-pulled";
+                        else if (p.state && p.state.startsWith("standalone-")) detail = `${p.state.replace("standalone-", "")} edge climbing`;
+                        else if (out) {
+                          const t = tempFragment(out.tempDir);
+                          const s = timeFragment(out.timeDir);
+                          if (t && s) detail = <>{t} and {s}</>;
+                          else if (t) detail = t;
+                          else if (s) detail = s;
+                        }
+                        return (
+                          <Row
+                            key={i}
+                            label={p.name}
+                            body={detail || "out of optimum"}
+                            headColor={theme.terra}
+                          />
+                        );
+                      })}
+                    </>
+                  )}
+                  {reds.length === 0 && (
+                    <>
+                      <div style={{ marginTop: 1 }}>
+                        <span style={{ color: headColor, fontStyle: "normal", fontWeight: 500 }}>
+                          {blendSev === "yellow" ? "drifting" : "merged profile"}
+                        </span>
+                      </div>
+                      {yellows.length > 0 && (
+                        <Row
+                          label="drifting"
+                          body={yellows.map(y => y.name).join(", ")}
+                          headColor={theme.ochre}
+                        />
+                      )}
+                      {moods.length > 0 && (
+                        <Row label="moods" body={moods.join(" · ")} />
+                      )}
+                      {flavors.length > 0 && (
+                        <Row label="flavors" body={flavors.join(" · ")} />
+                      )}
+                      {moods.length === 0 && flavors.length === 0 && (
+                        <Row label="cup" body="quiet — no dominant register yet" />
+                      )}
+                    </>
                   )}
                 </div>
               );
