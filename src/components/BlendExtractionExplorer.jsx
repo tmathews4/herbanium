@@ -314,18 +314,19 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
-      {/* Range bands — show each lead ingredient's preferred window
-          as a faint sage-green band behind each slider, accents as
-          thinner dashed bands. Where bands stack, the green gets
-          denser → the darkest zone is the natural sweet spot
-          without the user having to drag and watch warnings. */}
+      {/* Sweet-spot band — the intersection of every non-catalyst
+          ingredient's preferred window. The single sage band marks
+          the zone where every ingredient is in range simultaneously.
+          If the intersection is empty (windows don't overlap), no
+          band shows — which is itself the signal that this blend
+          can't satisfy every ingredient at once. Catalysts skip;
+          their trace dose doesn't constrain the brew. */}
       {(() => {
-        // Collect window data once; reuse for both sliders.
         const bandData = ingredients
           .map(({ id, role }) => {
             const meta = INGREDIENTS[id];
             if (!meta) return null;
-            if (role === "catalyst") return null;  // trace dose, no signal
+            if (role === "catalyst") return null;
             return {
               id,
               name: meta.name,
@@ -336,43 +337,53 @@ export const BlendExtractionExplorer = ({
           })
           .filter(Boolean);
 
+        // Intersection across all non-catalyst ingredients on a given axis.
+        const intersect = (axis) => {
+          let lo = -Infinity, hi = Infinity;
+          for (const ing of bandData) {
+            const [iMin, iMax] = ing[axis] || [];
+            if (iMin == null || iMax == null) continue;
+            lo = Math.max(lo, iMin);
+            hi = Math.min(hi, iMax);
+          }
+          if (!isFinite(lo) || !isFinite(hi) || hi <= lo) return null;
+          return [lo, hi];
+        };
+
         const RangeBands = ({ rangeMin, rangeMax, axis }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
+          const ix = intersect(axis);
+          if (!ix) {
+            return <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+          }
+          const lo = Math.max(ix[0], rangeMin);
+          const hi = Math.min(ix[1], rangeMax);
+          if (hi <= lo) {
+            return <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+          }
+          const left = ((lo - rangeMin) / span) * 100;
+          const width = ((hi - lo) / span) * 100;
+          const tooltip = axis === "tempC"
+            ? `Sweet spot: ${ix[0]}–${ix[1]}°C`
+            : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
           return (
             <div style={{
               position: "relative",
               height: 6,
               marginTop: 2, marginBottom: 2,
             }}>
-              {bandData.map((ing, i) => {
-                const [iMin, iMax] = ing[axis] || [];
-                if (iMin == null || iMax == null) return null;
-                const lo = Math.max(iMin, rangeMin);
-                const hi = Math.min(iMax, rangeMax);
-                if (hi <= lo) return null;
-                const left = ((lo - rangeMin) / span) * 100;
-                const width = ((hi - lo) / span) * 100;
-                const isLead = ing.role === "lead";
-                return (
-                  <div
-                    key={`${ing.id}-${i}`}
-                    title={`${ing.name} ${ing.role}: ${iMin}–${iMax}${axis === "tempC" ? "°C" : "s"}`}
-                    style={{
-                      position: "absolute",
-                      left: `${left}%`,
-                      width: `${width}%`,
-                      top: 0, bottom: 0,
-                      background: isLead
-                        ? "rgba(109,126,85,0.18)"
-                        : "rgba(109,126,85,0.10)",
-                      borderTop: isLead ? "none" : `1px dashed rgba(109,126,85,0.35)`,
-                      borderBottom: isLead ? "none" : `1px dashed rgba(109,126,85,0.35)`,
-                      borderRadius: 2,
-                    }}
-                  />
-                );
-              })}
+              <div
+                title={tooltip}
+                style={{
+                  position: "absolute",
+                  left: `${left}%`,
+                  width: `${width}%`,
+                  top: 0, bottom: 0,
+                  background: "rgba(109,126,85,0.30)",
+                  borderRadius: 2,
+                }}
+              />
             </div>
           );
         };
