@@ -263,9 +263,10 @@ export const BlendExtractionExplorer = ({
         };
 
         return (
-          <div style={{ marginBottom: 14 }}>
+          <div style={{ marginBottom: 14, textAlign: "left" }}>
             <div style={{
               display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center",
+              justifyContent: "flex-start",
             }}>
               {pills.map((p) => {
                 const { id, name } = p;
@@ -345,6 +346,7 @@ export const BlendExtractionExplorer = ({
                   borderLeft: `2px solid ${borderColor}`,
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: theme.ash, lineHeight: 1.5,
+                  textAlign: "left",
                 }}>
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
                     {tempStr}{steepStr ? ` · ${steepStr}` : ""}
