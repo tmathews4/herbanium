@@ -238,48 +238,42 @@ export const BlendExtractionExplorer = ({
                 ? { name: o.name, reason: o.reason }
                 : { name: o, reason: "temp" }
             );
-            // Highlight the out-of-range axis words in terracotta so a
-            // quick glance picks up "temperature" / "steep time" without
-            // reading the whole sentence.
-            const Hi = ({ children }) => (
+            // Out-of-range axis words highlighted in terracotta;
+            // ingredient names highlighted in sage green so a glance
+            // picks up both "what" and "why" instantly.
+            const Axis = ({ children }) => (
               <span style={{
                 color: theme.terra, fontStyle: "normal", fontWeight: 500,
               }}>{children}</span>
             );
+            const Ing = ({ children }) => (
+              <span style={{
+                color: theme.sageDeep, fontStyle: "normal", fontWeight: 500,
+              }}>{children}</span>
+            );
             const phraseFor = (reason) => {
               if (reason === "both") return (
-                <>is outside its preferred <Hi>temperature</Hi> and <Hi>steep time</Hi></>
+                <>is outside its preferred <Axis>temperature</Axis> and <Axis>steep time</Axis></>
               );
               if (reason === "time") return (
-                <>is <Hi>steeped past its preferred range</Hi></>
+                <>is <Axis>steeped past its preferred range</Axis></>
               );
               return (
-                <>is outside its preferred <Hi>temperature</Hi></>
+                <>is outside its preferred <Axis>temperature</Axis></>
               );
             };
-            const renderOne = (it, i) => (
-              <React.Fragment key={i}>
-                {it.name} {phraseFor(it.reason)}
-              </React.Fragment>
-            );
             return (
               <div style={{
                 marginTop: 6,
                 fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                color: theme.ash, lineHeight: 1.4,
+                color: theme.ash, lineHeight: 1.5,
+                display: "flex", flexDirection: "column", gap: 3,
               }}>
-                {items.length === 1 ? (
-                  <>{renderOne(items[0], 0)} — will extract unevenly.</>
-                ) : (
-                  <>
-                    {items.map((it, i) => (
-                      <React.Fragment key={i}>
-                        {i > 0 && "; "}{renderOne(it, i)}
-                      </React.Fragment>
-                    ))}
-                    .
-                  </>
-                )}
+                {items.map((it, i) => (
+                  <div key={i}>
+                    <Ing>{it.name}</Ing> {phraseFor(it.reason)} — will extract unevenly.
+                  </div>
+                ))}
               </div>
             );
           })()}
@@ -627,6 +621,22 @@ export const BlendExtractionExplorer = ({
       {(() => {
         const filtered = (brew.warnings || []).filter(w => w.kind !== "outsider");
         if (filtered.length === 0) return null;
+        // Per-ingredient over-pull warnings always start with the
+        // ingredient name and " is being over-pulled — ". Split on
+        // that pattern to color the name in sage green so a glance
+        // links the warning to which ingredient triggered it.
+        const renderText = (text) => {
+          const m = text.match(/^(.+?)\s+(is being over-pulled — .+)$/);
+          if (!m) return text;
+          return (
+            <>
+              <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                {m[1]}
+              </span>
+              {" "}{m[2]}
+            </>
+          );
+        };
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 14 }}>
             {filtered.map((w, i) => {
@@ -640,7 +650,7 @@ export const BlendExtractionExplorer = ({
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
                   color: accent, lineHeight: 1.4,
                 }}>
-                  {w.text}
+                  {renderText(w.text)}
                 </div>
               );
             })}
