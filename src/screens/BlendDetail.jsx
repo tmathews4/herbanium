@@ -40,6 +40,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
   // view still shows everything; the user can collapse to focus.
   const [recipeOpen, setRecipeOpen] = React.useState(true);
   const [brewingOpen, setBrewingOpen] = React.useState(true);
+  // Signal-tag overflow toggle. Cap visible at 6 (3 per row × 2
+  // rows); anything beyond hides behind "+N more" until expanded.
+  const [tagsExpanded, setTagsExpanded] = React.useState(false);
   // Tradition-over-literature note — lifted out of the explorer so
   // it can render right above the preparations dropdown rather than
   // at the top of the brewing card. Payload is null when the note
@@ -230,30 +233,62 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             });
           }
           if (tags.length === 0) return null;
+          const TAG_HEAD = 6; // 3 per row × 2 rows
+          const visibleTags = tagsExpanded ? tags : tags.slice(0, TAG_HEAD);
+          const hiddenCount = Math.max(0, tags.length - TAG_HEAD);
           return (
-            <div style={{
-              display: "flex", flexWrap: "wrap", gap: 5,
-              justifyContent: "center", marginTop: 10,
-            }}>
-              {tags.map((t, i) => {
-                const active = openTag?.label === t.label;
-                return (
+            <div style={{ marginTop: 10 }}>
+              {/* Strict 3-column grid so rows stay even regardless
+                  of label length. Two rows visible by default; the
+                  rest hide behind a +N more pill. */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 5,
+                maxWidth: 360, marginLeft: "auto", marginRight: "auto",
+              }}>
+                {visibleTags.map((t, i) => {
+                  const active = openTag?.label === t.label;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setOpenTag(prev => prev?.label === t.label ? null : t)}
+                      style={{
+                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: t.fg, background: t.bg,
+                        border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
+                        borderRadius: 3,
+                        padding: "3px 8px",
+                        cursor: "pointer",
+                        boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >{t.label}</button>
+                  );
+                })}
+              </div>
+              {hiddenCount > 0 && (
+                <div style={{ textAlign: "center", marginTop: 6 }}>
                   <button
-                    key={i}
-                    onClick={() => setOpenTag(prev => prev?.label === t.label ? null : t)}
+                    onClick={() => setTagsExpanded(v => !v)}
                     style={{
                       fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      color: t.fg, background: t.bg,
-                      border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
+                      color: theme.ash,
+                      background: "transparent",
+                      border: `1px dashed ${theme.rule}`,
                       borderRadius: 3,
-                      padding: "3px 8px",
+                      padding: "3px 10px",
                       cursor: "pointer",
-                      boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",
                     }}
-                  >{t.label}</button>
-                );
-              })}
+                  >
+                    {tagsExpanded ? "show fewer" : `+${hiddenCount} more`}
+                  </button>
+                </div>
+              )}
             </div>
           );
             })()}
