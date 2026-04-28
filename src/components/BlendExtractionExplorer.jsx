@@ -325,7 +325,13 @@ export const BlendExtractionExplorer = ({
                   <div style={{ fontFamily: ff.mono, fontStyle: "normal", fontSize: 11 }}>
                     {tempStr}{steepStr ? ` · ${steepStr}` : ""}
                   </div>
-                  {!inRange && out && (() => {
+                  {inRange ? (
+                    <div style={{ marginTop: 1 }}>
+                      <span style={{
+                        color: theme.sageDeep, fontStyle: "normal", fontWeight: 500,
+                      }}>Perfect</span>
+                    </div>
+                  ) : out && (() => {
                     const t = tempFragment(out.tempDir);
                     const s = timeFragment(out.timeDir);
                     let body;
