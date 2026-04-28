@@ -258,6 +258,82 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
+      {/* Temp + time sliders. Sit ABOVE the predicted-profile bars
+          so they stay in a fixed position even as bars/pills below
+          populate during a slider drag. Putting them under the
+          predicted profile meant the bars could expand mid-drag and
+          shove the sliders downward under the user's finger. */}
+      <div style={{ marginTop: 14, marginBottom: 14 }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          marginBottom: 6,
+        }}>
+          <label style={{
+            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+            textTransform: "uppercase", color: theme.inkSoft,
+          }}>
+            Water
+          </label>
+          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+            {displayTemp}
+          </div>
+        </div>
+        <input
+          type="range"
+          min={tempCRange[0]}
+          max={tempCRange[1]}
+          step={1}
+          value={tempC}
+          onChange={(e) => setTempC(Number(e.target.value))}
+          style={{
+            width: "100%",
+            accentColor: theme.terra,
+          }}
+        />
+        <div style={{
+          display: "flex", justifyContent: "space-between",
+          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
+        }}>
+          <span>{tempMinDisplay}°</span>
+          <span>{tempMaxDisplay}°</span>
+        </div>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          marginBottom: 6,
+        }}>
+          <label style={{
+            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+            textTransform: "uppercase", color: theme.inkSoft,
+          }}>
+            Steep
+          </label>
+          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+            {displayTime}
+          </div>
+        </div>
+        <input
+          type="range"
+          min={timeSRange[0]}
+          max={timeSRange[1]}
+          step={15}
+          value={timeS}
+          onChange={(e) => setTimeS(Number(e.target.value))}
+          style={{
+            width: "100%",
+            accentColor: theme.sage,
+          }}
+        />
+        <div style={{
+          display: "flex", justifyContent: "space-between",
+          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
+        }}>
+          <span>{Math.round(timeSRange[0] / 60)} min</span>
+          <span>{Math.round(timeSRange[1] / 60)} min</span>
+        </div>
+      </div>
+
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Each section renders the FULL set of entries any
           constituent ingredient can produce; entries the slider has
@@ -509,80 +585,6 @@ export const BlendExtractionExplorer = ({
           </div>
         );
       })()}
-
-      {/* Temp + time sliders. Sit below the predicted-profile bars so the
-          user reads the cup's character first, then has the levers to
-          tune it. The bars react live to slider motion. */}
-      <div style={{ marginTop: 14, marginBottom: 14 }}>
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          marginBottom: 6,
-        }}>
-          <label style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: theme.inkSoft,
-          }}>
-            Water
-          </label>
-          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-            {displayTemp}
-          </div>
-        </div>
-        <input
-          type="range"
-          min={tempCRange[0]}
-          max={tempCRange[1]}
-          step={1}
-          value={tempC}
-          onChange={(e) => setTempC(Number(e.target.value))}
-          style={{
-            width: "100%",
-            accentColor: theme.terra,
-          }}
-        />
-        <div style={{
-          display: "flex", justifyContent: "space-between",
-          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-        }}>
-          <span>{tempMinDisplay}°</span>
-          <span>{tempMaxDisplay}°</span>
-        </div>
-      </div>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          marginBottom: 6,
-        }}>
-          <label style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: theme.inkSoft,
-          }}>
-            Steep
-          </label>
-          <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-            {displayTime}
-          </div>
-        </div>
-        <input
-          type="range"
-          min={timeSRange[0]}
-          max={timeSRange[1]}
-          step={15}
-          value={timeS}
-          onChange={(e) => setTimeS(Number(e.target.value))}
-          style={{
-            width: "100%",
-            accentColor: theme.sage,
-          }}
-        />
-        <div style={{
-          display: "flex", justifyContent: "space-between",
-          fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-        }}>
-          <span>{Math.round(timeSRange[0] / 60)} min</span>
-          <span>{Math.round(timeSRange[1] / 60)} min</span>
-        </div>
-      </div>
 
       {/* Cup summary — dominant 1–2 effects and flavors as small
           pills matching the predicted-taste row's exact dimensions.
