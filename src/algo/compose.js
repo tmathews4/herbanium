@@ -1151,9 +1151,12 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     };
 
     const [tMin, tMax] = meta.tempC;
-    const inRange = tempC >= tMin && tempC <= tMax;
+    const [sMin, sMax] = meta.timeS || [0, Infinity];
+    const inTempRange = tempC >= tMin && tempC <= tMax;
+    const inTimeRange = timeS >= sMin && timeS <= sMax;
+    const inRange = inTempRange && inTimeRange;
 
-    return { id, name: meta.name, weight, profile, inRange, role: ingRole };
+    return { id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange, role: ingRole };
   });
 
   // Perception pipeline:
