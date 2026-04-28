@@ -20,6 +20,43 @@ import { wouldCreateUnsafeCombination } from "../data/safety.js";
 export const TRADITION_TIME_TOLERANCE_S = 120;
 
 /* ──────────────────────────────────────────────────────────────
+   Default register mapping — engine-level lookup that resolves
+   the (tempBand+timeBand) pair to a register id. Every ingredient
+   with the standard 4 tempZones + 5 timeZones + 5 registerZones
+   shape inherits this mapping automatically and only needs to
+   declare the register *content* (id + character + moodImpact).
+
+   Per-ingredient `when` arrays on a registerZone are still honored
+   as overrides for ingredients with unusual register behavior
+   (e.g. an ingredient where "cool+long" should still be aromatic
+   instead of balanced — declare `when: ["cool+long", ...]` on the
+   aromatic zone and it wins over the default).
+
+   Default coverage of all 4×5 = 20 pairings:
+                     under   short      medium    long      over
+       under         faint   faint      faint     faint     faint
+       cool          faint   aromatic   aromatic  balanced  overpulled
+       warm          faint   aromatic   balanced  tonic     overpulled
+       hot           faint   aromatic   balanced  tonic     overpulled
+   ────────────────────────────────────────────────────────────── */
+export const DEFAULT_REGISTER_MAPPING = Object.freeze({
+  "under+under":  "faint", "under+short": "faint", "under+medium": "faint",
+  "under+long":   "faint", "under+over":  "faint",
+  "cool+under":   "faint", "warm+under":  "faint", "hot+under":    "faint",
+
+  "cool+short":   "aromatic", "cool+medium":  "aromatic",
+  "warm+short":   "aromatic", "hot+short":    "aromatic",
+
+  "cool+long":    "balanced",
+  "warm+medium":  "balanced", "hot+medium":   "balanced",
+
+  "warm+long":    "tonic",    "hot+long":     "tonic",
+
+  "cool+over":    "overpulled",
+  "warm+over":    "overpulled", "hot+over":   "overpulled",
+});
+
+/* ──────────────────────────────────────────────────────────────
    Brewing profile — derive temp/time from constituent ingredients.
 
    The spec's prescription: "temperature as range intersection."
@@ -1178,13 +1215,28 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const tempZone = resolveAxisZone(meta.tempZones, tempC, "tempC");
     const timeZone = resolveAxisZone(meta.timeZones, timeS, "timeS");
     // Register is a third axis derived from the temp+time pairing.
-    // Each registerZone declares which pair-keys ("cool+short", etc.)
-    // yield that register; the resolver picks the first matching
-    // zone.
+    // The DEFAULT_REGISTER_MAPPING table (above the function) maps
+    // every (tempBand+timeBand) pair to a register id; ingredients
+    // pick up that mapping automatically and only need to provide
+    // the registerZone *content* (id + character + moodImpact).
+    // Per-ingredient `when` arrays are still honored as overrides
+    // for ingredients with unusual register behavior.
     let registerZone = null;
     if (tempZone && timeZone && Array.isArray(meta.registerZones)) {
       const key = `${tempZone.id}+${timeZone.id}`;
-      registerZone = meta.registerZones.find(z => Array.isArray(z.when) && z.when.includes(key)) || null;
+      // Override path: any registerZone with a `when` array that
+      // includes the key wins.
+      registerZone = meta.registerZones.find(z =>
+        Array.isArray(z.when) && z.when.includes(key)
+      ) || null;
+      // Default path: look up the engine table, find the matching
+      // registerZone by id.
+      if (!registerZone) {
+        const defaultId = DEFAULT_REGISTER_MAPPING[key];
+        if (defaultId) {
+          registerZone = meta.registerZones.find(z => z.id === defaultId) || null;
+        }
+      }
     }
     // Backwards compat: older `combinations` table maps to a thin
     // shim with id + character so legacy code doesn't break during

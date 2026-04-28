@@ -494,16 +494,24 @@ export const BlendExtractionExplorer = ({
                     );
                     return (
                       <div style={{ marginTop: 4 }}>
-                        {registerZone && (
-                          <AxisRow
-                            label="register"
-                            bandId={registerZone.id}
-                            character={registerZone.character}
-                            mood={registerZone.moodImpact}
-                          />
-                        )}
+                        {/* Inputs the user changes via the sliders. */}
                         <AxisRow label="temp" bandId={tempZone.id} character={tempZone.character} headColor={theme.inkSoft} />
                         <AxisRow label="steep" bandId={timeZone.id} character={timeZone.character} headColor={theme.inkSoft} />
+                        {/* Composite output, separated to imply
+                            it derives from the rows above. */}
+                        {registerZone && (
+                          <div style={{
+                            marginTop: 8, paddingTop: 6,
+                            borderTop: `1px dashed ${theme.ruleSoft}`,
+                          }}>
+                            <AxisRow
+                              label="register"
+                              bandId={registerZone.id}
+                              character={registerZone.character}
+                              mood={registerZone.moodImpact}
+                            />
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
