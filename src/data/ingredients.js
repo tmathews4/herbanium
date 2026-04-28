@@ -41,7 +41,10 @@ const INGREDIENTS = {
 
   chamomile: {
     name: "Chamomile", latin: "Matricaria chamomilla", category: "flower",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS [240, 420]: most packaged chamomile labels say 4–6 min; the
+    // light end captures the everyday cup, the long end the apigenin-
+    // forward sleep cup.
+    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
     effects: [["calm", 5], ["sleepy", 3], ["soothing", 4]],
     flavors: ["honey", "apple", "floral", "hay"],
     pairs: ["lavender", "lemonbalm", "rose", "passionflower", "fennel", "linden"],
@@ -94,7 +97,9 @@ const INGREDIENTS = {
   },
   rose: {
     name: "Rose Petal", latin: "Rosa × damascena", category: "flower",
-    caffeine: 0, tempC: [90, 95], timeS: [240, 300],
+    // timeS floor 180s: rose can read as a light floral at 3 min and
+    // a fuller perfume at 5; the geraniol/citronellol release fast.
+    caffeine: 0, tempC: [90, 95], timeS: [180, 300],
     effects: [["calm", 4], ["soothing", 4], ["sleepy", 2]],
     flavors: ["floral", "sweet", "fruity"],
     pairs: ["chamomile", "lavender", "hibiscus", "cardamom", "tulsi", "vanilla", "white", "oolong", "linden", "elderflower"],
@@ -142,7 +147,9 @@ const INGREDIENTS = {
   },
   passionflower: {
     name: "Passionflower", latin: "Passiflora incarnata", category: "herbal",
-    caffeine: 0, tempC: [95, 100], timeS: [420, 600],
+    // timeS floor 300s: 5-min cup is real (lighter); the long end stays
+    // for the chrysin-forward sleep extract.
+    caffeine: 0, tempC: [95, 100], timeS: [300, 600],
     effects: [["calm", 4], ["sleepy", 3], ["soothing", 3]],
     flavors: ["grassy", "hay", "delicate"],
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
@@ -166,7 +173,9 @@ const INGREDIENTS = {
   },
   lemonbalm: {
     name: "Lemon Balm", latin: "Melissa officinalis", category: "herbal",
-    caffeine: 0, tempC: [90, 95], timeS: [240, 300],
+    // timeS floor 180s: lemon balm reads as a light citrus-herb at 3 min;
+    // longer steeps deepen toward the calming herbal register.
+    caffeine: 0, tempC: [90, 95], timeS: [180, 300],
     // Calm 4: chamomile is the calm anchor at 5; lemon balm's rosmarinic-
     // acid calm sits below that defining peak even though it's strong.
     effects: [["calm", 4], ["sleepy", 3], ["cooling", 3], ["uplifting", 3], ["soothing", 3]],
@@ -195,7 +204,9 @@ const INGREDIENTS = {
 
   peppermint: {
     name: "Peppermint", latin: "Mentha × piperita", category: "herbal",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS floor 180s: most packaged peppermint instructs 3-5 min;
+    // menthol releases fast, longer steeps just intensify the cool.
+    caffeine: 0, tempC: [95, 100], timeS: [180, 420],
     // Digestive 4: peppermint anchors cooling at 5; fennel takes the
     // digestive anchor at 5 (cleaner anethole-led answer), so peppermint
     // sits at 4 — still strong, but no longer co-equal.
@@ -227,7 +238,9 @@ const INGREDIENTS = {
     // delicate than peppermint's menthol and more readily driven off
     // by aggressive heat. Maghrebi tradition (Moroccan Mint) brews
     // spearmint at 85-90°C for exactly this reason.
-    caffeine: 0, tempC: [85, 100], timeS: [300, 420],
+    // timeS floor 180s: light spearmint is a real cup; carvone
+    // releases as quickly as menthol does.
+    caffeine: 0, tempC: [85, 100], timeS: [180, 420],
     effects: [["cooling", 4], ["digestive", 4], ["uplifting", 3], ["calm", 3]],
     flavors: ["minty", "sweet", "grassy", "cool"],
     pairs: ["lemonbalm", "sencha", "rose", "chamomile", "gunpowder"],
@@ -251,7 +264,9 @@ const INGREDIENTS = {
   },
   lemongrass: {
     name: "Lemongrass", latin: "Cymbopogon citratus", category: "herbal",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS floor 240s: 4-min cup captures the citral lift; longer
+    // pulls the soft body and tisane-grade aromatic depth.
+    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
     effects: [["cooling", 4], ["uplifting", 4], ["digestive", 3], ["calm", 3]],
     flavors: ["citrus", "grassy", "bright"],
     pairs: ["ginger", "peppermint", "lemonbalm", "rose", "rooibos", "hibiscus", "yerba-mate"],
@@ -275,7 +290,9 @@ const INGREDIENTS = {
   },
   fennel: {
     name: "Fennel Seed", latin: "Foeniculum vulgare", category: "spice",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS floor 240s: bruised fennel seeds release anethole quickly;
+    // 4-min household digestive cup is real, longer steeps deepen.
+    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
     effects: [["digestive", 5], ["cooling", 3], ["soothing", 3], ["calm", 1]],
     flavors: ["licorice", "sweet", "aromatic"],
     pairs: ["peppermint", "ginger", "chamomile", "lemonbalm", "rooibos", "licorice-root"],
@@ -299,7 +316,9 @@ const INGREDIENTS = {
   },
   hibiscus: {
     name: "Hibiscus", latin: "Hibiscus sabdariffa", category: "flower",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS floor 240s: light tart hibiscus at 4 min is a real cup;
+    // anthocyanins give color fast, full body needs the 5-7 min range.
+    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
     effects: [["cooling", 4], ["energy", 2], ["digestive", 3]],
     flavors: ["tart", "fruity", "cranberry"],
     pairs: ["rose", "rooibos", "ginger", "lemongrass"],
@@ -350,7 +369,11 @@ const INGREDIENTS = {
 
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    // timeS floor 180s: Indian household practice and most packaged
+    // tulsi labels say 3-5 min; eugenol and methyl chavicol release
+    // fast. The longer end (5-7) pulls more rosmarinic and ursolic
+    // acid for the chronic-tonic register.
+    caffeine: 0, tempC: [95, 100], timeS: [180, 420],
     effects: [["calm", 4], ["soothing", 4], ["grounding", 3], ["uplifting", 3], ["digestive", 3], ["warming", 2]],
     flavors: ["spiced", "clove", "peppery", "sweet"],
     pairs: ["rose", "cardamom", "lemonbalm", "ginger", "peppermint", "ashwagandha"],
@@ -417,7 +440,10 @@ const INGREDIENTS = {
 
   ginger: {
     name: "Ginger", latin: "Zingiber officinale", category: "spice",
-    caffeine: 0, tempC: [100, 100], timeS: [420, 600],
+    // timeS floor 300s: dried ginger powder/slice steeps faster than
+    // fresh root in decoction; 5-min cup is a real everyday brew.
+    // Long end stays for the slow-decoction medicinal preparation.
+    caffeine: 0, tempC: [100, 100], timeS: [300, 600],
     // Digestive 4: ginger's signature is warming 5; digestive at 4 reflects
     // its nausea-targeting register without tying the fennel anchor.
     effects: [["warming", 5], ["digestive", 4], ["energy", 2], ["soothing", 3], ["grounding", 1]],
@@ -480,7 +506,10 @@ const INGREDIENTS = {
   },
   cinnamon: {
     name: "Cinnamon", latin: "Cinnamomum verum", category: "spice",
-    caffeine: 0, tempC: [95, 100], timeS: [420, 600],
+    // timeS floor 300s: ground cinnamon in chai-style brews releases
+    // cinnamaldehyde fast; 5-min cup is real. Stick cinnamon needs
+    // the long end for the same flavor intensity.
+    caffeine: 0, tempC: [95, 100], timeS: [300, 600],
     effects: [["warming", 4], ["digestive", 4], ["uplifting", 3], ["soothing", 3], ["grounding", 1]],
     flavors: ["spiced", "sweet", "woody", "warm"],
     pairs: ["assam", "rooibos", "ginger", "cardamom", "cloves", "vanilla", "turmeric", "black-pepper", "ashwagandha", "lions-mane", "dandelion-root", "reishi", "licorice-root", "elderflower"],
@@ -1150,7 +1179,9 @@ const INGREDIENTS = {
   elderflower: {
     name: "Elderflower", latin: "Sambucus nigra", category: "flower",
     aliases: ["black elder", "Holunder", "Sureau", "Sambuco", "Saúco"],
-    caffeine: 0, tempC: [85, 95], timeS: [300, 600],
+    // timeS floor 240s: light cold-care cup at 4 min is real;
+    // longer pulls more flavonoid for the immune-support register.
+    caffeine: 0, tempC: [85, 95], timeS: [240, 600],
     effects: [["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
     flavors: ["floral", "muscatel", "lychee", "sweet", "delicate"],
     basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },
@@ -1190,7 +1221,9 @@ const INGREDIENTS = {
   linden: {
     name: "Linden", latin: "Tilia cordata", category: "flower",
     aliases: ["lime flower", "Tilleul", "Tila", "Lipa", "Linde"],
-    caffeine: 0, tempC: [85, 95], timeS: [300, 600],
+    // timeS floor 240s: light tisane register at 4 min — linden's
+    // honey-floral notes don't need long extraction.
+    caffeine: 0, tempC: [85, 95], timeS: [240, 600],
     // Calm 4: linden's tisane calm reads gentler than chamomile's defining
     // apigenin peak; the anchor sits at 5 and linden a notch below.
     effects: [["calm", 4], ["sleepy", 3], ["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["digestive", 1]],
@@ -1432,7 +1465,9 @@ const INGREDIENTS = {
     name: "Sage", latin: "Salvia officinalis", category: "herbal",
     subcategory: "leaf",
     aliases: ["common sage", "garden sage", "salvia", "sauge", "Salbei"],
-    caffeine: 0, tempC: [90, 100], timeS: [240, 360],
+    // timeS floor 180s: light Mediterranean cup at 3 min reads as
+    // savory-bright without the tannin grip; longer steeps deepen.
+    caffeine: 0, tempC: [90, 100], timeS: [180, 360],
     effects: [["focus", 2], ["soothing", 2], ["cooling", 2], ["digestive", 2]],
     flavors: ["aromatic", "savory", "herbaceous", "bitter", "camphor"],
     pairs: ["chamomile", "lemon-peel", "rose", "fennel", "ginger", "lemonbalm"],
@@ -1484,7 +1519,9 @@ const INGREDIENTS = {
     name: "Orange Peel", latin: "Citrus sinensis", category: "herbal",
     subcategory: "peel",
     aliases: ["sweet orange peel", "bitter orange peel", "chen pi 陈皮", "zest"],
-    caffeine: 0, tempC: [90, 100], timeS: [240, 360],
+    // timeS floor 180s: chai-style brews use orange peel for 3-5 min;
+    // limonene releases fast, longer pulls more pith bitterness.
+    caffeine: 0, tempC: [90, 100], timeS: [180, 360],
     effects: [["digestive", 2], ["uplifting", 2], ["comfort", 1]],
     flavors: ["citrus", "aromatic", "sweet", "bittersweet"],
     pairs: ["cinnamon", "cardamom", "cloves", "ginger", "hibiscus", "rooibos", "assam"],
@@ -1509,7 +1546,9 @@ const INGREDIENTS = {
     name: "Dried Apple", latin: "Malus domestica", category: "herbal",
     subcategory: "fruit",
     aliases: ["apple pieces", "apfeltee fruit", "pomme séchée"],
-    caffeine: 0, tempC: [90, 100], timeS: [300, 420],
+    // timeS floor 240s: lighter sweetness at 4 min, fuller pectin
+    // body at 6-7 min; no bitter ceiling to worry about.
+    caffeine: 0, tempC: [90, 100], timeS: [240, 420],
     effects: [["soothing", 1], ["comfort", 1]],
     flavors: ["apple", "sweet", "fruity", "honey"],
     pairs: ["chamomile", "cinnamon", "hibiscus", "rose", "vanilla", "rooibos", "fennel"],
@@ -1534,7 +1573,9 @@ const INGREDIENTS = {
     name: "Dried Cranberry", latin: "Vaccinium macrocarpon", category: "herbal",
     subcategory: "fruit",
     aliases: ["American cranberry", "atoca", "craneberry"],
-    caffeine: 0, tempC: [90, 100], timeS: [300, 420],
+    // timeS floor 240s: light tart-bright cup at 4 min; the acids
+    // extract together, full cranberry character takes 5-7.
+    caffeine: 0, tempC: [90, 100], timeS: [240, 420],
     effects: [["uplifting", 1], ["cooling", 1]],
     flavors: ["tart", "fruity", "cranberry", "bright"],
     pairs: ["hibiscus", "rose", "ginger", "rooibos", "dried-apple", "orange-peel"],
