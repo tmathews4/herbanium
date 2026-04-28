@@ -7,7 +7,7 @@
 
 ---
 
-## The 9-step sequence
+## The 10-step sequence
 
 ### 1. Research file first
 Path: `docs/research/ingredients/<id>.md`
@@ -78,24 +78,67 @@ The five headings:
 4. Clinical evidence base (RCTs, mechanism papers, pharmacovigilance)
 5. Cultural & culinary references
 
-### 5. Run tests
+### 5. Calibration audit (NEW — required)
+Before running the full test suite, run the per-ingredient placement
+check on every new id:
+
+```
+npm run check-ingredient -- <id> [<id> ...]
+```
+
+For each ingredient, this prints:
+- **Effect placement**: each declared tag's anchor, how many ingredients
+  sit above, and the peers at the same strength rung. Lets you sanity-check
+  that "calm 3" feels right relative to the existing cohort.
+- **Anchor gaps**: a tag declared with no anchor in `EFFECT_ANCHORS`. If
+  this fires, you're either declaring a tag you shouldn't (drop it) or
+  introducing a new axis that needs a new anchor (add one — see below).
+- **Anchor-promotion candidates**: this ingredient ties or exceeds the
+  current anchor. Either lower the strength or promote it to anchor —
+  don't ignore.
+- **Flavor whitelist coverage**: every flavor word resolved against
+  `KNOWN_FLAVORS`.
+- **Pair resolution**: every id in `pairs[]` resolves to a real entry.
+- **Catalog-wide saturation creep** at the end — multiple 5s on one tag.
+
+The script exits non-zero if any issue surfaces. Treat it as part of the
+build gate, not optional reading.
+
+#### When to declare a new anchor
+If your ingredient introduces an effect axis that has no current anchor,
+or if it genuinely defines the top of a register (clearly stronger than
+any existing entry on that axis), you may need to add to `EFFECT_ANCHORS`
+in `src/data/ingredientFit.js`. Anchors don't have to be at strength 5 —
+if the catalog's strongest expression of a tag honestly sits at 4, anchor
+at 4 (this is intentional; honesty beats convention).
+
+Example: when `comfort` was first declared on orange-peel and dried-apple
+(both at 1), no anchor existed and `check-ingredient` flagged it. The fix
+was to declare `comfort: { id: "hojicha", strength: 4 }` — hojicha's
+roasted-cozy register is the catalog's clearest comfort archetype, and
+4 reflects the actual ceiling rather than inflating to 5.
+
+### 6. Run the full test suite
 ```
 npm test
 ```
 
-All 6 suites must pass:
+All 7 suites must pass:
 - `literature.test.mjs` — directional effect checks
-- `curated-blends.test.mjs` — clean-default audit on ~50 blends
+- `curated-blends.test.mjs` — clean-default audit on every blend (custom
+  blends must pass strict, traditionals get baseline suppression)
 - `ingredient-fit.test.mjs` — catalog audit + helper sanity
 - `blend-perception.test.mjs` — perception pipeline literature checks
 - `calibration.test.mjs` — anchor + ceiling + flavor whitelist
 - `perception-extras.test.mjs` — loudness, fragile decay, effect floor
+- `tone-guardrails.test.mjs` — voice consistency (no medical-claim
+  verbs, no clinical jargon, length caps, etc.)
 
 If `calibration.test.mjs` fails on an anchor invariant, the new ingredient's
 effect numbers are inconsistent with the rubric — don't widen the test
 bounds, lower the ingredient's number.
 
-### 6. In-app audit
+### 7. In-app audit
 Use the standard checklist:
 
 **Per-ingredient detail page** (Compose → Ingredients → tap):
@@ -116,7 +159,7 @@ Use the standard checklist:
 **Profile → Sources panel**:
 - [ ] Any new source items are visible under the right heading
 
-### 7. Suggest blend follow-ups
+### 8. Suggest blend follow-ups
 Once the ingredient lands, propose:
 - **Existing-blend rewrites** — does any current curated blend
   improve by adding this ingredient? (Garden Court → add bergamot for
@@ -128,7 +171,7 @@ Once the ingredient lands, propose:
 This step is what turns a single ingredient into a catalog improvement
 rather than a lone entry.
 
-### 8. Optional: extraction profiles
+### 9. Optional: extraction profiles
 File: `src/data/extractionProfiles.js`
 
 Add only if the ingredient has a meaningfully different gentle/standard/
@@ -137,7 +180,7 @@ single brewing window covers them. Reach for profiles when the cup
 genuinely changes shape across the temp/time grid (chamomile, matcha,
 puerh).
 
-### 9. Optional: wait content
+### 10. Optional: wait content
 File: `src/data/waitContent.js`
 
 Add per-ingredient steep-screen rotating cards if the ingredient has rich

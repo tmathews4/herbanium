@@ -802,7 +802,11 @@ const INGREDIENTS = {
     // Soothing 4: rooibos becomes the soothing anchor at 5; hojicha's
     // roasted-comfort soothing sits at 4, expressing the same register
     // through warmth rather than the rooibos full-body smoothness.
-    effects: [["soothing", 4], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
+    // Comfort 4: hojicha anchors the comfort axis. Nothing in the
+    // catalog hits a signature-5 "pure comfort" (the roasted-and-cozy
+    // register lives at 4 here, with vanilla a runner-up); the anchor
+    // sits at 4 deliberately so the rubric stays honest.
+    effects: [["soothing", 4], ["calm", 4], ["comfort", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
     flavors: ["roasted", "woody", "caramel", "nutty", "toasted"],
     pairs: ["rooibos", "ginger", "vanilla"],
     dose: "1 tbsp · 250ml",

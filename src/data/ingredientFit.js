@@ -89,6 +89,12 @@ export const EFFECT_ANCHORS = Object.freeze({
   // and licorice are runners-up but lean into roasted-comfort and
   // throat-coat respectively.
   soothing:  { id: "rooibos",    strength: 5 },
+  // Comfort lives at strength 4 — no ingredient in the catalog hits
+  // a signature-5 "pure comfort" register; hojicha's roasted-cozy
+  // expression is the cleanest archetype, with vanilla a runner-up.
+  // The anchor at 4 keeps the rubric honest rather than inflating
+  // it to 5 just to satisfy the convention.
+  comfort:   { id: "hojicha",    strength: 4 },
 });
 
 // Flavor anchors — for each declared flavor axis, the ingredient
