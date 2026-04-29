@@ -60,13 +60,13 @@ export const EXTRACTION_PROFILES = {
   ],
 
   hibiscus: [
-    { tempC: 90,  timeS: 240, flavors: ["tart", "fruity"],
+    { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright"],
       effects: [["cooling", 2], ["energy", 2]],
       character: "Light hibiscus — a pink tang, gentle brightness." },
-    { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry"],
+    { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry", "berry", "bright"],
       effects: [["cooling", 3], ["energy", 3]],
       character: "The standard cup. Ruby color, tart and lively." },
-    { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "astringent"],
+    { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent"],
       effects: [["cooling", 3], ["energy", 3], ["bitterness", 2]],
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
@@ -97,13 +97,13 @@ export const EXTRACTION_PROFILES = {
 
   // ─── Herbals ──────────────────────────────────────────────────
   lemonbalm: [
-    { tempC: 85,  timeS: 180, flavors: ["citrus", "grassy"],
+    { tempC: 85,  timeS: 180, flavors: ["citrus", "grassy", "bright"],
       effects: [["calm", 2], ["energy", 2]],
       character: "Gentle lemon balm — bright and soft, a light wash." },
-    { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy"],
+    { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy", "bright", "fresh"],
       effects: [["calm", 3], ["focus", 2], ["energy", 3]],
       character: "The standard cup. Lemon-mint with gentle lift and focus." },
-    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "astringent"],
+    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "fresh", "astringent"],
       effects: [["calm", 3], ["focus", 2], ["energy", 3], ["bitterness", 2]],
       character: "Pushed past the sweet spot — citrus dulls, grass turns hay-bitter." },
   ],
@@ -121,13 +121,13 @@ export const EXTRACTION_PROFILES = {
   ],
 
   rooibos: [
-    { tempC: 95,  timeS: 240, flavors: ["honey", "woody"],
+    { tempC: 95,  timeS: 240, flavors: ["honey", "woody", "warm"],
       effects: [["comfort", 3], ["digestive", 2]],
       character: "Light rooibos — warm honeywater, no tannins to speak of." },
-    { tempC: 98,  timeS: 360, flavors: ["honey", "woody", "vanilla"],
+    { tempC: 98,  timeS: 360, flavors: ["honey", "woody", "vanilla", "warm", "smooth"],
       effects: [["comfort", 4], ["digestive", 3]],
       character: "The standard cup. Round, sweet, forgiving — can't over-steep." },
-    { tempC: 100, timeS: 420, flavors: ["honey", "woody", "vanilla", "earthy"],
+    { tempC: 100, timeS: 420, flavors: ["honey", "woody", "vanilla", "earthy", "warm", "rich"],
       effects: [["comfort", 4], ["digestive", 3]],
       character: "Fuller body. Rooibos stays sweet even pushed — one of its charms." },
   ],
@@ -242,11 +242,22 @@ export const EXTRACTION_PROFILES = {
   ],
 
   // ─── Adaptogens ───────────────────────────────────────────────
+  // Tulsi was the proof-of-concept for the multi-zone brewing
+  // model and carries an unusually wide envelope (50-100°C). The
+  // five points below cover the full span so the FlavorMap and
+  // MoodMap show real gradients across the cool register, not
+  // flat extrapolation off the hot end.
   tulsi: [
-    { tempC: 95,  timeS: 240, flavors: ["spiced", "sweet"],
+    { tempC: 60,  timeS: 240, flavors: ["aromatic", "fresh", "sweet"],
+      effects: [["calm", 2], ["soothing", 2]],
+      character: "Cool-brewed tulsi — green basil top, almost no spice." },
+    { tempC: 78,  timeS: 300, flavors: ["aromatic", "spiced", "sweet", "fresh"],
+      effects: [["calm", 3], ["focus", 2], ["soothing", 2]],
+      character: "Warm steep — aromatic balance, the spice quietly arriving." },
+    { tempC: 92,  timeS: 300, flavors: ["spiced", "sweet", "aromatic"],
       effects: [["focus", 2], ["calm", 2], ["energy", 2], ["digestive", 2]],
       character: "Light tulsi — gently aromatic, balanced lift." },
-    { tempC: 98,  timeS: 360, flavors: ["spiced", "clove", "peppery", "sweet"],
+    { tempC: 98,  timeS: 360, flavors: ["spiced", "clove", "peppery", "sweet", "warm"],
       effects: [["focus", 3], ["calm", 3], ["energy", 3], ["digestive", 3]],
       character: "The standard cup. Full holy basil — the adaptogen balance." },
     { tempC: 100, timeS: 420, flavors: ["spiced", "clove", "peppery", "sweet", "earthy", "astringent"],
@@ -517,13 +528,13 @@ export const EXTRACTION_PROFILES = {
 
   // ─── Immune-support florals ─────────────────────────────────
   echinacea: [
-    { tempC: 90,  timeS: 300, flavors: ["earthy", "grassy"],
+    { tempC: 90,  timeS: 300, flavors: ["earthy", "grassy", "herbal"],
       effects: [["comfort", 1]],
       character: "Light echinacea — a gentle herbal wash." },
-    { tempC: 95,  timeS: 600, flavors: ["earthy", "grassy"],
+    { tempC: 95,  timeS: 600, flavors: ["earthy", "grassy", "herbal", "tingling", "musky"],
       effects: [["comfort", 2], ["digestive", 1]],
       character: "The standard cup. Alkamides surface — that distinctive tongue tingle." },
-    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "bitter"],
+    { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "herbal", "tingling", "musky", "bitter"],
       effects: [["comfort", 2], ["bitterness", 1]],
       character: "Pushed. Tingling intensifies; faint bitter edge." },
   ],
@@ -600,6 +611,78 @@ export const EXTRACTION_PROFILES = {
     { tempC: 100, timeS: 1800, flavors: ["sweet", "umami", "earthy", "nutty", "muddy"],
       effects: [["focus", 3], ["comfort", 2], ["bitterness", 2]],
       character: "Long-extracted. Earthy depth surfaces; the cup tips muddy." },
+  ],
+
+  // ─── Herbs (added for TrackMap gradient coverage) ─────────────
+  sage: [
+    { tempC: 92,  timeS: 240, flavors: ["herbaceous", "sage", "savory"],
+      effects: [["digestive", 2], ["soothing", 2]],
+      character: "Light sage — savory herb top, gentle aromatic lift." },
+    { tempC: 96,  timeS: 360, flavors: ["herbaceous", "sage", "savory", "camphor", "woody"],
+      effects: [["digestive", 3], ["soothing", 3], ["focus", 2]],
+      character: "The standard cup. Full sage character — eucalyptus edge, clearing." },
+    { tempC: 100, timeS: 480, flavors: ["herbaceous", "sage", "camphor", "woody", "medicinal", "bitter"],
+      effects: [["digestive", 3], ["soothing", 3], ["focus", 2], ["bitterness", 2]],
+      character: "Pushed long. The medicinal note climbs, edge into bitter." },
+  ],
+
+  // ─── Citrus peels ─────────────────────────────────────────────
+  bergamot: [
+    { tempC: 88,  timeS: 180, flavors: ["citrus", "bergamot", "floral"],
+      effects: [["uplifting", 2], ["focus", 2]],
+      character: "Light bergamot — perfumed citrus top, only just lifting." },
+    { tempC: 95,  timeS: 300, flavors: ["citrus", "bergamot", "floral", "bright", "aromatic"],
+      effects: [["uplifting", 3], ["focus", 3], ["calm", 2]],
+      character: "The Earl Grey signature — fragrant citrus and floral oil." },
+    { tempC: 100, timeS: 420, flavors: ["citrus", "bergamot", "bright", "aromatic", "pith", "bitter"],
+      effects: [["uplifting", 3], ["focus", 3], ["bitterness", 2]],
+      character: "Past optimal — the perfume thins, pith bitterness surfaces." },
+  ],
+  "orange-peel": [
+    { tempC: 92,  timeS: 240, flavors: ["citrus", "orange", "sweet"],
+      effects: [["uplifting", 2], ["warming", 2]],
+      character: "Light orange peel — bright citrus top, faint sweetness." },
+    { tempC: 96,  timeS: 360, flavors: ["citrus", "orange", "sweet", "aromatic", "warm"],
+      effects: [["uplifting", 3], ["warming", 3], ["digestive", 2]],
+      character: "The standard cup. Full orange character — sun-warm and rounded." },
+    { tempC: 100, timeS: 480, flavors: ["citrus", "orange", "aromatic", "warm", "pith", "bitter"],
+      effects: [["uplifting", 3], ["warming", 3], ["bitterness", 2]],
+      character: "Long extraction — the sweet edge thins, pith carries bitter." },
+  ],
+  "lemon-peel": [
+    { tempC: 88,  timeS: 180, flavors: ["citrus", "lemon", "bright"],
+      effects: [["uplifting", 2], ["cooling", 2]],
+      character: "Light lemon peel — sharp clean top, only the brightness." },
+    { tempC: 95,  timeS: 300, flavors: ["citrus", "lemon", "bright", "fresh", "aromatic"],
+      effects: [["uplifting", 3], ["cooling", 3], ["focus", 2]],
+      character: "The standard cup. Full lemon — citrus oil, clean and lively." },
+    { tempC: 100, timeS: 420, flavors: ["citrus", "lemon", "bright", "aromatic", "pith", "bitter"],
+      effects: [["uplifting", 3], ["cooling", 3], ["bitterness", 2]],
+      character: "Past optimal — the lemon edge sharpens, pith goes bitter." },
+  ],
+
+  // ─── Dried fruit ──────────────────────────────────────────────
+  "dried-apple": [
+    { tempC: 92,  timeS: 360, flavors: ["sweet", "fruity", "apple"],
+      effects: [["comfort", 2], ["uplifting", 2]],
+      character: "Light apple — soft sweetness, faint orchard fruit." },
+    { tempC: 96,  timeS: 480, flavors: ["sweet", "fruity", "apple", "honeyed", "hay"],
+      effects: [["comfort", 3], ["uplifting", 3], ["calm", 2]],
+      character: "The standard cup. Full dried-apple — honey-sweet, compote depth." },
+    { tempC: 100, timeS: 600, flavors: ["sweet", "fruity", "apple", "honeyed", "hay", "tart"],
+      effects: [["comfort", 3], ["uplifting", 3], ["calm", 2]],
+      character: "Long-steeped. Fruit deepens, a faint tart edge surfaces." },
+  ],
+  cranberry: [
+    { tempC: 92,  timeS: 240, flavors: ["tart", "fruity", "berry"],
+      effects: [["uplifting", 2], ["cooling", 2]],
+      character: "Light cranberry — bright tart top, gentle berry." },
+    { tempC: 96,  timeS: 360, flavors: ["tart", "fruity", "berry", "bright", "cranberry"],
+      effects: [["uplifting", 3], ["cooling", 3], ["energy", 2]],
+      character: "The standard cup. Full cranberry — ruby color, tart-sweet bite." },
+    { tempC: 100, timeS: 480, flavors: ["tart", "fruity", "berry", "cranberry", "astringent"],
+      effects: [["uplifting", 3], ["cooling", 3], ["energy", 2], ["bitterness", 2]],
+      character: "Pushed long — tart pushes into sour, astringency climbs." },
   ],
 };
 
