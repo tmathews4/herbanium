@@ -1176,6 +1176,17 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   // (1) Per-ingredient contributions. Falls back to flat ingredient
   // flavors/effects if no extraction profile exists for that id.
+  // Pre-compute the curated-traditional suppression flag so the
+  // per-ingredient state machine can soft-fold standalone-over-pull
+  // signals at the canonical baseline of a tradition. Without this,
+  // a curator-recognized brew like Maghrebi mint at 90°C/3 min would
+  // show every ingredient red because the state machine doesn't
+  // know we're sitting on a baseline the tradition has codified.
+  const _atCuratedBaseline = curated
+    && baselineTempC != null && baselineTimeS != null
+    && tempC === baselineTempC && timeS === baselineTimeS;
+  const _suppressAtBaseline = _atCuratedBaseline && isTraditional;
+
   const contributions = ingredients.map(({ id, g, role }) => {
     const meta = INGREDIENTS[id];
     const weight = g / totalG;
@@ -1205,6 +1216,13 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     // separately.
     const resolveAxisZone = (zoneArr, value, axis) => {
       if (!Array.isArray(zoneArr)) return null;
+      // Inclusive bounds + first-match. Boundary values fall to
+      // the lower band (e.g. 95°C between cool [90, 95] and warm
+      // [95, 99] resolves to cool). This matches the curated-blend
+      // expectation: most envelopes put the canonical brew at the
+      // upper-end corner, and the lower band reaching that corner
+      // keeps the canonical brew in a single register rather than
+      // jumping into "tonic" by clipping the boundary upward.
       for (const z of zoneArr) {
         const range = z[axis];
         if (!range) continue;
@@ -1305,10 +1323,17 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     // direction (legacy ingredients without zones).
     let state, severity;
     const driftBands = new Set(["under", "over"]);
+    // At a traditional's curated baseline, fold standalone-overpull
+    // into the zone-resolution path. The tradition has accepted the
+    // edge — the cup-level warnings already get suppressed there;
+    // the per-ingredient pill should match.
+    const standaloneToShow = (_suppressAtBaseline && tempZone && timeZone)
+      ? null
+      : standaloneOverPull;
     if (isOverPulled) {
       state = "over-pull"; severity = "red";
-    } else if (standaloneOverPull) {
-      state = `standalone-${standaloneOverPull}`; severity = "red";
+    } else if (standaloneToShow) {
+      state = `standalone-${standaloneToShow}`; severity = "red";
     } else if (tempZone && timeZone) {
       // Zone resolution covers the full slider span (including under
       // and over edges) — every brew resolves to bands on both axes.
