@@ -1025,7 +1025,7 @@ export const BlendExtractionExplorer = ({
               const tailFlavors = visibleFlavors.slice(FLAVOR_HEAD);
               const shownFlavors = flavorsExpanded ? visibleFlavors : headFlavors;
               return (
-                <div style={{ marginBottom: visibleEffects.length > 0 ? 14 : 0 }}>
+                <div>
                   {sectionLabel("predicted taste")}
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {shownFlavors.map(([name, strength]) => {
