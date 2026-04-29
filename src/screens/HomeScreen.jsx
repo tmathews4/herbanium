@@ -77,7 +77,18 @@ const pickHomePoem = (date) => {
   return pool[Math.abs(h) % pool.length];
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
+export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
+  // Resolve a favorite tap to the most recent session for that
+  // blend, if one exists. Routing through openCup gives the user
+  // the journal entry first; the cup detail's blend-name link
+  // hops to the recipe from there. Without a session, fall back
+  // to the recipe directly — there's no journal entry to show.
+  const openFavorite = (blendId) => {
+    const latest = (sessions || [])
+      .find(s => s.who === "you" && s.blendId === blendId);
+    if (latest && openCup) openCup(latest.id);
+    else if (openBlend) openBlend(blendId);
+  };
   // Mood follow-up — brew-time logging only captures flavor (verifiable
   // at first sip). Mood resolves over the next ~30 minutes, so any
   // session brewed in the last 24 hours that hasn't logged its mood
@@ -366,7 +377,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
               msOverflowStyle: "none",
             }}>
               {favoriteBlends.map(b => (
-                <FavoriteCard key={b.id} b={b} onTap={() => openBlend(b.id)} />
+                <FavoriteCard key={b.id} b={b} onTap={() => openFavorite(b.id)} />
               ))}
             </div>
             {favoriteBlends.length > 2 && (
@@ -398,7 +409,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       {yourSessions.length > 0 ? (
         <div>
           {yourSessions.slice(0, 5).map((s, i) => (
-            <CompactSessionRow key={s.id} s={s} openBlend={openBlend} first={i === 0} />
+            <CompactSessionRow key={s.id} s={s} openCup={openCup} first={i === 0} />
           ))}
         </div>
       ) : (
@@ -479,7 +490,7 @@ export const FavoriteCard = ({ b, onTap }) => {
 // known for, the reason a user reaches for it. "actual" is the
 // joined string of moods that landed for this brew. The "brewed"
 // placeholder (no specific landing) shows as a hanging arrow.
-export const CompactSessionRow = ({ s, openBlend, first }) => {
+export const CompactSessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
   const { unit } = useUnit();
@@ -503,7 +514,7 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
   const brewParts = [flavor, tempStr, timeStr].filter(Boolean);
 
   return (
-    <button onClick={() => openBlend(s.blendId, s)} style={{
+    <button onClick={() => openCup?.(s.id)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       padding: "10px 2px", cursor: "pointer",
@@ -560,7 +571,7 @@ export const CompactSessionRow = ({ s, openBlend, first }) => {
 // hangs on the absent side as a tiny tell — "tired →" for a logged
 // starting mood without a recorded landing, "→ calm" for a logged
 // landing without a recorded start.
-export const SessionRow = ({ s, openBlend, first }) => {
+export const SessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
 
@@ -574,7 +585,7 @@ export const SessionRow = ({ s, openBlend, first }) => {
   );
 
   return (
-    <button onClick={() => openBlend(s.blendId, s)} style={{
+    <button onClick={() => openCup?.(s.id)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       padding: "8px 2px", cursor: "pointer",
