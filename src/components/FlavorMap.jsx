@@ -273,11 +273,16 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
   // a flavor exists in an ingredient's light + strong profile points
   // but is missing from its standard point — the engine's interpolation
   // would lerp toward 0 across the middle bracket, then re-emerge at
-  // the strong bracket, producing a dark→light→dark band that doesn't
-  // reflect a real parabolic chemistry. Gaps wider than `maxGap` stay
-  // unfilled so the visualization doesn't invent continuity that isn't
-  // there (e.g., a flavor that only exists at one extreme).
-  const fillGaps = (series, maxGap = 6) => {
+  // the strong bracket, producing a dark→light→dark band (or worse,
+  // a visible transparent gap) that doesn't reflect real chemistry.
+  //
+  // Any gap between two non-zero samples gets filled — if the flavor
+  // is present on BOTH sides of a gap, it's effectively continuous
+  // (the zero in the middle is the engine's 0.5 threshold-drop, not
+  // a real disappearance). Gaps that touch the start or end of the
+  // series stay zero — those represent flavors that only exist at
+  // one extreme of the temp range, which IS real information.
+  const fillGaps = (series) => {
     const out = [...series];
     const n = out.length;
     for (let i = 1; i < n - 1; i++) {
@@ -290,7 +295,7 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
       for (let j = i + 1; j < n; j++) {
         if (series[j] > 0) { rightIdx = j; break; }
       }
-      if (leftIdx >= 0 && rightIdx >= 0 && (rightIdx - leftIdx) <= maxGap) {
+      if (leftIdx >= 0 && rightIdx >= 0) {
         const t = (i - leftIdx) / (rightIdx - leftIdx);
         out[i] = series[leftIdx] * (1 - t) + series[rightIdx] * t;
       }
