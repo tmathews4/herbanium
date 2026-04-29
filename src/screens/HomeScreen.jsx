@@ -170,11 +170,50 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
 
             {/* Greeting moves below the poem so the time-of-day
                 moment leads the page; the user's name lands as a
-                follow-on rather than a top banner. */}
-            <div style={{ marginBottom: 16 }}>
-              <FitText style={{ fontFamily: ff.serif, fontSize: 26, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
-                <>What's the tea, <em style={{ color: theme.terra }}>{name}</em>?</>
+                follow-on rather than a top banner.
+
+                Framed eyebrow + slogan + hairline rule reads as a
+                small pull-quote — gives the line weight without
+                making it shout. Ornament flourishes flank the
+                eyebrow to tie back to the poem card above. */}
+            <div style={{
+              marginBottom: 18, marginTop: 8,
+              textAlign: "center",
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 8, marginBottom: 8,
+              }}>
+                <span style={{
+                  flex: "0 0 28px", height: 1,
+                  background: `linear-gradient(to right, transparent, ${theme.rule})`,
+                }} />
+                <span style={{
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.24em",
+                  textTransform: "uppercase", color: theme.ash,
+                }}>
+                  a moment with you
+                </span>
+                <span style={{
+                  flex: "0 0 28px", height: 1,
+                  background: `linear-gradient(to left, transparent, ${theme.rule})`,
+                }} />
+              </div>
+              <FitText style={{
+                fontFamily: ff.serif, fontSize: 28, fontWeight: 400,
+                color: theme.ink, lineHeight: 1.05,
+                fontStyle: "italic",
+                letterSpacing: "-0.005em",
+              }}>
+                <>What's the tea, <em style={{
+                  color: theme.terra, fontStyle: "normal",
+                  fontWeight: 500,
+                }}>{name}</em>?</>
               </FitText>
+              <div style={{
+                width: 36, height: 1, margin: "10px auto 0",
+                background: theme.rule,
+              }} />
             </div>
           </>
         );
