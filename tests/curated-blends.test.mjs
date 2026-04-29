@@ -187,29 +187,32 @@ test("pushing past baseline still fires per-ingredient warnings", () => {
     "expected over-pull warnings when steep is past baseline; got none — suppression is too broad");
 });
 
-// Outsider suppression is curated-only and exact-baseline-only:
-// moving the slider away should restore the warning. Cranberry
-// Hearth has cranberry as lead (still un-migrated to multi-axis,
-// so the legacy outsider check fires); cranberry envelope is
-// tempC [90, 100], so dropping to 80°C makes it an outsider.
-test("moving the slider off baseline restores the outsider warning", () => {
+// Out-of-zone signals replace legacy outsider warnings now that
+// every non-catalyst ingredient is zone-covered. Cranberry Hearth's
+// cranberry lead resolves to its `under` tempZone band when slider
+// drops to 80°C; the contribution carries severity:"yellow" and
+// state:"in-zones" with tempZone.id === "under".
+test("moving the slider off baseline drops a lead into the under band", () => {
   const ch = blends.find(b => b.name === "Cranberry Hearth");
   assert(ch, "Cranberry Hearth fixture not found");
   const moved = resolveBlendAtBrew(ch.ings, 80, ch.s, ch.t, ch.s, true);
-  const outs = moved.warnings.filter(w => w.kind === "outsider");
-  assert(outs.length > 0,
-    "expected outsider warning when slider is moved off curated baseline; got none");
+  const cranberry = (moved.perIngredient || []).find(p => p.id === "cranberry");
+  assert(cranberry, "expected cranberry contribution in perIngredient");
+  assert(cranberry.tempZone && cranberry.tempZone.id === "under",
+    `expected cranberry tempZone to be "under" at 80°C; got ${cranberry.tempZone?.id}`);
+  assert(cranberry.severity === "yellow",
+    `expected cranberry severity yellow when drifting; got ${cranberry.severity}`);
 });
 
-test("non-curated (algorithm-derived) brew with out-of-range lead flags outsiders", () => {
-  // Same Cranberry Hearth, brewed at 80°C without curated flag —
-  // the suppression doesn't apply, so the outsider should fire.
+test("non-curated brew with out-of-zone lead surfaces drift severity", () => {
+  // Same Cranberry Hearth, brewed at 80°C without curated flag.
   const ch = blends.find(b => b.name === "Cranberry Hearth");
   assert(ch, "Cranberry Hearth fixture not found");
   const algo = resolveBlendAtBrew(ch.ings, 80, ch.s);
-  const outs = algo.warnings.filter(w => w.kind === "outsider");
-  assert(outs.length > 0,
-    "expected outsider warning for non-curated brew with lead out of range");
+  const cranberry = (algo.perIngredient || []).find(p => p.id === "cranberry");
+  assert(cranberry, "expected cranberry contribution");
+  assert(cranberry.severity === "yellow" || cranberry.severity === "red",
+    `expected drift severity (yellow/red) for out-of-zone lead; got ${cranberry.severity}`);
 });
 
 test("traditionNote stays off when nothing was suppressed", () => {
@@ -249,27 +252,18 @@ test("accent ingredients DO fire over-pull warnings, tagged with role:accent", (
   }
 });
 
-test("accent ingredients DO appear in outsider warnings, tagged with role:accent", () => {
-  // Use Apfeltee — has orange-peel accent that still uses the
-  // legacy single-window model. Pushing timeS down to 120s puts
-  // orange-peel (envelope [180, 360]s) below its floor, firing
-  // the legacy outsider warning that the test is asserting.
+test("accent ingredients carry role:accent on their contribution record", () => {
+  // Now that every non-catalyst ingredient is zone-covered, the
+  // legacy outsider warnings have been replaced by zone-state
+  // signals. Confirm accents still tag through the contribution
+  // record (used by the blend-summary card and warning UI).
   const hk = blends.find(b => b.name === "Apfeltee");
   assert(hk, "Apfeltee fixture not found");
-  const moved = resolveBlendAtBrew(hk.ings, hk.t, 120, hk.t, hk.s, true);
-  const accentOutsiders = moved.warnings
-    .filter(w => w.kind === "outsider")
-    .filter(w => /Orange Peel/.test(w.text));
-  assert(accentOutsiders.length > 0,
-    `expected accent outsider warnings to surface; got none`);
-  // The outsider records on brew.outsiders should also be role-tagged.
-  const accentOutsiderRecords = moved.outsiders.filter(o =>
-    typeof o === "object" && /Orange Peel/i.test(o.name)
-  );
-  for (const o of accentOutsiderRecords) {
-    assert(o.role === "accent",
-      `expected outsider record to carry role:"accent"; got role:"${o.role}" on ${o.name}`);
-  }
+  const at = resolveBlendAtBrew(hk.ings, hk.t, hk.s, hk.t, hk.s, true);
+  const orangePeel = (at.perIngredient || []).find(p => p.id === "orange-peel");
+  assert(orangePeel, "expected orange-peel contribution in perIngredient");
+  assert(orangePeel.role === "accent",
+    `expected orange-peel role:"accent"; got "${orangePeel.role}"`);
 });
 
 test("traditionNote stays off when lead deviation is only sub-tolerance time", async () => {

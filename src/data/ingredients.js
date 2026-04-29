@@ -2540,9 +2540,30 @@ const INGREDIENTS = {
     name: "Sage", latin: "Salvia officinalis", category: "herbal",
     subcategory: "leaf",
     aliases: ["common sage", "garden sage", "salvia", "sauge", "Salbei"],
-    // timeS floor 180s: light Mediterranean cup at 3 min reads as
-    // savory-bright without the tannin grip; longer steeps deepen.
+    // Mediterranean savory-aromatic. Tannin and camphor both climb
+    // past 7 min; the cup goes harshly medicinal there.
     caffeine: 0, tempC: [90, 100], timeS: [180, 360],
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "the savory barely lifts.", moodImpact: "soothing held back" },
+      { id: "cool",  tempC: [85, 92], character: "soft sage top, gentle savory.", moodImpact: "soothing gentle; cooling clean" },
+      { id: "warm",  tempC: [92, 97], character: "full sage character — savory, fragrant.", moodImpact: "soothing and digestive in balance" },
+      { id: "hot",   tempC: [97, 100], character: "deepest extraction, tannin climbing.", moodImpact: "soothing peak; cup tightens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "barely steeped, top-savory only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [90, 180],  character: "light Mediterranean cup.", moodImpact: "soothing settles; cooling present" },
+      { id: "medium", timeS: [180, 360], character: "the canonical sage tisane.", moodImpact: "soothing, cooling, digestive in balance" },
+      { id: "long",   timeS: [360, 480], character: "deeper, slight tannin grip.", moodImpact: "soothing deep; cup tightens" },
+      { id: "over",   timeS: [480, 600], character: "harsh tannin, camphor turning medicinal.", moodImpact: "the savory lost to medicine" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "light Mediterranean cup, savory-bright.", moodImpact: "soothing gentle; cooling clean" },
+      { id: "balanced",   character: "the canonical sage tisane.", moodImpact: "soothing, cooling, digestive in balance" },
+      { id: "tonic",      character: "deeper sage, fuller savory body.", moodImpact: "soothing peak; focus solid" },
+      { id: "overpulled", character: "harsh-medicinal — camphor and tannin overwhelm.", moodImpact: "the savory is lost to medicine" },
+    ],
+    overPull: { timeS: 600, reason: "camphor and tannin turn the cup medicinal" },
     effects: [["focus", 2], ["soothing", 2], ["cooling", 2], ["digestive", 2]],
     flavors: ["aromatic", "savory", "herbaceous", "bitter", "camphor"],
     pairs: ["chamomile", "lemon-peel", "rose", "fennel", "ginger", "lemonbalm"],
@@ -2569,7 +2590,30 @@ const INGREDIENTS = {
     name: "Bergamot Peel", latin: "Citrus bergamia", category: "herbal",
     subcategory: "peel",
     aliases: ["bergamot orange", "Earl Grey citrus", "bergamotto"],
+    // Calabrian citrus peel — perfumed, floral-citrus. Volatile
+    // oils dissipate fast past 5 min; longer pulls the bitter pith.
     caffeine: 0, tempC: [85, 100], timeS: [120, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "the perfume barely lifts.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [80, 88], character: "soft bergamot top, gentle perfume.", moodImpact: "uplifting bright; calm settles" },
+      { id: "warm",  tempC: [88, 95], character: "full bergamot character — citrus + floral.", moodImpact: "uplifting and calm in balance" },
+      { id: "hot",   tempC: [95, 100], character: "deepest pull, perfume saturated.", moodImpact: "uplifting peak; cooling arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 60],   character: "barely steeped, top-citrus only.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [60, 120], character: "Earl Grey-bright, perfume forward.", moodImpact: "uplifting and calm clean" },
+      { id: "medium", timeS: [120, 240], character: "the canonical bergamot register.", moodImpact: "uplifting and calm in clean balance" },
+      { id: "long",   timeS: [240, 300], character: "perfume softening, pith creeping in.", moodImpact: "uplifting holds; cup tightens" },
+      { id: "over",   timeS: [300, 420], character: "bitter pith overtakes the perfume.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "Earl Grey-bright bergamot top.", moodImpact: "uplifting forward; calm clean" },
+      { id: "balanced",   character: "the canonical bergamot perfume cup.", moodImpact: "uplifting and calm in clean balance" },
+      { id: "tonic",      character: "deeper, fuller bergamot — perfume + pith.", moodImpact: "uplifting deep; cooling settles" },
+      { id: "overpulled", character: "bitter pith overtakes the perfume.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 420, reason: "the volatile perfume gone, pith bitter remains" },
     effects: [["uplifting", 3], ["calm", 2], ["cooling", 1]],
     flavors: ["bergamot", "citrus", "floral", "heady", "aromatic"],
     pairs: ["assam", "darjeeling", "ceylon", "lavender", "lemonbalm", "jasmine"],
@@ -2594,7 +2638,29 @@ const INGREDIENTS = {
     name: "Orange Peel", latin: "Citrus sinensis", category: "herbal",
     subcategory: "peel",
     aliases: ["sweet orange peel", "bitter orange peel", "chen pi 陈皮", "zest"],
-    // timeS floor 180s: chai-style brews use orange peel for 3-5 min;
+    // Limonene-forward warming citrus peel. Pith bitter climbs
+    // past 8 min once the volatiles dissipate.
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "citrus barely lifting.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [85, 92], character: "soft orange top.", moodImpact: "uplifting gentle; comfort settles" },
+      { id: "warm",  tempC: [92, 97], character: "full orange-peel character — bittersweet, warm.", moodImpact: "uplifting and digestive in balance" },
+      { id: "hot",   tempC: [97, 100], character: "deepest extraction, full warmth.", moodImpact: "uplifting peak; warming arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "barely steeped, top-citrus only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [90, 180],  character: "bright chai-style orange.", moodImpact: "uplifting forward; comfort gentle" },
+      { id: "medium", timeS: [180, 360], character: "the canonical mulled-warm cup.", moodImpact: "uplifting, digestive, comfort in balance" },
+      { id: "long",   timeS: [360, 480], character: "deeper bittersweet, body forming.", moodImpact: "comfort deepens; uplifting holds" },
+      { id: "over",   timeS: [480, 600], character: "pith bitter overtaking the citrus.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "bright chai-style orange top.", moodImpact: "uplifting forward; comfort gentle" },
+      { id: "balanced",   character: "the canonical mulled-warm orange cup.", moodImpact: "uplifting, digestive, comfort in balance" },
+      { id: "tonic",      character: "deeper bittersweet body.", moodImpact: "comfort deep; warming arrives" },
+      { id: "overpulled", character: "pith bitter overtakes the orange-warm.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 600, reason: "pith bitter overtakes the citrus warmth" },
     // limonene releases fast, longer pulls more pith bitterness.
     caffeine: 0, tempC: [90, 100], timeS: [180, 360],
     effects: [["digestive", 2], ["uplifting", 2], ["comfort", 1]],
@@ -2621,7 +2687,29 @@ const INGREDIENTS = {
     name: "Dried Apple", latin: "Malus domestica", category: "herbal",
     subcategory: "fruit",
     aliases: ["apple pieces", "apfeltee fruit", "pomme séchée"],
-    // timeS floor 240s: lighter sweetness at 4 min, fuller pectin
+    // Sweet dried fruit — sugars and pectin extract slowly, no
+    // bitter ceiling. Long steeps just deepen sweetness.
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "sweetness barely lifting.", moodImpact: "comfort held back" },
+      { id: "cool",  tempC: [85, 92], character: "soft apple top, gentle sweet.", moodImpact: "comfort gentle" },
+      { id: "warm",  tempC: [92, 97], character: "full apple character — sweet, soft body.", moodImpact: "comfort and soothing in balance" },
+      { id: "hot",   tempC: [97, 100], character: "deepest sweet, fullest body.", moodImpact: "comfort peak; soothing solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, faint sweet.", moodImpact: "the sweet barely registers" },
+      { id: "short",  timeS: [120, 240], character: "lighter apple top.", moodImpact: "comfort starts to settle" },
+      { id: "medium", timeS: [240, 420], character: "the household Apfeltee register.", moodImpact: "comfort and soothing in clean balance" },
+      { id: "long",   timeS: [420, 600], character: "deep sweet, body rich.", moodImpact: "comfort deep; cup is dessert-soft" },
+      { id: "over",   timeS: [600, 900], character: "very strong but still smooth — apple forgives.", moodImpact: "comfort heavy; cup is dense-sweet" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter apple-sweet top.", moodImpact: "comfort gentle" },
+      { id: "balanced",   character: "the household Apfeltee cup.", moodImpact: "comfort and soothing in clean balance" },
+      { id: "tonic",      character: "deeper, dessert-soft body.", moodImpact: "comfort deep; soothing solid" },
+      { id: "overpulled", character: "very heavy but still smooth — apple rarely turns harsh.", moodImpact: "comfort holds; cup is dense" },
+    ],
+    overPull: { timeS: 900, reason: "the cup is past dessert into syrup-thick" },
     // body at 6-7 min; no bitter ceiling to worry about.
     caffeine: 0, tempC: [90, 100], timeS: [240, 420],
     effects: [["soothing", 1], ["comfort", 1]],
@@ -2648,7 +2736,30 @@ const INGREDIENTS = {
     name: "Dried Cranberry", latin: "Vaccinium macrocarpon", category: "herbal",
     subcategory: "fruit",
     aliases: ["American cranberry", "atoca", "craneberry"],
-    // timeS floor 240s: light tart-bright cup at 4 min; the acids
+    // Tart North American berry — quinic + malic + citric acid
+    // mix. Past 8 min the cup goes pucker-aggressive without
+    // gaining body.
+    tempZones: [
+      { id: "under", tempC: [50, 85], character: "color but no real tart.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [85, 92], character: "soft cranberry top.", moodImpact: "uplifting gentle; cooling clean" },
+      { id: "warm",  tempC: [92, 97], character: "full cranberry character — bright tart.", moodImpact: "uplifting and cooling in balance" },
+      { id: "hot",   tempC: [97, 100], character: "deepest extraction, sharpest tart.", moodImpact: "uplifting peak; cooling solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 120],   character: "barely steeped, color forming.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [120, 240], character: "lighter tart-bright cup.", moodImpact: "uplifting forward; cooling settles" },
+      { id: "medium", timeS: [240, 420], character: "the canonical cranberry register.", moodImpact: "uplifting and cooling in clean balance" },
+      { id: "long",   timeS: [420, 480], character: "deeper tart, body slight.", moodImpact: "cooling deep; uplifting holds" },
+      { id: "over",   timeS: [480, 600], character: "pucker-aggressive without depth.", moodImpact: "the brightness lost to bite" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter tart-bright top.", moodImpact: "uplifting forward; cooling clean" },
+      { id: "balanced",   character: "the canonical cranberry cup.", moodImpact: "uplifting and cooling in clean balance" },
+      { id: "tonic",      character: "deeper tart, fuller cup.", moodImpact: "cooling deep; uplifting holds" },
+      { id: "overpulled", character: "pucker-aggressive — tart without lift.", moodImpact: "the brightness lost" },
+    ],
+    overPull: { timeS: 600, reason: "tart goes pucker-aggressive without gaining body" },
     // extract together, full cranberry character takes 5-7.
     caffeine: 0, tempC: [90, 100], timeS: [240, 420],
     effects: [["uplifting", 1], ["cooling", 1]],
@@ -2675,7 +2786,30 @@ const INGREDIENTS = {
     name: "Lemon Peel", latin: "Citrus limon", category: "herbal",
     subcategory: "peel",
     aliases: ["lemon zest", "zeste de citron", "scorza di limone"],
+    // Sharp citral citrus peel — bright and direct. Past 8 min
+    // the pith bitter overtakes the citrus.
     caffeine: 0, tempC: [85, 100], timeS: [180, 360],
+    tempZones: [
+      { id: "under", tempC: [50, 80], character: "citral barely surfaces.", moodImpact: "uplifting held back" },
+      { id: "cool",  tempC: [80, 88], character: "soft lemon top, gentle bright.", moodImpact: "uplifting bright; cooling settles" },
+      { id: "warm",  tempC: [88, 95], character: "full lemon-peel character — sharp, clean.", moodImpact: "uplifting and digestive in balance" },
+      { id: "hot",   tempC: [95, 100], character: "deepest extraction, sharpest citrus.", moodImpact: "uplifting peak; cooling solid" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "barely steeped, top-citrus only.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [90, 180],  character: "Italian Canarino-bright cup.", moodImpact: "uplifting forward; digestive clean" },
+      { id: "medium", timeS: [180, 360], character: "the canonical Russian-lemon register.", moodImpact: "uplifting, digestive, cooling in balance" },
+      { id: "long",   timeS: [360, 480], character: "deeper, slight pith creeping in.", moodImpact: "uplifting holds; cup tightens" },
+      { id: "over",   timeS: [480, 600], character: "bitter pith overtakes the citrus.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "Canarino-bright lemon top.", moodImpact: "uplifting forward; digestive clean" },
+      { id: "balanced",   character: "the canonical lemon-peel register.", moodImpact: "uplifting, digestive, cooling in clean balance" },
+      { id: "tonic",      character: "deeper citrus, body forming.", moodImpact: "uplifting deep; cooling settles" },
+      { id: "overpulled", character: "bitter pith overtakes the citrus.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 600, reason: "pith bitter overtakes the lemon-bright" },
     effects: [["uplifting", 2], ["digestive", 2], ["cooling", 1]],
     flavors: ["citrus", "bright", "bitter", "aromatic"],
     pairs: ["ginger", "lemongrass", "chamomile", "hibiscus", "peppermint", "ceylon", "assam"],

@@ -68,12 +68,32 @@ tonic, overpulled}.
 - [x] cinnamon
 - [x] cardamom
 
-### ⏳ Pending — third tier (7)
+### ✅ Rollout complete — 46 / 47
 
-Less frequent or niche.
+All non-catalyst ingredients now have full multi-axis coverage.
+Black-pepper is intentionally skipped — at trace catalyst dose
+its brewing window doesn't constrain a cup; it's filtered out of
+the resolver via `role: "catalyst"` so the multi-axis layer
+doesn't apply to it.
 
-- [ ] black-pepper (catalyst — may skip)
-- [ ] bergamot, orange-peel, lemon-peel, dried-apple, cranberry, sage (recent additions)
+### Notes after the rollout
+
+- **Legacy outsider warnings are obsolete.** With every
+  non-catalyst ingredient zone-covered, the envelope-based
+  outsider check almost never fires. Drift signal now flows
+  through `contribution.severity` (green/yellow/red) and
+  `contribution.tempZone.id` / `contribution.timeZone.id`.
+  The two curated-blend tests that asserted legacy outsider
+  warnings have been rewritten to assert zone-state behavior.
+- **Test fixtures shifted twice during the rollout.** Each
+  batch that migrated an ingredient's zones broke the legacy
+  outsider check that test fixtures were using. The fixture
+  ingredient was rotated to whatever was still un-migrated;
+  finally rewritten when nothing was left.
+- **Voice consistency held.** Every ingredient uses the same
+  apothecary-poet voice — short lowercase character, single
+  mood-impact phrase using catalog mood vocabulary, no
+  chemistry compound names anywhere user-visible.
 
 ---
 
