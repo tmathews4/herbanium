@@ -546,6 +546,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               ingredients={b.ingredients}
               defaultTempC={b.tempC}
               defaultTimeS={b.timeS}
+              declaredEffects={b.effects}
               curated
               isTraditional={!!b.tradition}
               hideTraditionNote

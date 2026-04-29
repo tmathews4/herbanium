@@ -75,6 +75,11 @@ export const BlendExtractionExplorer = ({
                             // Required for the tradition-over-literature
                             // notice to fire; experimentals and synths
                             // shouldn't claim that lineage.
+  declaredEffects = null,   // blend.effects — soft-floor for cup-level
+                            // mood resolution. Without it, a curator's
+                            // declared "uplifting" register can fall
+                            // out of moodSummary if the perception
+                            // pipeline doesn't surface it on its own.
 }) => {
   const { unit } = useUnit();
 
@@ -157,8 +162,8 @@ export const BlendExtractionExplorer = ({
   // Experimental (user-built) blends skip baseline entirely so every
   // warning fires immediately.
   const brew = experimental
-    ? resolveBlendAtBrew(ingredients, tempC, timeS)
-    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated, isTraditional);
+    ? resolveBlendAtBrew(ingredients, tempC, timeS, undefined, undefined, false, false, declaredEffects)
+    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated, isTraditional, declaredEffects);
 
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.

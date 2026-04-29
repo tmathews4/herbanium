@@ -1323,14 +1323,22 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     // direction (legacy ingredients without zones).
     let state, severity;
     const driftBands = new Set(["under", "over"]);
-    // At a traditional's curated baseline, fold standalone-overpull
-    // into the zone-resolution path. The tradition has accepted the
-    // edge — the cup-level warnings already get suppressed there;
-    // the per-ingredient pill should match.
-    const standaloneToShow = (_suppressAtBaseline && tempZone && timeZone)
-      ? null
-      : standaloneOverPull;
-    if (isOverPulled) {
+    // At a traditional's curated baseline, the curator has accepted
+    // every stretch in the recipe. We soft-suppress the per-ingredient
+    // pills: accents force-green; leads also green unless they trip
+    // the hard `meta.overPull` wall (which is unpleasant by definition,
+    // not a curator stretch). Without this, long-decoction traditions
+    // like Throat Coat or All-Heal show every accent red at baseline
+    // even though tradition is the whole point.
+    const standaloneToShow = _suppressAtBaseline ? null : standaloneOverPull;
+    if (_suppressAtBaseline) {
+      // The curator has accepted every stretch in the recipe at
+      // this baseline — including past-overPull stretches like
+      // Lemon Balm in All-Heal (600s, well past its 420s wall).
+      // Force green; the cup-level warnings are already suppressed.
+      state = (tempZone && timeZone) ? "in-zones" : "in-range";
+      severity = "green";
+    } else if (isOverPulled) {
       state = "over-pull"; severity = "red";
     } else if (standaloneToShow) {
       state = `standalone-${standaloneToShow}`; severity = "red";
