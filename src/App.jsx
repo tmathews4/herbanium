@@ -609,10 +609,18 @@ export default function App() {
   const [tabHistory, setTabHistory] = useState([]);
   const navigateTab = (next) => {
     if (next === tab) return;
-    setTabHistory(prev => {
-      const trimmed = prev.length >= 8 ? prev.slice(-7) : prev;
-      return [...trimmed, tab];
-    });
+    // Home is the root of the navigation tree. Arriving at it clears
+    // any prior tab history so the back button never offers a path
+    // "further back than home" — the user's expectation is that home
+    // is the floor, and tapping it should always feel like a reset.
+    if (next === "home") {
+      setTabHistory([]);
+    } else {
+      setTabHistory(prev => {
+        const trimmed = prev.length >= 8 ? prev.slice(-7) : prev;
+        return [...trimmed, tab];
+      });
+    }
     setTab(next);
   };
   const goBack = () => {
@@ -629,9 +637,11 @@ export default function App() {
     // No history — fall back to home if we're not already there.
     if (tab !== "home") setTab("home");
   };
+  // Home is the root — even if a stale history slipped past
+  // navigateTab's reset, never expose "back" to the user from home.
   const canGoBack =
     overlayHistory.length > 0
-    || tabHistory.length > 0
+    || (tab !== "home" && tabHistory.length > 0)
     || tab !== "home";
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
