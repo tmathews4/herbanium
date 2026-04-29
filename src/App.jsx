@@ -598,35 +598,39 @@ export default function App() {
   const [apothecaryMode, setApothecaryMode] = useState("reverse");
   const [shelfMode, setShelfMode]           = useState("recipes");
 
-  // Universal back-button. Walks the visible-page hierarchy:
-  //   1. Open overlay   → pop one overlay (existing back stack)
-  //   2. Profile tab    → Home
-  //   3. Apothecary at non-default mode → Apothecary default mode
-  //      Apothecary at default mode     → Home
-  //   4. Shelf at non-default mode → Shelf default mode
-  //      Shelf at default mode     → Home
-  //   5. Home → no-op (it's the root)
+  // Tab navigation history. Every tab change pushes the previous
+  // tab onto the stack so the back button can return to whatever
+  // tab the user actually came from, not a hardcoded parent. Mode
+  // changes within a tab don't push (they're sub-views, not tab
+  // jumps). Stack stores at most the last few tabs to avoid
+  // unbounded growth.
+  const [tabHistory, setTabHistory] = useState([]);
+  const navigateTab = (next) => {
+    if (next === tab) return;
+    setTabHistory(prev => {
+      const trimmed = prev.length >= 8 ? prev.slice(-7) : prev;
+      return [...trimmed, tab];
+    });
+    setTab(next);
+  };
   const goBack = () => {
     if (overlayHistory.length > 0) {
       popOverlayHistory();
       return;
     }
-    if (tab === "profile") { setTab("home"); return; }
-    if (tab === "apothecary") {
-      if (apothecaryMode !== "reverse") { setApothecaryMode("reverse"); return; }
-      setTab("home"); return;
+    if (tabHistory.length > 0) {
+      const prev = tabHistory[tabHistory.length - 1];
+      setTabHistory(h => h.slice(0, -1));
+      setTab(prev);
+      return;
     }
-    if (tab === "shelf") {
-      if (shelfMode !== "recipes") { setShelfMode("recipes"); return; }
-      setTab("home"); return;
-    }
+    // No history — fall back to home if we're not already there.
+    if (tab !== "home") setTab("home");
   };
-  // Only show the global back button when there's somewhere to go.
   const canGoBack =
     overlayHistory.length > 0
-    || tab === "profile"
-    || tab === "apothecary"
-    || tab === "shelf";
+    || tabHistory.length > 0
+    || tab !== "home";
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
@@ -647,7 +651,7 @@ export default function App() {
     if ((to === "apothecary" || to === "shelf") && arg && typeof arg === "object") {
       setComposeView({ ...arg, at: Date.now() });
     }
-    setTab(to);
+    navigateTab(to);
   };
 
   // Restore a curated blend the user previously deleted from their
@@ -791,7 +795,7 @@ export default function App() {
   // highlighted, ready to set intent and brew.
   const openInCompose = (blendId) => {
     setComposePreselect({ blendId, at: Date.now() });
-    setTab("shelf");
+    navigateTab("shelf");
     setOverlay(null);
   };
 
@@ -959,7 +963,7 @@ export default function App() {
 
       <TabBar
         tab={tab}
-        setTab={(k) => { setOverlay(null); clearOverlayHistory(); setTab(k); }}
+        setTab={(k) => { setOverlay(null); clearOverlayHistory(); navigateTab(k); }}
         apothecaryMode={apothecaryMode}
         shelfMode={shelfMode}
         setApothecaryModeAction={setApothecaryModeAction}

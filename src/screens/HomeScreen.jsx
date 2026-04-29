@@ -205,20 +205,12 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           cursor: pointer;
           text-align: center;
           box-shadow: 0 1px 2px rgba(30,24,18,0.04), 0 4px 14px -8px rgba(30,24,18,0.08);
-          transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+          transition: box-shadow 0.12s ease, border-color 0.12s ease;
           outline: none;
         }
         .home-cta:hover {
           border-color: ${theme.sage};
           box-shadow: 0 1px 2px rgba(30,24,18,0.05), 0 6px 18px -8px rgba(30,24,18,0.12);
-        }
-        .home-cta:active {
-          transform: translateY(1px);
-          box-shadow: 0 1px 2px rgba(30,24,18,0.05);
-        }
-        .home-cta--primary {
-          background: ${theme.ivory};
-          border-color: ${theme.sage};
         }
       `}</style>
       <div style={{
@@ -231,7 +223,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             label: "Brew",
             onClick: () => go("shelf", { mode: "recipes" }),
             icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
-            primary: true,
           },
           {
             label: "Experiment",
@@ -247,7 +238,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           <button
             key={i}
             onClick={cta.onClick}
-            className={`home-cta${cta.primary ? " home-cta--primary" : ""}`}
+            className="home-cta"
           >
             {cta.icon(26)}
             <div style={{
@@ -256,7 +247,6 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: theme.inkSoft,
-              fontWeight: cta.primary ? 500 : 400,
             }}>
               {cta.label}
             </div>
