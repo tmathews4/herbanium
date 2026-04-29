@@ -879,11 +879,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 textAlign: "center",
               }}>{saveStatus.text}</div>
             )}
+            {/* Terra-tinted shadows. The card-system shadows are
+                calibrated for cream surfaces and disappear on a
+                strongly colored fill. Buttons need a deeper, warmer
+                drop that reads as actual elevation, not a hint of one. */}
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              {/* Save (secondary outlined). Terra outline at rest with a
-                  faint card shadow so the button reads as a surface
-                  rather than a flat outline. Hover deepens the shadow
-                  and tints the fill. */}
               <button
                 disabled={blend.empty}
                 onClick={() => {
@@ -893,36 +893,39 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 }}
                 onMouseEnter={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.hover;
-                  e.currentTarget.style.background = "rgba(176,84,47,0.06)";
+                  e.currentTarget.style.background = "rgba(176,84,47,0.10)";
+                  e.currentTarget.style.borderColor = theme.terra;
+                  e.currentTarget.style.boxShadow = "0 4px 12px -4px rgba(176,84,47,0.30)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = shadow.card;
                   e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = theme.terra;
+                  e.currentTarget.style.boxShadow = "0 1px 3px rgba(176,84,47,0.12)";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
                 onMouseDown={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.pressed;
+                  e.currentTarget.style.transform = "translateY(1px)";
+                  e.currentTarget.style.boxShadow = "0 1px 2px rgba(176,84,47,0.10)";
                 }}
                 onMouseUp={(e) => {
-                  e.currentTarget.style.boxShadow = shadow.hover;
+                  if (blend.empty) return;
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px -4px rgba(176,84,47,0.30)";
                 }}
                 style={{
-                  fontFamily: ff.serif, fontSize: 15, color: theme.terra,
-                  padding: "13px 22px", borderRadius: radius.md,
+                  fontFamily: ff.serif, fontSize: 15.5, fontWeight: 500,
+                  color: theme.terra,
+                  padding: "14px 24px", borderRadius: radius.md,
                   background: "transparent",
-                  border: `1px solid ${theme.terra}`,
+                  border: `1.5px solid ${theme.terra}`,
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   opacity: blend.empty ? 0.4 : 1,
-                  boxShadow: blend.empty ? "none" : shadow.card,
-                  transition: "box-shadow 0.18s ease, background 0.18s ease",
-                  letterSpacing: "0.01em",
+                  boxShadow: blend.empty ? "none" : "0 1px 3px rgba(176,84,47,0.12)",
+                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease, border-color 0.18s ease",
+                  letterSpacing: "0.02em",
                 }}
               >Save</button>
-              {/* Start brewing (primary filled). Mirrors the Home CTA
-                  tile and the Blend Detail Brew button — same
-                  shadow.lifted/hover/pressed choreography so primary
-                  actions feel uniform across the app. */}
               <button
                 disabled={blend.empty}
                 onClick={() => {
@@ -950,34 +953,42 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 }}
                 onMouseEnter={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.hover;
+                  e.currentTarget.style.boxShadow = "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)";
+                  e.currentTarget.style.background = "#BC5D33";
                 }}
                 onMouseLeave={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.lifted;
+                  e.currentTarget.style.boxShadow = "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)";
+                  e.currentTarget.style.background = theme.terra;
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
                 onMouseDown={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.pressed;
+                  e.currentTarget.style.transform = "translateY(1px)";
+                  e.currentTarget.style.boxShadow = "0 2px 4px rgba(176,84,47,0.30), inset 0 1px 2px rgba(0,0,0,0.10)";
                 }}
                 onMouseUp={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.hover;
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)";
                 }}
                 style={{
                   flex: 1,
-                  fontFamily: ff.serif, fontSize: 16,
-                  padding: "13px 16px", borderRadius: radius.md,
+                  fontFamily: ff.serif, fontSize: 16.5, fontWeight: 500,
+                  padding: "14px 16px", borderRadius: radius.md,
                   background: blend.empty ? theme.rule : theme.terra,
                   color: theme.cream, border: "none",
                   cursor: blend.empty ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  boxShadow: blend.empty ? "none" : shadow.lifted,
-                  transition: "box-shadow 0.18s ease, transform 0.12s ease",
-                  letterSpacing: "0.01em",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                  boxShadow: blend.empty
+                    ? "none"
+                    : "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)",
+                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
+                  letterSpacing: "0.02em",
+                  textShadow: blend.empty ? "none" : "0 1px 1px rgba(0,0,0,0.08)",
                 }}
               >
-                <Kettle size={18} c={theme.cream} />
+                <Kettle size={19} c={theme.cream} />
                 Start brewing
               </button>
             </div>
