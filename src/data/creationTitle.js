@@ -136,6 +136,45 @@ function pickCreature(commonPool, mythicalPool, seed) {
   return pick(commonPool, seed + "|common");
 }
 
+// English "royal order" adjective categories, lowest rank first.
+// Two modifiers in front of a noun should appear in ascending rank,
+// so a word in category 1 (origin/phenomenon) precedes a word in
+// category 2 (material) — "Mist Pearl Heron", not "Pearl Mist Heron."
+//
+// Most element-pool words are phenomena (mist, storm, frost, light,
+// dusk); most gem-pool words are materials. A few element words name
+// substances (Stone, Wood, Ash, Earth, Cinder, Ember, Bramble,
+// Nightshade) and tie with the gem on category — in a tie we keep
+// the input order, since the gem is the more specific material and
+// the rule of specificity puts it closer to the noun.
+const ADJECTIVE_RANK = {
+  // 1 — origin / phenomenon / time / state
+  Mist: 1, Dew: 1, Vapor: 1, Fog: 1, Drizzle: 1, Brume: 1, Hush: 1,
+  Light: 1, Sunfire: 1, Aurora: 1, Bloom: 1, Glow: 1, Glare: 1, Blaze: 1, Fire: 1,
+  Wind: 1, Sky: 1, Cloud: 1, Lightning: 1, Storm: 1,
+  Daybreak: 1, Sun: 1, Sunset: 1, Twilight: 1, Dusk: 1, Midnight: 1, Crescent: 1, Moon: 1,
+  Tide: 1, River: 1, Rain: 1, Frost: 1, Smoke: 1, Shadow: 1, Void: 1, Star: 1, Meadow: 1,
+  // 2 — material / substance
+  Stone: 2, Wood: 2, Earth: 2, Ash: 2, Cinder: 2, Ember: 2, Bramble: 2, Nightshade: 2,
+};
+
+// Returns the adjective category rank for ordering. Unknown words
+// default to material (2) — newer pool entries tend to be specific
+// nouns, and forcing them later in the chain is the safer side to
+// fail on if a phenomenon word is accidentally typed in.
+function adjectiveRank(word) {
+  return ADJECTIVE_RANK[word] ?? 2;
+}
+
+// Sort a pair of modifiers into English adjective order. Stable —
+// when ranks tie, the original (a, b) order is preserved so the
+// element-then-gem convention still controls equal-rank cases.
+function orderModifiers(a, b) {
+  const rA = adjectiveRank(a);
+  const rB = adjectiveRank(b);
+  return rA <= rB ? [a, b] : [b, a];
+}
+
 export function generateCreationTitle(profile) {
   if (!profile) return null;
   const createdAt = profile.createdAt || Date.now();
@@ -177,7 +216,11 @@ export function generateCreationTitle(profile) {
     creature = pickCreature(COMMON_BY_FLAVOR._none, MYTHICAL_BY_FLAVOR._none, seedBase + "|creature");
   }
 
-  return `The ${element} ${gem} ${creature}`;
+  // Sort the two modifiers into English adjective order before
+  // assembly so the title always reads "phenomenon → material →
+  // noun" (e.g., "Mist Pearl Heron"), not the inverse.
+  const [first, second] = orderModifiers(element, gem);
+  return `The ${first} ${second} ${creature}`;
 }
 
 // Brief, plain-language descriptions of each creature so users meeting
