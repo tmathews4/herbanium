@@ -1,17 +1,19 @@
 /* ──────────────────────────────────────────────────────────────
    algo/brewBounds.js — slider-range padding + safety clamps.
 
-   The recipe's union range (or a single ingredient's range) tells
-   the algorithm where the sweet spot lives, but it's also the
-   slider's hard wall in the UI. That can feel cramped when a user
-   wants to try "what does this taste like at 95°C instead of 90°C?"
-   on a blend whose union maxes at 90.
+   Every cup follows the same rule for slider bounds — standardized
+   so no recipe gets weirdly more or less room than another:
+     • Temp slider extends slightly below the recipe's coldest
+       reasonable steep (so the user can drop a few degrees and
+       see what happens) but does not pad above the recipe's max.
+     • Time slider extends 30% past the recipe's max (room to
+       oversteep and watch the bitter/tannic envelope grow) but
+       does not pad below the recipe's min.
 
-   These helpers pad the recipe-relative range with a fixed amount
-   on each side, then clamp to global brew-safety bounds (water
-   doesn't get hotter than boil; sub-15s isn't a steep). The
-   warnings layer in resolveBlendAtBrew handles "you've pushed past
-   the range" — the slider just needs to allow the push.
+   Both clamp to global brew-safety bounds: water doesn't get hotter
+   than boil; sub-15s isn't a steep. The warnings layer in
+   resolveBlendAtBrew handles "you've pushed past the range" — the
+   slider just needs to allow the push.
    ────────────────────────────────────────────────────────────── */
 
 // Hard global bounds — past these, brewing physics gets weird
@@ -20,31 +22,29 @@
 export const TEMP_HARD_MIN = 60;   // °C — below this no useful extraction for tea
 export const TEMP_HARD_MAX = 100;  // °C — boiling point at sea level
 export const TIME_HARD_MIN = 15;   // s — anything below is a flash, not a steep
-export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions and
-                                   //     cold-brew-style experimental steeps.
-                                   //     The TrackMap underlay paints far-past-
-                                   //     range as 'experimental' territory so
-                                   //     the user sees they've left the recipe.
+export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions
 
-// Experimentation padding — how far past the recipe's union the
-// slider extends. Wider than the older ±10°C / ±2min walls so the
-// profile graphs have visible "outside normal range" room — the
-// user asked to see what extraction looks like clearly past the
-// recipe's neighborhood, which the small pad didn't expose.
-export const TEMP_PAD = 20;        // ±20°C on each side (was 10)
-export const TIME_PAD = 300;       // ±5 min on each side (was 2 min)
+// Asymmetric padding — only the directions where exploration adds
+// signal. Going slightly cooler is interesting (under-extraction
+// preview); going hotter than the recipe's max is rarely useful
+// because the recipe already targets the upper bound for that style.
+// On time it's the inverse: oversteep reveals tannin/bitter ramp;
+// understeep below recipe min is just a flash with little to learn.
+export const TEMP_PAD_BELOW = 5;   // °C — "slightly lower than the
+                                   //       coldest reasonable steep"
+export const TIME_PAD_RATIO  = 0.30; // +30% past the recipe's max steep
 
 export function padTempRange([lo, hi]) {
   return [
-    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD),
-    Math.min(TEMP_HARD_MAX, hi + TEMP_PAD),
+    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW),
+    Math.min(TEMP_HARD_MAX, hi),
   ];
 }
 
 export function padTimeRange([lo, hi]) {
   return [
-    Math.max(TIME_HARD_MIN, lo - TIME_PAD),
-    Math.min(TIME_HARD_MAX, hi + TIME_PAD),
+    Math.max(TIME_HARD_MIN, lo),
+    Math.min(TIME_HARD_MAX, Math.round(hi * (1 + TIME_PAD_RATIO))),
   ];
 }
 
