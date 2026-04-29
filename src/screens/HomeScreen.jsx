@@ -588,9 +588,15 @@ export const SessionRow = ({ s, openCup, first }) => {
     <button onClick={() => openCup?.(s.id)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-      padding: "8px 2px", cursor: "pointer",
-      display: "flex", alignItems: "center", gap: 10, minWidth: 0,
+      borderLeft: `2px solid ${theme.sage}`,
+      padding: "8px 2px 8px 10px", cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 8, minWidth: 0,
     }}>
+      {/* Leading glyph — kettle accent so the journal timeline reads
+          cup vs entry at a glance. Sage-tinted to match the left edge. */}
+      <span style={{ flexShrink: 0, display: "inline-flex" }}>
+        <Kettle size={14} c={theme.sageDeep} />
+      </span>
       <span style={{
         flexShrink: 1, minWidth: 0,
         fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,

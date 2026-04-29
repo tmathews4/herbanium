@@ -1032,6 +1032,55 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           : true
         );
 
+        // Date-grouped sections. Buckets cascade by recency:
+        //   Today / Yesterday / This week / Earlier this month /
+        //   then "Month YYYY" for everything older. Reads as a
+        //   journal rather than a feed — the eye scans by date
+        //   header, not by counting rows back from now.
+        const startOfDay = (d) => {
+          const x = new Date(d);
+          x.setHours(0, 0, 0, 0);
+          return x.getTime();
+        };
+        const now = new Date();
+        const todayStart     = startOfDay(now);
+        const yesterdayStart = todayStart - 86400000;
+        const weekStart      = todayStart - 6 * 86400000;
+        const monthStart     = startOfDay(new Date(now.getFullYear(), now.getMonth(), 1));
+        const monthLabel = (ts) => {
+          const d = new Date(ts);
+          return d.toLocaleString(undefined, { month: "long", year: "numeric" });
+        };
+        const bucketFor = (ts) => {
+          if (ts >= todayStart)     return { key: "today",     label: "Today" };
+          if (ts >= yesterdayStart) return { key: "yesterday", label: "Yesterday" };
+          if (ts >= weekStart)      return { key: "this-week", label: "This week" };
+          if (ts >= monthStart)     return { key: "this-month", label: "Earlier this month" };
+          return { key: `m-${monthLabel(ts)}`, label: monthLabel(ts) };
+        };
+        // Group while preserving order — timeline is already sorted
+        // newest-first, so iterating once produces buckets in display
+        // order without an extra sort.
+        const groups = [];
+        let current = null;
+        for (const item of timeline) {
+          const b = bucketFor(item.ts || 0);
+          if (!current || current.key !== b.key) {
+            current = { ...b, items: [] };
+            groups.push(current);
+          }
+          current.items.push(item);
+        }
+
+        // Stats strip — quietly frames the page as a record. "Keeping
+        // since" reads off the earliest ts across cups + entries (the
+        // unfiltered set so the figure doesn't shift when the user
+        // toggles the cups/entries chips).
+        const allTimes = timelineFull.map(it => it.ts).filter(t => t > 0);
+        const earliest = allTimes.length ? Math.min(...allTimes) : null;
+        const cupCount   = sessionItems.length;
+        const entryCount = entryItems.length;
+
         return (
           <div style={{ marginTop: 4 }}>
             {/* Planner — collapsed by default; the journal timeline
@@ -1154,6 +1203,37 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               />
             )}
 
+            {/* Stats strip — surfaces only once the journal has any
+                weight to it. A blank line with three zeros on day one
+                feels patronizing; eight cups in is when this earns its
+                space. */}
+            {(cupCount + entryCount) >= 3 && (
+              <div style={{
+                marginTop: 6, marginBottom: 12,
+                padding: "8px 0",
+                borderTop: `1px solid ${theme.ruleSoft}`,
+                borderBottom: `1px solid ${theme.ruleSoft}`,
+                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: theme.ash,
+                gap: 10, flexWrap: "wrap",
+              }}>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  <span><span style={{ color: theme.sageDeep, fontWeight: 500 }}>{cupCount}</span> cup{cupCount === 1 ? "" : "s"}</span>
+                  <span style={{ color: theme.rule }}>·</span>
+                  <span><span style={{ color: theme.terra, fontWeight: 500 }}>{entryCount}</span> {entryCount === 1 ? "entry" : "entries"}</span>
+                </div>
+                {earliest && (
+                  <span style={{
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                    letterSpacing: "0.02em", textTransform: "none", color: theme.ash,
+                  }}>
+                    keeping since {monthLabel(earliest)}
+                  </span>
+                )}
+              </div>
+            )}
+
             {timeline.length === 0 ? (
               <div style={{
                 marginTop: 18, padding: "14px 16px",
@@ -1165,26 +1245,53 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               </div>
             ) : (
               <div style={{ marginTop: 6 }}>
-                {timeline.map((item, i) => {
-                  if (item.kind === "cup") {
-                    return (
-                      <SessionRow
-                        key={item.ref.id}
-                        s={item.ref}
-                        openCup={openCup}
-                        first={i === 0}
-                      />
-                    );
-                  }
-                  return (
-                    <JournalEntryRow
-                      key={item.ref.id}
-                      entry={item.ref}
-                      first={i === 0}
-                      openEntry={openEntry}
-                    />
-                  );
-                })}
+                {groups.map((g, gi) => (
+                  <div key={g.key} style={{ marginTop: gi === 0 ? 0 : 18 }}>
+                    {/* Section header — sans uppercase eyebrow with a
+                        soft underline. Reads like a date marker in a
+                        bound journal: a small announcement, not a
+                        button. The hairline carries the weight so the
+                        text itself can stay quiet. */}
+                    <div style={{
+                      paddingBottom: 6, marginBottom: 4,
+                      borderBottom: `1px solid ${theme.rule}`,
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                    }}>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
+                        textTransform: "uppercase", color: theme.inkSoft,
+                      }}>
+                        {g.label}
+                      </span>
+                      <span style={{
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                        color: theme.ash,
+                      }}>
+                        {g.items.length} {g.items.length === 1 ? "item" : "items"}
+                      </span>
+                    </div>
+                    {g.items.map((item, i) => {
+                      if (item.kind === "cup") {
+                        return (
+                          <SessionRow
+                            key={item.ref.id}
+                            s={item.ref}
+                            openCup={openCup}
+                            first={i === 0}
+                          />
+                        );
+                      }
+                      return (
+                        <JournalEntryRow
+                          key={item.ref.id}
+                          entry={item.ref}
+                          first={i === 0}
+                          openEntry={openEntry}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -1899,39 +2006,52 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
   const preview = (entry.text || "")
     .replace(/\s+/g, " ")
     .trim();
+  // Edge color + glyph differ for verse vs prose so the journal
+  // timeline tells them apart at a glance. Sprig (sage) for verse —
+  // a poetic flourish; Pencil (terra) for prose entries — the
+  // utilitarian writing tool.
+  const Glyph = isVerse ? Sprig : Pencil;
+  const accent = isVerse ? theme.sage : theme.terra;
+  const glyphColor = isVerse ? theme.sageDeep : theme.terra;
   return (
     <button
       onClick={() => openEntry?.(entry.id)}
       style={{
         width: "100%", textAlign: "left", background: "transparent",
         border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-        padding: "12px 2px", cursor: "pointer",
-        display: "flex", flexDirection: "column", gap: 4, minWidth: 0,
+        borderLeft: `2px solid ${accent}`,
+        padding: "10px 2px 10px 10px", cursor: "pointer",
+        display: "flex", gap: 8, minWidth: 0,
       }}
     >
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "baseline",
-      }}>
-        <span style={{
-          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-          textTransform: "uppercase", color: theme.ash,
+      <span style={{ flexShrink: 0, display: "inline-flex", paddingTop: 2 }}>
+        <Glyph size={12} c={glyphColor} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
         }}>
-          {label}
-        </span>
-        <span style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-        }}>{ago}</span>
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>
+            {label}
+          </span>
+          <span style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+          }}>{ago}</span>
+        </div>
+        {preview && (
+          <span style={{
+            fontFamily: ff.serif,
+            fontStyle: isVerse ? "italic" : "normal",
+            fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {preview}
+          </span>
+        )}
       </div>
-      {preview && (
-        <span style={{
-          fontFamily: ff.serif,
-          fontStyle: isVerse ? "italic" : "normal",
-          fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-        }}>
-          {preview}
-        </span>
-      )}
     </button>
   );
 };
