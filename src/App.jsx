@@ -353,11 +353,12 @@ export default function App() {
   // with stale persisted data get refreshed. Without this, an existing
   // dev session keeps its old "y1"-"y9" sessions even after we ship a
   // richer seed, because usePersistedState rehydrates from localStorage.
-  // Bumped to "6" when the brew log split into "flavor at first sip,
-  // mood on next return" — the mid-journey seed gained a pending-mood
-  // cup that the Home follow-up card surfaces. Bumping forces stale
-  // sessions from earlier shapes to be reapplied on next mount.
-  const SEED_VERSION = "6";
+  // Bumped to "7" after fixing the mid-journey seed to reference
+  // real blend IDs (all-heal, hojicha-evening) instead of stale
+  // synth IDs (dusk, hearth) that getBlend can't resolve. Without
+  // a version bump the user keeps seeing empty session rows because
+  // their persisted sessions hold IDs that render to null.
+  const SEED_VERSION = "7";
   const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
 
   // Apply a seed mode in full — covers every persisted flow state
