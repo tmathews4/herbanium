@@ -20,7 +20,7 @@ import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
 import { getBlend, iconBtn, suggestBlendName, formatAgo } from "../helpers/misc";
 import {
-  ff, theme,
+  ff, theme, shadow, radius,
 } from "../theme";
 import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
@@ -835,11 +835,13 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   <button
                     onClick={() => { setSavePromptOpen(false); setSaveStatus(null); }}
                     style={{
-                      fontFamily: ff.sans, fontSize: 12, color: theme.ash,
-                      padding: "6px 12px", borderRadius: 999,
+                      fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.04em",
+                      color: theme.ash,
+                      padding: "8px 14px", borderRadius: radius.md,
                       background: "transparent", border: "none", cursor: "pointer",
+                      transition: "color 0.18s ease",
                     }}
-                  >cancel</button>
+                  >Cancel</button>
                   <button
                     onClick={() => {
                       const id = saveComposedBlend && saveComposedBlend(
@@ -853,13 +855,19 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         setTimeout(() => setSaveStatus(null), 2000);
                       }
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.lifted; }}
+                    onMouseDown={(e)  => { e.currentTarget.style.boxShadow = shadow.pressed; }}
+                    onMouseUp={(e)    => { e.currentTarget.style.boxShadow = shadow.hover; }}
                     style={{
-                      fontFamily: ff.serif, fontSize: 14,
-                      padding: "6px 16px", borderRadius: 999,
+                      fontFamily: ff.serif, fontSize: 14, letterSpacing: "0.01em",
+                      padding: "8px 22px", borderRadius: radius.md,
                       background: theme.ink, color: theme.cream,
                       border: "none", cursor: "pointer",
+                      boxShadow: shadow.lifted,
+                      transition: "box-shadow 0.18s ease",
                     }}
-                  >save</button>
+                  >Save</button>
                 </div>
               </div>
             )}
@@ -871,40 +879,60 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 textAlign: "center",
               }}>{saveStatus.text}</div>
             )}
-            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+              {/* Save (secondary outlined). Terra outline at rest with a
+                  faint card shadow so the button reads as a surface
+                  rather than a flat outline. Hover deepens the shadow
+                  and tints the fill. */}
               <button
                 disabled={blend.empty}
                 onClick={() => {
-                  // Auto-suggest a name from the heaviest ingredients
-                  // so the user opens the prompt with something they
-                  // can keep, edit, or replace outright.
                   setSaveName(suggestBlendName(effectiveIngredients));
                   setSavePromptOpen(true);
                   setSaveStatus(null);
                 }}
+                onMouseEnter={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.hover;
+                  e.currentTarget.style.background = "rgba(176,84,47,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = shadow.card;
+                  e.currentTarget.style.background = "transparent";
+                }}
+                onMouseDown={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.pressed;
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.boxShadow = shadow.hover;
+                }}
                 style={{
-                  fontFamily: ff.sans, fontSize: 13, color: theme.terra,
-                  padding: "12px 18px", borderRadius: 10,
-                  background: "transparent", border: `1px solid ${theme.terra}`,
+                  fontFamily: ff.serif, fontSize: 15, color: theme.terra,
+                  padding: "13px 22px", borderRadius: radius.md,
+                  background: "transparent",
+                  border: `1px solid ${theme.terra}`,
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   opacity: blend.empty ? 0.4 : 1,
+                  boxShadow: blend.empty ? "none" : shadow.card,
+                  transition: "box-shadow 0.18s ease, background 0.18s ease",
+                  letterSpacing: "0.01em",
                 }}
-              >save</button>
+              >Save</button>
+              {/* Start brewing (primary filled). Mirrors the Home CTA
+                  tile and the Blend Detail Brew button — same
+                  shadow.lifted/hover/pressed choreography so primary
+                  actions feel uniform across the app. */}
               <button
                 disabled={blend.empty}
                 onClick={() => {
                   const candidate = { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS };
-                  // Custom & unsaved = just-built variant, synth, or a
-                  // local-blend that isn't in saved/favorites yet.
                   const isCustomUnsaved =
                     !blend.id
                     || String(blend.id).startsWith("synth-")
                     || (addedIngIds && addedIngIds.length > 0)
                     || (String(blend.id).startsWith("local-") && savedBlendIds && !savedBlendIds.has(blend.id));
                   if (isCustomUnsaved) {
-                    // If the catalogue already holds a blend with the
-                    // same temp + ingredients, brew that one instead of
-                    // re-prompting to save a duplicate.
                     const allCatalogue = [
                       ...BLENDS,
                       ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
@@ -920,18 +948,37 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   }
                   startBrew(candidate, "", moods);
                 }}
+                onMouseEnter={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.hover;
+                }}
+                onMouseLeave={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.lifted;
+                }}
+                onMouseDown={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.pressed;
+                }}
+                onMouseUp={(e) => {
+                  if (blend.empty) return;
+                  e.currentTarget.style.boxShadow = shadow.hover;
+                }}
                 style={{
                   flex: 1,
                   fontFamily: ff.serif, fontSize: 16,
-                  padding: "14px 16px", borderRadius: 10,
+                  padding: "13px 16px", borderRadius: radius.md,
                   background: blend.empty ? theme.rule : theme.terra,
                   color: theme.cream, border: "none",
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: blend.empty ? "none" : shadow.lifted,
+                  transition: "box-shadow 0.18s ease, transform 0.12s ease",
+                  letterSpacing: "0.01em",
                 }}
               >
                 <Kettle size={18} c={theme.cream} />
-                start brewing
+                Start brewing
               </button>
             </div>
 
