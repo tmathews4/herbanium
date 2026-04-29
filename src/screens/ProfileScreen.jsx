@@ -4,6 +4,7 @@
 
 import React, { useState, useRef } from "react";
 import { Flower, Ornament, Pencil, ATTRIBUTE_GLYPHS } from "../components/icons";
+import { TeaConstellation } from "../components/TeaConstellation";
 import {
   SectionLabel, Stat,
 } from "../components/layout";
@@ -27,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -260,6 +261,25 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
           )}
         </div>
       </div>
+
+      {/* Tea Constellation — every cup the user has logged plotted
+          as a dot in 2D sensory space (cool↔warm × bright↔deep).
+          Reads as a personal star map of their tea life rather than
+          a chart; sized by taste rating, faded by age, colored by
+          mood register. The personality readout below names the
+          quadrant the user gravitates toward. */}
+      {(() => {
+        const cupCount = (sessions || []).filter(s => s.who === "you" && s.blendId).length;
+        if (cupCount < 2) return null;
+        return (
+          <div style={{ marginTop: 22 }}>
+            <TeaConstellation
+              sessions={sessions}
+              openCup={openCup}
+            />
+          </div>
+        );
+      })()}
 
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
       <div style={{ display: "flex", flexDirection: "column" }}>
