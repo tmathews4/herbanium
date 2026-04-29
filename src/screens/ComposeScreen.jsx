@@ -472,11 +472,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             </div>
           )}
 
-          {/* Generated blend card */}
+          {/* Generated blend card. overflow stays "visible" so the
+              Save / Start brewing buttons at the bottom can paint
+              their drop shadow past the card's border — overflow:
+              hidden was clipping the shadow flat. */}
           <div style={{
             marginTop: candidates.length > 1 ? 12 : 22, padding: 18, borderRadius: 14,
             border: `1px solid ${theme.rule}`, background: theme.cream,
-            position: "relative", overflow: "hidden",
+            position: "relative",
             opacity: blend.empty ? 0.55 : 1,
           }}>
             <div style={{
