@@ -878,7 +878,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   setSavePromptOpen(true);
                   setSaveStatus(null);
                 }}
-                style={{ fontSize: 17, padding: "15px 22px" }}
+                style={{ fontSize: 14, padding: "10px 18px" }}
               >Save</Button>
               <Button
                 variant="primary" tone="terra"
@@ -906,8 +906,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   }
                   startBrew(candidate, "", moods);
                 }}
-                icon={<Kettle size={20} c={theme.cream} />}
-                style={{ flex: 1, fontSize: 17, padding: "15px 16px", gap: 10 }}
+                icon={<Kettle size={17} c={theme.cream} />}
+                style={{ flex: 1, fontSize: 14, padding: "10px 14px", gap: 8 }}
               >Start brewing</Button>
             </div>
 
