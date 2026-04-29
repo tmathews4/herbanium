@@ -18,7 +18,7 @@ import { theme, ff, shadow, radius } from "../theme";
 import { Button } from "../components/layout";
 import { Flower } from "../components/icons";
 
-const STEPS = 4;
+const STEPS = 5;
 
 export const OnboardingScreen = ({ onComplete }) => {
   const [step, setStep] = useState(0);
@@ -28,10 +28,11 @@ export const OnboardingScreen = ({ onComplete }) => {
   const [flavors, setFlavors] = useState([]);
 
   const canAdvance =
-    step === 0 ? true  // name is soft-required; blank → "friend"
-    : step === 1 ? timeOfDay.length > 0
-    : step === 2 ? draw.length > 0
-    : step === 3 ? true  // flavors are optional — skip-friendly final step
+    step === 0 ? true  // welcome — always advance
+    : step === 1 ? true  // name is soft-required; blank → "friend"
+    : step === 2 ? timeOfDay.length > 0
+    : step === 3 ? draw.length > 0
+    : step === 4 ? true  // flavors are optional — skip-friendly final step
     : false;
 
   const finish = () => {
@@ -92,14 +93,15 @@ export const OnboardingScreen = ({ onComplete }) => {
         justifyContent: "center", padding: "20px 28px 20px",
         maxWidth: 520, width: "100%", alignSelf: "center",
       }}>
-        {step === 0 && <StepName name={name} setName={setName} />}
-        {step === 1 && <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />}
-        {step === 2 && <StepDraw value={draw} setValue={setDraw} />}
-        {step === 3 && <StepFlavors value={flavors} setValue={setFlavors} />}
+        {step === 0 && <StepWelcome />}
+        {step === 1 && <StepName name={name} setName={setName} />}
+        {step === 2 && <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />}
+        {step === 3 && <StepDraw value={draw} setValue={setDraw} />}
+        {step === 4 && <StepFlavors value={flavors} setValue={setFlavors} />}
       </div>
 
       {/* Selection count hint (multi-select steps only) */}
-      {(step === 1 || step === 2 || step === 3) && (
+      {(step === 2 || step === 3 || step === 4) && (
         <div style={{
           padding: "0 24px 4px", textAlign: "center",
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
@@ -107,9 +109,9 @@ export const OnboardingScreen = ({ onComplete }) => {
           minHeight: 18, flexShrink: 0,
           maxWidth: 520, width: "100%", alignSelf: "center",
         }}>
-          {step === 1 && (timeOfDay.length === 0 ? "pick one or more" : `${timeOfDay.length} selected`)}
-          {step === 2 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
-          {step === 3 && (flavors.length === 0 ? "pick any that appeal — or skip" : `${flavors.length} selected`)}
+          {step === 2 && (timeOfDay.length === 0 ? "pick one or more" : `${timeOfDay.length} selected`)}
+          {step === 3 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
+          {step === 4 && (flavors.length === 0 ? "pick any that appeal — or skip" : `${flavors.length} selected`)}
         </div>
       )}
 
@@ -137,33 +139,91 @@ export const OnboardingScreen = ({ onComplete }) => {
         </Button>
       </div>
 
-      {/* Footer note */}
+      {/* Footer note — combines storage + medical disclaimer into
+          one quiet line. The full red-bordered legal card on every
+          step read as alarm fatigue; one italic line is enough to
+          set the right expectation without dominating the screen. */}
       <div style={{
-        padding: "0 24px 12px", textAlign: "center",
+        padding: "0 24px 28px", textAlign: "center",
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
         color: theme.ash, lineHeight: 1.5, flexShrink: 0,
         maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
         Your journal lives on this device — no account, no cloud.
-      </div>
-
-      {/* Legal notice — shown on every step in a red-bordered card,
-          shrink-wrapped to the text rather than spanning the screen. */}
-      <div style={{ textAlign: "center", padding: "0 24px 20px", flexShrink: 0 }}>
-        <div style={{
-          display: "inline-block", maxWidth: 360,
-          padding: "10px 14px", borderRadius: 8,
-          border: `2px solid ${theme.terra}`,
-          background: "rgba(176, 84, 47, 0.05)",
-          fontFamily: ff.serif, fontSize: 11.5, fontWeight: 600,
-          color: theme.terra, lineHeight: 1.5, textAlign: "center",
-        }}>
-          Herbanium is a brewing companion, <em>not</em> medical advice. Verify with a clinician for anything that matters.
-        </div>
+        <br />
+        A brewing companion, not medical advice — check with a clinician for anything that matters.
       </div>
     </div>
   );
 };
+
+/* ──────────────────────────────────────────────────────────────
+   Step 0: Welcome — names the app and surfaces the three things
+   it does. New users were landing on the name input with no idea
+   what Herbanium was for; this card gives them 5 seconds of
+   context before asking anything.
+   ────────────────────────────────────────────────────────────── */
+
+const StepWelcome = () => (
+  <div style={{ textAlign: "center" }}>
+    <div style={{
+      fontFamily: ff.serif, fontSize: 32, color: theme.ink,
+      lineHeight: 1.15, marginBottom: 12,
+    }}>
+      Welcome to Herbanium.
+    </div>
+    <div style={{
+      fontFamily: ff.serif, fontStyle: "italic", fontSize: 15,
+      color: theme.ash, marginBottom: 28, lineHeight: 1.55,
+      maxWidth: 360, margin: "0 auto 28px",
+    }}>
+      A quiet companion for tea — blend, brew, and notice what lands.
+    </div>
+    <div style={{
+      display: "flex", flexDirection: "column", gap: 14,
+      maxWidth: 360, margin: "0 auto", textAlign: "left",
+    }}>
+      <WelcomeBullet
+        title="Blend"
+        body="Compose your own recipes from a pantry of herbs, teas, and spices."
+      />
+      <WelcomeBullet
+        title="Brew"
+        body="See how temperature and time shift each cup before you steep."
+      />
+      <WelcomeBullet
+        title="Notice"
+        body="Log what you drank and how it landed — the journal learns your palate."
+      />
+    </div>
+  </div>
+);
+
+const WelcomeBullet = ({ title, body }) => (
+  <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+    <div style={{
+      flex: "0 0 auto",
+      width: 6, height: 6, borderRadius: "50%",
+      background: theme.terra,
+      transform: "translateY(-2px)",
+    }} />
+    <div style={{ flex: 1 }}>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.18em",
+        textTransform: "uppercase", color: theme.terra,
+        marginBottom: 2,
+      }}>
+        {title}
+      </div>
+      <div style={{
+        fontFamily: ff.serif, fontSize: 13.5,
+        color: theme.inkSoft, lineHeight: 1.5,
+      }}>
+        {body}
+      </div>
+    </div>
+  </div>
+);
 
 /* ──────────────────────────────────────────────────────────────
    Step 1: Name

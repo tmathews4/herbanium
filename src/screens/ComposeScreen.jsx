@@ -853,6 +853,18 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         setSavePromptOpen(false);
                         setSaveName("");
                         setTimeout(() => setSaveStatus(null), 2000);
+                      } else {
+                        // saveComposedBlend returned falsy — most likely
+                        // a duplicate name collision or a missing handler.
+                        // Surface it so the user isn't left wondering why
+                        // nothing happened. Stays on screen longer than
+                        // the success toast since failure copy needs a
+                        // beat to read.
+                        setSaveStatus({
+                          kind: "err",
+                          text: "Couldn't save — try a different name or check the recipe.",
+                        });
+                        setTimeout(() => setSaveStatus(null), 3500);
                       }
                     }}
                     style={{ fontSize: 14, padding: "10px 24px" }}
@@ -863,8 +875,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             {saveStatus && (
               <div style={{
                 marginTop: 10, padding: "6px 10px", borderRadius: 8,
-                background: "rgba(98,124,92,0.10)", border: `1px solid ${theme.ruleSoft}`,
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.sageDeep,
+                background: saveStatus.kind === "err"
+                  ? "rgba(176,84,47,0.08)"
+                  : "rgba(98,124,92,0.10)",
+                border: `1px solid ${saveStatus.kind === "err" ? theme.terra : theme.ruleSoft}`,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+                color: saveStatus.kind === "err" ? theme.terra : theme.sageDeep,
                 textAlign: "center",
               }}>{saveStatus.text}</div>
             )}
@@ -1870,6 +1886,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   setRcSavePromptOpen(false);
                   setRcSaveName("");
                   setTimeout(() => setRcSaveStatus(null), 2000);
+                } else {
+                  setRcSaveStatus({
+                    kind: "err",
+                    text: "Couldn't save — try a different name or check the recipe.",
+                  });
+                  setTimeout(() => setRcSaveStatus(null), 3500);
                 }
               }}
               style={{ fontSize: 14, padding: "10px 24px" }}
@@ -1880,8 +1902,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
       {rcSaveStatus && (
         <div style={{
           marginTop: 10, padding: "6px 10px", borderRadius: 8,
-          background: "rgba(98,124,92,0.10)", border: `1px solid ${theme.ruleSoft}`,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.sageDeep,
+          background: rcSaveStatus.kind === "err"
+            ? "rgba(176,84,47,0.08)"
+            : "rgba(98,124,92,0.10)",
+          border: `1px solid ${rcSaveStatus.kind === "err" ? theme.terra : theme.ruleSoft}`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+          color: rcSaveStatus.kind === "err" ? theme.terra : theme.sageDeep,
           textAlign: "center",
         }}>{rcSaveStatus.text}</div>
       )}
