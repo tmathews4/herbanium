@@ -130,6 +130,21 @@ const PALATE_COLORS = {
 };
 const colorForPalate = (axis) => PALATE_COLORS[axis] || "#796E5B";
 
+// Flavors that belong to the PALATE strip's axes (bitterness,
+// astringency, menthol families) shouldn't double up as their own
+// rows in the FLAVOR strip. Otherwise the user sees the same note
+// twice — once as a diagnostic palate band, once as a flavor band
+// — which dilutes both. Sweet / tart / bright stay on the flavor
+// side because tea drinkers describe cups with those words; they
+// just happen to also feed the palate sweetness / tartness axes.
+const EXCLUDED_FROM_FLAVOR = new Set([
+  // bitterness / astringency family
+  "bitter", "bitterness", "astringent", "tannic",
+  "harsh", "acrid", "sharp", "burnt",
+  // menthol / cooling family
+  "cool", "cooling", "menthol", "minty", "mint", "camphor",
+]);
+
 // Hex → "r,g,b" string for rgba() composition.
 const hexToRgb = (hex) => {
   const h = hex.replace("#", "");
@@ -170,6 +185,10 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
       );
       const flavorMap = {};
       (brew.flavors || []).forEach(([name, strength]) => {
+        // Palate-axis families (bitter, astringent, menthol/mint)
+        // belong to the palate strip; keeping them here would
+        // double up the same note across two strips.
+        if (EXCLUDED_FROM_FLAVOR.has(name)) return;
         flavorMap[name] = strength;
       });
       const effectMap = {};
