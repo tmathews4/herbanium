@@ -117,6 +117,19 @@ const EFFECT_FAMILY_COLORS = {
 const colorForEffect = (effect) =>
   EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "#796E5B";
 
+// Palate / balance axes — diagnostic taste-structure dimensions
+// (bitterness, sweetness, astringency, tartness, menthol). Colored
+// to read like sensory warnings + comforts: terra for grippy/bitter,
+// rose for tart, ochre for sweet, sky for cooling.
+const PALATE_COLORS = {
+  bitterness:  "#B0542F",  // terra
+  astringency: "#B0542F",  // terra
+  tartness:    "#C37959",  // rose
+  sweetness:   "#A57836",  // ochre
+  menthol:     "#7F9AA0",  // sky
+};
+const colorForPalate = (axis) => PALATE_COLORS[axis] || "#796E5B";
+
 // Hex → "r,g,b" string for rgba() composition.
 const hexToRgb = (hex) => {
   const h = hex.replace("#", "");
@@ -126,27 +139,26 @@ const hexToRgb = (hex) => {
 
 /**
  * Shared track-map renderer.
- *   kind:        "flavor" | "mood" — controls which dimension is
- *                pulled from each sample and which color palette
- *                drives the bands.
+ *   kind:        "flavor" | "mood" | "palate" — controls which
+ *                dimension is pulled from each sample and which
+ *                color palette drives the bands.
  *   ingredients: list of {id, g, role?}.
  *   tempC, timeS: current slider values.
  *   tempCRange:  [min, max] for the temp axis.
  *   showAxis:    render the temp tick row below the strip. Default
- *                true; pass false on the second strip when stacked
- *                so the axis only appears once.
+ *                true; pass false on stacked strips so the axis
+ *                only appears once.
  */
 const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true, title }) => {
   const { unit } = useUnit();
   const [tMin, tMax] = tempCRange;
   const span = tMax - tMin;
 
-  const isFlavor = kind === "flavor";
-
   // Sample the brew engine across the temp axis. Each sample carries
-  // both flavor and effect maps so the two strips can share work
-  // when used together (the wrappers each just pick the field they
-  // need, and React's memoization de-dupes the inner sample loop).
+  // flavor / effect / palate maps so all three strips share work
+  // when stacked (resolveBlendAtBrew already returns all three in
+  // one pass; React memoization keeps the inner loop from running
+  // three times per render).
   const samples = useMemo(() => {
     if (!ingredients || ingredients.length === 0 || span <= 0) return [];
     const out = [];
@@ -162,15 +174,29 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
       });
       const effectMap = {};
       (brew.effects || []).forEach(([name, strength]) => {
-        // Bitterness is a diagnostic axis (rendered as palate / balance
-        // elsewhere), not a felt-state mood. Keep it out of the mood map.
+        // Bitterness is a diagnostic axis (rendered on the palate
+        // strip), not a felt-state mood. Keep it out of the mood map.
         if (name === "bitterness") return;
         effectMap[name] = strength;
       });
-      out.push({ t, flavorMap, effectMap });
+      const palateMap = {};
+      (brew.balance || []).forEach(([name, strength]) => {
+        palateMap[name] = strength;
+      });
+      out.push({ t, flavorMap, effectMap, palateMap });
     }
     return out;
   }, [ingredients, timeS, tMin, tMax, span]);
+
+  // Pick which sample-map this strip pulls from.
+  const pickMap = (s) =>
+    kind === "flavor" ? s.flavorMap
+    : kind === "mood" ? s.effectMap
+    : s.palateMap;
+  const colorForName =
+    kind === "flavor" ? colorFor
+    : kind === "mood" ? colorForEffect
+    : colorForPalate;
 
   // Pick the top MAX_TRACKS by their peak strength anywhere in the
   // envelope. Peak (not average) means notes that surface only at
@@ -179,7 +205,7 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
   const tracks = useMemo(() => {
     const peaks = {};
     for (const s of samples) {
-      const map = isFlavor ? s.flavorMap : s.effectMap;
+      const map = pickMap(s);
       for (const [name, strength] of Object.entries(map)) {
         peaks[name] = Math.max(peaks[name] || 0, strength);
       }
@@ -189,20 +215,19 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_TRACKS)
       .map(([name]) => name);
-  }, [samples, isFlavor]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [samples, kind]);
 
   if (tracks.length === 0 || samples.length === 0) return null;
 
-  const colorForName = isFlavor ? colorFor : colorForEffect;
-  // Effects scale 0–5 in the engine, same as flavors. Cap divisor at 5.
+  // All three dimensions scale 0–5 in the engine.
   const STRENGTH_MAX = 5;
 
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const stops = samples.map((s, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
-      const map = isFlavor ? s.flavorMap : s.effectMap;
-      const strength = map[name] || 0;
+      const strength = pickMap(s)[name] || 0;
       const alpha = Math.max(0, Math.min(1, strength / STRENGTH_MAX));
       return `rgba(${rgb}, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
     }).join(", ");
@@ -302,4 +327,8 @@ export const FlavorMap = (props) => (
 
 export const MoodMap = (props) => (
   <TrackMap {...props} kind="mood" title="Mood across temperature" />
+);
+
+export const PalateMap = (props) => (
+  <TrackMap {...props} kind="palate" title="Palate across temperature" />
 );

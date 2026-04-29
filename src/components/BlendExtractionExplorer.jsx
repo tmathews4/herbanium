@@ -36,7 +36,7 @@ import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
 import { EffectBar } from "./EffectBar";
-import { FlavorMap, MoodMap } from "./FlavorMap";
+import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 import { VocabInfoCard } from "./layout";
 
 // Slider bounds — union of every ingredient's range, padded with
@@ -946,13 +946,15 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
-      {/* Flavor + mood across the temperature envelope. Sits between
-          the sliders and the predicted-profile pills: the pills show
-          the cup AT this point, the maps show the cup ACROSS the
-          whole temp envelope. The shared vertical terra indicator
-          tracks the current slider through every track at once.
-          Flavor map's axis is hidden because the mood map below it
-          repeats the same scale — one tick row covers both. */}
+      {/* Flavor + mood + palate across the temperature envelope.
+          Three stacked strips with one shared temperature axis at
+          the bottom — flavor reads what's tasted, mood what's felt,
+          palate the structural axes (tartness, astringency, sweet-
+          ness, bitterness, menthol). The shared vertical terra
+          indicator runs through all three so the user can see how
+          a temp change reshapes every dimension at once. Only the
+          palate strip renders the axis ticks; the others suppress
+          it so the scale only appears once. */}
       <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
         <FlavorMap
           ingredients={ingredients}
@@ -962,6 +964,13 @@ export const BlendExtractionExplorer = ({
           showAxis={false}
         />
         <MoodMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+        />
+        <PalateMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
