@@ -17,7 +17,7 @@ import {
 } from "../data/vocabularyDescriptions";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import {
-  ff, theme,
+  ff, theme, shadow, radius,
 } from "../theme";
 import {
   formatAmount, formatTempRange, useUnit,
@@ -80,11 +80,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
     }}>
-      {/* Hero */}
+      {/* Hero — flat cream with a soft drop shadow so it reads as a
+          lifted card sitting on the ivory page rather than a heavier
+          gradient strip. Mirrors Home's card-on-page elevation. */}
       <div style={{
-        background: `linear-gradient(180deg, ${theme.cream} 0%, ${theme.paper} 100%)`,
+        background: theme.cream,
         padding: "22px 22px 20px",
-        borderBottom: `1px solid ${theme.rule}`,
+        borderBottom: `1px solid ${theme.ruleSoft}`,
+        boxShadow: shadow.card,
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <button onClick={onClose} style={{
@@ -399,9 +402,10 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             <>
               <div style={{
                 marginTop: 10, padding: "4px 14px",
-                borderRadius: hasAccents ? "10px 10px 0 0" : 10,
+                borderRadius: hasAccents ? `${radius.md}px ${radius.md}px 0 0` : radius.md,
                 background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
                 borderBottom: hasAccents ? "none" : `1px solid ${theme.ruleSoft}`,
+                boxShadow: hasAccents ? "none" : shadow.card,
               }}>
                 {b.ingredients.map((ing, i) => {
                   const meta = INGREDIENTS[ing.id];
@@ -457,11 +461,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                   Click the header to expand the list. */}
               {hasAccents && (
                 <div style={{
-                  borderRadius: "0 0 10px 10px",
+                  borderRadius: `0 0 ${radius.md}px ${radius.md}px`,
                   background: "rgba(98, 124, 92, 0.04)",
                   border: `1px solid ${theme.ruleSoft}`,
                   borderTop: `1px dashed ${theme.ruleSoft}`,
                   overflow: "hidden",
+                  boxShadow: shadow.card,
                 }}>
                   <button
                     onClick={() => setTableAccentsOpen(o => !o)}
@@ -565,15 +570,26 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         )}
 
         {/* Brew CTA — sits above Recommended Preparations so the action
-            is reachable without scrolling past the ritual notes. */}
-        <button onClick={onBrew} style={{
-          marginTop: 18, width: "100%",
-          fontFamily: ff.serif, fontSize: 17,
-          padding: "14px", borderRadius: 10,
-          background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-          boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
-        }}>
+            is reachable without scrolling past the ritual notes.
+            Shadow choreography matches Home's primary tiles:
+            lifted resting → hover lift → pressed inset, so taps feel
+            consistent across the app. */}
+        <button
+          onClick={onBrew}
+          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; }}
+          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.lifted; }}
+          onMouseDown={(e)  => { e.currentTarget.style.boxShadow = shadow.pressed; }}
+          onMouseUp={(e)    => { e.currentTarget.style.boxShadow = shadow.hover; }}
+          style={{
+            marginTop: 18, width: "100%",
+            fontFamily: ff.serif, fontSize: 17,
+            padding: "14px", borderRadius: radius.md,
+            background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+            boxShadow: shadow.lifted,
+            transition: "box-shadow 0.18s ease, transform 0.12s ease",
+            letterSpacing: "0.01em",
+          }}>
           <Kettle size={20} c={theme.cream} />
           Brew this cup →
         </button>
@@ -642,10 +658,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                 <ol style={{
                   marginTop: 10, marginLeft: "auto", marginRight: "auto",
                   maxWidth: 360,
-                  padding: "12px 16px 12px 32px", borderRadius: 8,
+                  padding: "12px 16px 12px 32px", borderRadius: radius.md,
                   background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
                   fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
                   lineHeight: 1.55, textAlign: "left",
+                  boxShadow: shadow.card,
                 }}>
                   {steps.map((step, i) => (
                     <li key={i} style={{ marginBottom: i === steps.length - 1 ? 0 : 6 }}>
@@ -667,11 +684,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         {traditionInfo && (
           <div style={{
             margin: "16px 0 10px",
-            padding: "10px 12px", borderRadius: 8,
+            padding: "10px 12px", borderRadius: radius.md,
             background: "rgba(165, 120, 54, 0.08)",
             border: `1px solid rgba(165, 120, 54, 0.22)`,
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
             color: theme.inkSoft, lineHeight: 1.45,
+            boxShadow: shadow.card,
           }}>
             <em style={{
               color: theme.ochre, fontStyle: "normal",
@@ -699,7 +717,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         </div>
         {brewCount === 0 ? (
           <div style={{
-            padding: "16px 18px", borderRadius: 10,
+            padding: "16px 18px", borderRadius: radius.md,
             background: theme.cream, border: `1px dashed ${theme.ruleSoft}`,
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
             color: theme.ash, lineHeight: 1.5, textAlign: "center",
@@ -709,8 +727,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
         ) : (
           <div style={{
-            padding: "12px 14px", borderRadius: 10,
+            padding: "12px 14px", borderRadius: radius.md,
             background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+            boxShadow: shadow.card,
           }}>
             {/* Aggregate stats — one quiet line */}
             <div style={{
