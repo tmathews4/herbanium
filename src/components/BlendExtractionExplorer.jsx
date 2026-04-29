@@ -36,6 +36,7 @@ import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
 import { EffectBar } from "./EffectBar";
+import { FlavorMap } from "./FlavorMap";
 import { VocabInfoCard } from "./layout";
 
 // Slider bounds — union of every ingredient's range, padded with
@@ -944,6 +945,18 @@ export const BlendExtractionExplorer = ({
           </>
         );
       })()}
+
+      {/* Flavor-across-temperature map. Sits between the sliders and
+          the predicted-profile pills: the pills show the cup AT this
+          point, the map shows the cup ACROSS the whole temp envelope.
+          The vertical indicator tracks the current slider so the user
+          sees both views in one glance. */}
+      <FlavorMap
+        ingredients={ingredients}
+        tempC={tempC}
+        timeS={timeS}
+        tempCRange={tempCRange}
+      />
 
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Each section renders the FULL set of entries any
