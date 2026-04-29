@@ -294,7 +294,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 background: primaryAxis === k ? theme.terra : "transparent",
                 color: primaryAxis === k ? theme.cream : theme.inkSoft,
                 border: "none",
-                transition: "background 0.2s ease, color 0.2s ease",
+                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
+                boxShadow: primaryAxis === k
+                  ? "inset 0 -2px 6px rgba(176,84,47,0.22), 0 2px 6px -2px rgba(176,84,47,0.30)"
+                  : "none",
               }}>{label}</button>
             ))}
           </div>
@@ -1235,6 +1238,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         background: active ? theme.ink : "transparent",
                         color: active ? theme.cream : theme.ash,
                         border: `1px solid ${active ? theme.ink : theme.rule}`,
+                        boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.22)" : "0 1px 2px rgba(30,24,18,0.05)",
+                        transition: "all 0.18s ease",
                       }}
                     >{label}{count > 0 && (
                       <span style={{
@@ -1254,6 +1259,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   border: `1px solid ${theme.terra}`, borderRadius: 999,
                   padding: "5px 12px", cursor: "pointer",
                   flexShrink: 0,
+                  boxShadow: "0 1px 3px rgba(176,84,47,0.12)",
+                  transition: "all 0.18s ease",
                 }}
               >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
             </div>

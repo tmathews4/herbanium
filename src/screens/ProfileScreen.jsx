@@ -281,7 +281,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 background: unit === u ? theme.ink : "transparent",
                 color: unit === u ? theme.cream : theme.ash,
                 cursor: "pointer",
-                transition: "background 0.2s ease, color 0.2s ease",
+                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
+                boxShadow: unit === u ? "0 2px 6px -1px rgba(30,24,18,0.24)" : "none",
               }}>°{u}</button>
             ))}
           </div>
@@ -307,7 +308,8 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 background: weightUnit === val ? theme.ink : "transparent",
                 color: weightUnit === val ? theme.cream : theme.ash,
                 cursor: "pointer",
-                transition: "background 0.2s ease, color 0.2s ease",
+                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
+                boxShadow: weightUnit === val ? "0 2px 6px -1px rgba(30,24,18,0.24)" : "none",
               }}>{label}</button>
             ))}
           </div>

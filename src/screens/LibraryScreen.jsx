@@ -126,16 +126,21 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               rowGap={4}
               maxPerRow={6}
               align="spread"
-              renderItem={([key, label]) => (
-                <button key={key} onClick={() => setShelfCategory(key)} style={{
-                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                  padding: "4px 10px", borderRadius: 999,
-                  border: `1px solid ${shelfCategory === key ? theme.ink : theme.ruleSoft}`,
-                  background: shelfCategory === key ? theme.ink : "transparent",
-                  color: shelfCategory === key ? theme.cream : theme.ash,
-                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                }}>{label}</button>
-              )}
+              renderItem={([key, label]) => {
+                const active = shelfCategory === key;
+                return (
+                  <button key={key} onClick={() => setShelfCategory(key)} style={{
+                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                    padding: "4px 10px", borderRadius: 999,
+                    border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                    background: active ? theme.ink : "transparent",
+                    color: active ? theme.cream : theme.ash,
+                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                    boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.20)" : "0 1px 2px rgba(30,24,18,0.05)",
+                    transition: "all 0.18s ease",
+                  }}>{label}</button>
+                );
+              }}
             />
           </div>
 
@@ -148,16 +153,21 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                 rowGap={4}
                 maxPerRow={6}
                 align="spread"
-                renderItem={(key) => (
-                  <button key={key} onClick={() => setTeaSubcategory(key)} style={{
-                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.02em",
-                    padding: "3px 10px", borderRadius: 999,
-                    border: `1px solid ${teaSubcategory === key ? theme.terra : theme.ruleSoft}`,
-                    background: teaSubcategory === key ? theme.terra : "transparent",
-                    color: teaSubcategory === key ? theme.cream : theme.ash,
-                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                  }}>{key}</button>
-                )}
+                renderItem={(key) => {
+                  const active = teaSubcategory === key;
+                  return (
+                    <button key={key} onClick={() => setTeaSubcategory(key)} style={{
+                      fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.02em",
+                      padding: "3px 10px", borderRadius: 999,
+                      border: `1px solid ${active ? theme.terra : theme.ruleSoft}`,
+                      background: active ? theme.terra : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                      boxShadow: active ? "0 2px 6px -1px rgba(176,84,47,0.28)" : "0 1px 2px rgba(30,24,18,0.05)",
+                      transition: "all 0.18s ease",
+                    }}>{key}</button>
+                  );
+                }}
               />
             </div>
           )}
@@ -169,21 +179,26 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               textTransform: "uppercase", color: theme.ash, marginBottom: 4,
             }}>caffeine</div>
             <div style={{ display: "flex", gap: 4 }}>
-              {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setCaffeineFilter(key)}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                    padding: "5px 10px", borderRadius: 999,
-                    border: `1px solid ${caffeineFilter === key ? theme.ink : theme.ruleSoft}`,
-                    background: caffeineFilter === key ? theme.ink : "transparent",
-                    color: caffeineFilter === key ? theme.cream : theme.ash,
-                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                  }}
-                >{label}</button>
-              ))}
+              {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => {
+                const active = caffeineFilter === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setCaffeineFilter(key)}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                      padding: "5px 10px", borderRadius: 999,
+                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                      background: active ? theme.ink : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                      boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.20)" : "0 1px 2px rgba(30,24,18,0.05)",
+                      transition: "all 0.18s ease",
+                    }}
+                  >{label}</button>
+                );
+              })}
             </div>
           </div>
 
@@ -199,16 +214,21 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               rowGap={4}
               maxPerRow={5}
               align="spread"
-              renderItem={(key) => (
-                <button key={key} onClick={() => setEffectFilter(key)} style={{
-                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                  padding: "4px 10px", borderRadius: 999,
-                  border: `1px solid ${effectFilter === key ? theme.sageDeep : theme.ruleSoft}`,
-                  background: effectFilter === key ? theme.sageDeep : "transparent",
-                  color: effectFilter === key ? theme.cream : theme.ash,
-                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                }}>{key === "any" ? "any" : key}</button>
-              )}
+              renderItem={(key) => {
+                const active = effectFilter === key;
+                return (
+                  <button key={key} onClick={() => setEffectFilter(key)} style={{
+                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                    padding: "4px 10px", borderRadius: 999,
+                    border: `1px solid ${active ? theme.sageDeep : theme.ruleSoft}`,
+                    background: active ? theme.sageDeep : "transparent",
+                    color: active ? theme.cream : theme.ash,
+                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                    boxShadow: active ? "0 2px 6px -1px rgba(74,87,58,0.30)" : "0 1px 2px rgba(30,24,18,0.05)",
+                    transition: "all 0.18s ease",
+                  }}>{key === "any" ? "any" : key}</button>
+                );
+              }}
             />
           </div>
 

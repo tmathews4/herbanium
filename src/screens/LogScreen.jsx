@@ -140,17 +140,23 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
                   {[
                     ["tasted",  true],
                     ["missed",  false],
-                  ].map(([label, v]) => (
-                    <button key={label} onClick={() => setTasted({ ...tasted, [f]: v })} style={{
-                      fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.02em",
-                      padding: "5px 11px", borderRadius: 999,
-                      border: `1px solid ${tasted[f] === v ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
-                      background: tasted[f] === v ? (v ? theme.sageDeep : theme.terra) : "transparent",
-                      color: tasted[f] === v ? theme.cream : theme.inkSoft,
-                      cursor: "pointer",
-                      transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
-                    }}>{label}</button>
-                  ))}
+                  ].map(([label, v]) => {
+                    const isActive = tasted[f] === v;
+                    return (
+                      <button key={label} onClick={() => setTasted({ ...tasted, [f]: v })} style={{
+                        fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.02em",
+                        padding: "5px 11px", borderRadius: 999,
+                        border: `1px solid ${isActive ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
+                        background: isActive ? (v ? theme.sageDeep : theme.terra) : "transparent",
+                        color: isActive ? theme.cream : theme.inkSoft,
+                        cursor: "pointer",
+                        transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                        boxShadow: isActive
+                          ? (v ? "0 2px 6px -1px rgba(74,87,58,0.30)" : "0 2px 6px -1px rgba(176,84,47,0.30)")
+                          : "0 1px 2px rgba(30,24,18,0.05)",
+                      }}>{label}</button>
+                    );
+                  })}
                 </div>
               </div>
             ))}

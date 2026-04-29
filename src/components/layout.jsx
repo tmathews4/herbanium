@@ -212,6 +212,18 @@ export const Chip = ({ active, onClick, children, tone = "default", caution = fa
   // Dashed amber border + muted text is the "this would create tension" signal.
   const isCaution = caution && !active;
 
+  // Subtle elevation. Resting shadow lifts every chip a hair off the
+  // page so they read as tappable surfaces rather than flat rectangles;
+  // active chips get a slightly stronger shadow tinted to the chip's
+  // tone so the selected one stands out without changing color rules.
+  const restShadow = "0 1px 2px rgba(30,24,18,0.05)";
+  const activeShadow = active
+    ? (tone === "sage"
+        ? "0 2px 6px -1px rgba(74,87,58,0.25)"
+        : tone === "terra"
+        ? "0 2px 6px -1px rgba(176,84,47,0.28)"
+        : "0 2px 6px -1px rgba(30,24,18,0.18)")
+    : restShadow;
   return (
     <button onClick={onClick} style={{
       fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.02em",
@@ -222,6 +234,7 @@ export const Chip = ({ active, onClick, children, tone = "default", caution = fa
       opacity: isCaution ? 0.7 : 1,
       cursor: "pointer",
       transition: "all .15s ease", whiteSpace: "nowrap",
+      boxShadow: isCaution ? "none" : activeShadow,
     }}>{children}</button>
   );
 };
