@@ -23,7 +23,7 @@
 import React, { useState, useMemo } from "react";
 import { Flower } from "../components/icons";
 import {
-  Chip, ChipRows, SectionLabel, Toggle,
+  Button, Chip, ChipRows, SectionLabel, Toggle,
 } from "../components/layout";
 import { FLAVORS } from "../data/blends";
 import {
@@ -75,11 +75,7 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
       padding: "22px 22px 26px",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <button onClick={onCancel} style={{
-          background: "transparent", border: "none", color: theme.ash,
-          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
-          textTransform: "uppercase", cursor: "pointer",
-        }}>← back</button>
+        <Button variant="ghost" onClick={onCancel}>← back</Button>
         <div style={{
           fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
           textTransform: "uppercase", color: theme.ash,
@@ -254,7 +250,8 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
         )}
       </div>
 
-      <button
+      <Button
+        variant="primary" tone="ink" fullWidth
         onClick={() => onSubmit({
           flavorsTasted: tasted,
           flavorsExtra: extraFlavors,
@@ -262,30 +259,8 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
           taste, note, save,
           rename: rename.trim(),
         })}
-        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.btn.ink.hover; }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
-        onMouseDown={(e)  => {
-          e.currentTarget.style.transform = "translateY(1px)";
-          e.currentTarget.style.boxShadow = shadow.btn.ink.press;
-        }}
-        onMouseUp={(e)    => {
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
-        }}
-        style={{
-          width: "100%", fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
-          padding: "15px 16px", borderRadius: radius.md,
-          background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
-          boxShadow: shadow.btn.ink.rest,
-          transition: "box-shadow 0.18s ease, transform 0.12s ease",
-          letterSpacing: "0.02em",
-          textShadow: "0 1px 1px rgba(0,0,0,0.10)",
-        }}>
-        Log it →
-      </button>
+        style={{ fontSize: 17, padding: "15px 16px" }}
+      >Log it →</Button>
     </div>
   );
 };

@@ -9,6 +9,7 @@
 
 import React from "react";
 import { theme, ff } from "../theme";
+import { Button } from "./layout";
 
 export const FirstCupHintCard = ({ onDismiss }) => (
   <div style={{
@@ -35,16 +36,14 @@ export const FirstCupHintCard = ({ onDismiss }) => (
         </div>
       </div>
     </div>
-    <button
+    <Button
+      variant="primary" tone="terra" fullWidth
       onClick={onDismiss}
       style={{
-        width: "100%",
-        fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.10em",
-        textTransform: "uppercase",
-        padding: "10px 18px", borderRadius: 999,
-        background: theme.terra, color: theme.cream,
-        border: "none", cursor: "pointer",
+        fontFamily: ff.sans, fontSize: 12, fontWeight: 500,
+        letterSpacing: "0.10em", textTransform: "uppercase",
+        padding: "11px 18px",
       }}
-    >OK</button>
+    >OK</Button>
   </div>
 );

@@ -11,7 +11,7 @@ import {
   Flower, Kettle,
 } from "../components/icons";
 import {
-  Chip, ChipRows, Rule, SectionLabel, FitOneLine,
+  Button, Chip, ChipRows, Rule, SectionLabel, FitOneLine,
 } from "../components/layout";
 import {
   BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
@@ -835,17 +835,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                  <button
-                    onClick={() => { setSavePromptOpen(false); setSaveStatus(null); }}
-                    style={{
-                      fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.04em",
-                      color: theme.ash,
-                      padding: "8px 14px", borderRadius: radius.md,
-                      background: "transparent", border: "none", cursor: "pointer",
-                      transition: "color 0.18s ease",
-                    }}
-                  >Cancel</button>
-                  <button
+                  <Button variant="ghost" onClick={() => { setSavePromptOpen(false); setSaveStatus(null); }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary" tone="ink"
                     onClick={() => {
                       const id = saveComposedBlend && saveComposedBlend(
                         { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS },
@@ -858,29 +852,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         setTimeout(() => setSaveStatus(null), 2000);
                       }
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.btn.ink.hover; }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }}
-                    onMouseDown={(e)  => {
-                      e.currentTarget.style.transform = "translateY(1px)";
-                      e.currentTarget.style.boxShadow = shadow.btn.ink.press;
-                    }}
-                    onMouseUp={(e)    => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
-                    }}
-                    style={{
-                      fontFamily: ff.serif, fontSize: 14, fontWeight: 500, letterSpacing: "0.02em",
-                      padding: "10px 24px", borderRadius: radius.md,
-                      background: theme.ink, color: theme.cream,
-                      border: "none", cursor: "pointer",
-                      boxShadow: shadow.btn.ink.rest,
-                      transition: "box-shadow 0.18s ease, transform 0.12s ease",
-                      textShadow: "0 1px 1px rgba(0,0,0,0.10)",
-                    }}
-                  >Save</button>
+                    style={{ fontSize: 14, padding: "10px 24px" }}
+                  >Save</Button>
                 </div>
               </div>
             )}
@@ -892,52 +865,23 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 textAlign: "center",
               }}>{saveStatus.text}</div>
             )}
-            {/* Terra-tinted shadows. The card-system shadows are
-                calibrated for cream surfaces and disappear on a
-                strongly colored fill. Buttons need a deeper, warmer
-                drop that reads as actual elevation, not a hint of one. */}
+            {/* Save / Start brewing pair. Same height + type as the
+                BlendDetail Brew CTA, mirrored across both buttons so
+                the row reads as a balanced pair rather than two
+                stacked styles. */}
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              <button
+              <Button
+                variant="secondary" tone="terra"
                 disabled={blend.empty}
                 onClick={() => {
                   setSaveName(suggestBlendName(effectiveIngredients));
                   setSavePromptOpen(true);
                   setSaveStatus(null);
                 }}
-                onMouseEnter={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.background = "rgba(176,84,47,0.10)";
-                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.hover;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.rest;
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-                onMouseDown={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.transform = "translateY(1px)";
-                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.press;
-                }}
-                onMouseUp={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.hover;
-                }}
-                style={{
-                  fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
-                  color: theme.terra,
-                  padding: "15px 22px", borderRadius: radius.md,
-                  background: "transparent",
-                  border: `1.5px solid ${theme.terra}`,
-                  cursor: blend.empty ? "not-allowed" : "pointer",
-                  opacity: blend.empty ? 0.4 : 1,
-                  boxShadow: shadow.btn.terraOutline.rest,
-                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
-                  letterSpacing: "0.02em",
-                }}
-              >Save</button>
-              <button
+                style={{ fontSize: 17, padding: "15px 22px" }}
+              >Save</Button>
+              <Button
+                variant="primary" tone="terra"
                 disabled={blend.empty}
                 onClick={() => {
                   const candidate = { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS };
@@ -962,44 +906,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   }
                   startBrew(candidate, "", moods);
                 }}
-                onMouseEnter={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
-                  e.currentTarget.style.background = "#BC5D33";
-                }}
-                onMouseLeave={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = shadow.btn.terra.rest;
-                  e.currentTarget.style.background = theme.terra;
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-                onMouseDown={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.transform = "translateY(1px)";
-                  e.currentTarget.style.boxShadow = shadow.btn.terra.press;
-                }}
-                onMouseUp={(e) => {
-                  if (blend.empty) return;
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
-                }}
-                style={{
-                  flex: 1,
-                  fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
-                  padding: "15px 16px", borderRadius: radius.md,
-                  background: blend.empty ? theme.rule : theme.terra,
-                  color: theme.cream, border: "none",
-                  cursor: blend.empty ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  boxShadow: blend.empty ? shadow.card : shadow.btn.terra.rest,
-                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
-                  letterSpacing: "0.02em",
-                  textShadow: blend.empty ? "none" : "0 1px 1px rgba(0,0,0,0.08)",
-                }}
-              >
-                <Kettle size={20} c={theme.cream} />
-                Start brewing
-              </button>
+                icon={<Kettle size={20} c={theme.cream} />}
+                style={{ flex: 1, fontSize: 17, padding: "15px 16px", gap: 10 }}
+              >Start brewing</Button>
             </div>
 
             {/* Confirm-before-brew dialog for custom unsaved blends. */}

@@ -15,6 +15,7 @@
 
 import React, { useState } from "react";
 import { theme, ff, shadow, radius } from "../theme";
+import { Button } from "../components/layout";
 import { Flower } from "../components/icons";
 
 const STEPS = 4;
@@ -121,59 +122,19 @@ export const OnboardingScreen = ({ onComplete }) => {
         flexShrink: 0,
         maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
-        <button
+        <Button
+          variant="ghost"
           onClick={back}
           disabled={step === 0}
-          style={{
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: step === 0 ? "transparent" : theme.ash,
-            background: "transparent", border: "none",
-            cursor: step === 0 ? "default" : "pointer",
-            padding: "10px 4px",
-            transition: "color 0.2s ease",
-            visibility: step === 0 ? "hidden" : "visible",
-          }}
-        >
-          ← back
-        </button>
-        <button
+          style={{ visibility: step === 0 ? "hidden" : "visible" }}
+        >← back</Button>
+        <Button
+          variant="primary" tone="ink"
           onClick={advance}
           disabled={!canAdvance}
-          onMouseEnter={(e) => {
-            if (!canAdvance) return;
-            e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
-          }}
-          onMouseLeave={(e) => {
-            if (!canAdvance) return;
-            e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
-            e.currentTarget.style.transform = "translateY(0)";
-          }}
-          onMouseDown={(e)  => {
-            if (!canAdvance) return;
-            e.currentTarget.style.transform = "translateY(1px)";
-            e.currentTarget.style.boxShadow = shadow.btn.ink.press;
-          }}
-          onMouseUp={(e)    => {
-            if (!canAdvance) return;
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
-          }}
-          style={{
-            fontFamily: ff.serif, fontSize: 15, fontWeight: 500,
-            padding: "13px 30px", borderRadius: radius.pill,
-            background: canAdvance ? theme.ink : theme.rule,
-            color: theme.cream, border: "none",
-            cursor: canAdvance ? "pointer" : "default",
-            transition: "background 0.2s ease, box-shadow 0.18s ease, transform 0.12s ease",
-            boxShadow: canAdvance ? shadow.btn.ink.rest : "none",
-            opacity: canAdvance ? 1 : 0.65,
-            letterSpacing: "0.02em",
-            textShadow: canAdvance ? "0 1px 1px rgba(0,0,0,0.10)" : "none",
-          }}
         >
           {step === STEPS - 1 ? "begin →" : "next →"}
-        </button>
+        </Button>
       </div>
 
       {/* Footer note */}

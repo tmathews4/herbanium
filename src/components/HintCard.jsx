@@ -11,15 +11,17 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
-import { theme, ff } from "../theme";
+import { theme, ff, shadow, radius } from "../theme";
+import { Button } from "./layout";
 
 export const HintCard = ({ title, body, onDismiss }) => (
   <div style={{
     marginBottom: 16,
     padding: "12px 14px",
-    borderRadius: 12,
+    borderRadius: radius.md,
     background: theme.cream,
     border: `1px solid ${theme.ruleSoft}`,
+    boxShadow: shadow.card,
     display: "flex", flexDirection: "column", gap: 10,
   }}>
     <div>
@@ -34,16 +36,14 @@ export const HintCard = ({ title, body, onDismiss }) => (
         color: theme.inkSoft, lineHeight: 1.45, textAlign: "left",
       }}>{body}</div>
     </div>
-    <button
+    <Button
+      variant="primary" tone="terra" fullWidth
       onClick={onDismiss}
       style={{
-        width: "100%",
-        fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.10em",
-        textTransform: "uppercase",
-        padding: "10px 18px", borderRadius: 999,
-        background: theme.terra, color: theme.cream,
-        border: "none", cursor: "pointer",
+        fontFamily: ff.sans, fontSize: 12, fontWeight: 500,
+        letterSpacing: "0.10em", textTransform: "uppercase",
+        padding: "11px 18px",
       }}
-    >OK</button>
+    >OK</Button>
   </div>
 );

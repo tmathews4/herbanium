@@ -49,37 +49,35 @@ export const shadow = {
   // accepts the tap rather than rebounding off it.
   pressed: "inset 0 1px 2px rgba(30, 24, 18, 0.10)",
 
-  // Filled-CTA shadow recipes. The card tokens above use a near-black
-  // ink shadow at 4-8% opacity, which disappears on a saturated fill.
-  // Filled buttons need a stronger, color-tinted drop to read as
-  // elevation. Three variants (rest / hover / press) per tint.
-  //
-  // Tuned to a middle weight: deep enough to read on a saturated
-  // background (the prior 0.40 alpha on Brew/Log it pushed forward
-  // too much, dominating the page), light enough to actually show
-  // on the compose buttons that previously appeared flat.
+  // Filled-CTA shadow recipes. Two layers per state:
+  //   - inset top highlight (1px of white at 16-22% alpha) — gives
+  //     the button a subtle "molded" edge so it reads as a physical
+  //     surface rather than a flat color rectangle.
+  //   - drop shadow tinted to the button's color, giving real
+  //     elevation off the page.
+  // Press collapses both: the highlight inverts to a dark inset and
+  // the drop shadow shrinks, so the button feels depressed.
   btn: {
     // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs)
     terra: {
-      rest:  "0 4px 10px -2px rgba(176,84,47,0.28), 0 1px 3px rgba(176,84,47,0.16)",
-      hover: "0 6px 14px -3px rgba(176,84,47,0.36), 0 2px 4px rgba(176,84,47,0.18)",
-      press: "0 1px 3px rgba(176,84,47,0.22), inset 0 1px 2px rgba(0,0,0,0.08)",
+      rest:  "inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 4px rgba(176,84,47,0.16), 0 4px 10px -2px rgba(176,84,47,0.22)",
+      hover: "inset 0 1px 0 rgba(255,255,255,0.22), 0 3px 6px rgba(176,84,47,0.20), 0 6px 14px -3px rgba(176,84,47,0.30)",
+      press: "inset 0 1px 2px rgba(0,0,0,0.12), 0 1px 2px rgba(176,84,47,0.16)",
     },
-    // Terra outlined buttons (Save). Same shape as filled, slightly
-    // softer alpha so the visual hierarchy is filled > outlined while
-    // both clearly float above the page.
+    // Terra outlined buttons (Save). No inset highlight — the
+    // outline IS the structure. Lifted via a moderate drop shadow.
     terraOutline: {
-      rest:  "0 4px 10px -2px rgba(176,84,47,0.22), 0 1px 3px rgba(176,84,47,0.12)",
-      hover: "0 6px 14px -3px rgba(176,84,47,0.30), 0 2px 4px rgba(176,84,47,0.14)",
-      press: "0 1px 3px rgba(176,84,47,0.16), inset 0 1px 1px rgba(176,84,47,0.06)",
+      rest:  "0 2px 4px rgba(176,84,47,0.10), 0 4px 10px -3px rgba(176,84,47,0.16)",
+      hover: "0 3px 6px rgba(176,84,47,0.16), 0 6px 14px -4px rgba(176,84,47,0.24)",
+      press: "0 1px 2px rgba(176,84,47,0.10), inset 0 1px 1px rgba(176,84,47,0.06)",
     },
-    // Ink-filled buttons (log it, begin →, save mood). Same shape as
-    // terra but with an ink-tinted shadow so the depth reads on warm
-    // dark fills.
+    // Ink-filled buttons (log it, begin →, save mood). Same molded-
+    // surface treatment as terra; warmer because the inset highlight
+    // reads against a dark fill the same way it does against terra.
     ink: {
-      rest:  "0 4px 10px -2px rgba(30,24,18,0.22), 0 1px 3px rgba(30,24,18,0.12)",
-      hover: "0 6px 14px -3px rgba(30,24,18,0.30), 0 2px 4px rgba(30,24,18,0.14)",
-      press: "0 1px 3px rgba(30,24,18,0.18), inset 0 1px 2px rgba(0,0,0,0.08)",
+      rest:  "inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 4px rgba(30,24,18,0.18), 0 4px 10px -2px rgba(30,24,18,0.22)",
+      hover: "inset 0 1px 0 rgba(255,255,255,0.18), 0 3px 6px rgba(30,24,18,0.22), 0 6px 14px -3px rgba(30,24,18,0.30)",
+      press: "inset 0 1px 2px rgba(0,0,0,0.14), 0 1px 2px rgba(30,24,18,0.18)",
     },
   },
 };

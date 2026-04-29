@@ -8,7 +8,7 @@ import {
   Flower, Kettle, MOOD_ICONS,
 } from "../components/icons";
 import {
-  SectionLabel, VocabInfoCard, FitOneLine,
+  Button, SectionLabel, VocabInfoCard, FitOneLine,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
 import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";
@@ -90,10 +90,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         boxShadow: shadow.card,
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <button onClick={onClose} style={{
-            background: "transparent", border: "none", color: theme.ash,
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
-          }}>← back</button>
+          <Button variant="ghost" onClick={onClose}>← back</Button>
           <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
             The Blend
           </div>
@@ -569,42 +566,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </>
         )}
 
-        {/* Brew CTA — terra-tinted shadow tokens give the button real
-            visible elevation that reads on a saturated fill. Same
-            recipe as Compose's Start brewing for a consistent feel. */}
-        <button
+        {/* Brew CTA — primary terra button, full width. Style overrides
+            push the size up one tier (17px serif, 15px vertical pad) so
+            the page's headline action reads slightly bigger than the
+            standard Button defaults. */}
+        <Button
+          variant="primary" tone="terra" fullWidth
           onClick={onBrew}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
-            e.currentTarget.style.background = "#BC5D33";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = shadow.btn.terra.rest;
-            e.currentTarget.style.background = theme.terra;
-            e.currentTarget.style.transform = "translateY(0)";
-          }}
-          onMouseDown={(e)  => {
-            e.currentTarget.style.transform = "translateY(1px)";
-            e.currentTarget.style.boxShadow = shadow.btn.terra.press;
-          }}
-          onMouseUp={(e)    => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
-          }}
-          style={{
-            marginTop: 18, width: "100%",
-            fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
-            padding: "15px 16px", borderRadius: radius.md,
-            background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-            boxShadow: shadow.btn.terra.rest,
-            transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
-            letterSpacing: "0.02em",
-            textShadow: "0 1px 1px rgba(0,0,0,0.08)",
-          }}>
-          <Kettle size={20} c={theme.cream} />
+          icon={<Kettle size={20} c={theme.cream} />}
+          style={{ marginTop: 18, fontSize: 17, padding: "15px 16px", gap: 10 }}
+        >
           Brew this cup →
-        </button>
+        </Button>
 
         {/* Recommended Preparations — tradition-specific steps when curated,
             generic template otherwise. Sits after the predicted-mood/balance

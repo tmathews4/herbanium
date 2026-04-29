@@ -35,7 +35,132 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { theme, ff } from "../theme";
+import { theme, ff, shadow, radius } from "../theme";
+
+/* ──────────────────────────────────────────────────────────────
+   Button system — canonical button components.
+
+   Three variants:
+     primary   — filled tint (terra | ink), the screen's main action
+     secondary — outlined tint, the alternative action
+     ghost     — text-only, header back/cancel/dismiss links
+
+   Shared molded-surface treatment on filled buttons (inset top
+   highlight + tinted drop shadow) so a button reads as a physical
+   surface rather than a flat color rectangle. Hover deepens; press
+   inverts the highlight and flattens the drop. Translate-on-press
+   adds tactile feedback.
+   ────────────────────────────────────────────────────────────── */
+
+// Slightly lighter terra used for the hover fill on primary terra
+// buttons. Computed once so we don't pay a string concat per render.
+const TERRA_HOVER = "#BC5D33";
+const INK_HOVER   = "#2A211A";
+
+export const Button = ({
+  variant = "primary",   // primary | secondary | ghost
+  tone = "terra",        // terra | ink (filled / outlined variants only)
+  fullWidth = false,
+  disabled = false,
+  icon = null,           // optional leading icon node
+  children,
+  onClick,
+  type = "button",
+  style: styleOverride = {},
+  ...rest
+}) => {
+  // Ghost — bare text-only link. Used for back / cancel / dismiss.
+  if (variant === "ghost") {
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        disabled={disabled}
+        style={{
+          background: "transparent", border: "none",
+          color: theme.ash,
+          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          padding: "8px 6px",
+          cursor: disabled ? "default" : "pointer",
+          transition: "color 0.18s ease",
+          opacity: disabled ? 0.4 : 1,
+          width: fullWidth ? "100%" : "auto",
+          ...styleOverride,
+        }}
+        {...rest}
+      >{children}</button>
+    );
+  }
+
+  const isPrimary   = variant === "primary";
+  const isSecondary = variant === "secondary";
+  const accent      = tone === "ink" ? theme.ink : theme.terra;
+  const accentHover = tone === "ink" ? INK_HOVER : TERRA_HOVER;
+  const shadowSet   = isPrimary
+    ? (tone === "ink" ? shadow.btn.ink : shadow.btn.terra)
+    : (tone === "ink" ? shadow.btn.ink : shadow.btn.terraOutline);
+
+  const restShadow  = disabled ? "none" : shadowSet.rest;
+  const hoverShadow = shadowSet.hover;
+  const pressShadow = shadowSet.press;
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.boxShadow = hoverShadow;
+        if (isPrimary) e.currentTarget.style.background = accentHover;
+        if (isSecondary) e.currentTarget.style.background = tone === "ink"
+          ? "rgba(30,24,18,0.05)"
+          : "rgba(176,84,47,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.boxShadow = restShadow;
+        e.currentTarget.style.transform = "translateY(0)";
+        if (isPrimary)   e.currentTarget.style.background = accent;
+        if (isSecondary) e.currentTarget.style.background = "transparent";
+      }}
+      onMouseDown={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.transform = "translateY(1px)";
+        e.currentTarget.style.boxShadow = pressShadow;
+      }}
+      onMouseUp={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = hoverShadow;
+      }}
+      style={{
+        fontFamily: ff.serif, fontSize: 16, fontWeight: 500,
+        letterSpacing: "0.02em",
+        color: isPrimary ? theme.cream : accent,
+        padding: "13px 22px",
+        borderRadius: radius.md,
+        background: isPrimary
+          ? (disabled ? theme.rule : accent)
+          : "transparent",
+        border: isSecondary ? `1.5px solid ${accent}` : "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.55 : 1,
+        width: fullWidth ? "100%" : "auto",
+        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+        boxShadow: restShadow,
+        transition: "background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, color 0.18s ease",
+        textShadow: isPrimary && !disabled ? "0 1px 1px rgba(0,0,0,0.08)" : "none",
+        ...styleOverride,
+      }}
+      {...rest}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+};
 
 /**
  * Renders one line of text that auto-shrinks its font-size to fit
