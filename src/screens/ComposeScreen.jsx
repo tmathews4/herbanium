@@ -62,7 +62,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
   // Save-prompt state for the forward (Vibe) compose flow.
   const [saveName, setSaveName] = useState("");
   const [savePromptOpen, setSavePromptOpen] = useState(false);
@@ -1181,7 +1181,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                       key={item.ref.id}
                       entry={item.ref}
                       first={i === 0}
-                      onDelete={deleteJournalEntry}
+                      openEntry={openEntry}
                     />
                   );
                 })}
@@ -1881,8 +1881,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    things in one stream rather than one homogenous list.
    ────────────────────────────────────────────────────────────── */
 
-const JournalEntryRow = ({ entry, first, onDelete }) => {
-  const [open, setOpen] = useState(false);
+const JournalEntryRow = ({ entry, first, openEntry }) => {
   const isHaiku    = entry.kind === "haiku";
   const isLimerick = entry.kind === "limerick";
   const isVerse    = isHaiku || isLimerick;
@@ -1892,103 +1891,48 @@ const JournalEntryRow = ({ entry, first, onDelete }) => {
     isHaiku    ? "a verse"
     : isLimerick ? "a limerick"
     : "an entry";
+  // Single-line preview of the entry body. The detail screen carries
+  // the full text, line breaks, and mood arc; the row only needs to
+  // hint at the content so the user can tell entries apart at a
+  // glance. Strip newlines and trim so a haiku doesn't blow the row
+  // height open.
+  const preview = (entry.text || "")
+    .replace(/\s+/g, " ")
+    .trim();
   return (
-    <div style={{
-      padding: "12px 0",
-      borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-      position: "relative",
-    }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        style={{
-          width: "100%", textAlign: "left",
-          background: "transparent", border: "none", padding: 0,
-          cursor: "pointer",
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          marginBottom: 6,
-          paddingRight: onDelete ? 22 : 0,
-        }}
-      >
-        <div style={{
+    <button
+      onClick={() => openEntry?.(entry.id)}
+      style={{
+        width: "100%", textAlign: "left", background: "transparent",
+        border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+        padding: "12px 2px", cursor: "pointer",
+        display: "flex", flexDirection: "column", gap: 4, minWidth: 0,
+      }}
+    >
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+      }}>
+        <span style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
           textTransform: "uppercase", color: theme.ash,
-          display: "flex", alignItems: "baseline", gap: 8,
         }}>
-          <span style={{
-            display: "inline-block",
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.15s ease",
-            color: theme.terra,
-          }}>›</span>
-          <span>{label}</span>
-        </div>
-        <div style={{
+          {label}
+        </span>
+        <span style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-        }}>{ago}</div>
-      </button>
-      {open ? (
-        <>
-          <div style={{
-            fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-            lineHeight: isVerse ? 1.7 : 1.55,
-            whiteSpace: "pre-line",
-            fontStyle: isVerse ? "italic" : "normal",
-          }}>{entry.text}</div>
-          {(() => {
-            const start = (entry.currentMoods || []).join(", ");
-            const end   = (entry.landedMoods  || []).join(", ");
-            if (!start && !end) return null;
-            return (
-              <div style={{
-                marginTop: 8,
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                color: theme.ash, lineHeight: 1.4,
-              }}>
-                {start && (<span>{start}</span>)}
-                <span style={{ margin: "0 6px", color: theme.rule, fontStyle: "normal" }}>→</span>
-                {end && (<span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>)}
-              </div>
-            );
-          })()}
-          {entry.note && (
-            <div style={{
-              marginTop: 8, paddingTop: 6,
-              borderTop: `1px dashed ${theme.ruleSoft}`,
-              fontFamily: ff.serif, fontSize: 12.5,
-              color: theme.inkSoft, lineHeight: 1.5,
-              whiteSpace: "pre-line",
-            }}>{entry.note}</div>
-          )}
-        </>
-      ) : (
-        <div
-          onClick={() => setOpen(true)}
-          role="button"
-          style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-            color: theme.ash, lineHeight: 1.5, cursor: "pointer",
-          }}
-        >
-          tap to read
-        </div>
+        }}>{ago}</span>
+      </div>
+      {preview && (
+        <span style={{
+          fontFamily: ff.serif,
+          fontStyle: isVerse ? "italic" : "normal",
+          fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {preview}
+        </span>
       )}
-      {onDelete && (
-        <button
-          onClick={() => {
-            if (window.confirm("Remove this journal entry?")) onDelete(entry.id);
-          }}
-          title="delete entry"
-          style={{
-            position: "absolute", top: 10, right: 0,
-            background: "transparent", border: "none",
-            color: theme.ash, fontSize: 13, lineHeight: 1,
-            padding: "4px 6px", cursor: "pointer",
-            opacity: 0.45,
-          }}
-        >✕</button>
-      )}
-    </div>
+    </button>
   );
 };
 
