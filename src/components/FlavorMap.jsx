@@ -243,6 +243,36 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
 
   if (tracks.length === 0 || samples.length === 0) return null;
 
+  // Fill in zero-strength gaps that sit between non-zero neighbors
+  // by linear interpolation. This catches authoring artifacts where
+  // a flavor exists in an ingredient's light + strong profile points
+  // but is missing from its standard point — the engine's interpolation
+  // would lerp toward 0 across the middle bracket, then re-emerge at
+  // the strong bracket, producing a dark→light→dark band that doesn't
+  // reflect a real parabolic chemistry. Gaps wider than `maxGap` stay
+  // unfilled so the visualization doesn't invent continuity that isn't
+  // there (e.g., a flavor that only exists at one extreme).
+  const fillGaps = (series, maxGap = 6) => {
+    const out = [...series];
+    const n = out.length;
+    for (let i = 1; i < n - 1; i++) {
+      if (out[i] > 0) continue;
+      let leftIdx = -1;
+      for (let j = i - 1; j >= 0; j--) {
+        if (series[j] > 0) { leftIdx = j; break; }
+      }
+      let rightIdx = -1;
+      for (let j = i + 1; j < n; j++) {
+        if (series[j] > 0) { rightIdx = j; break; }
+      }
+      if (leftIdx >= 0 && rightIdx >= 0 && (rightIdx - leftIdx) <= maxGap) {
+        const t = (i - leftIdx) / (rightIdx - leftIdx);
+        out[i] = series[leftIdx] * (1 - t) + series[rightIdx] * t;
+      }
+    }
+    return out;
+  };
+
   // Per-track normalization. Alpha scales each band to its OWN peak
   // across the envelope rather than the engine's absolute 0-5 scale.
   // A flavor that ranges 0.5 → 1.5 used to render 10% → 30% opacity
@@ -258,9 +288,12 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
     const cap = peak < 1 ? Math.sqrt(peak) : 1;
-    const stops = samples.map((s, i) => {
+    // Build the raw strength series, then fill threshold-drop gaps
+    // before mapping to alpha so the gradient reads as continuous.
+    const rawSeries = samples.map(s => pickMap(s)[name] || 0);
+    const series = fillGaps(rawSeries);
+    const stops = series.map((strength, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
-      const strength = pickMap(s)[name] || 0;
       const alpha = Math.max(0, Math.min(cap, (strength / peak) * cap));
       return `rgba(${rgb}, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
     }).join(", ");
