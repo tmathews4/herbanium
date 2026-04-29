@@ -137,25 +137,35 @@ function pickCreature(commonPool, mythicalPool, seed) {
 }
 
 // English "royal order" adjective categories, lowest rank first.
-// Two modifiers in front of a noun should appear in ascending rank,
-// so a word in category 1 (origin/phenomenon) precedes a word in
-// category 2 (material) — "Mist Pearl Heron", not "Pearl Mist Heron."
+// Two modifiers in front of a noun should appear in ascending rank:
 //
-// Most element-pool words are phenomena (mist, storm, frost, light,
-// dusk); most gem-pool words are materials. A few element words name
-// substances (Stone, Wood, Ash, Earth, Cinder, Ember, Bramble,
-// Nightshade) and tie with the gem on category — in a tie we keep
-// the input order, since the gem is the more specific material and
-// the rule of specificity puts it closer to the noun.
+//   color (0) → origin/phenomenon (1) → material (2) → noun
+//
+// The gem pool is mixed — half its entries (Onyx, Ruby, Jade,
+// Topaz, Pearl, Coal, Gold) read as colors first and only secondarily
+// as substances; the rest (Marble, Granite, Quartz, Crystal, Diamond,
+// Agate, Moonstone, Opal) read as materials. A color-reading gem
+// belongs in front of an origin word: "Onyx Drizzle Moose," not
+// "Drizzle Onyx Moose," because the ear hears Onyx as black before
+// it hears Onyx as a stone.
 const ADJECTIVE_RANK = {
+  // 0 — color (gems whose color reading dominates over their
+  // material reading; pure color words would also live here)
+  Onyx: 0, Ruby: 0, Garnet: 0, Emerald: 0, Jade: 0, Topaz: 0, Citrine: 0,
+  Aquamarine: 0, Turquoise: 0, Coral: 0, Amber: 0, Carnelian: 0, Heliodor: 0,
+  Cinnabar: 0, Bloodstone: 0, Hematite: 0, Pyrite: 0, Coal: 0, Gold: 0,
+  Copper: 0, Sunstone: 0, Tigereye: 0, "Smoky-Quartz": 0, "Rose-Quartz": 0,
+  Sandstone: 0, Jasper: 0, Slate: 0, Obsidian: 0, Pearl: 0,
   // 1 — origin / phenomenon / time / state
   Mist: 1, Dew: 1, Vapor: 1, Fog: 1, Drizzle: 1, Brume: 1, Hush: 1,
   Light: 1, Sunfire: 1, Aurora: 1, Bloom: 1, Glow: 1, Glare: 1, Blaze: 1, Fire: 1,
   Wind: 1, Sky: 1, Cloud: 1, Lightning: 1, Storm: 1,
   Daybreak: 1, Sun: 1, Sunset: 1, Twilight: 1, Dusk: 1, Midnight: 1, Crescent: 1, Moon: 1,
   Tide: 1, River: 1, Rain: 1, Frost: 1, Smoke: 1, Shadow: 1, Void: 1, Star: 1, Meadow: 1,
-  // 2 — material / substance
+  // 2 — material / substance (read as substance first, color second)
   Stone: 2, Wood: 2, Earth: 2, Ash: 2, Cinder: 2, Ember: 2, Bramble: 2, Nightshade: 2,
+  Marble: 2, Granite: 2, Quartz: 2, Crystal: 2, Diamond: 2, Agate: 2,
+  Moonstone: 2, Opal: 2,
 };
 
 // Returns the adjective category rank for ordering. Unknown words
@@ -175,52 +185,102 @@ function orderModifiers(a, b) {
   return rA <= rB ? [a, b] : [b, a];
 }
 
+// Phonetic sanity check. Catches the patterns that make a title sound
+// like a tongue-twister regardless of grammatical correctness:
+//
+//   - Alliteration: adjacent words start with the same consonant
+//     ("Storm Stone Stoat" — three s-words in a row reads as a
+//     mistake, not a name).
+//   - Stutter: a word ends in the same consonant the next begins
+//     with ("Mist Stone" — st-st clamps the boundary).
+//   - Root echo: one modifier contains the stem of the other
+//     ("Sun Sunstone", "Stone Sandstone") — feels redundant.
+//
+// Vowel-vs-vowel boundaries are fine ("Aurora Onyx") so we don't
+// penalize those. Returns false when any rule trips.
+function euphonyOK(words) {
+  const norm = (w) => (w || "").toLowerCase().replace(/[^a-z]/g, "");
+  const isConsonant = (ch) => /[bcdfghjklmnpqrstvwxz]/.test(ch);
+  for (let i = 0; i < words.length - 1; i++) {
+    const a = norm(words[i]);
+    const b = norm(words[i + 1]);
+    if (!a || !b) continue;
+    if (a[0] === b[0] && isConsonant(a[0])) return false;
+    const tail = a[a.length - 1];
+    const head = b[0];
+    if (tail === head && isConsonant(tail)) return false;
+    if (a.length >= 4 && b.length >= 4) {
+      const stemA = a.slice(0, 4);
+      const stemB = b.slice(0, 4);
+      if (a.includes(stemB) || b.includes(stemA)) return false;
+    }
+  }
+  return true;
+}
+
 export function generateCreationTitle(profile) {
   if (!profile) return null;
   const createdAt = profile.createdAt || Date.now();
   const seedBase = `${profile.name || "friend"}|${createdAt}`;
   const hour = new Date(createdAt).getHours();
 
-  // Element — time-window pool, hash for variety within window.
-  const ePool = ELEMENT_POOLS[elementWindow(hour)] || ELEMENT_POOLS.midday;
-  const element = pick(ePool, seedBase + "|element");
-
-  // Gem — pick a flavor first (if any), then a gem from its pool.
   const flavors = profile.flavors || [];
-  let gem;
-  if (flavors.length > 0) {
-    const f = flavors[hash(seedBase + "|flavorPick") % flavors.length];
-    const pool = GEMS_BY_FLAVOR[f] || GEMS_BY_FLAVOR._none;
-    gem = pick(pool, seedBase + "|gem");
-  } else {
-    gem = pick(GEMS_BY_FLAVOR._none, seedBase + "|gem");
-  }
+  const moods   = profile.draw    || [];
+  const ePool   = ELEMENT_POOLS[elementWindow(hour)] || ELEMENT_POOLS.midday;
 
-  // Creature — pick a mood first (if any), then a creature. Fallback
-  // to flavor-derived creatures when no moods were chosen at onboarding.
-  // The picker rolls against MYTHICAL_RATE so a mythical beast appears
-  // only occasionally, regardless of which category is sourced.
-  const moods = profile.draw || [];
+  const gemPool = (() => {
+    if (flavors.length === 0) return GEMS_BY_FLAVOR._none;
+    const f = flavors[hash(seedBase + "|flavorPick") % flavors.length];
+    return GEMS_BY_FLAVOR[f] || GEMS_BY_FLAVOR._none;
+  })();
+
+  // Pick the creature once — it depends on profile.draw / flavors and
+  // doesn't participate in the euphony retry loop. Adjective retries
+  // only re-roll the two modifiers, so the elemental's species
+  // (which the user reads as identity) stays stable.
   let creature;
   if (moods.length > 0) {
     const m = moods[hash(seedBase + "|moodPick") % moods.length];
-    const common = COMMON_BY_MOOD[m] || COMMON_BY_FLAVOR._none;
-    const mythical = MYTHICAL_BY_MOOD[m] || MYTHICAL_BY_FLAVOR._none;
-    creature = pickCreature(common, mythical, seedBase + "|creature");
+    creature = pickCreature(
+      COMMON_BY_MOOD[m] || COMMON_BY_FLAVOR._none,
+      MYTHICAL_BY_MOOD[m] || MYTHICAL_BY_FLAVOR._none,
+      seedBase + "|creature",
+    );
   } else if (flavors.length > 0) {
     const f = flavors[hash(seedBase + "|creatureFlavorPick") % flavors.length];
-    const common = COMMON_BY_FLAVOR[f] || COMMON_BY_FLAVOR._none;
-    const mythical = MYTHICAL_BY_FLAVOR[f] || MYTHICAL_BY_FLAVOR._none;
-    creature = pickCreature(common, mythical, seedBase + "|creature");
+    creature = pickCreature(
+      COMMON_BY_FLAVOR[f] || COMMON_BY_FLAVOR._none,
+      MYTHICAL_BY_FLAVOR[f] || MYTHICAL_BY_FLAVOR._none,
+      seedBase + "|creature",
+    );
   } else {
-    creature = pickCreature(COMMON_BY_FLAVOR._none, MYTHICAL_BY_FLAVOR._none, seedBase + "|creature");
+    creature = pickCreature(
+      COMMON_BY_FLAVOR._none, MYTHICAL_BY_FLAVOR._none,
+      seedBase + "|creature",
+    );
   }
 
-  // Sort the two modifiers into English adjective order before
-  // assembly so the title always reads "phenomenon → material →
-  // noun" (e.g., "Mist Pearl Heron"), not the inverse.
-  const [first, second] = orderModifiers(element, gem);
-  return `The ${first} ${second} ${creature}`;
+  // Euphony-gated assembly. Each attempt picks an element + gem,
+  // sorts them into English adjective order, and runs the assembled
+  // phrase through the phonetic check. If a generation lands on
+  // "Storm Stone Stoat" or "Sun Sunstone Falcon," the retry walks
+  // forward with a different seed suffix until something cleaner
+  // surfaces. Capped so a tiny pool can't deadlock the loop.
+  const MAX_ATTEMPTS = 8;
+  let lastTitle = null;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const suffix = attempt === 0 ? "" : `|retry${attempt}`;
+    const element = pick(ePool,   seedBase + "|element" + suffix);
+    const gem     = pick(gemPool, seedBase + "|gem"     + suffix);
+    const [first, second] = orderModifiers(element, gem);
+    const title = `The ${first} ${second} ${creature}`;
+    lastTitle = title;
+    if (euphonyOK([first, second, creature])) return title;
+  }
+  // No clean ordering found in the pool — return the last attempt
+  // rather than throwing. Fallback rarely fires; the loop almost
+  // always succeeds in 1–2 iterations.
+  return lastTitle;
 }
 
 // Brief, plain-language descriptions of each creature so users meeting
