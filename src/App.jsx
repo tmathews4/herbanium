@@ -343,13 +343,21 @@ export default function App() {
 
   // Seed mode: dev-only toggle. Hidden from normal users. Only functional
   // when ?dev is set. Flipping it resets state to that seed's snapshot.
-  const [seedMode, setSeedMode] = useState("power");
+  // Persist the dev seed selection so a reload doesn't silently bounce
+  // the user from "mid" back to "power." Important for testing flows
+  // that depend on a specific seed (e.g. the mid-journey pending-mood
+  // cup that demos the Home follow-up card).
+  const [seedMode, setSeedMode] = usePersistedState("seedMode", "power");
 
   // Dev-seed version — bump when the power seed shape changes so users
   // with stale persisted data get refreshed. Without this, an existing
   // dev session keeps its old "y1"-"y9" sessions even after we ship a
   // richer seed, because usePersistedState rehydrates from localStorage.
-  const SEED_VERSION = "5";
+  // Bumped to "6" when the brew log split into "flavor at first sip,
+  // mood on next return" — the mid-journey seed gained a pending-mood
+  // cup that the Home follow-up card surfaces. Bumping forces stale
+  // sessions from earlier shapes to be reapplied on next mount.
+  const SEED_VERSION = "6";
   const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
 
   // Apply a seed mode in full — covers every persisted flow state
