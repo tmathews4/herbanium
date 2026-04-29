@@ -142,6 +142,19 @@ const PALATE_COLORS = {
 };
 const colorForPalate = (axis) => PALATE_COLORS[axis] || "#796E5B";
 
+// Per-axis "unpleasant" thresholds for the palate strip. When a
+// palate dimension crosses these levels, we render a terra warning
+// stripe under the band and a ⚠ badge in the row label so the user
+// sees that pushing the slider further would tip the cup into
+// astringent / bitter / sour / over-cooled territory. Sweetness
+// has no warning — naturally-sweet cups rarely turn cloying.
+const PALATE_WARNINGS = {
+  bitterness:  { threshold: 3.0, label: "bitter" },
+  astringency: { threshold: 3.0, label: "tannic" },
+  tartness:    { threshold: 4.0, label: "sour" },
+  menthol:     { threshold: 4.0, label: "burning" },
+};
+
 // Flavors that belong to the PALATE strip's axes (bitterness,
 // astringency, menthol families) shouldn't double up as their own
 // rows in the FLAVOR strip. Otherwise the user sees the same note
@@ -330,6 +343,44 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
     return `linear-gradient(to right, ${stops})`;
   };
 
+  // Per-track palate warning lookup. Returns null for non-palate
+  // strips and for axes that never cross their unpleasant threshold;
+  // otherwise returns the threshold config plus a per-sample
+  // intensity series that the warning underlay maps to alpha.
+  const warningFor = (name) => {
+    if (kind !== "palate") return null;
+    const cfg = PALATE_WARNINGS[name];
+    if (!cfg) return null;
+    const peak = trackData.peaks[name] || 0;
+    if (peak < cfg.threshold) return null;
+    const intensities = samples.map(s => {
+      const v = pickMap(s)[name] || 0;
+      if (v < cfg.threshold) return 0;
+      return Math.min(1, (v - cfg.threshold) / (5 - cfg.threshold));
+    });
+    return { ...cfg, peak, intensities };
+  };
+
+  // Build a thin terra warning gradient — fully transparent under
+  // the threshold, deepening as the axis pushes further past it.
+  const warningGradientFor = (warning) => {
+    const stops = warning.intensities.map((intensity, i) => {
+      const x = (i / (SAMPLES - 1)) * 100;
+      const alpha = intensity > 0 ? 0.4 + intensity * 0.55 : 0;
+      return `rgba(176,84,47, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
+    }).join(", ");
+    return `linear-gradient(to right, ${stops})`;
+  };
+
+  // Find the user's current sample index for the badge — the closest
+  // sample to where the slider sits. Used to decide whether to
+  // surface a "you're in the warning zone" badge next to the track.
+  const currentSampleIdx = span > 0
+    ? Math.round(((tempC - tMin) / span) * (SAMPLES - 1))
+    : 0;
+  const isWarningHere = (warning) =>
+    warning && warning.intensities[Math.max(0, Math.min(SAMPLES - 1, currentSampleIdx))] > 0;
+
   const indicatorPct = span > 0
     ? Math.max(0, Math.min(100, ((tempC - tMin) / span) * 100))
     : 0;
@@ -365,28 +416,63 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
           flex: "0 0 auto",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(name => (
-            <div key={name} style={{
-              height: TRACK_H,
-              fontFamily: ff.sans, fontSize: 10, color: theme.inkSoft,
-              display: "flex", alignItems: "center", justifyContent: "flex-end",
-              minWidth: LABEL_W,
-            }}>{name}</div>
-          ))}
+          {tracks.map(name => {
+            const warn = warningFor(name);
+            const here = isWarningHere(warn);
+            return (
+              <div key={name} style={{
+                height: TRACK_H,
+                fontFamily: ff.sans, fontSize: 10,
+                color: here ? theme.terra : theme.inkSoft,
+                fontWeight: here ? 500 : 400,
+                display: "flex", alignItems: "center", justifyContent: "flex-end",
+                gap: 3,
+                minWidth: LABEL_W,
+              }}>
+                {warn && (
+                  <span
+                    title={`pushes into ${warn.label} territory`}
+                    style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
+                  >⚠</span>
+                )}
+                <span>{name}</span>
+              </div>
+            );
+          })}
         </div>
 
         <div style={{
           flex: 1, position: "relative",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(name => (
-            <div key={name} style={{
-              height: TRACK_H,
-              borderRadius: 3,
-              background: gradientFor(name),
-              boxShadow: `inset 0 0 0 1px ${theme.ruleSoft}`,
-            }} />
-          ))}
+          {tracks.map(name => {
+            const warn = warningFor(name);
+            return (
+              <div key={name} style={{
+                position: "relative",
+                height: TRACK_H,
+                borderRadius: 3,
+                background: gradientFor(name),
+                boxShadow: `inset 0 0 0 1px ${theme.ruleSoft}`,
+              }}>
+                {/* Warning underlay — a thin terra stripe along the
+                    bottom of the band wherever the palate axis crosses
+                    its unpleasant threshold. Positioned inside the
+                    band so it scrolls with the gradient and doesn't
+                    add height to the row. */}
+                {warn && (
+                  <div style={{
+                    position: "absolute",
+                    left: 0, right: 0, bottom: 0,
+                    height: 3,
+                    borderRadius: "0 0 2px 2px",
+                    background: warningGradientFor(warn),
+                    pointerEvents: "none",
+                  }} />
+                )}
+              </div>
+            );
+          })}
           <div style={{
             position: "absolute",
             top: -2, bottom: -2,
