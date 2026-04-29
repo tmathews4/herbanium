@@ -101,7 +101,11 @@ export const Button = ({
     ? (tone === "ink" ? shadow.btn.ink : shadow.btn.terra)
     : (tone === "ink" ? shadow.btn.ink : shadow.btn.terraOutline);
 
-  const restShadow  = disabled ? "none" : shadowSet.rest;
+  // Disabled buttons keep a faint version of the rest shadow so they
+  // still read as physical surfaces (just dimmed). Killing the shadow
+  // entirely on disabled was making the compose Save/Start brewing
+  // look flat in their default no-blend-yet state.
+  const restShadow  = shadowSet.rest;
   const hoverShadow = shadowSet.hover;
   const pressShadow = shadowSet.press;
 

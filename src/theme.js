@@ -60,24 +60,24 @@ export const shadow = {
   btn: {
     // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs)
     terra: {
-      rest:  "inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 4px rgba(176,84,47,0.16), 0 4px 10px -2px rgba(176,84,47,0.22)",
-      hover: "inset 0 1px 0 rgba(255,255,255,0.22), 0 3px 6px rgba(176,84,47,0.20), 0 6px 14px -3px rgba(176,84,47,0.30)",
-      press: "inset 0 1px 2px rgba(0,0,0,0.12), 0 1px 2px rgba(176,84,47,0.16)",
+      rest:  "inset 0 1px 0 rgba(255,255,255,0.22), 0 3px 5px rgba(176,84,47,0.28), 0 6px 14px -2px rgba(176,84,47,0.36)",
+      hover: "inset 0 1px 0 rgba(255,255,255,0.26), 0 4px 8px rgba(176,84,47,0.32), 0 8px 18px -3px rgba(176,84,47,0.44)",
+      press: "inset 0 2px 3px rgba(0,0,0,0.16), 0 1px 2px rgba(176,84,47,0.20)",
     },
     // Terra outlined buttons (Save). No inset highlight — the
     // outline IS the structure. Lifted via a moderate drop shadow.
     terraOutline: {
-      rest:  "0 2px 4px rgba(176,84,47,0.10), 0 4px 10px -3px rgba(176,84,47,0.16)",
-      hover: "0 3px 6px rgba(176,84,47,0.16), 0 6px 14px -4px rgba(176,84,47,0.24)",
-      press: "0 1px 2px rgba(176,84,47,0.10), inset 0 1px 1px rgba(176,84,47,0.06)",
+      rest:  "0 3px 5px rgba(176,84,47,0.16), 0 6px 14px -3px rgba(176,84,47,0.22)",
+      hover: "0 4px 8px rgba(176,84,47,0.22), 0 8px 18px -4px rgba(176,84,47,0.32)",
+      press: "0 1px 2px rgba(176,84,47,0.14), inset 0 1px 1px rgba(176,84,47,0.08)",
     },
     // Ink-filled buttons (log it, begin →, save mood). Same molded-
     // surface treatment as terra; warmer because the inset highlight
     // reads against a dark fill the same way it does against terra.
     ink: {
-      rest:  "inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 4px rgba(30,24,18,0.18), 0 4px 10px -2px rgba(30,24,18,0.22)",
-      hover: "inset 0 1px 0 rgba(255,255,255,0.18), 0 3px 6px rgba(30,24,18,0.22), 0 6px 14px -3px rgba(30,24,18,0.30)",
-      press: "inset 0 1px 2px rgba(0,0,0,0.14), 0 1px 2px rgba(30,24,18,0.18)",
+      rest:  "inset 0 1px 0 rgba(255,255,255,0.18), 0 3px 5px rgba(30,24,18,0.24), 0 6px 14px -2px rgba(30,24,18,0.32)",
+      hover: "inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 8px rgba(30,24,18,0.28), 0 8px 18px -3px rgba(30,24,18,0.40)",
+      press: "inset 0 2px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(30,24,18,0.22)",
     },
   },
 };

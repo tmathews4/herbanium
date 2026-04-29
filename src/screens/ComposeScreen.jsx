@@ -1843,15 +1843,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             }}
           />
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <button
-              onClick={() => { setRcSavePromptOpen(false); setRcSaveStatus(null); }}
-              style={{
-                fontFamily: ff.sans, fontSize: 12, color: theme.ash,
-                padding: "6px 12px", borderRadius: 999,
-                background: "transparent", border: "none", cursor: "pointer",
-              }}
-            >cancel</button>
-            <button
+            <Button variant="ghost" onClick={() => { setRcSavePromptOpen(false); setRcSaveStatus(null); }}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary" tone="ink"
               onClick={() => {
                 const id = saveComposedBlend && saveComposedBlend(
                   { name: rcSaveName.trim() || "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS },
@@ -1864,13 +1860,8 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   setTimeout(() => setRcSaveStatus(null), 2000);
                 }
               }}
-              style={{
-                fontFamily: ff.serif, fontSize: 14,
-                padding: "6px 16px", borderRadius: 999,
-                background: theme.ink, color: theme.cream,
-                border: "none", cursor: "pointer",
-              }}
-            >save</button>
+              style={{ fontSize: 14, padding: "10px 24px" }}
+            >Save</Button>
           </div>
         </div>
       )}
@@ -1882,45 +1873,38 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           textAlign: "center",
         }}>{rcSaveStatus.text}</div>
       )}
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-        <button
+      <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+        <Button
+          variant="secondary" tone="terra"
           disabled={!saveComposedBlend || reverseIngs.length === 0}
           onClick={() => {
             setRcSaveName("");
             setRcSavePromptOpen(true);
             setRcSaveStatus(null);
           }}
-          style={{
-            fontFamily: ff.sans, fontSize: 13, color: theme.terra,
-            padding: "12px 18px", borderRadius: 10,
-            background: "transparent", border: `1px solid ${theme.terra}`,
-            cursor: reverseIngs.length === 0 ? "not-allowed" : "pointer",
-            opacity: reverseIngs.length === 0 ? 0.4 : 1,
+          style={{ fontSize: 14, padding: "10px 18px" }}
+        >Save</Button>
+        <Button
+          variant="primary" tone="terra"
+          disabled={reverseIngs.length === 0}
+          onClick={() => {
+            if (reverseIngs.length === 0) return;
+            const candidate = { name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS };
+            const allCatalogue = [
+              ...BLENDS,
+              ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
+            ];
+            const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+            if (dup) {
+              startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
+              return;
+            }
+            setRcPendingBrew({ candidate, moods: ["calm"] });
+            setRcBrewAsk(true);
           }}
-        >save</button>
-        <button onClick={() => {
-          if (reverseIngs.length === 0) return;
-          const candidate = { name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS };
-          // Skip the prompt when the catalogue already holds a blend
-          // with the same temp + ingredients — brew the saved record so
-          // repeats count toward elementals like the Self-Repeater.
-          const allCatalogue = [
-            ...BLENDS,
-            ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
-          ];
-          const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
-          if (dup) {
-            startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
-            return;
-          }
-          // Reverse-built blends never have an id — always custom.
-          setRcPendingBrew({ candidate, moods: ["calm"] });
-          setRcBrewAsk(true);
-        }} style={{
-          flex: 1, fontFamily: ff.serif, fontSize: 16,
-          padding: "12px 16px", borderRadius: 10,
-          background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
-        }}>start brewing</button>
+          icon={<Kettle size={17} c={theme.cream} />}
+          style={{ flex: 1, fontSize: 14, padding: "10px 14px", gap: 8 }}
+        >Start brewing</Button>
       </div>
 
       {rcBrewAsk && rcPendingBrew && (
