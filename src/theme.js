@@ -53,29 +53,33 @@ export const shadow = {
   // ink shadow at 4-8% opacity, which disappears on a saturated fill.
   // Filled buttons need a stronger, color-tinted drop to read as
   // elevation. Three variants (rest / hover / press) per tint.
+  //
+  // Tuned to a middle weight: deep enough to read on a saturated
+  // background (the prior 0.40 alpha on Brew/Log it pushed forward
+  // too much, dominating the page), light enough to actually show
+  // on the compose buttons that previously appeared flat.
   btn: {
     // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs)
     terra: {
-      rest:  "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)",
-      hover: "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)",
-      press: "0 2px 4px rgba(176,84,47,0.30), inset 0 1px 2px rgba(0,0,0,0.10)",
+      rest:  "0 4px 10px -2px rgba(176,84,47,0.28), 0 1px 3px rgba(176,84,47,0.16)",
+      hover: "0 6px 14px -3px rgba(176,84,47,0.36), 0 2px 4px rgba(176,84,47,0.18)",
+      press: "0 1px 3px rgba(176,84,47,0.22), inset 0 1px 2px rgba(0,0,0,0.08)",
     },
-    // Terra outlined buttons (Save). Outline-only buttons need a
-    // shadow visibly deeper than a card hint or they read flat next
-    // to a filled sibling — same body geometry, half the depth, but
-    // still clearly elevated.
+    // Terra outlined buttons (Save). Same shape as filled, slightly
+    // softer alpha so the visual hierarchy is filled > outlined while
+    // both clearly float above the page.
     terraOutline: {
-      rest:  "0 3px 8px -1px rgba(176,84,47,0.22), 0 1px 2px rgba(176,84,47,0.12)",
-      hover: "0 6px 14px -3px rgba(176,84,47,0.34), 0 2px 4px rgba(176,84,47,0.16)",
-      press: "0 1px 2px rgba(176,84,47,0.14), inset 0 1px 1px rgba(176,84,47,0.06)",
+      rest:  "0 4px 10px -2px rgba(176,84,47,0.22), 0 1px 3px rgba(176,84,47,0.12)",
+      hover: "0 6px 14px -3px rgba(176,84,47,0.30), 0 2px 4px rgba(176,84,47,0.14)",
+      press: "0 1px 3px rgba(176,84,47,0.16), inset 0 1px 1px rgba(176,84,47,0.06)",
     },
     // Ink-filled buttons (log it, begin →, save mood). Same shape as
     // terra but with an ink-tinted shadow so the depth reads on warm
     // dark fills.
     ink: {
-      rest:  "0 4px 12px -2px rgba(30,24,18,0.32), 0 2px 4px rgba(30,24,18,0.16)",
-      hover: "0 8px 20px -6px rgba(30,24,18,0.40), 0 2px 4px rgba(30,24,18,0.16)",
-      press: "0 2px 4px rgba(30,24,18,0.24), inset 0 1px 2px rgba(0,0,0,0.10)",
+      rest:  "0 4px 10px -2px rgba(30,24,18,0.22), 0 1px 3px rgba(30,24,18,0.12)",
+      hover: "0 6px 14px -3px rgba(30,24,18,0.30), 0 2px 4px rgba(30,24,18,0.14)",
+      press: "0 1px 3px rgba(30,24,18,0.18), inset 0 1px 2px rgba(0,0,0,0.08)",
     },
   },
 };

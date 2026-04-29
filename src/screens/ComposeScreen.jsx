@@ -932,7 +932,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   border: `1.5px solid ${theme.terra}`,
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   opacity: blend.empty ? 0.4 : 1,
-                  boxShadow: blend.empty ? "none" : shadow.btn.terraOutline.rest,
+                  boxShadow: shadow.btn.terraOutline.rest,
                   transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
                   letterSpacing: "0.02em",
                 }}
@@ -991,7 +991,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   color: theme.cream, border: "none",
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  boxShadow: blend.empty ? "none" : shadow.btn.terra.rest,
+                  boxShadow: blend.empty ? shadow.card : shadow.btn.terra.rest,
                   transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
                   letterSpacing: "0.02em",
                   textShadow: blend.empty ? "none" : "0 1px 1px rgba(0,0,0,0.08)",
