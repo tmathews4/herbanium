@@ -190,17 +190,17 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       }}>
         {[
           {
-            label: "Brew a recipe",
+            label: "Brew",
             onClick: () => go("shelf", { mode: "recipes" }),
             icon: (sz) => <Leaf size={sz} c={theme.sage} />,
           },
           {
-            label: "Brew an experiment",
+            label: "Experiment",
             onClick: () => go("apothecary"),
             icon: (sz) => <Flask size={sz} c={theme.plum} />,
           },
           {
-            label: "Note a moment",
+            label: "Write",
             onClick: () => go("shelf", { mode: "journal" }),
             icon: (sz) => <Pencil size={sz} c={theme.ochre} />,
           },
