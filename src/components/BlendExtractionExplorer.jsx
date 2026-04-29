@@ -475,12 +475,12 @@ export const BlendExtractionExplorer = ({
                     // not echoed three times.
                     const AxisRow = ({ label, bandId, character, mood, headColor }) => (
                       <div style={{
-                        display: "flex", marginTop: 2, alignItems: "baseline",
-                        whiteSpace: "nowrap", overflow: "hidden",
+                        display: "flex", marginTop: 2, alignItems: "flex-start",
                       }}>
                         <span style={{
                           flex: "0 0 auto", marginRight: 8,
                           color: theme.inkSoft, fontStyle: "normal",
+                          whiteSpace: "nowrap",
                         }}>
                           {label}{" "}
                           <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
@@ -489,8 +489,9 @@ export const BlendExtractionExplorer = ({
                         </span>
                         <span style={{
                           flex: 1, minWidth: 0,
-                          overflow: "hidden", textOverflow: "ellipsis",
                           color: theme.ash,
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
                         }}>
                           {character}
                           {mood && <> · <span style={{ color: theme.sageDeep }}>{mood}</span></>}
@@ -548,173 +549,121 @@ export const BlendExtractionExplorer = ({
               );
             })()}
 
-            {/* Blend-summary card — shown when the user has selected
-                the blend pill at the end of the row. Red ingredient
-                states list inline so the user sees which leaf is
-                pulling the cup off; otherwise the merged mood +
-                flavor profile shows what the cup is shaping into. */}
+            {/* Blend-summary card — a short narrative description of
+                the cup at the current brew point. Names the leading
+                ingredient, the dominant flavor notes, and what the
+                drinker should expect to feel. Verdict states (over-
+                pulled / faint / quiet) replace the description when
+                the brew has fallen out of useful range. */}
             {currentId === "__blend__" && (() => {
-              // Aggregate per-axis state across all ingredients.
+              // Aggregate per-axis state to decide the verdict.
               //
               // The cup tastes like whatever leaves actually extract at
               // the chosen brew point. If even one significant leaf is
               // in its sweet spot, that leaf carries the cup — the
               // under-band leaves contribute muted accents, not a
-              // diluted cup. Calling that "faint" is exactly backwards.
-              //
-              // Real example: user brews darjeeling + ginger + hibiscus
-              // each at 0.5g (the compose UI's default mass) at 88°C/3min.
-              // Darjeeling is squarely in its envelope. Ginger and
-              // hibiscus want hotter water, so they sit in "under" temp.
-              // The cup IS robust darjeeling with light ginger/hibiscus
-              // accents — and that's what the user wanted. The accents
-              // being under-extracted is what makes them accents.
+              // diluted cup.
               //
               // Rules, in order:
               //   - Over from any role aggregates: a small over-pulled
               //     leaf still leaks bitter into the whole cup.
               //   - Under aggregates only when NO significant leaf is
-              //     in a good zone. If something carries the cup, the
-              //     cup isn't faint.
+              //     in a good zone.
               //   - "Significant" = weight ≥ 20% of cup OR the
               //     heaviest leaf (handles equal-mass user-builds).
               const heaviestWeight = pills.reduce((m, p) => Math.max(m, p.weight || 0), 0);
-              const aggregateAxis = (axisKind) => {
-                const zoneKey = axisKind === "temp" ? "tempZone" : "timeZone";
-                const dirKey  = axisKind === "temp" ? "tempDir"  : "timeDir";
-                let overs = [], unders = [], goods = [];
-                for (const p of pills) {
-                  // Over-pull on steep is treated as over regardless of role.
-                  if (axisKind === "steep" && p.isOverPulled) {
-                    overs.push(p.name);
-                    continue;
-                  }
-                  const z = p[zoneKey];
-                  let isOver = false, isUnder = false;
-                  if (z) {
-                    isOver  = z.id === "over";
-                    isUnder = z.id === "under";
-                  } else {
-                    const d = p[dirKey];
-                    isOver  = d === "high" || d === "over";
-                    isUnder = d === "low"  || d === "under";
-                  }
-                  const w = p.weight || 0;
-                  const significant = w >= 0.20 || (heaviestWeight > 0 && w === heaviestWeight);
-                  if (isOver) {
-                    overs.push(p.name);
-                  } else if (isUnder) {
-                    if (significant) unders.push(p.name);
-                  } else if (significant) {
-                    // Non-edge zone at significant mass — this leaf is
-                    // actively carrying the cup. Anchors the aggregation
-                    // away from "under" even if accents sit cold.
-                    goods.push(p.name);
-                  }
+              const goodLeads = [];   // pills in a non-edge zone at significant mass
+              let anyOver = false, anyUnder = false;
+              for (const p of pills) {
+                let isOver = false, isUnder = false;
+                if (p.isOverPulled) isOver = true;
+                const tz = p.tempZone, sz = p.timeZone;
+                if (tz?.id === "over" || sz?.id === "over") isOver = true;
+                if (tz?.id === "under" || sz?.id === "under") isUnder = true;
+                if (!tz) {
+                  if (p.tempDir === "high") isOver = true;
+                  if (p.tempDir === "low")  isUnder = true;
                 }
-                if (overs.length) return { state: "over", offenders: overs };
-                // Faint only when nothing significant is in a good zone.
-                if (unders.length && goods.length === 0) {
-                  return { state: "under", offenders: unders };
+                if (!sz) {
+                  if (p.timeDir === "over")  isOver = true;
+                  if (p.timeDir === "under") isUnder = true;
                 }
-                return { state: "good", offenders: [] };
-              };
-              const tempAgg  = aggregateAxis("temp");
-              const steepAgg = aggregateAxis("steep");
-
-              // Composite blend register from the aggregate temp +
-              // steep states. Same priority — over trumps under
-              // trumps good.
-              const compositeRegister = (tA, sA) =>
-                (tA.state === "over"  || sA.state === "over")  ? "overpulled"
-                : (tA.state === "under" || sA.state === "under") ? "faint"
-                : "balanced";
-              const blendRegister = compositeRegister(tempAgg, steepAgg);
-              const blendSev = blendRegister === "overpulled" ? "red"
-                : blendRegister === "faint" ? "yellow"
-                : "green";
-              const borderColor = blendSev === "red" ? theme.terra
-                : blendSev === "yellow" ? theme.ochre
+                const w = p.weight || 0;
+                const significant = w >= 0.20 || (heaviestWeight > 0 && w === heaviestWeight);
+                if (isOver)  anyOver = true;
+                else if (isUnder && significant) anyUnder = true;
+                else if (significant) goodLeads.push(p);
+              }
+              const blendRegister = anyOver
+                ? "overpulled"
+                : (anyUnder && goodLeads.length === 0)
+                  ? "faint"
+                  : "balanced";
+              const borderColor = blendRegister === "overpulled" ? theme.terra
+                : blendRegister === "faint" ? theme.ochre
                 : theme.sage;
-              const sevColor = blendSev === "red" ? theme.terra
-                : blendSev === "yellow" ? theme.ochre
-                : theme.sageDeep;
-              const stateColor = (s) =>
-                s === "over"  ? theme.terra
-                : s === "under" ? theme.ochre
-                : theme.sageDeep;
 
-              const moods = brew.moodSummary || [];
+              const moods   = brew.moodSummary   || [];
               const flavors = brew.flavorSummary || [];
 
-              const AxisRow = ({ label, state, offenders, body }) => (
-                <div style={{
-                  display: "flex", marginTop: 2, alignItems: "baseline",
-                  whiteSpace: "nowrap", overflow: "hidden",
-                }}>
-                  <span style={{
-                    flex: "0 0 auto", marginRight: 8,
-                    color: theme.inkSoft, fontStyle: "normal",
-                  }}>
-                    {label}{" "}
-                    <span style={{ color: stateColor(state), fontStyle: "normal", fontWeight: 500 }}>
-                      ({state})
-                    </span>
-                  </span>
-                  <span style={{
-                    flex: 1, minWidth: 0,
-                    overflow: "hidden", textOverflow: "ellipsis",
-                    color: theme.ash,
-                  }}>
-                    {body || (offenders && offenders.length > 0 ? offenders.join(", ") : "")}
-                  </span>
-                </div>
-              );
+              // Pick the cup's leading voice — heaviest leaf in a good
+              // zone (the one actually carrying the cup at this brew),
+              // falling back to the heaviest leaf overall.
+              const leadIng = goodLeads
+                .slice()
+                .sort((a, b) => (b.weight || 0) - (a.weight || 0))[0]
+                || pills.slice().sort((a, b) => (b.weight || 0) - (a.weight || 0))[0];
+              const leadName = leadIng?.name || "blend";
+              const isMulti = pills.length > 1;
 
-              const composite = blendRegister === "overpulled"
-                ? <>pull back — <span style={{ color: theme.terra, fontWeight: 500 }}>over-pulled</span></>
-                : blendRegister === "faint"
-                ? <>under-extracted — the cup is faint</>
-                : moods.length > 0 || flavors.length > 0
-                  ? <>{[moods.join(", "), flavors.join(", ")].filter(Boolean).join(" · ")}</>
-                  : <>quiet — no dominant register yet</>;
+              // Mood → felt-state phrasing. The blend pill summary
+              // names what the drinker can expect to feel rather than
+              // the abstract effect tag.
+              const FEELING = {
+                energy: "energized", warming: "warmed", focus: "focused",
+                calm: "calm", comfort: "comforted", uplifting: "uplifted",
+                soothing: "soothed", digestive: "settled",
+                grounding: "grounded", cooling: "cooled",
+              };
+              const join = (arr) => {
+                if (arr.length === 0) return "";
+                if (arr.length === 1) return arr[0];
+                if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+                return `${arr.slice(0, -1).join(", ")}, and ${arr[arr.length - 1]}`;
+              };
+
+              let body;
+              if (blendRegister === "overpulled") {
+                body = <>Pull back — <span style={{ color: theme.terra, fontWeight: 500 }}>the cup is over-pulled</span>. Tannin or bitter has crossed past where it tastes right.</>;
+              } else if (blendRegister === "faint") {
+                body = <>The cup reads faint — the water hasn't pulled enough character. Try hotter or a little longer.</>;
+              } else if (flavors.length === 0 && moods.length === 0) {
+                body = <>A quiet cup — no dominant register yet.</>;
+              } else {
+                const flavorPhrase = flavors.length
+                  ? <>notes of <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>{join(flavors)}</span></>
+                  : null;
+                const feelings = moods.map(m => FEELING[m] || m);
+                const moodPhrase = feelings.length
+                  ? <>Expect to feel <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>{join(feelings)}</span>.</>
+                  : null;
+                const opener = isMulti
+                  ? <>A <span style={{ fontStyle: "normal", color: theme.ink, fontWeight: 500 }}>{leadName}</span>-led mix</>
+                  : <>A cup of <span style={{ fontStyle: "normal", color: theme.ink, fontWeight: 500 }}>{leadName}</span></>;
+                body = <>{opener}{flavorPhrase ? <> — {flavorPhrase}</> : null}.{moodPhrase ? <> {moodPhrase}</> : null}</>;
+              }
 
               return (
                 <div style={{
-                  marginTop: 8, paddingLeft: 10,
+                  marginTop: 8, padding: "8px 10px",
                   borderLeft: `2px solid ${borderColor}`,
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                  color: theme.ash, lineHeight: 1.5,
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+                  color: theme.ash, lineHeight: 1.55,
                   textAlign: "left",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
                 }}>
-                  <AxisRow label="temp"  state={tempAgg.state}  offenders={tempAgg.offenders} />
-                  <AxisRow label="steep" state={steepAgg.state} offenders={steepAgg.offenders} />
-                  <div style={{
-                    marginTop: 8, paddingTop: 6,
-                    borderTop: `1px dashed ${theme.ruleSoft}`,
-                  }}>
-                    <div style={{
-                      display: "flex", marginTop: 2, alignItems: "baseline",
-                      whiteSpace: "nowrap", overflow: "hidden",
-                    }}>
-                      <span style={{
-                        flex: "0 0 auto", marginRight: 8,
-                        color: theme.inkSoft, fontStyle: "normal",
-                      }}>
-                        blend{" "}
-                        <span style={{ color: sevColor, fontStyle: "normal", fontWeight: 500 }}>
-                          ({blendRegister})
-                        </span>
-                      </span>
-                      <span style={{
-                        flex: 1, minWidth: 0,
-                        overflow: "hidden", textOverflow: "ellipsis",
-                        color: theme.ash,
-                      }}>
-                        {composite}
-                      </span>
-                    </div>
-                  </div>
+                  {body}
                 </div>
               );
             })()}
