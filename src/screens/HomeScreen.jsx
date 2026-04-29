@@ -183,21 +183,22 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           All three share the dark-ink filled treatment so the
           block reads as a unified navigator; the icons carry the
           color contrast (green leaf, orange sun, purple pen). */}
-      {/* Three primary actions. Brew is the weighted-primary
-          (wider) since it's the canonical tap most users come back
-          to; Experiment and Write sit equal alongside.
-          Cream tiles with a thin sage border replace the dark-ink
-          fill — they read as part of the apothecary palette rather
-          than fighting it. Sans-uppercase labels match the existing
-          eyebrow style used across the app. */}
+      {/* Three primary actions. Equal-sized tiles so the row fits
+          any width cleanly; Brew gets the weighted-primary look
+          via background + border (ivory + sage) instead of width.
+          Cream tiles with a thin rule border replace the dark-ink
+          fill — reads as part of the apothecary palette. Sans-
+          uppercase labels match the eyebrow style used across the
+          app's section labels and tab bar. */}
       <style>{`
         .home-cta {
-          aspect-ratio: 1.15 / 1;
+          aspect-ratio: 1 / 1;
+          width: 100%;
           background: ${theme.cream};
           color: ${theme.inkSoft};
           border: 1px solid ${theme.rule};
           border-radius: 14px;
-          padding: 12px 10px;
+          padding: 10px 8px;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           gap: 10px;
@@ -222,8 +223,8 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
       `}</style>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "1.4fr 1fr 1fr",
-        gap: 10, marginBottom: 24,
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: 8, marginBottom: 24,
       }}>
         {[
           {
@@ -248,7 +249,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             onClick={cta.onClick}
             className={`home-cta${cta.primary ? " home-cta--primary" : ""}`}
           >
-            {cta.icon(cta.primary ? 30 : 26)}
+            {cta.icon(26)}
             <div style={{
               fontFamily: ff.sans,
               fontSize: 11,
