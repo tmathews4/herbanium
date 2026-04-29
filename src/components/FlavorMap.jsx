@@ -344,35 +344,6 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
     return `linear-gradient(to right, ${stops})`;
   };
 
-  // Per-track inflection ticks. Surfaces two meaningful points on
-  // each band: the temperature where the flavor first crosses its
-  // perception threshold (becomes tasteable) and the temperature at
-  // which it peaks. Skips the rise tick when the flavor starts above
-  // threshold at the low end of the range, and skips the peak tick
-  // when peak and rise land on the same sample.
-  const inflectionsFor = (name) => {
-    const peak = trackData.peaks[name] || 0;
-    if (peak <= 0) return null;
-    const rawSeries = samples.map(s => pickMap(s)[name] || 0);
-    const series = fillGaps(rawSeries);
-    let peakIdx = 0;
-    for (let i = 1; i < series.length; i++) {
-      if (series[i] > series[peakIdx]) peakIdx = i;
-    }
-    let riseIdx = -1;
-    for (let i = 0; i < series.length; i++) {
-      if (series[i] >= PRIMARY_THRESHOLD) { riseIdx = i; break; }
-    }
-    // No rise tick if the flavor was already above threshold from
-    // the first sample — there's no "becomes tasteable here" moment
-    // to mark.
-    if (riseIdx === 0) riseIdx = -1;
-    if (riseIdx === peakIdx) riseIdx = -1;
-    return { riseIdx, peakIdx };
-  };
-
-  const tickPct = (i) => (i / (SAMPLES - 1)) * 100;
-
   // Per-track palate warning lookup. Returns null for non-palate
   // strips and for axes that never cross their unpleasant threshold;
   // otherwise returns the threshold config plus a per-sample
@@ -484,7 +455,6 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
         }}>
           {tracks.map(name => {
             const warn = warningFor(name);
-            const inflect = inflectionsFor(name);
             return (
               <div key={name} style={{
                 position: "relative",
@@ -507,45 +477,6 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
                     background: warningGradientFor(warn),
                     pointerEvents: "none",
                   }} />
-                )}
-                {/* Inflection ticks — small notches at the top of
-                    the band marking where this flavor first becomes
-                    tasteable (rise) and where it peaks. Rise is
-                    smaller / lighter; peak is larger / darker. The
-                    user reads at-a-glance: "this band's max is over
-                    here, and it shows up around there". */}
-                {inflect && inflect.riseIdx >= 0 && (
-                  <div
-                    title="becomes tasteable"
-                    style={{
-                      position: "absolute",
-                      top: -3,
-                      left: `${tickPct(inflect.riseIdx)}%`,
-                      transform: "translateX(-50%)",
-                      width: 0, height: 0,
-                      borderLeft: "2.5px solid transparent",
-                      borderRight: "2.5px solid transparent",
-                      borderTop: `3px solid ${theme.ash}`,
-                      opacity: 0.7,
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-                {inflect && (
-                  <div
-                    title="peak"
-                    style={{
-                      position: "absolute",
-                      top: -4,
-                      left: `${tickPct(inflect.peakIdx)}%`,
-                      transform: "translateX(-50%)",
-                      width: 0, height: 0,
-                      borderLeft: "3.5px solid transparent",
-                      borderRight: "3.5px solid transparent",
-                      borderTop: `4.5px solid ${theme.ink}`,
-                      pointerEvents: "none",
-                    }}
-                  />
                 )}
               </div>
             );
