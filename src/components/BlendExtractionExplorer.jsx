@@ -474,28 +474,24 @@ export const BlendExtractionExplorer = ({
                     // character so the holistic mood is named once,
                     // not echoed three times.
                     const AxisRow = ({ label, bandId, character, mood, headColor }) => (
-                      <div style={{
-                        display: "flex", marginTop: 2, alignItems: "flex-start",
-                      }}>
-                        <span style={{
-                          flex: "0 0 auto", marginRight: 8,
+                      <div style={{ marginTop: 4 }}>
+                        <div style={{
                           color: theme.inkSoft, fontStyle: "normal",
-                          whiteSpace: "nowrap",
                         }}>
-                          {label}{" "}
-                          <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                            ({bandId})
-                          </span>
-                        </span>
-                        <span style={{
-                          flex: 1, minWidth: 0,
+                          {label}
+                        </div>
+                        <div style={{
+                          marginTop: 1, paddingLeft: 10,
                           color: theme.ash,
                           overflowWrap: "break-word",
                           wordBreak: "break-word",
                         }}>
+                          <span style={{ color: headColor || theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                            ({bandId})
+                          </span>{" "}
                           {character}
                           {mood && <> · <span style={{ color: theme.sageDeep }}>{mood}</span></>}
-                        </span>
+                        </div>
                       </div>
                     );
                     return (
