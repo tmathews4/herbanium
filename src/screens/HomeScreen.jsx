@@ -183,50 +183,79 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           All three share the dark-ink filled treatment so the
           block reads as a unified navigator; the icons carry the
           color contrast (green leaf, orange sun, purple pen). */}
+      {/* Three primary actions. Brew is the weighted-primary
+          (wider) since it's the canonical tap most users come back
+          to; Experiment and Write sit equal alongside.
+          Cream tiles with a thin sage border replace the dark-ink
+          fill — they read as part of the apothecary palette rather
+          than fighting it. Sans-uppercase labels match the existing
+          eyebrow style used across the app. */}
+      <style>{`
+        .home-cta {
+          aspect-ratio: 1.15 / 1;
+          background: ${theme.cream};
+          color: ${theme.inkSoft};
+          border: 1px solid ${theme.rule};
+          border-radius: 14px;
+          padding: 12px 10px;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          text-align: center;
+          box-shadow: 0 1px 2px rgba(30,24,18,0.04), 0 4px 14px -8px rgba(30,24,18,0.08);
+          transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+          outline: none;
+        }
+        .home-cta:hover {
+          border-color: ${theme.sage};
+          box-shadow: 0 1px 2px rgba(30,24,18,0.05), 0 6px 18px -8px rgba(30,24,18,0.12);
+        }
+        .home-cta:active {
+          transform: translateY(1px);
+          box-shadow: 0 1px 2px rgba(30,24,18,0.05);
+        }
+        .home-cta--primary {
+          background: ${theme.ivory};
+          border-color: ${theme.sage};
+        }
+      `}</style>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 8, marginBottom: 24,
+        gridTemplateColumns: "1.4fr 1fr 1fr",
+        gap: 10, marginBottom: 24,
       }}>
         {[
           {
             label: "Brew",
             onClick: () => go("shelf", { mode: "recipes" }),
-            icon: (sz) => <Leaf size={sz} c={theme.sage} />,
+            icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
+            primary: true,
           },
           {
             label: "Experiment",
             onClick: () => go("apothecary"),
-            icon: (sz) => <Flask size={sz} c={theme.plum} />,
+            icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
           },
           {
             label: "Write",
             onClick: () => go("shelf", { mode: "journal" }),
-            icon: (sz) => <Pencil size={sz} c={theme.ochre} />,
+            icon: (sz) => <Pencil size={sz} c={theme.sageDeep} />,
           },
         ].map((cta, i) => (
           <button
             key={i}
             onClick={cta.onClick}
-            style={{
-              aspectRatio: "1 / 1",
-              background: theme.ink,
-              color: theme.cream,
-              border: "none",
-              borderRadius: 14,
-              padding: "12px 10px",
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              gap: 8,
-              cursor: "pointer",
-              textAlign: "center",
-              boxShadow: "0 8px 24px -12px rgba(30,24,18,0.4)",
-            }}
+            className={`home-cta${cta.primary ? " home-cta--primary" : ""}`}
           >
-            {cta.icon(28)}
+            {cta.icon(cta.primary ? 30 : 26)}
             <div style={{
-              fontFamily: ff.serif, fontSize: 13,
-              lineHeight: 1.2,
+              fontFamily: ff.sans,
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: theme.inkSoft,
+              fontWeight: cta.primary ? 500 : 400,
             }}>
               {cta.label}
             </div>
