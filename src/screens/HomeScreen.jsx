@@ -83,13 +83,20 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
   // session brewed in the last 24 hours that hasn't logged its mood
   // gets surfaced as an inline card here. One per render: the most
   // recent pending cup, since piling them up reads as nagging.
+  //
+  // Min-elapsed gate (10 min): asking the moment the user finishes
+  // the cup defeats the point — caffeine hasn't kicked in, calm
+  // hasn't settled. Holding the card back for ten minutes gives the
+  // body time to actually feel the cup before we ask about it.
+  const FOLLOWUP_MIN_MS    = 10 * 60 * 1000;
   const FOLLOWUP_WINDOW_MS = 24 * 60 * 60 * 1000;
-  const pendingMoodSession = (sessions || []).find(s =>
-    s.who === "you"
-    && s.moodsPending
-    && (s.targetMoods?.length || 0) > 0
-    && (Date.now() - (s.brewedAt || 0)) < FOLLOWUP_WINDOW_MS
-  );
+  const pendingMoodSession = (sessions || []).find(s => {
+    if (s.who !== "you") return false;
+    if (!s.moodsPending) return false;
+    if ((s.targetMoods?.length || 0) === 0) return false;
+    const elapsed = Date.now() - (s.brewedAt || 0);
+    return elapsed >= FOLLOWUP_MIN_MS && elapsed < FOLLOWUP_WINDOW_MS;
+  });
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
   // are only surfaced behind the Shelf > Journal sub-tab where they
