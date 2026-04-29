@@ -33,9 +33,8 @@ import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import {
-  EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
+  FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
-import { EffectBar } from "./EffectBar";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 import { VocabInfoCard } from "./layout";
 
@@ -126,7 +125,6 @@ export const BlendExtractionExplorer = ({
     defaultTimeS ?? Math.round((timeSRange[0] + timeSRange[1]) / 2)
   );
   const [openFlavor, setOpenFlavor] = useState(null);
-  const [openEffect, setOpenEffect] = useState(null);
   // Ingredient pill currently selected for the under-row detail
   // line. Default behavior is to show the first ingredient's window
   // unless the user clicks another pill — see ensureValidSelection
@@ -989,37 +987,24 @@ export const BlendExtractionExplorer = ({
       {(() => {
         const flavorMap = {};
         (brew.flavors || []).forEach(([n, s]) => { flavorMap[n] = s || 0; });
-        const effectMap = {};
-        (brew.effects || []).forEach(([t, n]) => {
-          if (t === "bitterness") return;
-          effectMap[t] = n || 0;
-        });
 
         // Defensive union: any tag the algo currently emits but our
-        // static-profile scan missed (e.g. a synergy-derived effect)
+        // static-profile scan missed (e.g. a synergy-derived flavor)
         // joins the master set so it isn't dropped from view.
         const fNames = new Set([...possible.flavors, ...Object.keys(flavorMap)]);
-        const eTags  = new Set([...possible.effects, ...Object.keys(effectMap)]);
         const flavorEntries = [...fNames].map(name => [name, flavorMap[name] || 0]);
-        const effectEntries = [...eTags].map(tag => [tag, effectMap[tag] || 0]);
 
-        // Sort each: active first (by strength desc), inactive after (alphabetical).
-        const sortMixed = (entries) => entries.sort(([a, an], [b, bn]) => {
+        // Active first (by strength desc), inactive after (alphabetical).
+        flavorEntries.sort(([a, an], [b, bn]) => {
           const aActive = Math.round(an * 10) / 10 > 0;
           const bActive = Math.round(bn * 10) / 10 > 0;
           if (aActive !== bActive) return aActive ? -1 : 1;
           if (aActive) return bn - an;
           return a.localeCompare(b);
         });
-        sortMixed(flavorEntries);
-        sortMixed(effectEntries);
 
         const visibleFlavors = flavorEntries;
-        const visibleEffects = effectEntries;
-        const visibleBalance = (brew.balance || []).filter(([, n]) =>
-          Math.round((n || 0) * 10) / 10 > 0
-        );
-        if (visibleEffects.length === 0 && visibleBalance.length === 0 && visibleFlavors.length === 0) return null;
+        if (visibleFlavors.length === 0) return null;
 
         const sectionLabel = (text) => (
           <div style={{
@@ -1102,100 +1087,12 @@ export const BlendExtractionExplorer = ({
                 </div>
               );
             })()}
-            {visibleEffects.length > 0 && (() => {
-              let activeIdx = 0;
-              const colored = visibleEffects.map(([tag, n]) => {
-                const isActive = Math.round(n * 10) / 10 > 0;
-                let color;
-                if (!isActive)              color = theme.ash;
-                else if (activeIdx === 0) { color = theme.sage;  activeIdx++; }
-                else if (activeIdx === 1) { color = theme.ochre; activeIdx++; }
-                else                      { color = theme.sky;   activeIdx++; }
-                return { tag, n, isActive, color };
-              });
-              return (
-              <div style={{ marginBottom: visibleBalance.length > 0 ? 14 : 0 }}>
-                {sectionLabel("predicted mood")}
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {colored.map(({ tag, n, isActive, color }) => {
-                    const known = !!EFFECT_DESCRIPTIONS[tag];
-                    const opened = openEffect === tag;
-                    return (
-                      <div
-                        key={tag}
-                        role={known ? "button" : undefined}
-                        tabIndex={known ? 0 : undefined}
-                        onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
-                        onKeyDown={known ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setOpenEffect(prev => prev === tag ? null : tag);
-                          }
-                        } : undefined}
-                        style={{
-                          padding: "2px 4px", borderRadius: 4,
-                          background: opened ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                          cursor: known ? "pointer" : "default",
-                          outline: "none",
-                        }}
-                      >
-                        <EffectBar label={tag} value={n} color={color} dim={!isActive} />
-                      </div>
-                    );
-                  })}
-                </div>
-                {openEffect && EFFECT_DESCRIPTIONS[openEffect] && (
-                  <div style={{ marginTop: 10 }}>
-                    <VocabInfoCard
-                      term={openEffect}
-                      summary={EFFECT_DESCRIPTIONS[openEffect].summary}
-                      tone="sage"
-                      onClose={() => setOpenEffect(null)}
-                    />
-                  </div>
-                )}
-              </div>
-              );
-            })()}
-            {visibleBalance.length > 0 && (
-              <div>
-                {sectionLabel("predicted palate")}
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {visibleBalance.map(([tag, n]) => {
-                    const known = !!EFFECT_DESCRIPTIONS[tag];
-                    const active = openEffect === tag;
-                    const color =
-                      tag === "bitterness" ? theme.terra
-                      : tag === "sweetness" ? theme.ochre
-                      : tag === "astringency" ? theme.terra
-                      : tag === "tartness" ? theme.ochre
-                      : theme.sky;
-                    return (
-                      <div
-                        key={tag}
-                        role={known ? "button" : undefined}
-                        tabIndex={known ? 0 : undefined}
-                        onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
-                        onKeyDown={known ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setOpenEffect(prev => prev === tag ? null : tag);
-                          }
-                        } : undefined}
-                        style={{
-                          padding: "2px 4px", borderRadius: 4,
-                          background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                          cursor: known ? "pointer" : "default",
-                          outline: "none",
-                        }}
-                      >
-                        <EffectBar label={tag} value={n} color={color} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            {/* Mood and palate bar graphs removed — the FlavorMap /
+                MoodMap / PalateMap track stack above carries the same
+                information across the whole temp envelope, so the
+                point-in-time bars duplicated what's already shown.
+                Effect-vocabulary popovers still open from elsewhere
+                (per-ingredient pill detail). */}
           </div>
         );
       })()}
