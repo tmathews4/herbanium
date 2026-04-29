@@ -20,13 +20,19 @@
 export const TEMP_HARD_MIN = 60;   // °C — below this no useful extraction for tea
 export const TEMP_HARD_MAX = 100;  // °C — boiling point at sea level
 export const TIME_HARD_MIN = 15;   // s — anything below is a flash, not a steep
-export const TIME_HARD_MAX = 1800; // s — 30 min covers root decoctions
+export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions and
+                                   //     cold-brew-style experimental steeps.
+                                   //     The TrackMap underlay paints far-past-
+                                   //     range as 'experimental' territory so
+                                   //     the user sees they've left the recipe.
 
 // Experimentation padding — how far past the recipe's union the
-// slider extends. Tuned so a user can try a clearly-different brew
-// without leaving the recipe's neighborhood entirely.
-export const TEMP_PAD = 10;        // ±10°C on each side
-export const TIME_PAD = 120;       // ±2 min on each side
+// slider extends. Wider than the older ±10°C / ±2min walls so the
+// profile graphs have visible "outside normal range" room — the
+// user asked to see what extraction looks like clearly past the
+// recipe's neighborhood, which the small pad didn't expose.
+export const TEMP_PAD = 20;        // ±20°C on each side (was 10)
+export const TIME_PAD = 300;       // ±5 min on each side (was 2 min)
 
 export function padTempRange([lo, hi]) {
   return [
