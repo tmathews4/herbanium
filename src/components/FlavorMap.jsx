@@ -142,14 +142,15 @@ const PALATE_COLORS = {
 };
 const colorForPalate = (axis) => PALATE_COLORS[axis] || "#796E5B";
 
-// Per-axis "unpleasant" thresholds for the palate strip. When a
-// palate dimension crosses these levels, we render a terra warning
-// stripe under the band and a ⚠ badge in the row label so the user
-// sees that pushing the slider further would tip the cup into
-// astringent / bitter / sour / over-cooled territory. Sweetness
-// has no warning — naturally-sweet cups rarely turn cloying.
+// Per-axis "unpleasant" thresholds for the palate strip. The
+// bitterness axis sums bitter + bitterness + astringent, so it
+// can register high on a cup that reads as grippy/tannic without
+// being meaningfully bitter — kept the threshold conservative so
+// the ⚠ doesn't fire on cups that are just confidently brewed.
+// Astringency stays tighter because tannic at moderate levels is
+// already a 'pull back' signal in tea-drinker terms.
 const PALATE_WARNINGS = {
-  bitterness:  { threshold: 3.0, label: "bitter" },
+  bitterness:  { threshold: 3.8, label: "bitter" },
   astringency: { threshold: 3.0, label: "tannic" },
   tartness:    { threshold: 4.0, label: "sour" },
   menthol:     { threshold: 4.0, label: "burning" },
@@ -429,9 +430,16 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
                 gap: 3,
                 minWidth: LABEL_W,
               }}>
-                {warn && (
+                {/* ⚠ only fires when the CURRENT slider position is
+                    inside a warning zone — not just because a warning
+                    zone exists somewhere in the envelope. The terra
+                    underlay stripe in the band still shows where the
+                    bad region IS, so the user gets a region preview
+                    without a false 'your cup is bitter' alarm when
+                    the current brew is fine. */}
+                {here && (
                   <span
-                    title={`pushes into ${warn.label} territory`}
+                    title={`this brew is in ${warn.label} territory`}
                     style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
                   >⚠</span>
                 )}
