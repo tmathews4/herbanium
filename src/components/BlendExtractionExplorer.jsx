@@ -555,30 +555,34 @@ export const BlendExtractionExplorer = ({
                 flavor profile shows what the cup is shaping into. */}
             {currentId === "__blend__" && (() => {
               // Aggregate per-axis state across all ingredients.
-              // Priority: any over → "over"; else any *significant*
-              // ingredient under → "under"; else "good."
               //
-              // "Significant" weighting matters here. A real example:
-              // user brews darjeeling 2g (lead) + ginger 0.5g + hibiscus
-              // 0.3g at 88°C/3min. Ginger and hibiscus land in their
-              // "under" temp band because their canonical envelopes are
-              // hotter — but the cup IS the darjeeling cup with light
-              // ginger/hibiscus accents, which is exactly what the user
-              // wanted. Calling that "diluted" is wrong.
+              // The cup tastes like whatever leaves actually extract at
+              // the chosen brew point. If even one significant leaf is
+              // in its sweet spot, that leaf carries the cup — the
+              // under-band leaves contribute muted accents, not a
+              // diluted cup. Calling that "faint" is exactly backwards.
               //
-              // Rules:
-              //   - Over from any role still aggregates (a tiny over-
-              //     pulled accent CAN bring bitter that affects the cup).
-              //   - Under from dominant-mass ingredients aggregates.
-              //   - Under from low-weight accents (≤20% of cup mass and
-              //     not the heaviest leaf) does NOT — those reads are
-              //     "intentional accent dilution," not a dilute cup.
-              const totalG = pills.reduce((s, p) => s + (p.weight ? p.weight : 0), 0);
+              // Real example: user brews darjeeling + ginger + hibiscus
+              // each at 0.5g (the compose UI's default mass) at 88°C/3min.
+              // Darjeeling is squarely in its envelope. Ginger and
+              // hibiscus want hotter water, so they sit in "under" temp.
+              // The cup IS robust darjeeling with light ginger/hibiscus
+              // accents — and that's what the user wanted. The accents
+              // being under-extracted is what makes them accents.
+              //
+              // Rules, in order:
+              //   - Over from any role aggregates: a small over-pulled
+              //     leaf still leaks bitter into the whole cup.
+              //   - Under aggregates only when NO significant leaf is
+              //     in a good zone. If something carries the cup, the
+              //     cup isn't faint.
+              //   - "Significant" = weight ≥ 20% of cup OR the
+              //     heaviest leaf (handles equal-mass user-builds).
               const heaviestWeight = pills.reduce((m, p) => Math.max(m, p.weight || 0), 0);
               const aggregateAxis = (axisKind) => {
                 const zoneKey = axisKind === "temp" ? "tempZone" : "timeZone";
                 const dirKey  = axisKind === "temp" ? "tempDir"  : "timeDir";
-                let overs = [], unders = [];
+                let overs = [], unders = [], goods = [];
                 for (const p of pills) {
                   // Over-pull on steep is treated as over regardless of role.
                   if (axisKind === "steep" && p.isOverPulled) {
@@ -595,18 +599,24 @@ export const BlendExtractionExplorer = ({
                     isOver  = d === "high" || d === "over";
                     isUnder = d === "low"  || d === "under";
                   }
+                  const w = p.weight || 0;
+                  const significant = w >= 0.20 || (heaviestWeight > 0 && w === heaviestWeight);
                   if (isOver) {
                     overs.push(p.name);
                   } else if (isUnder) {
-                    // Significant-mass test: weight ≥ 20% of cup OR
-                    // this is the heaviest leaf in the cup.
-                    const w = p.weight || 0;
-                    const significant = w >= 0.20 || (heaviestWeight > 0 && w === heaviestWeight);
                     if (significant) unders.push(p.name);
+                  } else if (significant) {
+                    // Non-edge zone at significant mass — this leaf is
+                    // actively carrying the cup. Anchors the aggregation
+                    // away from "under" even if accents sit cold.
+                    goods.push(p.name);
                   }
                 }
-                if (overs.length)  return { state: "over",  offenders: overs };
-                if (unders.length) return { state: "under", offenders: unders };
+                if (overs.length) return { state: "over", offenders: overs };
+                // Faint only when nothing significant is in a good zone.
+                if (unders.length && goods.length === 0) {
+                  return { state: "under", offenders: unders };
+                }
                 return { state: "good", offenders: [] };
               };
               const tempAgg  = aggregateAxis("temp");
