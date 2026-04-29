@@ -188,24 +188,25 @@ test("pushing past baseline still fires per-ingredient warnings", () => {
 });
 
 // Outsider suppression is curated-only and exact-baseline-only:
-// moving the slider away should restore the warning. Wuyi Pine Smoke
-// has a single lead (lapsang) with tempC [95,100] — moving down to
-// 85°C should make lapsang an outsider.
+// moving the slider away should restore the warning. Cranberry
+// Hearth has cranberry as lead (still un-migrated to multi-axis,
+// so the legacy outsider check fires); cranberry envelope is
+// tempC [90, 100], so dropping to 80°C makes it an outsider.
 test("moving the slider off baseline restores the outsider warning", () => {
-  const wuyi = blends.find(b => b.name === "Wuyi Pine Smoke");
-  assert(wuyi, "Wuyi Pine Smoke fixture not found");
-  const moved = resolveBlendAtBrew(wuyi.ings, 85, wuyi.s, wuyi.t, wuyi.s, true);
+  const ch = blends.find(b => b.name === "Cranberry Hearth");
+  assert(ch, "Cranberry Hearth fixture not found");
+  const moved = resolveBlendAtBrew(ch.ings, 80, ch.s, ch.t, ch.s, true);
   const outs = moved.warnings.filter(w => w.kind === "outsider");
   assert(outs.length > 0,
     "expected outsider warning when slider is moved off curated baseline; got none");
 });
 
 test("non-curated (algorithm-derived) brew with out-of-range lead flags outsiders", () => {
-  // Same Wuyi Pine Smoke leaf, brewed at 85°C without curated flag —
+  // Same Cranberry Hearth, brewed at 80°C without curated flag —
   // the suppression doesn't apply, so the outsider should fire.
-  const wuyi = blends.find(b => b.name === "Wuyi Pine Smoke");
-  assert(wuyi, "Wuyi Pine Smoke fixture not found");
-  const algo = resolveBlendAtBrew(wuyi.ings, 85, wuyi.s);
+  const ch = blends.find(b => b.name === "Cranberry Hearth");
+  assert(ch, "Cranberry Hearth fixture not found");
+  const algo = resolveBlendAtBrew(ch.ings, 80, ch.s);
   const outs = algo.warnings.filter(w => w.kind === "outsider");
   assert(outs.length > 0,
     "expected outsider warning for non-curated brew with lead out of range");

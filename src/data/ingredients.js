@@ -1406,6 +1406,29 @@ const INGREDIENTS = {
   genmaicha: {
     name: "Genmaicha", latin: "Camellia sinensis + Oryza sativa", category: "true tea", subcategory: "green",
     aliases: ["玄米茶", "popcorn tea", "people's tea", "brown rice tea"],
+    // Sencha + roasted brown rice — gentle popcorn-toast flavor.
+    // Tannin-forgiving thanks to the rice; canonical cup short.
+    tempZones: [
+      { id: "under", tempC: [50, 65], character: "rice barely surfaces.", moodImpact: "comfort held back" },
+      { id: "cool",  tempC: [65, 75], character: "soft popcorn-toast top.", moodImpact: "comfort gentle; calm settles" },
+      { id: "warm",  tempC: [75, 82], character: "full genmaicha character.", moodImpact: "comfort and calm in balance" },
+      { id: "hot",   tempC: [82, 95], character: "deeper extraction, sencha grip climbing.", moodImpact: "calm holds; cup tightens" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 30],   character: "barely steeped, light color.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [30, 90],  character: "the canonical popcorn-tea pour.", moodImpact: "comfort and calm in balance" },
+      { id: "medium", timeS: [90, 150], character: "fuller body, rice prominent.", moodImpact: "comfort solid; calm settles" },
+      { id: "long",   timeS: [150, 210], character: "deeper green grip, rice softer.", moodImpact: "comfort holds; cup tightens" },
+      { id: "over",   timeS: [210, 360], character: "tannin overtakes the popcorn-warmth.", moodImpact: "the warmth is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "the canonical popcorn-tea cup.", moodImpact: "comfort and calm in clean balance" },
+      { id: "balanced",   character: "fuller genmaicha body.", moodImpact: "comfort and calm solid" },
+      { id: "tonic",      character: "deeper grip, fuller cup.", moodImpact: "calm deep; comfort holds" },
+      { id: "overpulled", character: "tannin overtakes the popcorn-warmth.", moodImpact: "the warmth is lost" },
+    ],
+    overPull: { timeS: 360, reason: "tannin overtakes the rice-warmth" },
     caffeine: 20, tempC: [70, 85], timeS: [60, 150],
     effects: [["soothing", 4], ["calm", 4], ["focus", 2], ["warming", 2], ["uplifting", 3], ["digestive", 3]],
     flavors: ["toasty", "nutty", "grassy", "sweet", "savory"],
@@ -1543,7 +1566,31 @@ const INGREDIENTS = {
   },
   dragonwell: {
     name: "Dragonwell", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    // Pan-fired Chinese green — chestnut-sweet with a clean
+    // vegetal body. Less tannin-prone than sencha; tolerates a
+    // touch more time and heat.
     caffeine: 28, tempC: [75, 85], timeS: [75, 150],
+    tempZones: [
+      { id: "under", tempC: [50, 70], character: "chestnut barely surfaces.", moodImpact: "focus held back" },
+      { id: "cool",  tempC: [70, 78], character: "soft chestnut-sweet top.", moodImpact: "focus crisp; calm clean" },
+      { id: "warm",  tempC: [78, 83], character: "full longjing character.", moodImpact: "focus and calm in balance" },
+      { id: "hot",   tempC: [83, 95], character: "deeper extraction, vegetal body.", moodImpact: "focus solid; calm holds" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 45],   character: "barely steeped.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [45, 90],  character: "first-pour bright chestnut.", moodImpact: "focus crisp; calm gentle" },
+      { id: "medium", timeS: [90, 150], character: "the canonical Hangzhou cup.", moodImpact: "focus and calm in clean balance" },
+      { id: "long",   timeS: [150, 240], character: "fuller body, slight tannin.", moodImpact: "focus holds; cup tightens" },
+      { id: "over",   timeS: [240, 360], character: "harsh tannin, chestnut gone.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "first-pour chestnut-sweet.", moodImpact: "focus crisp; calm clean" },
+      { id: "balanced",   character: "the canonical Hangzhou longjing cup.", moodImpact: "focus and calm in clean balance" },
+      { id: "tonic",      character: "fuller vegetal body.", moodImpact: "focus deep; calm holds" },
+      { id: "overpulled", character: "tannin overtakes the chestnut.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 360, reason: "tannin overtakes the chestnut top" },
     effects: [["focus", 4], ["uplifting", 4], ["energy", 3], ["cooling", 3], ["calm", 3]],
     flavors: ["nutty", "chestnut", "sweet", "vegetal", "bean"],
     pairs: ["rose", "jasmine"],
@@ -1763,7 +1810,30 @@ const INGREDIENTS = {
   },
   lapsang: {
     name: "Lapsang Souchong", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    // Pine-smoked Wuyi black tea — campfire register, deep and
+    // grounding. The smoke holds well; tannins climb past 5 min.
     caffeine: 30, tempC: [95, 100], timeS: [180, 240],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "smoke barely lifting.", moodImpact: "grounding held back" },
+      { id: "cool",  tempC: [90, 95],  character: "softer smoke, gentler body.", moodImpact: "grounding gentle; warming present" },
+      { id: "warm",  tempC: [95, 99],  character: "full pine-smoke character.", moodImpact: "grounding and warming in balance" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, smoke saturated.", moodImpact: "grounding peak; energy lifts" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 90],    character: "color but smoke quiet.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [90, 180],  character: "lighter smoke top.", moodImpact: "grounding settles in" },
+      { id: "medium", timeS: [180, 240], character: "the canonical campfire cup.", moodImpact: "grounding, warming, energy in balance" },
+      { id: "long",   timeS: [240, 300], character: "deeper smoke, body climbing.", moodImpact: "grounding deep; tannin starting" },
+      { id: "over",   timeS: [300, 420], character: "biting tannin overtakes the smoke.", moodImpact: "grounding holds; lift lost to bite" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter smoke top, gentle pine.", moodImpact: "grounding gentle; warming present" },
+      { id: "balanced",   character: "the canonical campfire cup.", moodImpact: "grounding, warming, and energy in clean balance" },
+      { id: "tonic",      character: "deeper smoke, full body.", moodImpact: "grounding peak; warming deep" },
+      { id: "overpulled", character: "biting tannin, smoke gone harsh.", moodImpact: "the warmth is lost to bite" },
+    ],
+    overPull: { timeS: 420, reason: "tannin overtakes the smoke character" },
     effects: [["warming", 4], ["grounding", 3], ["energy", 3], ["digestive", 3], ["focus", 2], ["soothing", 3]],
     flavors: ["smoked", "pine", "tar", "campfire", "woody"],
     pairs: ["rooibos"],
@@ -1787,7 +1857,30 @@ const INGREDIENTS = {
   },
   puerh: {
     name: "Shou Pu-erh", latin: "Camellia sinensis", category: "true tea", subcategory: "pu-erh",
+    // Fermented Yunnan tea — earthy, grounding, multi-steepable.
+    // Quick first pour, then ~1-3 min for the canonical cup.
     caffeine: 35, tempC: [95, 100], timeS: [60, 180],
+    tempZones: [
+      { id: "under", tempC: [50, 90],  character: "earth barely surfaces.", moodImpact: "grounding held back" },
+      { id: "cool",  tempC: [90, 95],  character: "soft earthy top.", moodImpact: "grounding gentle" },
+      { id: "warm",  tempC: [95, 99],  character: "full puerh character — earth, leather, depth.", moodImpact: "grounding forward; digestive solid" },
+      { id: "hot",   tempC: [99, 100], character: "deepest extraction, full earth body.", moodImpact: "grounding peak; warming arrives" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 30],   character: "rinse pour, color light.", moodImpact: "the cup hasn't woken" },
+      { id: "short",  timeS: [30, 60],  character: "first-pour bright earth.", moodImpact: "grounding starts to settle" },
+      { id: "medium", timeS: [60, 180], character: "the canonical Yunnan cup.", moodImpact: "grounding, digestive, warming in balance" },
+      { id: "long",   timeS: [180, 300], character: "fuller body, slight tannin.", moodImpact: "grounding deep; warming clear" },
+      { id: "over",   timeS: [300, 480], character: "tannin grip strong, earth heavy.", moodImpact: "grounding heavy; cup tightens" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "first-pour earth-bright.", moodImpact: "grounding gentle; digestive present" },
+      { id: "balanced",   character: "the canonical Yunnan road-tea cup.", moodImpact: "grounding, digestive, warming in clean balance" },
+      { id: "tonic",      character: "deeper earth, fuller body.", moodImpact: "grounding peak; warming deep" },
+      { id: "overpulled", character: "earth-heavy, tannin gripping.", moodImpact: "grounding holds; cup is dense" },
+    ],
+    overPull: { timeS: 480, reason: "tannin grip overtakes the earth-warmth" },
     // Digestive 4: post-meal traditional but the fennel anchor takes the
     // defining 5; puerh sits at 4 alongside its grounding/warming register.
     effects: [["digestive", 4], ["grounding", 3], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
@@ -1823,6 +1916,30 @@ const INGREDIENTS = {
   "yerba-mate": {
     name: "Yerba Mate", latin: "Ilex paraguariensis", category: "herbal",
     subcategory: "leaf",
+    // South American gourd-tea — high caffeine, vegetal,
+    // multi-refill register. Cool water keeps the bitterness down;
+    // hot water turns the cup harshly tannic.
+    tempZones: [
+      { id: "under", tempC: [40, 65], character: "barely extracting.", moodImpact: "energy held back" },
+      { id: "cool",  tempC: [65, 78], character: "soft vegetal top, gentle lift.", moodImpact: "energy moderate; focus settles" },
+      { id: "warm",  tempC: [78, 83], character: "full mate character, clean grip.", moodImpact: "energy and focus in balance" },
+      { id: "hot",   tempC: [83, 95], character: "harsh tannin overtaking the leaf.", moodImpact: "the lift is muddied" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 30],   character: "first-fill barely steeped.", moodImpact: "the cup hasn't lifted" },
+      { id: "short",  timeS: [30, 90],  character: "the canonical gourd-pour.", moodImpact: "energy crisp; focus clean" },
+      { id: "medium", timeS: [90, 300], character: "fuller body, tea-bag-style cup.", moodImpact: "energy and focus solid" },
+      { id: "long",   timeS: [300, 480], character: "deeper grip, tannin climbing.", moodImpact: "energy holds; cup tightens" },
+      { id: "over",   timeS: [480, 720], character: "harsh tannin, vegetal turned bitter.", moodImpact: "the lift is lost" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "the canonical gourd-pour cup.", moodImpact: "energy crisp; focus clean" },
+      { id: "balanced",   character: "fuller mate body.", moodImpact: "energy and focus in clean balance" },
+      { id: "tonic",      character: "deeper, fuller mate cup.", moodImpact: "energy steady; focus deep" },
+      { id: "overpulled", character: "harsh tannin, vegetal gone bitter.", moodImpact: "the lift is lost" },
+    ],
+    overPull: { timeS: 720, reason: "tannin overtakes the vegetal lift" },
     aliases: ["mate", "chimarrão", "cimarrón", "ka'ay", "erva-mate", "Paraguay tea"],
     caffeine: 40, tempC: [70, 85], timeS: [60, 300],
     effects: [["energy", 4], ["focus", 3], ["digestive", 3], ["uplifting", 3], ["warming", 1]],
@@ -2654,7 +2771,30 @@ const INGREDIENTS = {
     name: "Lion's Mane", latin: "Hericium erinaceus", category: "herbal",
     subcategory: "fungus",
     aliases: ["Yamabushitake 山伏茸", "Hou Tou Gu 猴頭菇", "monkey head mushroom", "bearded tooth fungus", "pom pom mushroom"],
+    // Long-decoction medicinal mushroom — sweeter and lighter than
+    // reishi but still wants 10-30 min simmer for full extraction.
     caffeine: 0, tempC: [90, 100], timeS: [600, 1800],
+    tempZones: [
+      { id: "under", tempC: [50, 85],  character: "the mushroom barely extracting.", moodImpact: "focus held back" },
+      { id: "cool",  tempC: [85, 92],  character: "soft mushroom top.", moodImpact: "focus gentle" },
+      { id: "warm",  tempC: [92, 98],  character: "full lion's mane character — sweet, marine.", moodImpact: "focus and uplifting in balance" },
+      { id: "hot",   tempC: [98, 100], character: "deepest extraction, full body.", moodImpact: "focus peak; calm settles" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],   character: "barely simmered.", moodImpact: "the cup hasn't bloomed" },
+      { id: "short",  timeS: [300, 600], character: "lighter mushroom water.", moodImpact: "focus starts to settle" },
+      { id: "medium", timeS: [600, 1200], character: "the canonical hericium decoction.", moodImpact: "focus and uplifting in clean balance" },
+      { id: "long",   timeS: [1200, 1800], character: "deepest decoction, full sweet body.", moodImpact: "focus peak; calm and soothing arrive" },
+      { id: "over",   timeS: [1800, 3600], character: "very long simmer — body thick.", moodImpact: "focus holds; cup is dense" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely simmered.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter mushroom-water top.", moodImpact: "focus gentle; uplifting present" },
+      { id: "balanced",   character: "the canonical lion's mane decoction.", moodImpact: "focus and uplifting in clean balance" },
+      { id: "tonic",      character: "deepest decoction, full sweet body.", moodImpact: "focus peak; calm and soothing deep" },
+      { id: "overpulled", character: "very heavy, mushroom-broth thick.", moodImpact: "focus holds; cup is dense" },
+    ],
+    overPull: { timeS: 3600, reason: "past peak decoction, body too thick" },
     effects: [["focus", 3], ["calm", 3], ["soothing", 3], ["uplifting", 3], ["grounding", 2], ["digestive", 3]],
     flavors: ["delicate", "sweet", "seafood-like", "earthy", "nutty"],
     basicTastes: { umami: 3, sweet: 2, bitter: 1, astringent: 1, earthy: 2 },
