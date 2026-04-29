@@ -1536,7 +1536,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const filteredAvailable = available
     .filter(id => {
       const ing = INGREDIENTS[id];
-      if (filter !== "all" && ing.category !== filter) return false;
+      // Match LibraryScreen: "fruit" is a virtual filter that
+      // surfaces fruit-adjacent ingredients regardless of where
+      // they live in the data taxonomy (cranberry, dried-apple,
+      // citrus peels, hibiscus).
+      if (filter === "fruit") {
+        const isFruit = ing.subcategory === "fruit"
+          || ing.subcategory === "peel"
+          || id === "hibiscus";
+        if (!isFruit) return false;
+      } else if (filter !== "all" && ing.category !== filter) {
+        return false;
+      }
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const hay = [ing.name, ing.latin, ...(ing.flavors || []), ing.category, ing.subcategory || ""]
@@ -1726,6 +1737,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
               ["true tea",  "teas"],
               ["herbal",    "herbals"],
               ["flower",    "flowers"],
+              ["fruit",     "fruits"],
               ["spice",     "spices"],
               ["adaptogen", "adaptogens"],
             ]}

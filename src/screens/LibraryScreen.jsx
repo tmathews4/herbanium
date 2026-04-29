@@ -51,7 +51,20 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
   const shelfItems = Object.entries(INGREDIENTS)
     .filter(([id, ing]) => {
       if (pantryOnly && !pantryIds.has(id)) return false;
-      if (shelfCategory !== "all" && ing.category !== shelfCategory) return false;
+      // "fruit" is a virtual category — collects everything fruit-
+      // adjacent regardless of where it lives in the data: cranberry
+      // and dried-apple (herbal/fruit), the citrus peels (herbal/peel),
+      // and hibiscus (botanically a calyx, classified as flower but
+      // tastes and pairs as a fruit). Keeps the data model stable
+      // while giving the user one filter for "anything fruity."
+      if (shelfCategory === "fruit") {
+        const isFruit = ing.subcategory === "fruit"
+          || ing.subcategory === "peel"
+          || id === "hibiscus";
+        if (!isFruit) return false;
+      } else if (shelfCategory !== "all" && ing.category !== shelfCategory) {
+        return false;
+      }
       if (shelfCategory === "true tea" && teaSubcategory !== "all"
           && ing.subcategory !== teaSubcategory) return false;
       if (caffeineFilter === "free" && (ing.caffeine || 0) > 0) return false;
@@ -119,6 +132,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                 ["true tea",  "teas"],
                 ["herbal",    "herbals"],
                 ["flower",    "flowers"],
+                ["fruit",     "fruits"],
                 ["spice",     "spices"],
                 ["adaptogen", "adaptogens"],
               ]}
