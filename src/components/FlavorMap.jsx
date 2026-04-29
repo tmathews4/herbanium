@@ -190,7 +190,24 @@ const hexToRgb = (hex) => {
  *                true; pass false on stacked strips so the axis
  *                only appears once.
  */
-const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true, title }) => {
+const TrackMap = ({
+  kind, ingredients, tempC, timeS, tempCRange,
+  showAxis = true, title,
+  // Tradition-deference suppression. When the strip is rendering a
+  // curated traditional recipe (e.g. Wuyi yancha at 212°F, gongfu
+  // black at 195°F × 30s) and the user is sitting AT or BELOW that
+  // recipe's defaults, the at-current-position ⚠ on palate axes is
+  // muffled. The model's bitter/tannic thresholds are tuned to a
+  // generic palate that treats astringency as a defect — but in
+  // these tea families it's the point of the cup. The terra
+  // underlay stripe in the band still shows where the warning
+  // region IS, so the user gets a region preview if they push past
+  // the recipe; only the alarm at the current position goes quiet.
+  curated = false,
+  isTraditional = false,
+  defaultTempC = null,
+  defaultTimeS = null,
+}) => {
   const { unit } = useUnit();
   const [tMin, tMax] = tempCRange;
   const span = tMax - tMin;
@@ -379,8 +396,24 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
   const currentSampleIdx = span > 0
     ? Math.round(((tempC - tMin) / span) * (SAMPLES - 1))
     : 0;
-  const isWarningHere = (warning) =>
-    warning && warning.intensities[Math.max(0, Math.min(SAMPLES - 1, currentSampleIdx))] > 0;
+  // Tradition-deference: on curated traditional blends, suppress the
+  // at-position ⚠ when the user is sitting at or below the curator's
+  // recommended brew. The recipe is the recipe — bitterness/tannin in
+  // a yancha or gongfu black at its tradition default is a feature,
+  // not a defect. Only fires for palate strips on curated traditions
+  // with both defaults declared; otherwise the suppression is a no-op
+  // and warnings behave as before.
+  const traditionMuffleActive =
+    kind === "palate"
+    && curated && isTraditional
+    && defaultTempC != null && defaultTimeS != null
+    && tempC <= defaultTempC
+    && timeS <= defaultTimeS;
+  const isWarningHere = (warning) => {
+    if (!warning) return false;
+    if (traditionMuffleActive) return false;
+    return warning.intensities[Math.max(0, Math.min(SAMPLES - 1, currentSampleIdx))] > 0;
+  };
 
   const indicatorPct = span > 0
     ? Math.max(0, Math.min(100, ((tempC - tMin) / span) * 100))

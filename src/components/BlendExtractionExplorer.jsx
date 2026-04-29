@@ -235,6 +235,10 @@ export const BlendExtractionExplorer = ({
           tempC={tempC}
           timeS={timeS}
           tempCRange={tempCRange}
+          curated={curated}
+          isTraditional={isTraditional}
+          defaultTempC={defaultTempC}
+          defaultTimeS={defaultTimeS}
         />
       </div>
 
