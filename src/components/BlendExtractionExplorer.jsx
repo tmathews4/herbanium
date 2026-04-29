@@ -555,27 +555,54 @@ export const BlendExtractionExplorer = ({
                 flavor profile shows what the cup is shaping into. */}
             {currentId === "__blend__" && (() => {
               // Aggregate per-axis state across all ingredients.
-              // Priority: any over → "over"; else any under → "under";
-              // else "good." This is the "oversteep trumps perfect
-              // trumps understeep" rule the user asked for.
+              // Priority: any over → "over"; else any *significant*
+              // ingredient under → "under"; else "good."
+              //
+              // "Significant" weighting matters here. A real example:
+              // user brews darjeeling 2g (lead) + ginger 0.5g + hibiscus
+              // 0.3g at 88°C/3min. Ginger and hibiscus land in their
+              // "under" temp band because their canonical envelopes are
+              // hotter — but the cup IS the darjeeling cup with light
+              // ginger/hibiscus accents, which is exactly what the user
+              // wanted. Calling that "diluted" is wrong.
+              //
+              // Rules:
+              //   - Over from any role still aggregates (a tiny over-
+              //     pulled accent CAN bring bitter that affects the cup).
+              //   - Under from dominant-mass ingredients aggregates.
+              //   - Under from low-weight accents (≤20% of cup mass and
+              //     not the heaviest leaf) does NOT — those reads are
+              //     "intentional accent dilution," not a dilute cup.
+              const totalG = pills.reduce((s, p) => s + (p.weight ? p.weight : 0), 0);
+              const heaviestWeight = pills.reduce((m, p) => Math.max(m, p.weight || 0), 0);
               const aggregateAxis = (axisKind) => {
                 const zoneKey = axisKind === "temp" ? "tempZone" : "timeZone";
                 const dirKey  = axisKind === "temp" ? "tempDir"  : "timeDir";
                 let overs = [], unders = [];
                 for (const p of pills) {
-                  // overpull (steep-axis severe state) is treated as over.
+                  // Over-pull on steep is treated as over regardless of role.
                   if (axisKind === "steep" && p.isOverPulled) {
                     overs.push(p.name);
                     continue;
                   }
                   const z = p[zoneKey];
+                  let isOver = false, isUnder = false;
                   if (z) {
-                    if (z.id === "over") overs.push(p.name);
-                    else if (z.id === "under") unders.push(p.name);
+                    isOver  = z.id === "over";
+                    isUnder = z.id === "under";
                   } else {
                     const d = p[dirKey];
-                    if (d === "high" || d === "over")  overs.push(p.name);
-                    else if (d === "low" || d === "under") unders.push(p.name);
+                    isOver  = d === "high" || d === "over";
+                    isUnder = d === "low"  || d === "under";
+                  }
+                  if (isOver) {
+                    overs.push(p.name);
+                  } else if (isUnder) {
+                    // Significant-mass test: weight ≥ 20% of cup OR
+                    // this is the heaviest leaf in the cup.
+                    const w = p.weight || 0;
+                    const significant = w >= 0.20 || (heaviestWeight > 0 && w === heaviestWeight);
+                    if (significant) unders.push(p.name);
                   }
                 }
                 if (overs.length)  return { state: "over",  offenders: overs };
