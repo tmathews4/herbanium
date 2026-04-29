@@ -896,32 +896,52 @@ export default function App() {
       display: "flex", flexDirection: "column",
       position: "relative",
     }}>
+      {/* Top chrome bar — fixed-height layer above the scroll area
+          so HintCards, notifications, and tab content can't drift
+          underneath the back button. Houses the global back button
+          today; reserved-space layout means future controls (page
+          title, profile menu, search, etc.) can drop in without
+          shifting the rest of the app.
+          Bar always renders so content height stays stable across
+          tab switches; just the back button visibility toggles. */}
+      <div style={{
+        flex: "0 0 auto",
+        height: 40,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 14px",
+        borderBottom: `1px solid ${theme.ruleSoft}`,
+        background: theme.ivory,
+        zIndex: 10,
+      }}>
+        <div style={{ flex: "0 0 auto", minWidth: 70 }}>
+          {canGoBack && !overlay && (
+            <button
+              type="button"
+              onClick={goBack}
+              style={{
+                background: "transparent", border: "none",
+                padding: "6px 4px", cursor: "pointer",
+                fontFamily: "Instrument Sans, system-ui, sans-serif",
+                fontSize: 12, letterSpacing: "0.12em",
+                textTransform: "uppercase", color: theme.ash,
+                outline: "none",
+              }}
+            >← back</button>
+          )}
+        </div>
+        {/* Reserved center slot for a future page title. */}
+        <div style={{ flex: 1 }} />
+        {/* Reserved right slot for future controls (search, profile
+            menu, etc). Empty for now but kept symmetric so the back
+            button anchors to the left edge cleanly. */}
+        <div style={{ flex: "0 0 auto", minWidth: 70, textAlign: "right" }} />
+      </div>
       <div ref={scrollRef} style={{
         flex: "1 1 auto", minHeight: 0,
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
       }}>
-        {/* Global back button — visible whenever there's a parent
-            page above the current view. Hidden on Home (root) and
-            while an overlay is open (the overlay carries its own
-            back button). Walks the page hierarchy:
-            sub-mode → tab default → Home. */}
-        {canGoBack && !overlay && (
-          <button
-            type="button"
-            onClick={goBack}
-            style={{
-              position: "absolute", top: 12, left: 14, zIndex: 5,
-              background: "transparent", border: "none",
-              padding: "4px 8px", cursor: "pointer",
-              fontFamily: "Instrument Sans, system-ui, sans-serif",
-              fontSize: 12, letterSpacing: "0.12em",
-              textTransform: "uppercase", color: "#8C8377",
-              outline: "none",
-            }}
-          >← back</button>
-        )}
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
