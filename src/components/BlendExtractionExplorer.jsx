@@ -36,7 +36,7 @@ import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
 import { EffectBar } from "./EffectBar";
-import { FlavorMap } from "./FlavorMap";
+import { FlavorMap, MoodMap } from "./FlavorMap";
 import { VocabInfoCard } from "./layout";
 
 // Slider bounds — union of every ingredient's range, padded with
@@ -946,17 +946,28 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
-      {/* Flavor-across-temperature map. Sits between the sliders and
-          the predicted-profile pills: the pills show the cup AT this
-          point, the map shows the cup ACROSS the whole temp envelope.
-          The vertical indicator tracks the current slider so the user
-          sees both views in one glance. */}
-      <FlavorMap
-        ingredients={ingredients}
-        tempC={tempC}
-        timeS={timeS}
-        tempCRange={tempCRange}
-      />
+      {/* Flavor + mood across the temperature envelope. Sits between
+          the sliders and the predicted-profile pills: the pills show
+          the cup AT this point, the maps show the cup ACROSS the
+          whole temp envelope. The shared vertical terra indicator
+          tracks the current slider through every track at once.
+          Flavor map's axis is hidden because the mood map below it
+          repeats the same scale — one tick row covers both. */}
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        <FlavorMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+        />
+        <MoodMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+        />
+      </div>
 
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Each section renders the FULL set of entries any

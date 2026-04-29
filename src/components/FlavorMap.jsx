@@ -1,7 +1,7 @@
 /* ──────────────────────────────────────────────────────────────
-   components/FlavorMap.jsx — temperature × flavor visualization.
+   components/FlavorMap.jsx — temperature × {flavor | mood} maps.
 
-   A horizontal strip showing how each dominant flavor's strength
+   A horizontal strip showing how each dominant flavor (or effect)
    changes across the temperature range. Reads at a glance:
    "muscatel peaks early, astringent climbs late, hibiscus tart
    stays loud everywhere." The current brew-temp slider position
@@ -9,13 +9,19 @@
    the user sees both where they ARE and what's possible at every
    other temperature.
 
-   Each flavor gets its own row, color-coded by family. Track
-   intensity (alpha) maps to flavor strength at that temp; darker
-   means louder. The map runs the brew engine N times across the
-   temp axis at the current steep time, so it's an honest
-   prediction, not a synthetic gradient.
+   Each row gets its own color from a family palette. Track
+   intensity (alpha) maps to strength at that temp; darker means
+   louder. The map runs the brew engine N times across the temp
+   axis at the current steep time, so it's an honest prediction.
 
-   Cost: N brew-engine evaluations per render. Memoized on
+   Two views share the same shape:
+     - <FlavorMap />       — taste notes (flavors)
+     - <MoodMap />         — felt-state effects (moods)
+   Both wrap the shared TrackMap component below.
+
+   Cost: N brew-engine evaluations per render, shared between the
+   two strips when they sit next to each other (the resolveBlendAtBrew
+   call returns both flavors and effects in one pass). Memoized on
    (ingredients, timeS, range) so a temp-only slider drag doesn't
    recompute — only the indicator moves.
    ────────────────────────────────────────────────────────────── */
@@ -83,6 +89,34 @@ const FAMILY_BY_FLAVOR = {
 
 const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "#796E5B";
 
+// Mood / effect → family. Smaller catalog than flavors, mostly
+// derived from how the app already groups effect tags (mood
+// register = sage, energy register = ochre, comfort = terra).
+const FAMILY_BY_EFFECT = {
+  // calm register — sage family
+  calm: "calm", soothing: "calm", grounding: "calm", cooling: "calm",
+  // focus register — sky / steady
+  focus: "focus",
+  // energy register — ochre / bright
+  energy: "energy", uplifting: "energy",
+  // warm / comfort register — terra / rose
+  warming: "warm", comfort: "warm",
+  // body register — sage-deep
+  digestive: "body",
+  // sleep register — plum
+  sleepy: "sleep",
+};
+const EFFECT_FAMILY_COLORS = {
+  calm:   "#6D7E55",  // sage
+  focus:  "#7F9AA0",  // sky
+  energy: "#A57836",  // ochre
+  warm:   "#C37959",  // rose
+  body:   "#4A573A",  // sageDeep
+  sleep:  "#7B4A5A",  // plum
+};
+const colorForEffect = (effect) =>
+  EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "#796E5B";
+
 // Hex → "r,g,b" string for rgba() composition.
 const hexToRgb = (hex) => {
   const h = hex.replace("#", "");
@@ -90,14 +124,29 @@ const hexToRgb = (hex) => {
   return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
 };
 
-export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
+/**
+ * Shared track-map renderer.
+ *   kind:        "flavor" | "mood" — controls which dimension is
+ *                pulled from each sample and which color palette
+ *                drives the bands.
+ *   ingredients: list of {id, g, role?}.
+ *   tempC, timeS: current slider values.
+ *   tempCRange:  [min, max] for the temp axis.
+ *   showAxis:    render the temp tick row below the strip. Default
+ *                true; pass false on the second strip when stacked
+ *                so the axis only appears once.
+ */
+const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true, title }) => {
   const { unit } = useUnit();
   const [tMin, tMax] = tempCRange;
   const span = tMax - tMin;
 
-  // Sample brew at SAMPLES points across the temp range. Each sample
-  // returns the same shape resolveBlendAtBrew normally produces — we
-  // just keep the flavors map keyed by name → strength.
+  const isFlavor = kind === "flavor";
+
+  // Sample the brew engine across the temp axis. Each sample carries
+  // both flavor and effect maps so the two strips can share work
+  // when used together (the wrappers each just pick the field they
+  // need, and React's memoization de-dupes the inner sample loop).
   const samples = useMemo(() => {
     if (!ingredients || ingredients.length === 0 || span <= 0) return [];
     const out = [];
@@ -111,48 +160,55 @@ export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
       (brew.flavors || []).forEach(([name, strength]) => {
         flavorMap[name] = strength;
       });
-      out.push({ t, flavorMap });
+      const effectMap = {};
+      (brew.effects || []).forEach(([name, strength]) => {
+        // Bitterness is a diagnostic axis (rendered as palate / balance
+        // elsewhere), not a felt-state mood. Keep it out of the mood map.
+        if (name === "bitterness") return;
+        effectMap[name] = strength;
+      });
+      out.push({ t, flavorMap, effectMap });
     }
     return out;
   }, [ingredients, timeS, tMin, tMax, span]);
 
-  // Pick the top MAX_TRACKS flavors by their peak strength anywhere
-  // in the envelope. Ranking by peak (not average) means notes that
-  // surface only at one end still get their own row — that IS the
-  // information the map is trying to surface.
+  // Pick the top MAX_TRACKS by their peak strength anywhere in the
+  // envelope. Peak (not average) means notes that surface only at
+  // one end still get their own row — that IS the information the
+  // map is trying to surface.
   const tracks = useMemo(() => {
     const peaks = {};
     for (const s of samples) {
-      for (const [name, strength] of Object.entries(s.flavorMap)) {
+      const map = isFlavor ? s.flavorMap : s.effectMap;
+      for (const [name, strength] of Object.entries(map)) {
         peaks[name] = Math.max(peaks[name] || 0, strength);
       }
     }
     return Object.entries(peaks)
-      .filter(([, peak]) => peak >= 0.5)  // drop notes that never really show up
+      .filter(([, peak]) => peak >= 0.5)
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_TRACKS)
       .map(([name]) => name);
-  }, [samples]);
+  }, [samples, isFlavor]);
 
   if (tracks.length === 0 || samples.length === 0) return null;
 
-  // Build a CSS gradient for each track. Strength 0 → fully
-  // transparent, strength 5 → full color. Linear scaling reads
-  // intuitively here; a curve would obscure peaks.
-  const gradientFor = (flavor) => {
-    const rgb = hexToRgb(colorFor(flavor));
+  const colorForName = isFlavor ? colorFor : colorForEffect;
+  // Effects scale 0–5 in the engine, same as flavors. Cap divisor at 5.
+  const STRENGTH_MAX = 5;
+
+  const gradientFor = (name) => {
+    const rgb = hexToRgb(colorForName(name));
     const stops = samples.map((s, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
-      const strength = s.flavorMap[flavor] || 0;
-      const alpha = Math.max(0, Math.min(1, strength / 5));
+      const map = isFlavor ? s.flavorMap : s.effectMap;
+      const strength = map[name] || 0;
+      const alpha = Math.max(0, Math.min(1, strength / STRENGTH_MAX));
       return `rgba(${rgb}, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
     }).join(", ");
     return `linear-gradient(to right, ${stops})`;
   };
 
-  // Where to draw the indicator line. Clamped so it stays inside
-  // the strip at the extremes (a half-pixel pen at the edge would
-  // render half-clipped).
   const indicatorPct = span > 0
     ? Math.max(0, Math.min(100, ((tempC - tMin) / span) * 100))
     : 0;
@@ -161,10 +217,11 @@ export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
 
   const TRACK_H   = 14;
   const TRACK_GAP = 3;
+  const LABEL_W   = 64;
 
   return (
     <div style={{
-      marginTop: 14, padding: "12px 12px 10px",
+      padding: "12px 12px 10px",
       background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
       borderRadius: 10,
     }}>
@@ -173,7 +230,7 @@ export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
         textTransform: "uppercase", color: theme.ash, marginBottom: 8,
         display: "flex", justifyContent: "space-between", alignItems: "baseline",
       }}>
-        <span>Flavor across temperature</span>
+        <span>{title}</span>
         <span style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
           letterSpacing: 0, textTransform: "none", color: theme.ash,
@@ -182,43 +239,33 @@ export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
         </span>
       </div>
 
-      {/* Two-column layout: fixed-width labels on the left, the
-          gradient-stack with the indicator overlay on the right.
-          Putting the indicator's positioning context on the right
-          column means the percentage math is straightforward (% of
-          the gradient strip width, not of the whole row). */}
       <div style={{ display: "flex", gap: 8 }}>
-        {/* Labels */}
         <div style={{
           flex: "0 0 auto",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(flavor => (
-            <div key={flavor} style={{
+          {tracks.map(name => (
+            <div key={name} style={{
               height: TRACK_H,
               fontFamily: ff.sans, fontSize: 10, color: theme.inkSoft,
               display: "flex", alignItems: "center", justifyContent: "flex-end",
-              minWidth: 64,
-            }}>{flavor}</div>
+              minWidth: LABEL_W,
+            }}>{name}</div>
           ))}
         </div>
 
-        {/* Tracks + indicator */}
         <div style={{
           flex: 1, position: "relative",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(flavor => (
-            <div key={flavor} style={{
+          {tracks.map(name => (
+            <div key={name} style={{
               height: TRACK_H,
               borderRadius: 3,
-              background: gradientFor(flavor),
+              background: gradientFor(name),
               boxShadow: `inset 0 0 0 1px ${theme.ruleSoft}`,
             }} />
           ))}
-          {/* Vertical indicator — spans the whole track stack so
-              the user can read what every flavor is doing at the
-              current brew point at once. */}
           <div style={{
             position: "absolute",
             top: -2, bottom: -2,
@@ -233,18 +280,26 @@ export const FlavorMap = ({ ingredients, tempC, timeS, tempCRange }) => {
         </div>
       </div>
 
-      {/* Temp axis ticks beneath the strip. min, midpoint, max so
-          the user can read the indicator's position quickly. */}
-      <div style={{
-        marginTop: 6,
-        marginLeft: 64 + 8,  // align with the gradient column
-        display: "flex", justifyContent: "space-between",
-        fontFamily: ff.mono, fontSize: 9, color: theme.ash,
-      }}>
-        <span>{tempLabel(tMin)}</span>
-        <span>{tempLabel(Math.round((tMin + tMax) / 2))}</span>
-        <span>{tempLabel(tMax)}</span>
-      </div>
+      {showAxis && (
+        <div style={{
+          marginTop: 6,
+          marginLeft: LABEL_W + 8,
+          display: "flex", justifyContent: "space-between",
+          fontFamily: ff.mono, fontSize: 9, color: theme.ash,
+        }}>
+          <span>{tempLabel(tMin)}</span>
+          <span>{tempLabel(Math.round((tMin + tMax) / 2))}</span>
+          <span>{tempLabel(tMax)}</span>
+        </div>
+      )}
     </div>
   );
 };
+
+export const FlavorMap = (props) => (
+  <TrackMap {...props} kind="flavor" title="Flavor across temperature" />
+);
+
+export const MoodMap = (props) => (
+  <TrackMap {...props} kind="mood" title="Mood across temperature" />
+);
