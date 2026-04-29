@@ -633,6 +633,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   const [landed, setLanded] = React.useState(() =>
     Object.fromEntries(targets.map(m => [m, true]))
   );
+  const [followNote, setFollowNote] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
 
   if (!blend || targets.length === 0) return null;
@@ -645,7 +646,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   const submit = () => {
     if (submitted) return;
     setSubmitted(true);
-    onSubmit?.({ landed, extra: [] });
+    onSubmit?.({ landed, extra: [], noteAppend: followNote.trim() });
   };
 
   return (
@@ -718,6 +719,25 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
           </div>
         ))}
       </div>
+
+      {/* Optional follow-up note. Lives below the landed/missed pills
+          because mood is what the user is reflecting on by the time
+          they reach this field — anything they want to say about how
+          the cup actually played out gets appended onto the session's
+          existing brew-time note. */}
+      <textarea
+        value={followNote}
+        onChange={(e) => setFollowNote(e.target.value)}
+        placeholder="anything to add about how it played out?"
+        style={{
+          width: "100%", minHeight: 44,
+          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: 8, padding: "8px 10px",
+          fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+          resize: "vertical", outline: "none",
+          boxSizing: "border-box",
+        }}
+      />
 
       <button
         onClick={submit}

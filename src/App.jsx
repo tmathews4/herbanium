@@ -787,7 +787,13 @@ export default function App() {
   // attributes/elementals scoring code that scans `s.actual`) get the
   // mood string they expect. Clears moodsPending so the follow-up
   // card stops asking.
-  const patchSessionMoods = (sessionId, { landed, extra }) => {
+  //
+  // The follow-up may also carry a `noteAppend` — anything the user
+  // jotted in the textarea below the mood pills. We merge it onto the
+  // session's existing brew-time note with a paragraph break so the
+  // single `note` field on the session reads as a small two-act log:
+  // first sip impressions on top, post-cup reflection underneath.
+  const patchSessionMoods = (sessionId, { landed, extra, noteAppend }) => {
     setSessions(prev => prev.map(s => {
       if (s.id !== sessionId) return s;
       const targetMoods = s.targetMoods || [];
@@ -796,11 +802,18 @@ export default function App() {
       const actual = landedMoods.length > 0 ? landedMoods.join(", ")
                    : extraMoods.length > 0 ? extraMoods.join(", ")
                    : "brewed";
+      const trimmedAppend = (noteAppend || "").trim();
+      const mergedNote = trimmedAppend
+        ? (s.note && s.note.trim()
+            ? `${s.note.trim()}\n\n${trimmedAppend}`
+            : trimmedAppend)
+        : (s.note || "");
       return {
         ...s,
         actual,
         landed: landed || {},
         extra: extraMoods,
+        note: mergedNote,
         moodsPending: false,
       };
     }));
