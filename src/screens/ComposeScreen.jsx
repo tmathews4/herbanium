@@ -925,9 +925,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   e.currentTarget.style.boxShadow = shadow.btn.terraOutline.hover;
                 }}
                 style={{
-                  fontFamily: ff.serif, fontSize: 15.5, fontWeight: 500,
+                  fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
                   color: theme.terra,
-                  padding: "14px 24px", borderRadius: radius.md,
+                  padding: "15px 22px", borderRadius: radius.md,
                   background: "transparent",
                   border: `1.5px solid ${theme.terra}`,
                   cursor: blend.empty ? "not-allowed" : "pointer",
@@ -985,19 +985,19 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 }}
                 style={{
                   flex: 1,
-                  fontFamily: ff.serif, fontSize: 16.5, fontWeight: 500,
-                  padding: "14px 16px", borderRadius: radius.md,
+                  fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
+                  padding: "15px 16px", borderRadius: radius.md,
                   background: blend.empty ? theme.rule : theme.terra,
                   color: theme.cream, border: "none",
                   cursor: blend.empty ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                   boxShadow: blend.empty ? "none" : shadow.btn.terra.rest,
                   transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
                   letterSpacing: "0.02em",
                   textShadow: blend.empty ? "none" : "0 1px 1px rgba(0,0,0,0.08)",
                 }}
               >
-                <Kettle size={19} c={theme.cream} />
+                <Kettle size={20} c={theme.cream} />
                 Start brewing
               </button>
             </div>
