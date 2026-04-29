@@ -60,12 +60,14 @@ export const shadow = {
       hover: "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)",
       press: "0 2px 4px rgba(176,84,47,0.30), inset 0 1px 2px rgba(0,0,0,0.10)",
     },
-    // Terra outlined buttons (Save). Lighter weight at rest so the
-    // outline reads as the structure; shadow grows on interaction.
+    // Terra outlined buttons (Save). Outline-only buttons need a
+    // shadow visibly deeper than a card hint or they read flat next
+    // to a filled sibling — same body geometry, half the depth, but
+    // still clearly elevated.
     terraOutline: {
-      rest:  "0 1px 3px rgba(176,84,47,0.12)",
-      hover: "0 4px 12px -4px rgba(176,84,47,0.30)",
-      press: "0 1px 2px rgba(176,84,47,0.10)",
+      rest:  "0 3px 8px -1px rgba(176,84,47,0.22), 0 1px 2px rgba(176,84,47,0.12)",
+      hover: "0 6px 14px -3px rgba(176,84,47,0.34), 0 2px 4px rgba(176,84,47,0.16)",
+      press: "0 1px 2px rgba(176,84,47,0.14), inset 0 1px 1px rgba(176,84,47,0.06)",
     },
     // Ink-filled buttons (log it, begin →, save mood). Same shape as
     // terra but with an ink-tinted shadow so the depth reads on warm
