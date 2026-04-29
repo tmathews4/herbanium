@@ -262,11 +262,16 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                 const inPantry = pantryIds.has(id);
                 const hasCaffeine = (ing.caffeine || 0) > 0;
                 return (
-                  <button key={id} onClick={() => go("ingredient", id)} style={{
+                  <button key={id} onClick={() => go("ingredient", id)}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 3px 8px rgba(30,24,18,0.08), 0 1px 2px rgba(30,24,18,0.05)"; e.currentTarget.style.borderColor = theme.rule; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 1px 2px rgba(30,24,18,0.04)"; e.currentTarget.style.borderColor = theme.ruleSoft; }}
+                  style={{
                     background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
                     borderRadius: 10, padding: "12px 12px", textAlign: "left", cursor: "pointer",
                     display: "flex", flexDirection: "column", gap: 4,
                     position: "relative",
+                    boxShadow: "0 1px 2px rgba(30,24,18,0.04)",
+                    transition: "box-shadow 0.18s ease, border-color 0.18s ease",
                   }}>
                     {/* Pantry toggle — clickable +/✓ in the top-right.
                         Stops propagation so the tile body still routes

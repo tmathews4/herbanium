@@ -281,6 +281,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 background: unit === u ? theme.ink : "transparent",
                 color: unit === u ? theme.cream : theme.ash,
                 cursor: "pointer",
+                transition: "background 0.2s ease, color 0.2s ease",
               }}>°{u}</button>
             ))}
           </div>
@@ -306,6 +307,7 @@ export const ProfileScreen = ({ go, sessions, savedBlendIds, pantryIds, seedMode
                 background: weightUnit === val ? theme.ink : "transparent",
                 color: weightUnit === val ? theme.cream : theme.ash,
                 cursor: "pointer",
+                transition: "background 0.2s ease, color 0.2s ease",
               }}>{label}</button>
             ))}
           </div>

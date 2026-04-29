@@ -215,11 +215,18 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
         )}
       </div>
 
-      <button onClick={() => onSubmit({ landed, extra, taste, note, save, rename: rename.trim() })} style={{
-        width: "100%", fontFamily: ff.serif, fontSize: 17,
-        padding: "14px", borderRadius: 10,
-        background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
-      }}>
+      <button
+        onClick={() => onSubmit({ landed, extra, taste, note, save, rename: rename.trim() })}
+        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 10px -4px rgba(30,24,18,0.25)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 2px 4px rgba(30,24,18,0.10)"; }}
+        style={{
+          width: "100%", fontFamily: ff.serif, fontSize: 17,
+          padding: "14px", borderRadius: 10,
+          background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
+          boxShadow: "0 2px 4px rgba(30,24,18,0.10)",
+          transition: "box-shadow 0.18s ease, transform 0.12s ease",
+          letterSpacing: "0.01em",
+        }}>
         log it →
       </button>
     </div>

@@ -294,6 +294,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 background: primaryAxis === k ? theme.terra : "transparent",
                 color: primaryAxis === k ? theme.cream : theme.inkSoft,
                 border: "none",
+                transition: "background 0.2s ease, color 0.2s ease",
               }}>{label}</button>
             ))}
           </div>

@@ -13,7 +13,7 @@ import { BLENDS } from "../data/blends";
 import { WAIT_POEMS } from "../data/waitContent";
 import { getBlend, mmss, sessionAgo } from "../helpers/misc";
 import {
-  ff, theme,
+  ff, theme, shadow, radius,
 } from "../theme";
 import {
   formatTempShort, useUnit,
@@ -132,9 +132,10 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
             <div style={{
               marginBottom: 14,
               padding: "14px 22px 16px",
-              borderRadius: 12,
+              borderRadius: radius.md,
               background: theme.cream,
               border: `1px solid ${theme.ruleSoft}`,
+              boxShadow: shadow.card,
               textAlign: "center",
             }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
@@ -197,20 +198,24 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           background: ${theme.cream};
           color: ${theme.inkSoft};
           border: 1px solid ${theme.rule};
-          border-radius: 14px;
+          border-radius: ${radius.lg}px;
           padding: 10px 8px;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           gap: 10px;
           cursor: pointer;
           text-align: center;
-          box-shadow: 0 1px 2px rgba(30,24,18,0.04), 0 4px 14px -8px rgba(30,24,18,0.08);
-          transition: box-shadow 0.12s ease, border-color 0.12s ease;
+          box-shadow: ${shadow.lifted};
+          transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
           outline: none;
         }
         .home-cta:hover {
           border-color: ${theme.sage};
-          box-shadow: 0 1px 2px rgba(30,24,18,0.05), 0 6px 18px -8px rgba(30,24,18,0.12);
+          box-shadow: ${shadow.hover};
+        }
+        .home-cta:active {
+          box-shadow: ${shadow.pressed};
+          transform: translateY(0.5px);
         }
       `}</style>
       <div style={{
@@ -365,9 +370,14 @@ export const FavoriteCard = ({ b, onTap }) => {
       flex: "0 0 auto", width: 150,
       textAlign: "left",
       background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-      borderRadius: 10, padding: "10px 12px", cursor: "pointer",
+      borderRadius: radius.md, padding: "10px 12px", cursor: "pointer",
       display: "flex", flexDirection: "column", gap: 6,
-    }}>
+      boxShadow: shadow.card,
+      transition: "box-shadow 0.18s ease, border-color 0.18s ease",
+    }}
+    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; e.currentTarget.style.borderColor = theme.rule; }}
+    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.card;  e.currentTarget.style.borderColor = theme.ruleSoft; }}
+    >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {(() => {
           const Icon = MOOD_ICONS[b.mood] || Flower;

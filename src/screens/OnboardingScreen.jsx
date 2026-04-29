@@ -125,11 +125,14 @@ export const OnboardingScreen = ({ onComplete }) => {
           onClick={back}
           disabled={step === 0}
           style={{
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.08em",
+            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+            textTransform: "uppercase",
             color: step === 0 ? "transparent" : theme.ash,
             background: "transparent", border: "none",
             cursor: step === 0 ? "default" : "pointer",
             padding: "10px 4px",
+            transition: "color 0.2s ease",
+            visibility: step === 0 ? "hidden" : "visible",
           }}
         >
           ← back
@@ -143,7 +146,10 @@ export const OnboardingScreen = ({ onComplete }) => {
             background: canAdvance ? theme.ink : theme.rule,
             color: theme.cream, border: "none",
             cursor: canAdvance ? "pointer" : "default",
-            transition: "background 0.2s ease",
+            transition: "background 0.2s ease, box-shadow 0.18s ease, transform 0.12s ease",
+            boxShadow: canAdvance ? "0 2px 6px rgba(30,24,18,0.15)" : "none",
+            opacity: canAdvance ? 1 : 0.65,
+            letterSpacing: "0.01em",
           }}
         >
           {step === STEPS - 1 ? "begin →" : "next →"}

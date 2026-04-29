@@ -307,7 +307,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                         textTransform: "uppercase",
                         color: t.fg, background: t.bg,
                         border: `1px ${t.dashed ? "dashed" : "solid"} ${t.border}`,
-                        borderRadius: 3,
+                        borderRadius: 6,
                         padding: "3px 8px",
                         cursor: "pointer",
                         boxShadow: active ? `0 0 0 2px ${t.border}33` : "none",

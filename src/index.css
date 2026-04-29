@@ -109,3 +109,30 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Global focus-visible ring. Keyboard users get a clear sage indicator
+   on any focused element; mouse/touch interactions never see it. */
+:focus-visible {
+  outline: 2px solid #6D7E55;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #4A573A;
+  outline-offset: 2px;
+}
+
+/* Tap-target minimum and pointer affordance for buttons missing them. */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Subtle press feedback on any tappable in the app — used as a
+   universal fallback when a component doesn't define its own active
+   state. The translate is too small to read as movement; it just
+   adds the suggestion of yield. */
+button:active {
+  transform: translateY(0.5px);
+}

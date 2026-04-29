@@ -84,6 +84,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
                 ? `2px solid ${theme.terra}`
                 : `2px solid transparent`,
               marginBottom: -1,
+              transition: "color 0.2s ease, border-color 0.2s ease",
             }}>{label}</button>
           ))}
         </div>
@@ -103,6 +104,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
             color: tab === t.k ? theme.terra : theme.ash,
             minWidth: 0,
             borderRight: i === 0 ? `1px solid ${theme.ruleSoft}` : "none",
+            transition: "color 0.2s ease",
           }}>
             {React.cloneElement(t.icon, { c: tab === t.k ? theme.terra : theme.ash })}
             <span style={{
