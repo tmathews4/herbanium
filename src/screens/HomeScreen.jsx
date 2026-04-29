@@ -181,24 +181,10 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
               textAlign: "center",
             }}>
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                gap: 8, marginBottom: 8,
-              }}>
-                <span style={{
-                  flex: "0 0 28px", height: 1,
-                  background: `linear-gradient(to right, transparent, ${theme.rule})`,
-                }} />
-                <span style={{
-                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.24em",
-                  textTransform: "uppercase", color: theme.ash,
-                }}>
-                  a moment with you
-                </span>
-                <span style={{
-                  flex: "0 0 28px", height: 1,
-                  background: `linear-gradient(to left, transparent, ${theme.rule})`,
-                }} />
-              </div>
+                width: 36, height: 1, margin: "0 auto 10px",
+                background: theme.rule,
+              }} />
+
               <FitText style={{
                 fontFamily: ff.serif, fontSize: 28, fontWeight: 400,
                 color: theme.ink, lineHeight: 1.05,
