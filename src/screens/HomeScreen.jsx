@@ -226,7 +226,7 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           },
           {
             label: "Experiment",
-            onClick: () => go("apothecary"),
+            onClick: () => go("apothecary", { mode: "reverse" }),
             icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
           },
           {
