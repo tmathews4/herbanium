@@ -201,8 +201,10 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
   // Pick the top MAX_TRACKS by their peak strength anywhere in the
   // envelope. Peak (not average) means notes that surface only at
   // one end still get their own row — that IS the information the
-  // map is trying to surface.
-  const tracks = useMemo(() => {
+  // map is trying to surface. Returns both the ranked names AND
+  // the peaks map so the gradient renderer can normalize each
+  // track to its own dynamic range.
+  const trackData = useMemo(() => {
     const peaks = {};
     for (const s of samples) {
       const map = pickMap(s);
@@ -210,25 +212,37 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
         peaks[name] = Math.max(peaks[name] || 0, strength);
       }
     }
-    return Object.entries(peaks)
+    const names = Object.entries(peaks)
       .filter(([, peak]) => peak >= 0.5)
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_TRACKS)
       .map(([name]) => name);
+    return { names, peaks };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind]);
+  const tracks = trackData.names;
 
   if (tracks.length === 0 || samples.length === 0) return null;
 
-  // All three dimensions scale 0–5 in the engine.
-  const STRENGTH_MAX = 5;
-
+  // Per-track normalization. Alpha scales each band to its OWN peak
+  // across the envelope rather than the engine's absolute 0-5 scale.
+  // A flavor that ranges 0.5 → 1.5 used to render 10% → 30% opacity
+  // (barely visible movement); now it renders ~33% → 100% within
+  // its track. The user sees real gradient instead of a hairline shift.
+  //
+  // Loudness comparison across tracks is preserved by the track ORDER
+  // (sorted by peak descending), and by an intensity floor that keeps
+  // a flat-quiet track from reading as loud-and-unchanging — peaks
+  // below 1.0 cap their max alpha at sqrt(peak), so a track that
+  // peaks at 0.6 maxes around 0.78 opacity rather than full 1.0.
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
+    const peak = trackData.peaks[name] || 1;
+    const cap = peak < 1 ? Math.sqrt(peak) : 1;
     const stops = samples.map((s, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
       const strength = pickMap(s)[name] || 0;
-      const alpha = Math.max(0, Math.min(1, strength / STRENGTH_MAX));
+      const alpha = Math.max(0, Math.min(cap, (strength / peak) * cap));
       return `rgba(${rgb}, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
     }).join(", ");
     return `linear-gradient(to right, ${stops})`;
