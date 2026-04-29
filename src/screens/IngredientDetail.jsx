@@ -118,11 +118,10 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
       <div style={{ padding: "18px 22px 130px" }}>
         {!ingredientHintShown && dismissIngredientHint && (
           <HintCard
-            title="Ingredient"
+            title="Hint"
             body={<>
-              <div><strong style={{ color: theme.terra }}>Overview</strong> — What It Is.</div>
-              <div><strong style={{ color: theme.terra }}>Brewing</strong> — Temp and Steep.</div>
-              <div><strong style={{ color: theme.terra }}>Pairings</strong> — What Plays Well.</div>
+              Hit the <strong style={{ color: theme.terra }}>Brewing</strong> tab
+              to experiment with steep and temp for this ingredient on its own.
             </>}
             onDismiss={dismissIngredientHint}
           />
