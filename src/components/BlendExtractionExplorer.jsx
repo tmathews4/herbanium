@@ -699,6 +699,37 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
+      {/* Flavor + mood + palate across the temperature envelope.
+          Sits ABOVE the temp/steep sliders now: the maps are fixed-
+          height (per-track normalization keeps each band's intensity
+          constant as the slider moves — only the vertical indicator
+          travels), so they no longer expand mid-drag and shove the
+          sliders downward. Reading order is now panorama → controls,
+          which matches the way a user thinks about brewing: see the
+          whole envelope, then aim for a point in it. */}
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        <FlavorMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+        />
+        <MoodMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+        />
+        <PalateMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+        />
+      </div>
+
       {/* Range bands — three states:
           1. Full intersection (every non-catalyst in range): GREEN.
              The blend's natural sweet spot.
@@ -862,11 +893,11 @@ export const BlendExtractionExplorer = ({
 
         return (
           <>
-            {/* Temp + time sliders. Sit ABOVE the predicted-profile bars
-                so they stay in a fixed position even as bars/pills below
-                populate during a slider drag. Putting them under the
-                predicted profile meant the bars could expand mid-drag and
-                shove the sliders downward under the user's finger. */}
+            {/* Temp + time sliders. Sit BELOW the maps now that the
+                maps are fixed-height (per-track normalization keeps
+                each band's intensity stable; only the vertical
+                indicator moves). The user reads the envelope first,
+                then aims for a point in it with the sliders. */}
             <div style={{ marginTop: 14, marginBottom: 14 }}>
               <div style={{
                 display: "flex", justifyContent: "space-between", alignItems: "baseline",
@@ -942,38 +973,6 @@ export const BlendExtractionExplorer = ({
           </>
         );
       })()}
-
-      {/* Flavor + mood + palate across the temperature envelope.
-          Three stacked strips with one shared temperature axis at
-          the bottom — flavor reads what's tasted, mood what's felt,
-          palate the structural axes (tartness, astringency, sweet-
-          ness, bitterness, menthol). The shared vertical terra
-          indicator runs through all three so the user can see how
-          a temp change reshapes every dimension at once. Only the
-          palate strip renders the axis ticks; the others suppress
-          it so the scale only appears once. */}
-      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
-        <FlavorMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-          showAxis={false}
-        />
-        <MoodMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-          showAxis={false}
-        />
-        <PalateMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-        />
-      </div>
 
       {/* Predicted profile — taste (flavor pills) on top, mood (effect
           bars) below. Each section renders the FULL set of entries any
