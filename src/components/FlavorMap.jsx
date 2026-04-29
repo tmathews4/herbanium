@@ -26,7 +26,7 @@
    recompute — only the indicator moves.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
@@ -35,9 +35,21 @@ import { cToF, useUnit } from "../units/units";
 // smooth without making the engine work too hard on every change
 // to ingredients / steep time.
 const SAMPLES = 24;
-// Number of flavors to display as their own track. Beyond ~5 the
-// strip starts feeling like a checklist rather than a profile.
+// Primary track count — the strip always shows up to this many
+// rows by peak. Beyond ~5 the strip starts feeling like a check-
+// list rather than a profile.
 const MAX_TRACKS = 5;
+// Peak strength a flavor must reach somewhere in the envelope to
+// earn a primary row.
+const PRIMARY_THRESHOLD = 0.5;
+// Secondary tier: flavors that don't make the primary cut but
+// rise above this threshold somewhere in the envelope are shown
+// behind a "more" expand toggle. Below this threshold the flavor
+// is essentially absent and stays hidden — surfacing it would
+// just be noise.
+const SECONDARY_THRESHOLD = 0.3;
+// Cap on secondary tracks shown when expanded.
+const MAX_SECONDARY = 6;
 
 // Family → color mapping. Keeps the strip readable as a palette
 // of related notes rather than a confetti of unrelated hues.
@@ -217,12 +229,16 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
     : kind === "mood" ? colorForEffect
     : colorForPalate;
 
-  // Pick the top MAX_TRACKS by their peak strength anywhere in the
-  // envelope. Peak (not average) means notes that surface only at
-  // one end still get their own row — that IS the information the
-  // map is trying to surface. Returns both the ranked names AND
-  // the peaks map so the gradient renderer can normalize each
-  // track to its own dynamic range.
+  // Compute peak strengths once, then split into two tiers:
+  //   - primary: top MAX_TRACKS with peak ≥ PRIMARY_THRESHOLD
+  //   - secondary: next ones with peak ≥ SECONDARY_THRESHOLD that
+  //     didn't make the primary cut. These are flavors getting
+  //     close to surfacing but not quite — useful to expose under
+  //     a "more" toggle so the user can see what's just below the
+  //     waterline. Anything below SECONDARY_THRESHOLD is genuine
+  //     noise and stays hidden.
+  // Returns the names + peaks so the gradient renderer can
+  // normalize each track to its own dynamic range.
   const trackData = useMemo(() => {
     const peaks = {};
     for (const s of samples) {
@@ -231,17 +247,26 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
         peaks[name] = Math.max(peaks[name] || 0, strength);
       }
     }
-    const names = Object.entries(peaks)
-      .filter(([, peak]) => peak >= 0.5)
-      .sort((a, b) => b[1] - a[1])
+    const ranked = Object.entries(peaks).sort((a, b) => b[1] - a[1]);
+    const primary = ranked
+      .filter(([, peak]) => peak >= PRIMARY_THRESHOLD)
       .slice(0, MAX_TRACKS)
       .map(([name]) => name);
-    return { names, peaks };
+    const primarySet = new Set(primary);
+    const secondary = ranked
+      .filter(([name, peak]) => peak >= SECONDARY_THRESHOLD && !primarySet.has(name))
+      .slice(0, MAX_SECONDARY)
+      .map(([name]) => name);
+    return { primary, secondary, peaks };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind]);
-  const tracks = trackData.names;
+  const [expanded, setExpanded] = useState(false);
+  const primaryTracks   = trackData.primary;
+  const secondaryTracks = trackData.secondary;
+  const tracks = expanded ? [...primaryTracks, ...secondaryTracks] : primaryTracks;
 
-  if (tracks.length === 0 || samples.length === 0) return null;
+  if (primaryTracks.length === 0 && secondaryTracks.length === 0) return null;
+  if (samples.length === 0) return null;
 
   // Fill in zero-strength gaps that sit between non-zero neighbors
   // by linear interpolation. This catches authoring artifacts where
@@ -370,6 +395,32 @@ const TrackMap = ({ kind, ingredients, tempC, timeS, tempCRange, showAxis = true
           }} />
         </div>
       </div>
+
+      {/* Expand toggle — only when the strip has secondary tracks
+          worth surfacing. Shows the count of near-but-not-quite
+          flavors so the user knows what's available before tapping. */}
+      {secondaryTracks.length > 0 && (
+        <div style={{ marginTop: 8, marginLeft: LABEL_W + 8 }}>
+          <button
+            onClick={() => setExpanded(v => !v)}
+            style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: theme.ash,
+              background: "transparent",
+              border: `1px dashed ${theme.ruleSoft}`,
+              borderRadius: 999,
+              padding: "3px 10px",
+              cursor: "pointer",
+              fontStyle: "normal",
+            }}
+          >
+            {expanded
+              ? "show less"
+              : `+ ${secondaryTracks.length} near the surface`}
+          </button>
+        </div>
+      )}
 
       {showAxis && (
         <div style={{

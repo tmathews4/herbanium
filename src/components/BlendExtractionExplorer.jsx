@@ -31,12 +31,7 @@ import { useUnit, cToF } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
-import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
-import {
-  FLAVOR_DESCRIPTIONS,
-} from "../data/vocabularyDescriptions";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
-import { VocabInfoCard } from "./layout";
 
 // Slider bounds — union of every ingredient's range, padded with
 // experimentation room. Single source of truth in algo/brewBounds.
@@ -89,34 +84,6 @@ export const BlendExtractionExplorer = ({
   // Master union of every flavor and effect that any constituent
   // ingredient can ever produce — pulls from EXTRACTION_PROFILES first,
   // and falls back to INGREDIENTS[id].flavors / .effects for ingredients
-  // without authored profile points. Used to render the full set in the
-  // predicted-taste / predicted-mood strips, dimmed when the slider
-  // pushes a given entry's strength to zero.
-  const possible = useMemo(() => {
-    const fSet = new Set(), eSet = new Set();
-    const addEffect = (tag) => {
-      // bitterness lives in the predicted-balance strip, not moods.
-      if (tag === "bitterness") return;
-      eSet.add(tag);
-    };
-    (ingredients || []).forEach(({ id }) => {
-      const profilePoints = EXTRACTION_PROFILES[id];
-      if (profilePoints && profilePoints.length > 0) {
-        profilePoints.forEach(p => {
-          (p.flavors || []).forEach(f => fSet.add(f));
-          (p.effects || []).forEach(([tag]) => addEffect(tag));
-        });
-      } else {
-        const meta = INGREDIENTS[id];
-        if (meta) {
-          (meta.flavors || []).forEach(f => fSet.add(f));
-          (meta.effects || []).forEach(([tag]) => addEffect(tag));
-        }
-      }
-    });
-    return { flavors: [...fSet], effects: [...eSet] };
-  }, [ingredients]);
-
   // Internal state — only used when parent hasn't supplied controlled values.
   const [tempCInternal, setTempCInternal] = useState(() =>
     defaultTempC ?? Math.round((tempCRange[0] + tempCRange[1]) / 2)
@@ -124,10 +91,6 @@ export const BlendExtractionExplorer = ({
   const [timeSInternal, setTimeSInternal] = useState(() =>
     defaultTimeS ?? Math.round((timeSRange[0] + timeSRange[1]) / 2)
   );
-  const [openFlavor, setOpenFlavor] = useState(null);
-  // Predicted-taste pill row caps at 6; the rest hide behind an
-  // expand toggle so a long flavor list doesn't dominate the screen.
-  const [flavorsExpanded, setFlavorsExpanded] = useState(false);
 
   const isControlled = tempCProp !== undefined && setTempCProp !== undefined;
   const tempC = isControlled ? tempCProp : tempCInternal;
@@ -519,126 +482,6 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
-      {/* Predicted profile — taste (flavor pills) on top, mood (effect
-          bars) below. Each section renders the FULL set of entries any
-          constituent ingredient can produce; entries the slider has
-          pushed to zero stay in the list but render dim, so the user
-          can see what's *possible* and watch each pill or bar fill in
-          as the brew conditions move into its territory. Balance keeps
-          its zero-strength filter — those metrics (bitterness, tartness)
-          are diagnostic, not constants of the blend's identity. */}
-      {(() => {
-        const flavorMap = {};
-        (brew.flavors || []).forEach(([n, s]) => { flavorMap[n] = s || 0; });
-
-        // Defensive union: any tag the algo currently emits but our
-        // static-profile scan missed (e.g. a synergy-derived flavor)
-        // joins the master set so it isn't dropped from view.
-        const fNames = new Set([...possible.flavors, ...Object.keys(flavorMap)]);
-        const flavorEntries = [...fNames].map(name => [name, flavorMap[name] || 0]);
-
-        // Active first (by strength desc), inactive after (alphabetical).
-        flavorEntries.sort(([a, an], [b, bn]) => {
-          const aActive = Math.round(an * 10) / 10 > 0;
-          const bActive = Math.round(bn * 10) / 10 > 0;
-          if (aActive !== bActive) return aActive ? -1 : 1;
-          if (aActive) return bn - an;
-          return a.localeCompare(b);
-        });
-
-        const visibleFlavors = flavorEntries;
-        if (visibleFlavors.length === 0) return null;
-
-        const sectionLabel = (text) => (
-          <div style={{
-            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
-            textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-          }}>{text}</div>
-        );
-
-        return (
-          <div style={{ marginBottom: 14 }}>
-            {visibleFlavors.length > 0 && (() => {
-              // Always show the top 6 (sorted active-first by strength,
-              // then alphabetical inactives). The remainder lives behind
-              // an expand toggle. Sort runs every render so the top 6
-              // stays live-correct as the brew sliders move.
-              const FLAVOR_HEAD = 6;
-              const headFlavors = visibleFlavors.slice(0, FLAVOR_HEAD);
-              const tailFlavors = visibleFlavors.slice(FLAVOR_HEAD);
-              const shownFlavors = flavorsExpanded ? visibleFlavors : headFlavors;
-              return (
-                <div>
-                  {sectionLabel("predicted taste")}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                    {shownFlavors.map(([name, strength]) => {
-                      const known = !!FLAVOR_DESCRIPTIONS[name];
-                      const opened = openFlavor === name;
-                      const isActive = Math.round(strength * 10) / 10 > 0;
-                      const intensity = Math.max(0.35, Math.min(1, strength / 5));
-                      return (
-                        <button
-                          key={name}
-                          onClick={() => known && setOpenFlavor(prev => prev === name ? null : name)}
-                          disabled={!known}
-                          style={{
-                            fontFamily: ff.sans, fontSize: 10.5,
-                            color: opened ? theme.cream
-                                  : isActive ? theme.terra
-                                  : theme.ash,
-                            letterSpacing: "0.04em",
-                            padding: "3px 9px",
-                            border: `1px solid ${opened || isActive ? theme.terra : theme.rule}`,
-                            borderRadius: 999,
-                            background: opened ? theme.terra : "transparent",
-                            opacity: opened ? 1 : isActive ? intensity : 0.45,
-                            fontStyle: isActive ? "normal" : "italic",
-                            cursor: known ? "pointer" : "default",
-                            transition: "all 0.15s ease",
-                          }}
-                        >{name}</button>
-                      );
-                    })}
-                    {tailFlavors.length > 0 && (
-                      <button
-                        onClick={() => setFlavorsExpanded(v => !v)}
-                        style={{
-                          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
-                          color: theme.ash,
-                          padding: "3px 9px",
-                          border: `1px dashed ${theme.rule}`,
-                          borderRadius: 999,
-                          background: "transparent",
-                          cursor: "pointer",
-                          fontStyle: "italic",
-                        }}
-                      >
-                        {flavorsExpanded ? "show fewer" : `+${tailFlavors.length} more`}
-                      </button>
-                    )}
-                  </div>
-                  {openFlavor && FLAVOR_DESCRIPTIONS[openFlavor] && (
-                    <div style={{ marginTop: 10 }}>
-                      <VocabInfoCard
-                        term={openFlavor}
-                        summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
-                        tone="terra"
-                        onClose={() => setOpenFlavor(null)}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-            {/* Mood and palate bar graphs removed — the FlavorMap /
-                MoodMap / PalateMap track stack above carries the same
-                information across the whole temp envelope, so the
-                point-in-time bars duplicated what's already shown.
-                Effect-vocabulary popovers still open from elsewhere
-                (per-ingredient pill detail). */}
-          </div>
-        );
-      })()}
 
       {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
           Sit between the slider levers and the profile bars so the user
