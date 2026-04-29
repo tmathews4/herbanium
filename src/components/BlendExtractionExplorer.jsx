@@ -221,13 +221,13 @@ export const BlendExtractionExplorer = ({
           others can be tapped. */}
       {brew.perIngredient && brew.perIngredient.length > 0 && (() => {
         const pills = brew.perIngredient;
-        // Resolve current selection. Special id "__blend__" selects
-        // the blend-summary card at the end of the row; otherwise
-        // pick the named ingredient or fall back to the first.
+        // Resolve current selection. Default lands on the blend
+        // summary so the user sees the cup's overall character first;
+        // they can still tap any ingredient pill to drill in.
         const currentId = (
           selectedIngId === "__blend__"
             || (selectedIngId && pills.some(p => p.id === selectedIngId))
-        ) ? selectedIngId : pills[0]?.id;
+        ) ? selectedIngId : "__blend__";
         const selected = currentId === "__blend__"
           ? null  // blend-card detail is rendered separately
           : pills.find(p => p.id === currentId);
@@ -275,6 +275,58 @@ export const BlendExtractionExplorer = ({
               display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center",
               justifyContent: "flex-start",
             }}>
+              {/* Blend Summary pill — leads the row as the default
+                  selection. Severity = worst across the ingredient
+                  set so the user can see at a glance whether any
+                  single leaf is overwhelming the cup. Same solid-
+                  outline shape as the ingredient pills now (no more
+                  dashed) so the row reads as one consistent set. */}
+              {(() => {
+                const blendSev = pills.some(p => p.severity === "red") ? "red"
+                  : pills.some(p => p.severity === "yellow") ? "yellow"
+                  : "green";
+                const isSelected = currentId === "__blend__";
+                const palette = blendSev === "green" ? {
+                  border: theme.sage, dot: theme.sage, text: theme.sageDeep,
+                  bgIdle: "rgba(109,126,85,0.10)", bgSel: "rgba(109,126,85,0.22)",
+                } : blendSev === "yellow" ? {
+                  border: theme.ochre, dot: theme.ochre, text: theme.ochre,
+                  bgIdle: "rgba(189,148,76,0.10)", bgSel: "rgba(189,148,76,0.22)",
+                } : {
+                  border: theme.terra, dot: theme.terra, text: theme.terra,
+                  bgIdle: "rgba(176,84,47,0.08)", bgSel: "rgba(176,84,47,0.18)",
+                };
+                return (
+                  <button
+                    key="__blend__"
+                    type="button"
+                    onClick={() => setSelectedIngId("__blend__")}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      padding: "3px 9px", borderRadius: 999,
+                      background: isSelected ? palette.bgSel : palette.bgIdle,
+                      border: `1px solid ${palette.border}`,
+                      borderWidth: isSelected ? 1.5 : 1,
+                      opacity: blendSev === "green" ? 1 : (isSelected ? 1 : 0.75),
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  >
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: palette.dot,
+                    }} />
+                    <span style={{
+                      fontFamily: ff.sans, fontSize: 10.5,
+                      color: palette.text,
+                    }}>
+                      Blend Summary
+                    </span>
+                  </button>
+                );
+              })()}
+
               {pills.map((p) => {
                 const { id, name } = p;
                 const isSelected = id === currentId;
@@ -323,59 +375,6 @@ export const BlendExtractionExplorer = ({
                   </button>
                 );
               })}
-
-              {/* Blend pill — sits at the end of the ingredient row.
-                  Severity = worst across the ingredient set so the
-                  user can see at a glance whether any single leaf is
-                  overwhelming the cup. Selecting it shows either the
-                  list of red-flagged ingredients (when a warning is
-                  carrying weight) or the merged mood/flavor profile
-                  of everything still in range. */}
-              {(() => {
-                const blendSev = pills.some(p => p.severity === "red") ? "red"
-                  : pills.some(p => p.severity === "yellow") ? "yellow"
-                  : "green";
-                const isSelected = currentId === "__blend__";
-                const palette = blendSev === "green" ? {
-                  border: theme.sage, dot: theme.sage, text: theme.sageDeep,
-                  bgIdle: "rgba(109,126,85,0.10)", bgSel: "rgba(109,126,85,0.22)",
-                } : blendSev === "yellow" ? {
-                  border: theme.ochre, dot: theme.ochre, text: theme.ochre,
-                  bgIdle: "rgba(189,148,76,0.10)", bgSel: "rgba(189,148,76,0.22)",
-                } : {
-                  border: theme.terra, dot: theme.terra, text: theme.terra,
-                  bgIdle: "rgba(176,84,47,0.08)", bgSel: "rgba(176,84,47,0.18)",
-                };
-                return (
-                  <button
-                    key="__blend__"
-                    type="button"
-                    onClick={() => setSelectedIngId("__blend__")}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 5,
-                      padding: "3px 9px", borderRadius: 999,
-                      background: isSelected ? palette.bgSel : palette.bgIdle,
-                      border: `1.5px dashed ${palette.border}`,
-                      borderWidth: isSelected ? 2 : 1.5,
-                      opacity: blendSev === "green" ? 1 : (isSelected ? 1 : 0.75),
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      outline: "none",
-                    }}
-                  >
-                    <span style={{
-                      width: 6, height: 6, borderRadius: "50%",
-                      background: palette.dot,
-                    }} />
-                    <span style={{
-                      fontFamily: ff.sans, fontSize: 10.5, fontStyle: "italic",
-                      color: palette.text,
-                    }}>
-                      blend
-                    </span>
-                  </button>
-                );
-              })()}
             </div>
 
             {/* Inline detail line for the selected pill — its window,
