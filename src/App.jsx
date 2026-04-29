@@ -597,6 +597,36 @@ export default function App() {
   // surfaces (sub-tab strip + main tabs) belong to the same GUI unit.
   const [apothecaryMode, setApothecaryMode] = useState("reverse");
   const [shelfMode, setShelfMode]           = useState("recipes");
+
+  // Universal back-button. Walks the visible-page hierarchy:
+  //   1. Open overlay   → pop one overlay (existing back stack)
+  //   2. Profile tab    → Home
+  //   3. Apothecary at non-default mode → Apothecary default mode
+  //      Apothecary at default mode     → Home
+  //   4. Shelf at non-default mode → Shelf default mode
+  //      Shelf at default mode     → Home
+  //   5. Home → no-op (it's the root)
+  const goBack = () => {
+    if (overlayHistory.length > 0) {
+      popOverlayHistory();
+      return;
+    }
+    if (tab === "profile") { setTab("home"); return; }
+    if (tab === "apothecary") {
+      if (apothecaryMode !== "reverse") { setApothecaryMode("reverse"); return; }
+      setTab("home"); return;
+    }
+    if (tab === "shelf") {
+      if (shelfMode !== "recipes") { setShelfMode("recipes"); return; }
+      setTab("home"); return;
+    }
+  };
+  // Only show the global back button when there's somewhere to go.
+  const canGoBack =
+    overlayHistory.length > 0
+    || tab === "profile"
+    || tab === "apothecary"
+    || tab === "shelf";
   const [catalogueFilter, setCatalogueFilter] = useState("all");
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
@@ -872,7 +902,27 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen    go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} />}
+        {/* Global back button — visible whenever there's a parent
+            page above the current view. Hidden on Home (root) and
+            while an overlay is open (the overlay carries its own
+            back button). Walks the page hierarchy:
+            sub-mode → tab default → Home. */}
+        {canGoBack && !overlay && (
+          <button
+            type="button"
+            onClick={goBack}
+            style={{
+              position: "absolute", top: 12, left: 14, zIndex: 5,
+              background: "transparent", border: "none",
+              padding: "4px 8px", cursor: "pointer",
+              fontFamily: "Instrument Sans, system-ui, sans-serif",
+              fontSize: 12, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "#8C8377",
+              outline: "none",
+            }}
+          >← back</button>
+        )}
+        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} />}
