@@ -759,14 +759,36 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       <button
         onClick={submit}
         disabled={submitted}
+        onMouseEnter={(e) => {
+          if (submitted) return;
+          e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+        }}
+        onMouseLeave={(e) => {
+          if (submitted) return;
+          e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+        onMouseDown={(e)  => {
+          if (submitted) return;
+          e.currentTarget.style.transform = "translateY(1px)";
+          e.currentTarget.style.boxShadow = shadow.btn.ink.press;
+        }}
+        onMouseUp={(e)    => {
+          if (submitted) return;
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+        }}
         style={{
-          width: "100%", fontFamily: ff.serif, fontSize: 14,
-          padding: "9px", borderRadius: 8,
+          width: "100%", fontFamily: ff.serif, fontSize: 14, fontWeight: 500,
+          padding: "11px", borderRadius: radius.md,
           background: submitted ? theme.rule : theme.ink,
           color: theme.cream, border: "none",
           cursor: submitted ? "default" : "pointer",
           opacity: submitted ? 0.6 : 1,
-          transition: "background 0.2s ease",
+          boxShadow: submitted ? "none" : shadow.btn.ink.rest,
+          transition: "background 0.2s ease, box-shadow 0.18s ease, transform 0.12s ease",
+          letterSpacing: "0.02em",
+          textShadow: submitted ? "none" : "0 1px 1px rgba(0,0,0,0.10)",
         }}>
         {submitted ? "saved" : "save mood"}
       </button>

@@ -855,17 +855,27 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         setTimeout(() => setSaveStatus(null), 2000);
                       }
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.lifted; }}
-                    onMouseDown={(e)  => { e.currentTarget.style.boxShadow = shadow.pressed; }}
-                    onMouseUp={(e)    => { e.currentTarget.style.boxShadow = shadow.hover; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.btn.ink.hover; }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }}
+                    onMouseDown={(e)  => {
+                      e.currentTarget.style.transform = "translateY(1px)";
+                      e.currentTarget.style.boxShadow = shadow.btn.ink.press;
+                    }}
+                    onMouseUp={(e)    => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+                    }}
                     style={{
-                      fontFamily: ff.serif, fontSize: 14, letterSpacing: "0.01em",
-                      padding: "8px 22px", borderRadius: radius.md,
+                      fontFamily: ff.serif, fontSize: 14, fontWeight: 500, letterSpacing: "0.02em",
+                      padding: "10px 24px", borderRadius: radius.md,
                       background: theme.ink, color: theme.cream,
                       border: "none", cursor: "pointer",
-                      boxShadow: shadow.lifted,
-                      transition: "box-shadow 0.18s ease",
+                      boxShadow: shadow.btn.ink.rest,
+                      transition: "box-shadow 0.18s ease, transform 0.12s ease",
+                      textShadow: "0 1px 1px rgba(0,0,0,0.10)",
                     }}
                   >Save</button>
                 </div>
@@ -894,24 +904,22 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 onMouseEnter={(e) => {
                   if (blend.empty) return;
                   e.currentTarget.style.background = "rgba(176,84,47,0.10)";
-                  e.currentTarget.style.borderColor = theme.terra;
-                  e.currentTarget.style.boxShadow = "0 4px 12px -4px rgba(176,84,47,0.30)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.hover;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.borderColor = theme.terra;
-                  e.currentTarget.style.boxShadow = "0 1px 3px rgba(176,84,47,0.12)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.rest;
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
                 onMouseDown={(e) => {
                   if (blend.empty) return;
                   e.currentTarget.style.transform = "translateY(1px)";
-                  e.currentTarget.style.boxShadow = "0 1px 2px rgba(176,84,47,0.10)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.press;
                 }}
                 onMouseUp={(e) => {
                   if (blend.empty) return;
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 12px -4px rgba(176,84,47,0.30)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terraOutline.hover;
                 }}
                 style={{
                   fontFamily: ff.serif, fontSize: 15.5, fontWeight: 500,
@@ -921,8 +929,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   border: `1.5px solid ${theme.terra}`,
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   opacity: blend.empty ? 0.4 : 1,
-                  boxShadow: blend.empty ? "none" : "0 1px 3px rgba(176,84,47,0.12)",
-                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease, border-color 0.18s ease",
+                  boxShadow: blend.empty ? "none" : shadow.btn.terraOutline.rest,
+                  transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
                   letterSpacing: "0.02em",
                 }}
               >Save</button>
@@ -953,24 +961,24 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 }}
                 onMouseEnter={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
                   e.currentTarget.style.background = "#BC5D33";
                 }}
                 onMouseLeave={(e) => {
                   if (blend.empty) return;
-                  e.currentTarget.style.boxShadow = "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terra.rest;
                   e.currentTarget.style.background = theme.terra;
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
                 onMouseDown={(e) => {
                   if (blend.empty) return;
                   e.currentTarget.style.transform = "translateY(1px)";
-                  e.currentTarget.style.boxShadow = "0 2px 4px rgba(176,84,47,0.30), inset 0 1px 2px rgba(0,0,0,0.10)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terra.press;
                 }}
                 onMouseUp={(e) => {
                   if (blend.empty) return;
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)";
+                  e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
                 }}
                 style={{
                   flex: 1,
@@ -980,9 +988,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   color: theme.cream, border: "none",
                   cursor: blend.empty ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                  boxShadow: blend.empty
-                    ? "none"
-                    : "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)",
+                  boxShadow: blend.empty ? "none" : shadow.btn.terra.rest,
                   transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
                   letterSpacing: "0.02em",
                   textShadow: blend.empty ? "none" : "0 1px 1px rgba(0,0,0,0.08)",

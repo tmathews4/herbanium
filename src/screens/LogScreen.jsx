@@ -27,7 +27,7 @@ import {
 } from "../components/layout";
 import { FLAVORS } from "../data/blends";
 import {
-  ff, theme,
+  ff, theme, shadow, radius,
 } from "../theme";
 
 /* ──────────────────────────────────────────────────────────────
@@ -256,17 +256,29 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
           taste, note, save,
           rename: rename.trim(),
         })}
-        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 10px -4px rgba(30,24,18,0.25)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 2px 4px rgba(30,24,18,0.10)"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.btn.ink.hover; }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+        onMouseDown={(e)  => {
+          e.currentTarget.style.transform = "translateY(1px)";
+          e.currentTarget.style.boxShadow = shadow.btn.ink.press;
+        }}
+        onMouseUp={(e)    => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+        }}
         style={{
-          width: "100%", fontFamily: ff.serif, fontSize: 17,
-          padding: "14px", borderRadius: 10,
+          width: "100%", fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
+          padding: "15px 16px", borderRadius: radius.md,
           background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
-          boxShadow: "0 2px 4px rgba(30,24,18,0.10)",
+          boxShadow: shadow.btn.ink.rest,
           transition: "box-shadow 0.18s ease, transform 0.12s ease",
-          letterSpacing: "0.01em",
+          letterSpacing: "0.02em",
+          textShadow: "0 1px 1px rgba(0,0,0,0.10)",
         }}>
-        log it →
+        Log it →
       </button>
     </div>
   );

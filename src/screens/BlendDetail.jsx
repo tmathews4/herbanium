@@ -569,26 +569,38 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </>
         )}
 
-        {/* Brew CTA — sits above Recommended Preparations so the action
-            is reachable without scrolling past the ritual notes.
-            Shadow choreography matches Home's primary tiles:
-            lifted resting → hover lift → pressed inset, so taps feel
-            consistent across the app. */}
+        {/* Brew CTA — terra-tinted shadow tokens give the button real
+            visible elevation that reads on a saturated fill. Same
+            recipe as Compose's Start brewing for a consistent feel. */}
         <button
           onClick={onBrew}
-          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; }}
-          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.lifted; }}
-          onMouseDown={(e)  => { e.currentTarget.style.boxShadow = shadow.pressed; }}
-          onMouseUp={(e)    => { e.currentTarget.style.boxShadow = shadow.hover; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
+            e.currentTarget.style.background = "#BC5D33";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = shadow.btn.terra.rest;
+            e.currentTarget.style.background = theme.terra;
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+          onMouseDown={(e)  => {
+            e.currentTarget.style.transform = "translateY(1px)";
+            e.currentTarget.style.boxShadow = shadow.btn.terra.press;
+          }}
+          onMouseUp={(e)    => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = shadow.btn.terra.hover;
+          }}
           style={{
             marginTop: 18, width: "100%",
-            fontFamily: ff.serif, fontSize: 17,
-            padding: "14px", borderRadius: radius.md,
+            fontFamily: ff.serif, fontSize: 17, fontWeight: 500,
+            padding: "15px 16px", borderRadius: radius.md,
             background: theme.terra, color: theme.cream, border: "none", cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-            boxShadow: shadow.lifted,
-            transition: "box-shadow 0.18s ease, transform 0.12s ease",
-            letterSpacing: "0.01em",
+            boxShadow: shadow.btn.terra.rest,
+            transition: "box-shadow 0.18s ease, background 0.18s ease, transform 0.12s ease",
+            letterSpacing: "0.02em",
+            textShadow: "0 1px 1px rgba(0,0,0,0.08)",
           }}>
           <Kettle size={20} c={theme.cream} />
           Brew this cup →

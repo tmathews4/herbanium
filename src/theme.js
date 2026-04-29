@@ -48,6 +48,34 @@ export const shadow = {
   // Inset for selected/depressed buttons — feels like the surface
   // accepts the tap rather than rebounding off it.
   pressed: "inset 0 1px 2px rgba(30, 24, 18, 0.10)",
+
+  // Filled-CTA shadow recipes. The card tokens above use a near-black
+  // ink shadow at 4-8% opacity, which disappears on a saturated fill.
+  // Filled buttons need a stronger, color-tinted drop to read as
+  // elevation. Three variants (rest / hover / press) per tint.
+  btn: {
+    // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs)
+    terra: {
+      rest:  "0 4px 12px -2px rgba(176,84,47,0.40), 0 2px 4px rgba(176,84,47,0.20)",
+      hover: "0 8px 20px -6px rgba(176,84,47,0.50), 0 2px 4px rgba(176,84,47,0.20)",
+      press: "0 2px 4px rgba(176,84,47,0.30), inset 0 1px 2px rgba(0,0,0,0.10)",
+    },
+    // Terra outlined buttons (Save). Lighter weight at rest so the
+    // outline reads as the structure; shadow grows on interaction.
+    terraOutline: {
+      rest:  "0 1px 3px rgba(176,84,47,0.12)",
+      hover: "0 4px 12px -4px rgba(176,84,47,0.30)",
+      press: "0 1px 2px rgba(176,84,47,0.10)",
+    },
+    // Ink-filled buttons (log it, begin →, save mood). Same shape as
+    // terra but with an ink-tinted shadow so the depth reads on warm
+    // dark fills.
+    ink: {
+      rest:  "0 4px 12px -2px rgba(30,24,18,0.32), 0 2px 4px rgba(30,24,18,0.16)",
+      hover: "0 8px 20px -6px rgba(30,24,18,0.40), 0 2px 4px rgba(30,24,18,0.16)",
+      press: "0 2px 4px rgba(30,24,18,0.24), inset 0 1px 2px rgba(0,0,0,0.10)",
+    },
+  },
 };
 
 // Standard corner radii. Drops the 3-/4-px outliers across the codebase

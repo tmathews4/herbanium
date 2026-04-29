@@ -14,7 +14,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState } from "react";
-import { theme, ff } from "../theme";
+import { theme, ff, shadow, radius } from "../theme";
 import { Flower } from "../components/icons";
 
 const STEPS = 4;
@@ -140,16 +140,36 @@ export const OnboardingScreen = ({ onComplete }) => {
         <button
           onClick={advance}
           disabled={!canAdvance}
+          onMouseEnter={(e) => {
+            if (!canAdvance) return;
+            e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+          }}
+          onMouseLeave={(e) => {
+            if (!canAdvance) return;
+            e.currentTarget.style.boxShadow = shadow.btn.ink.rest;
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+          onMouseDown={(e)  => {
+            if (!canAdvance) return;
+            e.currentTarget.style.transform = "translateY(1px)";
+            e.currentTarget.style.boxShadow = shadow.btn.ink.press;
+          }}
+          onMouseUp={(e)    => {
+            if (!canAdvance) return;
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = shadow.btn.ink.hover;
+          }}
           style={{
-            fontFamily: ff.serif, fontSize: 15,
-            padding: "12px 28px", borderRadius: 999,
+            fontFamily: ff.serif, fontSize: 15, fontWeight: 500,
+            padding: "13px 30px", borderRadius: radius.pill,
             background: canAdvance ? theme.ink : theme.rule,
             color: theme.cream, border: "none",
             cursor: canAdvance ? "pointer" : "default",
             transition: "background 0.2s ease, box-shadow 0.18s ease, transform 0.12s ease",
-            boxShadow: canAdvance ? "0 2px 6px rgba(30,24,18,0.15)" : "none",
+            boxShadow: canAdvance ? shadow.btn.ink.rest : "none",
             opacity: canAdvance ? 1 : 0.65,
-            letterSpacing: "0.01em",
+            letterSpacing: "0.02em",
+            textShadow: canAdvance ? "0 1px 1px rgba(0,0,0,0.10)" : "none",
           }}
         >
           {step === STEPS - 1 ? "begin →" : "next →"}
