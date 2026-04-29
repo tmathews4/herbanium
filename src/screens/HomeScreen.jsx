@@ -78,16 +78,13 @@ const pickHomePoem = (date) => {
 };
 
 export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
-  // Resolve a favorite tap to the most recent session for that
-  // blend, if one exists. Routing through openCup gives the user
-  // the journal entry first; the cup detail's blend-name link
-  // hops to the recipe from there. Without a session, fall back
-  // to the recipe directly — there's no journal entry to show.
+  // Favorite cards open the blend recipe directly. The "Recent
+  // brews" row below the favorites is the right place to land on
+  // a journal entry — keeping the two destinations distinct means
+  // a tap on Favorites always answers "what is this blend?" and a
+  // tap on Recent brews always answers "what was that cup like?"
   const openFavorite = (blendId) => {
-    const latest = (sessions || [])
-      .find(s => s.who === "you" && s.blendId === blendId);
-    if (latest && openCup) openCup(latest.id);
-    else if (openBlend) openBlend(blendId);
+    if (openBlend) openBlend(blendId);
   };
   // Mood follow-up — brew-time logging only captures flavor (verifiable
   // at first sip). Mood resolves over the next ~30 minutes, so any
