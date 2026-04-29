@@ -1,13 +1,31 @@
 /* ──────────────────────────────────────────────────────────────
    screens/LogScreen.jsx — post-brew logging screen.
+
+   Captures what's verifiable AT FIRST SIP:
+     - which predicted flavor notes actually surfaced
+     - any unexpected flavors that appeared
+     - taste rating (cup quality, not effect)
+     - marginalia (free-form notes)
+     - save-to-library toggle
+
+   Mood is intentionally NOT asked here. The user just put down the
+   cup; they can't yet tell whether the calm landed or the focus
+   sharpened. Mood resolves over the next ~30 minutes, so the
+   mood log moves to a follow-up prompt that surfaces on the next
+   app open (or, on mobile, as a 30-minute notification — a
+   future enhancement).
+
+   The session is created in a "moodsPending" state, and the Home
+   screen's MoodFollowUp card walks the user through landed/missed
+   when they next return to the app.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Flower } from "../components/icons";
 import {
   Chip, ChipRows, SectionLabel, Toggle,
-} from "../components/layout";;
-import { MOODS, UNEXPECTED_MOODS } from "../data/blends";
+} from "../components/layout";
+import { FLAVORS } from "../data/blends";
 import {
   ff, theme,
 } from "../theme";
@@ -16,26 +34,38 @@ import {
    Screen: LOG
    ────────────────────────────────────────────────────────────── */
 
-export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, onCancel }) => {
-  const safeMoods = targetMoods && targetMoods.length ? targetMoods : [];
-  // Per-dimension "did it land?" — default each target mood to "landed".
-  const [landed, setLanded] = useState(() =>
-    Object.fromEntries(safeMoods.map(m => [m, true]))
+export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) => {
+  // Predicted flavors for this blend — the notes the brew engine and
+  // curator say the cup should carry. The user confirms which ones
+  // actually surfaced. Pulled from the blend's static flavor list,
+  // which is the simplest source-of-truth that's available offline.
+  const predictedFlavors = useMemo(() => {
+    const list = Array.isArray(blend?.flavors) ? blend.flavors : [];
+    // Cap at 6 — beyond that the row reads as a checklist, not a
+    // tasting confirmation. The most prominent notes already lead
+    // the array (curator order), so a slice keeps the strongest.
+    return list.slice(0, 6);
+  }, [blend]);
+
+  // Default each predicted flavor to "tasted" — most cups deliver
+  // their advertised character, so the common path is one tap on
+  // any miss rather than confirming each one individually.
+  const [tasted, setTasted] = useState(() =>
+    Object.fromEntries(predictedFlavors.map(f => [f, true]))
   );
-  // Allow the user to add moods they didn't set out for (e.g. unintended sleepy).
-  const [extra, setExtra] = useState([]);
-  const [taste, setTaste] = useState(4);
-  const [note, setNote] = useState("");
-  const [save, setSave] = useState(true);
+  // Unexpected flavors the user noticed that weren't predicted.
+  const [extraFlavors, setExtraFlavors] = useState([]);
+  const [taste, setTaste]   = useState(4);
+  const [note, setNote]     = useState("");
+  const [save, setSave]     = useState(true);
   // Rename: only relevant for user-composed blends (no curated id). Empty
-  // string means "keep the auto-generated name"; any non-empty string
-  // overrides it when saving to the library.
+  // string means "keep the auto-generated name."
   const [rename, setRename] = useState("");
   const isComposed = !blend?.id;
 
-  const toggleExtra = (m) => {
-    if (safeMoods.includes(m)) return; // don't let extras collide with targets
-    setExtra(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
+  const toggleExtra = (f) => {
+    if (predictedFlavors.includes(f)) return;  // don't double-list
+    setExtraFlavors(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   };
 
   return (
@@ -47,9 +77,13 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <button onClick={onCancel} style={{
           background: "transparent", border: "none", color: theme.ash,
-          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
+          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+          textTransform: "uppercase", cursor: "pointer",
         }}>← back</button>
-        <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>
           Check-in
         </div>
         <div style={{ width: 40 }} />
@@ -57,69 +91,64 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
 
       <div style={{ textAlign: "center", marginTop: 18 }}>
         <Flower size={28} c={theme.ochre} />
-        <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 14, color: theme.ash, marginTop: 8 }}>
-          how's the cup?
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+          color: theme.ash, marginTop: 8,
+        }}>
+          how's the cup taste?
         </div>
-        <h2 style={{ fontFamily: ff.serif, fontSize: 24, fontWeight: 400, color: theme.ink, margin: "4px 0 0" }}>
+        <h2 style={{
+          fontFamily: ff.serif, fontSize: 24, fontWeight: 400,
+          color: theme.ink, margin: "4px 0 0",
+        }}>
           {blend.name}
         </h2>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+          color: theme.ash, marginTop: 8,
+        }}>
+          mood arrives over the next half hour — we'll ask you then
+        </div>
       </div>
 
-      <div style={{ margin: "20px 0" }}>
-        <SectionLabel>Set out feeling</SectionLabel>
-        {currentMoods && currentMoods.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
-            {currentMoods.map(m => (
-              <span key={m} style={{
-                fontFamily: ff.serif, fontSize: 12.5,
-                padding: "4px 10px", borderRadius: 999,
-                background: theme.cream, color: theme.terra,
-                border: `1px solid ${theme.ruleSoft}`,
-              }}>{m}</span>
-            ))}
-          </div>
-        )}
-        {intent ? (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 16, color: theme.inkSoft, marginTop: currentMoods?.length ? 8 : 6 }}>
-            "{intent}"
-          </div>
-        ) : (!currentMoods || currentMoods.length === 0) && (
-          <div style={{ fontFamily: ff.serif, fontSize: 18, color: theme.ash, marginTop: 6 }}>—</div>
-        )}
-      </div>
-
-      {/* Per-mood confirmation — "you aimed for calm + focus; did they land?" */}
-      {safeMoods.length > 0 && (
+      {/* Per-flavor confirmation — "the cup said muscatel and bright; did
+          they show up?" Mirrors the previous mood-landed UI pattern, so
+          users coming from the old log feel the same rhythm. */}
+      {predictedFlavors.length > 0 && (
         <div style={{ margin: "20px 0" }}>
-          <SectionLabel n="ii">Did each one land?</SectionLabel>
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash, marginTop: 4 }}>
-            you aimed for {safeMoods.join(" + ")}
+          <SectionLabel n="i">Did the notes show up?</SectionLabel>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: theme.ash, marginTop: 4,
+          }}>
+            the cup was meant to carry {predictedFlavors.join(", ")}
           </div>
           <div style={{
             marginTop: 10, border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
             background: theme.cream, overflow: "hidden",
           }}>
-            {safeMoods.map((m, i) => (
-              <div key={m} style={{
+            {predictedFlavors.map((f, i) => (
+              <div key={f} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 padding: "12px 14px",
                 borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
               }}>
                 <div style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
-                  <em style={{ color: theme.terra, fontStyle: "normal" }}>{m}</em>?
+                  <em style={{ color: theme.terra, fontStyle: "normal" }}>{f}</em>?
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
                   {[
-                    ["landed",  true],
+                    ["tasted",  true],
                     ["missed",  false],
                   ].map(([label, v]) => (
-                    <button key={label} onClick={() => setLanded({ ...landed, [m]: v })} style={{
+                    <button key={label} onClick={() => setTasted({ ...tasted, [f]: v })} style={{
                       fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.02em",
                       padding: "5px 11px", borderRadius: 999,
-                      border: `1px solid ${landed[m] === v ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
-                      background: landed[m] === v ? (v ? theme.sageDeep : theme.terra) : "transparent",
-                      color: landed[m] === v ? theme.cream : theme.inkSoft,
+                      border: `1px solid ${tasted[f] === v ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
+                      background: tasted[f] === v ? (v ? theme.sageDeep : theme.terra) : "transparent",
+                      color: tasted[f] === v ? theme.cream : theme.inkSoft,
                       cursor: "pointer",
+                      transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                     }}>{label}</button>
                   ))}
                 </div>
@@ -129,27 +158,34 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
         </div>
       )}
 
+      {/* Unexpected flavors. Every flavor in the FLAVORS pool that isn't
+          already in the predicted set, so the user can flag anything
+          that surfaced unbidden — a smoky note in what should have been
+          a floral cup, etc. */}
       <div style={{ margin: "20px 0" }}>
-        <SectionLabel n={safeMoods.length > 0 ? "iii" : "ii"}>
-          {safeMoods.length > 0 ? "Anything else showed up?" : "Feeling now"}
+        <SectionLabel n={predictedFlavors.length > 0 ? "ii" : "i"}>
+          Anything else come through?
         </SectionLabel>
-        {safeMoods.length > 0 && (
-          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash, marginTop: 4 }}>
-            unexpected moods from the cup
-          </div>
-        )}
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+          color: theme.ash, marginTop: 4,
+        }}>
+          notes you tasted that weren't promised
+        </div>
         <div style={{ marginTop: 10 }}>
           <ChipRows
-            items={UNEXPECTED_MOODS.filter(m => !safeMoods.includes(m))}
-            renderItem={(m) => (
-              <Chip key={m} active={extra.includes(m)} onClick={() => toggleExtra(m)} tone="sage">{m}</Chip>
+            items={FLAVORS.filter(f => !predictedFlavors.includes(f))}
+            renderItem={(f) => (
+              <Chip key={f} active={extraFlavors.includes(f)} onClick={() => toggleExtra(f)} tone="terra">
+                {f}
+              </Chip>
             )}
           />
         </div>
       </div>
 
       <div style={{ margin: "20px 0" }}>
-        <SectionLabel n={safeMoods.length > 0 ? "iv" : "iii"}>Taste</SectionLabel>
+        <SectionLabel n={predictedFlavors.length > 0 ? "iii" : "ii"}>Taste</SectionLabel>
         <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
           {[1,2,3,4,5].map(i => (
             <button key={i} onClick={() => setTaste(i)} style={{
@@ -161,7 +197,7 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
       </div>
 
       <div style={{ margin: "20px 0" }}>
-        <SectionLabel n={safeMoods.length > 0 ? "v" : "iv"}>Marginalia</SectionLabel>
+        <SectionLabel n={predictedFlavors.length > 0 ? "iv" : "iii"}>Marginalia</SectionLabel>
         <textarea
           value={note} onChange={e => setNote(e.target.value)}
           placeholder="a line or two, just for you"
@@ -177,9 +213,6 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, margin: "20px 0" }}>
         <Toggle label="Save blend to library as favorite" value={save} onChange={setSave} />
 
-        {/* Rename input — only when saving a user-composed blend.
-            Curated blends (Dusk Lullaby, Moroccan Mint, etc.) keep their
-            original names; only on-the-fly compositions get renamed. */}
         {save && isComposed && (
           <div style={{
             padding: "10px 12px", borderRadius: 8,
@@ -216,7 +249,13 @@ export const LogScreen = ({ blend, intent, targetMoods, currentMoods, onSubmit, 
       </div>
 
       <button
-        onClick={() => onSubmit({ landed, extra, taste, note, save, rename: rename.trim() })}
+        onClick={() => onSubmit({
+          flavorsTasted: tasted,
+          flavorsExtra: extraFlavors,
+          flavorsTarget: predictedFlavors,
+          taste, note, save,
+          rename: rename.trim(),
+        })}
         onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 10px -4px rgba(30,24,18,0.25)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 2px 4px rgba(30,24,18,0.10)"; }}
         style={{

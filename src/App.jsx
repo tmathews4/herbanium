@@ -717,32 +717,28 @@ export default function App() {
     setLastWildAt(wild.ts);
   };
 
-  const addSession = ({ blend, intent, targetMoods, currentMoods, landed, extra, taste, note, save, rename }) => {
+  const addSession = ({
+    blend, intent, targetMoods, currentMoods,
+    flavorsTasted, flavorsExtra, flavorsTarget,
+    taste, note, save, rename,
+  }) => {
     // A blend composed via forward-compose won't have an id; stash it under
     // a synthetic id so the session can reference it via getBlend().
     let blendId = blend.id;
     if (!blendId) {
       blendId = `local-${Date.now()}`;
-      // If the user renamed the blend at log time, use their name. Otherwise
-      // fall back to the auto-generated one. Composed blends can be awkward
-      // ("Dusk Lullaby · spiced accent"), so the rename field exists to let
-      // them give it a name they'll recognize in Apothecary later.
       const finalName = (rename && rename.length > 0) ? rename : blend.name;
       const persisted = { ...blend, id: blendId, name: finalName, experimental: true };
       LOCAL_BLENDS[blendId] = persisted;
-      // Also persist into generatedBlends so the blend survives reload
-      // and shows up in Catalogue → Experimental.
       setGeneratedBlends(prev => [...(prev || []), persisted]);
     }
 
-    // Derive "actual" from what landed: prefer target moods that landed,
-    // fall back to any unintended moods the user noted, then to "brewed".
-    const landedMoods = (targetMoods || []).filter(m => landed?.[m]);
-    const extraMoods = extra || [];
-    const actual = landedMoods.length > 0 ? landedMoods.join(", ")
-                 : extraMoods.length > 0 ? extraMoods.join(", ")
-                 : "brewed";
-
+    // Mood is intentionally NOT logged at brew-time — the user can't
+    // assess it yet. The session is created in a "moodsPending" state
+    // and the Home screen's MoodFollowUp card walks them through
+    // landed/missed on next app open. Until then, `actual` stays the
+    // "brewed" placeholder so existing readers (HomeScreen,
+    // attributes.js, BlendDetail) treat it as "no mood data yet."
     const newSession = {
       id: `sess-${Date.now()}`,
       who: "you",
@@ -750,21 +746,31 @@ export default function App() {
       ago: "just now",
       intent: intent || "",
       currentMoods: currentMoods || [],
-      actual,
+      // Mood fields — empty at brew-time, filled by patchSessionMoods.
+      actual: "brewed",
+      landed: {},
+      extra: [],
+      moodsPending: true,
+      // Snapshot of the moods the user originally aimed for, so the
+      // follow-up card knows which checkboxes to render.
+      targetMoods: targetMoods || [],
+      brewedAt: Date.now(),
+      // Flavor fields — what the user just verified at first sip.
+      flavorsTasted: flavorsTasted || {},
+      flavorsExtra:  flavorsExtra  || [],
+      flavorsTarget: flavorsTarget || [],
       taste: taste ?? 4,
       note: note || "",
       // Capture the user's actual brew settings — the explorer
       // sliders may have moved the temp/time off the blend's
-      // curated defaults, and downstream views (the home cup row,
-      // blend history) want to show what the user actually did,
-      // not the recipe spec.
+      // curated defaults, and downstream views want what the user
+      // actually did, not the recipe spec.
       tempC: blend.tempC,
       timeS: blend.timeS,
     };
 
     setSessions(prev => [newSession, ...prev]);
 
-    // Honor the "save blend to library" toggle in Log.
     if (save && !savedBlendIds.has(blendId)) {
       const next = new Set(savedBlendIds);
       next.add(blendId);
@@ -773,6 +779,41 @@ export default function App() {
 
     hapticTap();
     tryRollWildElemental();
+  };
+
+  // Patch a pending session with mood data once the user fills in the
+  // follow-up. Recomputes `actual` the same way the prior brew-time
+  // log did so downstream readers (HomeScreen mood arrow, the
+  // attributes/elementals scoring code that scans `s.actual`) get the
+  // mood string they expect. Clears moodsPending so the follow-up
+  // card stops asking.
+  const patchSessionMoods = (sessionId, { landed, extra }) => {
+    setSessions(prev => prev.map(s => {
+      if (s.id !== sessionId) return s;
+      const targetMoods = s.targetMoods || [];
+      const landedMoods = targetMoods.filter(m => landed?.[m]);
+      const extraMoods = extra || [];
+      const actual = landedMoods.length > 0 ? landedMoods.join(", ")
+                   : extraMoods.length > 0 ? extraMoods.join(", ")
+                   : "brewed";
+      return {
+        ...s,
+        actual,
+        landed: landed || {},
+        extra: extraMoods,
+        moodsPending: false,
+      };
+    }));
+    hapticTap();
+  };
+
+  // Skip a mood follow-up — user dismissed without filling. Clears
+  // moodsPending so the card doesn't reappear, but leaves `actual`
+  // as the "brewed" placeholder. The session still counts in the log.
+  const dismissSessionMoods = (sessionId) => {
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, moodsPending: false } : s
+    ));
   };
 
   // Append a free-form journal entry. Entries live alongside cup
@@ -958,7 +999,7 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
-        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} />}
+        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} />}

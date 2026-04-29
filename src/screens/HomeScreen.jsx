@@ -77,7 +77,19 @@ const pickHomePoem = (date) => {
   return pool[Math.abs(h) % pool.length];
 };
 
-export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice }) => {
+export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
+  // Mood follow-up — brew-time logging only captures flavor (verifiable
+  // at first sip). Mood resolves over the next ~30 minutes, so any
+  // session brewed in the last 24 hours that hasn't logged its mood
+  // gets surfaced as an inline card here. One per render: the most
+  // recent pending cup, since piling them up reads as nagging.
+  const FOLLOWUP_WINDOW_MS = 24 * 60 * 60 * 1000;
+  const pendingMoodSession = (sessions || []).find(s =>
+    s.who === "you"
+    && s.moodsPending
+    && (s.targetMoods?.length || 0) > 0
+    && (Date.now() - (s.brewedAt || 0)) < FOLLOWUP_WINDOW_MS
+  );
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
   // are only surfaced behind the Shelf > Journal sub-tab where they
@@ -283,6 +295,18 @@ export const HomeScreen = ({ go, openBlend, openInCompose, sessions, savedBlendI
           </button>
         ))}
       </div>
+
+      {/* Mood follow-up card — surfaces pending mood logs from cups
+          brewed in the last 24h. Sits above the favorites/recent rail
+          because it's the most time-sensitive thing on the page; the
+          longer we wait to ask, the worse the user's recall. */}
+      {pendingMoodSession && (
+        <MoodFollowUpCard
+          session={pendingMoodSession}
+          onSubmit={(payload) => patchSessionMoods?.(pendingMoodSession.id, payload)}
+          onDismiss={() => dismissSessionMoods?.(pendingMoodSession.id)}
+        />
+      )}
 
       {/* Seeded-favorites notice — sits right above Favorites so the
           'we added these' framing is adjacent to the rail it's
@@ -583,5 +607,125 @@ export const SessionRow = ({ s, openBlend, first }) => {
         flexShrink: 0, fontSize: 10, color: theme.ash, letterSpacing: "0.06em",
       }}>{sessionAgo(s) || s.ago}</span>
     </button>
+  );
+};
+
+// Inline follow-up card for sessions that brewed in the last 24h
+// without a mood log. The user dismissed the post-brew screen too
+// soon to assess mood (caffeine hadn't hit, calm hadn't settled),
+// so we ask now — landed/missed pills for each target mood, plus a
+// dismiss arrow for "I'd rather not say." Submit patches the
+// session, dismiss clears the pending flag without filling moods.
+//
+// Lives at the top of Home so it's the first thing the user sees on
+// return — the longer we wait to ask, the worse the recall, and
+// burying it under favorites turns it into a maintenance task.
+const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
+  const blend = getBlend(session.blendId);
+  const targets = session.targetMoods || [];
+  const [landed, setLanded] = React.useState(() =>
+    Object.fromEntries(targets.map(m => [m, true]))
+  );
+  const [submitted, setSubmitted] = React.useState(false);
+
+  if (!blend || targets.length === 0) return null;
+
+  const minutesAgo = Math.max(1, Math.round((Date.now() - (session.brewedAt || 0)) / 60000));
+  const timeLabel = minutesAgo < 60
+    ? `${minutesAgo} min ago`
+    : `${Math.round(minutesAgo / 60)}h ago`;
+
+  const submit = () => {
+    if (submitted) return;
+    setSubmitted(true);
+    onSubmit?.({ landed, extra: [] });
+  };
+
+  return (
+    <div style={{
+      marginBottom: 14, padding: "12px 14px",
+      borderRadius: 10,
+      background: "rgba(165, 120, 54, 0.07)",
+      border: `1px solid ${theme.ochre}`,
+      display: "flex", flexDirection: "column", gap: 10,
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.ochre, marginBottom: 4,
+          }}>
+            How did it land?
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.inkSoft, lineHeight: 1.4,
+          }}>
+            Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
+            {" "}from {timeLabel} — did the moods you reached for actually arrive?
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          aria-label="dismiss"
+          style={{
+            flexShrink: 0, background: "transparent", border: "none",
+            color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",
+            cursor: "pointer",
+          }}
+        >×</button>
+      </div>
+
+      <div style={{
+        display: "flex", flexDirection: "column", gap: 6,
+        background: theme.cream, borderRadius: 8, padding: "8px 10px",
+        border: `1px solid ${theme.ruleSoft}`,
+      }}>
+        {targets.map(m => (
+          <div key={m} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+          }}>
+            <span style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink }}>
+              <em style={{ color: theme.terra, fontStyle: "normal" }}>{m}</em>
+            </span>
+            <div style={{ display: "flex", gap: 5 }}>
+              {[
+                ["landed", true],
+                ["missed", false],
+              ].map(([label, v]) => (
+                <button
+                  key={label}
+                  onClick={() => setLanded(prev => ({ ...prev, [m]: v }))}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                    padding: "3px 9px", borderRadius: 999,
+                    border: `1px solid ${landed[m] === v ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
+                    background: landed[m] === v ? (v ? theme.sageDeep : theme.terra) : "transparent",
+                    color: landed[m] === v ? theme.cream : theme.inkSoft,
+                    cursor: "pointer",
+                    transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+                  }}
+                >{label}</button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={submit}
+        disabled={submitted}
+        style={{
+          width: "100%", fontFamily: ff.serif, fontSize: 14,
+          padding: "9px", borderRadius: 8,
+          background: submitted ? theme.rule : theme.ink,
+          color: theme.cream, border: "none",
+          cursor: submitted ? "default" : "pointer",
+          opacity: submitted ? 0.6 : 1,
+          transition: "background 0.2s ease",
+        }}>
+        {submitted ? "saved" : "save mood"}
+      </button>
+    </div>
   );
 };
