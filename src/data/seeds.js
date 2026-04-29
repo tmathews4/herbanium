@@ -57,16 +57,26 @@ export function materializeSeedPlannerItems(rawItems) {
   });
 }
 
-// Materialize seed sessions: each carries an `hoursAgo` offset which
-// resolves to a fresh sess-<ms> id at apply time. Otherwise stored
-// timestamps would drift further into the past on every reset and
-// break the "recent 20 cups" window predicates.
+// Materialize seed sessions: each carries an `hoursAgo` offset (or
+// `minutesAgo` for fine-grained "just brewed" seeds) which resolves
+// to a fresh sess-<ms> id at apply time. Otherwise stored timestamps
+// would drift further into the past on every reset and break the
+// "recent 20 cups" window predicates.
+//
+// Pending-mood seeds (moodsPending=true) also need a fresh brewedAt
+// stamp so the Home mood follow-up card's elapsed-time gate resolves
+// correctly on every apply — without it, a seed brewed "11 minutes
+// ago" would slowly age past the 24-hour window between resets.
 export function materializeSeedSessions(rawSessions) {
   const now = Date.now();
   return (rawSessions || []).map((s, i) => {
-    const hoursAgo = typeof s.hoursAgo === "number" ? s.hoursAgo : (i + 1);
-    const ts = now - hoursAgo * 3600000;
-    const ago = hoursAgo < 24 ? `${Math.round(hoursAgo)}h`
+    const offsetMs = typeof s.minutesAgo === "number"
+      ? s.minutesAgo * 60000
+      : (typeof s.hoursAgo === "number" ? s.hoursAgo : (i + 1)) * 3600000;
+    const ts = now - offsetMs;
+    const hoursAgo = offsetMs / 3600000;
+    const ago = hoursAgo < 1  ? `${Math.max(1, Math.round(hoursAgo * 60))}m`
+              : hoursAgo < 24 ? `${Math.round(hoursAgo)}h`
               : hoursAgo < 48 ? "yesterday"
               : `${Math.round(hoursAgo / 24)}d`;
     return {
@@ -80,6 +90,14 @@ export function materializeSeedSessions(rawSessions) {
       note: s.note || "",
       currentMoods: s.currentMoods || [],
       targetMoods: s.targetMoods || [],
+      // Pass-through fields for the post-brew flavor / pending-mood
+      // shape introduced when the log split into "flavor at first
+      // sip, mood on next return." Defaults keep older seeds working.
+      moodsPending: !!s.moodsPending,
+      brewedAt:    s.moodsPending ? ts : (s.brewedAt || ts),
+      flavorsTasted: s.flavorsTasted || {},
+      flavorsExtra:  s.flavorsExtra  || [],
+      flavorsTarget: s.flavorsTarget || [],
     };
   });
 }
@@ -235,9 +253,20 @@ export const SEED_MODES = {
     label: "mid journey",
     description: "a couple weeks in — a handful of cups and one saved blend",
     sessions: [
-      { id: "my1", who: "you", blendId: "dusk",   ago: "3h",    intent: "wound up", actual: "calm",    taste: 4, note: "Honeyed." },
-      { id: "my2", who: "you", blendId: "dusk",   ago: "yest.", intent: "keyed up", actual: "digestive",  taste: 5, note: "" },
-      { id: "my3", who: "you", blendId: "hearth", ago: "3d",    intent: "cold",     actual: "comfort", taste: 3, note: "" },
+      // Fresh pending-mood cup, just past the 10-minute gate so the
+      // Home follow-up card surfaces immediately on apply. Lets the
+      // dev profile demo the post-brew mood reflection flow without
+      // having to actually brew and wait.
+      { minutesAgo: 11, blendId: "dusk", actual: "brewed", taste: 4,
+        note: "First sip: honeyed and quiet.",
+        currentMoods: ["wound up"], targetMoods: ["calm"],
+        moodsPending: true,
+        flavorsTarget: ["floral", "honeyed", "sweet"],
+        flavorsTasted: { floral: true, honeyed: true, sweet: true },
+        flavorsExtra: [] },
+      { hoursAgo: 3,  blendId: "dusk",   intent: "wound up", actual: "calm",      taste: 4, note: "Honeyed.", targetMoods: ["calm"] },
+      { hoursAgo: 24, blendId: "dusk",   intent: "keyed up", actual: "digestive", taste: 5, note: "",          targetMoods: ["calm"] },
+      { hoursAgo: 72, blendId: "hearth", intent: "cold",     actual: "comfort",   taste: 3, note: "",          targetMoods: ["comfort"] },
     ],
     savedBlendIds: ["dusk"],
     favoriteBlendIds: ["dusk"],
