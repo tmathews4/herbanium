@@ -1137,13 +1137,24 @@ function sumCapTo5(...vals) {
 //   - secondary: second entry joins if it clears this
 // Below primary, returns [] — the cup isn't loud enough on this
 // axis to make a definite claim.
-function summarizeTopTuples(tuples, { primary, secondary }) {
+function summarizeTopTuples(tuples, { primary, secondary, tertiary }) {
   if (!tuples || tuples.length === 0) return [];
   const top = tuples[0];
   if (!top || top[1] < primary) return [];
+  const out = [top[0]];
   const second = tuples[1];
-  if (second && second[1] >= secondary) return [top[0], second[0]];
-  return [top[0]];
+  if (second && second[1] >= secondary) {
+    out.push(second[0]);
+    // Third entry surfaces only if it's tracking the second closely —
+    // 70% of the second's strength keeps the read honest. Without this,
+    // a quiet third-place flavor would claim equal billing with the
+    // dominant notes.
+    const third = tuples[2];
+    if (tertiary != null && third && third[1] >= tertiary && third[1] >= second[1] * 0.7) {
+      out.push(third[0]);
+    }
+  }
+  return out;
 }
 
 function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
@@ -1426,8 +1437,13 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // One-line summaries — the dominant 1–2 effects and flavors, threshold-
   // gated so a quiet cup doesn't claim a definite read. Posted alongside
   // the synergy pills in the UI as a quick "this is what the cup is" line.
-  const moodSummary   = summarizeTopTuples(effects, { primary: 2.0, secondary: 1.5 });
-  const flavorSummary = summarizeTopTuples(flavors, { primary: 1.5, secondary: 1.0 });
+  // Thresholds tuned for blends: a 3-leaf cup at 0.5g each weights every
+  // flavor down to ~0.33× of its single-ingredient strength, so the old
+  // 1.5/1.0 cutoffs read most blends as "no dominant flavor" even when
+  // a clear character exists. Tertiary slot opens up so a cup like
+  // darjeeling+ginger+hibiscus can name muscatel + tart + warm.
+  const moodSummary   = summarizeTopTuples(effects, { primary: 1.4, secondary: 1.0, tertiary: 0.7 });
+  const flavorSummary = summarizeTopTuples(flavors, { primary: 0.9, secondary: 0.6, tertiary: 0.4 });
 
   const rawFlavorTuples = Object.entries(rawFlavors)
     .map(([name, v]) => [name, Math.round(v * 10) / 10])

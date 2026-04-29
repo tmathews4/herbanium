@@ -1736,7 +1736,7 @@ const INGREDIENTS = {
     ],
     overPull: { timeS: 360, reason: "tannins overtake the muscatel" },
     effects: [["uplifting", 5], ["energy", 3], ["focus", 3], ["warming", 3], ["calm", 3]],
-    flavors: ["muscatel", "floral", "fruit", "bright"],
+    flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "brisk", "rich"],
     pairs: ["rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,

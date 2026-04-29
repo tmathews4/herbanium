@@ -355,13 +355,13 @@ export const EXTRACTION_PROFILES = {
   ],
 
   darjeeling: [
-    { tempC: 85,  timeS: 120, flavors: ["muscatel", "bright"],
+    { tempC: 85,  timeS: 120, flavors: ["muscatel", "bright", "brisk"],
       effects: [["energy", 2], ["focus", 2]],
       character: "Light darjeeling — muscatel top, restrained and bright." },
-    { tempC: 88,  timeS: 200, flavors: ["muscatel", "floral", "fruit", "bright"],
+    { tempC: 88,  timeS: 200, flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "rich"],
       effects: [["energy", 4], ["focus", 3]],
-      character: "The standard cup. Full 'champagne of teas' — floral, grape-like." },
-    { tempC: 90,  timeS: 240, flavors: ["muscatel", "floral", "fruit", "bright", "astringent"],
+      character: "The standard cup. Full 'champagne of teas' — floral, grape-like, with the granite-mineral body underneath." },
+    { tempC: 90,  timeS: 240, flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "rich", "astringent"],
       effects: [["energy", 4], ["focus", 3], ["bitterness", 2]],
       character: "Pushed — floral holds but tannins sharpen. Still distinctive." },
   ],
