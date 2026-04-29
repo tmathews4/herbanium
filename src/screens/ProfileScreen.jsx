@@ -262,13 +262,17 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
         </div>
       </div>
 
-      {/* Tea Constellation — every cup the user has logged plotted
-          as a dot in 2D sensory space (cool↔warm × bright↔deep).
-          Reads as a personal star map of their tea life rather than
-          a chart; sized by taste rating, faded by age, colored by
-          mood register. The personality readout below names the
-          quadrant the user gravitates toward. */}
+      {/* Tea Constellation — temporarily hidden. The component is
+          ready (src/components/TeaConstellation.jsx) and renders
+          every cup as a dot on a 2D cool↔warm × bright↔deep plane,
+          but the visualization needs more polish before shipping
+          (axis tuning, mobile sizing, possibly running through the
+          brew engine for actual brewed positions instead of static
+          flavor lists). To re-enable, swap SHOW_CONSTELLATION to true
+          below — everything else is wired through. */}
       {(() => {
+        const SHOW_CONSTELLATION = false;
+        if (!SHOW_CONSTELLATION) return null;
         const cupCount = (sessions || []).filter(s => s.who === "you" && s.blendId).length;
         if (cupCount < 2) return null;
         return (
