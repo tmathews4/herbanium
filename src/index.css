@@ -64,35 +64,39 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Warm-dark surfaces (candlelit, not flat tech-dark). */
-    --ivory:    #1A1612;
-    --paper:    #221C14;
-    --cream:    #2A2218;
-    /* Text — a soft warm cream rather than pure white so the
-       cream-on-dark feels of-a-piece with the original light
-       design rather than a switch into a different aesthetic. */
-    --ink:      #E8DDC4;
-    --ink-soft: #BFB59D;
-    --ash:      #8E826A;
-    /* Rules — barely-there warm dark borders. */
-    --rule:      #3D3324;
-    --rule-soft: #2A2118;
-    /* Accents lifted slightly so they read against the dark bg
-       without losing their original family. Roughly +20% lightness,
-       same hue. Terra remains the loudest CTA color. */
-    --sage:      #87A06A;
-    --sage-deep: #B0C295;
-    --ochre:     #C99955;
-    --terra:     #A86040;     /* dampened from #D17448 — less vibrant in dark */
-    --bark:      #94694A;     /* deep walnut, lifted for dark surfaces */
-    --rose:      #D89773;
-    --sky:       #9DBCC1;
-    --plum:      #A87186;
-    /* Shadow ink swaps to true black so the depth still reads on
-     dark surfaces; highlight stays white-toned at low alpha. */
+    /* Forest-noir surfaces — a tea-garden-at-dusk register rather
+       than the inverted-cream of the previous warm-dark take. The
+       cream/ivory identity belongs to the light theme; dark gets
+       its own aesthetic ground (deep moss, soft sage text, warm
+       accents that pop against the cool green base). */
+    --ivory:    #0F1410;     /* deep forest, near-black with a green cast */
+    --paper:    #141B17;     /* slightly lifted for the page bg */
+    --cream:    #1C241E;     /* card surface — readable lift over ivory */
+    /* Text — soft sage-cream so paragraphs read warm against the
+       cool surfaces without being orange. */
+    --ink:      #DDE5DB;
+    --ink-soft: #ADB7AB;
+    --ash:      #7C8779;
+    /* Rules — quiet borders that don't compete with the surfaces. */
+    --rule:      #2A332C;
+    --rule-soft: #1F2722;
+    /* Accents — warm registers stay warm so the hue families carry
+       across light/dark, but desaturated a touch so they don't
+       blare against the cool green ground. Sage and sky lifted
+       toward the surface family for visual cohesion. */
+    --sage:      #9DB582;
+    --sage-deep: #C0D2AB;
+    --ochre:     #C19450;
+    --terra:     #A86040;
+    --bark:      #936B4C;
+    --rose:      #C68567;
+    --sky:       #88AEB7;
+    --plum:      #9A647F;
+    /* Shadow ink stays true black for honest depth on dark surfaces;
+       highlight pulls cool to match the forest register. */
     --shadow-rgb: 0, 0, 0;
-    --hi-rgb:     255, 240, 210;
-    --ivory-rgb:  26, 22, 18;
+    --hi-rgb:     220, 232, 218;
+    --ivory-rgb:  15, 20, 16;
   }
 }
 
