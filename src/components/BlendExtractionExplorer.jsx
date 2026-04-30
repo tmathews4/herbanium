@@ -105,16 +105,18 @@ export const BlendExtractionExplorer = ({
   const setTimeS = (timeSProp !== undefined && setTimeSProp) ? setTimeSProp : setTimeSInternal;
 
   // Safety: if ingredients change and the slider values are now out of
-  // range, clamp them. Only applies in uncontrolled mode — parent-controlled
-  // mode is responsible for its own reset logic.
+  // range, clamp them. Runs in BOTH controlled and uncontrolled mode —
+  // the parent (ComposeScreen) provides setTempC/setTimeS in controlled
+  // mode, so calling them here propagates the clamp upward. Without
+  // this, a parent-held value that's out of the new range pinned the
+  // slider's thumb to the boundary — onChange would update state for
+  // a moment, then the next render's controlled prop snapped the
+  // value back, leaving the slider feeling unresponsive.
   useEffect(() => {
-    if (isControlled) return;
-    if (tempC < tempCRange[0] || tempC > tempCRange[1]) {
-      setTempC(defaultTempC ?? Math.round((tempCRange[0] + tempCRange[1]) / 2));
-    }
-    if (timeS < timeSRange[0] || timeS > timeSRange[1]) {
-      setTimeS(defaultTimeS ?? Math.round((timeSRange[0] + timeSRange[1]) / 2));
-    }
+    const clampedTemp = Math.min(tempCRange[1], Math.max(tempCRange[0], tempC));
+    if (clampedTemp !== tempC) setTempC(clampedTemp);
+    const clampedTime = Math.min(timeSRange[1], Math.max(timeSRange[0], timeS));
+    if (clampedTime !== timeS) setTimeS(clampedTime);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempCRange, timeSRange]);
 
