@@ -764,6 +764,51 @@ const TrackMap = ({
                   >⚠</span>
                 )}
                 <span>{labelFor(name)}</span>
+                {/* Absolute peak strength next to the label so the user
+                    can read cross-band intensity directly. Per-track
+                    normalization makes ALL bands fill their own track
+                    by visual alpha, hiding loud-vs-quiet comparisons;
+                    the numeric value restores that information without
+                    flattening the gradient. */}
+                <span style={{
+                  fontFamily: ff.mono, fontSize: 9, color: theme.ash,
+                  marginLeft: 2,
+                }}>
+                  {(trackData.peaks[name] || 0).toFixed(1)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Absolute-strength gauges on a shared 0-5 scale. Filled
+            bottom-up to each row's peak. Per-track normalization
+            scales each band's alpha to its own peak (good for
+            reading SHAPE within a track) but flattens cross-band
+            loudness; the gauge column restores that comparison. */}
+        <div style={{
+          flex: "0 0 auto",
+          width: 4,
+          display: "flex", flexDirection: "column", gap: TRACK_GAP,
+        }}>
+          {tracks.map(name => {
+            const peak = trackData.peaks[name] || 0;
+            const fill = Math.max(0, Math.min(1, peak / 5));
+            return (
+              <div key={name} style={{
+                height: TRACK_H,
+                position: "relative",
+                background: theme.ruleSoft,
+                borderRadius: 1,
+                overflow: "hidden",
+              }}>
+                <div style={{
+                  position: "absolute",
+                  left: 0, right: 0, bottom: 0,
+                  height: `${fill * 100}%`,
+                  background: colorForName(name),
+                  opacity: 0.7,
+                }} />
               </div>
             );
           })}
