@@ -535,6 +535,57 @@ export const BlendExtractionExplorer = ({
                 <span>{Math.round(timeSRange[1] / 60)} min</span>
               </div>
 
+              {/* No-overlap warning — fires when the blend has 2+ lead
+                  ingredients whose timeS ranges don't share a single
+                  window. A matcha (15-30s) + chamomile (300-420s)
+                  blend has no steep where both extract correctly;
+                  whatever the slider lands on, one lead is wrong.
+                  Stronger than the long-steep note below: that one
+                  says 'this ingredient could steep longer alone';
+                  this one says 'these ingredients can't share a cup
+                  at all.' Only fires on lead vs lead — accents and
+                  catalysts are intentionally stretched. */}
+              {ingredients.length >= 2 && (() => {
+                const leads = ingredients
+                  .filter(({ role }) => (role || "lead") === "lead")
+                  .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
+                  .filter(({ meta }) => meta?.timeS);
+                if (leads.length < 2) return null;
+                const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
+                const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
+                if (intersectLo <= intersectHi) return null;
+                // Identify the two leads with the most extreme tension
+                // — one with the highest min, one with the lowest max.
+                const earliestEnder = leads.reduce((a, b) =>
+                  a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
+                const latestStarter = leads.reduce((a, b) =>
+                  a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
+                return (
+                  <div style={{
+                    marginTop: 10,
+                    padding: "8px 10px",
+                    borderLeft: `2px solid ${theme.terra}`,
+                    background: "rgba(176,84,47,0.08)",
+                    borderRadius: "2px 6px 6px 2px",
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                    color: theme.inkSoft, lineHeight: 1.5,
+                  }}>
+                    <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+                      No shared steep window.
+                    </span>{" "}
+                    <span style={{ color: theme.terra, fontStyle: "normal" }}>
+                      {earliestEnder.meta.name}
+                    </span>{" "}
+                    finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
+                    <span style={{ color: theme.terra, fontStyle: "normal" }}>
+                      {latestStarter.meta.name}
+                    </span>{" "}
+                    needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
+                    lands, one lead won't extract right. Best to brew these separately.
+                  </div>
+                );
+              })()}
+
               {/* Clipped-long-steep note. The blend's time upper bound
                   follows the most-fragile lead × 1.3 (see
                   algo/brewBounds.js), so any ingredient whose own
