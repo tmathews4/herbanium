@@ -43,11 +43,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
   // Signal-tag overflow toggle. Cap visible at 6 (3 per row × 2
   // rows); anything beyond hides behind "+N more" until expanded.
   const [tagsExpanded, setTagsExpanded] = React.useState(false);
-  // Tradition-over-literature note — lifted out of the explorer so
-  // it can render right above the preparations dropdown rather than
-  // at the top of the brewing card. Payload is null when the note
-  // shouldn't fire.
-  const [traditionInfo, setTraditionInfo] = React.useState(null);
   const [tableAccentsOpen, setTableAccentsOpen] = React.useState(false);
   if (!b) return null;
 
@@ -551,8 +546,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               declaredEffects={b.effects}
               curated
               isTraditional={!!b.tradition}
-              hideTraditionNote
-              onTraditionNoteChange={setTraditionInfo}
             />
             {b.ml && (
               <div style={{
@@ -659,42 +652,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             </div>
           );
         })()}
-
-        {/* Tradition-over-literature notice — sits below the
-            preparations dropdown so the user reads the steps
-            first, then sees the caveat about why those steps
-            push past the ranges modern research suggests. Fires
-            when a curated traditional brew trips warnings at the
-            curator's chosen point. */}
-        {traditionInfo && (
-          <div style={{
-            margin: "16px 0 10px",
-            padding: "10px 12px", borderRadius: radius.md,
-            background: "rgba(165, 120, 54, 0.08)",
-            border: `1px solid rgba(165, 120, 54, 0.22)`,
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-            color: theme.inkSoft, lineHeight: 1.45,
-            boxShadow: shadow.card,
-          }}>
-            <em style={{
-              color: theme.ochre, fontStyle: "normal",
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
-              textTransform: "uppercase", marginRight: 6,
-            }}>tradition over literature</em>
-            This brew sits outside the ranges current research
-            recommends. The science matters; the centuries of
-            practice that found this cup matter too — and sometimes
-            practice knows what science hasn't measured yet.
-            {traditionInfo.sciDiffers && (
-              <div style={{ marginTop: 6, color: theme.ash }}>
-                If you'd like the research-aligned version, try{" "}
-                <em style={{ fontStyle: "normal", color: theme.inkSoft }}>
-                  {traditionInfo.sciTempDisplay} · {traditionInfo.sciTimeDisplay}
-                </em>.
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>

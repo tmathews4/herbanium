@@ -188,40 +188,6 @@ export const BlendExtractionExplorer = ({
       border: `1px solid ${theme.ruleSoft}`,
     }}>
 
-      {/* Tradition-over-literature notice — appears on curated blends
-          that brew outside what the studies prescribe. The curator
-          chose this point on purpose; the note acknowledges that the
-          warning system has been silenced here, and explains why.
-          Suppressed when the caller has lifted rendering out (e.g.
-          BlendDetail places it above the preparations dropdown). */}
-      {!hideTraditionNote && brew.traditionNote && (
-        <div style={{
-          marginBottom: 12, padding: "8px 10px", borderRadius: 6,
-          background: "rgba(165, 120, 54, 0.08)",
-          border: `1px solid rgba(165, 120, 54, 0.22)`,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-          color: theme.inkSoft, lineHeight: 1.45,
-        }}>
-          <em style={{
-            color: theme.ochre, fontStyle: "normal",
-            fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
-            textTransform: "uppercase", marginRight: 6,
-          }}>tradition over literature</em>
-          This brew sits outside the ranges current research recommends.
-          The science matters; the centuries of practice that found this
-          cup matter too — and sometimes practice knows what science
-          hasn't measured yet.
-          {sciDiffers && (
-            <div style={{ marginTop: 6, color: theme.ash }}>
-              If you'd like the research-aligned version, try{" "}
-              <em style={{ fontStyle: "normal", color: theme.inkSoft }}>
-                {sciTempDisplay} · {sciTimeDisplay}
-              </em>.
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Flavor + mood + palate across the temperature envelope.
           Sits ABOVE the temp/steep sliders now: the maps are fixed-
           height (per-track normalization keeps each band's intensity
