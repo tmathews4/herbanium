@@ -33,10 +33,11 @@ import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDesc
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
 
-// Number of temp samples across the axis. 24 keeps the gradient
+// Number of temp samples across the axis. 36 keeps the gradient
 // smooth without making the engine work too hard on every change
-// to ingredients / steep time.
-const SAMPLES = 24;
+// to ingredients / steep time. Was 24; 36 noticeably reduces the
+// step-banding artifacts in long bands without measurable cost.
+const SAMPLES = 36;
 // Primary track count — the strip always shows up to this many
 // rows by peak. Beyond ~5 the strip starts feeling like a check-
 // list rather than a profile.
@@ -545,6 +546,16 @@ const TrackMap = ({
   const FULL_EXTRACTION_REF = 1.5;
   const cupStrength = Math.min(1, cupPeak / FULL_EXTRACTION_REF);
 
+  // Visibility floor — when a band has any non-zero strength at this
+  // sample, render at least this fraction of cap so the band reads as
+  // a continuous ribbon. Zero stays zero (fade-outs still fade); any
+  // non-zero gets a visible trace.
+  const VISIBILITY_FLOOR = 0.10;
+  // Gamma curve on the alpha mapping. < 1 brightens midtones, which
+  // is where the gradient does most of its visual work; peaks and
+  // fade-outs are unchanged. 0.65 lifts a ~50%-strength sample from
+  // 50% alpha to ~63%, making subtle gradients feel richer.
+  const ALPHA_GAMMA = 0.65;
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
@@ -555,7 +566,13 @@ const TrackMap = ({
     const series = fillGaps(rawSeries);
     const stops = series.map((strength, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
-      const alpha = Math.max(0, Math.min(cap, (strength / peak) * cap));
+      const ratio = strength / peak;
+      const curved = ratio > 0 ? Math.pow(ratio, ALPHA_GAMMA) : 0;
+      // Lift any non-zero sample to the visibility floor so the band
+      // reads continuously where it's present, without changing the
+      // shape (peaks still peak; truly absent samples stay at 0).
+      const lifted = curved > 0 ? Math.max(curved, VISIBILITY_FLOOR) : 0;
+      const alpha = Math.max(0, Math.min(cap, lifted * cap));
       return `rgba(${rgb}, ${alpha.toFixed(3)}) ${x.toFixed(1)}%`;
     }).join(", ");
     return `linear-gradient(to right, ${stops})`;
