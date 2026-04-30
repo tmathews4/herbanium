@@ -23,6 +23,8 @@ import { OmenCard } from "./OmenCard";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { HintCard } from "./HintCard";
 import { Sprig } from "./icons";
+import { MoodCrystal } from "./MoodCrystal";
+import { getBlend } from "../helpers/misc";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
 import { usePersistedState } from "../hooks/usePersistedState";
@@ -246,6 +248,19 @@ export const BestiaryView = ({
           onDismiss={() => onArrivalDismiss(summonTarget.elemental.id)}
         />
       )}
+
+      {/* Lead crystal — visualizes the same mood + flavor signal
+          that already biases wild-elemental rolls (see
+          maybeRollWild in data/wildElementals.js). Color and
+          name shift with the user's last 30 days of cups and
+          journal entries; sits above the bestiary header so the
+          crystal reads as the lodestone the elementals gather
+          around. */}
+      <MoodCrystal
+        sessions={sessions}
+        journalEntries={journalEntries}
+        getBlend={getBlend}
+      />
 
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "space-between",
