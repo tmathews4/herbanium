@@ -412,37 +412,56 @@ export const BlendExtractionExplorer = ({
         const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
-          const empty = <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
+          const empty = <div style={{ height: 16, marginTop: 2, marginBottom: 2 }} />;
           const renderBand = (lo, hi, color, tooltip, kind, isSelected) => {
             const cLo = Math.max(lo, rangeMin);
             const cHi = Math.min(hi, rangeMax);
             if (cHi <= cLo) return empty;
             const left = ((cLo - rangeMin) / span) * 100;
             const width = ((cHi - cLo) / span) * 100;
+            // Wrapper is 16px tall (a comfortable tap target) but
+            // only 6px in the middle is the visible band — the rest
+            // is transparent click area so finger / mouse can land
+            // on it reliably.
             return (
               <div style={{
                 position: "relative",
-                height: 6,
+                height: 16,
                 marginTop: 2, marginBottom: 2,
               }}>
-                <div
+                <button
+                  type="button"
                   title={tooltip}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     onSelect && onSelect(isSelected ? null : kind);
                   }}
+                  aria-label={tooltip}
                   style={{
                     position: "absolute",
                     left: `${left}%`,
                     width: `${width}%`,
                     top: 0, bottom: 0,
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: onSelect ? "pointer" : "default",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "stretch",
+                  }}
+                >
+                  <div style={{
+                    width: "100%",
+                    height: 6,
                     background: color,
                     borderRadius: 2,
-                    cursor: onSelect ? "pointer" : "default",
                     boxShadow: isSelected ? `0 0 0 1.5px ${theme.terra}` : "none",
                     transition: "box-shadow 0.15s ease",
-                  }}
-                />
+                    pointerEvents: "none",
+                  }} />
+                </button>
               </div>
             );
           };
