@@ -294,12 +294,12 @@ export const EXTRACTION_PROFILES = {
     { tempC: 80,  timeS: 90,  flavors: ["toasted", "vegetal", "brisk"],
       effects: [["focus", 2], ["energy", 2]],
       character: "Light gunpowder — toasted and clean, approachable." },
-    { tempC: 85,  timeS: 135, flavors: ["smoky", "toasted", "bold", "vegetal", "mineral", "brisk"],
+    { tempC: 85,  timeS: 135, flavors: ["toasted", "bold", "vegetal", "mineral", "brisk"],
       effects: [["focus", 3], ["energy", 3], ["comfort", 2]],
-      character: "The standard cup. Full smoky-toasted character, bold mineral body, brisk finish." },
-    { tempC: 90,  timeS: 180, flavors: ["smoky", "bold", "toasted", "vegetal", "mineral", "brisk", "astringent"],
+      character: "The standard cup. Full toasted-mineral character, bold body, brisk finish." },
+    { tempC: 90,  timeS: 180, flavors: ["bold", "toasted", "vegetal", "mineral", "brisk", "astringent"],
       effects: [["focus", 3], ["energy", 4], ["comfort", 2], ["bitterness", 2]],
-      character: "Strong and tannic. Smoke intensifies; drinks more assertive." },
+      character: "Strong and tannic. Toast deepens; drinks more assertive." },
   ],
 
   hojicha: [

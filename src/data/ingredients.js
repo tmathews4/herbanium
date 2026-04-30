@@ -1464,32 +1464,34 @@ const INGREDIENTS = {
   gunpowder: {
     name: "Gunpowder Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
     // Pellet-rolled green — opens up gradually, gentler than sencha
-    // but still tannin-prone past 4 min. Smoky-toasted register
-    // anchors Maghrebi mint preparations.
+    // but still tannin-prone past 4 min. Toasted-mineral register
+    // anchors Maghrebi mint preparations. The pellets get their
+    // character from heavy wok-firing during rolling, not actual
+    // smoke; that's gentle toast, not a lapsang-style smoke note.
     caffeine: 30, tempC: [80, 90], timeS: [90, 180],
     tempZones: [
       { id: "under", tempC: [50, 75], character: "pellets barely opening.", moodImpact: "focus held back" },
       { id: "cool",  tempC: [75, 82], character: "soft toasted top, gentle body.", moodImpact: "focus gentle; calm settles" },
       { id: "warm",  tempC: [82, 88], character: "full gunpowder character, clean lift.", moodImpact: "focus and uplifting in balance" },
-      { id: "hot",   tempC: [88, 95], character: "deepest pull, smoke forward, tannin climbing.", moodImpact: "focus solid; cup tightens" },
+      { id: "hot",   tempC: [88, 95], character: "deepest pull, toast forward, tannin climbing.", moodImpact: "focus solid; cup tightens" },
     ],
     timeZones: [
       { id: "under",  timeS: [0, 60],    character: "barely opening, color light.", moodImpact: "the cup hasn't lifted" },
       { id: "short",  timeS: [60, 120],  character: "bright Maghrebi-style top.", moodImpact: "focus crisp; uplifting clean" },
       { id: "medium", timeS: [120, 180], character: "full gunpowder body — toasted, clean.", moodImpact: "focus and uplifting in balance" },
       { id: "long",   timeS: [180, 240], character: "deeper, tannin climbing.", moodImpact: "focus solid; calm fades" },
-      { id: "over",   timeS: [240, 360], character: "harsh tannin, smoke turned acrid.", moodImpact: "the brightness lost" },
+      { id: "over",   timeS: [240, 360], character: "harsh tannin, toast turned acrid.", moodImpact: "the brightness lost" },
     ],
     registerZones: [
       { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
       { id: "aromatic",   character: "Maghrebi-bright toasted-green top.", moodImpact: "focus crisp; uplifting clean" },
       { id: "balanced",   character: "the canonical gunpowder cup.", moodImpact: "focus and uplifting in clean balance" },
-      { id: "tonic",      character: "deeper smoke, fuller body.", moodImpact: "focus deep; cup grounds" },
+      { id: "tonic",      character: "deeper toast, fuller body.", moodImpact: "focus deep; cup grounds" },
       { id: "overpulled", character: "tannin-acrid, the toasted character lost.", moodImpact: "the lift is gone" },
     ],
-    overPull: { timeS: 360, reason: "tannin and acrid smoke overtake the toasted top" },
+    overPull: { timeS: 360, reason: "tannin and acrid edge overtake the toasted top" },
     effects: [["focus", 3], ["energy", 3], ["cooling", 3], ["uplifting", 3], ["digestive", 3]],
-    flavors: ["smoky", "toasted", "vegetal", "bold", "mineral", "brisk"],
+    flavors: ["toasted", "mineral", "vegetal", "bold", "brisk", "toasty"],
     pairs: ["spearmint", "peppermint", "rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
@@ -2146,7 +2148,7 @@ const INGREDIENTS = {
     ],
     overPull: { timeS: 900, reason: "perfume flattens past the cold-care peak" },
     effects: [["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
-    flavors: ["floral", "muscatel", "lychee", "sweet", "delicate"],
+    flavors: ["floral", "lychee", "sweet", "delicate", "honey-sweet"],
     basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },
     pairs: ["echinacea", "peppermint", "ginger", "linden", "rose"],
     dose: "1–2 tsp · 250ml",
