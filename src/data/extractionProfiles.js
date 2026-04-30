@@ -314,27 +314,74 @@ export const EXTRACTION_PROFILES = {
       character: "Fuller extraction. Toast notes deepen; stays gentle." },
   ],
 
+  // Dragonwell — non-monotonic Maillard peak. Pan-fired chestnut /
+  // toasted-bean sweetness PEAKS at ~80°C (idx 1) and recedes by 85°C
+  // as catechin grip climbs at the receptor level (not via volatile
+  // loss; these are non-volatile Maillard polymers). Explicit
+  // flavorStrengths on idx 1, 2, 3 let chestnut crest at 80–82°C
+  // then fall back at 85°C — a peak-then-fade arc that linear
+  // interpolation between three monotonically-rising points can't
+  // express. Light (idx 0) keeps auto-annotation.
   dragonwell: [
     { tempC: 75,  timeS: 75,  flavors: ["nutty", "sweet", "fresh"],
       effects: [["focus", 3], ["energy", 2]],
       character: "Light dragonwell — sweet chestnut, delicate sweetness, fresh top." },
-    { tempC: 80,  timeS: 110, flavors: ["chestnut", "nutty", "toasted", "sweet", "vegetal", "fresh"],
+    { tempC: 80,  timeS: 110,
+      flavorStrengths: [
+        ["chestnut", 4.2], ["nutty", 3.3], ["toasted", 2.5],
+        ["sweet", 2.0], ["vegetal", 1.4], ["fresh", 1.2],
+      ],
       effects: [["focus", 4], ["energy", 3]],
       character: "The classic cup. Pan-fired chestnut and toasted-bean character, bright focus." },
-    { tempC: 85,  timeS: 150, flavors: ["chestnut", "nutty", "toasted", "sweet", "vegetal", "bean", "astringent"],
+    { tempC: 82,  timeS: 125,
+      flavorStrengths: [
+        ["chestnut", 4.5], ["nutty", 3.5], ["toasted", 2.8],
+        ["sweet", 2.2], ["vegetal", 1.5], ["fresh", 1.0],
+      ],
+      effects: [["focus", 4], ["energy", 3]],
+      character: "The peak window — chestnut fullest, sweetness still leading, tannin not yet up." },
+    { tempC: 85,  timeS: 150,
+      flavorStrengths: [
+        ["chestnut", 3.5], ["nutty", 2.8], ["toasted", 2.3],
+        ["sweet", 1.0], ["vegetal", 1.4], ["bean", 1.5],
+        ["astringent", 2.5],
+      ],
       effects: [["focus", 4], ["energy", 3], ["bitterness", 2]],
       character: "Hotter than the leaf wants. Chestnut sweetness fades; tannins climb." },
   ],
 
   // ─── True teas: White ─────────────────────────────────────────
+  // Silver-needle white tea — honey/floral Maillard sweetness peaks
+  // around 80°C and thins as catechins climb at 85°C. Note: apricot,
+  // melon, floral, and delicate are already volatile-faded above
+  // ~85°C via FLAVOR_VOLATILES; the 4-point shape captures the
+  // separate non-volatile fade of HONEY (Maillard polymer suppressed
+  // by tannin grip, not boil-off). Light (idx 0) keeps auto.
   white: [
     { tempC: 75,  timeS: 120, flavors: ["sweet", "delicate", "floral"],
       effects: [["calm", 2], ["energy", 2]],
       character: "Light white tea — ghost-sweet, barely extracted, floral whispers." },
-    { tempC: 80,  timeS: 180, flavors: ["honey", "hay", "sweet", "floral", "apricot", "melon", "delicate"],
+    { tempC: 80,  timeS: 180,
+      flavorStrengths: [
+        ["honey", 4.2], ["hay", 3.3], ["sweet", 2.5],
+        ["floral", 2.0], ["apricot", 1.6], ["melon", 1.3],
+        ["delicate", 1.1],
+      ],
       effects: [["calm", 3], ["energy", 3], ["focus", 3]],
       character: "The standard cup. Full silver-needle — honeyed top, hay body, soft stone-fruit and floral edges." },
-    { tempC: 85,  timeS: 240, flavors: ["honey", "hay", "apricot", "melon", "wood", "delicate", "astringent"],
+    { tempC: 82,  timeS: 210,
+      flavorStrengths: [
+        ["honey", 4.5], ["hay", 3.4], ["sweet", 2.6],
+        ["floral", 2.0], ["apricot", 1.6], ["melon", 1.3],
+        ["delicate", 0.9],
+      ],
+      effects: [["calm", 3], ["energy", 3], ["focus", 3]],
+      character: "The sweet peak. Full honeyed silver-needle — the leaf's gentlest window before tannins tighten." },
+    { tempC: 85,  timeS: 240,
+      flavorStrengths: [
+        ["honey", 3.0], ["hay", 3.0], ["apricot", 1.4], ["melon", 1.2],
+        ["wood", 1.5], ["delicate", 0.7], ["astringent", 2.5],
+      ],
       effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2]],
       character: "Past the leaf's tolerance. Honey thins; hay turns tannic." },
   ],
@@ -766,8 +813,22 @@ function annotateFlavorStrengths(flavors, profileIndex) {
 
 // Augment EXTRACTION_PROFILES with flavorStrengths once at module load.
 // Each point gains a `flavorStrengths: [[name, strength], ...]` field.
+// Points can pre-declare flavorStrengths to opt out of the standard
+// "leading flavor at peakStrength, descending by array position"
+// formula — necessary for ingredients with non-monotonic curves
+// (Maillard sweet peaking at 80°C in dragonwell then receding under
+// catechin grip at 85°C, e.g.). When pre-declared, also auto-derive
+// the `flavors` string array from the strengths so the rest of the
+// engine sees a consistent shape.
 for (const id in EXTRACTION_PROFILES) {
   EXTRACTION_PROFILES[id].forEach((point, idx) => {
+    if (Array.isArray(point.flavorStrengths)) {
+      // Curator-authored peak/fade — keep as-is; sync flavors list.
+      if (!Array.isArray(point.flavors)) {
+        point.flavors = point.flavorStrengths.map(([name]) => name);
+      }
+      return;
+    }
     point.flavorStrengths = annotateFlavorStrengths(point.flavors, idx);
   });
 }
