@@ -39,6 +39,7 @@
   --shadow-rgb: 30, 24, 18;        /* ink */
   --hi-rgb:     255, 255, 255;     /* inset highlight */
   --ivory-rgb:  243, 236, 220;     /* translucent surfaces (TabBar dock) */
+  --terra-rgb:  176, 84, 47;       /* active-tab pill tint */
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -97,6 +98,7 @@
     --shadow-rgb: 0, 0, 0;
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
+    --terra-rgb:  168, 96, 64;
   }
 }
 
