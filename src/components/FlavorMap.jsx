@@ -571,6 +571,42 @@ const TrackMap = ({
         out[i] = series[leftIdx] * (1 - t) + series[rightIdx] * t;
       }
     }
+    // Soft fade for trailing / leading zero runs. A flavor that drops
+    // to 0 at the right or left edge of the series produced a hard
+    // visual cliff (e.g. tulsi's aromatic vanishing at 98°C+ as the
+    // profile shifts to spice/clove); the cliff reads as a rendering
+    // bug even though the underlying zero is real chemistry. Tapering
+    // the last few samples down from the last non-zero value gives
+    // a graceful fade-out that matches how the band actually behaves
+    // perceptually (volatile loss is gradual, not a step). FADE_LEN
+    // bounds how far the taper extends so we don't fabricate presence
+    // beyond what the chemistry supports.
+    const FADE_LEN = 4;
+    // Trailing
+    for (let i = n - 1; i >= 0 && out[i] === 0; i--) {
+      // Find the last non-zero before this run.
+      let lastNonZero = -1;
+      for (let j = i - 1; j >= 0; j--) {
+        if (out[j] > 0) { lastNonZero = j; break; }
+      }
+      if (lastNonZero < 0) break;
+      const distance = i - lastNonZero;
+      if (distance > FADE_LEN) break;
+      const t = distance / (FADE_LEN + 1);  // never quite reaches 0
+      out[i] = out[lastNonZero] * (1 - t);
+    }
+    // Leading
+    for (let i = 0; i < n && out[i] === 0; i++) {
+      let firstNonZero = -1;
+      for (let j = i + 1; j < n; j++) {
+        if (out[j] > 0) { firstNonZero = j; break; }
+      }
+      if (firstNonZero < 0) break;
+      const distance = firstNonZero - i;
+      if (distance > FADE_LEN) break;
+      const t = distance / (FADE_LEN + 1);
+      out[i] = out[firstNonZero] * (1 - t);
+    }
     return out;
   };
 
