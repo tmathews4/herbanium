@@ -33,13 +33,46 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  FAMILY_BY_FLAVOR, FAMILY_COLORS,
-  FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS,
+  FAMILY_BY_FLAVOR,
+  FAMILY_BY_EFFECT,
 } from "../components/FlavorMap";
 
 // Window: 30 days. Anything older drops out — the crystal is meant
 // to read as "lately," not as a permanent record.
 const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+// Crystal-specific palette — vibrant fluorescent gem tones, NOT
+// the muted FAMILY_COLORS / EFFECT_FAMILY_COLORS the rest of the
+// app uses (those are tuned to read as ink-on-cream and would go
+// muddy on the bestiary's dark forest-noir surface). Same palette
+// in both light and dark themes so the crystal reads identically
+// in either register — these are gem hues, not surface hues.
+//
+// Hex roughly mid-tone bright; the renderer composites them with
+// alpha for the glow halos (33–60%) so the crystal aura on dark
+// mode reads as a backlit jewel rather than a flat sticker.
+const CRYSTAL_EFFECT_COLORS = {
+  calm:   "#5BC282", // electric spring green
+  focus:  "#4FA8FF", // cyan-blue, sapphire-bright
+  energy: "#FFB229", // saturated amber-citrine
+  warm:   "#FF8455", // vivid coral / sunset
+  cool:   "#3FD3D7", // electric teal-aqua
+  body:   "#9B7339", // luminous bronze
+  sleep:  "#B677D5", // vivid amethyst
+};
+
+const CRYSTAL_FLAVOR_COLORS = {
+  fruit:   "#FF5A3E", // scarlet garnet
+  floral:  "#FF7AAF", // bright rose-quartz pink
+  earthy:  "#8B6B3E", // luminous walnut-bronze
+  spiced:  "#E8923B", // vivid amber-orange
+  smoky:   "#7E68A8", // vivid indigo-purple
+  fresh:   "#5DD4D9", // electric mint-cyan
+  vegetal: "#6FCB42", // vivid leaf green
+  marine:  "#2DA3C7", // saturated cobalt-teal
+  sweet:   "#FFCB47", // vivid honey-amber
+  body:    "#A89968", // warm gold-tan
+};
 
 // Adjective per family. Drawn from the same gemstone/atmosphere
 // vocabulary the bestiary already uses (see elementalAdjectives.js)
@@ -216,8 +249,8 @@ export function computeMoodCrystal({
   const moodTally = tally(collectRecentMoods(sessions, journalEntries, now));
   const flavorTally = tally(collectRecentFlavors(sessions, getBlend, now));
 
-  const effectFams = topFamily(moodTally, moodToEffectFamily, EFFECT_FAMILY_COLORS);
-  const flavorFams = topFamily(flavorTally, flavorToFlavorFamily, FAMILY_COLORS);
+  const effectFams = topFamily(moodTally, moodToEffectFamily, CRYSTAL_EFFECT_COLORS);
+  const flavorFams = topFamily(flavorTally, flavorToFlavorFamily, CRYSTAL_FLAVOR_COLORS);
   const profileFams = profileFamilies(profile);
 
   // Decide primary vs secondary. Prefer effect family as primary
@@ -252,22 +285,22 @@ export function computeMoodCrystal({
     const peffect = profileFams.effects[0];
     const pflavor = profileFams.flavors[0];
     if (peffect) {
-      primary = { family: peffect, color: EFFECT_FAMILY_COLORS[peffect], weight: 0 };
+      primary = { family: peffect, color: CRYSTAL_EFFECT_COLORS[peffect], weight: 0 };
       primaryAxis = "effect";
       if (pflavor) {
-        secondary = { family: pflavor, color: FAMILY_COLORS[pflavor], weight: 0 };
+        secondary = { family: pflavor, color: CRYSTAL_FLAVOR_COLORS[pflavor], weight: 0 };
         secondaryAxis = "flavor";
       } else if (profileFams.effects[1]) {
         const e2 = profileFams.effects[1];
-        secondary = { family: e2, color: EFFECT_FAMILY_COLORS[e2], weight: 0 };
+        secondary = { family: e2, color: CRYSTAL_EFFECT_COLORS[e2], weight: 0 };
         secondaryAxis = "effect";
       }
     } else if (pflavor) {
-      primary = { family: pflavor, color: FAMILY_COLORS[pflavor], weight: 0 };
+      primary = { family: pflavor, color: CRYSTAL_FLAVOR_COLORS[pflavor], weight: 0 };
       primaryAxis = "flavor";
       if (profileFams.flavors[1]) {
         const f2 = profileFams.flavors[1];
-        secondary = { family: f2, color: FAMILY_COLORS[f2], weight: 0 };
+        secondary = { family: f2, color: CRYSTAL_FLAVOR_COLORS[f2], weight: 0 };
         secondaryAxis = "flavor";
       }
     }
@@ -357,7 +390,7 @@ export function computeMoodCrystal({
       if (!seen.has(`e:${f}`)) {
         trailing = {
           adj: EFFECT_ADJECTIVES[f], voice: EFFECT_VOICE[f],
-          color: EFFECT_FAMILY_COLORS[f],
+          color: CRYSTAL_EFFECT_COLORS[f],
         };
         break;
       }
@@ -367,7 +400,7 @@ export function computeMoodCrystal({
         if (!seen.has(`f:${f}`)) {
           trailing = {
             adj: FLAVOR_ADJECTIVES[f], voice: FLAVOR_VOICE[f],
-            color: FAMILY_COLORS[f],
+            color: CRYSTAL_FLAVOR_COLORS[f],
           };
           break;
         }
