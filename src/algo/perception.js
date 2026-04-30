@@ -30,11 +30,23 @@
 const MASKING_MATRIX = {
   bitter:     { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7, fresh: 0.7 },
   bitterness: { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7, fresh: 0.7 },
+  // astringent now masks umami too — glutamate and catechin grip
+  // compete for receptor attention, so a tannic cup partially
+  // buries the umami amino-acid signal that gyokuro/matcha lean on.
   astringent: { floral: 0.6, fruity: 0.5, sweet: 0.4, umami: 0.4, honey: 0.5, delicate: 0.6, fresh: 0.6 },
-  smoky:      { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.95 },
-  smoked:     { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.95 },
+  // smoky → fresh tuned down 0.95 → 0.88. 0.95 effectively
+  // extinguished fresh on any moderate smoky cup; 0.88 still pushes
+  // fresh decisively back without erasing it on lighter smoky brews
+  // (matches "smoky with hints of fresh" tasting notes for lapsang).
+  smoky:      { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.88 },
+  smoked:     { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.88 },
   pungent:    { floral: 0.5, sweet: 0.4, citrus: 0.4, delicate: 0.6, fresh: 0.6 },
-  earthy:     { floral: 0.4, citrus: 0.3, fruity: 0.3, delicate: 0.5, fresh: 0.85 },
+  // earthy → fruity raised 0.3 → 0.45. Forest-floor / dark cups
+  // (puerh, reishi, ashwagandha) bury fruit harder than the prior
+  // coefficient allowed; 0.45 reduces a fruit signal to ~64% in a
+  // strongly earthy cup, matching how shou puerh hides berry notes
+  // in real blind tasting.
+  earthy:     { floral: 0.4, citrus: 0.3, fruity: 0.45, delicate: 0.5, fresh: 0.85 },
   // New rows — heavier non-tannic registers that drown out the
   // "fresh, just-picked" reading. These don't mask the lighter
   // aromatic family (floral / citrus / fruit), only fresh itself.
@@ -55,7 +67,12 @@ const AMPLIFIERS = {
 
 // Sweet partially neutralizes bitter — the honey-and-ginger trick.
 // Special-cased because the masking matrix only goes one direction.
-const BITTER_SUPPRESSION_BY_SWEET = 0.35;
+// Raised 0.35 → 0.45 so honey-forward / dessert-leaning blends
+// suppress bitter to a degree closer to the real psychophysical
+// curve. Individual variability in TAS2R38 / PROP genetics means
+// any single coefficient is an average, but 0.45 fits the middle of
+// the published range better than 0.35 did for sweet-led cups.
+const BITTER_SUPPRESSION_BY_SWEET = 0.45;
 
 // Perceptual loudness — how strongly a flavor reads in the cup
 // relative to its grams contribution. Mint at 1g doesn't taste like
