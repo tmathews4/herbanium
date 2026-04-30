@@ -582,30 +582,34 @@ const TrackMap = ({
     // bounds how far the taper extends so we don't fabricate presence
     // beyond what the chemistry supports.
     const FADE_LEN = 4;
-    // Trailing
-    for (let i = n - 1; i >= 0 && out[i] === 0; i--) {
-      // Find the last non-zero before this run.
-      let lastNonZero = -1;
-      for (let j = i - 1; j >= 0; j--) {
-        if (out[j] > 0) { lastNonZero = j; break; }
-      }
-      if (lastNonZero < 0) break;
-      const distance = i - lastNonZero;
-      if (distance > FADE_LEN) break;
-      const t = distance / (FADE_LEN + 1);  // never quite reaches 0
-      out[i] = out[lastNonZero] * (1 - t);
+    // Trailing fade — find the rightmost non-zero, then fill the
+    // next FADE_LEN samples with a linear decay toward zero.
+    // (Anything beyond FADE_LEN stays at 0 — we don't fabricate
+    // presence beyond what the chemistry supports.)
+    let lastNonZero = -1;
+    for (let j = n - 1; j >= 0; j--) {
+      if (out[j] > 0) { lastNonZero = j; break; }
     }
-    // Leading
-    for (let i = 0; i < n && out[i] === 0; i++) {
-      let firstNonZero = -1;
-      for (let j = i + 1; j < n; j++) {
-        if (out[j] > 0) { firstNonZero = j; break; }
+    if (lastNonZero >= 0 && lastNonZero < n - 1) {
+      const fadeEnd = Math.min(n - 1, lastNonZero + FADE_LEN);
+      for (let i = lastNonZero + 1; i <= fadeEnd; i++) {
+        const distance = i - lastNonZero;
+        const t = distance / (FADE_LEN + 1);  // never quite reaches 0
+        out[i] = out[lastNonZero] * (1 - t);
       }
-      if (firstNonZero < 0) break;
-      const distance = firstNonZero - i;
-      if (distance > FADE_LEN) break;
-      const t = distance / (FADE_LEN + 1);
-      out[i] = out[firstNonZero] * (1 - t);
+    }
+    // Leading fade — same idea, mirrored from the left edge.
+    let firstNonZero = -1;
+    for (let j = 0; j < n; j++) {
+      if (out[j] > 0) { firstNonZero = j; break; }
+    }
+    if (firstNonZero > 0) {
+      const fadeStart = Math.max(0, firstNonZero - FADE_LEN);
+      for (let i = fadeStart; i < firstNonZero; i++) {
+        const distance = firstNonZero - i;
+        const t = distance / (FADE_LEN + 1);
+        out[i] = out[firstNonZero] * (1 - t);
+      }
     }
     return out;
   };
