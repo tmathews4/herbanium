@@ -79,7 +79,7 @@ const pickHomePoem = (date) => {
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
-export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
+export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, addJournalEntry, journalEntries = [] }) => {
   // Favorite cards open the blend recipe directly. The "Recent
   // brews" row below the favorites is the right place to land on
   // a journal entry — keeping the two destinations distinct means
@@ -92,6 +92,22 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   // but fresh on each return to Home. Rotation comes from coming back
   // to Home through the day rather than from re-rendering in place.
   const homePoem = React.useMemo(() => pickHomePoem(new Date()), []);
+  // Track whether this visit's poem has been saved as a journal entry,
+  // so we can flip the action label to "Saved" without re-checking
+  // journalEntries (which would also flip on a prior save in another
+  // session — we want this acknowledgement scoped to the current tap).
+  const [poemSaved, setPoemSaved] = React.useState(false);
+  // Dedupe across visits: if the same poem text already lives in the
+  // journal, treat it as already-saved so we don't pile duplicates on
+  // a user who taps the action twice across two visits.
+  const poemAlreadyInJournal = !!homePoem && (journalEntries || []).some(
+    e => e && typeof e.text === "string" && e.text === homePoem.text,
+  );
+  const handleSavePoem = () => {
+    if (!homePoem || !addJournalEntry || poemSaved || poemAlreadyInJournal) return;
+    addJournalEntry(homePoem.text, "entry", homePoem.attribution || "");
+    setPoemSaved(true);
+  };
   // Mood follow-up — brew-time logging only captures flavor (verifiable
   // at first sip). Mood resolves over the next ~30 minutes, so any
   // session brewed in the last 24 hours that hasn't logged its mood
@@ -201,6 +217,29 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
                       {poem.attribution}
                     </div>
                   )}
+                  {addJournalEntry && (() => {
+                    const saved = poemSaved || poemAlreadyInJournal;
+                    return (
+                      <button
+                        type="button"
+                        onClick={handleSavePoem}
+                        disabled={saved}
+                        style={{
+                          marginTop: 10,
+                          background: "transparent", border: "none",
+                          padding: "4px 8px",
+                          fontFamily: ff.sans, fontSize: 11,
+                          letterSpacing: "0.04em",
+                          color: saved ? theme.sage : theme.terra,
+                          cursor: saved ? "default" : "pointer",
+                          opacity: saved ? 0.85 : 1,
+                          transition: "color 0.2s ease",
+                        }}
+                      >
+                        {saved ? "✓ Saved to journal" : "Save to journal"}
+                      </button>
+                    );
+                  })()}
                 </>
               ) : null}
             </div>
