@@ -1,15 +1,41 @@
+/* ──────────────────────────────────────────────────────────────
+   Herbanium palette — CSS variables driven by prefers-color-scheme.
+
+   Light theme (default) is the warm cream/ink register the app was
+   designed in; dark theme is a candlelit-warm register, NOT a
+   modern flat dark, so the cream-and-amber identity carries through.
+
+   theme.js references these via var() so every inline style picks
+   up the swap automatically with no per-component dark-mode wiring.
+
+   --shadow-rgb / --hi-rgb are RGB-only triplets (no alpha) used
+   inside rgba() composites for shadows and inset highlights —
+   they're the only place we need numeric pieces of a color in JS-
+   composed shadow strings.
+   ────────────────────────────────────────────────────────────── */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Surfaces */
+  --ivory:    #F3ECDC;
+  --paper:    #EAE0C7;
+  --cream:    #FAF4E4;
+  /* Text */
+  --ink:      #1E1812;
+  --ink-soft: #453A2C;
+  --ash:      #796E5B;
+  /* Rules */
+  --rule:      #D2C4A3;
+  --rule-soft: #E3D7B8;
+  /* Accents */
+  --sage:      #6D7E55;
+  --sage-deep: #4A573A;
+  --ochre:     #A57836;
+  --terra:     #B0542F;
+  --rose:      #C37959;
+  --sky:       #7F9AA0;
+  --plum:      #7B4A5A;
+  /* Numeric pieces for rgba() composites in JS-built shadows */
+  --shadow-rgb: 30, 24, 18;        /* ink */
+  --hi-rgb:     255, 255, 255;     /* inset highlight */
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -17,9 +43,12 @@
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
+  /* Tell the browser we know how to dress for both schemes so
+     Chrome's force-dark stops auto-flattening our intentional
+     palette. Both light and dark are real designs below. */
   color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--ink);
+  background: var(--ivory);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -32,21 +61,33 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    /* Warm-dark surfaces (candlelit, not flat tech-dark). */
+    --ivory:    #1A1612;
+    --paper:    #221C14;
+    --cream:    #2A2218;
+    /* Text — a soft warm cream rather than pure white so the
+       cream-on-dark feels of-a-piece with the original light
+       design rather than a switch into a different aesthetic. */
+    --ink:      #E8DDC4;
+    --ink-soft: #BFB59D;
+    --ash:      #8E826A;
+    /* Rules — barely-there warm dark borders. */
+    --rule:      #3D3324;
+    --rule-soft: #2A2118;
+    /* Accents lifted slightly so they read against the dark bg
+       without losing their original family. Roughly +20% lightness,
+       same hue. Terra remains the loudest CTA color. */
+    --sage:      #87A06A;
+    --sage-deep: #B0C295;
+    --ochre:     #C99955;
+    --terra:     #D17448;
+    --rose:      #D89773;
+    --sky:       #9DBCC1;
+    --plum:      #A87186;
+    /* Shadow ink swaps to true black so the depth still reads on
+     dark surfaces; highlight stays white-toned at low alpha. */
+    --shadow-rgb: 0, 0, 0;
+    --hi-rgb:     255, 240, 210;
   }
 }
 

@@ -9,22 +9,29 @@
    every consumer automatically.
    ────────────────────────────────────────────────────────────── */
 
+// Theme tokens reference CSS variables defined in src/index.css.
+// The variable values swap automatically under
+// @media (prefers-color-scheme: dark), so every inline style in
+// the app picks up dark mode without any per-component wiring.
+// Hex literals stay only in components that need to do JS-side
+// arithmetic on the value (e.g. hexToRgb in FlavorMap.jsx, where
+// the family colors are local hex tables not these palette tokens).
 export const theme = {
-  ivory:    "#F3ECDC",
-  paper:    "#EAE0C7",
-  cream:    "#FAF4E4",
-  ink:      "#1E1812",
-  inkSoft:  "#453A2C",
-  ash:      "#796E5B",
-  rule:     "#D2C4A3",
-  ruleSoft: "#E3D7B8",
-  sage:     "#6D7E55",
-  sageDeep: "#4A573A",
-  ochre:    "#A57836",
-  terra:    "#B0542F",
-  rose:     "#C37959",
-  sky:      "#7F9AA0",
-  plum:     "#7B4A5A",
+  ivory:    "var(--ivory)",
+  paper:    "var(--paper)",
+  cream:    "var(--cream)",
+  ink:      "var(--ink)",
+  inkSoft:  "var(--ink-soft)",
+  ash:      "var(--ash)",
+  rule:     "var(--rule)",
+  ruleSoft: "var(--rule-soft)",
+  sage:     "var(--sage)",
+  sageDeep: "var(--sage-deep)",
+  ochre:    "var(--ochre)",
+  terra:    "var(--terra)",
+  rose:     "var(--rose)",
+  sky:      "var(--sky)",
+  plum:     "var(--plum)",
 };
 
 export const ff = {
@@ -34,35 +41,39 @@ export const ff = {
 };
 
 // Soft elevation tokens — quiet shadows for cards and lifted controls.
-// Kept warm and shallow; the app's ink-on-cream palette can't carry hard
-// modern drop shadows without looking out of register.
+// Shadow color is composed via the --shadow-rgb CSS variable so dark
+// mode swaps to a true-black tint that still reads against warm-dark
+// surfaces (the original ink-on-cream tint would disappear into a
+// dark background). The inset highlights use --hi-rgb so they keep
+// the right warmth in either scheme.
+//
+// rgba(var(--name), <alpha>) is valid CSS as long as the variable
+// holds an "R, G, B" triplet; both --shadow-rgb and --hi-rgb do.
 export const shadow = {
-  // Resting state: barely-there warmth under cards. Reads as "this is
-  // a surface, not a flat region of the page."
-  card:    "0 1px 2px rgba(30, 24, 18, 0.04), 0 1px 1px rgba(30, 24, 18, 0.03)",
+  // Resting state: barely-there depth under cards.
+  card:    "0 1px 2px rgba(var(--shadow-rgb), 0.04), 0 1px 1px rgba(var(--shadow-rgb), 0.03)",
   // Lifted: a tile or tappable that wants to read as pressable.
-  lifted:  "0 2px 4px rgba(30, 24, 18, 0.06), 0 1px 2px rgba(30, 24, 18, 0.04)",
+  lifted:  "0 2px 4px rgba(var(--shadow-rgb), 0.06), 0 1px 2px rgba(var(--shadow-rgb), 0.04)",
   // Pressed/hover lift: doubles the resting depth, no offset shift so
   // the tile doesn't visibly jump.
-  hover:   "0 3px 8px rgba(30, 24, 18, 0.08), 0 1px 2px rgba(30, 24, 18, 0.05)",
-  // Inset for selected/depressed buttons — feels like the surface
-  // accepts the tap rather than rebounding off it.
-  pressed: "inset 0 1px 2px rgba(30, 24, 18, 0.10)",
+  hover:   "0 3px 8px rgba(var(--shadow-rgb), 0.08), 0 1px 2px rgba(var(--shadow-rgb), 0.05)",
+  // Inset for selected/depressed buttons.
+  pressed: "inset 0 1px 2px rgba(var(--shadow-rgb), 0.10)",
 
   // Filled-CTA shadow recipes. Two layers per state:
-  //   - inset top highlight (1px of white at 16-22% alpha) — gives
-  //     the button a subtle "molded" edge so it reads as a physical
-  //     surface rather than a flat color rectangle.
-  //   - drop shadow tinted to the button's color, giving real
-  //     elevation off the page.
-  // Press collapses both: the highlight inverts to a dark inset and
-  // the drop shadow shrinks, so the button feels depressed.
+  //   - inset top highlight (warm white at low alpha) — gives the
+  //     button a subtle "molded" edge.
+  //   - drop shadow tinted to the button's color, giving elevation.
   btn: {
-    // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs)
+    // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs).
+    // Terra rgb (176,84,47) light / (209,116,72) dark — the literal
+    // matches the light-mode terra; in dark mode the drop reads
+    // slightly redder than the brighter dark-mode terra fill, which
+    // keeps the depth visible without washing out.
     terra: {
-      rest:  "inset 0 1px 0 rgba(255,255,255,0.22), 0 3px 5px rgba(176,84,47,0.28), 0 6px 14px -2px rgba(176,84,47,0.36)",
-      hover: "inset 0 1px 0 rgba(255,255,255,0.26), 0 4px 8px rgba(176,84,47,0.32), 0 8px 18px -3px rgba(176,84,47,0.44)",
-      press: "inset 0 2px 3px rgba(0,0,0,0.16), 0 1px 2px rgba(176,84,47,0.20)",
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.22), 0 3px 5px rgba(176,84,47,0.28), 0 6px 14px -2px rgba(176,84,47,0.36)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.26), 0 4px 8px rgba(176,84,47,0.32), 0 8px 18px -3px rgba(176,84,47,0.44)",
+      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.16), 0 1px 2px rgba(176,84,47,0.20)",
     },
     // Terra outlined buttons (Save). No inset highlight — the
     // outline IS the structure. Lifted via a moderate drop shadow.
@@ -71,13 +82,12 @@ export const shadow = {
       hover: "0 4px 8px rgba(176,84,47,0.22), 0 8px 18px -4px rgba(176,84,47,0.32)",
       press: "0 1px 2px rgba(176,84,47,0.14), inset 0 1px 1px rgba(176,84,47,0.08)",
     },
-    // Ink-filled buttons (log it, begin →, save mood). Same molded-
-    // surface treatment as terra; warmer because the inset highlight
-    // reads against a dark fill the same way it does against terra.
+    // Ink-filled buttons. Drop tint follows --shadow-rgb so the
+    // depth still reads on a dark surface.
     ink: {
-      rest:  "inset 0 1px 0 rgba(255,255,255,0.18), 0 3px 5px rgba(30,24,18,0.24), 0 6px 14px -2px rgba(30,24,18,0.32)",
-      hover: "inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 8px rgba(30,24,18,0.28), 0 8px 18px -3px rgba(30,24,18,0.40)",
-      press: "inset 0 2px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(30,24,18,0.22)",
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.18), 0 3px 5px rgba(var(--shadow-rgb),0.24), 0 6px 14px -2px rgba(var(--shadow-rgb),0.32)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.22), 0 4px 8px rgba(var(--shadow-rgb),0.28), 0 8px 18px -3px rgba(var(--shadow-rgb),0.40)",
+      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.18), 0 1px 2px rgba(var(--shadow-rgb),0.22)",
     },
   },
 };
