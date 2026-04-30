@@ -1008,7 +1008,17 @@ function underFloorScale(profiles, timeS) {
   const minProfileTime = Math.min(...profiles.map(p => p.timeS));
   if (minProfileTime <= 0) return 1;
   if (timeS >= minProfileTime) return 1;
-  return Math.max(0, timeS / minProfileTime);
+  // Soft-floor at 0.30. The strip's cup-strength factor still gives
+  // a meaningful visual fade as time drops (low cupPeak dampens the
+  // band alpha), so we don't need the chemistry to literally zero
+  // out. And a 15-second flash of any tea isn't actually no-cup —
+  // the strongest extracted notes are still present, just dilute.
+  // Without this floor the scale was pulling a flavor that peaks at
+  // 3.0 down to 0.6 (barely above the engine's 0.5 visibility
+  // filter); anything weaker dropped out entirely, leaving the
+  // strip empty for the user. 0.30 floors the strongest flavors at
+  // ~0.9 strength so they stay visible but read as a faint trace.
+  return Math.max(0.30, timeS / minProfileTime);
 }
 
 function scaleFlavors(flavors, scale) {
