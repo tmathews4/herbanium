@@ -97,10 +97,20 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         borderRadius: "50%",
         padding: 4,
         display: "flex", alignItems: "center", justifyContent: "center",
+        // Directional halo — the crystal "emits" the trailing
+        // (unmet onboarding intent) or secondary current color.
+        // Two box-shadow layers: a soft inner aura that matches
+        // the primary backplate, then a wider outer halo in the
+        // glow color so the shape reads as drawing toward that
+        // direction. Hex+alpha pairs: 33 ≈ 20%, 55 ≈ 33%, 80 ≈ 50%.
+        boxShadow: crystal.glowColor
+          ? `0 0 14px 2px ${crystal.gradient[0]}33, 0 0 28px 6px ${crystal.glowColor}55`
+          : `0 0 14px 2px ${crystal.gradient[0]}33`,
         // Faint crystals (profile-only forecast) render dimmer so
         // the visual matches the description's "still gathering"
         // voice — the color is there, just not yet realized.
         opacity: crystal.isFaint ? 0.55 : 1,
+        transition: "box-shadow 0.4s ease, opacity 0.3s ease",
       }}>
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} />
       </div>

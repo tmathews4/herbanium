@@ -284,6 +284,7 @@ export function computeMoodCrystal({
       primary: null,
       secondary: null,
       gradient: ["#D8CDB3", "#B8AC92"],
+      glowColor: null,
       families: { effect: [], flavor: [] },
       isNeutral: true,
       isFaint: false,
@@ -342,6 +343,7 @@ export function computeMoodCrystal({
   // Only fires on real-data crystals (faint crystals already lead
   // with the unmet intent). Effects are searched first since mood
   // is the dominant signal in onboarding.
+  let trailing = null;
   if (!isFaint) {
     const seen = new Set();
     if (primaryAxis === "effect") seen.add(`e:${primary.family}`);
@@ -350,17 +352,22 @@ export function computeMoodCrystal({
       if (secondaryAxis === "effect") seen.add(`e:${secondary.family}`);
       else                            seen.add(`f:${secondary.family}`);
     }
-    let trailing = null;
     for (const f of profileFams.effects) {
       if (!seen.has(`e:${f}`)) {
-        trailing = { adj: EFFECT_ADJECTIVES[f], voice: EFFECT_VOICE[f] };
+        trailing = {
+          adj: EFFECT_ADJECTIVES[f], voice: EFFECT_VOICE[f],
+          color: EFFECT_FAMILY_COLORS[f],
+        };
         break;
       }
     }
     if (!trailing) {
       for (const f of profileFams.flavors) {
         if (!seen.has(`f:${f}`)) {
-          trailing = { adj: FLAVOR_ADJECTIVES[f], voice: FLAVOR_VOICE[f] };
+          trailing = {
+            adj: FLAVOR_ADJECTIVES[f], voice: FLAVOR_VOICE[f],
+            color: FAMILY_COLORS[f],
+          };
           break;
         }
       }
@@ -378,6 +385,13 @@ export function computeMoodCrystal({
     ? [primary.color, secondary.color]
     : [primary.color, "#C9BFA6"];
 
+  // Glow color — what the crystal emits as a directional halo.
+  // Priority: the unmet onboarding intent (forward-pointing — "where
+  // you're headed") if present, else the secondary current trend
+  // (echoes the second axis). Null when neither exists, so the
+  // visual can fall back to no glow.
+  const glowColor = trailing?.color || secondary?.color || null;
+
   return {
     name,
     description,
@@ -386,6 +400,7 @@ export function computeMoodCrystal({
       ? { ...secondary, axis: secondaryAxis, adjective: secondaryAdj }
       : null,
     gradient,
+    glowColor,
     families: {
       effect: effectFams.ranked,
       flavor: flavorFams.ranked,
