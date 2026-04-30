@@ -5,9 +5,8 @@
 import React, { useState } from "react";
 import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
-import {
-  ExtractionExplorer, hasExtractionProfile,
-} from "../components/ExtractionExplorer";
+import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
+import { hasExtractionProfile } from "../components/ExtractionExplorer";
 import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
@@ -15,7 +14,6 @@ import {
   SectionLabel, StatCard, VocabInfoCard,
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
-import { padTempRange, padTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -260,12 +258,18 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
 
         {tab === "brewing" && (
           <>
-            {/* Interactive explorer — only for ingredients with mock data yet */}
+            {/* Interactive explorer — same TrackMap-style strips as
+                blend pages, treated as a single-ingredient blend so
+                all the engine logic transfers cleanly (per-track
+                normalization, family rollup, gauge column, range
+                bands, descriptions). Only renders for ingredients
+                with extraction profiles; otherwise the strips would
+                be empty. */}
             {hasExtractionProfile(id) && (
-              <ExtractionExplorer
-                ingredientId={id}
-                tempCRange={padTempRange(ing.tempC)}
-                timeSRange={padTimeRange(ing.timeS)}
+              <BlendExtractionExplorer
+                ingredients={[{ id, g: 1.0 }]}
+                defaultTempC={Math.round((ing.tempC[0] + ing.tempC[1]) / 2)}
+                defaultTimeS={Math.round((ing.timeS[0] + ing.timeS[1]) / 2)}
               />
             )}
 

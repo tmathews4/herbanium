@@ -69,7 +69,7 @@ const GEMS_BY_FLAVOR = {
   floral:  ["Pearl", "Rose-Quartz", "Opal", "Moonstone"],
   citrus:  ["Amber", "Topaz", "Citrine", "Sunstone"],
   fruity:  ["Garnet", "Ruby", "Carnelian", "Coral"],
-  sweet:   ["Heliodor", "Gold", "Tigereye", "Sandstone"],
+  sweet:   ["Goldstone", "Mookaite", "Imperial-Topaz", "Tigereye", "Gold", "Beryl", "Honeycalcite"],
   spiced:  ["Copper", "Cinnabar", "Jasper", "Bloodstone"],
   minty:   ["Jade", "Aquamarine", "Turquoise", "Emerald"],
   earthy:  ["Onyx", "Slate", "Granite", "Obsidian"],
@@ -152,10 +152,11 @@ const ADJECTIVE_RANK = {
   // 0 — color (gems whose color reading dominates over their
   // material reading; pure color words would also live here)
   Onyx: 0, Ruby: 0, Garnet: 0, Emerald: 0, Jade: 0, Topaz: 0, Citrine: 0,
-  Aquamarine: 0, Turquoise: 0, Coral: 0, Amber: 0, Carnelian: 0, Heliodor: 0,
+  Aquamarine: 0, Turquoise: 0, Coral: 0, Amber: 0, Carnelian: 0,
   Cinnabar: 0, Bloodstone: 0, Hematite: 0, Pyrite: 0, Coal: 0, Gold: 0,
   Copper: 0, Sunstone: 0, Tigereye: 0, "Smoky-Quartz": 0, "Rose-Quartz": 0,
   Sandstone: 0, Jasper: 0, Slate: 0, Obsidian: 0, Pearl: 0,
+  Goldstone: 0, Mookaite: 0, "Imperial-Topaz": 0, Beryl: 0, Honeycalcite: 0,
   // 1 — origin / phenomenon / time / state
   Mist: 1, Dew: 1, Vapor: 1, Fog: 1, Drizzle: 1, Brume: 1, Hush: 1,
   Light: 1, Sunfire: 1, Aurora: 1, Bloom: 1, Glow: 1, Glare: 1, Blaze: 1, Fire: 1,
