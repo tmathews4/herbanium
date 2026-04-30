@@ -336,23 +336,22 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                         }}
                       >{inPantry ? "✓" : "+"}</div>
                     )}
-                    {/* Caffeine badge — top-left when applicable */}
-                    {hasCaffeine && (
-                      <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
-                        position: "absolute", top: 8, left: 8,
-                        padding: "1px 6px", borderRadius: 999,
-                        background: theme.terra, color: theme.cream,
-                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
-                        textTransform: "uppercase", fontWeight: "bold",
-                      }}>caf</div>
-                    )}
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: togglePantry ? 26 : 0, paddingLeft: hasCaffeine ? 32 : 0 }}>
-                      {ing.category === "flower" && <Flower size={18} c={theme.ochre} />}
-                      {ing.category === "herbal" && <Sprig size={18} c={theme.sage} />}
-                      {ing.category === "true tea" && <Leaf size={18} c={theme.sageDeep} />}
-                      {ing.category === "spice" && <Flower size={18} c={theme.terra} />}
-                      {ing.category === "adaptogen" && <Sprig size={18} c={theme.plum} />}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: togglePantry ? 26 : 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        {ing.category === "flower" && <Flower size={18} c={theme.ochre} />}
+                        {ing.category === "herbal" && <Sprig size={18} c={theme.sage} />}
+                        {ing.category === "true tea" && <Leaf size={18} c={theme.sageDeep} />}
+                        {ing.category === "spice" && <Flower size={18} c={theme.terra} />}
+                        {ing.category === "adaptogen" && <Sprig size={18} c={theme.plum} />}
+                        {hasCaffeine && (
+                          <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
+                            padding: "1px 6px", borderRadius: 999,
+                            background: theme.terra, color: theme.cream,
+                            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
+                            textTransform: "uppercase", fontWeight: "bold",
+                          }}>caf</div>
+                        )}
+                      </div>
                       <span style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>
                         {ing.subcategory || ing.category}
                       </span>
