@@ -90,22 +90,47 @@ export function unionAndPadTempRange(ingredients, INGREDIENTS) {
 
 /**
  * Time slider bounds: lower = global flash floor, upper = 30% past the
- * recipe's longest ingredient max. This keeps short steeps reachable
- * on every cup while giving each blend its own oversteep envelope.
+ * MOST-FRAGILE LEAD ingredient's max steep.
+ *
+ * Why min-of-leads instead of max-of-all: a blend's tolerance is set
+ * by its most fragile lead. Pairing chamomile (max 420s) with
+ * valerian root (max 1800s) at the union-max of 1800 × 1.3 = 2340s
+ * isn't "exploration room" — it's a destroyed chamomile lead, well
+ * past its over-pull boundary. The cup the recipe stands behind ends
+ * at the chamomile's tolerance; the slider should respect that.
+ *
+ * Catalysts (trace doses) and accents (deliberately stretched by the
+ * curator) don't shape the upper bound. Only leads count. If no roles
+ * are declared (legacy data), every ingredient is treated as a lead.
  */
 export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
   if (!ingredients?.length) {
     return [TIME_HARD_MIN, Math.min(TIME_HARD_MAX, Math.round(600 * (1 + TIME_PAD_RATIO)))];
   }
-  let hi = -Infinity;
-  for (const { id } of ingredients) {
+  let leadHi = Infinity;   // min of lead maxes
+  let anyLead = false;
+  for (const { id, role } of ingredients) {
+    const r = role || "lead";
+    if (r !== "lead") continue;
     const range = INGREDIENTS[id]?.timeS;
     if (!range) continue;
-    if (range[1] > hi) hi = range[1];
+    anyLead = true;
+    if (range[1] < leadHi) leadHi = range[1];
   }
-  if (!Number.isFinite(hi)) hi = 600;
+  // Defensive fallback: if every ingredient was an accent/catalyst
+  // (rare/unlikely), fall back to the union max of those so the
+  // slider is at least usable instead of stuck at -Infinity.
+  if (!anyLead) {
+    leadHi = -Infinity;
+    for (const { id } of ingredients) {
+      const range = INGREDIENTS[id]?.timeS;
+      if (!range) continue;
+      if (range[1] > leadHi) leadHi = range[1];
+    }
+  }
+  if (!Number.isFinite(leadHi)) leadHi = 600;
   return [
     TIME_HARD_MIN,
-    Math.min(TIME_HARD_MAX, Math.round(hi * (1 + TIME_PAD_RATIO))),
+    Math.min(TIME_HARD_MAX, Math.round(leadHi * (1 + TIME_PAD_RATIO))),
   ];
 }
