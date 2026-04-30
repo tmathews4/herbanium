@@ -634,12 +634,11 @@ const INGREDIENTS = {
     // just a different register. Zones describe what each register
     // pulls; overPull names the boundary past which the cup turns
     // unpleasant (the only assertive-warning trigger).
-    // Envelope widened to cover the full under-/in-/over- band span
-    // PLUS the slider's experimentation padding (±10°C / ±120s)
-    // so the user can drag to any reachable value and the resolver
-    // still finds a band. Hard floors at 50°C / 0s are well below
-    // any sensible brew but cover slider-pad territory.
-    caffeine: 0, tempC: [50, 100], timeS: [0, 720],
+    // Lower steep-time bound is 90s (was 0s — a legacy POC value
+    // covering slider-pad territory that's now handled by the
+    // global TIME_HARD_MIN floor). 90s is the minimum infusion
+    // where holy basil's volatile aromatics meaningfully release.
+    caffeine: 0, tempC: [50, 100], timeS: [90, 720],
     // Each axis is fully partitioned: under band at the bottom,
     // named in-envelope bands, and over band at the top (where
     // physically reachable). Every brew resolves to a band on each
