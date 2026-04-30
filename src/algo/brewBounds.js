@@ -28,10 +28,12 @@ export const TEMP_HARD_MIN = 40;   // °C — global safety floor. Per-blend
                                    //       ingredient); this just guards
                                    //       against pathologically low temps.
 export const TEMP_HARD_MAX = 100;  // °C — boiling point at sea level
-export const TIME_HARD_MIN = 0;    // s — slider starts at 0 per user request.
-                                   //       Bands render fully transparent at
-                                   //       t=0 (nothing extracted yet); slider
-                                   //       step keeps movement meaningful.
+export const TIME_HARD_MIN = 15;   // s — practical floor. 0s isn't a steep,
+                                   //       it's pouring water; the lightest
+                                   //       legitimate brew is a gongfu flash
+                                   //       rinse (~5–15s). 15s is reachable
+                                   //       on every cup and keeps every band
+                                   //       movement meaningful.
 export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions
 
 // Padding constants. Temp lower-bound pad scales with the recipe so
