@@ -85,6 +85,23 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     setJournalComposerOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, mode]);
+  // Section-aware mode clamp. Each section has a fixed set of valid
+  // sub-modes (apothecary: reverse / forward / compendium; shelf:
+  // recipes / journal / pantry). If the mode somehow drifts into an
+  // out-of-section value — usually because a deep-link from the
+  // other section was applied before the section guard caught it —
+  // snap back to the section's default. Belt-and-suspenders for the
+  // composeView section tag above.
+  React.useEffect(() => {
+    const apothecaryModes = new Set(["reverse", "forward", "compendium"]);
+    const shelfModes      = new Set(["recipes", "journal", "pantry"]);
+    if (section === "apothecary" && !apothecaryModes.has(mode)) {
+      setMode("reverse");
+    } else if (section === "shelf" && !shelfModes.has(mode)) {
+      setMode("recipes");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section, mode]);
   // Journal timeline filter — default "all" shows cups + entries.
   // Deep-links can preset it via composeView.journalFilter (e.g. the
   // Home recent-brews 'see all' link sets it to "cups").
@@ -138,9 +155,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
-  // sub-mode/tab pre-selected.
+  // sub-mode/tab pre-selected. The section guard prevents a deep-link
+  // intended for one section (e.g. shelf-journal) from leaking into
+  // the other section's mode the next time it mounts — both
+  // apothecary and shelf instances of ComposeScreen read the same
+  // composeView object, so without this guard switching tabs after
+  // a deep-link would replay the mode in the wrong section.
   React.useEffect(() => {
     if (!composeView) return;
+    if (composeView.section && composeView.section !== section) return;
     if (composeView.mode) setMode(composeView.mode);
     if (composeView.shelfTab) setShelfTab(composeView.shelfTab);
     if (composeView.journalFilter) setJournalFilter(composeView.journalFilter);

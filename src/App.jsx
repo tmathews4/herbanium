@@ -676,7 +676,13 @@ export default function App() {
       return;
     }
     if ((to === "apothecary" || to === "shelf") && arg && typeof arg === "object") {
-      setComposeView({ ...arg, at: Date.now() });
+      // Tag composeView with its target section so the deep-link
+      // state only applies to the section it was meant for. Without
+      // this tag, a go("shelf", { mode: "journal" }) call would
+      // also push apothecaryMode to "journal" the next time the
+      // user lands on Apothecary, since both section instances of
+      // ComposeScreen read the same composeView on mount.
+      setComposeView({ ...arg, section: to, at: Date.now() });
     }
     navigateTab(to);
   };
