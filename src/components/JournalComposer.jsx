@@ -211,6 +211,16 @@ export const JournalComposer = ({ onSave, onCancel }) => {
         setValue={setCurrentMoods}
       />
 
+      {/* Section divider — separates mood capture from the writing
+          surface so the composer reads as three discrete bands
+          (mood in → text → mood out) rather than one tall scroll.
+          Negative horizontal margin lets the rule span the card's
+          full width despite the inner padding. */}
+      <div style={{
+        height: 1, background: theme.rule,
+        margin: "14px -14px 14px",
+      }} />
+
       <div style={{ display: "flex", marginBottom: 10, borderBottom: `1px solid ${theme.ruleSoft}` }}>
         <button onClick={() => setMode("free")} style={tabBtnStyle(mode === "free")}>
           write freely
@@ -502,15 +512,21 @@ export const JournalComposer = ({ onSave, onCancel }) => {
         </>
       )}
 
+      {/* Section divider — closes the writing band before the
+          landing-mood capture. Mirrors the rule above the tabs so
+          the composer reads as three named bands. */}
+      <div style={{
+        height: 1, background: theme.rule,
+        margin: "16px -14px 14px",
+      }} />
+
       {/* Where-I-landed mood — the close of the arc. Same chip
           set; user picks how the entry left them. */}
-      <div style={{ marginTop: 14 }}>
-        <MoodChipRow
-          label="Where it left me"
-          value={landedMoods}
-          setValue={setLandedMoods}
-        />
-      </div>
+      <MoodChipRow
+        label="Where it left me"
+        value={landedMoods}
+        setValue={setLandedMoods}
+      />
 
       <div style={{
         marginTop: 4, display: "flex", gap: 8, justifyContent: "flex-end",
