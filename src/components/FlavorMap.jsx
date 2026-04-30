@@ -317,20 +317,22 @@ const TrackMap = ({
     : null;
   const aggregateToFamilies = (sourceMap) => {
     const fam = {};
-    const directFamily = {};
     for (const [name, strength] of Object.entries(sourceMap)) {
-      // familyColors keyed by family id — if the name IS a family id,
-      // the engine declared the family token directly.
-      if (familyColors && familyColors[name]) {
-        directFamily[name] = strength;
-      } else {
-        const familyName = familyOf[name] || "body";
-        if (!fam[familyName] || strength > fam[familyName]) fam[familyName] = strength;
+      // Whether the name is itself a family id (a "direct" signal)
+      // or a child token (a member of some family), we max-pool it
+      // into its family bucket. The earlier "direct overrides
+      // children" rule replaced louder children with quieter direct
+      // signals — e.g., on the mood strip, energy=0.2 appearing
+      // alongside uplifting=1.6 (both in the energy family) made the
+      // family band DROP to 0.2 because direct overrode children.
+      // Max is safer and matches the user's expectation that a
+      // family band reflects its loudest contributor, period.
+      const familyName = (familyColors && familyColors[name])
+        ? name
+        : (familyOf[name] || "body");
+      if (!fam[familyName] || strength > fam[familyName]) {
+        fam[familyName] = strength;
       }
-    }
-    // Direct family signals override the max-of-children fallback.
-    for (const [familyName, strength] of Object.entries(directFamily)) {
-      fam[familyName] = strength;
     }
     return fam;
   };
