@@ -651,6 +651,23 @@ const TrackMap = ({
   // fade-outs are unchanged. 0.65 lifts a ~50%-strength sample from
   // 50% alpha to ~63%, making subtle gradients feel richer.
   const ALPHA_GAMMA = 0.65;
+  // Filled (gap-bridged) series per name — the SAME series the
+  // gradient and the at-position numeric/gauge consult. Caching
+  // here keeps the band's visual reading and the readouts in
+  // agreement: if the band is solid through a region, the value
+  // at any point in that region is non-zero too. Without this,
+  // an interior gap that fillGaps bridged for visual continuity
+  // would read 0.0 in the numeric label even though the band
+  // was painted solid through the user's slider position.
+  const filledSeriesCache = {};
+  const filledSeriesFor = (name) => {
+    if (filledSeriesCache[name]) return filledSeriesCache[name];
+    const raw = samples.map(s => pickMap(s)[name] || 0);
+    const filled = fillGaps(raw);
+    filledSeriesCache[name] = filled;
+    return filled;
+  };
+
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
@@ -665,10 +682,7 @@ const TrackMap = ({
     // each band fills its own track to a consistent ceiling and
     // the gauge tells you the loudness story.
     const cap = MAX_BAND_ALPHA * cupStrength;
-    // Build the raw strength series, then fill threshold-drop gaps
-    // before mapping to alpha so the gradient reads as continuous.
-    const rawSeries = samples.map(s => pickMap(s)[name] || 0);
-    const series = fillGaps(rawSeries);
+    const series = filledSeriesFor(name);
     const stops = series.map((strength, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
       const ratio = strength / peak;
@@ -724,11 +738,17 @@ const TrackMap = ({
   // the temp envelope. Critical for diagnostic axes (bitterness,
   // astringency) which can peak at 5 at the extreme corner of the
   // slider while the user's current brew has none.
+  //
+  // Reads from the FILLED series (same one the gradient uses) so
+  // the numeric agrees with the band: if fillGaps bridged an
+  // interior zero between two non-zero neighbors (because the
+  // engine's 0.5 visibility filter dropped a real-but-faint signal
+  // in the middle), the value at that position is non-zero too,
+  // matching the visible band.
   const valueAtCurrent = (name) => {
     const safeIdx = Math.max(0, Math.min(samples.length - 1, currentSampleIdx));
-    const sample = samples[safeIdx];
-    if (!sample) return 0;
-    return pickMap(sample)[name] || 0;
+    const series = filledSeriesFor(name);
+    return series[safeIdx] || 0;
   };
   // Tradition-deference: on curated traditional blends, suppress the
   // at-position ⚠ when the user is sitting at or below the curator's
