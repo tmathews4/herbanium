@@ -612,8 +612,12 @@ export default function App() {
   // Sub-tab modes for Apothecary and Shelf. Lifted to App so the
   // TabBar can render them as a row inside the bottom dock — both
   // surfaces (sub-tab strip + main tabs) belong to the same GUI unit.
-  const [apothecaryMode, setApothecaryMode] = useState("reverse");
-  const [shelfMode, setShelfMode]           = useState("recipes");
+  // Persisted so each parent tab remembers which child sub-tab the
+  // user was last on. Switching apothecary ↔ shelf preserves the
+  // other side's last position, and a full reload doesn't drop the
+  // user back to defaults if they were mid-flow on a sub-tab.
+  const [apothecaryMode, setApothecaryMode] = usePersistedState("apothecaryMode", "reverse");
+  const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");
 
   // Tab navigation history. Every tab change pushes the previous
   // tab onto the stack so the back button can return to whatever
