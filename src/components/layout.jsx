@@ -60,7 +60,7 @@ const BARK_HOVER  = "#8C6240";
 
 export const Button = ({
   variant = "primary",   // primary | secondary | ghost
-  tone = "terra",        // terra | ink (filled / outlined variants only)
+  tone = "bark",         // bark | terra | ink (filled / outlined variants)
   fullWidth = false,
   disabled = false,
   icon = null,           // optional leading icon node
