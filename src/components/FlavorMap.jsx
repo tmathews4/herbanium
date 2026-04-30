@@ -252,15 +252,44 @@ const TrackMap = ({
     return out;
   }, [ingredients, timeS, tMin, tMax, span]);
 
+  // Family roll-up for the flavor strip — aggregates the catalog's
+  // specific notes (muscatel, peach, lychee, melon...) into the
+  // broader register (fruit, floral, earthy...) using FAMILY_BY_FLAVOR.
+  // Each family's strength at a sample is the MAX of its members at
+  // that sample, which keeps the engine's 0-5 scale honest (a band
+  // never reads as louder than its loudest contributor) and avoids
+  // double-counting overlapping notes. Defaults ON for the flavor
+  // strip; an inline toggle lets the user dive into specific notes
+  // when they want more detail.
+  const [familyMode, setFamilyMode] = useState(true);
+  const aggregateToFamilies = (flavorMap) => {
+    const fam = {};
+    for (const [name, strength] of Object.entries(flavorMap)) {
+      const familyName = FAMILY_BY_FLAVOR[name] || "body";
+      if (!fam[familyName] || strength > fam[familyName]) fam[familyName] = strength;
+    }
+    return fam;
+  };
+  const useFamilyMode = kind === "flavor" && familyMode;
+
   // Pick which sample-map this strip pulls from.
-  const pickMap = (s) =>
-    kind === "flavor" ? s.flavorMap
-    : kind === "mood" ? s.effectMap
-    : s.palateMap;
+  const pickMap = (s) => {
+    if (kind === "mood")  return s.effectMap;
+    if (kind === "palate") return s.palateMap;
+    if (useFamilyMode)    return aggregateToFamilies(s.flavorMap);
+    return s.flavorMap;
+  };
+  // Color resolver for the flavor strip in family mode looks up the
+  // FAMILY_COLORS table directly (the track names ARE family ids).
+  // Mood and palate kinds use their own color helpers; detail-mode
+  // flavor falls back to the original colorFor (flavor → family → color).
   const colorForName =
-    kind === "flavor" ? colorFor
-    : kind === "mood" ? colorForEffect
-    : colorForPalate;
+    kind === "flavor"
+      ? (useFamilyMode
+          ? (n) => FAMILY_COLORS[n] || "#796E5B"
+          : colorFor)
+      : kind === "mood" ? colorForEffect
+      : colorForPalate;
 
   // Compute peak strengths once, then split into two tiers:
   //   - primary: top MAX_TRACKS with peak ≥ PRIMARY_THRESHOLD
@@ -333,11 +362,28 @@ const TrackMap = ({
   }
   // Lookup tables — flavor strip uses FLAVOR_DESCRIPTIONS; mood and
   // palate strips both pull from EFFECT_DESCRIPTIONS (palate axes
-  // already live there).
+  // already live there). Family-mode flavor names (fruit, body, off)
+  // alias to existing description keys where the names don't match.
+  const FAMILY_DESC_ALIAS = {
+    fruit: "fruity",
+    body:  "creamy",
+    off:   "bitter",
+  };
   const descriptionFor = (name) => {
-    if (kind === "flavor") return FLAVOR_DESCRIPTIONS[name] || null;
+    if (kind === "flavor") {
+      if (useFamilyMode) {
+        const key = FAMILY_DESC_ALIAS[name] || name;
+        return FLAVOR_DESCRIPTIONS[key] || null;
+      }
+      return FLAVOR_DESCRIPTIONS[name] || null;
+    }
     return EFFECT_DESCRIPTIONS[name] || null;
   };
+  // Family-mode track names are short family ids; show them with a
+  // capitalized first letter so they read as register categories
+  // ("Fruit", "Floral") rather than internal slugs.
+  const labelFor = (name) =>
+    useFamilyMode ? name.charAt(0).toUpperCase() + name.slice(1) : name;
   const toggleSelected = (name) => {
     setSelectedTrack(prev => prev === name ? null : name);
   };
@@ -503,13 +549,38 @@ const TrackMap = ({
         fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
         textTransform: "uppercase", color: theme.ash, marginBottom: 8,
         display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        gap: 8,
       }}>
         <span>{title}</span>
-        <span style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
-          letterSpacing: 0, textTransform: "none", color: theme.ash,
-        }}>
-          at current steep
+        <span style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+          {/* Family/detail toggle — flavor strip only. Default is the
+              family roll-up (broader register, simpler read); the link
+              flips to the catalog's specific notes for users who want
+              the deeper view. Selection is cleared when switching modes
+              since track names differ between them. */}
+          {kind === "flavor" && (
+            <button
+              onClick={() => {
+                setSelectedTrack(null);
+                setFamilyMode(v => !v);
+              }}
+              style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                letterSpacing: 0, textTransform: "none",
+                color: theme.terra,
+                background: "transparent", border: "none",
+                padding: 0, cursor: "pointer",
+              }}
+            >
+              {familyMode ? "show specific notes →" : "← group by family"}
+            </button>
+          )}
+          <span style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+            letterSpacing: 0, textTransform: "none", color: theme.ash,
+          }}>
+            at current steep
+          </span>
         </span>
       </div>
 
@@ -556,7 +627,7 @@ const TrackMap = ({
                     style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
                   >⚠</span>
                 )}
-                <span>{name}</span>
+                <span>{labelFor(name)}</span>
               </div>
             );
           })}
@@ -635,7 +706,7 @@ const TrackMap = ({
             textTransform: "uppercase", color: theme.terra,
             marginBottom: 4,
           }}>
-            {selectedTrack}
+            {labelFor(selectedTrack)}
           </div>
           <div style={{
             fontFamily: ff.serif, fontSize: 13, color: theme.ink,
