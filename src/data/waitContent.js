@@ -797,6 +797,131 @@ export const WAIT_POEMS = [
     attribution: "— Thich Nhat Hanh (paraphrased, attributed)",
     tags: ["stillness", "calm", "tea", "comfort", "reflection"],
   },
+
+  // — Witty / insightful expansion: short, punchy lines that
+  //   land an idea or a smile rather than evoke a season. All
+  //   pre-1929 US public domain or ancient / classical-translated
+  //   PD. Tagged loosely on time-of-day so they can rotate into
+  //   any visit; the picker biases by season but doesn't require it.
+
+  // Witty / dark-comic / fun
+  {
+    text: "My candle burns at both ends;\nIt will not last the night;\nBut ah, my foes, and oh, my friends —\nIt gives a lovely light!",
+    attribution: "— Edna St. Vincent Millay (1920)",
+    tags: ["whimsy", "energy", "reflection", "evening", "night"],
+  },
+  {
+    text: "Four be the things I am wiser to know:\nIdleness, sorrow, a friend, and a foe.\nFour be the things I'd been better without:\nLove, curiosity, freckles, and doubt.",
+    attribution: "— Dorothy Parker (1926)",
+    tags: ["whimsy", "reflection", "comfort"],
+  },
+  {
+    text: "When I am dead, I hope it may be said:\n\"His sins were scarlet, but his books were read.\"",
+    attribution: "— Hilaire Belloc",
+    tags: ["whimsy", "reflection", "evening"],
+  },
+  {
+    text: "\"The time has come,\" the Walrus said,\n\"To talk of many things:\nOf shoes — and ships — and sealing-wax —\nOf cabbages — and kings —\nAnd why the sea is boiling hot —\nAnd whether pigs have wings.\"",
+    attribution: "— Lewis Carroll (1871)",
+    tags: ["whimsy", "reflection", "comfort"],
+  },
+  {
+    text: "'Twas brillig, and the slithy toves\nDid gyre and gimble in the wabe;\nAll mimsy were the borogoves,\nAnd the mome raths outgrabe.",
+    attribution: "— Lewis Carroll (1871)",
+    tags: ["whimsy", "energy", "morning"],
+  },
+  {
+    text: "I saw a man pursuing the horizon;\nRound and round they sped.\nI was disturbed at this;\nI accosted the man.\n\"It is futile,\" I said,\n\"You can never —\"\n\"You lie,\" he cried,\nAnd ran on.",
+    attribution: "— Stephen Crane (1895)",
+    tags: ["reflection", "whimsy", "focus"],
+  },
+  {
+    text: "There are strange things done in the midnight sun\nBy the men who moil for gold;\nThe Arctic trails have their secret tales\nThat would make your blood run cold.",
+    attribution: "— Robert Service (1907)",
+    tags: ["whimsy", "night", "winter", "reflection"],
+  },
+  {
+    text: "A canner exceedingly canny\nOne morning remarked to his granny:\n  \"A canner can can\n  Anything that he can\nBut a canner can't can a can, can he?\"",
+    attribution: "— Anonymous (traditional)",
+    tags: ["whimsy", "morning", "energy"],
+  },
+  {
+    text: "There was an Old Man in a tree,\nWho was horribly bored by a Bee.\n  When they said, \"Does it buzz?\"\n  He replied, \"Yes, it does!\nIt's a regular brute of a Bee!\"",
+    attribution: "— Edward Lear",
+    tags: ["whimsy", "summer", "comfort"],
+  },
+
+  // Insightful / makes-you-think
+  {
+    text: "Some say the world will end in fire,\nSome say in ice.\nFrom what I've tasted of desire\nI hold with those who favor fire.",
+    attribution: "— Robert Frost (1920)",
+    tags: ["reflection", "winter", "evening"],
+  },
+  {
+    text: "so much depends\nupon\n\na red wheel\nbarrow\n\nglazed with rain\nwater\n\nbeside the white\nchickens",
+    attribution: "— William Carlos Williams (1923)",
+    tags: ["reflection", "stillness", "rain", "morning"],
+  },
+  {
+    text: "The apparition of these faces in the crowd;\nPetals on a wet, black bough.",
+    attribution: "— Ezra Pound (1913)",
+    tags: ["reflection", "stillness", "rain", "noon"],
+  },
+  {
+    text: "The fog comes\non little cat feet.\nIt sits looking\nover harbor and city\non silent haunches\nand then moves on.",
+    attribution: "— Carl Sandburg (1916)",
+    tags: ["stillness", "morning", "calm", "reflection"],
+  },
+  {
+    text: "You cannot step into the same river twice,\nfor other waters are continually flowing on.",
+    attribution: "— Heraclitus",
+    tags: ["reflection", "stillness", "focus"],
+  },
+  {
+    text: "He who knows others is wise;\nhe who knows himself is enlightened.",
+    attribution: "— Lao Tzu",
+    tags: ["reflection", "stillness", "focus"],
+  },
+  {
+    text: "Once Zhuang Zhou dreamt he was a butterfly,\nflitting and fluttering, happy with himself.\nSuddenly he awoke, and was Zhou again.\nNow he does not know whether he was Zhou\ndreaming he was a butterfly,\nor a butterfly dreaming he is Zhou.",
+    attribution: "— Zhuangzi (Giles trans., 1889)",
+    tags: ["reflection", "stillness", "sleepy", "night"],
+  },
+  {
+    text: "This dewdrop world\nis a dewdrop world,\nand yet, and yet ...",
+    attribution: "— Issa",
+    tags: ["reflection", "stillness", "calm", "evening"],
+  },
+  {
+    text: "I have spread my dreams under your feet;\nTread softly because you tread on my dreams.",
+    attribution: "— W.B. Yeats (1899)",
+    tags: ["reflection", "evening", "calm", "comfort"],
+  },
+  {
+    text: "You have power over your mind —\nnot outside events.\nRealize this, and you will find strength.",
+    attribution: "— Marcus Aurelius",
+    tags: ["focus", "reflection", "morning"],
+  },
+  {
+    text: "The best laid schemes o' Mice an' Men\nGang aft agley,\nAn' lea'e us nought but grief an' pain,\nFor promis'd joy!",
+    attribution: "— Robert Burns (1785)",
+    tags: ["reflection", "comfort", "evening"],
+  },
+  {
+    text: "Do I contradict myself?\nVery well then I contradict myself,\n(I am large, I contain multitudes.)",
+    attribution: "— Walt Whitman",
+    tags: ["reflection", "energy", "noon"],
+  },
+  {
+    text: "No man is an island, entire of itself;\nevery man is a piece of the continent,\na part of the main.",
+    attribution: "— John Donne (1624)",
+    tags: ["reflection", "comfort", "evening"],
+  },
+  {
+    text: "You have no enemies, you say?\nAlas, my friend, the boast is poor.\nHe who has mingled in the fray\nOf duty, that the brave endure,\nMust have made foes.",
+    attribution: "— Charles Mackay (1846)",
+    tags: ["reflection", "focus", "energy"],
+  },
 ];
 
 // Brew-companion writing prompts. Short, sensory, low-friction —
