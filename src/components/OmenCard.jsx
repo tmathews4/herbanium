@@ -13,8 +13,12 @@ import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
 import { describeCreationTitle } from "../data/creationTitle";
 
-const FADE_IN_MS  = 1500;
-const FADE_OUT_MS = 800;
+// Quick enough to feel responsive on the user's tap, slow enough
+// that the omen still reads as arriving rather than blinking in.
+// Mirrors ElementalArrivalCard's pacing so both cards feel like
+// the same surface across the bestiary.
+const FADE_IN_MS  = 500;
+const FADE_OUT_MS = 320;
 
 function stripLeadingThe(title) {
   return (title || "").replace(/^The\s+/i, "");

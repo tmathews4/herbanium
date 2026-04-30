@@ -150,6 +150,7 @@ export function maybeRollWild({
   sessions = [],
   journalEntries = [],
   getBlend,
+  crystalName = null,
   rng = Math.random,
   now = Date.now(),
 }) {
@@ -170,12 +171,25 @@ export function maybeRollWild({
   const adjective = weightedPick(ALL_ADJECTIVES, biasedAdj, rng);
   const creature  = weightedPick(RANDOM_CREATURE_POOL, biasedCre, rng);
 
-  const trendBits = [];
-  if (topMoods[0])   trendBits.push(`a steady draw toward ${topMoods[0]}`);
-  if (topFlavors[0]) trendBits.push(`the ${topFlavors[0]} note in your kettle`);
-  const trail = trendBits.length > 0
-    ? `Drawn here by ${trendBits.join(" and ")}.`
-    : `Drawn here by the rhythm of your week.`;
+  // Trail closes the loop on the bestiary's lead crystal when one
+  // is named — same signal that biased this roll. Falls back to
+  // the older mood/flavor trend phrasing when there's no crystal
+  // (early users, or anyone with the bestiary disabled).
+  let trail;
+  if (crystalName) {
+    // Strip the leading article so the line scans naturally:
+    // "Drawn here by your Sky Crystal" reads better than "by your
+    // A Sky Crystal." Idempotent on names already missing one.
+    const naked = crystalName.replace(/^(A|An|The)\s+/i, "");
+    trail = `Drawn here by your ${naked}.`;
+  } else {
+    const trendBits = [];
+    if (topMoods[0])   trendBits.push(`a steady draw toward ${topMoods[0]}`);
+    if (topFlavors[0]) trendBits.push(`the ${topFlavors[0]} note in your kettle`);
+    trail = trendBits.length > 0
+      ? `Drawn here by ${trendBits.join(" and ")}.`
+      : `Drawn here by the rhythm of your week.`;
+  }
 
   const desc = `A wild elemental that wandered into the steam between cups. ${trail}`;
   const ts = now;

@@ -14,8 +14,12 @@ import { Ornament } from "./icons";
 import { arrivalVerbFor } from "../data/elementalArrivals";
 import { creatureFor } from "../data/elementalAdjectives";
 
-const FADE_IN_MS  = 1200;
-const FADE_OUT_MS = 700;
+// Quick enough that the user doesn't sit waiting or over-click,
+// slow enough that the card still arrives rather than blinks in.
+// Fade-out is kept tighter than fade-in so dismissing feels
+// responsive to the tap, not deferential to the animation.
+const FADE_IN_MS  = 450;
+const FADE_OUT_MS = 280;
 
 export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
   const [phase, setPhase] = useState("entering");

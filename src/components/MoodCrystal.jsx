@@ -14,6 +14,7 @@
 import React from "react";
 import { ff, theme } from "../theme";
 import { computeMoodCrystal } from "../data/moodCrystal";
+import { usePersistedState } from "../hooks/usePersistedState";
 
 const CrystalShape = ({ gradient, idSuffix }) => {
   const gradId = `crystal-grad-${idSuffix}`;
@@ -77,16 +78,57 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
   // with the first's colors in some browsers).
   const idSuffix = React.useId().replace(/[^a-zA-Z0-9]/g, "");
 
+  // Pulse-on-shift: when the user logs a cup or journal entry the
+  // total activity count grows, the crystal pulses once for ~900ms
+  // so the change feels reactive instead of silently swapping.
+  // Persisted across navigations so the pulse fires on the visit
+  // that follows the log, not on every revisit.
+  const activityCount = (sessions?.length || 0) + (journalEntries?.length || 0);
+  const [lastSeenCount, setLastSeenCount] = usePersistedState("crystalLastSeenCount", 0);
+  const [pulsing, setPulsing] = React.useState(false);
+  React.useEffect(() => {
+    if (activityCount > lastSeenCount) {
+      setPulsing(true);
+      const t1 = setTimeout(() => setPulsing(false), 900);
+      // Acknowledge the new count after the pulse so a second log
+      // before the pulse finishes still resets the timer cleanly.
+      const t2 = setTimeout(() => setLastSeenCount(activityCount), 950);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [activityCount, lastSeenCount, setLastSeenCount]);
+
+  // Tap to expand — opens a small detail panel below the card
+  // showing what's powering the crystal: top families per axis
+  // plus the user's onboarding intent for context.
+  const [expanded, setExpanded] = React.useState(false);
+
+  // Pulse multiplier — when active, glow alphas roughly double so
+  // the crystal flares briefly. The CSS transition on the inner
+  // div eases the change in and back.
+  const pulseMul = pulsing ? 2 : 1;
+  const innerAlpha = pulseMul === 2 ? "B0" : "60";  // 0xB0 ≈ 69%, 0x60 ≈ 38%
+  const outerAlpha = pulseMul === 2 ? "A0" : "55";  // 0xA0 ≈ 63%, 0x55 ≈ 33%
+  const ambAlpha   = pulseMul === 2 ? "55" : "22";
+
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 14,
-      padding: "12px 14px",
       borderRadius: 12,
       background: theme.cream,
       border: `1px solid ${theme.ruleSoft}`,
       boxShadow: "0 1px 2px rgba(30,24,18,0.04)",
       marginBottom: 14,
+      overflow: "hidden",
     }}>
+    <button
+      type="button"
+      onClick={() => setExpanded(v => !v)}
+      aria-expanded={expanded}
+      style={{
+        all: "unset", cursor: "pointer", width: "100%", boxSizing: "border-box",
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "12px 14px",
+      }}
+    >
       <div style={{
         flexShrink: 0,
         // Faint backplate behind the crystal so the shape pops on
@@ -103,12 +145,12 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         // Either can be missing (null) and the corresponding layer
         // drops cleanly. Always include a faint primary-color
         // ambient at the very inside so the shape pops on the page
-        // even when both axis-glows are absent.
-        // Hex+alpha pairs: 22 ≈ 13%, 55 ≈ 33%, 60 ≈ 38%.
+        // even when both axis-glows are absent. Pulse boosts every
+        // alpha briefly when the user just logged a new entry.
         boxShadow: [
-          `0 0 8px 1px ${crystal.gradient[0]}22`,
-          crystal.innerGlowColor && `0 0 16px 3px ${crystal.innerGlowColor}60`,
-          crystal.outerGlowColor && `0 0 32px 8px ${crystal.outerGlowColor}55`,
+          `0 0 ${pulsing ? 14 : 8}px 1px ${crystal.gradient[0]}${ambAlpha}`,
+          crystal.innerGlowColor && `0 0 ${pulsing ? 24 : 16}px 3px ${crystal.innerGlowColor}${innerAlpha}`,
+          crystal.outerGlowColor && `0 0 ${pulsing ? 44 : 32}px 8px ${crystal.outerGlowColor}${outerAlpha}`,
         ].filter(Boolean).join(", "),
         // Faint crystals (profile-only forecast) render dimmer so
         // the visual matches the description's "still gathering"
@@ -122,8 +164,15 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
         }}>
-          your crystal
+          <span>your crystal</span>
+          <span style={{
+            fontSize: 9, color: theme.ash, opacity: 0.7,
+            transition: "transform 0.2s ease",
+            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+            display: "inline-block",
+          }}>▾</span>
         </div>
         <div style={{
           fontFamily: ff.serif, fontSize: 15, color: theme.ink,
@@ -138,6 +187,80 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
           {crystal.description}
         </div>
       </div>
+    </button>
+    {expanded && <CrystalDetail crystal={crystal} profile={profile} />}
+    </div>
+  );
+};
+
+// Detail panel under the crystal — shows what's powering the
+// current name + description. Family ranks tell the user where
+// their activity actually clusters; onboarding intent tells them
+// what they said they wanted, so they can see whether they're
+// brewing toward it or away from it.
+const CrystalDetail = ({ crystal, profile }) => {
+  const intentMoods   = (profile?.draw    || []).join(", ");
+  const intentFlavors = (profile?.flavors || [])
+    .map(e => Array.isArray(e) ? e[0] : e)
+    .filter(Boolean)
+    .join(", ");
+  const effects = (crystal.families?.effect || []).slice(0, 3);
+  const flavors = (crystal.families?.flavor || []).slice(0, 3);
+
+  const Row = ({ title, items, empty }) => (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+      }}>{title}</div>
+      {items.length === 0 ? (
+        <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash }}>
+          {empty}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {items.map(({ family, weight, color }) => (
+            <span key={family} style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              padding: "2px 8px", borderRadius: 999,
+              background: `${color}1A`,
+              border: `1px solid ${color}55`,
+              fontFamily: ff.sans, fontSize: 11, color: theme.inkSoft,
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%",
+                background: color, display: "inline-block",
+              }} />
+              {family} <span style={{ color: theme.ash }}>· {weight}</span>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{
+      padding: "10px 14px 14px",
+      borderTop: `1px solid ${theme.ruleSoft}`,
+      background: "rgba(var(--hi-rgb),0.04)",
+    }}>
+      <Row title="from your moods" items={effects} empty="no recent mood data" />
+      <Row title="from your cups" items={flavors} empty="no flavor data yet" />
+      {(intentMoods || intentFlavors) && (
+        <div style={{
+          marginTop: 4, paddingTop: 8,
+          borderTop: `1px dashed ${theme.ruleSoft}`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+          color: theme.inkSoft, lineHeight: 1.5,
+        }}>
+          You said{" "}
+          {intentMoods && <em style={{ fontStyle: "normal", color: theme.terra }}>{intentMoods}</em>}
+          {intentMoods && intentFlavors && " and "}
+          {intentFlavors && <em style={{ fontStyle: "normal", color: theme.terra }}>{intentFlavors}</em>}
+          {" "}draw{(intentMoods.split(",").length + (intentFlavors ? intentFlavors.split(",").length : 0)) === 1 ? "s" : ""} you.
+        </div>
+      )}
     </div>
   );
 };

@@ -24,6 +24,7 @@ import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
+import { computeMoodCrystal } from "./data/moodCrystal";
 import { configureStatusBar, hapticTap } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
@@ -765,11 +766,20 @@ export default function App() {
   // (id won't be in seenElementalIds, so it queues up naturally).
   const tryRollWildElemental = () => {
     if (elementalsDisabled) return;
+    // Crystal name is included in the wild's `desc` so the arrival
+    // card closes the loop on the bestiary's lead crystal — the
+    // same signal that biased this roll. Computed inline rather
+    // than read from a memo so the name reflects the activity
+    // state the roller saw, not a stale render.
+    const crystal = computeMoodCrystal({
+      sessions, journalEntries, getBlend, profile,
+    });
     const wild = maybeRollWild({
       lastWildAt,
       sessions,
       journalEntries,
       getBlend,
+      crystalName: crystal.isNeutral ? null : crystal.name,
     });
     if (!wild) return;
     setWildElementals(prev => [...(prev || []), wild]);
