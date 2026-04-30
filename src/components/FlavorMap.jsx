@@ -638,58 +638,50 @@ const TrackMap = ({
         gap: 8,
       }}>
         <span>{title}</span>
-        <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          {/* Family/detail toggle — flavor strip only. Segmented two-
-              button control: 'Family' rolls members up to the broader
-              register (Fruit, Floral, Marine...); 'Detail' shows every
-              specific note the engine surfaces (muscatel, peach, lychee,
-              chestnut, etc.) — only different from family when the
-              brewed ingredients declare specific notes rather than
-              generic family terms. Selection clears on toggle. */}
-          {kind === "flavor" && (
-            <span style={{
-              display: "inline-flex",
-              border: `1px solid ${theme.ruleSoft}`,
-              borderRadius: 999,
-              overflow: "hidden",
-            }}>
-              {[
-                { id: "family", label: "Family" },
-                { id: "detail", label: "Detail" },
-              ].map(opt => {
-                const active = (opt.id === "family") === familyMode;
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => {
-                      const want = opt.id === "family";
-                      if (want === familyMode) return;
-                      setSelectedTrack(null);
-                      setFamilyMode(want);
-                    }}
-                    style={{
-                      fontFamily: ff.sans, fontSize: 9.5,
-                      letterSpacing: "0.12em", textTransform: "uppercase",
-                      padding: "3px 9px",
-                      background: active ? theme.terra : "transparent",
-                      color: active ? theme.cream : theme.ash,
-                      border: "none",
-                      cursor: active ? "default" : "pointer",
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </span>
-          )}
+        {/* Simple/Detailed toggle — flavor strip only. Sits where the
+            "at current steep" hint used to. Simple rolls specific notes
+            up to their family (Fruit, Floral, Marine...); Detailed
+            shows the engine's specific notes (muscatel, peach, lychee,
+            chestnut, etc.) — only meaningfully different when the
+            brewed ingredients declare specific notes rather than
+            generic family terms. Selection clears on toggle. */}
+        {kind === "flavor" ? (
           <span style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
-            letterSpacing: 0, textTransform: "none", color: theme.ash,
+            display: "inline-flex",
+            border: `1px solid ${theme.ruleSoft}`,
+            borderRadius: 999,
+            overflow: "hidden",
           }}>
-            at current steep
+            {[
+              { id: "simple",   label: "Simple"   },
+              { id: "detailed", label: "Detailed" },
+            ].map(opt => {
+              const active = (opt.id === "simple") === familyMode;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    const want = opt.id === "simple";
+                    if (want === familyMode) return;
+                    setSelectedTrack(null);
+                    setFamilyMode(want);
+                  }}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 9.5,
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                    padding: "3px 9px",
+                    background: active ? theme.terra : "transparent",
+                    color: active ? theme.cream : theme.ash,
+                    border: "none",
+                    cursor: active ? "default" : "pointer",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
           </span>
-        </span>
+        ) : <span />}
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
