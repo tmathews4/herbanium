@@ -28,6 +28,7 @@
 
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
+import { loudnessOf } from "../algo/perception";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
 
@@ -278,7 +279,18 @@ const TrackMap = ({
         peaks[name] = Math.max(peaks[name] || 0, strength);
       }
     }
-    const ranked = Object.entries(peaks).sort((a, b) => b[1] - a[1]);
+    // Rank by perceptual prominence (peak × loudness) for the flavor
+    // strip so when two flavors have similar peaks, the more assertive
+    // one wins the slot. Mint at 0.6 reads louder in the cup than honey
+    // at 0.65 because menthol's TRPM8 trigger dominates well above its
+    // mass ratio — the strip should reflect what the user will taste,
+    // not the raw chemistry. Mood/palate strips don't have an analogous
+    // hierarchy curated yet, so they keep raw-peak ordering.
+    const rankWeight = kind === "flavor"
+      ? (name, peak) => peak * loudnessOf(name)
+      : (_name, peak) => peak;
+    const ranked = Object.entries(peaks)
+      .sort((a, b) => rankWeight(b[0], b[1]) - rankWeight(a[0], a[1]));
     let primary = ranked
       .filter(([, peak]) => peak >= PRIMARY_THRESHOLD)
       .slice(0, MAX_TRACKS)
