@@ -303,17 +303,30 @@ const StepTimeOfDay = ({ value, setValue }) => {
 
 /* ──────────────────────────────────────────────────────────────
    Step 3: What draws you — condensed 6-mood list for first-run.
-   The full vocabulary lives in data/blends.js MOODS; this is just
-   the easy-on-ramp subset.
+
+   Each option carries a `family` field that ties the user-facing
+   pick to the master mood-family hierarchy used by the TrackMap
+   strip and the engine's matching logic. Keeping the keys stable
+   (calm, focus, energy, sleepy, comfort, digestive) protects
+   seed/profile code that already reads them; the family field is
+   the additive correlation link.
+
+   Mapping:
+     calm      → calm   (calm + soothing + grounding)
+     focus     → focus  (focus)
+     energy    → energy (energy + uplifting)
+     sleepy    → sleep  (sleepy)
+     comfort   → warm   (warming + comfort)
+     digestive → body   (digestive)
    ────────────────────────────────────────────────────────────── */
 
 const DRAW_OPTIONS = [
-  { key: "calm",      label: "Calm",      note: "a settling, a softening" },
-  { key: "focus",     label: "Focus",     note: "attention, the clear mind" },
-  { key: "energy",    label: "Energy",    note: "lift, the spark to begin" },
-  { key: "sleepy",    label: "Sleep",     note: "the drift toward rest" },
-  { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup" },
-  { key: "digestive", label: "Digestive", note: "fennel, after-supper ease" },
+  { key: "calm",      family: "calm",   label: "Calm",      note: "a settling, a softening" },
+  { key: "focus",     family: "focus",  label: "Focus",     note: "attention, the clear mind" },
+  { key: "energy",    family: "energy", label: "Energy",    note: "lift, the spark to begin" },
+  { key: "sleepy",    family: "sleep",  label: "Sleep",     note: "the drift toward rest" },
+  { key: "comfort",   family: "warm",   label: "Comfort",   note: "warmth, the familiar cup" },
+  { key: "digestive", family: "body",   label: "Digestive", note: "fennel, after-supper ease" },
 ];
 
 const StepDraw = ({ value, setValue }) => {
@@ -330,19 +343,36 @@ const StepDraw = ({ value, setValue }) => {
 
 /* ──────────────────────────────────────────────────────────────
    Step 4: Flavors — condensed 8-flavor list for first-run.
-   The full vocabulary lives in data/blends.js FLAVORS; this is
-   just the broadest, most legible families for new users.
+
+   Each option carries a `family` field tying the user-facing pick
+   to the master flavor-family hierarchy (FAMILY_BY_FLAVOR in
+   FlavorMap.jsx). Citrus and minty both correlate to the 'fresh'
+   family — kept as separate picks because users distinguish them
+   on the palate even though the master family rolls them together.
+   Sweet sits in the floral family for now per FAMILY_BY_FLAVOR;
+   if we promote 'sweet' to its own family later, this is the
+   single line to update.
+
+   Mapping:
+     floral → floral
+     citrus → fresh    (citrus rolls into the fresh register)
+     fruity → fruit
+     sweet  → floral   (current FAMILY_BY_FLAVOR lumping)
+     spiced → spiced
+     minty  → fresh    (minty rolls into the fresh register)
+     earthy → earthy
+     smoky  → smoky
    ────────────────────────────────────────────────────────────── */
 
 const FLAVOR_OPTIONS = [
-  { key: "floral",   label: "Floral" },
-  { key: "citrus",   label: "Citrus" },
-  { key: "fruity",   label: "Fruity" },
-  { key: "sweet",    label: "Sweet" },
-  { key: "spiced",   label: "Spiced" },
-  { key: "minty",    label: "Minty" },
-  { key: "earthy",   label: "Earthy" },
-  { key: "smoky",    label: "Smoky" },
+  { key: "floral", family: "floral", label: "Floral" },
+  { key: "citrus", family: "fresh",  label: "Citrus" },
+  { key: "fruity", family: "fruit",  label: "Fruity" },
+  { key: "sweet",  family: "floral", label: "Sweet"  },
+  { key: "spiced", family: "spiced", label: "Spiced" },
+  { key: "minty",  family: "fresh",  label: "Minty"  },
+  { key: "earthy", family: "earthy", label: "Earthy" },
+  { key: "smoky",  family: "smoky",  label: "Smoky"  },
 ];
 
 const StepFlavors = ({ value, setValue }) => {

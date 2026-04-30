@@ -112,21 +112,25 @@ const FAMILY_BY_FLAVOR = {
 
 const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "#796E5B";
 
-// Mood / effect → family. Smaller catalog than flavors, mostly
-// derived from how the app already groups effect tags (mood
-// register = sage, energy register = ochre, comfort = terra).
+// Mood / effect → family. Mirrors the flavor hierarchy so the same
+// Simple/Detailed toggle can roll up moods. Cooling is split out of
+// 'calm' into its own 'cool' family — felt-temperature cooling is
+// orthogonal to mind-quieting calm; lumping them confused green-tea
+// brews where the cup reads cool but not particularly settling.
 const FAMILY_BY_EFFECT = {
-  // calm register — sage family
-  calm: "calm", soothing: "calm", grounding: "calm", cooling: "calm",
-  // focus register — sky / steady
+  // calm register — settling, mind-quieting
+  calm: "calm", soothing: "calm", grounding: "calm",
+  // focus register — clarity, alertness
   focus: "focus",
-  // energy register — ochre / bright
+  // energy register — lift, brightening
   energy: "energy", uplifting: "energy",
-  // warm / comfort register — terra / rose
+  // warm register — comfort, warmth-of-spirit
   warming: "warm", comfort: "warm",
-  // body register — sage-deep
+  // cool register — felt-temperature cooling, opposite warm
+  cooling: "cool",
+  // body register — gut/stomach, after-meal
   digestive: "body",
-  // sleep register — plum
+  // sleep register — drowsiness, downward drift
   sleepy: "sleep",
 };
 const EFFECT_FAMILY_COLORS = {
@@ -134,6 +138,7 @@ const EFFECT_FAMILY_COLORS = {
   focus:  "#7F9AA0",  // sky
   energy: "#A57836",  // ochre
   warm:   "#C37959",  // rose
+  cool:   "#5A8E8E",  // teal — distinct from focus's sky
   body:   "#4A573A",  // sageDeep
   sleep:  "#7B4A5A",  // plum
 };
@@ -261,28 +266,35 @@ const TrackMap = ({
     return out;
   }, [ingredients, timeS, tMin, tMax, span]);
 
-  // Family roll-up for the flavor strip. Default ON; segmented toggle
-  // lets the user dive into specific notes.
+  // Family roll-up. Default ON for flavor and mood strips; segmented
+  // toggle lets the user dive into specific notes / specific effects.
   //
   // Aggregation rule:
   //   - For each family, max-pool the strengths of its specific child
-  //     notes that appear in the cup (campfire, tar, pine → smoky).
-  //   - EXCEPTION: if the family name itself was declared as a flavor
-  //     (e.g. an ingredient declared "smoky" or "fruity" directly),
-  //     use the family-name's own curve instead of the max-of-children
-  //     fallback. The engine's direct signal wins because the curator
-  //     chose the family-level term — that's the cup's natural curve.
+  //     members that appear in the cup (campfire/tar/pine → smoky;
+  //     soothing/grounding → calm).
+  //   - EXCEPTION: if the family name itself was declared as a token
+  //     (e.g. an ingredient declared "smoky" or "calm" directly), use
+  //     that token's own curve instead of the max-of-children fallback.
+  //     The engine's direct signal wins because the curator chose the
+  //     family-level term — that's the cup's natural curve.
   const [familyMode, setFamilyMode] = useState(true);
-  const aggregateToFamilies = (flavorMap) => {
+  // Resolve which hierarchy applies to this strip's data.
+  const familyOf  = kind === "flavor" ? FAMILY_BY_FLAVOR : FAMILY_BY_EFFECT;
+  const familyColors =
+    kind === "flavor" ? FAMILY_COLORS
+    : kind === "mood"  ? EFFECT_FAMILY_COLORS
+    : null;
+  const aggregateToFamilies = (sourceMap) => {
     const fam = {};
     const directFamily = {};
-    for (const [name, strength] of Object.entries(flavorMap)) {
-      // FAMILY_COLORS keyed by family id — if the flavor name IS a
-      // family id, the engine declared the family directly.
-      if (FAMILY_COLORS[name]) {
+    for (const [name, strength] of Object.entries(sourceMap)) {
+      // familyColors keyed by family id — if the name IS a family id,
+      // the engine declared the family token directly.
+      if (familyColors && familyColors[name]) {
         directFamily[name] = strength;
       } else {
-        const familyName = FAMILY_BY_FLAVOR[name] || "body";
+        const familyName = familyOf[name] || "body";
         if (!fam[familyName] || strength > fam[familyName]) fam[familyName] = strength;
       }
     }
@@ -292,22 +304,24 @@ const TrackMap = ({
     }
     return fam;
   };
-  const useFamilyMode = kind === "flavor" && familyMode;
+  const useFamilyMode = (kind === "flavor" || kind === "mood") && familyMode;
 
   // Detail-mode filter — across the entire envelope, identify which
-  // families have at least one specific (non-family-name) child note
-  // present. If they do, the family-name flavor is redundant in detail
-  // view (e.g. "smoky" alongside "campfire" + "tar" + "pine") so we
-  // hide it. Family-name flavors with no specific children stay in
-  // detail mode — they're the only signal for that register.
+  // families have at least one specific (non-family-name) child member
+  // present. If they do, the family-name token is redundant in detail
+  // view (e.g. "smoky" alongside campfire+tar+pine; "calm" alongside
+  // soothing+grounding) so we hide it. Family-name tokens with no
+  // specific children stay in detail mode — they're the only signal
+  // for that register.
   const familiesWithSpecificChildren = useMemo(() => {
     const set = new Set();
-    if (kind !== "flavor") return set;
+    if (kind !== "flavor" && kind !== "mood") return set;
+    const source = kind === "flavor" ? "flavorMap" : "effectMap";
     for (const s of samples) {
-      for (const [name, strength] of Object.entries(s.flavorMap)) {
+      for (const [name, strength] of Object.entries(s[source])) {
         if (strength <= 0) continue;
-        if (FAMILY_COLORS[name]) continue;  // this name IS a family id
-        const familyName = FAMILY_BY_FLAVOR[name];
+        if (familyColors && familyColors[name]) continue;
+        const familyName = familyOf[name];
         if (familyName) set.add(familyName);
       }
     }
@@ -315,12 +329,10 @@ const TrackMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind]);
 
-  const filterDetailFlavors = (flavorMap) => {
+  const filterDetail = (sourceMap) => {
     const out = {};
-    for (const [name, strength] of Object.entries(flavorMap)) {
-      if (FAMILY_COLORS[name]) {
-        // Family-name flavor — hide if specific children of this
-        // family are present somewhere in the envelope.
+    for (const [name, strength] of Object.entries(sourceMap)) {
+      if (familyColors && familyColors[name]) {
         if (familiesWithSpecificChildren.has(name)) continue;
       }
       out[name] = strength;
@@ -330,21 +342,24 @@ const TrackMap = ({
 
   // Pick which sample-map this strip pulls from.
   const pickMap = (s) => {
-    if (kind === "mood")  return s.effectMap;
     if (kind === "palate") return s.palateMap;
-    if (useFamilyMode)    return aggregateToFamilies(s.flavorMap);
-    return filterDetailFlavors(s.flavorMap);
+    const source = kind === "flavor" ? s.flavorMap : s.effectMap;
+    if (useFamilyMode) return aggregateToFamilies(source);
+    return filterDetail(source);
   };
-  // Color resolver for the flavor strip in family mode looks up the
-  // FAMILY_COLORS table directly (the track names ARE family ids).
-  // Mood and palate kinds use their own color helpers; detail-mode
-  // flavor falls back to the original colorFor (flavor → family → color).
+  // Color resolver. In family mode, look up the family palette
+  // directly since the track names ARE family ids. In detail mode,
+  // route through the strip's normal helper (which resolves flavor
+  // → family → color or effect → family → color).
   const colorForName =
     kind === "flavor"
       ? (useFamilyMode
           ? (n) => FAMILY_COLORS[n] || "#796E5B"
           : colorFor)
-      : kind === "mood" ? colorForEffect
+      : kind === "mood"
+      ? (useFamilyMode
+          ? (n) => EFFECT_FAMILY_COLORS[n] || "#796E5B"
+          : colorForEffect)
       : colorForPalate;
 
   // Compute peak strengths once, then split into two tiers:
@@ -422,20 +437,31 @@ const TrackMap = ({
   }
   // Lookup tables — flavor strip uses FLAVOR_DESCRIPTIONS; mood and
   // palate strips both pull from EFFECT_DESCRIPTIONS (palate axes
-  // already live there). Family-mode flavor names (fruit, body, off)
-  // alias to existing description keys where the names don't match.
-  const FAMILY_DESC_ALIAS = {
+  // already live there). Family-mode names (fruit, body, off, warm,
+  // cool, sleep) alias to existing description keys where the family
+  // id doesn't match a vocabulary entry.
+  const FLAVOR_FAMILY_DESC_ALIAS = {
     fruit: "fruity",
     body:  "creamy",
     off:   "bitter",
   };
+  const MOOD_FAMILY_DESC_ALIAS = {
+    warm:  "warming",
+    body:  "digestive",
+    sleep: "sleepy",
+  };
   const descriptionFor = (name) => {
     if (kind === "flavor") {
-      if (useFamilyMode) {
-        const key = FAMILY_DESC_ALIAS[name] || name;
-        return FLAVOR_DESCRIPTIONS[key] || null;
-      }
-      return FLAVOR_DESCRIPTIONS[name] || null;
+      const key = useFamilyMode
+        ? (FLAVOR_FAMILY_DESC_ALIAS[name] || name)
+        : name;
+      return FLAVOR_DESCRIPTIONS[key] || null;
+    }
+    if (kind === "mood") {
+      const key = useFamilyMode
+        ? (MOOD_FAMILY_DESC_ALIAS[name] || name)
+        : name;
+      return EFFECT_DESCRIPTIONS[key] || null;
     }
     return EFFECT_DESCRIPTIONS[name] || null;
   };
@@ -445,26 +471,26 @@ const TrackMap = ({
   // read as a stylistic outlier.
   const labelFor = (name) => name;
 
-  // For a family-mode selected track, list the specific notes that
-  // contributed to it (any flavor that mapped into this family AND
-  // showed up with non-zero strength somewhere in the envelope). This
-  // is the "you're seeing Fruit because the cup carries muscatel +
-  // peach" disclosure — useful when the catalog ingredient declared
-  // the family term itself ('fruity' rolls into Fruit too) and the
-  // detail view doesn't surface anything more specific.
+  // For a family-mode selected track, list the specific members that
+  // contributed to it (any token that mapped into this family AND
+  // showed up with non-zero strength somewhere in the envelope). The
+  // "you're seeing fruit because the cup carries muscatel + peach"
+  // disclosure — works the same on flavor and mood strips.
   const contributorsForFamily = (familyName) => {
-    if (!useFamilyMode || kind !== "flavor") return [];
+    if (!useFamilyMode) return [];
+    if (kind !== "flavor" && kind !== "mood") return [];
     const seen = new Set();
+    const sourceKey = kind === "flavor" ? "flavorMap" : "effectMap";
     for (const s of samples) {
-      for (const [n, v] of Object.entries(s.flavorMap)) {
+      for (const [n, v] of Object.entries(s[sourceKey])) {
         if (v <= 0) continue;
-        const fam = FAMILY_BY_FLAVOR[n] || "body";
+        const fam = familyOf[n] || "body";
         if (fam === familyName) seen.add(n);
       }
     }
-    // Sort with the family name itself at the END (it's the generic
-    // term — listing the SPECIFIC notes first reads as 'this is what
-    // makes up Fruit', then 'and the recipe also called it fruity').
+    // Sort with the family name itself at the END — listing the
+    // specific members first reads as 'this is what makes up calm',
+    // then 'and the recipe also called it calm'.
     return [...seen].sort((a, b) => {
       if (a === familyName) return 1;
       if (b === familyName) return -1;
@@ -655,14 +681,14 @@ const TrackMap = ({
         gap: 8,
       }}>
         <span>{title}</span>
-        {/* Simple/Detailed toggle — flavor strip only. Sits where the
-            "at current steep" hint used to. Simple rolls specific notes
-            up to their family (Fruit, Floral, Marine...); Detailed
-            shows the engine's specific notes (muscatel, peach, lychee,
-            chestnut, etc.) — only meaningfully different when the
-            brewed ingredients declare specific notes rather than
-            generic family terms. Selection clears on toggle. */}
-        {kind === "flavor" ? (
+        {/* Simple/Detailed toggle — flavor and mood strips. Simple
+            rolls members up to their family (fruit, floral, smoky on
+            the flavor side; calm, focus, energy, warm on the mood
+            side). Detailed shows the engine's specific tokens
+            (muscatel, peach, chestnut; soothing, grounding, uplifting)
+            and hides family-name tokens that are redundant when their
+            children are present. Selection clears on toggle. */}
+        {(kind === "flavor" || kind === "mood") ? (
           <span style={{
             display: "inline-flex",
             border: `1px solid ${theme.ruleSoft}`,
