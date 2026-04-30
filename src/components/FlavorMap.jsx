@@ -350,13 +350,27 @@ const TrackMap = ({
   // alpha 1.0 — a flat block of full-saturation color that visually
   // 'punches in' compared to a varying gradient on the same band.
   // Capping below 1.0 keeps uniform regions feeling like part of the
-  // same band as varying regions. 0.82 is high enough to read as
-  // confidently present, low enough to soften the slab effect.
+  // same band as varying regions.
   const MAX_BAND_ALPHA = 0.82;
+
+  // Cup-wide extraction strength. Bands per-track-normalize for
+  // SHAPE (so a minor flavor in a healthy cup still shows clear
+  // gradient) but we want a CUP-LEVEL fade when the whole cup is
+  // underextracted — at timeS → 0, everything should fade out
+  // toward transparent rather than sit at full per-track opacity.
+  // The cup-strength factor compares the loudest peak in the
+  // strip to a "well-extracted" reference (1.5 on the engine's
+  // 0–5 scale). When the cup-wide peak is healthy, no fade. When
+  // it drops because the user pulled the time slider toward zero,
+  // every band dampens in proportion.
+  const cupPeak = Math.max(0, ...Object.values(trackData.peaks));
+  const FULL_EXTRACTION_REF = 1.5;
+  const cupStrength = Math.min(1, cupPeak / FULL_EXTRACTION_REF);
+
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
-    const cap = (peak < 1 ? Math.sqrt(peak) : 1) * MAX_BAND_ALPHA;
+    const cap = (peak < 1 ? Math.sqrt(peak) : 1) * MAX_BAND_ALPHA * cupStrength;
     // Build the raw strength series, then fill threshold-drop gaps
     // before mapping to alpha so the gradient reads as continuous.
     const rawSeries = samples.map(s => pickMap(s)[name] || 0);
