@@ -260,32 +260,79 @@ const TrackMap = ({
     return out;
   }, [ingredients, timeS, tMin, tMax, span]);
 
-  // Family roll-up for the flavor strip — aggregates the catalog's
-  // specific notes (muscatel, peach, lychee, melon...) into the
-  // broader register (fruit, floral, earthy...) using FAMILY_BY_FLAVOR.
-  // Each family's strength at a sample is the MAX of its members at
-  // that sample, which keeps the engine's 0-5 scale honest (a band
-  // never reads as louder than its loudest contributor) and avoids
-  // double-counting overlapping notes. Defaults ON for the flavor
-  // strip; an inline toggle lets the user dive into specific notes
-  // when they want more detail.
+  // Family roll-up for the flavor strip. Default ON; segmented toggle
+  // lets the user dive into specific notes.
+  //
+  // Aggregation rule:
+  //   - For each family, max-pool the strengths of its specific child
+  //     notes that appear in the cup (campfire, tar, pine → smoky).
+  //   - EXCEPTION: if the family name itself was declared as a flavor
+  //     (e.g. an ingredient declared "smoky" or "fruity" directly),
+  //     use the family-name's own curve instead of the max-of-children
+  //     fallback. The engine's direct signal wins because the curator
+  //     chose the family-level term — that's the cup's natural curve.
   const [familyMode, setFamilyMode] = useState(true);
   const aggregateToFamilies = (flavorMap) => {
     const fam = {};
+    const directFamily = {};
     for (const [name, strength] of Object.entries(flavorMap)) {
-      const familyName = FAMILY_BY_FLAVOR[name] || "body";
-      if (!fam[familyName] || strength > fam[familyName]) fam[familyName] = strength;
+      // FAMILY_COLORS keyed by family id — if the flavor name IS a
+      // family id, the engine declared the family directly.
+      if (FAMILY_COLORS[name]) {
+        directFamily[name] = strength;
+      } else {
+        const familyName = FAMILY_BY_FLAVOR[name] || "body";
+        if (!fam[familyName] || strength > fam[familyName]) fam[familyName] = strength;
+      }
+    }
+    // Direct family signals override the max-of-children fallback.
+    for (const [familyName, strength] of Object.entries(directFamily)) {
+      fam[familyName] = strength;
     }
     return fam;
   };
   const useFamilyMode = kind === "flavor" && familyMode;
+
+  // Detail-mode filter — across the entire envelope, identify which
+  // families have at least one specific (non-family-name) child note
+  // present. If they do, the family-name flavor is redundant in detail
+  // view (e.g. "smoky" alongside "campfire" + "tar" + "pine") so we
+  // hide it. Family-name flavors with no specific children stay in
+  // detail mode — they're the only signal for that register.
+  const familiesWithSpecificChildren = useMemo(() => {
+    const set = new Set();
+    if (kind !== "flavor") return set;
+    for (const s of samples) {
+      for (const [name, strength] of Object.entries(s.flavorMap)) {
+        if (strength <= 0) continue;
+        if (FAMILY_COLORS[name]) continue;  // this name IS a family id
+        const familyName = FAMILY_BY_FLAVOR[name];
+        if (familyName) set.add(familyName);
+      }
+    }
+    return set;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [samples, kind]);
+
+  const filterDetailFlavors = (flavorMap) => {
+    const out = {};
+    for (const [name, strength] of Object.entries(flavorMap)) {
+      if (FAMILY_COLORS[name]) {
+        // Family-name flavor — hide if specific children of this
+        // family are present somewhere in the envelope.
+        if (familiesWithSpecificChildren.has(name)) continue;
+      }
+      out[name] = strength;
+    }
+    return out;
+  };
 
   // Pick which sample-map this strip pulls from.
   const pickMap = (s) => {
     if (kind === "mood")  return s.effectMap;
     if (kind === "palate") return s.palateMap;
     if (useFamilyMode)    return aggregateToFamilies(s.flavorMap);
-    return s.flavorMap;
+    return filterDetailFlavors(s.flavorMap);
   };
   // Color resolver for the flavor strip in family mode looks up the
   // FAMILY_COLORS table directly (the track names ARE family ids).
@@ -350,8 +397,12 @@ const TrackMap = ({
       .slice(0, MAX_SECONDARY)
       .map(([name]) => name);
     return { primary, secondary, peaks };
+    // useFamilyMode is part of the deps because pickMap above uses
+    // it to choose the family-rolled-up sample map vs the
+    // detail-filtered one — the track set must recompute when the
+    // user toggles the segmented control.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [samples, kind]);
+  }, [samples, kind, useFamilyMode]);
   const [expanded, setExpanded] = useState(false);
   // Track-description selection. Clicking a band or its label opens
   // a fixed-position description panel below the strip; clicking the
