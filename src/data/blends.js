@@ -46,6 +46,29 @@ const FLAVORS = [
   "bitter", "tart", "vegetal", "nutty", "savory",
 ];
 
+// User-facing flavor chip list aligned to the master flavor-family
+// hierarchy in components/FlavorMap.jsx (FAMILY_BY_FLAVOR). One chip
+// per family so cup logs and journal entries select at the same
+// register the strip groups by. Each chip carries `family` (the
+// internal id used for engine matching) and `label` (user-facing).
+//
+// Used by:
+//   - LogScreen "anything else come through?" picker
+//   - JournalComposer flavor row
+//   - OnboardingScreen step 4 (flavors you reach for)
+export const FLAVOR_FAMILY_CHIPS = [
+  { key: "fruity",  family: "fruit",   label: "Fruity"  },
+  { key: "floral",  family: "floral",  label: "Floral"  },
+  { key: "sweet",   family: "sweet",   label: "Sweet"   },
+  { key: "spiced",  family: "spiced",  label: "Spiced"  },
+  { key: "smoky",   family: "smoky",   label: "Smoky"   },
+  { key: "earthy",  family: "earthy",  label: "Earthy"  },
+  { key: "fresh",   family: "fresh",   label: "Fresh"   },
+  { key: "vegetal", family: "vegetal", label: "Vegetal" },
+  { key: "marine",  family: "marine",  label: "Marine"  },
+  { key: "creamy",  family: "body",    label: "Creamy"  },
+];
+
 /* ── Curated named blends ──────────────────────────────────── */
 
 // Optional fields that explain why a recipe doesn't fit a Western steep:

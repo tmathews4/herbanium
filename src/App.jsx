@@ -868,7 +868,7 @@ export default function App() {
   // Append a free-form journal entry. Entries live alongside cup
   // sessions in the chronology and render via JournalEntryRow on the
   // Compose · Shelf · Journal tab.
-  const addJournalEntry = (text, kind, note, currentMoods, landedMoods) => {
+  const addJournalEntry = (text, kind, note, currentMoods, landedMoods, flavors) => {
     if (!text || !text.trim()) return;
     const validKind =
       kind === "haiku" ? "haiku"
@@ -884,6 +884,9 @@ export default function App() {
       // timeline reads as one mood log across cups + entries.
       currentMoods: Array.isArray(currentMoods) ? currentMoods : [],
       landedMoods:  Array.isArray(landedMoods)  ? landedMoods  : [],
+      // Flavor selections — family-aligned chips from the same
+      // master register the strip uses. Optional per entry.
+      flavors:      Array.isArray(flavors) ? flavors : [],
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
     tryRollWildElemental();

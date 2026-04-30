@@ -68,6 +68,9 @@ const FAMILY_COLORS = {
                         // distinct enough from grassy vegetal that it
                         // earns its own band rather than rolling under
                         // 'vegetal' and losing the kelp character.
+  sweet:    "#C49E5C",  // honey-amber — sweetness is its own register
+                        // (honey, vanilla, caramel, "honey-sweet")
+                        // rather than an extension of floral.
   body:     "#796E5B",  // ash
   off:      "#B0542F",  // terra (off-notes share terra to read as "warning")
 };
@@ -78,12 +81,16 @@ const FAMILY_BY_FLAVOR = {
   apricot: "fruit", berry: "fruit", tart: "fruit", cranberry: "fruit",
   bright: "fruit", melon: "fruit",
   // floral
-  floral: "floral", rose: "floral", orchid: "floral", honeyed: "floral",
-  honey: "floral", sweet: "floral", delicate: "floral",
-  // earthy / dark / woody
+  floral: "floral", rose: "floral", orchid: "floral", delicate: "floral",
+  // sweet — its own register (was lumped under floral). honey,
+  // honeyed, "honey-sweet" sit here too because they're sweetness-
+  // forward rather than perfume-forward.
+  sweet: "sweet", honey: "sweet", honeyed: "sweet",
+  "honey-sweet": "sweet", vanilla: "sweet", caramel: "sweet",
+  // earthy / dark / woody — caramel moved to sweet family above
   earthy: "earthy", woody: "earthy", mushroom: "earthy", leather: "earthy",
   dark: "earthy", mineral: "earthy", malty: "earthy", cocoa: "earthy",
-  rich: "earthy", chestnut: "earthy", nutty: "earthy", caramel: "earthy",
+  rich: "earthy", chestnut: "earthy", nutty: "earthy",
   toasted: "earthy", roasted: "earthy", warm: "earthy", bold: "earthy",
   robust: "earthy", brisk: "earthy", musky: "earthy", musty: "earthy",
   // spiced / warming

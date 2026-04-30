@@ -21,6 +21,7 @@ import {
 import {
   LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
 } from "../data/limerickAdlibs";
+import { FLAVOR_FAMILY_CHIPS } from "../data/blends";
 
 // Shared mood vocabulary for the journal — one chip per master mood
 // family (the TrackMap hierarchy in FlavorMap.jsx) plus the rough-
@@ -43,7 +44,20 @@ const JOURNAL_MOOD_CHIPS = [
   { key: "restless",  label: "Restless" },
 ];
 
-const MoodChipRow = ({ label, value, setValue }) => {
+const MoodChipRow = ({ label, value, setValue }) => (
+  <ChipPickerRow label={label} chips={JOURNAL_MOOD_CHIPS} value={value} setValue={setValue} />
+);
+
+const FlavorChipRow = ({ value, setValue }) => (
+  <ChipPickerRow label="Flavors" chips={FLAVOR_FAMILY_CHIPS} value={value} setValue={setValue} />
+);
+
+// Shared chip picker — used for moods (current / landed) and the
+// flavor row. Chips can be `{key, label}` or `{key, family, label}`;
+// the row only reads key + label. Same visual treatment whether
+// rendering moods or flavors keeps the journal entry feeling like
+// one form, not three sections with different conventions.
+const ChipPickerRow = ({ label, chips, value, setValue }) => {
   const selected = new Set(value || []);
   const toggle = (key) => {
     const cur = value || [];
@@ -57,7 +71,7 @@ const MoodChipRow = ({ label, value, setValue }) => {
         textTransform: "uppercase", color: theme.ash, marginBottom: 6,
       }}>{label}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-        {JOURNAL_MOOD_CHIPS.map(c => {
+        {chips.map(c => {
           const isOn = selected.has(c.key);
           return (
             <button
@@ -93,9 +107,12 @@ export const JournalComposer = ({ onSave, onCancel }) => {
   const [limAdlib, setLimAdlib] = useState(true);
   const [limOwn, setLimOwn] = useState("");
   // Shared across all three modes — every entry can record a
-  // before/after mood arc, the same shape cup sessions use.
+  // before/after mood arc, the same shape cup sessions use, plus
+  // an optional flavors set (family-aligned with the master
+  // hierarchy used on the TrackMap strip).
   const [currentMoods, setCurrentMoods] = useState([]);
   const [landedMoods, setLandedMoods] = useState([]);
+  const [flavors, setFlavors] = useState([]);
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
   const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
@@ -121,6 +138,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     setLimAdlib(true);
     setCurrentMoods([]);
     setLandedMoods([]);
+    setFlavors([]);
     setMode("free");
   };
 
@@ -128,12 +146,12 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     if (!ready) return;
     if (mode === "haiku") {
       const finalText = haikuAdlib ? haikuPreview : haikuOwn.trim();
-      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods);
+      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods, flavors);
     } else if (mode === "limerick") {
       const finalText = limAdlib ? limerickPreview : limOwn.trim();
-      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods);
+      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods, flavors);
     } else {
-      onSave(text.trim(), "entry", "", currentMoods, landedMoods);
+      onSave(text.trim(), "entry", "", currentMoods, landedMoods, flavors);
     }
     // Wipe the form so the next time the composer opens it's blank.
     resetForm();
@@ -467,6 +485,14 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           value={landedMoods}
           setValue={setLandedMoods}
         />
+      </div>
+
+      {/* Flavor selections — family-aligned with the master
+          hierarchy. Optional; many entries won't have a cup
+          attached, but when there is a cup the writer often wants
+          to capture the register that surfaced. */}
+      <div style={{ marginTop: 4 }}>
+        <FlavorChipRow value={flavors} setValue={setFlavors} />
       </div>
 
       <div style={{

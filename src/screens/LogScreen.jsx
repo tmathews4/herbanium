@@ -25,7 +25,7 @@ import { Flower } from "../components/icons";
 import {
   Button, Chip, ChipRows, SectionLabel, Toggle,
 } from "../components/layout";
-import { FLAVORS } from "../data/blends";
+import { FLAVOR_FAMILY_CHIPS } from "../data/blends";
 import {
   ff, theme, shadow, radius,
 } from "../theme";
@@ -176,10 +176,15 @@ export const LogScreen = ({ blend, intent, currentMoods, onSubmit, onCancel }) =
         </div>
         <div style={{ marginTop: 10 }}>
           <ChipRows
-            items={FLAVORS.filter(f => !predictedFlavors.includes(f))}
-            renderItem={(f) => (
-              <Chip key={f} active={extraFlavors.includes(f)} onClick={() => toggleExtra(f)} tone="terra">
-                {f}
+            items={FLAVOR_FAMILY_CHIPS}
+            renderItem={(c) => (
+              <Chip
+                key={c.key}
+                active={extraFlavors.includes(c.key)}
+                onClick={() => toggleExtra(c.key)}
+                tone="terra"
+              >
+                {c.label}
               </Chip>
             )}
           />
