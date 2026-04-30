@@ -581,11 +581,18 @@ const TrackMap = ({
     // perceptually (volatile loss is gradual, not a step). FADE_LEN
     // bounds how far the taper extends so we don't fabricate presence
     // beyond what the chemistry supports.
+    // Trailing fade only. A flavor that's present then disappears
+    // at the right edge does so via gradual volatile loss / mass-
+    // weighting cliff, and the band reads more honestly with a
+    // short taper than a hard cutoff.
+    //
+    // Leading-edge zeros stay zero. Compounds that only extract
+    // above some temperature threshold don't have a gentle gradient
+    // below it — extraction is closer to a step than a slope at
+    // the cold end. Adding a leading taper would fabricate presence
+    // and produced a 'fades then brightens' visual that read as a
+    // bug rather than a smoothing.
     const FADE_LEN = 4;
-    // Trailing fade — find the rightmost non-zero, then fill the
-    // next FADE_LEN samples with a linear decay toward zero.
-    // (Anything beyond FADE_LEN stays at 0 — we don't fabricate
-    // presence beyond what the chemistry supports.)
     let lastNonZero = -1;
     for (let j = n - 1; j >= 0; j--) {
       if (out[j] > 0) { lastNonZero = j; break; }
@@ -596,19 +603,6 @@ const TrackMap = ({
         const distance = i - lastNonZero;
         const t = distance / (FADE_LEN + 1);  // never quite reaches 0
         out[i] = out[lastNonZero] * (1 - t);
-      }
-    }
-    // Leading fade — same idea, mirrored from the left edge.
-    let firstNonZero = -1;
-    for (let j = 0; j < n; j++) {
-      if (out[j] > 0) { firstNonZero = j; break; }
-    }
-    if (firstNonZero > 0) {
-      const fadeStart = Math.max(0, firstNonZero - FADE_LEN);
-      for (let i = fadeStart; i < firstNonZero; i++) {
-        const distance = firstNonZero - i;
-        const t = distance / (FADE_LEN + 1);
-        out[i] = out[firstNonZero] * (1 - t);
       }
     }
     return out;
