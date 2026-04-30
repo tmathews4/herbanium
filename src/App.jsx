@@ -63,7 +63,10 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   return (
     <div style={{
       flexShrink: 0,
-      background: "rgba(243,236,220,0.94)",
+      // Translucent ivory dock — composes from --ivory-rgb so the
+      // bottom bar swaps to a warm-dark in prefers-color-scheme: dark
+      // instead of staying cream over the dark page.
+      background: "rgba(var(--ivory-rgb),0.94)",
       backdropFilter: "blur(8px)",
       borderTop: `1px solid ${theme.rule}`,
     }}>

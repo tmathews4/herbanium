@@ -33,9 +33,11 @@
   --rose:      #C37959;
   --sky:       #7F9AA0;
   --plum:      #7B4A5A;
-  /* Numeric pieces for rgba() composites in JS-built shadows */
+  /* Numeric pieces for rgba() composites in JS-built shadows /
+     translucent surfaces. */
   --shadow-rgb: 30, 24, 18;        /* ink */
   --hi-rgb:     255, 255, 255;     /* inset highlight */
+  --ivory-rgb:  243, 236, 220;     /* translucent surfaces (TabBar dock) */
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -88,6 +90,7 @@
      dark surfaces; highlight stays white-toned at low alpha. */
     --shadow-rgb: 0, 0, 0;
     --hi-rgb:     255, 240, 210;
+    --ivory-rgb:  26, 22, 18;
   }
 }
 
