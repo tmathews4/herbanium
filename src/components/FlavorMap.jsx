@@ -315,28 +315,58 @@ const TrackMap = ({
     kind === "flavor" ? FAMILY_COLORS
     : kind === "mood"  ? EFFECT_FAMILY_COLORS
     : null;
+  const useFamilyMode = (kind === "flavor" || kind === "mood") && familyMode;
+
+  // Global contributor map — for each family, which specific tokens
+  // contribute to it across the entire envelope. Used to demote
+  // families with only one contributor to that contributor's name,
+  // so a band that's really just "grassy" doesn't get relabeled
+  // "vegetal" when grassy is the lone vegetal-family note in the
+  // cup. Computed across samples so the display name is stable as
+  // the user drags the slider.
+  const globalFamilyContributors = useMemo(() => {
+    const map = new Map();
+    if (kind !== "flavor" && kind !== "mood") return map;
+    const sourceKey = kind === "flavor" ? "flavorMap" : "effectMap";
+    for (const s of samples) {
+      for (const [name, strength] of Object.entries(s[sourceKey])) {
+        if (strength <= 0) continue;
+        const familyName = (familyColors && familyColors[name])
+          ? name
+          : (familyOf[name] || "body");
+        if (!map.has(familyName)) map.set(familyName, new Set());
+        map.get(familyName).add(name);
+      }
+    }
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [samples, kind]);
+
+  // For a family, the display name to use in Simple mode: the family
+  // id if multiple tokens contribute, the single contributor's name
+  // if only one. Lets a vegetal band stay labeled "grassy" when
+  // grassy is the only vegetal-family member in the cup, while
+  // still rolling up to "vegetal" in cups that carry both grassy
+  // AND umami / marine / etc.
+  const familyDisplayKey = (familyName) => {
+    const contribs = globalFamilyContributors.get(familyName);
+    if (contribs && contribs.size === 1) return [...contribs][0];
+    return familyName;
+  };
+
   const aggregateToFamilies = (sourceMap) => {
     const fam = {};
     for (const [name, strength] of Object.entries(sourceMap)) {
-      // Whether the name is itself a family id (a "direct" signal)
-      // or a child token (a member of some family), we max-pool it
-      // into its family bucket. The earlier "direct overrides
-      // children" rule replaced louder children with quieter direct
-      // signals — e.g., on the mood strip, energy=0.2 appearing
-      // alongside uplifting=1.6 (both in the energy family) made the
-      // family band DROP to 0.2 because direct overrode children.
-      // Max is safer and matches the user's expectation that a
-      // family band reflects its loudest contributor, period.
       const familyName = (familyColors && familyColors[name])
         ? name
         : (familyOf[name] || "body");
-      if (!fam[familyName] || strength > fam[familyName]) {
-        fam[familyName] = strength;
+      const key = familyDisplayKey(familyName);
+      if (!fam[key] || strength > fam[key]) {
+        fam[key] = strength;
       }
     }
     return fam;
   };
-  const useFamilyMode = (kind === "flavor" || kind === "mood") && familyMode;
 
   // Detail-mode filter — across the entire envelope, identify which
   // families have at least one specific (non-family-name) child member
@@ -383,14 +413,18 @@ const TrackMap = ({
   // directly since the track names ARE family ids. In detail mode,
   // route through the strip's normal helper (which resolves flavor
   // → family → color or effect → family → color).
+  // In Simple mode the track name might be a family id ("vegetal")
+  // OR a single-contributor token ("grassy") that got demoted from
+  // its family. Resolve both — direct family lookup first, then
+  // route through the family map for child tokens.
   const colorForName =
     kind === "flavor"
       ? (useFamilyMode
-          ? (n) => FAMILY_COLORS[n] || "#796E5B"
+          ? (n) => FAMILY_COLORS[n] || FAMILY_COLORS[FAMILY_BY_FLAVOR[n]] || "#796E5B"
           : colorFor)
       : kind === "mood"
       ? (useFamilyMode
-          ? (n) => EFFECT_FAMILY_COLORS[n] || "#796E5B"
+          ? (n) => EFFECT_FAMILY_COLORS[n] || EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[n]] || "#796E5B"
           : colorForEffect)
       : colorForPalate;
 
