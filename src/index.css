@@ -109,6 +109,17 @@ body {
   margin: 0;
 }
 
+/* Placeholder text — keep it visibly distinct from real input but
+   not so faint it disappears in dark mode. var(--ash) reads as a
+   suggestion in both registers; italic separates it from typed
+   text without needing a different font size. */
+input::placeholder,
+textarea::placeholder {
+  color: var(--ash);
+  opacity: 0.78;
+  font-style: italic;
+}
+
 #root {
   width: 1126px;
   max-width: 100%;

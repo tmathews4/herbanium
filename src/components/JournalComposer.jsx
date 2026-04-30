@@ -299,9 +299,10 @@ export const JournalComposer = ({ onSave, onCancel }) => {
                   style={{
                     width: "100%", boxSizing: "border-box",
                     fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-                    background: "transparent",
-                    border: "none", borderBottom: `1px solid ${theme.ruleSoft}`,
-                    padding: "4px 2px", outline: "none",
+                    background: "rgba(var(--hi-rgb),0.05)",
+                    border: `1px solid ${theme.rule}`,
+                    borderRadius: 6,
+                    padding: "7px 10px", outline: "none",
                   }}
                 />
               </div>
@@ -418,9 +419,10 @@ export const JournalComposer = ({ onSave, onCancel }) => {
                   style={{
                     width: "100%", boxSizing: "border-box",
                     fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-                    background: "transparent",
-                    border: "none", borderBottom: `1px solid ${theme.ruleSoft}`,
-                    padding: "4px 2px", outline: "none",
+                    background: "rgba(var(--hi-rgb),0.05)",
+                    border: `1px solid ${theme.rule}`,
+                    borderRadius: 6,
+                    padding: "7px 10px", outline: "none",
                   }}
                 />
               </div>
