@@ -248,31 +248,22 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           {adlibToggle(haikuAdlib, setHaikuAdlib)}
 
           {!haikuAdlib && (
-            <>
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-                color: theme.ash, lineHeight: 1.5, marginBottom: 8, textAlign: "left",
-              }}>
-                Three lines, traditionally <em>5 / 7 / 5 syllables</em> —
-                a moment held in the briefest possible frame.
-              </div>
-              <textarea
-                value={haikuOwn}
-                onChange={(e) => setHaikuOwn(e.target.value)}
-                placeholder={"line one — five syllables\nline two — seven syllables\nline three — five syllables"}
-                rows={4}
-                style={{
-                  width: "100%", boxSizing: "border-box",
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-                  color: theme.ink, lineHeight: 1.7,
-                  background: "rgba(255,255,255,0.4)",
-                  border: `1px dashed ${theme.rule}`, borderRadius: 8,
-                  padding: "10px 12px", outline: "none",
-                  resize: "vertical", minHeight: 110,
-                  whiteSpace: "pre-wrap",
-                }}
-              />
-            </>
+            <textarea
+              value={haikuOwn}
+              onChange={(e) => setHaikuOwn(e.target.value)}
+              placeholder={"Three lines — traditionally 5 / 7 / 5 syllables.\nA moment held in the briefest possible frame.\n\nline one — five syllables\nline two — seven syllables\nline three — five syllables"}
+              rows={6}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+                color: theme.ink, lineHeight: 1.7,
+                background: "rgba(var(--hi-rgb),0.05)",
+                border: `1px solid ${theme.rule}`, borderRadius: 8,
+                padding: "10px 12px", outline: "none",
+                resize: "vertical", minHeight: 160,
+                whiteSpace: "pre-wrap",
+              }}
+            />
           )}
 
           {haikuAdlib && (<>
@@ -367,32 +358,22 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           {adlibToggle(limAdlib, setLimAdlib)}
 
           {!limAdlib && (
-            <>
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-                color: theme.ash, lineHeight: 1.5, marginBottom: 8, textAlign: "left",
-              }}>
-                Five lines, <em>AABBA</em> rhyme — lines 1, 2, 5 share an
-                end-sound; lines 3, 4 share a different one. Lines 1, 2, 5
-                run a beat longer than 3 and 4.
-              </div>
-              <textarea
-                value={limOwn}
-                onChange={(e) => setLimOwn(e.target.value)}
-                placeholder={"line one — A\nline two — A\n   line three — B\n   line four — B\nline five — A"}
-                rows={6}
-                style={{
-                  width: "100%", boxSizing: "border-box",
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-                  color: theme.ink, lineHeight: 1.7,
-                  background: "rgba(255,255,255,0.4)",
-                  border: `1px dashed ${theme.rule}`, borderRadius: 8,
-                  padding: "10px 12px", outline: "none",
-                  resize: "vertical", minHeight: 150,
-                  whiteSpace: "pre-wrap",
-                }}
-              />
-            </>
+            <textarea
+              value={limOwn}
+              onChange={(e) => setLimOwn(e.target.value)}
+              placeholder={"Five lines, AABBA rhyme — lines 1, 2, 5 share an\nend-sound; lines 3, 4 share a different one.\nLines 1, 2, 5 run a beat longer than 3 and 4.\n\nline one — A\nline two — A\n   line three — B\n   line four — B\nline five — A"}
+              rows={9}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+                color: theme.ink, lineHeight: 1.7,
+                background: "rgba(var(--hi-rgb),0.05)",
+                border: `1px solid ${theme.rule}`, borderRadius: 8,
+                padding: "10px 12px", outline: "none",
+                resize: "vertical", minHeight: 220,
+                whiteSpace: "pre-wrap",
+              }}
+            />
           )}
 
           {limAdlib && (<>
