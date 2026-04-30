@@ -29,6 +29,7 @@
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import { loudnessOf } from "../algo/perception";
+import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
 
@@ -315,9 +316,31 @@ const TrackMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind]);
   const [expanded, setExpanded] = useState(false);
+  // Track-description selection. Clicking a band or its label opens
+  // a fixed-position description panel below the strip; clicking the
+  // same row again closes it. Single panel per strip keeps layout
+  // predictable instead of accordion-jumping each row.
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const primaryTracks   = trackData.primary;
   const secondaryTracks = trackData.secondary;
   const tracks = expanded ? [...primaryTracks, ...secondaryTracks] : primaryTracks;
+  // If the displayed track set changes (timeS slider drag drops a
+  // track) and the previously-selected track is no longer present,
+  // close the panel so it never points at something off-screen.
+  if (selectedTrack && !tracks.includes(selectedTrack)) {
+    // Defer to avoid a setState-in-render warning on the same row.
+    setTimeout(() => setSelectedTrack(null), 0);
+  }
+  // Lookup tables — flavor strip uses FLAVOR_DESCRIPTIONS; mood and
+  // palate strips both pull from EFFECT_DESCRIPTIONS (palate axes
+  // already live there).
+  const descriptionFor = (name) => {
+    if (kind === "flavor") return FLAVOR_DESCRIPTIONS[name] || null;
+    return EFFECT_DESCRIPTIONS[name] || null;
+  };
+  const toggleSelected = (name) => {
+    setSelectedTrack(prev => prev === name ? null : name);
+  };
 
   if (primaryTracks.length === 0 && secondaryTracks.length === 0) return null;
   if (samples.length === 0) return null;
@@ -498,16 +521,28 @@ const TrackMap = ({
           {tracks.map(name => {
             const warn = warningFor(name);
             const here = isWarningHere(warn);
+            const isSelected = selectedTrack === name;
+            const hasDescription = !!descriptionFor(name);
             return (
-              <div key={name} style={{
-                height: TRACK_H,
-                fontFamily: ff.sans, fontSize: 10,
-                color: here ? theme.terra : theme.inkSoft,
-                fontWeight: here ? 500 : 400,
-                display: "flex", alignItems: "center", justifyContent: "flex-end",
-                gap: 3,
-                minWidth: LABEL_W,
-              }}>
+              <div
+                key={name}
+                onClick={hasDescription ? () => toggleSelected(name) : undefined}
+                title={hasDescription ? "tap for definition" : undefined}
+                style={{
+                  height: TRACK_H,
+                  fontFamily: ff.sans, fontSize: 10,
+                  color: here ? theme.terra : (isSelected ? theme.ink : theme.inkSoft),
+                  fontWeight: here || isSelected ? 500 : 400,
+                  display: "flex", alignItems: "center", justifyContent: "flex-end",
+                  gap: 3,
+                  minWidth: LABEL_W,
+                  cursor: hasDescription ? "pointer" : "default",
+                  textDecoration: isSelected ? "underline" : "none",
+                  textDecorationColor: theme.terra,
+                  textDecorationThickness: 1,
+                  textUnderlineOffset: 2,
+                }}
+              >
                 {/* ⚠ only fires when the CURRENT slider position is
                     inside a warning zone — not just because a warning
                     zone exists somewhere in the envelope. The terra
@@ -533,14 +568,23 @@ const TrackMap = ({
         }}>
           {tracks.map(name => {
             const warn = warningFor(name);
+            const isSelected = selectedTrack === name;
+            const hasDescription = !!descriptionFor(name);
             return (
-              <div key={name} style={{
-                position: "relative",
-                height: TRACK_H,
-                borderRadius: 3,
-                background: gradientFor(name),
-                boxShadow: `inset 0 0 0 1px ${theme.ruleSoft}`,
-              }}>
+              <div
+                key={name}
+                onClick={hasDescription ? () => toggleSelected(name) : undefined}
+                style={{
+                  position: "relative",
+                  height: TRACK_H,
+                  borderRadius: 3,
+                  background: gradientFor(name),
+                  boxShadow: isSelected
+                    ? `inset 0 0 0 1.5px ${theme.terra}`
+                    : `inset 0 0 0 1px ${theme.ruleSoft}`,
+                  cursor: hasDescription ? "pointer" : "default",
+                }}
+              >
                 {/* Warning underlay — a thin terra stripe along the
                     bottom of the band wherever the palate axis crosses
                     its unpleasant threshold. Positioned inside the
@@ -572,6 +616,43 @@ const TrackMap = ({
           }} />
         </div>
       </div>
+
+      {/* Description panel — fixed position below the bands so the
+          user always knows where the explanation lands when they
+          tap a row. Stays out of the way until something is selected;
+          renders inline (no popup, no accordion-jump per row). */}
+      {selectedTrack && descriptionFor(selectedTrack) && (
+        <div style={{
+          marginTop: 10,
+          marginLeft: LABEL_W + 8,
+          padding: "8px 12px",
+          borderLeft: `2px solid ${theme.terra}`,
+          background: "rgba(176,84,47,0.04)",
+          borderRadius: "2px 6px 6px 2px",
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.terra,
+            marginBottom: 4,
+          }}>
+            {selectedTrack}
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+            lineHeight: 1.45, marginBottom: 4,
+          }}>
+            {descriptionFor(selectedTrack).summary}
+          </div>
+          {descriptionFor(selectedTrack).body && (
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+              color: theme.ash, lineHeight: 1.5,
+            }}>
+              {descriptionFor(selectedTrack).body}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Expand toggle — only when the strip has secondary tracks
           worth surfacing. Shows the count of near-but-not-quite
