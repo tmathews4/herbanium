@@ -75,6 +75,16 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
+  // Close the composer whenever the user navigates away from the
+  // journal sub-view — switching apothecary/shelf mode, switching
+  // section, or moving to a different journal sub-tab. Without this
+  // the composer's open flag could outlive the journal context that
+  // surfaced it; the next time the user landed back on the journal
+  // tab it could re-render an unintended writing surface.
+  React.useEffect(() => {
+    setJournalComposerOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section, mode]);
   // Journal timeline filter — default "all" shows cups + entries.
   // Deep-links can preset it via composeView.journalFilter (e.g. the
   // Home recent-brews 'see all' link sets it to "cups").
@@ -101,6 +111,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // brew/entry timeline and the elemental Bestiary that used to sit
   // as its own primary tab.
   const [journalSubTab, setJournalSubTab] = useState("journal"); // journal | bestiary
+  // Switching between Journal and Bestiary inside the journal mode
+  // also dismisses an open composer — the writing surface belongs
+  // to the journal sub-tab and shouldn't bleed across.
+  React.useEffect(() => {
+    setJournalComposerOpen(false);
+  }, [journalSubTab]);
   const [apothecaryFilter, setApothecaryFilter] = useState("favorites");
   const [shelfTab, setShelfTab] = useState("blends"); // blends | catalogue | journal
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
