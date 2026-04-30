@@ -929,7 +929,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 stacked styles. */}
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <Button
-                variant="secondary" tone="terra"
+                variant="secondary"
                 disabled={blend.empty}
                 onClick={() => {
                   setSaveName(suggestBlendName(effectiveIngredients));
@@ -939,7 +939,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 style={{ fontSize: 14, padding: "10px 18px" }}
               >Save</Button>
               <Button
-                variant="primary" tone="terra"
+                variant="primary"
                 disabled={blend.empty}
                 onClick={() => {
                   const candidate = { ...blend, ingredients: effectiveIngredients, tempC: brewTempC, timeS: brewTimeS };
@@ -1952,7 +1952,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
       )}
       <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
         <Button
-          variant="secondary" tone="terra"
+          variant="secondary"
           disabled={!saveComposedBlend || reverseIngs.length === 0}
           onClick={() => {
             setRcSaveName("");
@@ -1962,7 +1962,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           style={{ fontSize: 14, padding: "10px 18px" }}
         >Save</Button>
         <Button
-          variant="primary" tone="terra"
+          variant="primary"
           disabled={reverseIngs.length === 0}
           onClick={() => {
             if (reverseIngs.length === 0) return;

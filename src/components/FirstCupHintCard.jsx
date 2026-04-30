@@ -37,7 +37,7 @@ export const FirstCupHintCard = ({ onDismiss }) => (
       </div>
     </div>
     <Button
-      variant="primary" tone="terra" fullWidth
+      variant="primary" fullWidth
       onClick={onDismiss}
       style={{
         fontFamily: ff.sans, fontSize: 12, fontWeight: 500,

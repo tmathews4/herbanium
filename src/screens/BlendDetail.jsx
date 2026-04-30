@@ -564,7 +564,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             the page's headline action reads slightly bigger than the
             standard Button defaults. */}
         <Button
-          variant="primary" tone="terra" fullWidth
+          variant="primary" fullWidth
           onClick={onBrew}
           icon={<Kettle size={20} c={theme.cream} />}
           style={{ marginTop: 18, fontSize: 17, padding: "15px 16px", gap: 10 }}
