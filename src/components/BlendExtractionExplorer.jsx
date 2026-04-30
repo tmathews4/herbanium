@@ -481,6 +481,55 @@ export const BlendExtractionExplorer = ({
                 <span>{Math.round(timeSRange[0] / 60)} min</span>
                 <span>{Math.round(timeSRange[1] / 60)} min</span>
               </div>
+
+              {/* Clipped-long-steep note. The blend's time upper bound
+                  follows the most-fragile lead × 1.3 (see
+                  algo/brewBounds.js), so any ingredient whose own
+                  timeS[1] reaches significantly past the cap will
+                  render with its long-steep range hidden. Surface
+                  that explicitly so the user understands why the
+                  slider stops short and where to go for the longer
+                  brew (the ingredient solo, via IngredientDetail).
+                  Only shows on real blends (≥2 ingredients) and
+                  only if the gap is meaningful (>60s past cap). */}
+              {ingredients.length >= 2 && (() => {
+                const capS = timeSRange[1];
+                const items = ingredients
+                  .map(({ id }) => {
+                    const meta = INGREDIENTS[id];
+                    if (!meta?.timeS) return null;
+                    const ownMaxS = meta.timeS[1];
+                    if (ownMaxS <= capS + 60) return null;
+                    return { name: meta.name, ownMaxMin: Math.round(ownMaxS / 60) };
+                  })
+                  .filter(Boolean);
+                if (items.length === 0) return null;
+                const capMin = Math.round(capS / 60);
+                const names = items.length === 1
+                  ? items[0].name
+                  : items.length === 2
+                    ? `${items[0].name} and ${items[1].name}`
+                    : `${items.slice(0, -1).map(i => i.name).join(", ")}, and ${items[items.length - 1].name}`;
+                const longestMin = Math.max(...items.map(i => i.ownMaxMin));
+                return (
+                  <div style={{
+                    marginTop: 10,
+                    padding: "8px 10px",
+                    borderLeft: `2px solid ${theme.terra}`,
+                    background: "rgba(176,84,47,0.05)",
+                    borderRadius: "2px 6px 6px 2px",
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                    color: theme.inkSoft, lineHeight: 1.5,
+                  }}>
+                    <span style={{ color: theme.terra, fontStyle: "normal" }}>
+                      {names}
+                    </span>
+                    {items.length === 1 ? " can steep" : " can each steep"} up to {longestMin} min on its own —
+                    the blend caps at {capMin} min so the more fragile leads don't oversteep alongside it.
+                    To brew the longer cup, open the ingredient and steep it solo.
+                  </div>
+                );
+              })()}
             </div>
           </>
         );
