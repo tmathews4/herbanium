@@ -24,13 +24,21 @@ import {
 // rough-edged states a tea ritual is often addressing (anxious, stressed,
 // tired, restless); the "I'd like to feel" row stays positive-only since
 // no one aspires to feel anxious.
+//
+// Each positive chip corresponds to one master mood family from the
+// TrackMap hierarchy (FAMILY_BY_EFFECT in FlavorMap.jsx). Exactly
+// one chip per family — using leaf-effect keys (sleepy, comfort,
+// cooling, digestive) for compatibility with existing saved sessions
+// that already store these keys; the `family` field is the
+// correlation link to the master register.
 const DESIRED_MOOD_CHIPS = [
-  { key: "calm",      label: "Calm" },
-  { key: "focus",     label: "Focus" },
-  { key: "energy",    label: "Energy" },
-  { key: "sleepy",    label: "Sleepy" },
-  { key: "comfort",   label: "Comfort" },
-  { key: "digestive", label: "Digestive" },
+  { key: "calm",      family: "calm",   label: "Calm" },
+  { key: "focus",     family: "focus",  label: "Focus" },
+  { key: "energy",    family: "energy", label: "Energy" },
+  { key: "comfort",   family: "warm",   label: "Comfort" },
+  { key: "cooling",   family: "cool",   label: "Cooling" },
+  { key: "digestive", family: "body",   label: "Digestive" },
+  { key: "sleepy",    family: "sleep",  label: "Sleep" },
 ];
 const CURRENT_MOOD_CHIPS = [
   ...DESIRED_MOOD_CHIPS,

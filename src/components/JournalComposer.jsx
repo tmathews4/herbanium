@@ -22,18 +22,21 @@ import {
   LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
 } from "../data/limerickAdlibs";
 
-// Shared mood vocabulary for the journal. Includes the rough-edged
-// states ("anxious", "tired", etc.) since the journal is a venting
-// surface as much as a steady one. Same key set the cup log uses
-// for currentMoods, so entries and cups share the mood timeline.
+// Shared mood vocabulary for the journal — one chip per master mood
+// family (the TrackMap hierarchy in FlavorMap.jsx) plus the rough-
+// edged states the journal often surfaces ("anxious", "tired" etc).
+// Previously had separate Uplifting and Soothing chips that doubled
+// up with Energy and Calm at the family level — collapsed so the
+// user picks at the family register the rest of the app uses, and
+// added Cooling for the cool family that was missing here.
 const JOURNAL_MOOD_CHIPS = [
-  { key: "calm",      label: "Calm" },
-  { key: "focus",     label: "Focus" },
-  { key: "energy",    label: "Energy" },
-  { key: "sleepy",    label: "Sleepy" },
-  { key: "comfort",   label: "Comfort" },
-  { key: "uplifting", label: "Uplifting" },
-  { key: "soothing",  label: "Soothing" },
+  { key: "calm",      family: "calm",   label: "Calm" },
+  { key: "focus",     family: "focus",  label: "Focus" },
+  { key: "energy",    family: "energy", label: "Energy" },
+  { key: "comfort",   family: "warm",   label: "Comfort" },
+  { key: "cooling",   family: "cool",   label: "Cooling" },
+  { key: "digestive", family: "body",   label: "Digestive" },
+  { key: "sleepy",    family: "sleep",  label: "Sleep" },
   { key: "anxious",   label: "Anxious" },
   { key: "stressed",  label: "Stressed" },
   { key: "tired",     label: "Tired" },
