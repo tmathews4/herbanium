@@ -269,13 +269,16 @@ test("padTempRange: upper always boiling regardless of input", () => {
   assert(out[1] === TEMP_HARD_MAX,
     `upper should be ${TEMP_HARD_MAX}, got ${out[1]}`);
 });
-test("padTimeRange: lower = TIME_HARD_MIN; upper = hi × (1 + ratio)", () => {
+test("padTimeRange: lower = TIME_HARD_MIN; upper aligned to slider step", () => {
   const out = padTimeRange([180, 360]);
   assert(out[0] === TIME_HARD_MIN,
     `lower should be ${TIME_HARD_MIN}, got ${out[0]}`);
-  const expectedHi = Math.round(360 * (1 + TIME_PAD_RATIO));
+  // Upper rounds UP to the 15s slider step boundary so the slider
+  // thumb can reach the labeled max. 360 × 1.3 = 468; ceil to 480.
+  const padded = 360 * (1 + TIME_PAD_RATIO);
+  const expectedHi = Math.ceil(padded / 15) * 15;
   assert(out[1] === expectedHi,
-    `expected upper = round(360 * 1.${TIME_PAD_RATIO * 100}) = ${expectedHi}, got ${out[1]}`);
+    `expected upper = ceil(${padded} / 15) * 15 = ${expectedHi}, got ${out[1]}`);
 });
 test("padTimeRange: lower always TIME_HARD_MIN regardless of input", () => {
   const out = padTimeRange([30, 60]);

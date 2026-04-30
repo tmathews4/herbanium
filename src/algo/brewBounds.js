@@ -45,6 +45,11 @@ export const TEMP_PAD_BELOW = 10;  // °C below the coldest ingredient's
                                    // tempC min — "right below where the
                                    // bottom couple bands drop off"
 export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
+// Slider step granularity for the time slider. The upper bound is
+// rounded UP to a multiple of this so the slider thumb can land on
+// it — otherwise the input snaps to the largest step ≤ upper bound
+// and the user feels stuck near the right edge.
+export const TIME_STEP_S = 15;
 
 /**
  * Single-range helpers used by IngredientDetail (where the explorer
@@ -59,9 +64,11 @@ export function padTempRange([lo, _hi]) {
 }
 
 export function padTimeRange([_lo, hi]) {
+  const padded = hi * (1 + TIME_PAD_RATIO);
+  const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
   return [
     TIME_HARD_MIN,
-    Math.min(TIME_HARD_MAX, Math.round(hi * (1 + TIME_PAD_RATIO))),
+    Math.min(TIME_HARD_MAX, stepAligned),
   ];
 }
 
@@ -105,7 +112,9 @@ export function unionAndPadTempRange(ingredients, INGREDIENTS) {
  */
 export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
   if (!ingredients?.length) {
-    return [TIME_HARD_MIN, Math.min(TIME_HARD_MAX, Math.round(600 * (1 + TIME_PAD_RATIO)))];
+    const padded = 600 * (1 + TIME_PAD_RATIO);
+    const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
+    return [TIME_HARD_MIN, Math.min(TIME_HARD_MAX, stepAligned)];
   }
   let leadHi = Infinity;   // min of lead maxes
   let anyLead = false;
@@ -129,8 +138,15 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
     }
   }
   if (!Number.isFinite(leadHi)) leadHi = 600;
+  // Round UP to the slider's 15s step boundary so the slider thumb
+  // can actually reach the upper edge. Without this, leadHi×1.3 can
+  // fall between two step values (e.g., 546s when steps are 15s),
+  // and the slider snaps to floor(546/15)*15 = 540 — leaving the
+  // user feeling stuck near the right end.
+  const padded = leadHi * (1 + TIME_PAD_RATIO);
+  const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
   return [
     TIME_HARD_MIN,
-    Math.min(TIME_HARD_MAX, Math.round(leadHi * (1 + TIME_PAD_RATIO))),
+    Math.min(TIME_HARD_MAX, stepAligned),
   ];
 }
