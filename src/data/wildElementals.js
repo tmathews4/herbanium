@@ -24,39 +24,67 @@ const ROLL_DENOMINATOR = 15;
 // lot of "calm" cups gets a higher chance of meeting a Hush Otter
 // or a Mist Heron. Items must be drawn from ALL_ADJECTIVES — any
 // term not present is silently ignored by the weighting pass.
+//
+// Each crystal-family adjective (see EFFECT_ADJECTIVES /
+// FLAVOR_ADJECTIVES in data/moodCrystal.js) is present in EVERY
+// raw-key pool that aggregates to that family, so a wild roll
+// triggered by activity reinforces the crystal's named hue
+// instead of drifting into a different gem from a parallel pool.
 const MOOD_ADJECTIVES = {
-  calm:      ["Hush", "Mist", "Moonstone", "Pearl", "Dew", "Twilight", "Aquamarine", "Glow", "Cloud", "Drizzle"],
+  // family: calm — Sage is the crystal's calm adjective.
+  calm:      ["Hush", "Mist", "Moonstone", "Pearl", "Dew", "Twilight", "Aquamarine", "Glow", "Cloud", "Drizzle", "Sage"],
+  soothing:  ["Hush", "Pearl", "Moonstone", "Dew", "Aquamarine", "Glow", "Mist", "Drizzle", "Sage"],
+  grounding: ["Stone", "Earth", "Onyx", "Slate", "Granite", "Obsidian", "Wood", "Hematite", "Sage"],
+  // family: focus — Sky already in pool.
   focus:     ["Stone", "Slate", "Quartz", "Crystal", "Lightning", "Sunfire", "Granite", "Star", "Sky"],
+  // family: energy — Citrine already in pools.
   energy:    ["Sunfire", "Sun", "Sunstone", "Topaz", "Citrine", "Daybreak", "Blaze", "Fire", "Lightning"],
-  comfort:   ["Ember", "Amber", "Gold", "Glow", "Sunset", "Carnelian", "Coral", "Hush"],
-  sleepy:    ["Dusk", "Twilight", "Midnight", "Moonstone", "Moon", "Shadow", "Fog"],
-  soothing:  ["Hush", "Pearl", "Moonstone", "Dew", "Aquamarine", "Glow", "Mist", "Drizzle"],
-  warming:   ["Ember", "Amber", "Cinder", "Carnelian", "Sunset", "Gold", "Blaze"],
-  cooling:   ["Frost", "Mist", "Aquamarine", "Dew", "Drizzle", "Crystal", "Tide", "River"],
-  digestive: ["Earth", "Wood", "Stone", "Bramble", "Jade", "Sandstone"],
-  grounding: ["Stone", "Earth", "Onyx", "Slate", "Granite", "Obsidian", "Wood", "Hematite"],
   uplifting: ["Daybreak", "Sun", "Sunfire", "Citrine", "Topaz", "Bloom", "Aurora", "Light"],
+  // family: warm — Ember already in pools.
+  comfort:   ["Ember", "Amber", "Gold", "Glow", "Sunset", "Carnelian", "Coral", "Hush"],
+  warming:   ["Ember", "Amber", "Cinder", "Carnelian", "Sunset", "Gold", "Blaze"],
+  // family: cool — Aquamarine already in pool.
+  cooling:   ["Frost", "Mist", "Aquamarine", "Dew", "Drizzle", "Crystal", "Tide", "River"],
+  // family: body — Bloodstone is the crystal's body adjective.
+  digestive: ["Earth", "Wood", "Stone", "Bramble", "Jade", "Sandstone", "Bloodstone"],
+  // family: sleep — Twilight already in pool.
+  sleepy:    ["Dusk", "Twilight", "Midnight", "Moonstone", "Moon", "Shadow", "Fog"],
 };
 
 const FLAVOR_ADJECTIVES = {
+  // family: floral — Rose-Quartz already in pool.
   floral:  ["Bloom", "Pearl", "Rose-Quartz", "Aurora", "Glow", "Meadow", "Dew"],
+  // family: earthy — Onyx already in pool.
   earthy:  ["Earth", "Stone", "Onyx", "Wood", "Bramble", "Jasper", "Hematite"],
-  citrus:  ["Citrine", "Sunstone", "Daybreak", "Sun", "Topaz", "Heliodor"],
-  spiced:  ["Cinder", "Ember", "Carnelian", "Cinnabar", "Amber", "Fire"],
-  minty:   ["Frost", "Aquamarine", "Mist", "Tide", "Crystal"],
-  fruity:  ["Carnelian", "Coral", "Garnet", "Amber", "Bloom"],
-  sweet:   ["Amber", "Gold", "Topaz", "Carnelian"],
-  grassy:  ["Meadow", "Wood", "Bramble", "Jade", "Bloom"],
-  smoky:   ["Smoke", "Ash", "Cinder", "Coal", "Smoky-Quartz", "Shadow"],
-  mineral: ["Stone", "Slate", "Quartz", "Granite", "Marble", "Pyrite"],
-  honeyed: ["Amber", "Gold", "Topaz", "Citrine"],
-  umami:   ["Tide", "River", "Onyx", "Hematite"],
-  woody:   ["Wood", "Bramble", "Earth", "Bloodstone"],
-  roasted: ["Cinder", "Ember", "Coal", "Smoky-Quartz", "Carnelian"],
+  woody:   ["Wood", "Bramble", "Earth", "Bloodstone", "Onyx"],
+  mineral: ["Stone", "Slate", "Quartz", "Granite", "Marble", "Pyrite", "Onyx"],
+  nutty:   ["Amber", "Sandstone", "Cinder", "Carnelian", "Onyx"],
   bitter:  ["Onyx", "Coal", "Hematite", "Slate"],
-  tart:    ["Citrine", "Topaz", "Heliodor", "Sun"],
+  // family: fresh — Frost is the crystal's fresh adjective.
+  // citrus rolls up to fresh, so Frost added to citrus too.
+  citrus:  ["Citrine", "Sunstone", "Daybreak", "Sun", "Topaz", "Heliodor", "Frost"],
+  minty:   ["Frost", "Aquamarine", "Mist", "Tide", "Crystal"],
+  // family: spiced — Cinnabar already in pool.
+  spiced:  ["Cinder", "Ember", "Carnelian", "Cinnabar", "Amber", "Fire"],
+  // family: smoky — Obsidian is the crystal's smoky adjective.
+  smoky:   ["Smoke", "Ash", "Cinder", "Coal", "Smoky-Quartz", "Shadow", "Obsidian"],
+  roasted: ["Cinder", "Ember", "Coal", "Smoky-Quartz", "Carnelian", "Obsidian"],
+  // family: fruit — Garnet is the crystal's fruit adjective.
+  fruity:  ["Carnelian", "Coral", "Garnet", "Amber", "Bloom"],
+  tart:    ["Citrine", "Topaz", "Heliodor", "Sun", "Garnet"],
+  // family: sweet — Amber already in pool.
+  sweet:   ["Amber", "Gold", "Topaz", "Carnelian"],
+  honeyed: ["Amber", "Gold", "Topaz", "Citrine"],
+  // family: vegetal — Jade already in pool.
   vegetal: ["Meadow", "Wood", "Jade", "Bloom"],
-  nutty:   ["Amber", "Sandstone", "Cinder", "Carnelian"],
+  grassy:  ["Meadow", "Wood", "Bramble", "Jade", "Bloom"],
+  // family: marine — Tide is the crystal's marine adjective. Crystal
+  // family had no wild pool before; adding raw-flavor entries
+  // covering the marine register so umami / savory / oceanic
+  // brewing pulls Tide / Aquamarine forward in wild rolls.
+  marine:  ["Tide", "River", "Aquamarine", "Pearl"],
+  oceanic: ["Tide", "River", "Aquamarine", "Pearl"],
+  umami:   ["Tide", "River", "Onyx", "Hematite"],
   savory:  ["Tide", "River", "Stone", "Jade"],
 };
 

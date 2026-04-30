@@ -27,6 +27,12 @@ export const ELEMENT_ADJECTIVES = [
   "Shadow", "Moon", "Frost", "Smoke", "Midnight",
   "Void", "Nightshade", "Star", "Ash", "Crescent",
   "Storm", "Hush", "Brume", "Cinder", "Bramble",
+  // Plant-side element words. Sage joins the existing botanicals
+  // (Bramble, Bloom, Meadow) so it can surface as a wild adjective
+  // — required for the calm-family crystal name to actually appear
+  // in wild rolls biased on calm activity (see data/wildElementals.js
+  // and data/moodCrystal.js's CRYSTAL_EFFECT_COLORS / EFFECT_ADJECTIVES).
+  "Sage",
 ];
 
 export const GEM_ADJECTIVES = [

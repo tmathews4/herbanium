@@ -167,6 +167,9 @@ const ADJECTIVE_RANK = {
   Stone: 2, Wood: 2, Earth: 2, Ash: 2, Cinder: 2, Ember: 2, Bramble: 2, Nightshade: 2,
   Marble: 2, Granite: 2, Quartz: 2, Crystal: 2, Diamond: 2, Agate: 2,
   Moonstone: 2, Opal: 2,
+  // Plant-side material — botanicals read like Bramble (substance
+  // first, the herb's namesake green is a quieter secondary).
+  Sage: 2,
 };
 
 // Returns the adjective category rank for ordering. Unknown words
