@@ -197,6 +197,13 @@ export default function App() {
     configureStatusBar();
   }, []);
 
+  // Dev modes pin the palette to light so we can spot-check the cream
+  // register on a phone that's stuck in system dark mode without
+  // toggling the OS theme. Pairs with :root:not(.force-light) in CSS.
+  useEffect(() => {
+    document.documentElement.classList.toggle("force-light", isDev);
+  }, [isDev]);
+
   // If dev flag, bypass onboarding by synthesizing a stub profile on first render.
   // Only runs if no profile exists yet — doesn't override a real user's profile.
   useEffect(() => {

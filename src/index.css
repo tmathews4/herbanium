@@ -63,8 +63,11 @@
   }
 }
 
+/* `:not(.force-light)` lets ?dev / dev-mode pin the app to the light
+   palette regardless of system theme — handy for testing on a phone
+   that's stuck in system dark mode. App.jsx toggles the class. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.force-light) {
     /* Forest-noir surfaces — a tea-garden-at-dusk register rather
        than the inverted-cream of the previous warm-dark take. The
        cream/ivory identity belongs to the light theme; dark gets
