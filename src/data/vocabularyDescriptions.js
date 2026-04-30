@@ -20,27 +20,27 @@ export const EFFECT_DESCRIPTIONS = {
   },
   digestive: {
     summary: "Settles the stomach. The post-meal cup across cultures.",
-    body: "Peppermint has the catalog's strongest IBS evidence (NNT≈4). Fennel, ginger, dandelion root, pu-erh all reliable here.",
+    body: "Peppermint's menthol is the most studied for easing the gut; fennel, ginger, dandelion root, and pu-erh all pull in the same direction.",
   },
   uplifting: {
     summary: "Lightening, brightening, mood-lifting.",
-    body: "Jasmine, bergamot, light oolongs, citrus-forward herbs. Darjeeling's muscatel character lifts this way.",
+    body: "Jasmine, bergamot, light oolongs, and citrus-forward herbs. Darjeeling's muscatel character lifts the same way — aromatics that read on the nose before the tongue.",
   },
   warming: {
     summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
-    body: "Black teas, roasted oolongs, ripe pu-erh, ginger, cinnamon, cardamom, cloves. Ginger sets the catalog ceiling at 5.",
+    body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it: cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog.",
   },
   focus: {
     summary: "Meditative clarity. Alert without jitter.",
-    body: "The L-theanine + caffeine prototype — gyokuro and matcha join at 5; sencha, dragonwell, oolong below them. Lion's mane on a longer timescale.",
+    body: "L-theanine paired with caffeine — the shaded-green signature. Gyokuro and matcha hold the top of this register, with sencha, dragonwell, and oolong following the same chemistry at lower amplitude. Lion's mane works on a longer arc through nerve-growth-factor support.",
   },
   energy: {
     summary: "Stimulating, awakening — the wake-up cup.",
-    body: "Often the smoother caffeine + L-theanine profile, not stimulant edge. Assam at 5; matcha and yerba-mate at 4 by different mechanisms.",
+    body: "Usually the smoother caffeine + L-theanine register rather than a stimulant edge. Assam carries the most caffeine of the true teas; matcha lands close behind through its shaded-tea chemistry, and yerba-mate gets there a different way — caffeine with theobromine in support.",
   },
   sleepy: {
     summary: "Sedating, drowsiness-adjacent.",
-    body: "Heavier than calm — a downward drift. Valerian sets the ceiling at 5; reishi at 4; passionflower, chamomile, ashwagandha all in this register.",
+    body: "Heavier than calm — a downward drift. Valerian's valerenic acid is the strongest sedative in the kitchen, with reishi's triterpenes close behind; passionflower, chamomile, and ashwagandha all pull in the same direction more gently.",
   },
   cooling: {
     summary: "Refreshes and clarifies. The settling-down register opposite warming.",
@@ -48,7 +48,7 @@ export const EFFECT_DESCRIPTIONS = {
   },
   grounding: {
     summary: "Settling, centering, earthy.",
-    body: "Reishi sets the ceiling at 5; ashwagandha at 4; ripe pu-erh, lapsang's smoke, dandelion root all pull here.",
+    body: "Reishi's triterpenes carry this most strongly, with ashwagandha and ripe pu-erh close behind. Lapsang's pine smoke and dandelion root pull here too — the deeper, low-pitched register.",
   },
 
   // ── User-facing mood aliases (mapped to effects above) ──
