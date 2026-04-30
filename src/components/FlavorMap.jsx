@@ -345,10 +345,18 @@ const TrackMap = ({
   // a flat-quiet track from reading as loud-and-unchanging — peaks
   // below 1.0 cap their max alpha at sqrt(peak), so a track that
   // peaks at 0.6 maxes around 0.78 opacity rather than full 1.0.
+  // Perceptual ceiling on band opacity. A track that's uniformly at
+  // its peak across the whole envelope used to render every stop at
+  // alpha 1.0 — a flat block of full-saturation color that visually
+  // 'punches in' compared to a varying gradient on the same band.
+  // Capping below 1.0 keeps uniform regions feeling like part of the
+  // same band as varying regions. 0.82 is high enough to read as
+  // confidently present, low enough to soften the slab effect.
+  const MAX_BAND_ALPHA = 0.82;
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
-    const cap = peak < 1 ? Math.sqrt(peak) : 1;
+    const cap = (peak < 1 ? Math.sqrt(peak) : 1) * MAX_BAND_ALPHA;
     // Build the raw strength series, then fill threshold-drop gaps
     // before mapping to alpha so the gradient reads as continuous.
     const rawSeries = samples.map(s => pickMap(s)[name] || 0);
