@@ -56,6 +56,7 @@ import { theme, ff, shadow, radius } from "../theme";
 // buttons. Computed once so we don't pay a string concat per render.
 const TERRA_HOVER = "#BC5D33";
 const INK_HOVER   = "#2A211A";
+const BARK_HOVER  = "#8C6240";
 
 export const Button = ({
   variant = "primary",   // primary | secondary | ghost
@@ -95,11 +96,29 @@ export const Button = ({
 
   const isPrimary   = variant === "primary";
   const isSecondary = variant === "secondary";
-  const accent      = tone === "ink" ? theme.ink : theme.terra;
-  const accentHover = tone === "ink" ? INK_HOVER : TERRA_HOVER;
-  const shadowSet   = isPrimary
-    ? (tone === "ink" ? shadow.btn.ink : shadow.btn.terra)
-    : (tone === "ink" ? shadow.btn.ink : shadow.btn.terraOutline);
+  // Default tone is "bark" — the calmer warm-walnut accent. Callers
+  // pass tone="terra" explicitly for the brighter terracotta on
+  // home-page CTAs, hint cards, and a few highlight surfaces; the
+  // app's general buttons use bark.
+  const resolvedTone =
+    tone === "ink"   ? "ink"
+    : tone === "terra" ? "terra"
+    : "bark";
+  const accent =
+    resolvedTone === "ink"   ? theme.ink
+    : resolvedTone === "terra" ? theme.terra
+    : theme.bark;
+  const accentHover =
+    resolvedTone === "ink"   ? INK_HOVER
+    : resolvedTone === "terra" ? TERRA_HOVER
+    : BARK_HOVER;
+  const shadowSet = isPrimary
+    ? (resolvedTone === "ink"   ? shadow.btn.ink
+      : resolvedTone === "terra" ? shadow.btn.terra
+      : shadow.btn.bark)
+    : (resolvedTone === "ink"   ? shadow.btn.ink
+      : resolvedTone === "terra" ? shadow.btn.terraOutline
+      : shadow.btn.barkOutline);
 
   // Disabled buttons keep a faint version of the rest shadow so they
   // still read as physical surfaces (just dimmed). Killing the shadow

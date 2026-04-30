@@ -30,6 +30,7 @@
   --sage-deep: #4A573A;
   --ochre:     #A57836;
   --terra:     #B0542F;
+  --bark:      #7A5436;     /* warm walnut — default button accent */
   --rose:      #C37959;
   --sky:       #7F9AA0;
   --plum:      #7B4A5A;
@@ -82,7 +83,8 @@
     --sage:      #87A06A;
     --sage-deep: #B0C295;
     --ochre:     #C99955;
-    --terra:     #D17448;
+    --terra:     #A86040;     /* dampened from #D17448 — less vibrant in dark */
+    --bark:      #A07555;     /* warm walnut, lifted for dark surfaces */
     --rose:      #D89773;
     --sky:       #9DBCC1;
     --plum:      #A87186;

@@ -29,6 +29,7 @@ export const theme = {
   sageDeep: "var(--sage-deep)",
   ochre:    "var(--ochre)",
   terra:    "var(--terra)",
+  bark:     "var(--bark)",
   rose:     "var(--rose)",
   sky:      "var(--sky)",
   plum:     "var(--plum)",
@@ -88,6 +89,20 @@ export const shadow = {
       rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.18), 0 3px 5px rgba(var(--shadow-rgb),0.24), 0 6px 14px -2px rgba(var(--shadow-rgb),0.32)",
       hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.22), 0 4px 8px rgba(var(--shadow-rgb),0.28), 0 8px 18px -3px rgba(var(--shadow-rgb),0.40)",
       press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.18), 0 1px 2px rgba(var(--shadow-rgb),0.22)",
+    },
+    // Bark-filled buttons (the default tone). Warm-walnut drop
+    // tint instead of terra-orange. Same molded-edge treatment as
+    // terra; reads as the calmer, more grounded sibling for the
+    // app's general button accent.
+    bark: {
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.20), 0 3px 5px rgba(122,84,54,0.26), 0 6px 14px -2px rgba(122,84,54,0.32)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.24), 0 4px 8px rgba(122,84,54,0.30), 0 8px 18px -3px rgba(122,84,54,0.40)",
+      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.16), 0 1px 2px rgba(122,84,54,0.20)",
+    },
+    barkOutline: {
+      rest:  "0 3px 5px rgba(122,84,54,0.16), 0 6px 14px -3px rgba(122,84,54,0.22)",
+      hover: "0 4px 8px rgba(122,84,54,0.22), 0 8px 18px -4px rgba(122,84,54,0.32)",
+      press: "0 1px 2px rgba(122,84,54,0.14), inset 0 1px 1px rgba(122,84,54,0.08)",
     },
   },
 };
