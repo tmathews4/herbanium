@@ -8,8 +8,8 @@
    wild-elemental rolls. This module names that signal so the user
    can see it shifting on screen.
 
-   computeMoodCrystal({ sessions, journalEntries, getBlend, now })
-   → { name, description, primary, secondary, gradient, families }
+   computeMoodCrystal({ sessions, journalEntries, getBlend, profile, now })
+   → { name, description, primary, secondary, gradient, families, isFaint }
 
    - primary / secondary    — the two strongest family records
    - gradient               — `[color1, color2]` for the SVG fill
@@ -17,9 +17,19 @@
    - description            — a short poetic line about the trend
    - families               — { effect, flavor } family records,
                               sorted weight desc
+   - isFaint                — true when the crystal is colored from
+                              the user's onboarding intent (profile
+                              draw / flavors) rather than real
+                              activity. Visual renders dimmer.
 
-   Empty input returns the "Neutral" crystal — the baseline before
-   any data has accumulated. Same shape, different voice.
+   Three states:
+   - Real data → primary/secondary from sessions + journal,
+     with optional "with faint X" trailing mention pulling in
+     unmet onboarding intent.
+   - No real data + onboarding intent → faint crystal colored
+     from profile.draw / profile.flavors. Description leads with
+     "Faintly..." so the user reads it as a forecast, not a record.
+   - Nothing at all → the "Neutral" baseline.
    ────────────────────────────────────────────────────────────── */
 
 import {
@@ -151,6 +161,28 @@ function collectRecentFlavors(sessions, getBlend, now) {
   return flavors;
 }
 
+// Pull the user's onboarding-declared intent — the moods they said
+// drew them in (profile.draw) and the flavors they said they liked
+// (profile.flavors, [[name, strength], ...]) — and normalize each
+// to its family. Used as a fallback color source when there's no
+// real activity yet, and as a "with faint X ahead" trailing mention
+// when real activity exists but hasn't covered every declared lane.
+function profileFamilies(profile) {
+  if (!profile) return { effects: [], flavors: [] };
+  const effects = [];
+  for (const d of profile.draw || []) {
+    const fam = FAMILY_BY_EFFECT[d];
+    if (fam && !effects.includes(fam)) effects.push(fam);
+  }
+  const flavors = [];
+  for (const entry of profile.flavors || []) {
+    const name = Array.isArray(entry) ? entry[0] : entry;
+    const fam = FAMILY_BY_FLAVOR[name];
+    if (fam && !flavors.includes(fam)) flavors.push(fam);
+  }
+  return { effects, flavors };
+}
+
 function topFamily(rawCounts, mapper, palette) {
   const familyCounts = {};
   for (const [word, n] of Object.entries(rawCounts)) {
@@ -178,6 +210,7 @@ export function computeMoodCrystal({
   sessions = [],
   journalEntries = [],
   getBlend = null,
+  profile = null,
   now = Date.now(),
 } = {}) {
   const moodTally = tally(collectRecentMoods(sessions, journalEntries, now));
@@ -185,6 +218,7 @@ export function computeMoodCrystal({
 
   const effectFams = topFamily(moodTally, moodToEffectFamily, EFFECT_FAMILY_COLORS);
   const flavorFams = topFamily(flavorTally, flavorToFlavorFamily, FAMILY_COLORS);
+  const profileFams = profileFamilies(profile);
 
   // Decide primary vs secondary. Prefer effect family as primary
   // when present (mood is the user's intent); fall back to flavor
@@ -194,6 +228,7 @@ export function computeMoodCrystal({
   let secondary = null;
   let primaryAxis = null;
   let secondaryAxis = null;
+  let isFaint = false;
 
   if (effectFams.top) {
     primary = effectFams.top; primaryAxis = "effect";
@@ -209,6 +244,36 @@ export function computeMoodCrystal({
     }
   }
 
+  // No real activity — fall back to the user's onboarding intent.
+  // The crystal renders dimmer (isFaint) and the description
+  // frames it as a forecast: "the focus you reach for, still
+  // gathering" rather than "moss-cool, a hush at the center."
+  if (!primary && (profileFams.effects.length || profileFams.flavors.length)) {
+    const peffect = profileFams.effects[0];
+    const pflavor = profileFams.flavors[0];
+    if (peffect) {
+      primary = { family: peffect, color: EFFECT_FAMILY_COLORS[peffect], weight: 0 };
+      primaryAxis = "effect";
+      if (pflavor) {
+        secondary = { family: pflavor, color: FAMILY_COLORS[pflavor], weight: 0 };
+        secondaryAxis = "flavor";
+      } else if (profileFams.effects[1]) {
+        const e2 = profileFams.effects[1];
+        secondary = { family: e2, color: EFFECT_FAMILY_COLORS[e2], weight: 0 };
+        secondaryAxis = "effect";
+      }
+    } else if (pflavor) {
+      primary = { family: pflavor, color: FAMILY_COLORS[pflavor], weight: 0 };
+      primaryAxis = "flavor";
+      if (profileFams.flavors[1]) {
+        const f2 = profileFams.flavors[1];
+        secondary = { family: f2, color: FAMILY_COLORS[f2], weight: 0 };
+        secondaryAxis = "flavor";
+      }
+    }
+    isFaint = true;
+  }
+
   // Empty pool — the unbrewed baseline. Two soft ash-cream tones
   // so the crystal renders as a translucent quartz, not a flat
   // grey shape that looks broken.
@@ -221,6 +286,7 @@ export function computeMoodCrystal({
       gradient: ["#D8CDB3", "#B8AC92"],
       families: { effect: [], flavor: [] },
       isNeutral: true,
+      isFaint: false,
     };
   }
 
@@ -253,12 +319,56 @@ export function computeMoodCrystal({
     : null;
 
   let description;
-  if (secondaryVoice) {
+  if (isFaint) {
+    // Faint = forecast voice. Lowercase the family voice so the
+    // line reads as continuation of "Faintly..." rather than two
+    // capitalized starts.
+    const lc = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+    if (secondaryVoice) {
+      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, with a hint of ${lc(secondaryVoice)} ahead.`;
+    } else {
+      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, still gathering.`;
+    }
+  } else if (secondaryVoice) {
     description = `${primaryVoice}, drifting into ${secondaryVoice}.`;
     description = description.charAt(0).toUpperCase() + description.slice(1);
   } else {
     description = `${primaryVoice}.`;
     description = description.charAt(0).toUpperCase() + description.slice(1);
+  }
+
+  // "With faint X" trailing mention — surfaces an onboarding-
+  // declared family the user hasn't actually brewed toward yet.
+  // Only fires on real-data crystals (faint crystals already lead
+  // with the unmet intent). Effects are searched first since mood
+  // is the dominant signal in onboarding.
+  if (!isFaint) {
+    const seen = new Set();
+    if (primaryAxis === "effect") seen.add(`e:${primary.family}`);
+    else                          seen.add(`f:${primary.family}`);
+    if (secondary) {
+      if (secondaryAxis === "effect") seen.add(`e:${secondary.family}`);
+      else                            seen.add(`f:${secondary.family}`);
+    }
+    let trailing = null;
+    for (const f of profileFams.effects) {
+      if (!seen.has(`e:${f}`)) {
+        trailing = { adj: EFFECT_ADJECTIVES[f], voice: EFFECT_VOICE[f] };
+        break;
+      }
+    }
+    if (!trailing) {
+      for (const f of profileFams.flavors) {
+        if (!seen.has(`f:${f}`)) {
+          trailing = { adj: FLAVOR_ADJECTIVES[f], voice: FLAVOR_VOICE[f] };
+          break;
+        }
+      }
+    }
+    if (trailing) {
+      description = description.replace(/\.$/, "")
+        + `, with faint ${trailing.adj} still ahead of you.`;
+    }
   }
 
   // Gradient: primary on the warm/saturated side, secondary on the
@@ -281,5 +391,6 @@ export function computeMoodCrystal({
       flavor: flavorFams.ranked,
     },
     isNeutral: false,
+    isFaint,
   };
 }

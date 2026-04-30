@@ -66,10 +66,10 @@ const CrystalShape = ({ gradient, idSuffix }) => {
   );
 };
 
-export const MoodCrystal = ({ sessions, journalEntries, getBlend }) => {
+export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => {
   const crystal = React.useMemo(
-    () => computeMoodCrystal({ sessions, journalEntries, getBlend }),
-    [sessions, journalEntries, getBlend],
+    () => computeMoodCrystal({ sessions, journalEntries, getBlend, profile }),
+    [sessions, journalEntries, getBlend, profile],
   );
 
   // Stable id suffix so multiple crystals on a page don't share
@@ -97,6 +97,10 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend }) => {
         borderRadius: "50%",
         padding: 4,
         display: "flex", alignItems: "center", justifyContent: "center",
+        // Faint crystals (profile-only forecast) render dimmer so
+        // the visual matches the description's "still gathering"
+        // voice — the color is there, just not yet realized.
+        opacity: crystal.isFaint ? 0.55 : 1,
       }}>
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} />
       </div>

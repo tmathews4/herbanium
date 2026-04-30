@@ -260,6 +260,7 @@ export const BestiaryView = ({
         sessions={sessions}
         journalEntries={journalEntries}
         getBlend={getBlend}
+        profile={profile}
       />
 
       <div style={{
