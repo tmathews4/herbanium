@@ -31,6 +31,81 @@ import {
 } from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
+   SolidBar — static row mimicking the Brewing-tab strip's band
+   shape. Label on the left (right-aligned, fixed-width), single
+   solid colored bar on the right filled to value/5. No 5-segment
+   blocks, no gradient — just the strip's row architecture
+   without the gradient story. Used on the Overview tab so static
+   readouts visually match the dynamic strip.
+   ────────────────────────────────────────────────────────────── */
+
+const TRACK_H   = 14;
+const LABEL_W   = 64;
+
+const SolidBar = ({ label, value, color, selected, onClick }) => {
+  const v = Math.max(0, Math.min(5, Number(value) || 0));
+  const fill = v / 5;
+  const interactive = !!onClick;
+  return (
+    <div
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={interactive ? (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); }
+      } : undefined}
+      style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "2px 0",
+        cursor: interactive ? "pointer" : "default",
+        outline: "none",
+      }}
+    >
+      <div style={{
+        flex: "0 0 auto",
+        minWidth: LABEL_W,
+        textAlign: "right",
+        fontFamily: ff.sans, fontSize: 10,
+        color: selected ? theme.ink : theme.inkSoft,
+        fontWeight: selected ? 500 : 400,
+        textDecoration: selected ? "underline" : "none",
+        textDecorationColor: color,
+        textDecorationThickness: 1,
+        textUnderlineOffset: 2,
+      }}>
+        {label}
+      </div>
+      <div style={{
+        flex: 1,
+        position: "relative",
+        height: TRACK_H,
+        borderRadius: 3,
+        background: theme.ruleSoft,
+        boxShadow: selected
+          ? `inset 0 0 0 1.5px ${color}`
+          : `inset 0 0 0 1px ${theme.ruleSoft}`,
+        overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0,
+          width: `${fill * 100}%`,
+          background: color,
+          opacity: 0.85,
+          borderRadius: 3,
+        }} />
+      </div>
+      <div style={{
+        flex: "0 0 auto",
+        fontFamily: ff.mono, fontSize: 9, color: theme.ash,
+        minWidth: 18, textAlign: "right",
+      }}>
+        {v.toFixed(1)}
+      </div>
+    </div>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────────
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
@@ -138,36 +213,20 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
               {ing.blurb}
             </p>
 
-            <div style={{ margin: "22px 0 14px" }}><SectionLabel n="i">Effect</SectionLabel></div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ margin: "22px 0 10px" }}><SectionLabel n="i">Effect</SectionLabel></div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {ing.effects.map(([tag, n]) => {
                 const known = !!EFFECT_DESCRIPTIONS[tag];
                 const active = openEffect === tag;
                 return (
-                  <div
+                  <SolidBar
                     key={tag}
-                    role={known ? "button" : undefined}
-                    tabIndex={known ? 0 : undefined}
+                    label={tag}
+                    value={n}
+                    color={EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[tag]] || theme.sage}
+                    selected={active}
                     onClick={known ? () => setOpenEffect(prev => prev === tag ? null : tag) : undefined}
-                    onKeyDown={known ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpenEffect(prev => prev === tag ? null : tag);
-                      }
-                    } : undefined}
-                    style={{
-                      padding: "4px 6px", borderRadius: 6,
-                      background: active ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                      cursor: known ? "pointer" : "default",
-                      outline: "none",
-                    }}
-                  >
-                    <EffectBar
-                      label={tag}
-                      value={n}
-                      color={EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[tag]] || theme.sage}
-                    />
-                  </div>
+                  />
                 );
               })}
             </div>
@@ -181,41 +240,25 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
               />
             )}
 
-            <div style={{ margin: "22px 0 14px" }}><SectionLabel n="ii">Flavor notes</SectionLabel></div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Flavor notes</SectionLabel></div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {ing.flavors.map((f, i) => {
                 // Position-derived strength: leading flavor at 4,
-                // descending to 1. Mirrors the catalog convention
-                // that the first entry is the most prominent and
-                // matches what annotateFlavorStrengths produces at
-                // the standard profile point — keeps the static
-                // overview consistent with what a Brewing-tab
-                // standard cup would render.
+                // descending to 1 — same convention annotateFlavor-
+                // Strengths uses for the standard profile.
                 const strength = Math.max(1, 4 - i);
                 const known = !!FLAVOR_DESCRIPTIONS[f];
                 const active = openFlavor === f;
                 const familyColor = FAMILY_COLORS[FAMILY_BY_FLAVOR[f]] || theme.ash;
                 return (
-                  <div
+                  <SolidBar
                     key={f}
-                    role={known ? "button" : undefined}
-                    tabIndex={known ? 0 : undefined}
+                    label={f}
+                    value={strength}
+                    color={familyColor}
+                    selected={active}
                     onClick={known ? () => setOpenFlavor(prev => prev === f ? null : f) : undefined}
-                    onKeyDown={known ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpenFlavor(prev => prev === f ? null : f);
-                      }
-                    } : undefined}
-                    style={{
-                      padding: "4px 6px", borderRadius: 6,
-                      background: active ? "rgba(176,84,47,0.08)" : "transparent",
-                      cursor: known ? "pointer" : "default",
-                      outline: "none",
-                    }}
-                  >
-                    <EffectBar label={f} value={strength} color={familyColor} />
-                  </div>
+                  />
                 );
               })}
             </div>
