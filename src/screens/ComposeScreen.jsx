@@ -276,9 +276,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Accent/catalyst ingredients also don't fire it (they're stylistic
   // adjuncts; the recipe accepts the stretch by design).
   const atCuratedBaseline = brewTempC === blend.tempC && brewTimeS === blend.timeS;
+  // Filter on tempRange specifically — this banner's copy explicitly
+  // names a temperature ("don't all share a brewing window at X°"),
+  // so a time-only outsider would mislead the reader (e.g. an apple
+  // at 100°C but only steeped 60s isn't a temp problem). Time-axis
+  // pulls are surfaced by the over-/under-steep warnings instead.
   const liveOutsiders = atCuratedBaseline
     ? []
-    : (liveBrew.perIngredient || []).filter(c => !c.inRange && (c.role === "lead" || c.role == null));
+    : (liveBrew.perIngredient || []).filter(c => !c.inTempRange && (c.role === "lead" || c.role == null));
 
   // Ingredient-interaction safety flags (high + moderate). Surfaced
   // below the temperature-compromise banner so the user sees both
@@ -1633,7 +1638,10 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const liveBrew = ingsForProfile.length > 0
     ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS)
     : { outsiders: [], perIngredient: [] };
-  const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inRange) || [];
+  // Same as forward-mode filter: this banner is temp-axis only, so
+  // exclude ingredients that are in their preferred temp band even
+  // if their steep time is currently off.
+  const liveOutsiders = liveBrew.perIngredient?.filter(c => !c.inTempRange) || [];
 
   // Reverse-mode safety check — same rules as forward mode. Custom
   // user-built combinations are exactly where unsafe pairs can sneak
@@ -2035,12 +2043,14 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 const JournalEntryRow = ({ entry, first, openEntry }) => {
   const isHaiku    = entry.kind === "haiku";
   const isLimerick = entry.kind === "limerick";
-  const isVerse    = isHaiku || isLimerick;
+  const isPoem     = entry.kind === "poem";
+  const isVerse    = isHaiku || isLimerick || isPoem;
   const stamp = entry.ts ? new Date(entry.ts) : null;
   const ago = stamp ? formatAgo(stamp) : "";
   const label =
     isHaiku    ? "a verse"
     : isLimerick ? "a limerick"
+    : isPoem    ? "a poem"
     : "an entry";
   // Single-line preview of the entry body. The detail screen carries
   // the full text, line breaks, and mood arc; the row only needs to

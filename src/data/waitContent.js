@@ -922,6 +922,87 @@ export const WAIT_POEMS = [
     attribution: "— Charles Mackay (1846)",
     tags: ["reflection", "focus", "energy"],
   },
+
+  // — Diversification pass: haiku from less-represented Japanese
+  //   poets (Bashō, Issa, Buson dominate the existing rotation) and
+  //   additional Edward Lear / classical-anonymous limericks. All
+  //   pre-1929 US PD: Page (1923), Aston (1899), Chamberlain (1902)
+  //   for haiku; Lear (1846 Book of Nonsense), Buller (1923) for
+  //   limericks. Translator named where the translation date matters.
+
+  {
+    text: "Birds, even, in flight\nmust be careful where they go —\nmercy on the snow.",
+    attribution: "— Naitō Jōsō (Page trans., 1923)",
+    tags: ["winter", "morning", "stillness", "calm"],
+  },
+  {
+    text: "They spoke no word —\nthe host, the guest,\nand the white chrysanthemum.",
+    attribution: "— Mukai Kyorai (Page trans., 1923)",
+    tags: ["autumn", "stillness", "calm", "reflection"],
+  },
+  {
+    text: "In my hut this spring,\nthere is nothing —\nthere is everything!",
+    attribution: "— Yamaguchi Sodō (Page trans., 1923)",
+    tags: ["spring", "morning", "reflection", "comfort"],
+  },
+  {
+    text: "Plum-tree fragrance —\nthe night reluctant\nto go away.",
+    attribution: "— Tan Taigi (Page trans., 1923)",
+    tags: ["spring", "night", "stillness", "calm"],
+  },
+  {
+    text: "An evening bell\nresting upon the flowers —\nstill it is heard.",
+    attribution: "— Yosa Buson (Aston trans., 1899)",
+    tags: ["evening", "spring", "stillness"],
+  },
+  {
+    text: "Just simply alive,\nboth of us, I\nand the poppy.",
+    attribution: "— Issa (Aston trans., 1899)",
+    tags: ["summer", "morning", "calm", "reflection"],
+  },
+  {
+    text: "All my life through,\nthis very day —\nfine spring weather.",
+    attribution: "— Sōseki (Chamberlain trans., 1910)",
+    tags: ["spring", "morning", "comfort", "reflection"],
+  },
+  {
+    text: "I think the falling leaves\nmust have a sound\nwe never hear.",
+    attribution: "— Shiki (Aston trans., 1899)",
+    tags: ["autumn", "evening", "stillness", "reflection"],
+  },
+
+  // Limericks — diversified beyond the existing Lear pair + four
+  // anonymous traditionals. All pre-1929 verified PD.
+  {
+    text: "There was an Old Man of the Coast,\nWho placidly sat on a post;\n  But when it was cold,\n  He relinquished his hold,\nAnd called for some hot buttered toast.",
+    attribution: "— Edward Lear (1846)",
+    tags: ["whimsy", "winter", "morning", "comfort"],
+  },
+  {
+    text: "There was a Young Lady whose chin\nResembled the point of a pin;\n  So she had it made sharp,\n  And purchased a harp,\nAnd played several tunes with her chin.",
+    attribution: "— Edward Lear (1846)",
+    tags: ["whimsy", "energy", "comfort"],
+  },
+  {
+    text: "There was an Old Person of Cromer,\nWho stood on one leg to read Homer;\n  When he found he grew stiff,\n  He jumped over the cliff,\nWhich concluded that Person of Cromer.",
+    attribution: "— Edward Lear (1872)",
+    tags: ["whimsy", "afternoon", "focus"],
+  },
+  {
+    text: "There was a young lady named Bright,\nWhose speed was far faster than light;\n  She set out one day\n  In a relative way,\nAnd returned on the previous night.",
+    attribution: "— A.H. Reginald Buller (1923)",
+    tags: ["whimsy", "night", "focus", "energy"],
+  },
+  {
+    text: "An epicure, dining at Crewe,\nFound quite a large mouse in his stew;\n  Said the waiter, \"Don't shout\n  And wave it about,\nOr the rest will be wanting one too!\"",
+    attribution: "— Anonymous (traditional)",
+    tags: ["whimsy", "noon", "afternoon", "comfort"],
+  },
+  {
+    text: "There was a Young Lady of Lynn,\nWho was so uncommonly thin\n  That when she essayed\n  To drink lemonade,\nShe slipped through the straw and fell in.",
+    attribution: "— Anonymous (traditional)",
+    tags: ["whimsy", "summer", "energy"],
+  },
 ];
 
 // Brew-companion writing prompts. Short, sensory, low-friction —

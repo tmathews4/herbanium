@@ -99,6 +99,10 @@ export const JournalComposer = ({ onSave, onCancel }) => {
   const [limNote, setLimNote] = useState("");
   const [limAdlib, setLimAdlib] = useState(true);
   const [limOwn, setLimOwn] = useState("");
+  // Free-form poem mode — like haiku/limerick but no syllable count
+  // or rhyme scheme. Just a textarea with a small prompt listing
+  // common short forms the user might reach for.
+  const [poemText, setPoemText] = useState("");
   // Shared across all three modes — every entry can record a
   // before/after mood arc, the same shape cup sessions use.
   // Flavor chips deliberately live on cup logs only (LogScreen);
@@ -117,6 +121,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     mode === "free"     ? text.trim().length > 0
     : mode === "haiku"  ? haikuReady
     : mode === "limerick" ? limerickReady
+    : mode === "poem"   ? poemText.trim().length > 0
     : false;
 
   const resetForm = () => {
@@ -129,6 +134,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     setLimNote("");
     setLimOwn("");
     setLimAdlib(true);
+    setPoemText("");
     setCurrentMoods([]);
     setLandedMoods([]);
     setMode("free");
@@ -142,6 +148,8 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     } else if (mode === "limerick") {
       const finalText = limAdlib ? limerickPreview : limOwn.trim();
       onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods);
+    } else if (mode === "poem") {
+      onSave(poemText.trim(), "poem", "", currentMoods, landedMoods);
     } else {
       onSave(text.trim(), "entry", "", currentMoods, landedMoods);
     }
@@ -212,6 +220,9 @@ export const JournalComposer = ({ onSave, onCancel }) => {
         </button>
         <button onClick={() => setMode("limerick")} style={tabBtnStyle(mode === "limerick")}>
           limerick
+        </button>
+        <button onClick={() => setMode("poem")} style={tabBtnStyle(mode === "poem")}>
+          poem
         </button>
       </div>
 
@@ -466,6 +477,45 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               }}
             />
           </div>
+        </>
+      )}
+
+      {mode === "poem" && (
+        <>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+            color: theme.ash, lineHeight: 1.55, marginBottom: 10, textAlign: "left",
+          }}>
+            Free-form verse — no syllable count, no rhyme scheme. A few short
+            forms to reach for if you want a frame:
+            <ul style={{
+              margin: "6px 0 0", paddingLeft: 18,
+              fontStyle: "normal", fontSize: 12,
+              color: theme.inkSoft, lineHeight: 1.55,
+            }}>
+              <li><em>couplet</em> — two lines, often rhymed; one thought, finished.</li>
+              <li><em>tercet</em> — three lines, freer than a haiku.</li>
+              <li><em>quatrain</em> — four lines; the workhorse of English verse.</li>
+              <li><em>cinquain</em> — five lines, building then settling.</li>
+              <li><em>free verse</em> — no fixed shape; line breaks where the breath lands.</li>
+            </ul>
+          </div>
+          <textarea
+            value={poemText}
+            onChange={(e) => setPoemText(e.target.value)}
+            placeholder={"a line, however it lands\nanother, if it wants to follow"}
+            rows={6}
+            style={{
+              width: "100%", boxSizing: "border-box",
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
+              color: theme.ink, lineHeight: 1.7,
+              background: "rgba(255,255,255,0.4)",
+              border: `1px dashed ${theme.rule}`, borderRadius: 8,
+              padding: "10px 12px", outline: "none",
+              resize: "vertical", minHeight: 130,
+              whiteSpace: "pre-wrap",
+            }}
+          />
         </>
       )}
 

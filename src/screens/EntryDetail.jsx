@@ -60,10 +60,12 @@ export const EntryDetail = ({ entry, onClose, onDelete }) => {
 
   const isHaiku    = entry.kind === "haiku";
   const isLimerick = entry.kind === "limerick";
-  const isVerse    = isHaiku || isLimerick;
+  const isPoem     = entry.kind === "poem";
+  const isVerse    = isHaiku || isLimerick || isPoem;
   const label =
     isHaiku    ? "A verse"
     : isLimerick ? "A limerick"
+    : isPoem    ? "A poem"
     : "An entry";
   const stamp = entry.ts ? new Date(entry.ts) : null;
   const ago   = formatAgo(stamp);

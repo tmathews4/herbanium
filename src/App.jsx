@@ -896,6 +896,7 @@ export default function App() {
     const validKind =
       kind === "haiku" ? "haiku"
       : kind === "limerick" ? "limerick"
+      : kind === "poem" ? "poem"
       : "entry";
     const entry = {
       id: `entry-${Date.now()}`,
