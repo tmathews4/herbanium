@@ -84,6 +84,13 @@ export const BlendExtractionExplorer = ({
   // leaf effects) for the whole panorama, not per-strip.
   const [familyMode, setFamilyMode] = useState(true);
 
+  // Range-band selection. Each axis ("tempC" / "timeS") gets its
+  // own slot — tapping a band toggles a description panel below
+  // that slider. null means "nothing selected for this axis."
+  const [bandSelected, setBandSelected] = useState({ tempC: null, timeS: null });
+  const selectBand = (axis, kind) =>
+    setBandSelected(prev => ({ ...prev, [axis]: kind }));
+
   const tempCRange = useMemo(() => unionAndPadTempRange(ingredients, INGREDIENTS), [ingredients]);
   const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS), [ingredients]);
 
@@ -402,11 +409,11 @@ export const BlendExtractionExplorer = ({
           return { range: [best.a, best.b], coverage: maxCount, total: bandData.length };
         };
 
-        const RangeBands = ({ rangeMin, rangeMax, axis }) => {
+        const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
           const empty = <div style={{ height: 6, marginTop: 2, marginBottom: 2 }} />;
-          const renderBand = (lo, hi, color, tooltip) => {
+          const renderBand = (lo, hi, color, tooltip, kind, isSelected) => {
             const cLo = Math.max(lo, rangeMin);
             const cHi = Math.min(hi, rangeMax);
             if (cHi <= cLo) return empty;
@@ -420,6 +427,10 @@ export const BlendExtractionExplorer = ({
               }}>
                 <div
                   title={tooltip}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect && onSelect(isSelected ? null : kind);
+                  }}
                   style={{
                     position: "absolute",
                     left: `${left}%`,
@@ -427,6 +438,9 @@ export const BlendExtractionExplorer = ({
                     top: 0, bottom: 0,
                     background: color,
                     borderRadius: 2,
+                    cursor: onSelect ? "pointer" : "default",
+                    boxShadow: isSelected ? `0 0 0 1.5px ${theme.terra}` : "none",
+                    transition: "box-shadow 0.15s ease",
                   }}
                 />
               </div>
@@ -436,24 +450,81 @@ export const BlendExtractionExplorer = ({
           const ix = intersect(axis);
           if (ix) {
             const tooltip = axis === "tempC"
-              ? `Sweet spot: ${ix[0]}–${ix[1]}°C`
-              : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
-            return renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip);
+              ? `Sweet spot: ${ix[0]}–${ix[1]}°C — tap for details`
+              : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min — tap for details`;
+            return renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip, "sweet", selected === "sweet");
           }
 
           const fallback = bestCoverageZone(axis);
           if (fallback) {
             const [a, b] = fallback.range;
             const tooltip = axis === "tempC"
-              ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range)`
-              : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range)`;
+              ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`
+              : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`;
             // Soft amber — calls attention without alarming. Using
             // theme.ochre family at ~30% opacity to match the green
             // band's visual weight while reading distinctly.
-            return renderBand(a, b, "rgba(189,148,76,0.32)", tooltip);
+            return renderBand(a, b, "rgba(189,148,76,0.32)", tooltip, "compromise", selected === "compromise");
           }
 
           return empty;
+        };
+
+        // Description panel shown below a slider when a band is
+        // tapped. Answers the literal question "what does this
+        // colored bar represent?" — the engine math behind it has
+        // gotten more nuanced as the slider bounds and warning
+        // layers evolved, so users deserve a precise read.
+        const BandDescription = ({ axis, kind }) => {
+          if (!kind) return null;
+          const totalIngs = bandData.length;
+          let title, body, sub;
+          if (kind === "sweet") {
+            const ix = intersect(axis);
+            if (!ix) return null;
+            const fmt = axis === "tempC"
+              ? `${ix[0]}–${ix[1]}°C`
+              : `${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
+            title = "Sweet spot";
+            body  = `Every non-catalyst ingredient (${totalIngs}) is inside its own authored steep range somewhere in this band. Brewing here means no leaf is being stretched out of its preferred extraction window.`;
+            sub   = fmt;
+          } else {
+            const fallback = bestCoverageZone(axis);
+            if (!fallback) return null;
+            const [a, b] = fallback.range;
+            const fmt = axis === "tempC"
+              ? `${a}–${b}°C`
+              : `${Math.round(a / 60)}–${Math.round(b / 60)} min`;
+            title = "Compromise zone";
+            body  = `No single ${axis === "tempC" ? "temperature" : "time"} satisfies all the leaves at once. This band is the longest run where the most ingredients (${fallback.coverage} of ${fallback.total}) overlap inside the primary lead's window. The remaining ${fallback.total - fallback.coverage} sit outside their authored range — slightly under- or over-extracted but not broken.`;
+            sub   = fmt;
+          }
+          return (
+            <div style={{
+              marginTop: 8,
+              padding: "8px 10px",
+              borderLeft: `2px solid ${kind === "sweet" ? theme.sage : theme.ochre}`,
+              background: kind === "sweet"
+                ? "rgba(109,126,85,0.08)"
+                : "rgba(189,148,76,0.10)",
+              borderRadius: "2px 6px 6px 2px",
+            }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: kind === "sweet" ? theme.sageDeep : theme.ochre,
+                marginBottom: 3,
+              }}>
+                {title} · {sub}
+              </div>
+              <div style={{
+                fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
+                lineHeight: 1.5, fontStyle: "italic",
+              }}>
+                {body}
+              </div>
+            </div>
+          );
         };
 
         return (
@@ -490,7 +561,11 @@ export const BlendExtractionExplorer = ({
                   accentColor: theme.terra,
                 }}
               />
-              <RangeBands rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC" />
+              <RangeBands
+                rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
+                selected={bandSelected.tempC}
+                onSelect={(k) => selectBand("tempC", k)}
+              />
               <div style={{
                 display: "flex", justifyContent: "space-between",
                 fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
@@ -498,6 +573,7 @@ export const BlendExtractionExplorer = ({
                 <span>{tempMinDisplay}°</span>
                 <span>{tempMaxDisplay}°</span>
               </div>
+              <BandDescription axis="tempC" kind={bandSelected.tempC} />
             </div>
             <div style={{ marginBottom: 16 }}>
               <div style={{
@@ -526,7 +602,11 @@ export const BlendExtractionExplorer = ({
                   accentColor: theme.sage,
                 }}
               />
-              <RangeBands rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS" />
+              <RangeBands
+                rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
+                selected={bandSelected.timeS}
+                onSelect={(k) => selectBand("timeS", k)}
+              />
               <div style={{
                 display: "flex", justifyContent: "space-between",
                 fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
@@ -534,6 +614,7 @@ export const BlendExtractionExplorer = ({
                 <span>{Math.round(timeSRange[0] / 60)} min</span>
                 <span>{Math.round(timeSRange[1] / 60)} min</span>
               </div>
+              <BandDescription axis="timeS" kind={bandSelected.timeS} />
 
               {/* No-overlap warning — fires when the blend has 2+ lead
                   ingredients whose timeS ranges don't share a single
