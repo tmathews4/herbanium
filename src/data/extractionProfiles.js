@@ -848,23 +848,54 @@ function bracketByIntensity(profiles, tempC, timeS) {
   return [sorted[0], sorted[0], 0];
 }
 
+// When the user's brew sits BELOW the lightest authored profile's
+// timeS (e.g. time slider pulled toward 0 on Wuyi, where the lightest
+// profile is at ~200s), the bracket clamps to the lightest profile
+// and would return its full flavor strengths as-is. That makes the
+// bands re-darken at the very bottom of the time slider after
+// appearing to fade as the user approached it — the engine has no
+// "barely extracted" state of its own. This factor scales the
+// resolver's output toward zero based on how far below the lightest
+// profile's time we are. Temp is intentionally NOT scaled here:
+// authored profiles' lightest tempC is usually the ingredient's own
+// minimum, and tea brewed at its lower temp bound is still a real
+// (lighter) cup — not "barely extracted" the way 0s of steep is.
+function underFloorScale(profiles, timeS) {
+  if (!profiles || profiles.length < 2) return 1;
+  const minProfileTime = Math.min(...profiles.map(p => p.timeS));
+  if (minProfileTime <= 0) return 1;
+  if (timeS >= minProfileTime) return 1;
+  return Math.max(0, timeS / minProfileTime);
+}
+
+function scaleFlavors(flavors, scale) {
+  if (scale === 1) return flavors;
+  return flavors.map(([n, v]) => [n, Math.round(v * scale * 10) / 10]);
+}
+
+function scaleEffects(effects, scale) {
+  if (scale === 1) return effects;
+  return effects.map(([tag, v]) => [tag, Math.round(v * scale * 10) / 10]);
+}
+
 export function resolveExtractionProfile(ingredientId, tempC, timeS) {
   const profiles = EXTRACTION_PROFILES[ingredientId];
   if (!profiles || profiles.length === 0) return null;
 
   const [lo, hi, t] = bracketByIntensity(profiles, tempC, timeS);
+  const scale = underFloorScale(profiles, timeS);
 
   if (lo === hi) {
     return {
-      flavors: lo.flavorStrengths,
-      effects: lo.effects,
+      flavors:  scaleFlavors(lo.flavorStrengths, scale),
+      effects:  scaleEffects(lo.effects, scale),
       character: lo.character,
     };
   }
 
   return {
-    flavors: blendFlavorsWithStrength(lo, hi, t),
-    effects: blendEffects(lo, hi, t),
+    flavors:  scaleFlavors(blendFlavorsWithStrength(lo, hi, t), scale),
+    effects:  scaleEffects(blendEffects(lo, hi, t), scale),
     character: blendCharacter(lo, hi, t),
   };
 }
