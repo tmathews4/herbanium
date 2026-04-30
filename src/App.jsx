@@ -74,22 +74,24 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
         <div style={{
           display: "grid",
           gridTemplateColumns: `repeat(${subTabs.length}, 1fr)`,
-          gap: 6,
-          padding: "8px 10px 8px",
+          gap: 4,
+          padding: "8px 12px 0",
           borderBottom: `1px solid ${theme.ruleSoft}`,
         }}>
           {subTabs.map(([k, label]) => {
             const active = subActive === k;
             return (
               <button key={k} onClick={() => onSubClick(k)} style={{
-                background: active ? "rgba(var(--terra-rgb),0.12)" : "transparent",
-                border: "none", cursor: "pointer",
-                padding: "8px 6px",
-                borderRadius: 8,
+                background: "transparent", border: "none", cursor: "pointer",
+                padding: "6px 4px 8px",
                 fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
                 fontWeight: active ? 600 : 500,
                 color: active ? theme.terra : theme.inkSoft,
-                transition: "color 0.2s ease, background 0.2s ease",
+                borderBottom: active
+                  ? `2px solid ${theme.terra}`
+                  : `2px solid transparent`,
+                marginBottom: -1,
+                transition: "color 0.2s ease, border-color 0.2s ease",
               }}>{label}</button>
             );
           })}
