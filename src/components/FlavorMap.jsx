@@ -438,11 +438,11 @@ const TrackMap = ({
     }
     return EFFECT_DESCRIPTIONS[name] || null;
   };
-  // Family-mode track names are short family ids; show them with a
-  // capitalized first letter so they read as register categories
-  // ("Fruit", "Floral") rather than internal slugs.
-  const labelFor = (name) =>
-    useFamilyMode ? name.charAt(0).toUpperCase() + name.slice(1) : name;
+  // Family-mode track names render lowercase to match the detail-mode
+  // and mood/balance strip conventions — every other label across the
+  // strips is lowercase, so capitalizing only the family slugs would
+  // read as a stylistic outlier.
+  const labelFor = (name) => name;
 
   // For a family-mode selected track, list the specific notes that
   // contributed to it (any flavor that mapped into this family AND
