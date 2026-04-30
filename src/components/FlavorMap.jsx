@@ -279,10 +279,21 @@ const TrackMap = ({
       }
     }
     const ranked = Object.entries(peaks).sort((a, b) => b[1] - a[1]);
-    const primary = ranked
+    let primary = ranked
       .filter(([, peak]) => peak >= PRIMARY_THRESHOLD)
       .slice(0, MAX_TRACKS)
       .map(([name]) => name);
+    // If no track clears the primary threshold but the strip still has
+    // tracks above the secondary threshold, promote the loudest of those
+    // so the strip is never empty-with-an-expand-button. The user
+    // shouldn't have to tap "+ N near the surface" just to see the one
+    // mood / flavor / palate that does exist.
+    if (primary.length === 0) {
+      primary = ranked
+        .filter(([, peak]) => peak >= SECONDARY_THRESHOLD)
+        .slice(0, MAX_TRACKS)
+        .map(([name]) => name);
+    }
     const primarySet = new Set(primary);
     const secondary = ranked
       .filter(([name, peak]) => peak >= SECONDARY_THRESHOLD && !primarySet.has(name))
