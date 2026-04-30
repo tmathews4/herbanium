@@ -56,7 +56,7 @@ import { theme, ff, shadow, radius } from "../theme";
 // buttons. Computed once so we don't pay a string concat per render.
 const TERRA_HOVER = "#BC5D33";
 const INK_HOVER   = "#2A211A";
-const BARK_HOVER  = "#8C6240";
+const BARK_HOVER  = "#714A28";
 
 export const Button = ({
   variant = "primary",   // primary | secondary | ghost
