@@ -671,17 +671,19 @@ const TrackMap = ({
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
     const peak = trackData.peaks[name] || 1;
-    // Cap is just MAX_BAND_ALPHA × cupStrength now. The earlier
-    // (peak < 1 ? sqrt(peak) : 1) penalty encoded cross-band
-    // loudness in alpha (quiet bands rendered dimmer), but the
-    // absolute-strength gauge column does that job directly and
-    // more honestly. The sqrt penalty also produced a ~28% sudden
-    // alpha jump when a band's peak crossed 1.0 (e.g., aromatic
-    // climbing from 0.6 to 1.1 as steep time increased) — confusing
-    // the user about what they were seeing. With the cap clean,
-    // each band fills its own track to a consistent ceiling and
-    // the gauge tells you the loudness story.
-    const cap = MAX_BAND_ALPHA * cupStrength;
+    // Cross-band loudness factor. Each band's alpha cap multiplies
+    // by sqrt(peak/5), so a peak-0.5 band reaches ~26% alpha at
+    // its own peak while a peak-3.0 band reaches ~63%. Quiet bands
+    // stay readable (the sqrt keeps the curve gentle for low
+    // values) but the cross-band intensity story comes through in
+    // the gradient itself, not just the gauge column.
+    //
+    // The previous PIECEWISE version (peak < 1 ? sqrt(peak) : 1)
+    // caused a visible jump as a band's peak crossed 1.0; making
+    // this a continuous curve removes that artifact while still
+    // encoding the absolute loudness in alpha.
+    const loudnessFactor = Math.sqrt(Math.min(1, peak / 5));
+    const cap = MAX_BAND_ALPHA * cupStrength * loudnessFactor;
     const series = filledSeriesFor(name);
     const stops = series.map((strength, i) => {
       const x = (i / (SAMPLES - 1)) * 100;
