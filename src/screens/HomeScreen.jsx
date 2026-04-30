@@ -51,8 +51,11 @@ const seasonOf = (m) => {
 };
 
 // Pick a public-domain poem from WAIT_POEMS that fits the current
-// hour and (when possible) season. Stable per day so the user
-// gets one quiet line that holds, not a new one on every render.
+// hour and (when possible) season. Rotates on each visit (each
+// fresh mount of HomeScreen) so a user returning to Home through
+// the day doesn't see the same line over and over. Time of day
+// AND season still bias the candidate pool — the rotation just
+// happens within the candidate set rather than across days.
 const pickHomePoem = (date) => {
   const tod = getTimeOfDay(date.getHours());
   const season = seasonOf(date.getMonth());
@@ -62,19 +65,18 @@ const pickHomePoem = (date) => {
     const tags = p.tags || [];
     return tags.some(t => todSet.has(t));
   });
-  // Prefer ones that also match the season; fall back to time-only.
+  // Soft season bias: when a strong seasonal subset exists (≥3 poems
+  // tagged for the current season at this time of day), use it;
+  // otherwise stay with the broader time-of-day pool so the rotation
+  // doesn't lock onto 1-2 seasonal poems for an entire season.
   const seasonMatched = candidates.filter(p => (p.tags || []).includes(season));
-  const pool = seasonMatched.length > 0 ? seasonMatched : candidates;
+  const pool = seasonMatched.length >= 3 ? seasonMatched : candidates;
   if (pool.length === 0) return null;
 
-  // Stable hash by the calendar day so the same poem holds for
-  // the whole day. Different users on the same day see the same
-  // poem — fine since the pool is curated public-domain and the
-  // content is impersonal.
-  const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${tod.label}`;
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h << 5) - h + key.charCodeAt(i) | 0;
-  return pool[Math.abs(h) % pool.length];
+  // Random pick — different each Home mount. Keeps a pool of >1 in
+  // genuinely fresh rotation while time-of-day / season bias still
+  // shapes which subset the pick happens within.
+  return pool[Math.floor(Math.random() * pool.length)];
 };
 
 export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods }) => {
@@ -86,6 +88,10 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   const openFavorite = (blendId) => {
     if (openBlend) openBlend(blendId);
   };
+  // Pick a poem ONCE per mount so the line is stable within a visit
+  // but fresh on each return to Home. Rotation comes from coming back
+  // to Home through the day rather than from re-rendering in place.
+  const homePoem = React.useMemo(() => pickHomePoem(new Date()), []);
   // Mood follow-up — brew-time logging only captures flavor (verifiable
   // at first sip). Mood resolves over the next ~30 minutes, so any
   // session brewed in the last 24 hours that hasn't logged its mood
@@ -149,11 +155,15 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         </div>
       )}
 
-      {/* Time-of-day contextual card + greeting (returning users only) */}
+      {/* Time-of-day contextual card + greeting (returning users only).
+          Poem is memoized per mount so the rotation is per-visit,
+          not per-render — each fresh return to Home gets a new
+          line rather than the same one repeating, but the same
+          line holds steady within one visit. */}
       {!isEmpty && (() => {
         const now = new Date();
         const tod = getTimeOfDay(now.getHours());
-        const poem = pickHomePoem(now);
+        const poem = homePoem;
         return (
           <>
             <div style={{

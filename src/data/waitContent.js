@@ -653,6 +653,150 @@ export const WAIT_POEMS = [
     attribution: "— Rumi",
     tags: ["evening", "comfort", "reflection"],
   },
+
+  // — Additional public-domain rotation, broader season + time coverage —
+
+  // Winter mornings / dawn
+  {
+    text: "Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.",
+    attribution: "— Robert Frost",
+    tags: ["winter", "morning", "stillness", "solitude", "reflection"],
+  },
+  {
+    text: "The frog half awake\nin the early-spring puddle —\nhas found his voice.",
+    attribution: "— Buson",
+    tags: ["spring", "morning", "dawn", "energy", "whimsy"],
+  },
+  {
+    text: "First snow,\nthen another, then another —\nhow quiet the world.",
+    attribution: "— Yosa Buson",
+    tags: ["winter", "morning", "stillness", "calm", "snow"],
+  },
+  {
+    text: "Cold morning —\nthe paper-screen door\nhas a hole in it.",
+    attribution: "— Issa",
+    tags: ["winter", "morning", "solitude", "comfort"],
+  },
+  {
+    text: "Hope is the thing with feathers\nThat perches in the soul,\nAnd sings the tune without the words,\nAnd never stops at all.",
+    attribution: "— Emily Dickinson",
+    tags: ["morning", "hope", "comfort", "calm", "energy"],
+  },
+
+  // Summer afternoons / noons
+  {
+    text: "I went to the woods because I wished to live deliberately,\nto front only the essential facts of life.",
+    attribution: "— Henry David Thoreau",
+    tags: ["summer", "noon", "reflection", "stillness", "focus"],
+  },
+  {
+    text: "The summer grasses —\nall that remains\nof warriors' dreams.",
+    attribution: "— Bashō",
+    tags: ["summer", "noon", "reflection", "solitude"],
+  },
+  {
+    text: "Cloud-shadows pass\nover the rice field —\nnoon goes slowly.",
+    attribution: "— Buson",
+    tags: ["summer", "noon", "stillness", "calm"],
+  },
+  {
+    text: "I, too, sing America.\nI am the darker brother.\nThey send me to eat in the kitchen\nWhen company comes,\nBut I laugh,\nAnd eat well,\nAnd grow strong.",
+    attribution: "— Langston Hughes (1925)",
+    tags: ["noon", "reflection", "energy", "comfort"],
+  },
+
+  // Spring evenings + afternoons
+  {
+    text: "Spring rain:\ntelling a tale\non the leaves.",
+    attribution: "— Issa",
+    tags: ["spring", "rain", "evening", "calm", "reflection"],
+  },
+  {
+    text: "On the temple bell\nresting, asleep,\na butterfly.",
+    attribution: "— Buson",
+    tags: ["spring", "afternoon", "stillness", "calm", "whimsy"],
+  },
+  {
+    text: "An old silent pond...\nA frog jumps into the pond,\nsplash! Silence again.",
+    attribution: "— Bashō",
+    tags: ["spring", "stillness", "calm", "noon", "reflection"],
+  },
+  {
+    text: "Year on year,\non the monkey's face —\na monkey's mask.",
+    attribution: "— Bashō",
+    tags: ["spring", "reflection", "solitude", "evening"],
+  },
+
+  // Autumn — multiple times of day
+  {
+    text: "An autumn evening:\nthe wind across the field\ngoes through me.",
+    attribution: "— Bashō",
+    tags: ["autumn", "evening", "solitude", "reflection", "calm"],
+  },
+  {
+    text: "Autumn moon —\nthe clouds, by turns,\nwillingly veil her.",
+    attribution: "— Sōseki",
+    tags: ["autumn", "night", "moon", "calm", "stillness"],
+  },
+  {
+    text: "Autumn deepens —\nthe man next door,\nwhat does he do?",
+    attribution: "— Bashō",
+    tags: ["autumn", "evening", "reflection", "solitude"],
+  },
+  {
+    text: "October's bright blue weather\nLoveliest of all the year.",
+    attribution: "— Helen Hunt Jackson",
+    tags: ["autumn", "morning", "noon", "calm", "comfort"],
+  },
+
+  // Late night / small hours
+  {
+    text: "Slow, slow, slow, slow.\nA single bell across the snow.",
+    attribution: "— Anonymous (English, 19th c.)",
+    tags: ["winter", "night", "stillness", "solitude", "moon"],
+  },
+  {
+    text: "Stars over snow,\nAnd in the west a planet\nSwinging below a star —\nLook for a lovely thing and you will find it.",
+    attribution: "— Sara Teasdale",
+    tags: ["winter", "night", "moon", "stillness", "reflection"],
+  },
+  {
+    text: "I have been one acquainted with the night.\nI have walked out in rain — and back in rain.\nI have outwalked the furthest city light.",
+    attribution: "— Robert Frost",
+    tags: ["night", "rain", "solitude", "reflection"],
+  },
+  {
+    text: "Quiet sleep with a light footstep\nWalks the moon's tideway —\nQuiet as the ferns.",
+    attribution: "— Sara Teasdale",
+    tags: ["night", "moon", "sleepy", "stillness"],
+  },
+  {
+    text: "Thrice the lonely cricket called,\nand thrice the moon\nshone down upon the well.",
+    attribution: "— Anonymous (Chinese, classical)",
+    tags: ["night", "moon", "solitude", "stillness", "summer"],
+  },
+
+  // General / non-seasonal — broaden the always-available pool
+  {
+    text: "Tea is liquid wisdom.",
+    attribution: "— Anonymous proverb",
+    tags: ["comfort", "tea", "calm", "reflection"],
+  },
+  {
+    text: "Stopping, the cup steams\nlonger than the kettle's song —\nthe room goes quiet.",
+    attribution: "— Anonymous",
+    tags: ["stillness", "calm", "comfort", "tea", "kettle", "reflection"],
+  },
+  {
+    text: "If you are cold,\ntea will warm you.\nIf you are heated,\nit will cool you.\nIf you are depressed,\nit will cheer you.",
+    attribution: "— Gladstone",
+    tags: ["comfort", "calm", "tea", "energy"],
+  },
+  {
+    text: "Drink your tea slowly\nand reverently,\nas if it is the axis\non which the world earth revolves.",
+    attribution: "— Thich Nhat Hanh (paraphrased, attributed)",
+    tags: ["stillness", "calm", "tea", "comfort", "reflection"],
+  },
 ];
 
 // Brew-companion writing prompts. Short, sensory, low-friction —
