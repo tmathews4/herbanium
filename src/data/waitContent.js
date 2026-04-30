@@ -311,19 +311,19 @@ export const WAIT_POEMS = [
     tags: ["spring", "rain", "calm", "green", "sencha"],
   },
   {
-    text: "The breeze of dawn has secrets to tell you.\nDon't go back to sleep.",
-    attribution: "— Rumi",
-    tags: ["morning", "energy", "focus"],
+    text: "Stray birds of summer come to my window to sing and fly away.\nAnd yellow leaves of autumn, which have no songs,\nflutter and fall there with a sigh.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["morning", "autumn", "summer", "reflection", "calm"],
   },
   {
-    text: "Silence is the language of God.\nAll else is poor translation.",
-    attribution: "— Rumi",
-    tags: ["stillness", "calm", "digestive", "reflection"],
+    text: "The water in a vessel is sparkling;\nthe water in the sea is dark.\nThe small truth has words that are clear;\nthe great truth has great silence.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["stillness", "calm", "reflection"],
   },
   {
-    text: "Be melting snow.\nWash yourself of yourself.",
-    attribution: "— Rumi",
-    tags: ["calm", "stillness", "winter", "reflection"],
+    text: "Let life be beautiful like summer flowers,\nand death like autumn leaves.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["calm", "reflection", "summer", "autumn"],
   },
 
   // — English-language public domain (all pre-1930, safely out of copyright) —
@@ -475,9 +475,9 @@ export const WAIT_POEMS = [
     tags: ["dawn", "morning", "spring"],
   },
   {
-    text: "The breeze at dawn has secrets to tell you.\nDon't go back to sleep.\nYou must ask for what you really want.",
-    attribution: "— Rumi",
-    tags: ["dawn", "morning", "focus", "energy"],
+    text: "The mist, like love, plays upon the heart of the hills,\nand brings out surprises of beauty.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["dawn", "morning", "calm", "reflection"],
   },
   {
     text: "Morning glory —\neven the well-bucket\nis taken.",
@@ -561,8 +561,8 @@ export const WAIT_POEMS = [
     tags: ["spring", "rain", "calm"],
   },
   {
-    text: "What a strange thing! —\nto be alive\nbeneath cherry blossoms.",
-    attribution: "— Issa",
+    text: "It is the tears of the earth\nthat keep her smiles in bloom.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
     tags: ["spring", "reflection", "morning"],
   },
 
@@ -634,23 +634,23 @@ export const WAIT_POEMS = [
     tags: ["comfort", "reflection", "solitude"],
   },
   {
-    text: "When you do things from your soul,\nyou feel a river moving in you, a joy.",
-    attribution: "— Rumi",
+    text: "The world has kissed my soul with its pain,\nasking for its return in songs.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
     tags: ["calm", "reflection", "comfort"],
   },
   {
-    text: "Don't worry, spiders,\nI keep house\ncasually.",
-    attribution: "— Issa",
-    tags: ["calm", "comfort", "stillness"],
+    text: "By plucking her petals,\nyou do not gather the beauty of the flower.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["calm", "comfort", "stillness", "reflection"],
   },
   {
-    text: "Even with insects —\nsome can sing,\nsome can't.",
-    attribution: "— Issa",
-    tags: ["summer", "reflection", "calm"],
+    text: "We live in this world\nwhen we love it.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
+    tags: ["summer", "reflection", "calm", "comfort"],
   },
   {
-    text: "Whoever brought me here\nwill have to take me home.",
-    attribution: "— Rumi",
+    text: "I cannot choose the best.\nThe best chooses me.",
+    attribution: "— Rabindranath Tagore (Stray Birds, 1916)",
     tags: ["evening", "comfort", "reflection"],
   },
 
@@ -766,9 +766,9 @@ export const WAIT_POEMS = [
     tags: ["night", "rain", "solitude", "reflection"],
   },
   {
-    text: "Quiet sleep with a light footstep\nWalks the moon's tideway —\nQuiet as the ferns.",
-    attribution: "— Sara Teasdale",
-    tags: ["night", "moon", "sleepy", "stillness"],
+    text: "There will come soft rains and the smell of the ground,\nAnd swallows circling with their shimmering sound;\nAnd frogs in the pools, singing at night,\nAnd wild plum trees in tremulous white.",
+    attribution: "— Sara Teasdale (1918)",
+    tags: ["spring", "rain", "night", "stillness", "reflection"],
   },
   {
     text: "Thrice the lonely cricket called,\nand thrice the moon\nshone down upon the well.",
@@ -793,9 +793,9 @@ export const WAIT_POEMS = [
     tags: ["comfort", "calm", "tea", "energy"],
   },
   {
-    text: "Drink your tea slowly\nand reverently,\nas if it is the axis\non which the world earth revolves.",
-    attribution: "— Thich Nhat Hanh (paraphrased, attributed)",
-    tags: ["stillness", "calm", "tea", "comfort", "reflection"],
+    text: "There are few hours in life more agreeable\nthan the hour dedicated to the ceremony\nknown as afternoon tea.",
+    attribution: "— Henry James (1881)",
+    tags: ["stillness", "calm", "tea", "comfort", "afternoon", "noon"],
   },
 
   // — Witty / insightful expansion: short, punchy lines that
@@ -873,23 +873,23 @@ export const WAIT_POEMS = [
     tags: ["stillness", "morning", "calm", "reflection"],
   },
   {
-    text: "You cannot step into the same river twice,\nfor other waters are continually flowing on.",
-    attribution: "— Heraclitus",
+    text: "It is not possible to step twice into the same river.",
+    attribution: "— Heraclitus (Bywater trans., 1877)",
     tags: ["reflection", "stillness", "focus"],
   },
   {
-    text: "He who knows others is wise;\nhe who knows himself is enlightened.",
-    attribution: "— Lao Tzu",
+    text: "He who knows others is clever,\nbut he who knows himself is enlightened.\nHe who conquers others is strong,\nbut he who conquers himself is mightier still.",
+    attribution: "— Lao Tzu (Carus trans., 1898)",
     tags: ["reflection", "stillness", "focus"],
   },
   {
-    text: "Once Zhuang Zhou dreamt he was a butterfly,\nflitting and fluttering, happy with himself.\nSuddenly he awoke, and was Zhou again.\nNow he does not know whether he was Zhou\ndreaming he was a butterfly,\nor a butterfly dreaming he is Zhou.",
-    attribution: "— Zhuangzi (Giles trans., 1889)",
+    text: "Once upon a time, I, Chuang Chou, dreamt I was a butterfly,\nfluttering hither and thither — a butterfly to all intents and purposes.\nSuddenly I awaked, and there I lay, myself again.\nNow I do not know whether I was then a man dreaming I was a butterfly,\nor whether I am now a butterfly dreaming I am a man.",
+    attribution: "— Chuang Tzŭ (Giles trans., 1889)",
     tags: ["reflection", "stillness", "sleepy", "night"],
   },
   {
-    text: "This dewdrop world\nis a dewdrop world,\nand yet, and yet ...",
-    attribution: "— Issa",
+    text: "A drop of dew,\nthis world;\na drop of dew,\nand yet, and yet —",
+    attribution: "— Issa (Aston trans., 1899)",
     tags: ["reflection", "stillness", "calm", "evening"],
   },
   {
@@ -898,8 +898,8 @@ export const WAIT_POEMS = [
     tags: ["reflection", "evening", "calm", "comfort"],
   },
   {
-    text: "You have power over your mind —\nnot outside events.\nRealize this, and you will find strength.",
-    attribution: "— Marcus Aurelius",
+    text: "Look within.\nWithin is the fountain of good,\nand it will ever bubble up,\nif thou wilt ever dig.",
+    attribution: "— Marcus Aurelius (Long trans., 1862)",
     tags: ["focus", "reflection", "morning"],
   },
   {
