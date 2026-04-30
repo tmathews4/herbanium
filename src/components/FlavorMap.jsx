@@ -230,6 +230,11 @@ const TrackMap = ({
   isTraditional = false,
   defaultTempC = null,
   defaultTimeS = null,
+  // Family/Detail mode is now driven from the parent
+  // BlendExtractionExplorer so flavor + mood strips share one
+  // toggle instead of each carrying its own. Default true keeps
+  // the rolled-up family view as the comfortable starting register.
+  familyMode = true,
 }) => {
   const { unit } = useUnit();
   const [tMin, tMax] = tempCRange;
@@ -285,7 +290,10 @@ const TrackMap = ({
   //     that token's own curve instead of the max-of-children fallback.
   //     The engine's direct signal wins because the curator chose the
   //     family-level term — that's the cup's natural curve.
-  const [familyMode, setFamilyMode] = useState(true);
+  //
+  // familyMode is a prop now (driven by the parent explorer's
+  // shared Simple/Detailed toggle); no per-strip state.
+
   // Resolve which hierarchy applies to this strip's data.
   const familyOf  = kind === "flavor" ? FAMILY_BY_FLAVOR : FAMILY_BY_EFFECT;
   const familyColors =
@@ -399,42 +407,33 @@ const TrackMap = ({
       : (_name, peak) => peak;
     const ranked = Object.entries(peaks)
       .sort((a, b) => rankWeight(b[0], b[1]) - rankWeight(a[0], a[1]));
-    let primary = ranked
-      .filter(([, peak]) => peak >= PRIMARY_THRESHOLD)
-      .slice(0, MAX_TRACKS)
+    // Show every track that crosses the secondary threshold in one
+    // list — no more sub-expand. The user wanted everything the
+    // engine calculated visible at once, with the parent's
+    // Simple/Detailed toggle controlling the rolled-up vs raw view
+    // rather than gating tracks behind another tap.
+    const tracks = ranked
+      .filter(([, peak]) => peak >= SECONDARY_THRESHOLD)
       .map(([name]) => name);
-    // If no track clears the primary threshold but the strip still has
-    // tracks above the secondary threshold, promote the loudest of those
-    // so the strip is never empty-with-an-expand-button. The user
-    // shouldn't have to tap "+ N near the surface" just to see the one
-    // mood / flavor / palate that does exist.
-    if (primary.length === 0) {
-      primary = ranked
-        .filter(([, peak]) => peak >= SECONDARY_THRESHOLD)
-        .slice(0, MAX_TRACKS)
-        .map(([name]) => name);
-    }
-    const primarySet = new Set(primary);
-    const secondary = ranked
-      .filter(([name, peak]) => peak >= SECONDARY_THRESHOLD && !primarySet.has(name))
-      .slice(0, MAX_SECONDARY)
-      .map(([name]) => name);
-    return { primary, secondary, peaks };
+    return { tracks, peaks };
     // useFamilyMode is part of the deps because pickMap above uses
     // it to choose the family-rolled-up sample map vs the
     // detail-filtered one — the track set must recompute when the
     // user toggles the segmented control.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind, useFamilyMode]);
-  const [expanded, setExpanded] = useState(false);
   // Track-description selection. Clicking a band or its label opens
   // a fixed-position description panel below the strip; clicking the
   // same row again closes it. Single panel per strip keeps layout
   // predictable instead of accordion-jumping each row.
   const [selectedTrack, setSelectedTrack] = useState(null);
-  const primaryTracks   = trackData.primary;
-  const secondaryTracks = trackData.secondary;
-  const tracks = expanded ? [...primaryTracks, ...secondaryTracks] : primaryTracks;
+  // Clear selection when familyMode flips — track names differ
+  // between Simple and Detailed views (family ids vs leaf tokens),
+  // so the previously-selected name might not exist in the new view.
+  React.useEffect(() => {
+    setSelectedTrack(null);
+  }, [familyMode]);
+  const tracks = trackData.tracks;
   // If the displayed track set changes (timeS slider drag drops a
   // track) and the previously-selected track is no longer present,
   // close the panel so it never points at something off-screen.
@@ -509,7 +508,7 @@ const TrackMap = ({
     setSelectedTrack(prev => prev === name ? null : name);
   };
 
-  if (primaryTracks.length === 0 && secondaryTracks.length === 0) return null;
+  if (tracks.length === 0) return null;
   if (samples.length === 0) return null;
 
   // Fill in zero-strength gaps that sit between non-zero neighbors
@@ -689,50 +688,10 @@ const TrackMap = ({
         gap: 8,
       }}>
         <span>{title}</span>
-        {/* Simple/Detailed toggle — flavor and mood strips. Simple
-            rolls members up to their family (fruit, floral, smoky on
-            the flavor side; calm, focus, energy, warm on the mood
-            side). Detailed shows the engine's specific tokens
-            (muscatel, peach, chestnut; soothing, grounding, uplifting)
-            and hides family-name tokens that are redundant when their
-            children are present. Selection clears on toggle. */}
-        {(kind === "flavor" || kind === "mood") ? (
-          <span style={{
-            display: "inline-flex",
-            border: `1px solid ${theme.ruleSoft}`,
-            borderRadius: 999,
-            overflow: "hidden",
-          }}>
-            {[
-              { id: "simple",   label: "Simple"   },
-              { id: "detailed", label: "Detailed" },
-            ].map(opt => {
-              const active = (opt.id === "simple") === familyMode;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => {
-                    const want = opt.id === "simple";
-                    if (want === familyMode) return;
-                    setSelectedTrack(null);
-                    setFamilyMode(want);
-                  }}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 9.5,
-                    letterSpacing: "0.12em", textTransform: "uppercase",
-                    padding: "3px 9px",
-                    background: active ? theme.terra : "transparent",
-                    color: active ? theme.cream : theme.ash,
-                    border: "none",
-                    cursor: active ? "default" : "pointer",
-                  }}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </span>
-        ) : <span />}
+        {/* Simple/Detailed lives at the parent BlendExtractionExplorer
+            now so flavor + mood share one toggle. Right-side spacer
+            keeps the header layout balanced. */}
+        <span />
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
@@ -895,32 +854,6 @@ const TrackMap = ({
               </div>
             );
           })()}
-        </div>
-      )}
-
-      {/* Expand toggle — only when the strip has secondary tracks
-          worth surfacing. Shows the count of near-but-not-quite
-          flavors so the user knows what's available before tapping. */}
-      {secondaryTracks.length > 0 && (
-        <div style={{ marginTop: 8, marginLeft: LABEL_W + 8 }}>
-          <button
-            onClick={() => setExpanded(v => !v)}
-            style={{
-              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: theme.ash,
-              background: "transparent",
-              border: `1px dashed ${theme.ruleSoft}`,
-              borderRadius: 999,
-              padding: "3px 10px",
-              cursor: "pointer",
-              fontStyle: "normal",
-            }}
-          >
-            {expanded
-              ? "show less"
-              : `+ ${secondaryTracks.length} near the surface`}
-          </button>
         </div>
       )}
 

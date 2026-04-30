@@ -78,6 +78,12 @@ export const BlendExtractionExplorer = ({
 }) => {
   const { unit } = useUnit();
 
+  // Shared Simple/Detailed mode for the flavor + mood strips. One
+  // toggle at the top of the explorer drives both at once so the
+  // user picks a register (rolled-up families vs specific notes /
+  // leaf effects) for the whole panorama, not per-strip.
+  const [familyMode, setFamilyMode] = useState(true);
+
   const tempCRange = useMemo(() => unionAndPadTempRange(ingredients, INGREDIENTS), [ingredients]);
   const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS), [ingredients]);
 
@@ -214,14 +220,58 @@ export const BlendExtractionExplorer = ({
           travels), so they no longer expand mid-drag and shove the
           sliders downward. Reading order is now panorama → controls,
           which matches the way a user thinks about brewing: see the
-          whole envelope, then aim for a point in it. */}
+          whole envelope, then aim for a point in it.
+
+          A single Simple/Detailed segmented toggle at the top drives
+          BOTH the flavor and mood strips at once — registers vs
+          specific notes/leaf effects. Palate doesn't have a
+          comparable hierarchy and reads the same in either mode. */}
       <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{
+          display: "flex", justifyContent: "flex-end", alignItems: "center",
+        }}>
+          <span style={{
+            display: "inline-flex",
+            border: `1px solid ${theme.ruleSoft}`,
+            borderRadius: 999,
+            overflow: "hidden",
+          }}>
+            {[
+              { id: "simple",   label: "Simple"   },
+              { id: "detailed", label: "Detailed" },
+            ].map(opt => {
+              const active = (opt.id === "simple") === familyMode;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    const want = opt.id === "simple";
+                    if (want === familyMode) return;
+                    setFamilyMode(want);
+                  }}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 9.5,
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                    padding: "3px 9px",
+                    background: active ? theme.terra : "transparent",
+                    color: active ? theme.cream : theme.ash,
+                    border: "none",
+                    cursor: active ? "default" : "pointer",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </span>
+        </div>
         <FlavorMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
           tempCRange={tempCRange}
           showAxis={false}
+          familyMode={familyMode}
         />
         <MoodMap
           ingredients={ingredients}
@@ -229,6 +279,7 @@ export const BlendExtractionExplorer = ({
           timeS={timeS}
           tempCRange={tempCRange}
           showAxis={false}
+          familyMode={familyMode}
         />
         <PalateMap
           ingredients={ingredients}
