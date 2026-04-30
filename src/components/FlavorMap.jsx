@@ -454,6 +454,7 @@ const TrackMap = ({
   };
   const MOOD_FAMILY_DESC_ALIAS = {
     warm:  "warming",
+    cool:  "cooling",
     body:  "digestive",
     sleep: "sleepy",
   };
