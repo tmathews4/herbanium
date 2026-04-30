@@ -94,6 +94,13 @@ const FLAVOR_LOUDNESS = {
   tar: 1.5,
   // Mid — a touch louder than mass-ratio
   spiced: 1.2, peppery: 1.4, roasted: 1.1, earthy: 1.1,
+  // Tart / acidic-bright register. Anthocyanins, citric/malic acid,
+  // and tartaric character read more loudly on the palate than
+  // their grams ratio suggests, and they're stable in water (acids
+  // don't volatilize). Boosting loudness here keeps tart, bright,
+  // cranberry from cliff-edging in and out of the visibility
+  // threshold when contributed by small accent ingredients.
+  tart: 1.2, bright: 1.2, cranberry: 1.1,
   // Low — easily dominated, read quieter than grams ratio
   sweet: 0.7, honey: 0.7, honeyed: 0.7, "honey-sweet": 0.7,
   floral: 0.7, delicate: 0.6,

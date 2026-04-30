@@ -103,7 +103,7 @@ export const EXTRACTION_PROFILES = {
     { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy", "bright", "fresh"],
       effects: [["calm", 3], ["focus", 2], ["energy", 3]],
       character: "The standard cup. Lemon-mint with gentle lift and focus." },
-    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "fresh", "astringent"],
+    { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "fresh", "astringent", "bright"],
       effects: [["calm", 3], ["focus", 2], ["energy", 3], ["bitterness", 2]],
       character: "Pushed past the sweet spot — citrus dulls, grass turns hay-bitter." },
   ],
@@ -934,11 +934,16 @@ const FLAVOR_VOLATILES = {
   apricot:  { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
   lychee:   { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
   melon:    { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
-  // Generic fruit register — averages of stone-fruit esters
-  fruit:    { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
-  fruity:   { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
-  berry:    { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
-  cranberry:{ fadeAboveC: 90, tempK: 0.03, timeK: 0.0006 },
+  // Generic fruit register — partly volatile esters, partly stable
+  // pigment / acid chemistry. Gentle fade so the volatile share
+  // recedes at high heat without zeroing out the stable part.
+  fruit:    { fadeAboveC: 90, tempK: 0.025, timeK: 0.0005 },
+  fruity:   { fadeAboveC: 90, tempK: 0.025, timeK: 0.0005 },
+  // berry, cranberry, tart removed from the volatile list — these
+  // tokens primarily reflect anthocyanin / citric-acid character
+  // which is water-stable. Fading them produced the wrong reading
+  // (e.g., All-Heal's bright fading away, hibiscus tart drifting
+  // down at oversteep when it should plateau or rise).
   // Muscatel — Darjeeling's signature, fairly fragile
   muscatel: { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
   // Floral terpenes — moderately volatile
@@ -949,11 +954,13 @@ const FLAVOR_VOLATILES = {
   delicate: { fadeAboveC: 82, tempK: 0.06, timeK: 0.0012 },
   heady:    { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
   aromatic: { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
-  // Citrus citral — volatile, bright
-  citrus:   { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
-  citrusy:  { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
-  bright:   { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
-  bergamot: { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
+  // Citrus — citral evaporates, but citric acid is stable. Gentle
+  // fade only so the bright lift recedes a bit without erasing
+  // the citrus register entirely. 'bright' removed — it's the
+  // acidic-lift perception, not a volatile aromatic on its own.
+  citrus:   { fadeAboveC: 90, tempK: 0.025, timeK: 0.0005 },
+  citrusy:  { fadeAboveC: 90, tempK: 0.025, timeK: 0.0005 },
+  bergamot: { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
   // Fresh / the cut-grass register — fragile and quick to fade
   fresh:    { fadeAboveC: 82, tempK: 0.06, timeK: 0.0012 },
   grassy:   { fadeAboveC: 85, tempK: 0.04, timeK: 0.0010 },
