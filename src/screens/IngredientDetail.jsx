@@ -15,20 +15,17 @@ import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  SectionLabel, StatCard, VocabInfoCard,
+  SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
-import { iconBtn, mmss } from "../helpers/misc";
+import { iconBtn } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
-import {
-  formatTempRange, formatTempShort, useUnit,
-} from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
    SolidBar — static row mimicking the Brewing-tab strip's band
@@ -110,14 +107,12 @@ const SolidBar = ({ label, value, color, selected, onClick }) => {
    ────────────────────────────────────────────────────────────── */
 
 export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
-  const { unit, weightUnit } = useUnit();
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   const [tab, setTab] = useState("overview");
   // Click-to-expand description cards. null = closed; clicking the same
   // term again closes; clicking a different term swaps the card.
   const [openEffect, setOpenEffect] = useState(null);
   const [openFlavor, setOpenFlavor] = useState(null);
-  const [openIntent, setOpenIntent] = useState(null);
   // Pairing preview — id of a paired ingredient currently being shown
   // in a floating quick-look card. null = no preview open. Lets users
   // peek at a pairing's effects/flavors without leaving this ingredient.
@@ -340,62 +335,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
               />
             )}
 
-            <div style={{ display: "flex", gap: 14, marginBottom: 20 }}>
-              <StatCard label="Water" value={formatTempRange(ing.tempC[0], ing.tempC[1], unit)} />
-              <StatCard label="Steep" value={`${Math.round(ing.timeS[0]/60)}–${Math.round(ing.timeS[1]/60)} min`} />
-              <StatCard label="Caffeine" value={ing.caffeine > 0 ? `${ing.caffeine} mg` : "none"} />
-            </div>
-
-            <SectionLabel n="i">Brew for a different effect</SectionLabel>
-            <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
-              {(ing.variants || [
-                { intent: "calm",       tempC: ing.tempC[0], timeS: ing.timeS[0], note: "Light steep for a softer cup." },
-                { intent: "everyday",   tempC: ing.tempC[1], timeS: Math.round((ing.timeS[0]+ing.timeS[1])/2), note: "Balanced standard." },
-                { intent: "full",       tempC: ing.tempC[1], timeS: ing.timeS[1], note: "Fuller effect, slightly more bitter." },
-              ]).map((v, i) => {
-                const known = !!EFFECT_DESCRIPTIONS[v.intent];
-                return (
-                  <div key={i} style={{
-                    padding: 14, borderRadius: 10,
-                    background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-                  }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                      <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink }}>
-                        for{" "}
-                        {known ? (
-                          <button
-                            onClick={() => setOpenIntent(prev => prev === v.intent ? null : v.intent)}
-                            style={{
-                              background: openIntent === v.intent ? "rgba(176, 84, 47, 0.10)" : "transparent",
-                              border: "none", padding: "0 4px", borderRadius: 4,
-                              fontFamily: ff.serif, fontSize: 17, fontStyle: "italic",
-                              color: theme.terra, cursor: "pointer",
-                            }}
-                          >{v.intent}</button>
-                        ) : (
-                          <em style={{ color: theme.terra }}>{v.intent}</em>
-                        )}
-                      </div>
-                      <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.ash }}>
-                        {formatTempShort(v.tempC, v.tempC, unit)} · {mmss(v.timeS)}
-                      </div>
-                    </div>
-                    <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft, marginTop: 4 }}>
-                      {v.note}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {openIntent && EFFECT_DESCRIPTIONS[openIntent] && (
-              <VocabInfoCard
-                term={openIntent}
-                summary={EFFECT_DESCRIPTIONS[openIntent].summary}
-                body={EFFECT_DESCRIPTIONS[openIntent].body}
-                tone="terra"
-                onClose={() => setOpenIntent(null)}
-              />
-            )}
           </>
         )}
 
