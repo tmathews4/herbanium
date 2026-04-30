@@ -672,6 +672,18 @@ const TrackMap = ({
   const currentSampleIdx = span > 0
     ? Math.round(((tempC - tMin) / span) * (SAMPLES - 1))
     : 0;
+  // Per-track strength at the user's current slider position. Used
+  // for the numeric label and the strength gauge — we want those to
+  // reflect what's in the cup RIGHT NOW, not the peak somewhere on
+  // the temp envelope. Critical for diagnostic axes (bitterness,
+  // astringency) which can peak at 5 at the extreme corner of the
+  // slider while the user's current brew has none.
+  const valueAtCurrent = (name) => {
+    const safeIdx = Math.max(0, Math.min(samples.length - 1, currentSampleIdx));
+    const sample = samples[safeIdx];
+    if (!sample) return 0;
+    return pickMap(sample)[name] || 0;
+  };
   // Tradition-deference: on curated traditional blends, suppress the
   // at-position ⚠ when the user is sitting at or below the curator's
   // recommended brew. The recipe is the recipe — bitterness/tannin in
@@ -764,17 +776,20 @@ const TrackMap = ({
                   >⚠</span>
                 )}
                 <span>{labelFor(name)}</span>
-                {/* Absolute peak strength next to the label so the user
-                    can read cross-band intensity directly. Per-track
-                    normalization makes ALL bands fill their own track
-                    by visual alpha, hiding loud-vs-quiet comparisons;
-                    the numeric value restores that information without
-                    flattening the gradient. */}
+                {/* Strength at the user's current slider position, on
+                    the engine's 0-5 scale. Per-track normalization
+                    makes every band fill its own track by alpha
+                    (great for shape) but hides cross-band loudness;
+                    the numeric restores that signal — and tied to
+                    the current slider rather than the envelope peak,
+                    so a diagnostic axis (bitterness/astringency) at
+                    a brew where it's silent reads "0.0", not the
+                    peak it would hit at the extreme corner. */}
                 <span style={{
                   fontFamily: ff.mono, fontSize: 9, color: theme.ash,
                   marginLeft: 2,
                 }}>
-                  {(trackData.peaks[name] || 0).toFixed(1)}
+                  {valueAtCurrent(name).toFixed(1)}
                 </span>
               </div>
             );
@@ -782,18 +797,22 @@ const TrackMap = ({
         </div>
 
         {/* Absolute-strength gauges on a shared 0-5 scale. Filled
-            bottom-up to each row's peak. Per-track normalization
-            scales each band's alpha to its own peak (good for
-            reading SHAPE within a track) but flattens cross-band
-            loudness; the gauge column restores that comparison. */}
+            bottom-up to each row's CURRENT slider value. Per-track
+            normalization scales each band's alpha to its own peak
+            (good for reading SHAPE within a track) but flattens
+            cross-band loudness; the gauge restores that comparison.
+            Tied to the current slider position (not envelope peak)
+            so palate axes that fire only at the slider's extreme
+            corner read empty when the user's brew is in clean
+            territory. */}
         <div style={{
           flex: "0 0 auto",
           width: 4,
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
           {tracks.map(name => {
-            const peak = trackData.peaks[name] || 0;
-            const fill = Math.max(0, Math.min(1, peak / 5));
+            const current = valueAtCurrent(name);
+            const fill = Math.max(0, Math.min(1, current / 5));
             return (
               <div key={name} style={{
                 height: TRACK_H,
