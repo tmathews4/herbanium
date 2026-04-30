@@ -28,7 +28,6 @@
 
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
-import { loudnessOf } from "../algo/perception";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
@@ -53,6 +52,22 @@ const PRIMARY_THRESHOLD = 0.5;
 const SECONDARY_THRESHOLD = 0.3;
 // Cap on secondary tracks shown when expanded.
 const MAX_SECONDARY = 6;
+
+// Canonical hierarchy order for the flavor strip. Tracks render in
+// this order regardless of which crossed strongest at any given
+// brew — so a strip's reading is structurally stable as the user
+// drags the temp/time sliders. Families on the left are the
+// brighter, lighter registers; the right end carries body, dark,
+// off-notes. Detail-mode tokens inherit the order of their family.
+const FLAVOR_FAMILY_ORDER = [
+  "fruit", "floral", "sweet", "fresh", "vegetal", "marine",
+  "spiced", "smoky", "earthy", "body", "off",
+];
+
+// Same idea for moods.
+const MOOD_FAMILY_ORDER = [
+  "calm", "focus", "energy", "warm", "cool", "body", "sleep",
+];
 
 // Family → color mapping. Keeps the strip readable as a palette
 // of related notes rather than a confetti of unrelated hues.
@@ -402,18 +417,29 @@ const TrackMap = ({
     // mass ratio — the strip should reflect what the user will taste,
     // not the raw chemistry. Mood/palate strips don't have an analogous
     // hierarchy curated yet, so they keep raw-peak ordering.
-    const rankWeight = kind === "flavor"
-      ? (name, peak) => peak * loudnessOf(name)
-      : (_name, peak) => peak;
-    const ranked = Object.entries(peaks)
-      .sort((a, b) => rankWeight(b[0], b[1]) - rankWeight(a[0], a[1]));
-    // Show every track that crosses the secondary threshold in one
-    // list — no more sub-expand. The user wanted everything the
-    // engine calculated visible at once, with the parent's
-    // Simple/Detailed toggle controlling the rolled-up vs raw view
-    // rather than gating tracks behind another tap.
-    const tracks = ranked
+    // Stable hierarchy ordering — tracks render in their family's
+    // canonical position regardless of which crossed strongest at
+    // any given brew. Reading the strip across slider drags is
+    // structurally stable: the calm row always sits where calm sits.
+    // Detail-mode leaf tokens inherit their family's position; ties
+    // within a family resolve by descending peak so the loudest
+    // member sits at the top of its group.
+    const familyOrder = kind === "flavor" ? FLAVOR_FAMILY_ORDER
+                       : kind === "mood"  ? MOOD_FAMILY_ORDER
+                       : null;
+    const orderIndex = (name) => {
+      if (!familyOrder) return 0;
+      const fam = (kind === "flavor" ? FAMILY_BY_FLAVOR : FAMILY_BY_EFFECT)[name] || name;
+      const idx = familyOrder.indexOf(fam);
+      return idx === -1 ? familyOrder.length : idx;
+    };
+    const tracks = Object.entries(peaks)
       .filter(([, peak]) => peak >= SECONDARY_THRESHOLD)
+      .sort((a, b) => {
+        const oi = orderIndex(a[0]) - orderIndex(b[0]);
+        if (oi !== 0) return oi;
+        return b[1] - a[1];
+      })
       .map(([name]) => name);
     return { tracks, peaks };
     // useFamilyMode is part of the deps because pickMap above uses
