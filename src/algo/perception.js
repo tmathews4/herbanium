@@ -19,14 +19,32 @@
 // Each row = a "loud" flavor or mouthfeel that suppresses gentler ones.
 // Values 0–1: suppression coefficient at the masker's max strength of 5.
 // At masker strength 2.5, suppression is half the listed value, etc.
+//
+// "Fresh" is treated as a negative-space register — it reads precisely
+// because heavier registers aren't competing for the palate. So most
+// of the heavy maskers also mask fresh, with strong coefficients that
+// push it below the 0.5 visibility floor when those flavors are loud.
+// Vegetal is intentionally NOT a fresh-masker: sencha and dragonwell
+// hold both registers at once, and the green-tea fresh-vegetal pair
+// is real — masking it there would misread the cup.
 const MASKING_MATRIX = {
-  bitter:     { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7 },
-  bitterness: { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7 },
-  astringent: { floral: 0.6, fruity: 0.5, sweet: 0.4, umami: 0.4, honey: 0.5, delicate: 0.6 },
-  smoky:      { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5 },
-  smoked:     { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5 },
-  pungent:    { floral: 0.5, sweet: 0.4, citrus: 0.4, delicate: 0.6 },
-  earthy:     { floral: 0.4, citrus: 0.3, fruity: 0.3, delicate: 0.5 },
+  bitter:     { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7, fresh: 0.7 },
+  bitterness: { floral: 0.7, citrus: 0.6, sweet: 0.4, umami: 0.5, minty: 0.5, fruity: 0.5, honey: 0.5, delicate: 0.7, fresh: 0.7 },
+  astringent: { floral: 0.6, fruity: 0.5, sweet: 0.4, umami: 0.4, honey: 0.5, delicate: 0.6, fresh: 0.6 },
+  smoky:      { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.95 },
+  smoked:     { floral: 0.85, fruity: 0.6, citrus: 0.5, delicate: 0.9, honey: 0.5, fresh: 0.95 },
+  pungent:    { floral: 0.5, sweet: 0.4, citrus: 0.4, delicate: 0.6, fresh: 0.6 },
+  earthy:     { floral: 0.4, citrus: 0.3, fruity: 0.3, delicate: 0.5, fresh: 0.85 },
+  // New rows — heavier non-tannic registers that drown out the
+  // "fresh, just-picked" reading. These don't mask the lighter
+  // aromatic family (floral / citrus / fruit), only fresh itself.
+  malty:      { fresh: 0.9 },
+  creamy:     { fresh: 0.85 },
+  woody:      { fresh: 0.8 },
+  leather:    { fresh: 0.9 },
+  dark:       { fresh: 0.85 },
+  caramel:    { fresh: 0.7 },
+  roasted:    { fresh: 0.75 },
 };
 
 // Amplifiers — small additive bonuses, capped by the soft ceiling later.
