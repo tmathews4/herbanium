@@ -1,18 +1,18 @@
 /* ──────────────────────────────────────────────────────────────
    algo/brewBounds.js — slider-range padding + safety clamps.
 
-   Slider bounds are standardized across every cup using one rule
-   for temp and one rule for time:
+   Slider bounds use one rule for temp and one for time. Both are
+   per-blend so each cup's gradient bands show meaningful variation
+   across the slider's span (a too-wide span flattens the bands —
+   you lose the gradient detail you came to see):
 
-     • TEMP slider is the SAME for every cup — lower = slightly
-       below the coldest steep in the entire ingredient catalog
-       (e.g. ~5°C below gyokuro), upper = boiling. The user gets
-       the full reasonable tea-brewing envelope on every blend so
-       experiments line up visually across screens.
-     • TIME slider runs from the global flash floor up to 30% past
-       the recipe's longest ingredient max steep. Lower bound does
-       NOT use the recipe's min (so flash steeps and gongfu rebrews
-       are reachable on any cup).
+     • TEMP slider lower = a touch below the coldest ingredient's
+       tempC min, so the user can see the bottom couple of flavors
+       / moods / palate axes start dropping off as they slide
+       toward "lighter brew" territory. Upper = boiling (100°C).
+     • TIME slider lower = global flash floor (0s); upper = +30%
+       past the recipe's longest ingredient max. Flash steeps and
+       gongfu rebrews are reachable on any blend.
 
    Both clamp to global safety bounds. The warnings layer in
    resolveBlendAtBrew handles "you've pushed past the range" — the
@@ -22,10 +22,11 @@
 // Hard global bounds — past these, brewing physics gets weird
 // (boil-off, near-zero extraction) so the slider should never go
 // further regardless of the recipe's declared range.
-export const TEMP_HARD_MIN = 45;   // °C — sits 5° below the catalog's
-                                   //       coldest steep (tulsi at 50°C),
-                                   //       per "slightly lower than the
-                                   //       lowest you'd want to steep" rule.
+export const TEMP_HARD_MIN = 40;   // °C — global safety floor. Per-blend
+                                   //       lower bound is recipe-relative
+                                   //       (10°C below the coldest
+                                   //       ingredient); this just guards
+                                   //       against pathologically low temps.
 export const TEMP_HARD_MAX = 100;  // °C — boiling point at sea level
 export const TIME_HARD_MIN = 0;    // s — slider starts at 0 per user request.
                                    //       Bands render fully transparent at
@@ -33,25 +34,26 @@ export const TIME_HARD_MIN = 0;    // s — slider starts at 0 per user request.
                                    //       step keeps movement meaningful.
 export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions
 
-// Padding constants. Temp lower-bound pad lives on the global
-// catalog floor (not the recipe), so every cup's slider starts at
-// the same place. Time upper-bound pad scales with the recipe.
-export const TEMP_PAD_BELOW_GLOBAL = 5; // °C below the catalog's coldest
-                                        // steep — "slightly lower than
-                                        // the lowest you'd want to steep"
-export const TIME_PAD_RATIO         = 0.30; // +30% past the recipe's max steep
+// Padding constants. Temp lower-bound pad scales with the recipe so
+// the slider's bottom sits just past where the coldest ingredient
+// stops extracting — enough room for the bottom couple of bands to
+// visibly drop off, not so much that the recipe's gradient flattens.
+// Time upper-bound pad scales with the recipe.
+export const TEMP_PAD_BELOW = 10;  // °C below the coldest ingredient's
+                                   // tempC min — "right below where the
+                                   // bottom couple bands drop off"
+export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
 
 /**
  * Single-range helpers used by IngredientDetail (where the explorer
- * is for one ingredient, not a blend). They follow the same standard
- * rules as the blend versions: temp ignores the input range and uses
- * the global tea envelope; time keeps the input max but applies the
- * +30% oversteep pad and snaps the lower bound to the global flash
- * floor. Keeps single-ingredient screens visually aligned with blend
- * screens.
+ * is for one ingredient, not a blend). Same per-recipe rules as the
+ * blend versions, applied to the single ingredient's range.
  */
-export function padTempRange(_range) {
-  return [TEMP_HARD_MIN, TEMP_HARD_MAX];
+export function padTempRange([lo, _hi]) {
+  return [
+    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW),
+    TEMP_HARD_MAX,
+  ];
 }
 
 export function padTimeRange([_lo, hi]) {
@@ -62,38 +64,26 @@ export function padTimeRange([_lo, hi]) {
 }
 
 /**
- * Compute the catalog-wide minimum tempC across all ingredients.
- * Memoized by INGREDIENTS reference since the catalog is effectively
- * static at runtime — recomputing per render would be cheap but the
- * cache keeps the bounds object identity stable.
+ * Per-blend temp slider bounds: lower = a touch below the coldest
+ * ingredient's tempC[0] (so the bottom couple of bands visibly drop
+ * off as the slider moves toward the cold end), upper = boiling.
+ * Each blend gets its own narrow-enough span to show real gradient.
  */
-let _cachedGlobalTempLo = null;
-let _cachedCatalogRef   = null;
-function globalCatalogTempLo(INGREDIENTS) {
-  if (INGREDIENTS === _cachedCatalogRef && _cachedGlobalTempLo != null) {
-    return _cachedGlobalTempLo;
+export function unionAndPadTempRange(ingredients, INGREDIENTS) {
+  if (!ingredients?.length) {
+    return [Math.max(TEMP_HARD_MIN, 90 - TEMP_PAD_BELOW), TEMP_HARD_MAX];
   }
   let lo = Infinity;
-  for (const id of Object.keys(INGREDIENTS)) {
+  for (const { id } of ingredients) {
     const range = INGREDIENTS[id]?.tempC;
     if (!range) continue;
     if (range[0] < lo) lo = range[0];
   }
-  if (!Number.isFinite(lo)) lo = 70;  // safety fallback
-  _cachedCatalogRef   = INGREDIENTS;
-  _cachedGlobalTempLo = lo;
-  return lo;
-}
-
-/**
- * Standardized temp slider bounds for every cup: [globalCatalogLo - pad,
- * boiling]. Recipe ingredients aren't consulted — the same envelope
- * shows up on every blend so experiments compare apples-to-apples.
- */
-export function unionAndPadTempRange(ingredients, INGREDIENTS) {
-  const globalLo = globalCatalogTempLo(INGREDIENTS);
-  const lo = Math.max(TEMP_HARD_MIN, globalLo - TEMP_PAD_BELOW_GLOBAL);
-  return [lo, TEMP_HARD_MAX];
+  if (!Number.isFinite(lo)) lo = 90;
+  return [
+    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW),
+    TEMP_HARD_MAX,
+  ];
 }
 
 /**
