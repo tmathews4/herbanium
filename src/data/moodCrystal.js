@@ -284,7 +284,8 @@ export function computeMoodCrystal({
       primary: null,
       secondary: null,
       gradient: ["#D8CDB3", "#B8AC92"],
-      glowColor: null,
+      innerGlowColor: null,
+      outerGlowColor: null,
       families: { effect: [], flavor: [] },
       isNeutral: true,
       isFaint: false,
@@ -385,12 +386,18 @@ export function computeMoodCrystal({
     ? [primary.color, secondary.color]
     : [primary.color, "#C9BFA6"];
 
-  // Glow color — what the crystal emits as a directional halo.
-  // Priority: the unmet onboarding intent (forward-pointing — "where
-  // you're headed") if present, else the secondary current trend
-  // (echoes the second axis). Null when neither exists, so the
-  // visual can fall back to no glow.
-  const glowColor = trailing?.color || secondary?.color || null;
+  // Two-layer glow, each tied to a phrase in the description so
+  // the visual reads as a one-to-one map of the words:
+  //
+  //   inner glow → the "drifting into X" / "with a hint of X"
+  //                clause — i.e. the secondary current trend
+  //   outer halo → the "with faint X still ahead of you" clause
+  //                — i.e. the unmet onboarding intent (forecast)
+  //
+  // Either can be null when the corresponding clause is absent
+  // from the description. The renderer drops the layer cleanly.
+  const innerGlowColor = secondary?.color || null;
+  const outerGlowColor = trailing?.color || null;
 
   return {
     name,
@@ -400,7 +407,8 @@ export function computeMoodCrystal({
       ? { ...secondary, axis: secondaryAxis, adjective: secondaryAdj }
       : null,
     gradient,
-    glowColor,
+    innerGlowColor,
+    outerGlowColor,
     families: {
       effect: effectFams.ranked,
       flavor: flavorFams.ranked,
