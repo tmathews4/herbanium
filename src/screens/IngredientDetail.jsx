@@ -15,14 +15,13 @@ import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  SectionLabel, VocabInfoCard,
+  Button, SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
-import { iconBtn } from "../helpers/misc";
 import {
   ff, theme,
 } from "../theme";
@@ -201,9 +200,9 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
         {tab === "overview" && (
           <>
             <p style={{
-              fontFamily: ff.serif, fontSize: 15.5, color: theme.inkSoft,
-              lineHeight: 1.6, margin: 0,
-              textAlign: "left", textIndent: "1.4em",
+              fontFamily: ff.serif, fontSize: 15, color: theme.inkSoft,
+              lineHeight: 1.65, margin: 0,
+              textAlign: "left",
             }}>
               {ing.blurb}
             </p>
@@ -276,44 +275,47 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
 
             {ing.headsUp && (
               <div style={{
-                marginTop: 22, padding: 12, borderRadius: 10,
-                background: "rgba(176, 84, 47, 0.07)",
-                border: `1px solid rgba(176, 84, 47, 0.2)`,
-                display: "flex", gap: 10, alignItems: "flex-start",
+                marginTop: 22,
+                padding: "10px 14px",
+                borderLeft: `2px solid ${theme.terra}`,
+                background: "rgba(176,84,47,0.05)",
+                borderRadius: "2px 8px 8px 2px",
               }}>
                 <div style={{
-                  width: 20, height: 20, borderRadius: "50%",
-                  background: theme.terra, color: theme.cream,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: ff.serif, fontSize: 12, fontStyle: "italic", flexShrink: 0,
-                }}>!</div>
-                <div>
-                  <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.terra }}>
-                    Heads up
-                  </div>
-                  <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft, marginTop: 3, lineHeight: 1.5 }}>
-                    {ing.headsUp}
-                  </div>
-                  <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginTop: 4 }}>
-                    (not medical advice)
-                  </div>
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.terra,
+                  marginBottom: 4,
+                }}>
+                  Heads up
+                </div>
+                <div style={{
+                  fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
+                  lineHeight: 1.55,
+                }}>
+                  {ing.headsUp}
+                </div>
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                  color: theme.ash, marginTop: 6,
+                }}>
+                  not medical advice
                 </div>
               </div>
             )}
 
             <div style={{ marginTop: 22 }}>
-              <button
+              <Button
+                variant="secondary"
+                fullWidth
                 onClick={() => togglePantry && togglePantry(id)}
-                style={{
-                  ...iconBtn(),
-                  width: "100%",
-                  background: pantryIds && pantryIds.has(id) ? theme.cream : "transparent",
-                  borderColor: pantryIds && pantryIds.has(id) ? theme.sageDeep : theme.rule,
-                  color: pantryIds && pantryIds.has(id) ? theme.sageDeep : theme.inkSoft,
-                }}
+                style={(pantryIds && pantryIds.has(id)) ? {
+                  background: "rgba(74,87,58,0.06)",
+                  borderColor: theme.sageDeep,
+                  color: theme.sageDeep,
+                } : {}}
               >
                 {pantryIds && pantryIds.has(id) ? "✓ in pantry" : "+ pantry"}
-              </button>
+              </Button>
             </div>
           </>
         )}
