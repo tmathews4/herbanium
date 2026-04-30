@@ -898,13 +898,13 @@ const TrackMap = ({
 };
 
 export const FlavorMap = (props) => (
-  <TrackMap {...props} kind="flavor" title="Flavor across temperature" />
+  <TrackMap {...props} kind="flavor" title="Flavors" />
 );
 
 export const MoodMap = (props) => (
-  <TrackMap {...props} kind="mood" title="Mood across temperature" />
+  <TrackMap {...props} kind="mood" title="Moods" />
 );
 
 export const PalateMap = (props) => (
-  <TrackMap {...props} kind="palate" title="Palate across temperature" />
+  <TrackMap {...props} kind="palate" title="Balance" />
 );
