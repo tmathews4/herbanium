@@ -848,6 +848,88 @@ function bracketByIntensity(profiles, tempC, timeS) {
   return [sorted[0], sorted[0], 0];
 }
 
+// Volatile-aromatic fade. The 3-point profiles can express that a
+// flavor exists across light/standard/strong, but they can't model
+// the real chemistry of volatile thiols and terpenes — compounds
+// that PEAK at moderate temps then evaporate above ~85°C. Stone
+// fruit esters (peach, apricot, muscatel), floral terpenes (rose,
+// jasmine, orchid), and the fresh / delicate / citrus aromatics
+// all fall off at higher temperatures and longer steeps.
+//
+// Without this, fruity and floral bands rendered monotonically up
+// the temp axis even though a real cup at 95°C × 6min has lost
+// most of its peach character. The fade scales each affected
+// flavor by an exponential factor in temp above its threshold and
+// in time above 240s, modeling Arrhenius-style aromatic loss.
+//
+// Calibration choice: fadeAboveC is the rough boil-off threshold
+// for the compound family. tempK and timeK control fade rate.
+// Ranges (peach 0.5, rose 0.4, honey 0.25) reflect that stone
+// fruit esters are the most fragile, citrus citral and floral
+// terpenes are moderate, Maillard sweetness is most stable.
+const FLAVOR_VOLATILES = {
+  // Stone fruit / fragile esters — boil off fastest
+  peach:    { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
+  apricot:  { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
+  lychee:   { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
+  melon:    { fadeAboveC: 85, tempK: 0.05, timeK: 0.0010 },
+  // Generic fruit register — averages of stone-fruit esters
+  fruit:    { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
+  fruity:   { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
+  berry:    { fadeAboveC: 87, tempK: 0.04, timeK: 0.0008 },
+  cranberry:{ fadeAboveC: 90, tempK: 0.03, timeK: 0.0006 },
+  // Muscatel — Darjeeling's signature, fairly fragile
+  muscatel: { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  // Floral terpenes — moderately volatile
+  floral:   { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  rose:     { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  jasmine:  { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  orchid:   { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  delicate: { fadeAboveC: 82, tempK: 0.06, timeK: 0.0012 },
+  heady:    { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  aromatic: { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  // Citrus citral — volatile, bright
+  citrus:   { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
+  citrusy:  { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
+  bright:   { fadeAboveC: 88, tempK: 0.04, timeK: 0.0008 },
+  bergamot: { fadeAboveC: 88, tempK: 0.05, timeK: 0.0010 },
+  // Fresh / the cut-grass register — fragile and quick to fade
+  fresh:    { fadeAboveC: 82, tempK: 0.06, timeK: 0.0012 },
+  grassy:   { fadeAboveC: 85, tempK: 0.04, timeK: 0.0010 },
+  // Honey / Maillard-adjacent — relatively stable, mild fade only
+  honey:       { fadeAboveC: 92, tempK: 0.025, timeK: 0.0005 },
+  honeyed:     { fadeAboveC: 92, tempK: 0.025, timeK: 0.0005 },
+  "honey-sweet":{ fadeAboveC: 92, tempK: 0.025, timeK: 0.0005 },
+};
+
+const VOLATILE_TIME_THRESHOLD_S = 240;
+
+// Compute the multiplicative fade for a flavor at the user's
+// (tempC, timeS). Returns 1 when the flavor isn't volatile or the
+// brew is below both thresholds. Bounded at 0.15 so a flavor never
+// completely vanishes — there's always SOME residual signal even
+// in heavily over-pulled cups.
+function volatileFadeFor(flavorName, tempC, timeS) {
+  const cfg = FLAVOR_VOLATILES[flavorName];
+  if (!cfg) return 1;
+  let factor = 1;
+  if (tempC > cfg.fadeAboveC) {
+    factor *= Math.exp(-cfg.tempK * (tempC - cfg.fadeAboveC));
+  }
+  if (timeS > VOLATILE_TIME_THRESHOLD_S) {
+    factor *= Math.exp(-cfg.timeK * (timeS - VOLATILE_TIME_THRESHOLD_S));
+  }
+  return Math.max(0.15, factor);
+}
+
+function applyVolatileFade(flavorTuples, tempC, timeS) {
+  return flavorTuples.map(([name, v]) => {
+    const factor = volatileFadeFor(name, tempC, timeS);
+    if (factor === 1) return [name, v];
+    return [name, Math.round(v * factor * 10) / 10];
+  });
+}
+
 // When the user's brew sits BELOW the lightest authored profile's
 // timeS (e.g. time slider pulled toward 0 on Wuyi, where the lightest
 // profile is at ~200s), the bracket clamps to the lightest profile
@@ -885,16 +967,24 @@ export function resolveExtractionProfile(ingredientId, tempC, timeS) {
   const [lo, hi, t] = bracketByIntensity(profiles, tempC, timeS);
   const scale = underFloorScale(profiles, timeS);
 
+  // Volatile-aromatic fade applies LAST — on top of the bracket
+  // interpolation and the under-floor scaling — so peak-and-fade
+  // arcs (peach rising 70→85°C then dropping 90→100°C) emerge from
+  // the engine instead of monotonic strength climbs the user can't
+  // see ringing through.
   if (lo === hi) {
+    const flavorsScaled = scaleFlavors(lo.flavorStrengths, scale);
     return {
-      flavors:  scaleFlavors(lo.flavorStrengths, scale),
+      flavors:  applyVolatileFade(flavorsScaled, tempC, timeS),
       effects:  scaleEffects(lo.effects, scale),
       character: lo.character,
     };
   }
 
+  const flavorsBlended = blendFlavorsWithStrength(lo, hi, t);
+  const flavorsScaled  = scaleFlavors(flavorsBlended, scale);
   return {
-    flavors:  scaleFlavors(blendFlavorsWithStrength(lo, hi, t), scale),
+    flavors:  applyVolatileFade(flavorsScaled, tempC, timeS),
     effects:  scaleEffects(blendEffects(lo, hi, t), scale),
     character: blendCharacter(lo, hi, t),
   };
