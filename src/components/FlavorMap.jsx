@@ -71,7 +71,10 @@ const MOOD_FAMILY_ORDER = [
 
 // Family → color mapping. Keeps the strip readable as a palette
 // of related notes rather than a confetti of unrelated hues.
-const FAMILY_COLORS = {
+// Exported so static views (IngredientDetail overview bars, etc.)
+// can color flavors and effects with the same palette the
+// dynamic strip uses.
+export const FAMILY_COLORS = {
   fruit:    "#B0542F",  // terra
   floral:   "#C37959",  // rose
   earthy:   "#4A573A",  // sageDeep
@@ -90,7 +93,7 @@ const FAMILY_COLORS = {
   off:      "#B0542F",  // terra (off-notes share terra to read as "warning")
 };
 
-const FAMILY_BY_FLAVOR = {
+export const FAMILY_BY_FLAVOR = {
   // fruit
   muscatel: "fruit", fruit: "fruit", fruity: "fruit", peach: "fruit",
   apricot: "fruit", berry: "fruit", tart: "fruit", cranberry: "fruit",
@@ -139,7 +142,7 @@ const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] |
 // 'calm' into its own 'cool' family — felt-temperature cooling is
 // orthogonal to mind-quieting calm; lumping them confused green-tea
 // brews where the cup reads cool but not particularly settling.
-const FAMILY_BY_EFFECT = {
+export const FAMILY_BY_EFFECT = {
   // calm register — settling, mind-quieting
   calm: "calm", soothing: "calm", grounding: "calm",
   // focus register — clarity, alertness
@@ -155,7 +158,7 @@ const FAMILY_BY_EFFECT = {
   // sleep register — drowsiness, downward drift
   sleepy: "sleep",
 };
-const EFFECT_FAMILY_COLORS = {
+export const EFFECT_FAMILY_COLORS = {
   calm:   "#6D7E55",  // sage
   focus:  "#7F9AA0",  // sky
   energy: "#A57836",  // ochre

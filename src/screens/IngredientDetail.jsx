@@ -8,6 +8,10 @@ import { FactsCard } from "../components/FactsCard";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import { hasExtractionProfile } from "../components/ExtractionExplorer";
 import {
+  FAMILY_BY_FLAVOR, FAMILY_COLORS,
+  FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS,
+} from "../components/FlavorMap";
+import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
@@ -158,7 +162,11 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                       outline: "none",
                     }}
                   >
-                    <EffectBar label={tag} value={n} color={theme.sage} />
+                    <EffectBar
+                      label={tag}
+                      value={n}
+                      color={EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[tag]] || theme.sage}
+                    />
                   </div>
                 );
               })}
@@ -173,25 +181,41 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
               />
             )}
 
-            <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Flavor notes</SectionLabel></div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {ing.flavors.map(f => {
+            <div style={{ margin: "22px 0 14px" }}><SectionLabel n="ii">Flavor notes</SectionLabel></div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {ing.flavors.map((f, i) => {
+                // Position-derived strength: leading flavor at 4,
+                // descending to 1. Mirrors the catalog convention
+                // that the first entry is the most prominent and
+                // matches what annotateFlavorStrengths produces at
+                // the standard profile point — keeps the static
+                // overview consistent with what a Brewing-tab
+                // standard cup would render.
+                const strength = Math.max(1, 4 - i);
                 const known = !!FLAVOR_DESCRIPTIONS[f];
                 const active = openFlavor === f;
+                const familyColor = FAMILY_COLORS[FAMILY_BY_FLAVOR[f]] || theme.ash;
                 return (
-                  <button
+                  <div
                     key={f}
-                    onClick={() => known && setOpenFlavor(prev => prev === f ? null : f)}
-                    disabled={!known}
+                    role={known ? "button" : undefined}
+                    tabIndex={known ? 0 : undefined}
+                    onClick={known ? () => setOpenFlavor(prev => prev === f ? null : f) : undefined}
+                    onKeyDown={known ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenFlavor(prev => prev === f ? null : f);
+                      }
+                    } : undefined}
                     style={{
-                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                      color: active ? theme.cream : theme.terra,
-                      padding: "4px 10px", borderRadius: 999,
-                      background: active ? theme.terra : theme.cream,
-                      border: `1px solid ${active ? theme.terra : theme.rule}`,
+                      padding: "4px 6px", borderRadius: 6,
+                      background: active ? "rgba(176,84,47,0.08)" : "transparent",
                       cursor: known ? "pointer" : "default",
+                      outline: "none",
                     }}
-                  >{f}</button>
+                  >
+                    <EffectBar label={f} value={strength} color={familyColor} />
+                  </div>
                 );
               })}
             </div>
