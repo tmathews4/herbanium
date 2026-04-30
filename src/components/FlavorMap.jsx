@@ -63,6 +63,10 @@ const FAMILY_COLORS = {
   smoky:    "#7B4A5A",  // plum
   fresh:    "#7F9AA0",  // sky
   vegetal:  "#6D7E55",  // sage
+  marine:   "#4F7B83",  // deep teal — gyokuro/matcha oceanic register,
+                        // distinct enough from grassy vegetal that it
+                        // earns its own band rather than rolling under
+                        // 'vegetal' and losing the kelp character.
   body:     "#796E5B",  // ash
   off:      "#B0542F",  // terra (off-notes share terra to read as "warning")
 };
@@ -90,10 +94,14 @@ const FAMILY_BY_FLAVOR = {
   // fresh / cooling / mint / citrus
   citrus: "fresh", minty: "fresh", mint: "fresh", cool: "fresh",
   cooling: "fresh", fresh: "fresh", camphor: "fresh", licorice: "fresh",
-  // vegetal / grassy / marine
-  grassy: "vegetal", marine: "vegetal", umami: "vegetal", vegetal: "vegetal",
-  oceanic: "vegetal", seaweed: "vegetal", buttery: "vegetal", savory: "vegetal",
+  // vegetal / grassy
+  grassy: "vegetal", umami: "vegetal", vegetal: "vegetal",
+  buttery: "vegetal", savory: "vegetal",
   hay: "vegetal", bean: "vegetal",
+  // marine — kelp, oceanic, seafood register. Lives in shaded
+  // Japanese greens (gyokuro, matcha) and a few mushroom decoctions.
+  marine: "marine", oceanic: "marine", seaweed: "marine",
+  "seafood-like": "marine",
   // body words
   creamy: "body",
   // off / diagnostic
@@ -384,6 +392,33 @@ const TrackMap = ({
   // ("Fruit", "Floral") rather than internal slugs.
   const labelFor = (name) =>
     useFamilyMode ? name.charAt(0).toUpperCase() + name.slice(1) : name;
+
+  // For a family-mode selected track, list the specific notes that
+  // contributed to it (any flavor that mapped into this family AND
+  // showed up with non-zero strength somewhere in the envelope). This
+  // is the "you're seeing Fruit because the cup carries muscatel +
+  // peach" disclosure — useful when the catalog ingredient declared
+  // the family term itself ('fruity' rolls into Fruit too) and the
+  // detail view doesn't surface anything more specific.
+  const contributorsForFamily = (familyName) => {
+    if (!useFamilyMode || kind !== "flavor") return [];
+    const seen = new Set();
+    for (const s of samples) {
+      for (const [n, v] of Object.entries(s.flavorMap)) {
+        if (v <= 0) continue;
+        const fam = FAMILY_BY_FLAVOR[n] || "body";
+        if (fam === familyName) seen.add(n);
+      }
+    }
+    // Sort with the family name itself at the END (it's the generic
+    // term — listing the SPECIFIC notes first reads as 'this is what
+    // makes up Fruit', then 'and the recipe also called it fruity').
+    return [...seen].sort((a, b) => {
+      if (a === familyName) return 1;
+      if (b === familyName) return -1;
+      return a.localeCompare(b);
+    });
+  };
   const toggleSelected = (name) => {
     setSelectedTrack(prev => prev === name ? null : name);
   };
@@ -552,28 +587,50 @@ const TrackMap = ({
         gap: 8,
       }}>
         <span>{title}</span>
-        <span style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-          {/* Family/detail toggle — flavor strip only. Default is the
-              family roll-up (broader register, simpler read); the link
-              flips to the catalog's specific notes for users who want
-              the deeper view. Selection is cleared when switching modes
-              since track names differ between them. */}
+        <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          {/* Family/detail toggle — flavor strip only. Segmented two-
+              button control: 'Family' rolls members up to the broader
+              register (Fruit, Floral, Marine...); 'Detail' shows every
+              specific note the engine surfaces (muscatel, peach, lychee,
+              chestnut, etc.) — only different from family when the
+              brewed ingredients declare specific notes rather than
+              generic family terms. Selection clears on toggle. */}
           {kind === "flavor" && (
-            <button
-              onClick={() => {
-                setSelectedTrack(null);
-                setFamilyMode(v => !v);
-              }}
-              style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
-                letterSpacing: 0, textTransform: "none",
-                color: theme.terra,
-                background: "transparent", border: "none",
-                padding: 0, cursor: "pointer",
-              }}
-            >
-              {familyMode ? "show specific notes →" : "← group by family"}
-            </button>
+            <span style={{
+              display: "inline-flex",
+              border: `1px solid ${theme.ruleSoft}`,
+              borderRadius: 999,
+              overflow: "hidden",
+            }}>
+              {[
+                { id: "family", label: "Family" },
+                { id: "detail", label: "Detail" },
+              ].map(opt => {
+                const active = (opt.id === "family") === familyMode;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      const want = opt.id === "family";
+                      if (want === familyMode) return;
+                      setSelectedTrack(null);
+                      setFamilyMode(want);
+                    }}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 9.5,
+                      letterSpacing: "0.12em", textTransform: "uppercase",
+                      padding: "3px 9px",
+                      background: active ? theme.terra : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      border: "none",
+                      cursor: active ? "default" : "pointer",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </span>
           )}
           <span style={{
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
@@ -722,6 +779,28 @@ const TrackMap = ({
               {descriptionFor(selectedTrack).body}
             </div>
           )}
+          {/* Contributors — for the flavor strip in family mode, list
+              the specific notes the cup carries that rolled into this
+              family. Only shows when there's more than one (a single
+              contributor adds no information beyond what the family
+              label already says). */}
+          {(() => {
+            const contributors = contributorsForFamily(selectedTrack);
+            if (contributors.length < 2) return null;
+            return (
+              <div style={{
+                marginTop: 6,
+                fontFamily: ff.sans, fontSize: 10,
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                color: theme.terra,
+              }}>
+                in this cup: <span style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                  letterSpacing: 0, textTransform: "none", color: theme.inkSoft,
+                }}>{contributors.join(", ")}</span>
+              </div>
+            );
+          })()}
         </div>
       )}
 
