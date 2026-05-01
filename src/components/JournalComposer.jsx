@@ -546,8 +546,15 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           style={{
             fontFamily: ff.serif, fontSize: 14,
             padding: "8px 18px", borderRadius: 999,
-            background: ready ? theme.ink : theme.rule,
-            color: theme.cream, border: "none",
+            // Disabled keeps a visible silhouette in BOTH themes.
+            // The naive bg=theme.rule/color=theme.cream pair was
+            // dark-on-dark in dark mode (rule and cream are both
+            // forest greens). Now: translucent --hi-rgb wash with
+            // ash text + ruleSoft outline matches the layout.jsx
+            // Button's disabled treatment.
+            background: ready ? theme.ink : "rgba(var(--hi-rgb),0.18)",
+            color: ready ? theme.cream : theme.ash,
+            border: ready ? "none" : `1px solid ${theme.ruleSoft}`,
             cursor: ready ? "pointer" : "not-allowed",
           }}
         >save entry</button>

@@ -256,8 +256,13 @@ export const FeedbackModal = ({ onClose }) => {
             style={{
               fontFamily: ff.serif, fontSize: 14,
               padding: "8px 18px", borderRadius: 999,
-              background: canSubmit ? theme.ink : theme.rule,
-              color: theme.cream, border: "none",
+              // Disabled treatment matches the layout.jsx Button
+              // and JournalComposer Save: theme-aware translucent
+              // wash + ash text instead of the naive rule/cream
+              // pair, which collapses to dark-on-dark in dark mode.
+              background: canSubmit ? theme.ink : "rgba(var(--hi-rgb),0.18)",
+              color: canSubmit ? theme.cream : theme.ash,
+              border: canSubmit ? "none" : `1px solid ${theme.ruleSoft}`,
               cursor: canSubmit ? "pointer" : "default",
             }}
           >send →</button>
