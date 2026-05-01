@@ -33,6 +33,20 @@ const EFFECT_FILTERS = [
   "soothing", "warming", "cooling", "digestive",
 ];
 
+// Category color — anchors each ingredient card with a left-edge
+// strip in its family's hue. Mirrors the icon color so the card
+// reads as one visual unit. Falls back to ash for unknown categories.
+const categoryColor = (cat, theme) => {
+  switch (cat) {
+    case "flower":    return theme.ochre;
+    case "herbal":    return theme.sage;
+    case "true tea":  return theme.sageDeep;
+    case "spice":     return theme.terra;
+    case "adaptogen": return theme.plum;
+    default:          return theme.ash;
+  }
+};
+
 export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
@@ -101,9 +115,10 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
         {/* Search input */}
         <div style={{
             display: "flex", alignItems: "center", gap: 8,
-            padding: "8px 10px", borderRadius: 8,
+            padding: "10px 12px", borderRadius: 10,
             background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-            marginBottom: 10,
+            boxShadow: "0 1px 2px rgba(30,24,18,0.04)",
+            marginBottom: 12,
           }}>
             <span style={{ color: theme.ash, fontSize: 13 }}>⌕</span>
             <input
@@ -189,8 +204,8 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
           {/* Caffeine — labeled row, three pills span full width */}
           <div style={{ marginBottom: 8 }}>
             <div style={{
-              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 6,
             }}>caffeine</div>
             <div style={{ display: "flex", gap: 4 }}>
               {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => {
@@ -219,8 +234,8 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
           {/* Effect filter — labeled row, spread pills */}
           <div style={{ marginBottom: 10 }}>
             <div style={{
-              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: theme.ash, marginBottom: 4,
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 6,
             }}>effect</div>
             <ChipRows
               items={["any", ...EFFECT_FILTERS]}
@@ -246,12 +261,17 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             />
           </div>
 
-          {/* Pantry-only toggle + count. Toggle hidden when the
-              parent surface (Shelf · Pantry) already implies pantry-
-              only — the toggle would be redundant and misleading. */}
+          {/* Pantry-only toggle + count. Sits in a quiet meta band
+              with a hairline above it so the filters above feel
+              wrapped, and the grid below gets a clean header to
+              start under. Toggle hidden when the parent surface
+              (Shelf · Pantry) already implies pantry-only — the
+              toggle would be redundant and misleading. */}
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
-            marginBottom: 12, padding: "2px 0",
+            marginTop: 14, marginBottom: 14,
+            paddingTop: 10,
+            borderTop: `1px solid ${theme.ruleSoft}`,
           }}>
             {hidePantryToggle ? <span /> : (
               <label style={{
@@ -274,9 +294,10 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               </label>
             )}
             <span style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: theme.ash,
             }}>
-              {shelfItems.length} of {Object.keys(INGREDIENTS).length}
+              {shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span>
             </span>
           </div>
 
@@ -290,26 +311,45 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             </div>
           ) : (
             <div style={{
-              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10,
+              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
             }}>
               {shelfItems.map(([id, ing]) => {
                 const inPantry = pantryIds.has(id);
                 const hasCaffeine = (ing.caffeine || 0) > 0;
+                const accent = categoryColor(ing.category, theme);
                 return (
                   <button key={id} onClick={() => go("ingredient", id)}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 3px 8px rgba(30,24,18,0.08), 0 1px 2px rgba(30,24,18,0.05)"; e.currentTarget.style.borderColor = theme.rule; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 1px 2px rgba(30,24,18,0.04)"; e.currentTarget.style.borderColor = theme.ruleSoft; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = "0 4px 10px rgba(30,24,18,0.09), 0 1px 2px rgba(30,24,18,0.05)";
+                    e.currentTarget.style.borderColor = theme.rule;
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = "0 1px 2px rgba(30,24,18,0.04)";
+                    e.currentTarget.style.borderColor = theme.ruleSoft;
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
                   style={{
                     background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-                    borderRadius: 10, padding: "12px 12px", textAlign: "left", cursor: "pointer",
-                    display: "flex", flexDirection: "column", gap: 4,
-                    position: "relative",
+                    borderRadius: 12, padding: "14px 14px 12px 16px",
+                    textAlign: "left", cursor: "pointer",
+                    display: "flex", flexDirection: "column", gap: 2,
+                    position: "relative", overflow: "hidden",
                     boxShadow: "0 1px 2px rgba(30,24,18,0.04)",
-                    transition: "box-shadow 0.18s ease, border-color 0.18s ease",
+                    transition: "box-shadow 0.18s ease, border-color 0.18s ease, transform 0.12s ease",
                   }}>
-                    {/* Pantry toggle — clickable +/✓ in the top-right.
-                        Stops propagation so the tile body still routes
-                        to the ingredient detail. */}
+                    {/* Category-color accent strip on the left edge.
+                        Anchors the card to its family at a glance and
+                        gives the grid visual variety without adding
+                        heavy backgrounds. */}
+                    <div style={{
+                      position: "absolute", left: 0, top: 0, bottom: 0,
+                      width: 3, background: accent, opacity: 0.85,
+                    }} />
+                    {/* Pantry toggle — clean circular tap target in
+                        the top-right. Empty state uses a soft outline
+                        ring (no dashed edge) so it reads as a quiet
+                        affordance rather than an unfinished button. */}
                     {togglePantry && (
                       <div
                         role="button"
@@ -324,42 +364,58 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                         }}
                         title={inPantry ? "in cabinet — tap to remove" : "tap to add to cabinet"}
                         style={{
-                          position: "absolute", top: 6, right: 6,
+                          position: "absolute", top: 8, right: 8,
                           width: 22, height: 22, borderRadius: "50%",
                           background: inPantry ? theme.sage : "transparent",
-                          border: inPantry ? `1px solid ${theme.sage}` : `1px dashed ${theme.rule}`,
+                          border: `1px solid ${inPantry ? theme.sage : theme.ruleSoft}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: inPantry ? theme.cream : theme.ash,
-                          fontSize: 13, fontWeight: "bold", lineHeight: 1,
+                          fontSize: 13, fontWeight: 600, lineHeight: 1,
                           cursor: "pointer",
-                          transition: "background 0.15s ease, border 0.15s ease",
+                          transition: "background 0.15s ease, border-color 0.15s ease",
                         }}
                       >{inPantry ? "✓" : "+"}</div>
                     )}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: togglePantry ? 26 : 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        {ing.category === "flower" && <Flower size={18} c={theme.ochre} />}
-                        {ing.category === "herbal" && <Sprig size={18} c={theme.sage} />}
-                        {ing.category === "true tea" && <Leaf size={18} c={theme.sageDeep} />}
-                        {ing.category === "spice" && <Flower size={18} c={theme.terra} />}
-                        {ing.category === "adaptogen" && <Sprig size={18} c={theme.plum} />}
+                    {/* Header row — type icon (with optional CAF pill
+                        beside it) on the left; subcategory eyebrow on
+                        the right. Both anchor in the same baseline so
+                        the row reads as a unit. */}
+                    <div style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      paddingRight: togglePantry ? 28 : 0, marginBottom: 4,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                        {ing.category === "flower"    && <Flower size={20} c={accent} />}
+                        {ing.category === "herbal"    && <Sprig  size={20} c={accent} />}
+                        {ing.category === "true tea"  && <Leaf   size={20} c={accent} />}
+                        {ing.category === "spice"     && <Flower size={20} c={accent} />}
+                        {ing.category === "adaptogen" && <Sprig  size={20} c={accent} />}
                         {hasCaffeine && (
                           <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
-                            padding: "1px 6px", borderRadius: 999,
+                            padding: "1px 7px", borderRadius: 999,
                             background: theme.terra, color: theme.cream,
-                            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
-                            textTransform: "uppercase", fontWeight: "bold",
+                            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.10em",
+                            textTransform: "uppercase", fontWeight: 700,
                           }}>caf</div>
                         )}
                       </div>
-                      <span style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+                        textTransform: "uppercase", color: theme.ash,
+                      }}>
                         {ing.subcategory || ing.category}
                       </span>
                     </div>
-                    <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, marginTop: 6 }}>
+                    <div style={{
+                      fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+                      lineHeight: 1.2, marginTop: 4,
+                    }}>
                       {ing.name}
                     </div>
-                    <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5, color: theme.ash }}>
+                    <div style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                      color: theme.ash, marginTop: 2, lineHeight: 1.3,
+                    }}>
                       {ing.latin}
                     </div>
                   </button>
