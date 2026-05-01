@@ -143,7 +143,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
   // resolver varies across for alternate candidates.
-  const [primaryAxis, setPrimaryAxis] = useState("feel");
+  // primaryAxis was a user-facing "by feel / by taste" toggle that
+  // told the algorithm which axis (mood vs flavor) to lead the
+  // candidate ranking with. Removed from the UI — users can pick
+  // moods, flavors, or both, and the engine treats each selection
+  // as an honest filter without an explicit lead. The compose.js
+  // helpers still accept the parameter; we pin it to "feel" for
+  // backward compatibility with their internal name/score logic.
+  const primaryAxis = "feel";
 
   // When a favorite is tapped on Home (or a saved blend in Apothecary),
   // composePreselect arrives here. Switch to Recipe Book / favorites so
@@ -296,43 +303,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
       {mode === "forward" && (
         <>
-          {/* Primary-axis toggle — "by feel" (mood leads) vs "by taste" (flavor leads).
-              Reorders the page and changes how alternate candidates are generated. */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr",
-            border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
-            marginBottom: 16, background: theme.cream,
-          }}>
-            {[
-              ["feel",  "by feel"],
-              ["taste", "by taste"],
-            ].map(([k, label]) => (
-              <button key={k} onClick={() => setPrimaryAxis(k)} style={{
-                fontFamily: ff.serif, fontSize: 13, fontStyle: "italic",
-                padding: "9px 4px", cursor: "pointer",
-                background: primaryAxis === k ? theme.terra : "transparent",
-                color: primaryAxis === k ? theme.cream : theme.inkSoft,
-                border: "none",
-                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
-                boxShadow: primaryAxis === k
-                  ? "inset 0 -2px 6px rgba(176,84,47,0.22), 0 2px 6px -2px rgba(176,84,47,0.30)"
-                  : "none",
-              }}>{label}</button>
-            ))}
-          </div>
-
           {(() => {
             const moodRow = (
-              <div key="mood-row" style={{ opacity: primaryAxis === "feel" ? 1 : 0.72 }}>
+              <div key="mood-row">
                 <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <SectionLabel n={primaryAxis === "feel" ? "ii" : "iii"}>
-                    {primaryAxis === "feel" ? "Desired mood" : "Mood, lightly"}
-                  </SectionLabel>
+                  <SectionLabel n="ii">Desired mood</SectionLabel>
                   <span style={{
                     fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
                   }}>
-                    {primaryAxis === "taste" && moods.length === 0 ? "optional" :
-                     moods.length === 0 ? "pick one or two" :
+                    {moods.length === 0 ? "pick any · optional" :
                      moods.length === 1 ? "add a second to combine" :
                      moods.length === 2 ? "2 selected · pairs well" :
                      moods.length === 3 ? "3 selected · adding nuance" :
@@ -372,11 +351,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             );
 
             const flavorRow = (
-              <div key="flavor-row" style={{ opacity: primaryAxis === "taste" ? 1 : 0.72 }}>
+              <div key="flavor-row">
                 <div style={{ marginTop: 20 }}>
-                  <SectionLabel n={primaryAxis === "taste" ? "ii" : "iii"}>
-                    {primaryAxis === "taste" ? "Flavor you're after" : "Flavor direction"}
-                  </SectionLabel>
+                  <SectionLabel n="iii">Flavor direction</SectionLabel>
                 </div>
                 <div style={{ marginTop: 10 }}>
                   <ChipRows
@@ -419,8 +396,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               </div>
             );
 
-            // Render the primary axis first (gets "ii"), secondary second (gets "iii")
-            return primaryAxis === "feel" ? [moodRow, flavorRow] : [flavorRow, moodRow];
+            return [moodRow, flavorRow];
           })()}
 
           <label style={{
