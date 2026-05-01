@@ -320,11 +320,22 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         }
         /* Thin variant — same surface treatment as the square CTAs above
            (cream + rule + lifted shadow + sage-on-hover) but flat-row
-           layout for the secondary HERBANIUM doorway. */
+           layout for the secondary HERBANIUM doorway. Re-declares the
+           shadow + hover/active states so they win against any inline
+           style fall-through and don't depend on cascade order. */
         .home-cta-thin {
           aspect-ratio: auto;
           padding: 8px 14px 9px;
           gap: 3px;
+          box-shadow: ${shadow.lifted};
+        }
+        .home-cta-thin:hover {
+          border-color: ${theme.sage};
+          box-shadow: ${shadow.hover};
+        }
+        .home-cta-thin:active {
+          box-shadow: ${shadow.pressed};
+          transform: translateY(0.5px);
         }
       `}</style>
       <div style={{
