@@ -1431,6 +1431,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               <FilterRow
                 label="flavor"
                 multi
+                perRow={5}
                 items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
                 value={cf.flavors}
                 setValue={(f) => toggleInList("flavors", f)}
@@ -1696,11 +1697,18 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 // of label length, and active vs inactive uses the same ink-fill
 // pattern as the catalog/cabinet filter chips for consistency
 // across the app.
-const FilterRow = ({ label, items, value, setValue, multi = false }) => {
+const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null }) => {
   // Single-select rows pass `value` as a string; multi-select rows pass
   // an array of selected keys. Active state is computed accordingly so
   // both modes share the same chip styling.
   const isActive = (key) => multi ? (value || []).includes(key) : value === key;
+  // Chip width is computed off perRow so chips wrap onto a second line
+  // at the same card width as other rows. perRow defaults to items.length
+  // (single line, equal-width). Pass a smaller perRow when there are more
+  // chips than fit comfortably across the row.
+  const cap = perRow || items.length;
+  const gap = 4;
+  const basis = `calc((100% - ${(cap - 1) * gap}px) / ${cap})`;
   return (
     <div style={{ marginBottom: 8 }}>
       <div style={{
@@ -1708,7 +1716,7 @@ const FilterRow = ({ label, items, value, setValue, multi = false }) => {
         textTransform: "uppercase", color: theme.ash,
         marginBottom: 5,
       }}>{label}</div>
-      <div style={{ display: "flex", gap: 4, width: "100%", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap, width: "100%", flexWrap: "wrap", rowGap: gap }}>
         {items.map(([key, lbl]) => {
           const active = isActive(key);
           return (
@@ -1716,7 +1724,7 @@ const FilterRow = ({ label, items, value, setValue, multi = false }) => {
               key={key}
               onClick={() => setValue(key)}
               style={{
-                flex: 1, minWidth: 0, whiteSpace: "nowrap",
+                flex: `0 0 ${basis}`, minWidth: 0, whiteSpace: "nowrap",
                 fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
                 padding: "6px 8px", borderRadius: 999,
                 border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
