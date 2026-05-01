@@ -14,8 +14,10 @@ import {
   Button, Chip, ChipRows, Rule, SectionLabel, FitOneLine,
 } from "../components/layout";
 import {
-  BLENDS, FLAVOR_CONFLICTS, FLAVORS, MOOD_CONFLICTS, MOODS,
+  BLENDS, FLAVOR_CONFLICTS, FLAVORS, FLAVOR_FAMILY_CHIPS,
+  MOOD_CONFLICTS, MOODS,
 } from "../data/blends";
+import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
 import { getBlend, iconBtn, suggestBlendName, formatAgo } from "../helpers/misc";
@@ -1306,55 +1308,102 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         const experimental = [...curatedExperimental, ...generatedExperimental];
 
         // Recipe Book always shows the catalogue with filter chips.
+        // Filter state is a structured object: collection (single-select),
+        // moods (multi-select OR), flavors (multi-select OR). String form
+        // is supported for backwards-compat with any cached older state.
         if (true) {
-          let catVisible;
+          const cf = typeof catalogueFilter === "string"
+            ? { collection: catalogueFilter, moods: [], flavors: [] }
+            : { collection: "favorites", moods: [], flavors: [], ...(catalogueFilter || {}) };
+          const setCollection = (c) => setCatalogueFilter({ ...cf, collection: c });
+          const toggleInList = (key, item) => {
+            const list = cf[key] || [];
+            const next = list.includes(item)
+              ? list.filter(x => x !== item)
+              : [...list, item];
+            setCatalogueFilter({ ...cf, [key]: next });
+          };
+
+          // Step 1 — collection bucket.
+          let pool;
           let catEmpty;
-          if (catalogueFilter === "all") {
+          if (cf.collection === "all") {
             const seen = new Set();
-            catVisible = [...traditional, ...experimental].filter(b => {
+            pool = [...traditional, ...experimental].filter(b => {
               if (seen.has(b.id)) return false;
               seen.add(b.id);
               return true;
             });
             catEmpty = "No catalogue blends to show.";
-          } else if (catalogueFilter === "favorites") {
+          } else if (cf.collection === "favorites") {
             const fav = favoriteBlendIds || new Set();
             const seen = new Set();
-            catVisible = [...traditional, ...experimental].filter(b => {
+            pool = [...traditional, ...experimental].filter(b => {
               if (seen.has(b.id)) return false;
               seen.add(b.id);
               return fav.has(b.id);
             });
             catEmpty = "No favorites yet. Tap the star on a blend to mark it.";
-          } else if (catalogueFilter === "traditional") {
-            catVisible = traditional;
+          } else if (cf.collection === "traditional") {
+            pool = traditional;
             catEmpty = "No traditional blends to show.";
-          } else if (catalogueFilter === "twists") {
+          } else if (cf.collection === "twists") {
             // Herbanium Twists — experimentals that deviate from a
             // traditional with one or two accent additions or
             // brewing changes. Marked twist:true with a twistNote
             // explaining why the deviation works.
-            catVisible = experimental.filter(b => b.twist);
+            pool = experimental.filter(b => b.twist);
             catEmpty = "No Herbanium Twists to show.";
-          } else if (catalogueFilter === "house recipes" || catalogueFilter === "experimental") {
-            catVisible = experimental;
+          } else if (cf.collection === "house recipes" || cf.collection === "experimental") {
+            pool = experimental;
             catEmpty = "No house recipes to show.";
           } else {
-            catVisible = [...traditional, ...experimental]
+            // Legacy fallback — older state may hold a mood string here.
+            pool = [...traditional, ...experimental]
               .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
-              .filter(b => b.mood === catalogueFilter);
-            catEmpty = `No catalogue blends match ${catalogueFilter} yet.`;
+              .filter(b => b.mood === cf.collection);
+            catEmpty = `No catalogue blends match ${cf.collection} yet.`;
           }
+
+          // Step 2 — sub-filter by mood (OR within row) and flavor
+          // family (OR within row, ANDed across rows). Flavor is matched
+          // against any ingredient in the blend whose flavor maps to a
+          // selected family via FAMILY_BY_FLAVOR.
+          const moodSet = new Set(cf.moods || []);
+          const flavorSet = new Set(cf.flavors || []);
+          const blendMatchesFlavors = (b) => {
+            if (flavorSet.size === 0) return true;
+            const ings = b.ingredients || [];
+            for (const it of ings) {
+              const ing = INGREDIENTS.find(x => x.id === it.id);
+              if (!ing) continue;
+              for (const fl of (ing.flavors || [])) {
+                const fam = FAMILY_BY_FLAVOR[fl] || fl;
+                if (flavorSet.has(fam) || flavorSet.has(fl)) return true;
+              }
+            }
+            return false;
+          };
+          const blendMatchesMoods = (b) => {
+            if (moodSet.size === 0) return true;
+            return moodSet.has(b.mood);
+          };
+          const catVisible = pool.filter(b => blendMatchesMoods(b) && blendMatchesFlavors(b));
+          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0)) {
+            const subBits = [
+              moodSet.size > 0 ? `mood (${[...moodSet].join(", ")})` : null,
+              flavorSet.size > 0 ? `flavor (${[...flavorSet].join(", ")})` : null,
+            ].filter(Boolean).join(" + ");
+            catEmpty = `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
+          }
+
           return (
             <div style={{ marginTop: 4 }}>
-              {/* Filters — split into two rows with eyebrow labels
-                  so the eye reads collection vs mood as distinct
-                  groupings. Each row is a flex-1 grid where every
-                  chip fills its share of the row width, so the
-                  strip extends edge-to-edge instead of clustering
-                  flush-left at ~60% of the screen.
-                  Labels: COLLECTION on top (favorites/all/etc.),
-                  MOOD on the bottom (calm/focus/etc.). */}
+              {/* Filters — three rows with eyebrow labels: COLLECTION
+                  (single-select bucket), MOOD (multi-select), FLAVOR
+                  (multi-select). Each row is a flex-1 grid so the
+                  strip extends edge-to-edge. Selections AND across
+                  rows; chips within a multi-select row OR together. */}
               <FilterRow
                 label="collection"
                 items={[
@@ -1364,19 +1413,27 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   ["twists",      "Twists"],
                   ["house recipes", "House"],
                 ]}
-                value={catalogueFilter}
-                setValue={setCatalogueFilter}
+                value={cf.collection}
+                setValue={setCollection}
               />
               <FilterRow
                 label="mood"
+                multi
                 items={[
                   ["calm",    "Calm"],
                   ["focus",   "Focus"],
                   ["energy",  "Energy"],
                   ["comfort", "Comfort"],
                 ]}
-                value={catalogueFilter}
-                setValue={setCatalogueFilter}
+                value={cf.moods}
+                setValue={(m) => toggleInList("moods", m)}
+              />
+              <FilterRow
+                label="flavor"
+                multi
+                items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
+                value={cf.flavors}
+                setValue={(f) => toggleInList("flavors", f)}
               />
 
               {/* Add-recipe CTA — sends the user to the Apothecary's
@@ -1440,7 +1497,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                     body: "Traditional preparations with one or two intentional deviations — a layered accent, a swapped base, a tighter steep. Each twist comes with a short note on why the change works.",
                   },
                 };
-                const d = descriptions[catalogueFilter];
+                const d = descriptions[cf.collection];
                 if (!d) return null;
                 return (
                   <div style={{
@@ -1639,39 +1696,45 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 // of label length, and active vs inactive uses the same ink-fill
 // pattern as the catalog/cabinet filter chips for consistency
 // across the app.
-const FilterRow = ({ label, items, value, setValue }) => (
-  <div style={{ marginBottom: 8 }}>
-    <div style={{
-      fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-      textTransform: "uppercase", color: theme.ash,
-      marginBottom: 5,
-    }}>{label}</div>
-    <div style={{ display: "flex", gap: 4, width: "100%" }}>
-      {items.map(([key, lbl]) => {
-        const active = value === key;
-        return (
-          <button
-            key={key}
-            onClick={() => setValue(key)}
-            style={{
-              flex: 1, minWidth: 0, whiteSpace: "nowrap",
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
-              padding: "6px 8px", borderRadius: 999,
-              border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
-              background: active ? theme.ink : "transparent",
-              color: active ? theme.cream : theme.inkSoft,
-              cursor: "pointer",
-              boxShadow: active
-                ? "0 2px 6px -1px rgba(30,24,18,0.20)"
-                : "0 1px 2px rgba(30,24,18,0.05)",
-              transition: "all 0.18s ease",
-            }}
-          >{lbl}</button>
-        );
-      })}
+const FilterRow = ({ label, items, value, setValue, multi = false }) => {
+  // Single-select rows pass `value` as a string; multi-select rows pass
+  // an array of selected keys. Active state is computed accordingly so
+  // both modes share the same chip styling.
+  const isActive = (key) => multi ? (value || []).includes(key) : value === key;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{
+        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+        textTransform: "uppercase", color: theme.ash,
+        marginBottom: 5,
+      }}>{label}</div>
+      <div style={{ display: "flex", gap: 4, width: "100%", flexWrap: "wrap" }}>
+        {items.map(([key, lbl]) => {
+          const active = isActive(key);
+          return (
+            <button
+              key={key}
+              onClick={() => setValue(key)}
+              style={{
+                flex: 1, minWidth: 0, whiteSpace: "nowrap",
+                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+                padding: "6px 8px", borderRadius: 999,
+                border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                background: active ? theme.ink : "transparent",
+                color: active ? theme.cream : theme.inkSoft,
+                cursor: "pointer",
+                boxShadow: active
+                  ? "0 2px 6px -1px rgba(30,24,18,0.20)"
+                  : "0 1px 2px rgba(30,24,18,0.05)",
+                transition: "all 0.18s ease",
+              }}
+            >{lbl}</button>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds }) => {
   const [rcSaveName, setRcSaveName] = useState("");

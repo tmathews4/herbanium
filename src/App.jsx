@@ -682,7 +682,13 @@ export default function App() {
     overlayHistory.length > 0
     || (tab !== "home" && tabHistory.length > 0)
     || tab !== "home";
-  const [catalogueFilter, setCatalogueFilter] = useState("favorites");
+  // Recipes filter is a structured object: collection is single-select,
+  // moods + flavors are arrays for multi-select sub-filtering. Selections
+  // across rows AND together (collection ∩ moods ∩ flavors); within mood
+  // and flavor rows the chips OR together.
+  const [catalogueFilter, setCatalogueFilter] = useState({
+    collection: "favorites", moods: [], flavors: [],
+  });
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
     // Recipes lands on the user's Favorites by default — that's the
@@ -690,7 +696,9 @@ export default function App() {
     // flip to All / Traditional / etc. via the chip strip if they
     // want a wider browse. Deep-links can still override downstream
     // via composePreselect.
-    if (k === "recipes" && shelfMode !== "recipes") setCatalogueFilter("favorites");
+    if (k === "recipes" && shelfMode !== "recipes") {
+      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
+    }
     setShelfMode(k);
   };
 
