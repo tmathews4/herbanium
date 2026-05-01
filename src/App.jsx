@@ -682,13 +682,15 @@ export default function App() {
     overlayHistory.length > 0
     || (tab !== "home" && tabHistory.length > 0)
     || tab !== "home";
-  const [catalogueFilter, setCatalogueFilter] = useState("all");
+  const [catalogueFilter, setCatalogueFilter] = useState("favorites");
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
-    // Manual click on Recipes resets the catalogue filter to "all" so
-    // the user sees the full stock by default; deep-links via
-    // composePreselect can still flip it to "favorites" downstream.
-    if (k === "recipes" && shelfMode !== "recipes") setCatalogueFilter("all");
+    // Recipes lands on the user's Favorites by default — that's the
+    // most common destination on a brew-now visit. The user can
+    // flip to All / Traditional / etc. via the chip strip if they
+    // want a wider browse. Deep-links can still override downstream
+    // via composePreselect.
+    if (k === "recipes" && shelfMode !== "recipes") setCatalogueFilter("favorites");
     setShelfMode(k);
   };
 
