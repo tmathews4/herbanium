@@ -96,11 +96,32 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
 
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 18,
-          color: theme.inkSoft, lineHeight: 1.45, marginBottom: 18,
+          color: theme.inkSoft, lineHeight: 1.45, marginBottom: 14,
         }}>
           <em style={{ color: theme.terra, fontStyle: "normal" }}>{displayName}</em>
           {" "}{verb}.
         </div>
+
+        {/* The elemental's poetic flavor line + the trigger that
+            earned it (or, for wild rolls, the lodestone they were
+            drawn by). Ornament hairline above so the description
+            reads as its own beat — not a continuation of the
+            arrival headline. */}
+        {elemental.desc && (
+          <>
+            <div style={{
+              width: 32, height: 1, margin: "0 auto 12px",
+              background: theme.rule, opacity: 0.7,
+            }} />
+            <div style={{
+              fontFamily: ff.serif, fontSize: 13.5,
+              color: theme.inkSoft, lineHeight: 1.55,
+              marginBottom: 18, padding: "0 6px",
+            }}>
+              {elemental.desc}
+            </div>
+          </>
+        )}
 
         <button
           onClick={beginExit}
