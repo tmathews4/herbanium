@@ -24,6 +24,7 @@ import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { HintCard } from "./HintCard";
 import { Sprig } from "./icons";
 import { MoodCrystal } from "./MoodCrystal";
+import { ElementalSigil } from "./ElementalSigil";
 import { getBlend } from "../helpers/misc";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
@@ -477,7 +478,7 @@ const AttributeShelf = ({
         onClick={handleClick}
         style={{
           fontFamily: ff.serif, fontSize: 13,
-          padding: "6px 12px", borderRadius: 6,
+          padding: "5px 10px 5px 7px", borderRadius: 6,
           background: isOpen || isSwapTarget ? tone.bg : "transparent",
           color: theme.ink,
           border: isSwapTarget
@@ -486,8 +487,12 @@ const AttributeShelf = ({
           cursor: "pointer",
           transition: "background 0.15s ease, border 0.15s ease",
           whiteSpace: "nowrap",
+          display: "inline-flex", alignItems: "center", gap: 6,
         }}
-      >{a.displayName || a.name}</button>
+      >
+        <ElementalSigil elemental={a} size={18} color={tone.color} />
+        <span>{a.displayName || a.name}</span>
+      </button>
     );
   };
 

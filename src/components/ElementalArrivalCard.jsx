@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
+import { ElementalSigil } from "./ElementalSigil";
 import { arrivalVerbFor } from "../data/elementalArrivals";
 import { creatureFor } from "../data/elementalAdjectives";
 
@@ -85,8 +86,13 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
           }}
         >×</button>
 
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
           <Ornament w={120} c={theme.terra} />
+        </div>
+        {/* Per-elemental procedural sigil — hashed from id, stable
+            across visits. Reads as the elemental's signet. */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <ElementalSigil elemental={elemental} size={48} color={theme.terra} />
         </div>
 
         <div style={{
