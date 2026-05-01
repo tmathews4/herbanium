@@ -421,6 +421,7 @@ export default function App() {
     const hints = mode.hints || {};
     setFirstCupHintShown(!!hints.firstCupHintShown);
     setComposeHintShown(!!hints.composeHintShown);
+    setShelfHintShown(!!hints.shelfHintShown);
     setJournalHintShown(!!hints.journalHintShown);
     setProfileHintShown(!!hints.profileHintShown);
     setPantryHintShown(!!hints.pantryHintShown);
@@ -494,6 +495,11 @@ export default function App() {
   // its Journal sub-tab, and Profile. Each is persisted independently
   // so users only see each one once.
   const [composeHintShown, setComposeHintShown] = usePersistedState("composeHintShown", false);
+  // Shelf tutorial — separate flag so dismissing the Apothecary
+  // tutorial doesn't also pre-suppress the Shelf one. The two
+  // surfaces have distinct sub-tabs (Blend/Vibe/Compendium vs
+  // Recipes/Cabinet/Journal), so each deserves its own first-visit.
+  const [shelfHintShown, setShelfHintShown] = usePersistedState("shelfHintShown", false);
   const [journalHintShown, setJournalHintShown] = usePersistedState("journalHintShown", false);
   const [profileHintShown, setProfileHintShown] = usePersistedState("profileHintShown", false);
   // First-visit hint for Shelf > Bestiary. Lives on its own flag
@@ -1103,13 +1109,22 @@ export default function App() {
       {/* Apothecary / Shelf first-visit tutorial — floats just above
           the TabBar dock, sharing its layer so the card reads as
           part of the menu strip rather than buried in the screen
-          scroll. Sits flex-pinned between the screen content and
-          the TabBar so it never gets cropped or detached on scroll. */}
-      <ComposeTutorialOverlay
-        section={tab === "apothecary" ? "apothecary" : tab === "shelf" ? "shelf" : null}
-        composeHintShown={composeHintShown}
-        dismissComposeHint={() => setComposeHintShown(true)}
-      />
+          scroll. Each section has its own dismiss flag so seeing
+          one doesn't pre-suppress the other. */}
+      {tab === "apothecary" && (
+        <ComposeTutorialOverlay
+          section="apothecary"
+          hintShown={composeHintShown}
+          dismissHint={() => setComposeHintShown(true)}
+        />
+      )}
+      {tab === "shelf" && (
+        <ComposeTutorialOverlay
+          section="shelf"
+          hintShown={shelfHintShown}
+          dismissHint={() => setShelfHintShown(true)}
+        />
+      )}
 
       <TabBar
         tab={tab}

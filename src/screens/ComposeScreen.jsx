@@ -1564,8 +1564,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 // the description's words land right above the sub-tabs they
 // describe. Pulled out of the ComposeScreen tree so the in-screen
 // scroll doesn't carry it.
-export const ComposeTutorialOverlay = ({ section, composeHintShown, dismissComposeHint }) => {
-  if (composeHintShown || !dismissComposeHint) return null;
+export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
+  if (hintShown || !dismissHint) return null;
   if (section !== "apothecary" && section !== "shelf") return null;
 
   const isApothecary = section === "apothecary";
@@ -1602,7 +1602,7 @@ export const ComposeTutorialOverlay = ({ section, composeHintShown, dismissCompo
             </div>
           ))}
         </>}
-        onDismiss={dismissComposeHint}
+        onDismiss={dismissHint}
       />
     </div>
   );
