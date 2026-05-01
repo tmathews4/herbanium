@@ -142,6 +142,18 @@ export const BestiaryView = ({
   const onArrivalDismiss = (id) => {
     markElementalSeen(id);
     setSummonTarget(null);
+    // Auto-add to featured row when there's room. Once main is
+    // full, the new elemental settles into reserve — the user's
+    // curated top five stays intact and they can swap it in
+    // manually via swap mode if they want.
+    if (setFeaturedElementals) {
+      setFeaturedElementals(prev => {
+        const cur = prev || [];
+        if (cur.includes(id)) return cur;
+        if (cur.length >= FEATURED_LIMIT) return cur;
+        return [...cur, id];
+      });
+    }
   };
 
   // Creation card — unique elemental, decorated with element + gem
@@ -176,6 +188,25 @@ export const BestiaryView = ({
   const effectiveFeaturedIds = validFeatured.length > 0
     ? validFeatured.slice(0, FEATURED_LIMIT)
     : revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
+
+  // Cold-start auto-pin: once anything is revealed and the user
+  // hasn't curated yet (validFeatured empty), freeze the current
+  // top-N-by-rarity into featuredElementals. After this fires
+  // once, the auto-fallback above stops mattering — new high-
+  // rarity arrivals don't bump existing items out of main; they
+  // settle into reserve instead, where the user can swap them in.
+  // Functional update to avoid stale-closure overwrites if the
+  // arrival-dismiss handler also fires in the same tick.
+  React.useEffect(() => {
+    if (!setFeaturedElementals) return;
+    if (revealedSorted.length === 0) return;
+    setFeaturedElementals(prev => {
+      const cur = prev || [];
+      if (cur.length > 0) return cur;
+      return revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealedSorted.length, setFeaturedElementals]);
   const featured = effectiveFeaturedIds
     .map(id => revealedSorted.find(a => a.id === id))
     .filter(Boolean);
