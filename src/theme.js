@@ -65,44 +65,43 @@ export const shadow = {
   //   - inset top highlight (warm white at low alpha) — gives the
   //     button a subtle "molded" edge.
   //   - drop shadow tinted to the button's color, giving elevation.
+  //
+  // Calibrated quieter than the earlier glow-heavy recipe so buttons
+  // read as gently lifted rather than buoyantly hovering. Outer-drop
+  // alphas roughly halved; spread radii tightened; inset highlights
+  // softened. Keeps real depth without the "glow" feel.
   btn: {
     // Terra-filled buttons (Start brewing, Brew this cup, primary CTAs).
-    // Terra rgb (176,84,47) light / (209,116,72) dark — the literal
-    // matches the light-mode terra; in dark mode the drop reads
-    // slightly redder than the brighter dark-mode terra fill, which
-    // keeps the depth visible without washing out.
     terra: {
-      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.22), 0 3px 5px rgba(176,84,47,0.28), 0 6px 14px -2px rgba(176,84,47,0.36)",
-      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.26), 0 4px 8px rgba(176,84,47,0.32), 0 8px 18px -3px rgba(176,84,47,0.44)",
-      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.16), 0 1px 2px rgba(176,84,47,0.20)",
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.14), 0 1px 2px rgba(176,84,47,0.16), 0 3px 8px -2px rgba(176,84,47,0.20)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.18), 0 2px 4px rgba(176,84,47,0.20), 0 5px 12px -3px rgba(176,84,47,0.26)",
+      press: "inset 0 1px 2px rgba(var(--shadow-rgb),0.12), 0 1px 1px rgba(176,84,47,0.12)",
     },
     // Terra outlined buttons (Save). No inset highlight — the
-    // outline IS the structure. Lifted via a moderate drop shadow.
+    // outline IS the structure. Lifted via a quiet drop shadow.
     terraOutline: {
-      rest:  "0 3px 5px rgba(176,84,47,0.16), 0 6px 14px -3px rgba(176,84,47,0.22)",
-      hover: "0 4px 8px rgba(176,84,47,0.22), 0 8px 18px -4px rgba(176,84,47,0.32)",
-      press: "0 1px 2px rgba(176,84,47,0.14), inset 0 1px 1px rgba(176,84,47,0.08)",
+      rest:  "0 1px 2px rgba(176,84,47,0.10), 0 3px 8px -3px rgba(176,84,47,0.14)",
+      hover: "0 2px 4px rgba(176,84,47,0.14), 0 5px 12px -4px rgba(176,84,47,0.20)",
+      press: "0 1px 1px rgba(176,84,47,0.10), inset 0 1px 1px rgba(176,84,47,0.06)",
     },
     // Ink-filled buttons. Drop tint follows --shadow-rgb so the
     // depth still reads on a dark surface.
     ink: {
-      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.18), 0 3px 5px rgba(var(--shadow-rgb),0.24), 0 6px 14px -2px rgba(var(--shadow-rgb),0.32)",
-      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.22), 0 4px 8px rgba(var(--shadow-rgb),0.28), 0 8px 18px -3px rgba(var(--shadow-rgb),0.40)",
-      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.18), 0 1px 2px rgba(var(--shadow-rgb),0.22)",
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.12), 0 1px 2px rgba(var(--shadow-rgb),0.14), 0 3px 8px -2px rgba(var(--shadow-rgb),0.18)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.16), 0 2px 4px rgba(var(--shadow-rgb),0.18), 0 5px 12px -3px rgba(var(--shadow-rgb),0.24)",
+      press: "inset 0 1px 2px rgba(var(--shadow-rgb),0.14), 0 1px 1px rgba(var(--shadow-rgb),0.14)",
     },
     // Bark-filled buttons (the default tone). Warm-walnut drop
-    // tint instead of terra-orange. Same molded-edge treatment as
-    // terra; reads as the calmer, more grounded sibling for the
-    // app's general button accent.
+    // tint instead of terra-orange.
     bark: {
-      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.20), 0 3px 5px rgba(94,61,32,0.26), 0 6px 14px -2px rgba(94,61,32,0.32)",
-      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.24), 0 4px 8px rgba(94,61,32,0.30), 0 8px 18px -3px rgba(94,61,32,0.40)",
-      press: "inset 0 2px 3px rgba(var(--shadow-rgb),0.16), 0 1px 2px rgba(94,61,32,0.20)",
+      rest:  "inset 0 1px 0 rgba(var(--hi-rgb),0.13), 0 1px 2px rgba(94,61,32,0.14), 0 3px 8px -2px rgba(94,61,32,0.18)",
+      hover: "inset 0 1px 0 rgba(var(--hi-rgb),0.16), 0 2px 4px rgba(94,61,32,0.18), 0 5px 12px -3px rgba(94,61,32,0.24)",
+      press: "inset 0 1px 2px rgba(var(--shadow-rgb),0.12), 0 1px 1px rgba(94,61,32,0.12)",
     },
     barkOutline: {
-      rest:  "0 3px 5px rgba(94,61,32,0.16), 0 6px 14px -3px rgba(94,61,32,0.22)",
-      hover: "0 4px 8px rgba(94,61,32,0.22), 0 8px 18px -4px rgba(94,61,32,0.32)",
-      press: "0 1px 2px rgba(94,61,32,0.14), inset 0 1px 1px rgba(94,61,32,0.08)",
+      rest:  "0 1px 2px rgba(94,61,32,0.10), 0 3px 8px -3px rgba(94,61,32,0.14)",
+      hover: "0 2px 4px rgba(94,61,32,0.14), 0 5px 12px -4px rgba(94,61,32,0.20)",
+      press: "0 1px 1px rgba(94,61,32,0.10), inset 0 1px 1px rgba(94,61,32,0.06)",
     },
   },
 };
