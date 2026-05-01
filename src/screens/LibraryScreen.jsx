@@ -485,32 +485,50 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
   }, 0);
   const caffeineDisplay = caffeineMg > 0 ? Math.round(caffeineMg) : 0;
   return (
-  <button onClick={handleTap} style={{
-    width: "100%", textAlign: "left",
-    background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
-    border: "none",
-    borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-    borderLeft: highlighted ? `3px solid ${theme.terra}` : "3px solid transparent",
-    padding: "14px 12px 14px 9px", cursor: "pointer",
-    display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center",
-  }}>
-    <div>
+  <button
+    onClick={handleTap}
+    onMouseEnter={(e) => {
+      if (highlighted) return;
+      e.currentTarget.style.background = "rgba(var(--hi-rgb),0.04)";
+    }}
+    onMouseLeave={(e) => {
+      if (highlighted) return;
+      e.currentTarget.style.background = "transparent";
+    }}
+    style={{
+      width: "100%", textAlign: "left",
+      background: highlighted ? "rgba(181,130,89,0.08)" : "transparent",
+      border: "none",
+      borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+      borderLeft: highlighted ? `3px solid ${theme.terra}` : "3px solid transparent",
+      padding: "14px 12px 14px 12px", cursor: "pointer",
+      display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "center",
+      transition: "background 0.18s ease",
+    }}>
+    <div style={{ minWidth: 0 }}>
       <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <span>{b.name}</span>
         {caffeineDisplay > 0 && (
           <span title={`~${caffeineDisplay}mg caffeine per cup`} style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
-            textTransform: "uppercase", fontWeight: "bold",
-            padding: "1px 6px", borderRadius: 999,
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.10em",
+            textTransform: "uppercase", fontWeight: 700,
+            padding: "1px 7px", borderRadius: 999,
             background: theme.terra, color: theme.cream,
           }}>caf</span>
         )}
-        {author && <span style={{ fontStyle: "italic", fontSize: 12, color: theme.ash }}>· {author}</span>}
+        {author && (
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>· {author}</span>
+        )}
       </div>
-      <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.ash, marginTop: 2 }}>
-        {b.subtitle}
-      </div>
-      <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
+      {b.subtitle && (
+        <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.ash, marginTop: 3, lineHeight: 1.35 }}>
+          {b.subtitle}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 4, marginTop: 7, flexWrap: "wrap" }}>
         {b.ingredients.map(ing => INGREDIENTS[ing.id] && (
           <span
             key={ing.id}
@@ -520,16 +538,24 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
             }}
             style={{
               fontFamily: ff.sans, fontSize: 10.5, color: theme.inkSoft, letterSpacing: "0.02em",
-              padding: "2px 7px", background: theme.cream, borderRadius: 999, border: `1px solid ${theme.ruleSoft}`,
+              padding: "2px 8px", background: "rgba(var(--hi-rgb),0.05)", borderRadius: 999, border: `1px solid ${theme.ruleSoft}`,
               cursor: "pointer",
+              transition: "background 0.15s ease, border-color 0.15s ease",
             }}
           >{INGREDIENTS[ing.id].name}</span>
         ))}
       </div>
     </div>
-    <div style={{ textAlign: "right" }}>
-      <div style={{ fontFamily: ff.serif, fontSize: 13, color: theme.ink }}>{formatTempShort(b.tempC, b.tempC, unit)}</div>
-      <div style={{ fontFamily: ff.mono, fontSize: 10.5, color: theme.ash }}>{mmss(b.timeS)}</div>
+    {/* Right-side temp/time meta — bracketed by a soft vertical
+        rule so the brew parameters read as their own band, not
+        as text floating off the right edge. */}
+    <div style={{
+      textAlign: "right", flexShrink: 0,
+      paddingLeft: 12,
+      borderLeft: `1px solid ${theme.ruleSoft}`,
+    }}>
+      <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink, lineHeight: 1.1 }}>{formatTempShort(b.tempC, b.tempC, unit)}</div>
+      <div style={{ fontFamily: ff.mono, fontSize: 10.5, color: theme.ash, marginTop: 2 }}>{mmss(b.timeS)}</div>
     </div>
   </button>
   );

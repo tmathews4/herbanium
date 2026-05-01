@@ -8,7 +8,7 @@ import {
 } from "../algo/compose";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
-  Flower, Kettle,
+  Flower, Kettle, Ornament,
 } from "../components/icons";
 import {
   Button, Chip, ChipRows, Rule, SectionLabel, FitOneLine,
@@ -1371,9 +1371,28 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           }
           return (
             <div style={{ marginTop: 4 }}>
-              <div style={{ marginBottom: 10 }}>
+              {/* Filters — split into two rows so the eye reads
+                  collection vs mood as two distinct groupings.
+                  Collection chips up top (favorites / all / curated
+                  by tradition / twists / house picks); mood chips
+                  below for narrowing by intent. Small gap between
+                  them is the only separator — keeps the strip
+                  light without an explicit divider. */}
+              <div style={{ marginBottom: 6 }}>
                 <ChipRows
-                  items={["favorites", "all", "traditional", "twists", "house recipes", "calm", "focus", "energy", "comfort"]}
+                  items={["favorites", "all", "traditional", "twists", "house recipes"]}
+                  renderItem={(f) => (
+                    <Chip
+                      key={f}
+                      active={catalogueFilter === f}
+                      onClick={() => setCatalogueFilter(f)}
+                    >{f}</Chip>
+                  )}
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <ChipRows
+                  items={["calm", "focus", "energy", "comfort"]}
                   renderItem={(f) => (
                     <Chip
                       key={f}
@@ -1386,82 +1405,101 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
               {/* Add-recipe CTA — sends the user to the Apothecary's
                   Blend (reverse-compose) page where they can build
-                  one of their own from ingredients. */}
+                  one of their own from ingredients. Solid secondary-
+                  style button with a thin-stroke SVG plus, replacing
+                  the prior dashed-border placeholder look. */}
               <button
                 onClick={() => go("apothecary", { mode: "reverse" })}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(176,84,47,0.06)";
+                  e.currentTarget.style.borderColor = theme.terra;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = theme.ruleSoft;
+                }}
                 style={{
                   width: "100%",
-                  padding: "10px 14px",
+                  padding: "11px 14px",
                   marginBottom: 14,
                   fontFamily: ff.serif, fontSize: 14,
                   color: theme.terra,
                   background: "transparent",
-                  border: `1px dashed ${theme.terra}`,
+                  border: `1px solid ${theme.ruleSoft}`,
                   borderRadius: 10,
                   cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  transition: "background 0.18s ease, border-color 0.18s ease",
                 }}
-              >+ add a recipe</button>
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                  <path d="M6 2.5 L6 9.5 M2.5 6 L9.5 6" stroke={theme.terra} strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                add a recipe
+              </button>
 
-              {catalogueFilter === "all" && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-                }}>
-                  The full Recipe Book — {traditional.length} traditional preparations
-                  and {experimental.length} Herbanium house recipes, plus any blend
-                  you've composed and saved.
-                </div>
-              )}
+              {/* Per-filter description band — soft left-rule + meta
+                  count line so each filter's context reads as a band,
+                  not a paragraph dropped into the page. */}
+              {(() => {
+                const descriptions = {
+                  all: {
+                    count: `${traditional.length + experimental.length} recipes`,
+                    body: `The full Recipe Book — ${traditional.length} traditional preparations and ${experimental.length} Herbanium house recipes, plus any blend you've composed and saved.`,
+                  },
+                  favorites: {
+                    count: "your starred picks",
+                    body: "Blends you've starred. Same set as your Home favorites — tap the star on any blend to add or remove it.",
+                  },
+                  traditional: {
+                    count: `${traditional.length} classics`,
+                    body: "Classic preparations, taught the way they're traditionally made. Tap any to open its recipe or start brewing.",
+                  },
+                  "house recipes": {
+                    count: `${experimental.length} from the kettle`,
+                    body: "Herbanium's own recipes — combinations the catalog's chemistry suggests but no tradition has codified. Try, log, judge for yourself.",
+                  },
+                  twists: {
+                    count: "tradition with intent",
+                    body: "Traditional preparations with one or two intentional deviations — a layered accent, a swapped base, a tighter steep. Each twist comes with a short note on why the change works.",
+                  },
+                };
+                const d = descriptions[catalogueFilter];
+                if (!d) return null;
+                return (
+                  <div style={{
+                    marginBottom: 14, padding: "10px 12px",
+                    borderLeft: `2px solid ${theme.terra}`,
+                    background: "rgba(176,84,47,0.04)",
+                    borderRadius: "0 6px 6px 0",
+                  }}>
+                    <div style={{
+                      fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                      textTransform: "uppercase", color: theme.terra, marginBottom: 4,
+                    }}>{d.count}</div>
+                    <div style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                      color: theme.inkSoft, lineHeight: 1.5,
+                    }}>
+                      {d.body}
+                    </div>
+                  </div>
+                );
+              })()}
 
-              {catalogueFilter === "favorites" && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-                }}>
-                  Blends you've starred. Same set as your Home favorites — tap
-                  the star on any blend to add or remove it.
-                </div>
-              )}
-
-              {catalogueFilter === "traditional" && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-                }}>
-                  Classic preparations, taught the way they're traditionally made.
-                  Tap any to open its recipe or start brewing.
-                </div>
-              )}
-
-              {catalogueFilter === "house recipes" && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-                }}>
-                  Herbanium's own recipes — combinations the catalog's chemistry
-                  suggests but no tradition has codified. Try, log, judge for
-                  yourself.
-                </div>
-              )}
-
-              {catalogueFilter === "twists" && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, lineHeight: 1.5, marginBottom: 14,
-                }}>
-                  Traditional preparations with one or two intentional
-                  deviations — a layered accent, a swapped base, a tighter
-                  steep. Each twist comes with a short note on why the
-                  change works.
-                </div>
-              )}
 
               {catVisible.length === 0 ? (
                 <div style={{
-                  marginTop: 18, padding: "14px 16px",
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                  color: theme.ash, textAlign: "center", lineHeight: 1.5,
+                  marginTop: 18, padding: "28px 20px",
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5,
+                  color: theme.ash, textAlign: "center", lineHeight: 1.55,
+                  background: theme.cream,
+                  border: `1px solid ${theme.ruleSoft}`,
+                  borderRadius: 12,
                 }}>
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+                    <Ornament w={56} c={theme.ash} />
+                  </div>
                   {catEmpty}
                 </div>
               ) : (
@@ -1499,14 +1537,25 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                             }
                           }}
                           title="Delete from catalogue"
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; }}
                           style={{
-                            position: "absolute", top: 10, right: 8,
-                            background: "transparent", border: "none",
-                            color: theme.ash, fontSize: 14, lineHeight: 1,
-                            padding: "4px 6px", cursor: "pointer",
-                            opacity: 0.55,
+                            position: "absolute", top: 12, right: 10,
+                            width: 22, height: 22,
+                            background: "transparent",
+                            border: `1px solid ${theme.ruleSoft}`,
+                            borderRadius: "50%",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            padding: 0, cursor: "pointer",
+                            opacity: 0.45,
+                            transition: "opacity 0.18s ease",
                           }}
-                        >✕</button>
+                        >
+                          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+                            <path d="M1.5 1.5 L7.5 7.5 M7.5 1.5 L1.5 7.5"
+                              stroke={theme.ash} strokeWidth="1.4" strokeLinecap="round" />
+                          </svg>
+                        </button>
                       )}
                     </div>
                   );
