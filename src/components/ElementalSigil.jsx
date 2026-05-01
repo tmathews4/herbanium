@@ -46,11 +46,13 @@ function hashStr(s) {
 // co-opted by hate groups; the remaining 22 carry the alphabet's
 // older, broader register.
 const RUNES = {
-  // Fehu ᚠ — cattle, wealth
+  // Fehu ᚠ — cattle, wealth. Branches end at x=4 (box edge),
+  // y extrapolated along the original slope, so the hex clip
+  // extends them to the right face.
   fehu: [
     [[2, 0], [2, 6]],
-    [[2, 0.6], [3.6, -0.2]],
-    [[2, 2.2], [3.6, 1.4]],
+    [[2, 0.6], [4, -0.4]],
+    [[2, 2.2], [4, 1.2]],
   ],
   // Uruz ᚢ — aurochs, strength
   uruz: [
