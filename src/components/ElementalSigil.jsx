@@ -64,11 +64,13 @@ const RUNES = {
     [[1.5, 1.6], [3.2, 3]],
     [[3.2, 3], [1.5, 4.4]],
   ],
-  // Ansuz ᚨ — divine breath
+  // Ansuz ᚨ — divine breath. Branches end at x=4 (box edge) so
+  // the hex clip extends them out to the right face like the
+  // other border-reaching runes.
   ansuz: [
     [[1.5, 0], [1.5, 6]],
-    [[1.5, 0.8], [3.5, 1.4]],
-    [[1.5, 2.4], [3.5, 3]],
+    [[1.5, 0.8], [4, 1.4]],
+    [[1.5, 2.4], [4, 3]],
   ],
   // Raidho ᚱ — journey
   raidho: [
@@ -283,8 +285,13 @@ export const ElementalSigil = ({
           stamped letter. A reader who knows Elder Futhark will
           spot it; everyone else sees pattern. Clipped to the hex
           so border-reaching rune strokes terminate at the
-          frame, not in mid-air outside it. */}
-      <g clipPath={`url(#${clipId})`}>
+          frame, not in mid-air outside it.
+          Opacity is applied to the wrapping <g>, not to each
+          polyline's strokeOpacity, so where rune lines cross or
+          share endpoints they don't composite onto each other
+          and produce darker intersection points — the whole rune
+          fades uniformly as a single rendered group. */}
+      <g clipPath={`url(#${clipId})`} opacity="0.42">
         {runeLines.map((line, i) => {
           const points = line.map(([x, y]) => {
             const tx = runeOffsetX + x * runeUnit;
@@ -298,7 +305,6 @@ export const ElementalSigil = ({
               fill="none"
               stroke={color}
               strokeWidth={runeStrokeWidth}
-              strokeOpacity="0.32"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
