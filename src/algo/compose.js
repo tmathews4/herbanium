@@ -1070,7 +1070,8 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
 import { resolveExtractionProfile } from "../data/extractionProfiles.js";
 import {
   applyMasking, applyEffectSynergies, buildWarnings,
-  loudnessOf, attenuateFragileEffects, applyEffectFloor,
+  attenuateFragileEffects, applyEffectFloor,
+  combineFlavors,
 } from "./perception.js";
 
 /**
@@ -1387,14 +1388,19 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   // Perception pipeline:
   //   raw accumulation → masking → synergies → effect floor → fragile decay.
-  // Loudness multiplier on flavors lets a 1g dose of mint read
-  // dominant the way menthol does (see FLAVOR_LOUDNESS in perception).
-  const rawFlavors = {};
+  //
+  // Flavor combination splits into two paths inside combineFlavors:
+  //   - Additive set (heat, bitter, astringent — see ADDITIVE_FLAVORS
+  //     in perception.js): unweighted sum × loudness, capped. Three
+  //     heat sources at 1/3 dose each push the cup genuinely hotter.
+  //   - Everything else: dose-weighted × loudness (the saturating
+  //     behavior — two citrus at 50/50 still reads as one citrus).
+  //
+  // Effects stay dose-weighted across the board — no effect tag
+  // currently behaves like "heat" in the additive sense.
+  const rawFlavors = combineFlavors(contributions);
   const rawEffects = {};
   for (const { weight, profile } of contributions) {
-    for (const [name, strength] of profile.flavors) {
-      rawFlavors[name] = (rawFlavors[name] || 0) + strength * weight * loudnessOf(name);
-    }
     for (const [tag, strength] of profile.effects) {
       rawEffects[tag] = (rawEffects[tag] || 0) + strength * weight;
     }

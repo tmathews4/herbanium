@@ -111,6 +111,70 @@ export function loudnessOf(flavor) {
   return FLAVOR_LOUDNESS[flavor] ?? 1.0;
 }
 
+// Flavors that should STACK across ingredients rather than dilute
+// via dose-weighting. Three heat sources at 1/3 dose each don't
+// average down to one heat — the cup reads hotter than any single
+// component would alone (capsaicin / piperine / eugenol all grip
+// trigeminal receptors independently and the sensations sum).
+//
+// Bitter / astringent are NOT in this set even though they also
+// stack physiologically: the curated catalog is calibrated against
+// dose-weighted bitter accumulation, and the existing tannin
+// warnings already fire on dose-weighted thresholds. Adding bitter
+// here without recalibrating thresholds would falsely flag dozens
+// of clean blends. Heat is the one where the engine genuinely
+// under-reads multi-source contributions today.
+//
+// Most aromatic flavors (citrus, floral, fruity, smoky, vegetal)
+// genuinely saturate via dose dilution and stay outside this set —
+// two citrus ingredients at 50/50 read as one citrus, not two.
+export const ADDITIVE_FLAVORS = new Set([
+  "peppery", "pungent", "spiced", "hot", "numbing",
+]);
+
+// Soft ceiling for additive flavors. Past 5 the palate saturates
+// — a cup can't realistically read hotter / more bitter than this
+// regardless of how many sources contribute. Caps a runaway sum.
+const ADDITIVE_CAP = 5;
+
+/**
+ * Combine raw flavor contributions across ingredients. Two paths:
+ *
+ *   - Additive set (heat, bitter, astringent): use weight^0.5 instead
+ *     of weight^1, so a single full-weight contributor reads exactly
+ *     as before but multiple contributors stack incrementally without
+ *     fully diluting (sqrt(n) growth — three 1/3-dose heat sources
+ *     read ~1.7× a single equivalent). Capped at ADDITIVE_CAP so a
+ *     pile-on can't run away.
+ *   - Everything else: dose-weighted × loudness (the existing
+ *     behavior). Two citrus contributors at 50/50 still read as
+ *     one citrus — most aromatic flavors saturate via dilution.
+ *
+ * Backward-compatible for single-source blends (weight^0.5 = 1 when
+ * weight = 1), so the existing curated catalog's calibration holds.
+ */
+export function combineFlavors(contributions) {
+  const additiveSums = {};
+  const dosed = {};
+  for (const { weight, profile } of contributions) {
+    if (!profile?.flavors) continue;
+    for (const [name, strength] of profile.flavors) {
+      const loud = loudnessOf(name);
+      if (ADDITIVE_FLAVORS.has(name)) {
+        const w = Math.sqrt(Math.max(0, weight));
+        additiveSums[name] = (additiveSums[name] || 0) + strength * w * loud;
+      } else {
+        dosed[name] = (dosed[name] || 0) + strength * weight * loud;
+      }
+    }
+  }
+  const out = { ...dosed };
+  for (const [name, sum] of Object.entries(additiveSums)) {
+    out[name] = Math.min(ADDITIVE_CAP, sum);
+  }
+  return out;
+}
+
 // Effects that get blunted when a cup is overpulled — focus, calm,
 // soothing, uplifting are the "fragile" registers that real overpull
 // degrades along with the bitterness it adds. Warming, energy,
