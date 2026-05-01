@@ -346,10 +346,11 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                       position: "absolute", left: 0, top: 0, bottom: 0,
                       width: 3, background: accent, opacity: 0.85,
                     }} />
-                    {/* Pantry toggle — clean circular tap target in
-                        the top-right. Empty state uses a soft outline
-                        ring (no dashed edge) so it reads as a quiet
-                        affordance rather than an unfinished button. */}
+                    {/* Pantry toggle — modern thin-stroke icon button.
+                        Empty state: ghost circle with a hairline plus
+                        in ash. Active state: sage-filled with a clean
+                        check stroke. Same 24px target either way; no
+                        bold text glyphs, no dashed edges. */}
                     {togglePantry && (
                       <div
                         role="button"
@@ -363,18 +364,39 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                           }
                         }}
                         title={inPantry ? "in cabinet — tap to remove" : "tap to add to cabinet"}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.08)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                         style={{
                           position: "absolute", top: 8, right: 8,
-                          width: 22, height: 22, borderRadius: "50%",
+                          width: 24, height: 24, borderRadius: "50%",
                           background: inPantry ? theme.sage : "transparent",
                           border: `1px solid ${inPantry ? theme.sage : theme.ruleSoft}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          color: inPantry ? theme.cream : theme.ash,
-                          fontSize: 13, fontWeight: 600, lineHeight: 1,
                           cursor: "pointer",
-                          transition: "background 0.15s ease, border-color 0.15s ease",
+                          transition: "background 0.18s ease, border-color 0.18s ease, transform 0.12s ease",
                         }}
-                      >{inPantry ? "✓" : "+"}</div>
+                      >
+                        {inPantry ? (
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                            <path
+                              d="M2.5 6.2 L5 8.5 L9.5 3.7"
+                              stroke={theme.cream}
+                              strokeWidth="1.7"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        ) : (
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                            <path
+                              d="M6 2.5 L6 9.5 M2.5 6 L9.5 6"
+                              stroke={theme.ash}
+                              strokeWidth="1.4"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
                     )}
                     {/* Header row — type icon (with optional CAF pill
                         beside it) on the left; subcategory eyebrow on
