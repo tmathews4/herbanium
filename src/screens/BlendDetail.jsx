@@ -262,10 +262,26 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             }
           }
           if (flagged) {
+            // Name the actual ingredient(s) carrying the heads-up so
+            // the user doesn't have to scan the recipe to find it.
+            // Joined with commas for 2+, "and" before the last entry
+            // when listing more than one. Lookup falls back to the
+            // raw id if a meta record is missing (shouldn't happen
+            // since `flagged` already gated on INGREDIENTS[id]).
+            const flaggedNames = (b.ingredients || [])
+              .filter(ing => INGREDIENTS[ing.id]?.headsUp)
+              .map(ing => INGREDIENTS[ing.id]?.name || ing.id);
+            const namesSentence = flaggedNames.length === 1
+              ? flaggedNames[0]
+              : flaggedNames.length === 2
+                ? `${flaggedNames[0]} and ${flaggedNames[1]}`
+                : `${flaggedNames.slice(0, -1).join(", ")}, and ${flaggedNames[flaggedNames.length - 1]}`;
             tags.push({
               label: "heads-up",
-              summary: "Caution — at least one ingredient has a heads-up note.",
-              body: "Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open any ingredient with a flagged badge to read its specific note. Herbanium is a brewing companion, not medical advice — verify with a clinician.",
+              summary: flaggedNames.length === 1
+                ? `Caution — ${namesSentence} has a heads-up note.`
+                : `Caution — ${namesSentence} have heads-up notes.`,
+              body: `Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open ${flaggedNames.length === 1 ? "it" : "either"} on the recipe list above to read the specific note. Herbanium is a brewing companion, not medical advice — verify with a clinician.`,
               tone: "terra",
               fg: theme.terra, bg: "transparent", border: theme.terra, dashed: true,
             });
@@ -421,7 +437,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                     topFlavors,
                     topEffect ? topEffect[0] : null,
                   ].filter(Boolean);
-                  const hasHeadsUp = !!(meta.headsUp && meta.headsUp.trim?.());
                   return (
                     <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
                       width: "100%", textAlign: "left", background: "transparent",
@@ -430,27 +445,8 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                       display: "flex", justifyContent: "space-between", alignItems: "baseline",
                     }}>
                       <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                        <div style={{
-                          fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-                          display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
-                        }}>
-                          <span>{meta.name}</span>
-                          {hasHeadsUp && (
-                            // Heads-up indicator on the ingredient row —
-                            // matches the badge style on the ingredient
-                            // catalog cards (LibraryScreen) so the user
-                            // recognizes it as the same flag, and answers
-                            // the recipe-page question "which ingredient
-                            // does the blend's heads-up tag refer to?"
-                            <span title={`heads up — ${meta.headsUp}`} style={{
-                              width: 16, height: 16, borderRadius: "50%",
-                              background: theme.ochre, color: theme.cream,
-                              fontFamily: ff.serif, fontSize: 11, fontWeight: "bold",
-                              display: "inline-flex", alignItems: "center", justifyContent: "center",
-                              lineHeight: 1,
-                            }}>!</span>
-                          )}
-                          <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                          {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                         </div>
                         <div style={{
                           fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
