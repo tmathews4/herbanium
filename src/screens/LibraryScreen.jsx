@@ -295,7 +295,6 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               {shelfItems.map(([id, ing]) => {
                 const inPantry = pantryIds.has(id);
                 const hasCaffeine = (ing.caffeine || 0) > 0;
-                const hasHeadsUp  = !!(ing.headsUp && ing.headsUp.trim?.());
                 return (
                   <button key={id} onClick={() => go("ingredient", id)}
                   onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 3px 8px rgba(30,24,18,0.08), 0 1px 2px rgba(30,24,18,0.05)"; e.currentTarget.style.borderColor = theme.rule; }}
@@ -351,22 +350,6 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                             fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.08em",
                             textTransform: "uppercase", fontWeight: "bold",
                           }}>caf</div>
-                        )}
-                        {hasHeadsUp && (
-                          // Heads-up indicator — surfaces ingredients
-                          // whose detail page carries an interaction
-                          // / contraindication note (warfarin, blood
-                          // pressure, pregnancy, etc.). Tooltip shows
-                          // the actual headsUp text so the card
-                          // answers "why am I being warned?" without
-                          // forcing the user into the detail page.
-                          <div title={`heads up — ${ing.headsUp}`} style={{
-                            width: 16, height: 16, borderRadius: "50%",
-                            background: theme.ochre, color: theme.cream,
-                            fontFamily: ff.serif, fontSize: 11, fontWeight: "bold",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            lineHeight: 1,
-                          }}>!</div>
                         )}
                       </div>
                       <span style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash }}>
