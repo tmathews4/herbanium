@@ -160,7 +160,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   React.useEffect(() => {
     if (!composePreselect) return;
     setMode("recipes");
-    setCatalogueFilter("favorites");
+    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
@@ -1371,14 +1371,18 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           // selected family via FAMILY_BY_FLAVOR.
           const moodSet = new Set(cf.moods || []);
           const flavorSet = new Set(cf.flavors || []);
+          const flavorMap = FAMILY_BY_FLAVOR || {};
           const blendMatchesFlavors = (b) => {
             if (flavorSet.size === 0) return true;
             const ings = b.ingredients || [];
             for (const it of ings) {
+              if (!it || !it.id) continue;
               const ing = INGREDIENTS.find(x => x.id === it.id);
               if (!ing) continue;
-              for (const fl of (ing.flavors || [])) {
-                const fam = FAMILY_BY_FLAVOR[fl] || fl;
+              const fls = ing.flavors || [];
+              for (const fl of fls) {
+                if (!fl) continue;
+                const fam = flavorMap[fl] || fl;
                 if (flavorSet.has(fam) || flavorSet.has(fl)) return true;
               }
             }
@@ -1724,7 +1728,8 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
               key={key}
               onClick={() => setValue(key)}
               style={{
-                flex: `0 0 ${basis}`, minWidth: 0, whiteSpace: "nowrap",
+                flexGrow: 0, flexShrink: 0, flexBasis: basis,
+                minWidth: 0, whiteSpace: "nowrap",
                 fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
                 padding: "6px 8px", borderRadius: 999,
                 border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
