@@ -421,6 +421,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                     topFlavors,
                     topEffect ? topEffect[0] : null,
                   ].filter(Boolean);
+                  const hasHeadsUp = !!(meta.headsUp && meta.headsUp.trim?.());
                   return (
                     <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
                       width: "100%", textAlign: "left", background: "transparent",
@@ -429,8 +430,27 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                       display: "flex", justifyContent: "space-between", alignItems: "baseline",
                     }}>
                       <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
-                          {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        <div style={{
+                          fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+                          display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
+                        }}>
+                          <span>{meta.name}</span>
+                          {hasHeadsUp && (
+                            // Heads-up indicator on the ingredient row —
+                            // matches the badge style on the ingredient
+                            // catalog cards (LibraryScreen) so the user
+                            // recognizes it as the same flag, and answers
+                            // the recipe-page question "which ingredient
+                            // does the blend's heads-up tag refer to?"
+                            <span title={`heads up — ${meta.headsUp}`} style={{
+                              width: 16, height: 16, borderRadius: "50%",
+                              background: theme.ochre, color: theme.cream,
+                              fontFamily: ff.serif, fontSize: 11, fontWeight: "bold",
+                              display: "inline-flex", alignItems: "center", justifyContent: "center",
+                              lineHeight: 1,
+                            }}>!</span>
+                          )}
+                          <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                         </div>
                         <div style={{
                           fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
