@@ -36,6 +36,7 @@ import {
   FAMILY_BY_FLAVOR,
   FAMILY_BY_EFFECT,
 } from "../components/FlavorMap";
+import { orderModifiers, euphonyOK } from "./titleEuphony";
 
 // Window: 30 days. Anything older drops out — the crystal is meant
 // to read as "lately," not as a permanent record.
@@ -382,9 +383,26 @@ export function computeMoodCrystal({
   // colors to read as a relationship. "A Sage Crystal" reads cleaner
   // than "A Sage Threaded Crystal" when there's nothing to thread
   // it with.
-  const namePieces = secondaryAdj
-    ? [primaryAdj, secondaryAdj, patternWord]
-    : [primaryAdj];
+  let namePieces;
+  if (!secondaryAdj) {
+    namePieces = [primaryAdj];
+  } else {
+    // Run the same "sounds good" pass the unique creation title
+    // uses (see data/titleEuphony.js): order the two color
+    // modifiers by English adjective rank, then check the full
+    // [adj1, adj2, pattern] sequence for alliteration / stutter /
+    // root-echo. If the rank-correct ordering trips the check,
+    // try the swap. If both fail, accept the rank-correct one —
+    // pattern is a per-profile signature, so we don't substitute
+    // it; the user keeps their crystal's identity intact.
+    const ranked  = orderModifiers(primaryAdj, secondaryAdj);
+    const swapped = [ranked[1], ranked[0]];
+    const rankedSeq  = [...ranked,  patternWord];
+    const swappedSeq = [...swapped, patternWord];
+    namePieces = euphonyOK(rankedSeq) ? rankedSeq
+              : euphonyOK(swappedSeq) ? swappedSeq
+              : rankedSeq;
+  }
   const name = `${articleFor(namePieces[0])} ${namePieces.join(" ")} Crystal`;
 
   // Description voice — names both registers when both exist,
