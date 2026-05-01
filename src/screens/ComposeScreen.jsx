@@ -160,7 +160,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   React.useEffect(() => {
     if (!composePreselect) return;
     setMode("recipes");
-    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
+    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [], pantryOnly: false });
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
@@ -1313,8 +1313,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         // is supported for backwards-compat with any cached older state.
         if (true) {
           const cf = typeof catalogueFilter === "string"
-            ? { collection: catalogueFilter, moods: [], flavors: [] }
-            : { collection: "favorites", moods: [], flavors: [], ...(catalogueFilter || {}) };
+            ? { collection: catalogueFilter, moods: [], flavors: [], pantryOnly: false }
+            : { collection: "favorites", moods: [], flavors: [], pantryOnly: false, ...(catalogueFilter || {}) };
           const setCollection = (c) => setCatalogueFilter({ ...cf, collection: c });
           const toggleInList = (key, item) => {
             const list = cf[key] || [];
@@ -1323,6 +1323,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               : [...list, item];
             setCatalogueFilter({ ...cf, [key]: next });
           };
+          const togglePantryOnly = () =>
+            setCatalogueFilter({ ...cf, pantryOnly: !cf.pantryOnly });
 
           // Step 1 — collection bucket.
           let pool;
@@ -1393,13 +1395,27 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             if (moodSet.size === 0) return true;
             return moodSet.has(b.mood);
           };
-          const catVisible = pool.filter(b => blendMatchesMoods(b) && blendMatchesFlavors(b));
-          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0)) {
+          // Pantry-only filter: every ingredient in the blend must be
+          // in the user's pantry. Empty pantry + toggle on = empty list,
+          // explained by the empty-state copy below.
+          const blendInPantry = (b) => {
+            if (!cf.pantryOnly) return true;
+            if (!pantryIds) return false;
+            const ings = b.ingredients || [];
+            return ings.every(it => it && it.id && pantryIds.has(it.id));
+          };
+          const catVisible = pool.filter(b =>
+            blendMatchesMoods(b) && blendMatchesFlavors(b) && blendInPantry(b)
+          );
+          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0 || cf.pantryOnly)) {
             const subBits = [
               moodSet.size > 0 ? `mood (${[...moodSet].join(", ")})` : null,
               flavorSet.size > 0 ? `flavor (${[...flavorSet].join(", ")})` : null,
+              cf.pantryOnly ? "in your cabinet" : null,
             ].filter(Boolean).join(" + ");
-            catEmpty = `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
+            catEmpty = cf.pantryOnly && pantryIds && pantryIds.size === 0
+              ? "Add ingredients to your cabinet to use this filter."
+              : `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
           }
 
           return (
@@ -1441,6 +1457,31 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 value={cf.flavors}
                 setValue={(f) => toggleInList("flavors", f)}
               />
+
+              {/* Cabinet toggle — narrows the visible recipes to ones the
+                  user can actually brew right now from what they've marked
+                  as in their pantry. Same pill switch pattern as the Vibe
+                  screen "only use what's in my cabinet" toggle so the two
+                  flows feel like one control vocabulary. */}
+              <label style={{
+                display: "flex", alignItems: "center", gap: 10,
+                marginTop: 4, marginBottom: 12,
+                fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
+              }}>
+                <span style={{
+                  width: 30, height: 18, borderRadius: 999,
+                  background: cf.pantryOnly ? theme.sageDeep : theme.rule,
+                  position: "relative", transition: "background .2s",
+                  flexShrink: 0,
+                }} onClick={togglePantryOnly}>
+                  <span style={{
+                    position: "absolute", top: 2, left: cf.pantryOnly ? 14 : 2,
+                    width: 14, height: 14, borderRadius: "50%", background: theme.cream,
+                    transition: "left .2s",
+                  }} />
+                </span>
+                only recipes I have ingredients for
+              </label>
 
               {/* Add-recipe CTA — sends the user to the Apothecary's
                   Blend (reverse-compose) page where they can build

@@ -687,7 +687,7 @@ export default function App() {
   // across rows AND together (collection ∩ moods ∩ flavors); within mood
   // and flavor rows the chips OR together.
   const [catalogueFilter, setCatalogueFilter] = useState({
-    collection: "favorites", moods: [], flavors: [],
+    collection: "favorites", moods: [], flavors: [], pantryOnly: false,
   });
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
@@ -697,7 +697,7 @@ export default function App() {
     // want a wider browse. Deep-links can still override downstream
     // via composePreselect.
     if (k === "recipes" && shelfMode !== "recipes") {
-      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
+      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [], pantryOnly: false });
     }
     setShelfMode(k);
   };
