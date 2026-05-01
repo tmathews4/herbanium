@@ -213,9 +213,27 @@ const EXCLUDED_FROM_FLAVOR = new Set([
 ]);
 
 // Hex → "r,g,b" string for rgba() composition.
-const hexToRgb = (hex) => {
-  const h = hex.replace("#", "");
+// Resolve a color value to "r,g,b" for use inside rgba() composites
+// in band gradients. Accepts:
+//   - hex like "#B0542F"
+//   - CSS variable refs like "var(--family-fruit)" — resolved at
+//     runtime so the value tracks the active theme. Without this
+//     resolution path, the gradient receives an unparseable string,
+//     parseInt returns NaN, and every band renders as rgb(0,0,0) —
+//     i.e. black bars.
+const hexToRgb = (color) => {
+  let hex = color || "";
+  if (typeof hex === "string" && hex.startsWith("var(")) {
+    const match = hex.match(/^var\((--[^,)]+)\)$/);
+    if (match && typeof document !== "undefined") {
+      hex = getComputedStyle(document.documentElement)
+        .getPropertyValue(match[1])
+        .trim();
+    }
+  }
+  const h = (hex || "").replace("#", "");
   const n = parseInt(h, 16);
+  if (Number.isNaN(n)) return "121,110,91"; // theme.ash fallback
   return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
 };
 
