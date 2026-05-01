@@ -61,13 +61,13 @@ export const EXTRACTION_PROFILES = {
 
   hibiscus: [
     { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright"],
-      effects: [["cooling", 2], ["energy", 2]],
+      effects: [["cooling", 2]],
       character: "Light hibiscus — a pink tang, gentle brightness." },
     { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry", "berry", "bright"],
-      effects: [["cooling", 3], ["energy", 3]],
+      effects: [["cooling", 3], ["digestive", 2]],
       character: "The standard cup. Ruby color, tart and lively." },
     { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent", "bright"],
-      effects: [["cooling", 3], ["energy", 3], ["bitterness", 2]],
+      effects: [["cooling", 3], ["digestive", 2], ["bitterness", 2]],
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
 
@@ -85,13 +85,13 @@ export const EXTRACTION_PROFILES = {
 
   jasmine: [
     { tempC: 75,  timeS: 120, flavors: ["floral", "sweet"],
-      effects: [["calm", 2], ["energy", 2]],
+      effects: [["calm", 2], ["uplifting", 1]],
       character: "Light jasmine — heady perfume, soft and quick." },
     { tempC: 80,  timeS: 150, flavors: ["floral", "sweet", "honeyed", "heady"],
-      effects: [["calm", 3], ["energy", 3]],
+      effects: [["calm", 3], ["uplifting", 2]],
       character: "The standard cup. Full jasmine bloom, balanced lift." },
     { tempC: 85,  timeS: 180, flavors: ["floral", "sweet", "honeyed", "heady", "vegetal", "astringent"],
-      effects: [["calm", 3], ["energy", 3], ["bitterness", 2]],
+      effects: [["calm", 3], ["uplifting", 2], ["bitterness", 2]],
       character: "Pushed past the perfume's range — green-tea base pulls tannin, the heady note fades." },
   ],
 
@@ -701,7 +701,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["uplifting", 2], ["cooling", 2]],
       character: "Light lemon peel — sharp clean top, only the brightness." },
     { tempC: 95,  timeS: 300, flavors: ["citrus", "lemon", "bright", "fresh", "aromatic"],
-      effects: [["uplifting", 3], ["cooling", 3], ["focus", 2]],
+      effects: [["uplifting", 3], ["cooling", 3]],
       character: "The standard cup. Full lemon — citrus oil, clean and lively." },
     { tempC: 100, timeS: 420, flavors: ["citrus", "lemon", "bright", "aromatic", "pith", "bitter"],
       effects: [["uplifting", 3], ["cooling", 3], ["bitterness", 2]],
