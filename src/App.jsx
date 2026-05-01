@@ -10,7 +10,7 @@ import { DemoHint } from "./components/DemoHint";
 import { FirstCupHintCard } from "./components/FirstCupHintCard";
 // Screens
 import { HomeScreen } from "./screens/HomeScreen";
-import { ComposeScreen } from "./screens/ComposeScreen";
+import { ComposeScreen, ComposeTutorialOverlay } from "./screens/ComposeScreen";
 import { SteepScreen } from "./screens/SteepScreen";
 import { LogScreen } from "./screens/LogScreen";
 import { IngredientDetail } from "./screens/IngredientDetail";
@@ -1099,6 +1099,17 @@ export default function App() {
         && sessions.filter(s => s.who === "you").length === 0 && (
         <FirstCupHintCard onDismiss={() => setFirstCupHintShown(true)} />
       )}
+
+      {/* Apothecary / Shelf first-visit tutorial — floats just above
+          the TabBar dock, sharing its layer so the card reads as
+          part of the menu strip rather than buried in the screen
+          scroll. Sits flex-pinned between the screen content and
+          the TabBar so it never gets cropped or detached on scroll. */}
+      <ComposeTutorialOverlay
+        section={tab === "apothecary" ? "apothecary" : tab === "shelf" ? "shelf" : null}
+        composeHintShown={composeHintShown}
+        dismissComposeHint={() => setComposeHintShown(true)}
+      />
 
       <TabBar
         tab={tab}

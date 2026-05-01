@@ -1553,63 +1553,57 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         />
       )}
 
-      {/* First-visit tutorial — anchored at the bottom of the
-          scroll surface so it sits directly above the bottom dock,
-          drawing the user's eye to the sub-tab strip the copy
-          describes. Different content per section. */}
-      {section === "apothecary" && !composeHintShown && dismissComposeHint && (
-        <div style={{ marginTop: 24 }}>
-          <HintCard
-            icon={<Sprig size={18} c={theme.sageDeep} />}
-            title="Apothecary"
-            body={<>
-              <div style={{ marginBottom: 6 }}>
-                <strong style={{ color: theme.terra }}>Blend</strong> —
-                {" "}Build a recipe from scratch. Pick ingredients, see
-                how they read together, save your formula.
-              </div>
-              <div style={{ marginBottom: 6 }}>
-                <strong style={{ color: theme.terra }}>Vibe</strong> —
-                {" "}Tell the kettle how you want to feel; we'll suggest
-                blends that hit that mood at the strength you'd brew them.
-              </div>
-              <div>
-                <strong style={{ color: theme.terra }}>Compendium</strong> —
-                {" "}Every leaf, flower, root, and bark Herbanium tracks.
-                Tap one to read its profile.
-              </div>
-            </>}
-            onDismiss={dismissComposeHint}
-          />
-        </div>
-      )}
-      {section === "shelf" && !composeHintShown && dismissComposeHint && (
-        <div style={{ marginTop: 24 }}>
-          <HintCard
-            icon={<Pencil size={16} c={theme.terra} />}
-            title="Shelf"
-            body={<>
-              <div style={{ marginBottom: 6 }}>
-                <strong style={{ color: theme.terra }}>Recipes</strong> —
-                {" "}Curated picks you've held onto plus your own
-                creations, all in one place to brew again.
-              </div>
-              <div style={{ marginBottom: 6 }}>
-                <strong style={{ color: theme.terra }}>Cabinet</strong> —
-                {" "}Ingredients you actually keep at home. Filter
-                blends to use only what's in stock.
-              </div>
-              <div>
-                <strong style={{ color: theme.terra }}>Journal</strong> —
-                {" "}Cup logs, free-form entries, and mood arcs.
-                Your tea-meets-mood diary.
-              </div>
-            </>}
-            onDismiss={dismissComposeHint}
-          />
-        </div>
-      )}
+    </div>
+  );
+};
 
+// Floating Apothecary / Shelf tutorial card — rendered at the App
+// level just above the TabBar so it overlays the screen content
+// instead of pushing it. Shares the same z layer as the menu
+// buttons so the user reads "this card sits with the dock," and
+// the description's words land right above the sub-tabs they
+// describe. Pulled out of the ComposeScreen tree so the in-screen
+// scroll doesn't carry it.
+export const ComposeTutorialOverlay = ({ section, composeHintShown, dismissComposeHint }) => {
+  if (composeHintShown || !dismissComposeHint) return null;
+  if (section !== "apothecary" && section !== "shelf") return null;
+
+  const isApothecary = section === "apothecary";
+  const Icon  = isApothecary ? Sprig : Pencil;
+  const title = isApothecary ? "Apothecary" : "Shelf";
+  const items = isApothecary
+    ? [
+        ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
+        ["Vibe",  "Tell the kettle how you want to feel; we'll suggest blends that hit that mood at the strength you'd brew them."],
+        ["Compendium", "Every leaf, flower, root, and bark Herbanium tracks. Tap one to read its profile."],
+      ]
+    : [
+        ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
+        ["Cabinet", "Ingredients you actually keep at home. Filter blends to use only what's in stock."],
+        ["Journal", "Cup logs, free-form entries, and mood arcs. Your tea-meets-mood diary."],
+      ];
+
+  return (
+    <div style={{
+      // Float above the TabBar dock without taking flex space.
+      // 100% width inside the centered phone-frame column so the
+      // card aligns with the same gutter as the rest of the app.
+      flexShrink: 0,
+      padding: "0 14px 8px",
+      pointerEvents: "auto",
+    }}>
+      <HintCard
+        icon={<Icon size={18} c={isApothecary ? theme.sageDeep : theme.terra} />}
+        title={title}
+        body={<>
+          {items.map(([k, body], i) => (
+            <div key={k} style={{ marginBottom: i === items.length - 1 ? 0 : 6 }}>
+              <strong style={{ color: theme.terra }}>{k}</strong> — {body}
+            </div>
+          ))}
+        </>}
+        onDismiss={dismissComposeHint}
+      />
     </div>
   );
 };
