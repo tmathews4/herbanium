@@ -189,6 +189,136 @@ const RUNES = {
 };
 const RUNE_KEYS = Object.keys(RUNES);
 
+// Adjective → sigil color. Each elemental's signet draws its
+// stroke from the feel of its name word — Ember reads as fire,
+// Frost as cyan, Onyx as deep, Sage as moss-green. Picks from the
+// vibrant gem palette already used by the mood-crystal renderer
+// so the bestiary's sigils sit in the same color family as the
+// crystal at the top of the screen.
+//
+// Unknown adjectives fall back to whatever color the caller
+// passes in (typically the rarity tone), so the system degrades
+// gracefully if a new adjective is added without a mapping.
+const ADJECTIVE_COLORS = {
+  // Warm / fire / sunset
+  Sunfire:        "#FF7A4C",
+  Ember:          "#FF7A4C",
+  Sunset:         "#FF7A4C",
+  Blaze:          "#FF7A4C",
+  Fire:           "#FF4A2D",
+  Cinder:         "#FF7A4C",
+  Carnelian:      "#FF7A4C",
+  Coral:          "#FF7A4C",
+  Cinnabar:       "#FF4A2D",
+  Bloodstone:     "#FF4A2D",
+  Garnet:         "#FF4A2D",
+  Ruby:           "#FF4A2D",
+  Copper:         "#FF7A4C",
+
+  // Sun / amber / yellow
+  Sun:            "#FFC318",
+  Sunstone:       "#FFC318",
+  Daybreak:       "#FFC318",
+  Light:          "#FFDF5A",
+  Glow:           "#FFDF5A",
+  Glare:          "#FFDF5A",
+  Star:           "#FFDF5A",
+  Crescent:       "#FFDF5A",
+  Citrine:        "#FFC318",
+  Amber:          "#FFC318",
+  Topaz:          "#FFDF5A",
+  Honeycalcite:   "#FFDF5A",
+  "Imperial-Topaz": "#FFC318",
+  Goldstone:      "#FFC318",
+  Tigereye:       "#FFC318",
+  Gold:           "#FFC318",
+  Pyrite:         "#FFC318",
+
+  // Floral / pink / rose
+  Aurora:         "#FF8DC3",
+  Bloom:          "#FF8DC3",
+  Pearl:          "#FF8DC3",
+  "Rose-Quartz":  "#FF8DC3",
+
+  // Atmospheric / cool / silver
+  Mist:           "#A8C4CB",
+  Vapor:          "#A8C4CB",
+  Fog:            "#8FA8B0",
+  Cloud:          "#A8C4CB",
+  Brume:          "#A8C4CB",
+  Hush:           "#C0D2AB",
+  Wind:           "#A8C4CB",
+  Opal:           "#A8C4CB",
+  Diamond:        "#A8C4CB",
+  Crystal:        "#A8C4CB",
+  Quartz:         "#C0D2AB",
+  Marble:         "#A89968",
+  Agate:          "#A89968",
+  Moonstone:      "#C0D2AB",
+
+  // Cool — mint / aqua / teal / cyan
+  Frost:          "#4FECF0",
+  Aquamarine:     "#4FECF0",
+  Turquoise:      "#3FD3D7",
+  Dew:            "#5DD4D9",
+  Drizzle:        "#74A8B3",
+  Rain:           "#74A8B3",
+  Tide:           "#2EB7DC",
+  River:          "#3EBAFF",
+  Sky:            "#3EBAFF",
+  Lightning:      "#3EBAFF",
+
+  // Green — leaf / sage / jade
+  Sage:           "#97B47B",
+  Meadow:         "#7CE049",
+  Bramble:        "#7CE049",
+  Wood:           "#B58E55",
+  Earth:          "#B58E55",
+  Jade:           "#7CE049",
+  Emerald:        "#4DEB7E",
+  Beryl:          "#7CE049",
+
+  // Dusk / sleep / violet
+  Twilight:       "#C77FFF",
+  Dusk:           "#9684C8",
+  Midnight:       "#7E68A8",
+  Storm:          "#7E68A8",
+  Nightshade:     "#9684C8",
+
+  // Smoke / dark / shadow
+  Smoke:          "#9684C8",
+  Shadow:         "#7E68A8",
+  Ash:            "#9684C8",
+  "Smoky-Quartz": "#7E68A8",
+  Slate:          "#7E68A8",
+  Hematite:       "#7E68A8",
+  Onyx:           "#3A3045",
+  Obsidian:       "#3A3045",
+  Coal:           "#3A3045",
+  Void:           "#3A3045",
+
+  // Stone / earth-mineral
+  Stone:          "#A89968",
+  Granite:        "#9684C8",
+  Jasper:         "#B58E55",
+  Sandstone:      "#A89968",
+  Mookaite:       "#B58E55",
+
+  // Sleep / moon
+  Moon:           "#C0D2AB",
+};
+
+/**
+ * Resolve an elemental's sigil-stroke color from its adjective.
+ * Falls back to the supplied default (typically the rarity tone)
+ * when the adjective is missing or not in the lookup table.
+ */
+export function sigilColorFor(elemental, fallback) {
+  const adj = elemental?.adjective;
+  if (adj && ADJECTIVE_COLORS[adj]) return ADJECTIVE_COLORS[adj];
+  return fallback;
+}
+
 export const ElementalSigil = ({
   elemental,
   size = 24,

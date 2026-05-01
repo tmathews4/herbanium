@@ -24,7 +24,7 @@ import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { HintCard } from "./HintCard";
 import { Sprig } from "./icons";
 import { MoodCrystal } from "./MoodCrystal";
-import { ElementalSigil } from "./ElementalSigil";
+import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
 import { getBlend } from "../helpers/misc";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
@@ -87,6 +87,7 @@ export const BestiaryView = ({
     const baseDesc = (a.desc || "").trim();
     return {
       ...a,
+      adjective: adj,
       creature,
       displayName: `${articleFor(adj)} ${adj} ${creature}`,
       desc: baseDesc ? `${flavor} ${baseDesc}` : flavor,
@@ -490,7 +491,7 @@ const AttributeShelf = ({
           display: "inline-flex", alignItems: "center", gap: 6,
         }}
       >
-        <ElementalSigil elemental={a} size={18} color={tone.color} />
+        <ElementalSigil elemental={a} size={18} color={sigilColorFor(a, tone.color)} />
         <span>{a.displayName || a.name}</span>
       </button>
     );
@@ -552,7 +553,7 @@ const AttributeShelf = ({
                 tile, just at a size where the structure (chord
                 lines, dot placement, center mark) is legible. */}
             <div style={{ flexShrink: 0, marginTop: 2 }}>
-              <ElementalSigil elemental={openAttr} size={48} color={tone.color} />
+              <ElementalSigil elemental={openAttr} size={48} color={sigilColorFor(openAttr, tone.color)} />
             </div>
             <div style={{ flex: 1, minWidth: 0, marginRight: 18 }}>
             <div style={{

@@ -11,7 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { theme, ff } from "../theme";
 import { Ornament } from "./icons";
-import { ElementalSigil } from "./ElementalSigil";
+import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
 import { arrivalVerbFor } from "../data/elementalArrivals";
 import { creatureFor } from "../data/elementalAdjectives";
 
@@ -94,8 +94,11 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
             in once at arrival via the .sigil-arriving keyframe in
             index.css. */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-          <span className="sigil-arriving">
-            <ElementalSigil elemental={elemental} size={56} color={theme.terra} />
+          <span
+            className="sigil-arriving"
+            style={{ color: sigilColorFor(elemental, theme.terra) }}
+          >
+            <ElementalSigil elemental={elemental} size={56} color={sigilColorFor(elemental, theme.terra)} />
           </span>
         </div>
 
