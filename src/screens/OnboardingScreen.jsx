@@ -129,13 +129,24 @@ export const OnboardingScreen = ({ onComplete }) => {
         flexShrink: 0,
         maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
+        {/* Keyed by step so the buttons remount on each navigation.
+            Without this, lingering inline styles set by the Button's
+            hover/press handlers (transform, boxShadow not always
+            replayed by React's style diff) carried across steps —
+            specifically, going back from a step where the user had
+            just clicked next would leave the previous step's button
+            in a half-state that read as "default" rather than
+            re-rendering its active enabled fill. Forcing fresh DOM
+            nodes per step removes the inheritance. */}
         <Button
+          key={`back-${step}`}
           variant="ghost"
           onClick={back}
           disabled={step === 0}
           style={{ visibility: step === 0 ? "hidden" : "visible" }}
         >← back</Button>
         <Button
+          key={`next-${step}`}
           variant="primary" tone="ink"
           onClick={advance}
           disabled={!canAdvance}
@@ -275,7 +286,7 @@ const StepName = ({ name, setName }) => (
       marginTop: 10,
       fontFamily: ff.sans, fontSize: 11, color: theme.ash,
     }}>
-      or leave blank and we'll call you "friend"
+      we'll greet you by this in the kettle
     </div>
   </div>
 );
