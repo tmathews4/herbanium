@@ -202,10 +202,17 @@ function flavorToFlavorFamily(f) {
   return FAMILY_BY_FLAVOR[f] || null;
 }
 
+// Pull a session's timestamp from `brewedAt` (the field App.jsx and
+// the seed materializer actually set) before falling back to `ts`.
+// The original implementation read `s.ts` directly — undefined on
+// every session — which silently dropped the entire session pool
+// before any mood / flavor counting happened.
+const tsOf = (item) => item?.brewedAt || item?.ts || 0;
+
 function collectRecentMoods(sessions, journalEntries, now) {
   const moods = [];
   for (const s of sessions || []) {
-    if (!withinWindow(s.ts, now)) continue;
+    if (!withinWindow(tsOf(s), now)) continue;
     if (Array.isArray(s.currentMoods)) moods.push(...s.currentMoods);
     if (Array.isArray(s.targetMoods))  moods.push(...s.targetMoods);
     if (typeof s.actual === "string") {
@@ -215,7 +222,7 @@ function collectRecentMoods(sessions, journalEntries, now) {
     }
   }
   for (const e of journalEntries || []) {
-    if (!withinWindow(e.ts, now)) continue;
+    if (!withinWindow(tsOf(e), now)) continue;
     if (Array.isArray(e.currentMoods)) moods.push(...e.currentMoods);
     if (Array.isArray(e.landedMoods))  moods.push(...e.landedMoods);
   }
@@ -225,7 +232,7 @@ function collectRecentMoods(sessions, journalEntries, now) {
 function collectRecentFlavors(sessions, getBlend, now) {
   const flavors = [];
   for (const s of sessions || []) {
-    if (!withinWindow(s.ts, now)) continue;
+    if (!withinWindow(tsOf(s), now)) continue;
     const blend = getBlend ? getBlend(s.blendId) : null;
     if (!blend) continue;
     if (typeof blend.flavor === "string") flavors.push(blend.flavor);
