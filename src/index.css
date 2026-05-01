@@ -41,6 +41,32 @@
   --ivory-rgb:  243, 236, 220;     /* translucent surfaces (TabBar dock) */
   --terra-rgb:  176, 84, 47;       /* active-tab pill tint */
 
+  /* Family bar colors — used by the graph strips (FlavorMap /
+     EffectMap / palate maps). Light-mode values match the existing
+     ink-on-cream palette; dark mode below brightens each register
+     so bars actually pop against the forest-noir surfaces instead
+     of going muddy. Two parallel scales so flavor families and
+     effect families can collide on the same name without overwriting
+     (e.g. "body" means different things to each axis). */
+  --family-fruit:    #B0542F;
+  --family-floral:   #C37959;
+  --family-earthy:   #4A573A;
+  --family-spiced:   #A57836;
+  --family-smoky:    #7B4A5A;
+  --family-fresh:    #7F9AA0;
+  --family-vegetal:  #6D7E55;
+  --family-marine:   #4F7B83;
+  --family-sweet:    #C49E5C;
+  --family-body:     #796E5B;
+  --family-off:      #B0542F;
+  --effect-calm:     #6D7E55;
+  --effect-focus:    #7F9AA0;
+  --effect-energy:   #A57836;
+  --effect-warm:     #C37959;
+  --effect-cool:     #5A8E8E;
+  --effect-body:     #4A573A;
+  --effect-sleep:    #7B4A5A;
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -102,6 +128,31 @@
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
     --terra-rgb:  168, 96, 64;
+
+    /* Family bars — vibrant variants sized between the muted light
+       palette and the crystal's fluorescent gem tones. Each register
+       picks up roughly one saturation level over the light value so
+       bars register clearly on the dark forest cards without going
+       neon. Earthy and effect-body lift hardest because their muted
+       sage-deep value (#4A573A) was nearly invisible on dark cards. */
+    --family-fruit:    #DA6E40;
+    --family-floral:   #E08F73;
+    --family-earthy:   #8FA876;
+    --family-spiced:   #D9A458;
+    --family-smoky:    #A07090;
+    --family-fresh:    #A8C4CB;
+    --family-vegetal:  #97B47B;
+    --family-marine:   #74A8B3;
+    --family-sweet:    #E0BC78;
+    --family-body:     #A89D89;
+    --family-off:      #DA6E40;
+    --effect-calm:     #97B47B;
+    --effect-focus:    #A8C4CB;
+    --effect-energy:   #D9A458;
+    --effect-warm:     #E08F73;
+    --effect-cool:     #82BCBC;
+    --effect-body:     #8FA876;
+    --effect-sleep:    #A07090;
   }
 }
 

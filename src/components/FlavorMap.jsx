@@ -74,23 +74,23 @@ const MOOD_FAMILY_ORDER = [
 // Exported so static views (IngredientDetail overview bars, etc.)
 // can color flavors and effects with the same palette the
 // dynamic strip uses.
+// Resolve to CSS variables so dark mode lifts each register to its
+// vibrant variant (see --family-* in index.css). The hex values are
+// preserved per-mode in the stylesheet — keeping these as var()
+// references keeps every consumer (graph bars, ingredient detail
+// chips, family-color callouts) theme-aware in one place.
 export const FAMILY_COLORS = {
-  fruit:    "#B0542F",  // terra
-  floral:   "#C37959",  // rose
-  earthy:   "#4A573A",  // sageDeep
-  spiced:   "#A57836",  // ochre
-  smoky:    "#7B4A5A",  // plum
-  fresh:    "#7F9AA0",  // sky
-  vegetal:  "#6D7E55",  // sage
-  marine:   "#4F7B83",  // deep teal — gyokuro/matcha oceanic register,
-                        // distinct enough from grassy vegetal that it
-                        // earns its own band rather than rolling under
-                        // 'vegetal' and losing the kelp character.
-  sweet:    "#C49E5C",  // honey-amber — sweetness is its own register
-                        // (honey, vanilla, caramel, "honey-sweet")
-                        // rather than an extension of floral.
-  body:     "#796E5B",  // ash
-  off:      "#B0542F",  // terra (off-notes share terra to read as "warning")
+  fruit:    "var(--family-fruit)",
+  floral:   "var(--family-floral)",
+  earthy:   "var(--family-earthy)",
+  spiced:   "var(--family-spiced)",
+  smoky:    "var(--family-smoky)",
+  fresh:    "var(--family-fresh)",
+  vegetal:  "var(--family-vegetal)",
+  marine:   "var(--family-marine)",
+  sweet:    "var(--family-sweet)",
+  body:     "var(--family-body)",
+  off:      "var(--family-off)",
 };
 
 export const FAMILY_BY_FLAVOR = {
@@ -135,7 +135,7 @@ export const FAMILY_BY_FLAVOR = {
   harsh: "off", acrid: "off", soapy: "off", muddy: "off", medicinal: "off",
 };
 
-const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "#796E5B";
+const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "var(--ash)";
 
 // Mood / effect → family. Mirrors the flavor hierarchy so the same
 // Simple/Detailed toggle can roll up moods. Cooling is split out of
@@ -159,16 +159,16 @@ export const FAMILY_BY_EFFECT = {
   sleepy: "sleep",
 };
 export const EFFECT_FAMILY_COLORS = {
-  calm:   "#6D7E55",  // sage
-  focus:  "#7F9AA0",  // sky
-  energy: "#A57836",  // ochre
-  warm:   "#C37959",  // rose
-  cool:   "#5A8E8E",  // teal — distinct from focus's sky
-  body:   "#4A573A",  // sageDeep
-  sleep:  "#7B4A5A",  // plum
+  calm:   "var(--effect-calm)",
+  focus:  "var(--effect-focus)",
+  energy: "var(--effect-energy)",
+  warm:   "var(--effect-warm)",
+  cool:   "var(--effect-cool)",
+  body:   "var(--effect-body)",
+  sleep:  "var(--effect-sleep)",
 };
 const colorForEffect = (effect) =>
-  EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "#796E5B";
+  EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "var(--ash)";
 
 // Palate / balance axes — diagnostic taste-structure dimensions
 // (bitterness, sweetness, astringency, tartness, menthol). Colored
@@ -181,7 +181,7 @@ const PALATE_COLORS = {
   sweetness:   "#A57836",  // ochre
   menthol:     "#7F9AA0",  // sky
 };
-const colorForPalate = (axis) => PALATE_COLORS[axis] || "#796E5B";
+const colorForPalate = (axis) => PALATE_COLORS[axis] || "var(--ash)";
 
 // Per-axis "unpleasant" thresholds for the palate strip. The
 // bitterness axis sums bitter + bitterness + astringent, so it
@@ -423,11 +423,11 @@ const TrackMap = ({
   const colorForName =
     kind === "flavor"
       ? (useFamilyMode
-          ? (n) => FAMILY_COLORS[n] || FAMILY_COLORS[FAMILY_BY_FLAVOR[n]] || "#796E5B"
+          ? (n) => FAMILY_COLORS[n] || FAMILY_COLORS[FAMILY_BY_FLAVOR[n]] || "var(--ash)"
           : colorFor)
       : kind === "mood"
       ? (useFamilyMode
-          ? (n) => EFFECT_FAMILY_COLORS[n] || EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[n]] || "#796E5B"
+          ? (n) => EFFECT_FAMILY_COLORS[n] || EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[n]] || "var(--ash)"
           : colorForEffect)
       : colorForPalate;
 
