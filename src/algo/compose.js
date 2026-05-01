@@ -824,10 +824,10 @@ export function buildSyntheticForSelections(moods, flavors, primaryAxis = "feel"
 // Legacy: the second positional arg accepts either a single flavor
 // string (older callers) or a flavors array (current callers).
 export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
-  if (moods.length === 0) return [];
   const flavors = Array.isArray(flavorArg)
     ? flavorArg.filter(Boolean)
     : flavorArg ? [flavorArg] : [];
+  if (moods.length === 0 && flavors.length === 0) return [];
   // Legacy single-flavor variable for axis-aware accent generation
   // (the accent helpers still expect a single flavor or null).
   const flavor = flavors[0] || null;
@@ -897,8 +897,10 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
     );
   }
 
-  const primary = resolveBlend(moods, flavor);
-  if (primary) {
+  // resolveBlend requires at least one mood; for flavor-only queries
+  // we skip it and rely on the scored pool below to surface matches.
+  const primary = moods.length > 0 ? resolveBlend(moods, flavor) : null;
+  if (primary && !primary.empty) {
     const score = scoreSelections(primary, moods, flavors, primaryAxis);
     // Additive — primary candidate is included as long as it hits
     // at least one of the user's selections.
@@ -913,6 +915,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
   if (primaryAxis === "feel") {
     const complements = flavor ? (FLAVOR_COMPLEMENTS[flavor] || []) : [];
     for (const comp of complements) {
+      if (!primary) break;
       const v = buildAccentVariantByFlavor(primary, comp);
       if (!v) continue;
       const score = scoreSelections(v, moods, flavors, primaryAxis);
@@ -920,7 +923,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
       addBlend(v, "accent", `${comp} accent`, score);
       break;
     }
-  } else {
+  } else if (moods.length > 0) {
     const primaryMood = moods[0];
     const neighbors = MOOD_NEIGHBORS[primaryMood] || [];
     for (const nb of neighbors) {

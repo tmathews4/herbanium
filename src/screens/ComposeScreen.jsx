@@ -236,7 +236,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       ? (pantryIds && pantryIds.size === 0
           ? "add ingredients to your cabinet first"
           : "no blends from what you have on hand")
-      : "pick a mood to begin",
+      : "pick a mood or flavor to begin",
     ingredients: [], tempC: 95, timeS: 300, effects: [],
     empty: true, conflict: null, moods: [],
   };
