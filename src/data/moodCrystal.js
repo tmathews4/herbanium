@@ -130,6 +130,45 @@ const FLAVOR_VOICE = {
 
 const articleFor = (word) => /^[aeiou]/i.test(word || "") ? "An" : "A";
 
+// Pattern words — describe the crystal's visual texture. One per
+// user, picked deterministically from profile.name + createdAt so
+// each user has their own signature pattern that doesn't shift
+// across sessions. Pattern shows up in the name's third slot
+// ("A Sage Sky Threaded Crystal") and shapes the description's
+// transition verb between the two color clauses.
+//
+// Each entry: [Title-Case word, transition phrase used in the
+// description, single-color phrase when only one family lands].
+const CRYSTAL_PATTERNS = [
+  ["Threaded", "threaded with",   "drawn through with a single clear strand"],
+  ["Swirling", "swirling into",   "the color spirals slow at its heart"],
+  ["Veined",   "veined with",     "thin currents branch across the cut"],
+  ["Misted",   "misted into",     "softened toward a hazed center"],
+  ["Banded",   "banded with",     "neat layers stack within the stone"],
+  ["Blotted",  "blotted into",    "irregular patches drift in the depth"],
+  ["Dotted",   "dotted through with", "small bright points scatter through it"],
+  ["Cloudy",   "clouded into",    "the color hangs in a soft suspension"],
+];
+
+function hashStr(s) {
+  let h = 0;
+  const str = s || "";
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function patternForProfile(profile) {
+  // Deterministic per profile — same user keeps the same pattern
+  // across sessions and devices, since name + createdAt is stable.
+  // Falls back to Threaded for the no-profile case (e.g. previews).
+  if (!profile) return CRYSTAL_PATTERNS[0];
+  const seed = `${profile.name || "anon"}|${profile.createdAt || 0}|crystalPattern`;
+  return CRYSTAL_PATTERNS[hashStr(seed) % CRYSTAL_PATTERNS.length];
+}
+
 function withinWindow(ts, now) {
   if (!ts) return false;
   return now - ts <= WINDOW_MS;
@@ -325,8 +364,9 @@ export function computeMoodCrystal({
     };
   }
 
-  // Family-aligned adjective for the primary, used to build the
-  // crystal's name. "A Citrine-Sage Crystal" when both axes lead.
+  // Family-aligned adjective for each axis, used to build the
+  // crystal's compact name. Two-axis form keeps both colors stacked
+  // before the pattern word: "A Sage Sky Threaded Crystal."
   const primaryAdj = primaryAxis === "effect"
     ? EFFECT_ADJECTIVES[primary.family]
     : FLAVOR_ADJECTIVES[primary.family];
@@ -336,10 +376,16 @@ export function computeMoodCrystal({
         : FLAVOR_ADJECTIVES[secondary.family])
     : null;
 
-  const titleAdj = secondaryAdj
-    ? `${primaryAdj} threaded with ${secondaryAdj}`
-    : primaryAdj;
-  const name = `${articleFor(titleAdj)} ${titleAdj} Crystal`;
+  const [patternWord, patternVerb, patternSoloVoice] = patternForProfile(profile);
+
+  // Single-axis crystals skip the pattern word — pattern needs two
+  // colors to read as a relationship. "A Sage Crystal" reads cleaner
+  // than "A Sage Threaded Crystal" when there's nothing to thread
+  // it with.
+  const namePieces = secondaryAdj
+    ? [primaryAdj, secondaryAdj, patternWord]
+    : [primaryAdj];
+  const name = `${articleFor(namePieces[0])} ${namePieces.join(" ")} Crystal`;
 
   // Description voice — names both registers when both exist,
   // otherwise stays single-color. Built from the family voice
@@ -353,23 +399,28 @@ export function computeMoodCrystal({
         : FLAVOR_VOICE[secondary.family])
     : null;
 
+  // Description ties together: the pattern (visual texture word),
+  // the primary family voice, and the secondary family voice if
+  // present. Pattern verb (e.g. "swirling into", "veined with") is
+  // the connector so the user reads the texture as the relationship
+  // between the two colors. Single-color crystals get the pattern's
+  // solo phrase instead — describes how the one color sits in the
+  // stone rather than how two colors meet.
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const lc  = (s) => s.charAt(0).toLowerCase() + s.slice(1);
   let description;
   if (isFaint) {
-    // Faint = forecast voice. Lowercase the family voice so the
-    // line reads as continuation of "Faintly..." rather than two
-    // capitalized starts.
-    const lc = (s) => s.charAt(0).toLowerCase() + s.slice(1);
     if (secondaryVoice) {
-      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, with a hint of ${lc(secondaryVoice)} ahead.`;
+      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, ${patternVerb} ${lc(secondaryVoice)} ahead.`;
     } else {
       description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, still gathering.`;
     }
   } else if (secondaryVoice) {
-    description = `${primaryVoice}, drifting into ${secondaryVoice}.`;
-    description = description.charAt(0).toUpperCase() + description.slice(1);
+    description = cap(`${primaryVoice}, ${patternVerb} ${lc(secondaryVoice)}.`);
   } else {
-    description = `${primaryVoice}.`;
-    description = description.charAt(0).toUpperCase() + description.slice(1);
+    // Pattern's solo phrase + the primary voice. Reads as the
+    // pattern describing how the one color inhabits the stone.
+    description = cap(`${patternSoloVoice} — ${lc(primaryVoice)}.`);
   }
 
   // "With faint X" trailing mention — surfaces an onboarding-
@@ -442,6 +493,7 @@ export function computeMoodCrystal({
     gradient,
     innerGlowColor,
     outerGlowColor,
+    pattern: patternWord,
     families: {
       effect: effectFams.ranked,
       flavor: flavorFams.ranked,

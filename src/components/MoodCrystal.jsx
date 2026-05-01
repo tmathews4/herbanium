@@ -16,32 +16,159 @@ import { ff, theme } from "../theme";
 import { computeMoodCrystal } from "../data/moodCrystal";
 import { usePersistedState } from "../hooks/usePersistedState";
 
-const CrystalShape = ({ gradient, idSuffix }) => {
+// Per-pattern stop configurations for the body fill. Each pattern
+// reshapes either the gradient stops or the gradient type so the
+// crystal reads visibly differently across the eight pattern words.
+// Returned shape: { type: "linear" | "radial", coords, stops }
+//   coords:  x1,y1,x2,y2 for linear; cx,cy,r for radial
+//   stops:   [{ offset, color, opacity }]
+const patternConfig = (pattern, c1, c2) => {
+  switch (pattern) {
+    case "Swirling":
+      // Rotated, alternating stops so the eye reads a curve.
+      return {
+        type: "linear",
+        coords: { x1: "12%", y1: "10%", x2: "88%", y2: "92%" },
+        stops: [
+          { offset: "0%",   color: c1, opacity: 0.95 },
+          { offset: "32%",  color: c2, opacity: 0.92 },
+          { offset: "60%",  color: c1, opacity: 0.92 },
+          { offset: "100%", color: c2, opacity: 0.88 },
+        ],
+      };
+    case "Misted":
+      // Feathered stops — soft, low-contrast, overlapping.
+      return {
+        type: "linear",
+        coords: { x1: "0%", y1: "0%", x2: "100%", y2: "100%" },
+        stops: [
+          { offset: "0%",   color: c1, opacity: 0.80 },
+          { offset: "40%",  color: c2, opacity: 0.70 },
+          { offset: "70%",  color: c1, opacity: 0.70 },
+          { offset: "100%", color: c2, opacity: 0.78 },
+        ],
+      };
+    case "Banded":
+      // Hard 50/50 split so each color reads as its own stripe.
+      return {
+        type: "linear",
+        coords: { x1: "0%", y1: "0%", x2: "0%", y2: "100%" },
+        stops: [
+          { offset: "0%",   color: c1, opacity: 0.95 },
+          { offset: "49%",  color: c1, opacity: 0.95 },
+          { offset: "51%",  color: c2, opacity: 0.92 },
+          { offset: "100%", color: c2, opacity: 0.92 },
+        ],
+      };
+    case "Blotted":
+      // Radial — c1 in the center, c2 toward the edges. Reads as
+      // a patch suspended in the stone.
+      return {
+        type: "radial",
+        coords: { cx: "40%", cy: "40%", r: "75%" },
+        stops: [
+          { offset: "0%",   color: c1, opacity: 0.95 },
+          { offset: "55%",  color: c2, opacity: 0.90 },
+          { offset: "100%", color: c1, opacity: 0.85 },
+        ],
+      };
+    case "Cloudy":
+      // Wide low-contrast radial — blurred suspension, no edge.
+      return {
+        type: "radial",
+        coords: { cx: "50%", cy: "50%", r: "85%" },
+        stops: [
+          { offset: "0%",   color: c2, opacity: 0.78 },
+          { offset: "60%",  color: c1, opacity: 0.85 },
+          { offset: "100%", color: c2, opacity: 0.75 },
+        ],
+      };
+    case "Threaded":
+    case "Veined":
+    case "Dotted":
+    default:
+      // Default linear — Threaded uses this baseline; Veined and
+      // Dotted layer extra geometry on top via the overlay below.
+      return {
+        type: "linear",
+        coords: { x1: "0%", y1: "0%", x2: "100%", y2: "100%" },
+        stops: [
+          { offset: "0%",   color: c1, opacity: 0.95 },
+          { offset: "55%",  color: c2, opacity: 0.92 },
+          { offset: "100%", color: c1, opacity: 0.88 },
+        ],
+      };
+  }
+};
+
+const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
   const gradId = `crystal-grad-${idSuffix}`;
   const glowId = `crystal-glow-${idSuffix}`;
+  const clipId = `crystal-clip-${idSuffix}`;
   const [c1, c2] = gradient;
+  const config = patternConfig(pattern, c1, c2);
+
+  // Crystal silhouette polygon — six-faceted bipyramid.
+  const silhouette = "36,6 60,28 56,58 36,80 16,58 12,28";
+
   return (
     <svg width={72} height={84} viewBox="0 0 72 84" aria-hidden>
       <defs>
-        <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"  stopColor={c1} stopOpacity="0.95" />
-          <stop offset="55%" stopColor={c2} stopOpacity="0.92" />
-          <stop offset="100%" stopColor={c1} stopOpacity="0.88" />
-        </linearGradient>
+        {config.type === "linear" ? (
+          <linearGradient id={gradId} {...config.coords}>
+            {config.stops.map((s, i) => (
+              <stop key={i} offset={s.offset} stopColor={s.color} stopOpacity={s.opacity} />
+            ))}
+          </linearGradient>
+        ) : (
+          <radialGradient id={gradId} {...config.coords}>
+            {config.stops.map((s, i) => (
+              <stop key={i} offset={s.offset} stopColor={s.color} stopOpacity={s.opacity} />
+            ))}
+          </radialGradient>
+        )}
         <radialGradient id={glowId} cx="50%" cy="40%" r="60%">
           <stop offset="0%"   stopColor="#fff" stopOpacity="0.55" />
           <stop offset="60%"  stopColor="#fff" stopOpacity="0.0" />
         </radialGradient>
+        {/* Clip path for pattern overlays (Veined / Dotted) so the
+            extra geometry stays inside the silhouette. */}
+        <clipPath id={clipId}>
+          <polygon points={silhouette} />
+        </clipPath>
       </defs>
-      {/* Diamond / shard silhouette — six-faceted bipyramid in 2D.
-          Coords sketch a tall hexagonal jewel: top point, two
-          shoulders, two hips, bottom point. */}
+
       <polygon
-        points="36,6 60,28 56,58 36,80 16,58 12,28"
+        points={silhouette}
         fill={`url(#${gradId})`}
         stroke="rgba(30,24,18,0.18)"
         strokeWidth="0.75"
       />
+
+      {/* Pattern-specific overlay: extra geometry that rides on top
+          of the gradient body. Veined draws thin branching currents,
+          Dotted scatters small bright points. Both clipped to the
+          silhouette so they don't bleed past the cut. */}
+      {pattern === "Veined" && (
+        <g clipPath={`url(#${clipId})`} stroke={c2} strokeOpacity="0.7" strokeWidth="0.7" fill="none">
+          <path d="M22,16 Q34,38 30,72" />
+          <path d="M50,18 Q40,40 46,68" />
+          <path d="M30,24 Q40,42 38,60" />
+        </g>
+      )}
+      {pattern === "Dotted" && (
+        <g clipPath={`url(#${clipId})`} fill={c2} fillOpacity="0.85">
+          <circle cx="26" cy="32" r="1.6" />
+          <circle cx="44" cy="40" r="1.2" />
+          <circle cx="32" cy="50" r="1.4" />
+          <circle cx="48" cy="58" r="1.1" />
+          <circle cx="22" cy="46" r="1.0" />
+          <circle cx="38" cy="66" r="1.3" />
+          <circle cx="50" cy="28" r="1.0" />
+          <circle cx="30" cy="20" r="0.9" />
+        </g>
+      )}
+
       {/* Inner facet edges so the shape reads as cut, not flat. */}
       <polyline
         points="12,28 36,38 60,28"
@@ -158,7 +285,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         opacity: crystal.isFaint ? 0.55 : 1,
         transition: "box-shadow 0.4s ease, opacity 0.3s ease",
       }}>
-        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} />
+        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
