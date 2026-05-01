@@ -112,24 +112,30 @@ export function loudnessOf(flavor) {
 }
 
 // Flavors that should STACK across ingredients rather than dilute
-// via dose-weighting. Three heat sources at 1/3 dose each don't
-// average down to one heat — the cup reads hotter than any single
-// component would alone (capsaicin / piperine / eugenol all grip
-// trigeminal receptors independently and the sensations sum).
+// via dose-weighting. Two registers belong here:
 //
-// Bitter / astringent are NOT in this set even though they also
-// stack physiologically: the curated catalog is calibrated against
-// dose-weighted bitter accumulation, and the existing tannin
-// warnings already fire on dose-weighted thresholds. Adding bitter
-// here without recalibrating thresholds would falsely flag dozens
-// of clean blends. Heat is the one where the engine genuinely
-// under-reads multi-source contributions today.
+//   - Heat / spice (capsaicin / piperine / eugenol) — independent
+//     trigeminal grips that sum on the palate. Three 1/3-dose hot
+//     ingredients read genuinely hotter than one full-dose source.
+//   - Tannin grip (catechins / tannic acid / theaflavins) — every
+//     tannic source adds to the dry-mouth accumulation rather than
+//     averaging out. A multi-leaf chai cup is more astringent than
+//     a single-leaf cup at equivalent total mass.
 //
 // Most aromatic flavors (citrus, floral, fruity, smoky, vegetal)
 // genuinely saturate via dose dilution and stay outside this set —
 // two citrus ingredients at 50/50 read as one citrus, not two.
+//
+// Calibration note: the tannin / overpull thresholds in this file
+// are tuned against this stacking model. Removing items from this
+// set without re-tuning would silently miss tannin warnings on
+// multi-source blends.
 export const ADDITIVE_FLAVORS = new Set([
+  // Heat
   "peppery", "pungent", "spiced", "hot", "numbing",
+  // Tannin grip — dry-mouth + bitter alkaloids accumulate, don't
+  // dilute, when multiple tannic sources share a cup.
+  "bitter", "bitterness", "astringent", "tannic",
 ]);
 
 // Soft ceiling for additive flavors. Past 5 the palate saturates
@@ -137,40 +143,99 @@ export const ADDITIVE_FLAVORS = new Set([
 // regardless of how many sources contribute. Caps a runaway sum.
 const ADDITIVE_CAP = 5;
 
+// Minimum per-contributor strength to count as a "real" stacking
+// source. Stacking only kicks in for contributors that are
+// individually meaningful at the noticeable-or-above level
+// (strength ≥ 2 = "present, noticeable" on the catalog scale).
+// Below this, the contribution stays on the dose-weighted path
+// so background trace notes don't sum into phantom tannin or
+// phantom heat. A multi-leaf cup with one trace-astringent
+// contributor each won't stack; a cup with three honestly-tannic
+// tea bases will.
+const STACKING_MIN_STRENGTH = 2.0;
+
+// Stacking exponent. weight^0.85 sits between dose-weighted (1) and
+// pure unweighted (0). Chosen so single-source full-weight ingredients
+// read identically to the prior math, two-source 50/50 lifts ~1.11×,
+// three-source 1/3 lifts ~1.21×, four-source 1/4 lifts ~1.27×, and
+// the curve flattens past five sources — heat / tannin builds
+// noticeably with stack count without runaway. Steeper exponents
+// (0.5, 0.7) flagged accent-stretched curated blends as tannic at
+// baseline; 0.85 keeps those blends clean while still surfacing
+// honestly tannic multi-leaf cups. 1.0 would be no stacking at all.
+const STACK_EXPONENT = 0.85;
+
 /**
  * Combine raw flavor contributions across ingredients. Two paths:
  *
- *   - Additive set (heat, bitter, astringent): use weight^0.5 instead
- *     of weight^1, so a single full-weight contributor reads exactly
- *     as before but multiple contributors stack incrementally without
- *     fully diluting (sqrt(n) growth — three 1/3-dose heat sources
- *     read ~1.7× a single equivalent). Capped at ADDITIVE_CAP so a
- *     pile-on can't run away.
+ *   - Additive set (heat, bitter, astringent): if a flavor has 2+
+ *     strong LEAD contributors (each at strength ≥ STACKING_MIN_STRENGTH
+ *     and role !== "accent"/"catalyst"), ALL lead contributors of that
+ *     flavor switch to weight^STACK_EXPONENT accumulation — multi-lead
+ *     heat / tannin builds with stack count. Accents and catalysts
+ *     always stay dose-weighted so curator-stretched accents don't
+ *     pile onto the cup's tannin reading. Capped at ADDITIVE_CAP.
  *   - Everything else: dose-weighted × loudness (the existing
  *     behavior). Two citrus contributors at 50/50 still read as
  *     one citrus — most aromatic flavors saturate via dilution.
  *
- * Backward-compatible for single-source blends (weight^0.5 = 1 when
- * weight = 1), so the existing curated catalog's calibration holds.
+ * Why leads only: accents are deliberate stylistic stretches by
+ * the curator (e.g. rose past its overpull point to introduce a
+ * tannic edge). Stacking them with another over-pulled accent
+ * created false cup-level warnings on blends the curator considers
+ * clean. Real multi-source heat / tannin from a chai-style recipe
+ * comes from multiple LEAD spices, which is what we want to flag.
+ *
+ * Backward-compatible for single-source blends (any weight^k = same
+ * when weight = 1), so the existing curated catalog's calibration
+ * holds for one-leaf cups.
  */
 export function combineFlavors(contributions) {
-  const additiveSums = {};
-  const dosed = {};
-  for (const { weight, profile } of contributions) {
-    if (!profile?.flavors) continue;
-    for (const [name, strength] of profile.flavors) {
-      const loud = loudnessOf(name);
-      if (ADDITIVE_FLAVORS.has(name)) {
-        const w = Math.sqrt(Math.max(0, weight));
-        additiveSums[name] = (additiveSums[name] || 0) + strength * w * loud;
-      } else {
-        dosed[name] = (dosed[name] || 0) + strength * weight * loud;
+  // Lead-only filter for stacking. Accents (curator-stretched
+  // stylistic stretches) and catalysts (trace bioavailability
+  // helpers) don't participate in stacking — they always
+  // dose-weight, even if their extraction profile flags strength
+  // ≥ threshold.
+  const isStackable = (c) => {
+    const r = c.role || "lead";
+    return r === "lead";
+  };
+
+  // First pass — count strong LEAD contributors per additive flavor.
+  // A flavor only switches to stacking math when 2+ leads are
+  // independently meaningful tannic / heat sources.
+  const strongCount = {};
+  for (const c of contributions) {
+    if (!c.profile?.flavors || !isStackable(c)) continue;
+    for (const [name, strength] of c.profile.flavors) {
+      if (ADDITIVE_FLAVORS.has(name) && strength >= STACKING_MIN_STRENGTH) {
+        strongCount[name] = (strongCount[name] || 0) + 1;
       }
     }
   }
-  const out = { ...dosed };
-  for (const [name, sum] of Object.entries(additiveSums)) {
-    out[name] = Math.min(ADDITIVE_CAP, sum);
+
+  // Second pass — accumulate. Lead contributions to flavors with
+  // ≥2 strong leads use the stacking path; everything else uses
+  // dose-weighted.
+  const out = {};
+  for (const c of contributions) {
+    if (!c.profile?.flavors) continue;
+    const stackable = isStackable(c);
+    for (const [name, strength] of c.profile.flavors) {
+      const loud = loudnessOf(name);
+      const stack = stackable
+        && ADDITIVE_FLAVORS.has(name)
+        && (strongCount[name] || 0) >= 2;
+      const w = stack
+        ? Math.pow(Math.max(0, c.weight), STACK_EXPONENT)
+        : c.weight;
+      out[name] = (out[name] || 0) + strength * w * loud;
+    }
+  }
+  for (const name of Object.keys(out)) {
+    if (ADDITIVE_FLAVORS.has(name)) {
+      out[name] = Math.min(ADDITIVE_CAP, out[name]);
+    }
   }
   return out;
 }
