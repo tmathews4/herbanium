@@ -14,8 +14,31 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  ALL_ADJECTIVES, RANDOM_CREATURE_POOL,
+  RARE_TIER_ADJECTIVES, MYTHIC_TIER_ADJECTIVES,
+  RARE_TIER_CREATURES, LEGENDARY_TIER_CREATURES, MYTHIC_TIER_CREATURES,
 } from "./elementalAdjectives";
+
+// Wild rarity tiers: 75% rare, 20% legendary, 5% mythic. Mythic
+// rolls reach into the cosmic-adjective pool and the great-beast
+// creature pool; legendary into folk-spirit creatures; rare into
+// real animals + workmanlike adjectives. Each tier specifies its
+// own pools so a "rare" wild can never land "Fenrir Sleipnir,"
+// and a "mythic" wild won't be a "Mist Hare."
+const TIER_TABLE = [
+  { rarity: "rare",      weight: 75, adjPool: RARE_TIER_ADJECTIVES,   crePool: RARE_TIER_CREATURES },
+  { rarity: "legendary", weight: 20, adjPool: RARE_TIER_ADJECTIVES,   crePool: LEGENDARY_TIER_CREATURES },
+  { rarity: "mythic",    weight:  5, adjPool: MYTHIC_TIER_ADJECTIVES, crePool: MYTHIC_TIER_CREATURES },
+];
+
+function pickTier(rng) {
+  const total = TIER_TABLE.reduce((s, t) => s + t.weight, 0);
+  let r = rng() * total;
+  for (const tier of TIER_TABLE) {
+    r -= tier.weight;
+    if (r < 0) return tier;
+  }
+  return TIER_TABLE[0];
+}
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const ROLL_DENOMINATOR = 15;
@@ -196,8 +219,13 @@ export function maybeRollWild({
   ];
   const biasedCre = topMoods.flatMap(m => MOOD_CREATURES[m] || []);
 
-  const adjective = weightedPick(ALL_ADJECTIVES, biasedAdj, rng);
-  const creature  = weightedPick(RANDOM_CREATURE_POOL, biasedCre, rng);
+  // Roll a rarity tier first; pick adjective + creature from its
+  // tier pools. Bias overlay still applies via weightedPick — a
+  // user's recent calm/comfort activity nudges any tier roll
+  // toward its in-pool calm/comfort items.
+  const tier = pickTier(rng);
+  const adjective = weightedPick(tier.adjPool, biasedAdj, rng);
+  const creature  = weightedPick(tier.crePool, biasedCre, rng);
 
   // Trail closes the loop on the bestiary's lead crystal when one
   // is named — same signal that biased this roll. Falls back to
@@ -231,7 +259,7 @@ export function maybeRollWild({
     displayName: display,
     adjective,
     creature,
-    rarity: "rare",
+    rarity: tier.rarity,
     desc,
     earned: true,
     wild: true,

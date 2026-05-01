@@ -277,6 +277,93 @@ export const RANDOM_CREATURE_POOL = [
 // element + gem so the variety reads as broad as possible.
 export const ALL_ADJECTIVES = [...ELEMENT_ADJECTIVES, ...GEM_ADJECTIVES];
 
+/* ─── Rarity-tiered pools for wild rolls ──────────────────────────
+   Wild elementals roll across three rarity tiers so the rare,
+   cosmic, or true-mythic adjective+creature combinations feel
+   genuinely earned. Probability split: 75% rare, 20% legendary,
+   5% mythic. The wild roller picks tier first, then pulls
+   adjective + creature from the tier-matched pool below.
+
+   Adjectives:
+     RARE_TIER_*  — workmanlike stones, weather, common gems.
+                    What "wild elemental" defaults to.
+     MYTHIC_TIER_* — celestial, cosmic, fire, precious gems.
+                    Reserved for the rarer top-tier rolls.
+
+   Creatures:
+     RARE_TIER_CREATURES   — real animals (drawn from existing
+                              RANDOM_CREATURE_POOL).
+     LEGENDARY_TIER_CREATURES — minor folk-spirits and small fae.
+     MYTHIC_TIER_CREATURES — true mythical beasts (drawn from
+                              creationTitle.js MYTHICAL pools).
+   ──────────────────────────────────────────────────────────────── */
+
+// Default tier — broad, grounded register. The bulk of wild rolls
+// land here.
+export const RARE_TIER_ADJECTIVES = [
+  // Atmospheric / soft
+  "Mist", "Dew", "Vapor", "Fog", "Drizzle", "Brume", "Hush", "Cloud",
+  "Wind", "Frost", "Smoke", "Cinder", "Ash",
+  // Grounded — wood / earth / botanicals
+  "Stone", "Wood", "Earth", "Sage", "Bramble", "Meadow", "Tide", "River",
+  "Sky", "Sandstone", "Jasper", "Hematite", "Pyrite", "Coal",
+  "Slate", "Granite", "Marble", "Agate", "Quartz",
+  "Smoky-Quartz",
+  // Common gems / semi-precious
+  "Pearl", "Onyx", "Opal", "Moonstone", "Aquamarine", "Jade",
+  "Turquoise", "Coral", "Carnelian", "Amber", "Citrine", "Topaz",
+  "Garnet", "Ruby", "Rose-Quartz", "Cinnabar", "Bloodstone",
+  "Copper", "Gold", "Bloom", "Glow",
+];
+
+// Top tier — celestial, fire, luminous, the precious or rarely
+// mined. Reserved for legendary / mythic rolls.
+export const MYTHIC_TIER_ADJECTIVES = [
+  // Celestial / cosmic
+  "Sun", "Sunfire", "Daybreak", "Sunset", "Lightning", "Storm",
+  "Star", "Moon", "Crescent", "Light", "Aurora",
+  "Twilight", "Dusk", "Midnight", "Shadow", "Void", "Nightshade",
+  // Fire / blaze
+  "Blaze", "Fire", "Glare",
+  // Precious / rare gems
+  "Sunstone", "Diamond", "Imperial-Topaz", "Honeycalcite", "Goldstone",
+  "Mookaite", "Beryl", "Tigereye", "Emerald",
+];
+
+// Common-tier creatures: real animals. The bulk of wild rolls
+// produce one of these. Drawn from RANDOM_CREATURE_POOL above,
+// minus the few minor-spirit entries that move up to the next
+// tier.
+export const RARE_TIER_CREATURES = [
+  "Wolf", "Hare", "Owl", "Stag", "Otter", "Hawk",
+  "Bee", "Moth", "Cricket", "Salamander", "Crow", "Fox", "Tortoise",
+  "Heron", "Lark", "Bat", "Cat", "Squirrel", "Mole", "Bear",
+  "Hummingbird", "Magpie", "Robin", "Boar", "Beaver", "Crane",
+  "Dove", "Falcon", "Lynx", "Doe", "Hedgehog", "Frog", "Beetle",
+  "Spider", "Octopus", "Newt", "Camel", "Stork", "Mongoose",
+  "Mantis", "Tanuki", "Tiger", "Hound", "Marmot", "Ermine",
+];
+
+// Legendary-tier creatures: small folk-spirits. A step up from
+// "real animal" but not yet a great mythic beast.
+export const LEGENDARY_TIER_CREATURES = [
+  "Phoenix", "Pyralis", "Hobgoblin", "Dryad", "Sprite", "Wisp",
+  "Halcyon", "Caladrius", "Jackalope", "Bakeneko", "Salamander",
+  "Bicorn", "Bunyip",
+];
+
+// Mythic-tier creatures: the great beasts. Drawn from the same
+// pool the unique creation title pulls from, so a mythic wild
+// roll feels of a piece with the user's signature elemental.
+export const MYTHIC_TIER_CREATURES = [
+  "Sphinx", "Yale", "Cockatrice", "Pegasus", "Griffon", "Garuda",
+  "Sleipnir", "Hippogriff", "Buraq", "Ouroboros", "Yeti", "Behemoth",
+  "Kirin", "Bonnacon", "Sasquatch", "Wyvern", "Bennu", "Catoblepas",
+  "Tarasque", "Simurgh", "Hippocampus", "Wyrm", "Manticore",
+  "Chimera", "Kelpie", "Cetus", "Knucker", "Cerberus", "Fenrir",
+  "Basilisk", "Unicorn", "Amphithere",
+];
+
 // Returns the creature noun for an attribute. Pre-resolved
 // `attr.creature` first (set by ProfileScreen for random attrs so
 // downstream consumers like ElementalArrivalCard don't need a seed),
