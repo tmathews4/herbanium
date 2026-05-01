@@ -208,14 +208,26 @@ export const ElementalSigil = ({
   // rune choice is the most consistent layer per id. Drawn at low
   // opacity beneath everything else so it reads as background
   // pattern unless the viewer is looking for it.
+  //
+  // Scale so the 4×6 rune box matches the hex's 2r height (i.e.
+  // top-of-rune = top point of hex, bottom-of-rune = bottom point
+  // of hex). Rune endpoints at y=0 / y=6 / x=0 / x=4 of the rune
+  // box thus extend out toward the hex border; the SVG clipPath
+  // below crops them exactly at the hex perimeter. Lines whose
+  // endpoints sit inside the box (e.g. Naudhiz's diagonal slash)
+  // stay short — that's the "some lines reach the border, some
+  // don't" effect the geometry should produce naturally.
   const runeIdx = h % RUNE_KEYS.length; h = Math.floor(h / RUNE_KEYS.length);
   const runeLines = RUNES[RUNE_KEYS[runeIdx]];
-  // Scale so the 4×6 rune box fits inside ~62% of the hex. Center
-  // it at (cx, cy) accounting for the box's (2, 3) center.
-  const runeUnit = (size * 0.62) / 6;
+  const runeUnit = (2 * r) / 6;             // matches hex height
   const runeOffsetX = cx - 2 * runeUnit;
   const runeOffsetY = cy - 3 * runeUnit;
   const runeStrokeWidth = Math.max(0.6, size * 0.03);
+  // useId guarantees a unique clipPath id per sigil instance, so
+  // multiple sigils on the same page (tile + detail card) don't
+  // collide on the same document-level <clipPath id="…">.
+  const reactId = React.useId();
+  const clipId = `sigil-clip-${reactId.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
   // Chord lines — 1 or 2 of them, each connecting two non-adjacent
   // vertices. Adjacent (offset 1) is excluded so chords don't just
@@ -248,6 +260,15 @@ export const ElementalSigil = ({
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+      <defs>
+        {/* Clip the rune to the hexagon outline so any rune
+            stroke that runs to a box edge lands exactly on the
+            hex perimeter — turning rune endpoints at the box's
+            top/bottom/sides into "extends to the border" cuts. */}
+        <clipPath id={clipId}>
+          <polygon points={hexPath} />
+        </clipPath>
+      </defs>
       {/* Hexagon frame */}
       <polygon
         points={hexPath}
@@ -260,26 +281,30 @@ export const ElementalSigil = ({
           chord lines and dots, which partially obscure it so the
           rune reads as part of the geometry rather than as a
           stamped letter. A reader who knows Elder Futhark will
-          spot it; everyone else sees pattern. */}
-      {runeLines.map((line, i) => {
-        const points = line.map(([x, y]) => {
-          const tx = runeOffsetX + x * runeUnit;
-          const ty = runeOffsetY + y * runeUnit;
-          return `${tx.toFixed(1)},${ty.toFixed(1)}`;
-        }).join(" ");
-        return (
-          <polyline
-            key={`rune${i}`}
-            points={points}
-            fill="none"
-            stroke={color}
-            strokeWidth={runeStrokeWidth}
-            strokeOpacity="0.32"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        );
-      })}
+          spot it; everyone else sees pattern. Clipped to the hex
+          so border-reaching rune strokes terminate at the
+          frame, not in mid-air outside it. */}
+      <g clipPath={`url(#${clipId})`}>
+        {runeLines.map((line, i) => {
+          const points = line.map(([x, y]) => {
+            const tx = runeOffsetX + x * runeUnit;
+            const ty = runeOffsetY + y * runeUnit;
+            return `${tx.toFixed(1)},${ty.toFixed(1)}`;
+          }).join(" ");
+          return (
+            <polyline
+              key={`rune${i}`}
+              points={points}
+              fill="none"
+              stroke={color}
+              strokeWidth={runeStrokeWidth}
+              strokeOpacity="0.32"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          );
+        })}
+      </g>
       {/* Chord lines */}
       {chords.map(([a, b], i) => (
         <line
