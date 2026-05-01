@@ -1371,37 +1371,37 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           }
           return (
             <div style={{ marginTop: 4 }}>
-              {/* Filters — split into two rows so the eye reads
-                  collection vs mood as two distinct groupings.
-                  Collection chips up top (favorites / all / curated
-                  by tradition / twists / house picks); mood chips
-                  below for narrowing by intent. Small gap between
-                  them is the only separator — keeps the strip
-                  light without an explicit divider. */}
-              <div style={{ marginBottom: 6 }}>
-                <ChipRows
-                  items={["favorites", "all", "traditional", "twists", "house recipes"]}
-                  renderItem={(f) => (
-                    <Chip
-                      key={f}
-                      active={catalogueFilter === f}
-                      onClick={() => setCatalogueFilter(f)}
-                    >{f}</Chip>
-                  )}
-                />
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <ChipRows
-                  items={["calm", "focus", "energy", "comfort"]}
-                  renderItem={(f) => (
-                    <Chip
-                      key={f}
-                      active={catalogueFilter === f}
-                      onClick={() => setCatalogueFilter(f)}
-                    >{f}</Chip>
-                  )}
-                />
-              </div>
+              {/* Filters — split into two rows with eyebrow labels
+                  so the eye reads collection vs mood as distinct
+                  groupings. Each row is a flex-1 grid where every
+                  chip fills its share of the row width, so the
+                  strip extends edge-to-edge instead of clustering
+                  flush-left at ~60% of the screen.
+                  Labels: COLLECTION on top (favorites/all/etc.),
+                  MOOD on the bottom (calm/focus/etc.). */}
+              <FilterRow
+                label="collection"
+                items={[
+                  ["favorites",   "Favorites"],
+                  ["all",         "All"],
+                  ["traditional", "Traditional"],
+                  ["twists",      "Twists"],
+                  ["house recipes", "House"],
+                ]}
+                value={catalogueFilter}
+                setValue={setCatalogueFilter}
+              />
+              <FilterRow
+                label="mood"
+                items={[
+                  ["calm",    "Calm"],
+                  ["focus",   "Focus"],
+                  ["energy",  "Energy"],
+                  ["comfort", "Comfort"],
+                ]}
+                value={catalogueFilter}
+                setValue={setCatalogueFilter}
+              />
 
               {/* Add-recipe CTA — sends the user to the Apothecary's
                   Blend (reverse-compose) page where they can build
@@ -1656,6 +1656,46 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
     </div>
   );
 };
+
+// FilterRow — recipe-page filter strip with an eyebrow label and a
+// row of equal-width chip buttons that span the full container.
+// Each chip is flex:1 so the row extends edge-to-edge regardless
+// of label length, and active vs inactive uses the same ink-fill
+// pattern as the catalog/cabinet filter chips for consistency
+// across the app.
+const FilterRow = ({ label, items, value, setValue }) => (
+  <div style={{ marginBottom: 8 }}>
+    <div style={{
+      fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+      textTransform: "uppercase", color: theme.ash,
+      marginBottom: 5,
+    }}>{label}</div>
+    <div style={{ display: "flex", gap: 4, width: "100%" }}>
+      {items.map(([key, lbl]) => {
+        const active = value === key;
+        return (
+          <button
+            key={key}
+            onClick={() => setValue(key)}
+            style={{
+              flex: 1, minWidth: 0, whiteSpace: "nowrap",
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+              padding: "6px 8px", borderRadius: 999,
+              border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+              background: active ? theme.ink : "transparent",
+              color: active ? theme.cream : theme.inkSoft,
+              cursor: "pointer",
+              boxShadow: active
+                ? "0 2px 6px -1px rgba(30,24,18,0.20)"
+                : "0 1px 2px rgba(30,24,18,0.05)",
+              transition: "all 0.18s ease",
+            }}
+          >{lbl}</button>
+        );
+      })}
+    </div>
+  </div>
+);
 
 export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds }) => {
   const [rcSaveName, setRcSaveName] = useState("");
