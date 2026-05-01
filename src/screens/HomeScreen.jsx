@@ -360,6 +360,39 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         ))}
       </div>
 
+      {/* Herbanium — the reference book. Thin full-width button sits
+          beneath the three primary CTAs as a quieter doorway into the
+          apothecary's compendium of every leaf, flower, root, and bark. */}
+      <button
+        onClick={() => go("apothecary", { mode: "compendium" })}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = theme.sage;
+          e.currentTarget.style.background = "rgba(125,140,108,0.06)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = theme.rule;
+          e.currentTarget.style.background = theme.cream;
+        }}
+        style={{
+          width: "100%",
+          marginTop: -16,
+          marginBottom: 24,
+          padding: "9px 14px",
+          background: theme.cream,
+          color: theme.inkSoft,
+          border: `1px solid ${theme.rule}`,
+          borderRadius: radius.lg,
+          fontFamily: ff.sans,
+          fontSize: 11,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          cursor: "pointer",
+          transition: "border-color 0.18s ease, background 0.18s ease",
+        }}
+      >
+        Herbanium
+      </button>
+
       {/* Mood follow-up card — surfaces pending mood logs from cups
           brewed in the last 24h. Sits above the favorites/recent rail
           because it's the most time-sensitive thing on the page; the

@@ -1704,7 +1704,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
     ? [
         ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
         ["Vibe",  "Tell the kettle how you want to feel; we'll suggest blends that hit that mood at the strength you'd brew them."],
-        ["Compendium", "Every leaf, flower, root, and bark Herbanium tracks. Tap one to read its profile."],
+        ["Herbanium", "The full reference — every leaf, flower, root, and bark the apothecary tracks. Tap one to read its profile."],
       ]
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
