@@ -42,37 +42,35 @@ import { orderModifiers, euphonyOK } from "./titleEuphony";
 // to read as "lately," not as a permanent record.
 const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Crystal-specific palette — vibrant fluorescent gem tones, NOT
-// the muted FAMILY_COLORS / EFFECT_FAMILY_COLORS the rest of the
-// app uses (those are tuned to read as ink-on-cream and would go
-// muddy on the bestiary's dark forest-noir surface). Same palette
-// in both light and dark themes so the crystal reads identically
-// in either register — these are gem hues, not surface hues.
-//
-// Hex roughly mid-tone bright; the renderer composites them with
-// alpha for the glow halos (33–60%) so the crystal aura on dark
-// mode reads as a backlit jewel rather than a flat sticker.
+// Crystal-specific palette — fluorescent / neon gem tones, lifted
+// hard above the muted FAMILY_COLORS / EFFECT_FAMILY_COLORS the
+// rest of the app uses. These are deliberately near-highlighter
+// saturated so the crystal reads as a luminous backlit object,
+// not a painted shape. Same palette in both light and dark themes
+// (gem hues, not surface hues); the SVG renderer pushes them
+// further with brighter inset highlights, more saturated gradient
+// stops, and stronger glow halos so each color almost emits.
 const CRYSTAL_EFFECT_COLORS = {
-  calm:   "#5BC282", // electric spring green
-  focus:  "#4FA8FF", // cyan-blue, sapphire-bright
-  energy: "#FFB229", // saturated amber-citrine
-  warm:   "#FF8455", // vivid coral / sunset
-  cool:   "#3FD3D7", // electric teal-aqua
-  body:   "#9B7339", // luminous bronze
-  sleep:  "#B677D5", // vivid amethyst
+  calm:   "#4DEB7E", // neon spring-green
+  focus:  "#3EBAFF", // electric sapphire
+  energy: "#FFC318", // saturated amber-yellow
+  warm:   "#FF7A4C", // hot coral
+  cool:   "#2EE8EC", // electric aqua
+  body:   "#C68F47", // luminous bronze
+  sleep:  "#C77FFF", // neon amethyst
 };
 
 const CRYSTAL_FLAVOR_COLORS = {
-  fruit:   "#FF5A3E", // scarlet garnet
-  floral:  "#FF7AAF", // bright rose-quartz pink
-  earthy:  "#8B6B3E", // luminous walnut-bronze
-  spiced:  "#E8923B", // vivid amber-orange
-  smoky:   "#7E68A8", // vivid indigo-purple
-  fresh:   "#5DD4D9", // electric mint-cyan
-  vegetal: "#6FCB42", // vivid leaf green
-  marine:  "#2DA3C7", // saturated cobalt-teal
-  sweet:   "#FFCB47", // vivid honey-amber
-  body:    "#A89968", // warm gold-tan
+  fruit:   "#FF4A2D", // neon scarlet
+  floral:  "#FF8DC3", // bright rose-pink
+  earthy:  "#B58E55", // luminous walnut
+  spiced:  "#FFA240", // bright amber-orange
+  smoky:   "#9684C8", // bright indigo-violet
+  fresh:   "#4FECF0", // neon mint-cyan
+  vegetal: "#7CE049", // electric leaf-green
+  marine:  "#2EB7DC", // bright cobalt-teal
+  sweet:   "#FFDF5A", // honey-yellow lift
+  body:    "#C4B57E", // bright gold-tan
 };
 
 // Adjective per family. Drawn from the same gemstone/atmosphere

@@ -22,6 +22,9 @@ import { usePersistedState } from "../hooks/usePersistedState";
 // Returned shape: { type: "linear" | "radial", coords, stops }
 //   coords:  x1,y1,x2,y2 for linear; cx,cy,r for radial
 //   stops:   [{ offset, color, opacity }]
+// Stops sit at near-full opacity so the fluorescent palette comes
+// through the gradient at maximum saturation — the renderer is now
+// going for "this stone glows" rather than "this stone is painted."
 const patternConfig = (pattern, c1, c2) => {
   switch (pattern) {
     case "Swirling":
@@ -30,10 +33,10 @@ const patternConfig = (pattern, c1, c2) => {
         type: "linear",
         coords: { x1: "12%", y1: "10%", x2: "88%", y2: "92%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 0.95 },
-          { offset: "32%",  color: c2, opacity: 0.92 },
-          { offset: "60%",  color: c1, opacity: 0.92 },
-          { offset: "100%", color: c2, opacity: 0.88 },
+          { offset: "0%",   color: c1, opacity: 1.00 },
+          { offset: "32%",  color: c2, opacity: 0.98 },
+          { offset: "60%",  color: c1, opacity: 0.98 },
+          { offset: "100%", color: c2, opacity: 0.96 },
         ],
       };
     case "Misted":
@@ -42,10 +45,10 @@ const patternConfig = (pattern, c1, c2) => {
         type: "linear",
         coords: { x1: "0%", y1: "0%", x2: "100%", y2: "100%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 0.80 },
-          { offset: "40%",  color: c2, opacity: 0.70 },
-          { offset: "70%",  color: c1, opacity: 0.70 },
-          { offset: "100%", color: c2, opacity: 0.78 },
+          { offset: "0%",   color: c1, opacity: 0.92 },
+          { offset: "40%",  color: c2, opacity: 0.85 },
+          { offset: "70%",  color: c1, opacity: 0.85 },
+          { offset: "100%", color: c2, opacity: 0.90 },
         ],
       };
     case "Banded":
@@ -54,10 +57,10 @@ const patternConfig = (pattern, c1, c2) => {
         type: "linear",
         coords: { x1: "0%", y1: "0%", x2: "0%", y2: "100%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 0.95 },
-          { offset: "49%",  color: c1, opacity: 0.95 },
-          { offset: "51%",  color: c2, opacity: 0.92 },
-          { offset: "100%", color: c2, opacity: 0.92 },
+          { offset: "0%",   color: c1, opacity: 1.00 },
+          { offset: "49%",  color: c1, opacity: 1.00 },
+          { offset: "51%",  color: c2, opacity: 0.98 },
+          { offset: "100%", color: c2, opacity: 0.98 },
         ],
       };
     case "Blotted":
@@ -67,9 +70,9 @@ const patternConfig = (pattern, c1, c2) => {
         type: "radial",
         coords: { cx: "40%", cy: "40%", r: "75%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 0.95 },
-          { offset: "55%",  color: c2, opacity: 0.90 },
-          { offset: "100%", color: c1, opacity: 0.85 },
+          { offset: "0%",   color: c1, opacity: 1.00 },
+          { offset: "55%",  color: c2, opacity: 0.96 },
+          { offset: "100%", color: c1, opacity: 0.92 },
         ],
       };
     case "Cloudy":
@@ -78,9 +81,9 @@ const patternConfig = (pattern, c1, c2) => {
         type: "radial",
         coords: { cx: "50%", cy: "50%", r: "85%" },
         stops: [
-          { offset: "0%",   color: c2, opacity: 0.78 },
-          { offset: "60%",  color: c1, opacity: 0.85 },
-          { offset: "100%", color: c2, opacity: 0.75 },
+          { offset: "0%",   color: c2, opacity: 0.88 },
+          { offset: "60%",  color: c1, opacity: 0.92 },
+          { offset: "100%", color: c2, opacity: 0.85 },
         ],
       };
     case "Threaded":
@@ -93,9 +96,9 @@ const patternConfig = (pattern, c1, c2) => {
         type: "linear",
         coords: { x1: "0%", y1: "0%", x2: "100%", y2: "100%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 0.95 },
-          { offset: "55%",  color: c2, opacity: 0.92 },
-          { offset: "100%", color: c1, opacity: 0.88 },
+          { offset: "0%",   color: c1, opacity: 1.00 },
+          { offset: "55%",  color: c2, opacity: 0.98 },
+          { offset: "100%", color: c1, opacity: 0.95 },
         ],
       };
   }
@@ -128,8 +131,17 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
           </radialGradient>
         )}
         <radialGradient id={glowId} cx="50%" cy="40%" r="60%">
-          <stop offset="0%"   stopColor="#fff" stopOpacity="0.55" />
-          <stop offset="60%"  stopColor="#fff" stopOpacity="0.0" />
+          <stop offset="0%"   stopColor="#fff" stopOpacity="0.85" />
+          <stop offset="40%"  stopColor="#fff" stopOpacity="0.20" />
+          <stop offset="70%"  stopColor="#fff" stopOpacity="0.0" />
+        </radialGradient>
+        {/* Inner emit — a soft luminous core in the gradient's
+            primary color that bleeds outward through the gem,
+            making it read as backlit rather than painted. Clipped
+            to the silhouette via the clipPath below. */}
+        <radialGradient id={`${gradId}-emit`} cx="50%" cy="50%" r="55%">
+          <stop offset="0%"   stopColor={c1} stopOpacity="0.55" />
+          <stop offset="100%" stopColor={c1} stopOpacity="0.0" />
         </radialGradient>
         {/* Clip path for pattern overlays (Veined / Dotted) so the
             extra geometry stays inside the silhouette. */}
@@ -141,8 +153,15 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
       <polygon
         points={silhouette}
         fill={`url(#${gradId})`}
-        stroke="rgba(30,24,18,0.18)"
-        strokeWidth="0.75"
+        stroke="rgba(30,24,18,0.12)"
+        strokeWidth="0.6"
+      />
+      {/* Inner emit overlay — adds a luminous core glow on top of
+          the gradient body. */}
+      <polygon
+        points={silhouette}
+        fill={`url(#${gradId}-emit)`}
+        style={{ mixBlendMode: "screen" }}
       />
 
       {/* Pattern-specific overlay: extra geometry that rides on top
@@ -233,9 +252,12 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
   // the crystal flares briefly. The CSS transition on the inner
   // div eases the change in and back.
   const pulseMul = pulsing ? 2 : 1;
-  const innerAlpha = pulseMul === 2 ? "B0" : "60";  // 0xB0 ≈ 69%, 0x60 ≈ 38%
-  const outerAlpha = pulseMul === 2 ? "A0" : "55";  // 0xA0 ≈ 63%, 0x55 ≈ 33%
-  const ambAlpha   = pulseMul === 2 ? "55" : "22";
+  // Halo alphas lifted hard for the fluorescent palette — the
+  // crystal now reads as actively emitting light, not just tinted.
+  // Resting state still distinguishable from the pulse state.
+  const innerAlpha = pulseMul === 2 ? "D0" : "85";  // 0xD0 ≈ 82%, 0x85 ≈ 52%
+  const outerAlpha = pulseMul === 2 ? "C0" : "78";  // 0xC0 ≈ 75%, 0x78 ≈ 47%
+  const ambAlpha   = pulseMul === 2 ? "70" : "3A";  // 0x70 ≈ 44%, 0x3A ≈ 23%
 
   return (
     <div style={{
@@ -275,9 +297,9 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         // even when both axis-glows are absent. Pulse boosts every
         // alpha briefly when the user just logged a new entry.
         boxShadow: [
-          `0 0 ${pulsing ? 14 : 8}px 1px ${crystal.gradient[0]}${ambAlpha}`,
-          crystal.innerGlowColor && `0 0 ${pulsing ? 24 : 16}px 3px ${crystal.innerGlowColor}${innerAlpha}`,
-          crystal.outerGlowColor && `0 0 ${pulsing ? 44 : 32}px 8px ${crystal.outerGlowColor}${outerAlpha}`,
+          `0 0 ${pulsing ? 18 : 12}px 2px ${crystal.gradient[0]}${ambAlpha}`,
+          crystal.innerGlowColor && `0 0 ${pulsing ? 28 : 20}px 4px ${crystal.innerGlowColor}${innerAlpha}`,
+          crystal.outerGlowColor && `0 0 ${pulsing ? 50 : 38}px 10px ${crystal.outerGlowColor}${outerAlpha}`,
         ].filter(Boolean).join(", "),
         // Faint crystals (profile-only forecast) render dimmer so
         // the visual matches the description's "still gathering"
