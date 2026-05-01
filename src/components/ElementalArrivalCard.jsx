@@ -90,9 +90,13 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
           <Ornament w={120} c={theme.terra} />
         </div>
         {/* Per-elemental procedural sigil — hashed from id, stable
-            across visits. Reads as the elemental's signet. */}
+            across visits. Reads as the elemental's signet, pulsed
+            in once at arrival via the .sigil-arriving keyframe in
+            index.css. */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-          <ElementalSigil elemental={elemental} size={48} color={theme.terra} />
+          <span className="sigil-arriving">
+            <ElementalSigil elemental={elemental} size={56} color={theme.terra} />
+          </span>
         </div>
 
         <div style={{

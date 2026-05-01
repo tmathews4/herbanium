@@ -171,6 +171,26 @@ textarea::placeholder {
   font-style: italic;
 }
 
+/* Elemental sigil arrival pulse — runs once when the arrival card
+   first paints. Brief scale + glow drop-shadow so the signet
+   reads as "drawn into the bestiary" at the moment of logging.
+   currentColor lets it inherit the sigil's stroke color (terra on
+   the arrival card), so the glow halo is the same hue as the
+   strokes. */
+@keyframes sigil-arrival-pulse {
+  0%   { transform: scale(0.6);  opacity: 0; filter: drop-shadow(0 0 0 currentColor); }
+  18%  { transform: scale(1.18); opacity: 1; filter: drop-shadow(0 0 14px currentColor); }
+  45%  { transform: scale(0.96);             filter: drop-shadow(0 0  6px currentColor); }
+  72%  { transform: scale(1.03);             filter: drop-shadow(0 0  3px currentColor); }
+  100% { transform: scale(1);    opacity: 1; filter: drop-shadow(0 0 0 currentColor); }
+}
+.sigil-arriving {
+  display: inline-flex;
+  color: var(--terra);             /* drives drop-shadow currentColor */
+  animation: sigil-arrival-pulse 1.6s ease-out 1 backwards;
+  transform-origin: center;
+}
+
 #root {
   width: 1126px;
   max-width: 100%;

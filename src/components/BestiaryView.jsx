@@ -535,19 +535,29 @@ const AttributeShelf = ({
         const tone = RARITY_TONE[openAttr.rarity] || RARITY_TONE.common;
         return (
           <div style={{
-            marginBottom: 12, padding: "12px 14px", borderRadius: 10,
+            marginBottom: 12, padding: "14px 14px 12px", borderRadius: 10,
             background: tone.bg,
             border: `2px solid ${tone.color}`,
             position: "relative",
+            display: "flex", alignItems: "flex-start", gap: 12,
           }}>
             <button onClick={() => setOpenId(null)} aria-label="close" style={{
               position: "absolute", top: 4, right: 8,
               background: "transparent", border: "none", cursor: "pointer",
               color: theme.ash, fontSize: 18, lineHeight: 1, padding: 4,
             }}>×</button>
+            {/* Larger sigil pinned to the description card so the
+                user reads the elemental's mark next to its name and
+                story — pulls the same id-hashed signet shown on the
+                tile, just at a size where the structure (chord
+                lines, dot placement, center mark) is legible. */}
+            <div style={{ flexShrink: 0, marginTop: 2 }}>
+              <ElementalSigil elemental={openAttr} size={48} color={tone.color} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0, marginRight: 18 }}>
             <div style={{
               display: "flex", alignItems: "baseline", gap: 8,
-              marginBottom: 4, flexWrap: "wrap", marginRight: 18,
+              marginBottom: 4, flexWrap: "wrap",
             }}>
               <span style={{ fontFamily: ff.serif, fontSize: 16, color: theme.ink }}>
                 {openAttr.displayName || openAttr.name}
@@ -600,6 +610,7 @@ const AttributeShelf = ({
               }
               return null;
             })()}
+            </div>
           </div>
         );
       })()}
