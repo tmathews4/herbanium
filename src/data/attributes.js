@@ -300,7 +300,7 @@ export const ATTRIBUTES = [
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Plain brown bird, restless, watching from the eaves. Drawn by the steady habit of a kettle.",
     earned: ctx => ctx.lifetime.n >= 10 },
-  { id: "half-centurion", name: "The Hippogriff", rarity: "uncommon", window: "lifetime",
+  { id: "half-centurion", name: "The Hippogriff", rarity: "rare", window: "lifetime",
     glyph: "comfort", tint: "ochre", frame: "circle", accent: "star",
     desc: "Eagle-headed, horse-bodied, half-tamed under a worn bridle. Drawn by patient handling, cup after cup.",
     earned: ctx => ctx.lifetime.n >= 50 },
@@ -308,7 +308,7 @@ export const ATTRIBUTES = [
     glyph: "comfort", tint: "terra", frame: "hex", accent: "star",
     desc: "Vast wings shadowing whole valleys. Drawn by cups stacked into a landscape over time.",
     earned: ctx => ctx.lifetime.n >= 100 },
-  { id: "year-walker", name: "The Cernunnos", rarity: "rare", window: "lifetime",
+  { id: "year-walker", name: "The Cernunnos", rarity: "legendary", window: "lifetime",
     glyph: "compass", tint: "plum", frame: "circle", accent: "rays",
     desc: "Antlered noble at the forest's quiet edge, ringed by the still beasts of the season-turn. Drawn by a year of seasons turned beside your kettle.",
     earned: ctx => ctx.daysSinceFirst >= 365 && ctx.lifetime.n >= 50 },
@@ -342,7 +342,7 @@ export const ATTRIBUTES = [
     desc: "Scaled chimera with a flame mane and gentle hooves. Drawn by every true tea steeped in your kettle.",
     earned: ctx => ctx.teaIngsAll.length > 0
       && ctx.teaIngsAll.every(id => ctx.lifetime.byIngredient.has(id)) },
-  { id: "polyglot-life", name: "The Anansi", rarity: "uncommon", window: "lifetime",
+  { id: "polyglot-life", name: "The Anansi", rarity: "rare", window: "lifetime",
     glyph: "compass", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Patient weaver spinning stories on eight slow legs. Drawn by cups borrowed from many traditions.",
     earned: ctx => ctx.lifetime.distinctTraditions >= 3 },
@@ -357,7 +357,7 @@ export const ATTRIBUTES = [
       });
       return traditions.size >= 14;
     } },
-  { id: "self-knower", name: "The Sphinx", rarity: "rare", window: "lifetime",
+  { id: "self-knower", name: "The Sphinx", rarity: "legendary", window: "lifetime",
     glyph: "focus", tint: "sageDeep", frame: "circle", accent: "rays",
     desc: "Lion-bodied, wing-shouldered, riddle in the curl of her mouth. Drawn by your knack for naming what you need before the cup arrives.",
     earned: ctx => {
@@ -381,7 +381,7 @@ export const ATTRIBUTES = [
     earned: ctx => ctx.recent.sessions.filter(s => {
       const ts = tsFromSession(s); return ts && ts.getHours() >= 22;
     }).length >= 3 },
-  { id: "afternoon-constant", name: "The Helios", rarity: "common", window: "recent",
+  { id: "afternoon-constant", name: "The Helios", rarity: "uncommon", window: "recent",
     glyph: "comfort", tint: "ochre", frame: "square", accent: "none",
     desc: "Hooded raptor circling the open hour at its highest arc. Drawn by your unfailing afternoon kettle.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -445,7 +445,7 @@ export const ATTRIBUTES = [
     glyph: "warming", tint: "terra", frame: "square", accent: "none",
     desc: "Round-bellied burrower asleep in the warm pantry of the den. Drawn by a kettle kept lit for the home's comfort.",
     earned: ctx => moodFamily(ctx.recent, ["warming","comfort"]) >= 5 },
-  { id: "sun-chaser", name: "The Sol Invictus", rarity: "common", window: "recent",
+  { id: "sun-chaser", name: "The Sol Invictus", rarity: "uncommon", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Iridescent flicker following the brightest blossom across the day. Drawn by a cup that always reaches for the light.",
     earned: ctx => moodFamily(ctx.recent, ["uplifting","energy"]) >= 5 },
@@ -503,7 +503,7 @@ export const ATTRIBUTES = [
     glyph: "warming", tint: "terra", frame: "hex", accent: "dot",
     desc: "Tiny moth that lives in the heart of an open fire. Drawn by cups pan-fired, sweet without honey.",
     earned: ctx => flavorCount(ctx.recent, "roasted") >= 3 },
-  { id: "five-tongues-recent", name: "The Chimera", rarity: "rare", window: "recent",
+  { id: "five-tongues-recent", name: "The Chimera", rarity: "legendary", window: "recent",
     glyph: "compass", tint: "plum", frame: "diamond", accent: "rays",
     desc: "Lion, goat, and serpent grafted into a single beast. Drawn by a palate hungry for many tongues.",
     earned: ctx => ctx.recent.distinctFlavors >= 5 },
@@ -590,7 +590,7 @@ export const ATTRIBUTES = [
     glyph: "comfort", tint: "sage", frame: "square", accent: "dot",
     desc: "Heavy-yoked walker keeping the same furrow day after day. Drawn by a kettle that keeps showing up on its own days.",
     earned: ctx => ctx.recent.distinctDays.size >= 7 },
-  { id: "binge-watcher", name: "The Hydra", rarity: "rare", window: "recent",
+  { id: "binge-watcher", name: "The Hydra", rarity: "legendary", window: "recent",
     glyph: "kettle", tint: "ash", frame: "diamond", accent: "rays",
     desc: "Many-headed water serpent — cut one, two return. Drawn by a single day spent fully inside the cup.",
     earned: ctx => ctx.recent.n === 10 && ctx.recent.distinctDays.size === 1 },
@@ -608,7 +608,7 @@ export const ATTRIBUTES = [
     glyph: "heart", tint: "ochre", frame: "circle", accent: "dot",
     desc: "Red-breasted bird singing yes from a wet branch at the rain's end. Drawn by a string of cups you picked well.",
     earned: ctx => ctx.recent.ratings.filter(r => r >= 4).length >= 8 },
-  { id: "honest-critic", name: "The Themis", rarity: "uncommon", window: "recent",
+  { id: "honest-critic", name: "The Themis", rarity: "rare", window: "recent",
     glyph: "feather", tint: "terra", frame: "diamond", accent: "none",
     desc: "Lean desert dog at the hour of weighing, eyes level. Drawn by your truthful kettle.",
     earned: ctx => ctx.recent.ratings.filter(r => r <= 3).length >= 5 },
@@ -619,7 +619,7 @@ export const ATTRIBUTES = [
       && ctx.recent.ratings.every(r => r === 4) },
 
   // ─── Recent: multi-condition rare ─────────────────────────
-  { id: "morning-mountain", name: "The Tianlong", rarity: "rare", window: "recent",
+  { id: "morning-mountain", name: "The Tianlong", rarity: "legendary", window: "recent",
     glyph: "grounding", tint: "terra", frame: "hex", accent: "rays",
     desc: "Celestial sky-dragon coiled above the mountain at dawn. Drawn by aged leaf before the world wakes.",
     earned: ctx => ctx.recent.sessions.filter(s => {
@@ -736,19 +736,19 @@ export const ATTRIBUTES = [
     glyph: "grounding", tint: "ash", frame: "diamond", accent: "none",
     desc: "Long-eared mountain runner with a small ink pot at the cliff's edge. Drawn by a desk steady and leaves dark.",
     earned: ctx => usePick(ctx, "focus", ["earthy"]) },
-  { id: "smoke-sage",        name: "The Tezcatlipoca",     rarity: "rare", window: "recent",
+  { id: "smoke-sage",        name: "The Tezcatlipoca",     rarity: "legendary", window: "recent",
     glyph: "warming", tint: "ash", frame: "diamond", accent: "rays",
     desc: "Black-winged thinker on a fire-blackened branch above woodsmoke. Drawn by a mind that thinks best near woodsmoke.",
     earned: ctx => usePick(ctx, "focus", ["smoky"]) },
-  { id: "the-sharpener",     name: "The Athena",      rarity: "uncommon", window: "recent",
+  { id: "the-sharpener",     name: "The Athena",      rarity: "rare", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "rays",
     desc: "Tufted-eared cat with gold eyes catching the smallest movement. Drawn by a cup taken to sharpen the mind.",
     earned: ctx => usePick(ctx, "focus", ["minty"]) },
-  { id: "bright-mind",       name: "The Apollo",    rarity: "common", window: "recent",
+  { id: "bright-mind",       name: "The Apollo",    rarity: "rare", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Iridescent flicker at the brightest blossom of the morning. Drawn by clean cognition — the morning of the mind.",
     earned: ctx => usePick(ctx, "focus", ["citrus", "fruity"]) },
-  { id: "sun-sailor",        name: "The Ra",     rarity: "common", window: "recent",
+  { id: "sun-sailor",        name: "The Ra",     rarity: "rare", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Sharp-winged raptor riding the high-noon thermal. Drawn by lift taken like a sail takes wind.",
     earned: ctx => usePick(ctx, "energy", ["citrus", "fruity"]) },
@@ -760,7 +760,7 @@ export const ATTRIBUTES = [
     glyph: "warming", tint: "terra", frame: "circle", accent: "dot",
     desc: "Long-legged spice-walker pacing the warm road to the kettle. Drawn by chai cups smelling of long roads.",
     earned: ctx => usePick(ctx, "energy", ["spiced"]) },
-  { id: "frost-runner",      name: "The Skadi",   rarity: "rare", window: "recent",
+  { id: "frost-runner",      name: "The Skadi",   rarity: "legendary", window: "recent",
     glyph: "cooling", tint: "sky", frame: "diamond", accent: "rays",
     desc: "Tufted-eared cat with wide paws on fresh snow, breath cold and quick. Drawn by cool kinetic — lift without heat.",
     earned: ctx => usePick(ctx, "energy", ["minty"]) },
@@ -772,11 +772,11 @@ export const ATTRIBUTES = [
     glyph: "sleepy", tint: "plum", frame: "circle", accent: "dot",
     desc: "Round-eyed watcher on soundless wings above a sleeping room. Drawn by sugared dusk in the cup.",
     earned: ctx => usePick(ctx, "sleepy", ["sweet"]) },
-  { id: "the-rootbed",       name: "The Demeter",        rarity: "rare", window: "recent",
+  { id: "the-rootbed",       name: "The Demeter",        rarity: "legendary", window: "recent",
     glyph: "grounding", tint: "plum", frame: "diamond", accent: "none",
     desc: "Velvet-coated burrower navigating the warm dark by feel alone. Drawn by a kettle that goes down to rise.",
     earned: ctx => usePick(ctx, "sleepy", ["earthy"]) },
-  { id: "hearth-witch",      name: "The Baba Yaga",   rarity: "uncommon", window: "recent",
+  { id: "hearth-witch",      name: "The Baba Yaga",   rarity: "rare", window: "recent",
     glyph: "warming", tint: "terra", frame: "square", accent: "dot",
     desc: "Slim shape with green eyes asleep on the warm kitchen tile. Drawn by kitchen warmth and a cup as slow embrace.",
     earned: ctx => usePick(ctx, "comfort", ["spiced"]) },
@@ -818,7 +818,7 @@ export const ATTRIBUTES = [
     desc: "Pale-winged drifter circling a low lantern in the violet hour. Drawn by a cup at the lowering light.",
     earned: ctx => usePickAtTime(ctx, "calm", null, "evening", 3)
       || usePickAtTime(ctx, "sleepy", null, "evening", 3) },
-  { id: "afternoon-scholar", name: "The Saraswati", rarity: "uncommon", window: "recent",
+  { id: "afternoon-scholar", name: "The Saraswati", rarity: "rare", window: "recent",
     glyph: "scroll", tint: "ochre", frame: "square", accent: "none",
     desc: "Slim shape asleep across an open book in the long afternoon. Drawn by a kettle that keeps the page open past three.",
     earned: ctx => usePickAtTime(ctx, "focus", null, "afternoon", 3) },
@@ -1056,14 +1056,14 @@ export const ATTRIBUTES = [
         return d >= 1 && d <= 5;
       });
     } },
-  { id: "long-steeper", name: "The Methuselah", rarity: "uncommon", window: "recent",
+  { id: "long-steeper", name: "The Methuselah", rarity: "rare", window: "recent",
     glyph: "grounding", tint: "terra", frame: "hex", accent: "none",
     desc: "Carapaced walker waiting out the slow extraction. Drawn by slow extraction — leaves let to talk all the way.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
       const b = getBlend(s.blendId);
       return b && (b.timeS || 0) >= 360;
     }) },
-  { id: "quick-cup", name: "The Sleipnir", rarity: "uncommon", window: "recent",
+  { id: "quick-cup", name: "The Sleipnir", rarity: "rare", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Long-eared runner whose flash through the meadow is already past. Drawn by a brisk hand — the leaf giving quickly.",
     earned: ctx => ctx.recent.n >= 5 && ctx.recent.sessions.every(s => {
@@ -1119,7 +1119,7 @@ export const ATTRIBUTES = [
       });
       return fiveStarBlends.size >= 3;
     } },
-  { id: "self-repeater", name: "The Ouroboros", rarity: "uncommon", window: "lifetime",
+  { id: "self-repeater", name: "The Ouroboros", rarity: "rare", window: "lifetime",
     glyph: "heart", tint: "plum", frame: "circle", accent: "dot",
     desc: "Serpent swallowing its own tail, the unbroken circle closed. Drawn by your hand returning to its own brew.",
     earned: ctx => {
@@ -1138,7 +1138,7 @@ export const ATTRIBUTES = [
   //     completionism, true-tea breadth, decoction patience. Each is
   //     tied to a specific UI flow so the spirit becomes a reason to
   //     try something the user hasn't done yet. ─────────────────────
-  { id: "odin", name: "The Odin", rarity: "rare", window: "lifetime",
+  { id: "odin", name: "The Odin", rarity: "legendary", window: "lifetime",
     glyph: "scroll", tint: "plum", frame: "diamond", accent: "star",
     desc: "Long wingless dragon resting on a hoard of kept brews. Drawn by your own composed blends gathering in your catalogue.",
     earned: ctx => {
@@ -1158,7 +1158,7 @@ export const ATTRIBUTES = [
         && has(["assam","darjeeling","ceylon","lapsang"])
         && has(["puerh"]);
     } },
-  { id: "kitsune", name: "The Kitsune", rarity: "uncommon", window: "lifetime",
+  { id: "kitsune", name: "The Kitsune", rarity: "rare", window: "lifetime",
     glyph: "sprig", tint: "terra", frame: "circle", accent: "dot",
     desc: "Nine-tailed fox of Japanese myth, guardian of the inari rice-stores and a thousand small kept gifts. Drawn by a curated pantry held ready for the kettle.",
     earned: ctx => ctx.pantryIds.size >= 15 },
