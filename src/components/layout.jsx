@@ -161,15 +161,32 @@ export const Button = ({
       style={{
         fontFamily: ff.serif, fontSize: 16, fontWeight: 500,
         letterSpacing: "0.02em",
-        color: isPrimary ? theme.cream : accent,
+        // Disabled primary keeps a visible silhouette in BOTH themes.
+        // The previous setup (bg=theme.rule, text=theme.cream) went
+        // invisible in dark mode — rule and cream are both deep
+        // forest-greens on the dark palette, so the button blended
+        // into the page. Now: a translucent highlight wash for the
+        // background (light in both modes via --hi-rgb) plus ash text
+        // gives a clear "present but dimmed" read without depending
+        // on the cream/rule pair to provide contrast.
+        color: isPrimary
+          ? (disabled ? theme.ash : theme.cream)
+          : accent,
         padding: "13px 22px",
         borderRadius: radius.md,
         background: isPrimary
-          ? (disabled ? theme.rule : accent)
+          ? (disabled ? "rgba(var(--hi-rgb),0.18)" : accent)
           : "transparent",
-        border: isSecondary ? `1.5px solid ${accent}` : "none",
+        border: isSecondary
+          ? `1.5px solid ${accent}`
+          : (isPrimary && disabled ? `1px solid ${theme.ruleSoft}` : "none"),
         cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.55 : 1,
+        // Secondary/ghost still fade to 0.55; primary disabled relies
+        // on the bg+text shift instead of opacity so contrast holds
+        // up in dark mode.
+        opacity: disabled
+          ? (isPrimary ? 1 : 0.55)
+          : 1,
         width: fullWidth ? "100%" : "auto",
         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
         boxShadow: restShadow,

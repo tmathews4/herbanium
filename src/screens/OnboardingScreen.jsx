@@ -29,7 +29,12 @@ export const OnboardingScreen = ({ onComplete }) => {
 
   const canAdvance =
     step === 0 ? true  // welcome — always advance
-    : step === 1 ? true  // name is soft-required; blank → "friend"
+    // Name now hard-required (≥1 non-whitespace char) so the next
+    // button visibly lights up as the user types — the prior
+    // "soft-required, blank → 'friend'" logic kept the button
+    // permanently enabled at this step, which read as broken in
+    // dark mode where the enabled state didn't shift on input.
+    : step === 1 ? name.trim().length > 0
     : step === 2 ? timeOfDay.length > 0
     : step === 3 ? draw.length > 0
     : step === 4 ? true  // flavors are optional — skip-friendly final step
