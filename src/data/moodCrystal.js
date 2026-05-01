@@ -440,7 +440,7 @@ export function computeMoodCrystal({
   let description;
   if (isFaint) {
     if (secondaryVoice) {
-      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, ${patternVerb} ${lc(secondaryVoice)} ahead.`;
+      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, ${patternVerb} traces of ${lc(secondaryVoice)} just stirring.`;
     } else {
       description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, still gathering.`;
     }
@@ -487,8 +487,12 @@ export function computeMoodCrystal({
       }
     }
     if (trailing) {
+      // Trailing mention reads as a hint of unrealized color
+      // visible at the crystal's edge — same in-stone register
+      // as the rest of the description, no journey/destination
+      // metaphor.
       description = description.replace(/\.$/, "")
-        + `, with faint ${trailing.adj} still ahead of you.`;
+        + `, with a faint ${trailing.adj} just stirring at the edge.`;
     }
   }
 
