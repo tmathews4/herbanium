@@ -102,35 +102,35 @@ const FLAVOR_ADJECTIVES = {
   body:    "Stone",
 };
 
-// One short poetic phrase per family — used as the description's
-// dominant or secondary "voice." Each is a single noun-phrase
-// fragment with no internal commas and no leading article, so it
-// reads cleanly whether it's the subject of the sentence or the
-// object of any pattern verb (threaded with X, swirling into X,
-// dotted with X, misted into X). Cross-family register words are
-// avoided too — flavor.spiced doesn't say "warming" since that's
-// an effect family, etc.
+// Each voice describes the crystal's interior glow and the
+// ethereal motion of color inside the stone — light pooling,
+// running, flickering, drifting. Strictly inorganic register: no
+// body parts (breath, tongue), no taste verbs (tart, sweet on the
+// palate). The crystal is alive but not biological. Single noun-
+// phrase fragments without internal commas or leading articles,
+// so they slot cleanly into any pattern verb (threaded with X,
+// swirling into X, banded with X, etc.).
 const EFFECT_VOICE = {
-  calm:   "moss-cool stillness",
-  focus:  "clear glass lit from within",
-  energy: "amber crackling at its edges",
-  warm:   "hearth-light at dusk",
-  cool:   "mineral tide held still",
-  body:   "stone warmed by the sun",
-  sleep:  "low candle drift",
+  calm:   "moss-green light pooling",
+  focus:  "sapphire light running clear",
+  energy: "amber sparks flickering",
+  warm:   "ember-glow at the heart",
+  cool:   "teal current held cool",
+  body:   "bronze warmth low and steady",
+  sleep:  "low violet glow settling",
 };
 
 const FLAVOR_VOICE = {
-  fruit:   "bright fruit-skin tart",
-  floral:  "petal-soft perfume",
-  earthy:  "deep wood and damp soil",
-  spiced:  "kindling and clove",
-  smoky:   "pine smoke and ash",
-  fresh:   "mint-clean breath",
-  vegetal: "fresh leaf and grass",
-  marine:  "kelp-green oceanic",
-  sweet:   "slow honey",
-  body:    "the cup's quiet body",
+  fruit:   "scarlet flicker",
+  floral:  "rose-pink shimmer",
+  earthy:  "walnut-dark grain",
+  spiced:  "orange ember pulse",
+  smoky:   "indigo haze",
+  fresh:   "cyan ripple",
+  vegetal: "leaf-green gleam",
+  marine:  "cobalt current",
+  sweet:   "honey-gold pool",
+  body:    "warm gold settled",
 };
 
 const articleFor = (word) => /^[aeiou]/i.test(word || "") ? "An" : "A";
