@@ -1372,12 +1372,13 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           const moodSet = new Set(cf.moods || []);
           const flavorSet = new Set(cf.flavors || []);
           const flavorMap = FAMILY_BY_FLAVOR || {};
+          // INGREDIENTS is a dict keyed by id, not an array — look up by key.
           const blendMatchesFlavors = (b) => {
             if (flavorSet.size === 0) return true;
             const ings = b.ingredients || [];
             for (const it of ings) {
               if (!it || !it.id) continue;
-              const ing = INGREDIENTS.find(x => x.id === it.id);
+              const ing = INGREDIENTS[it.id];
               if (!ing) continue;
               const fls = ing.flavors || [];
               for (const fl of fls) {
