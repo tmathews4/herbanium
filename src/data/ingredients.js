@@ -365,7 +365,7 @@ const INGREDIENTS = {
     // Digestive 4: peppermint anchors cooling at 5; fennel takes the
     // digestive anchor at 5 (cleaner anethole-led answer), so peppermint
     // sits at 4 — still strong, but no longer co-equal.
-    effects: [["cooling", 5], ["digestive", 4], ["calm", 3], ["focus", 2]],
+    effects: [["cooling", 5], ["digestive", 4], ["calm", 2], ["focus", 2]],
     flavors: ["minty", "cool", "grassy"],
     pairs: ["lemonbalm", "ginger", "rooibos", "fennel", "lemongrass", "yerba-mate", "elderflower", "linden", "nettle", "dandelion-leaf", "licorice-root"],
     dose: "1 tsp · 200ml",
@@ -1736,7 +1736,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "biting tannin, the perfume lost.", moodImpact: "uplifting overshadowed by bitter grip" },
     ],
     overPull: { timeS: 360, reason: "tannins overtake the muscatel" },
-    effects: [["uplifting", 5], ["energy", 3], ["focus", 3], ["warming", 3], ["calm", 3]],
+    effects: [["uplifting", 5], ["energy", 3], ["focus", 3], ["warming", 3], ["calm", 2]],
     flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "brisk", "rich"],
     pairs: ["rose"],
     dose: "1 tsp · 200ml",
