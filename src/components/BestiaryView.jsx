@@ -27,7 +27,6 @@ import { MoodCrystal } from "./MoodCrystal";
 import { getBlend } from "../helpers/misc";
 import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
-import { usePersistedState } from "../hooks/usePersistedState";
 import {
   buildElementalNaming, flavorLineFor,
 } from "../data/elementalAdjectives";
@@ -62,11 +61,6 @@ export const BestiaryView = ({
   dismissBestiaryHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
-  // Swap-mode toggle. When on, tapping a featured tile enters
-  // "swap-in-progress" mode (the existing behavior). When off,
-  // tapping a featured tile just opens the description card —
-  // simpler read-only browsing for users who've finished pinning.
-  const [swapMode, setSwapMode] = usePersistedState("bestiarySwapMode", false);
 
   const attrCtx = buildAttributeContext({
     sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
@@ -321,37 +315,6 @@ export const BestiaryView = ({
             : "log elemental"}
         </button>
       </div>
-      {/* Swap-mode toggle — small switch right under the header.
-          Off = tapping a featured tile just opens its description.
-          On  = tapping a featured tile enters swap-in-progress so
-          the user can replace it from the reserve. */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "flex-end",
-        gap: 8, marginBottom: 6,
-      }}>
-        <span style={{
-          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
-          textTransform: "uppercase", color: theme.ash,
-        }}>Swap mode</span>
-        <button
-          onClick={() => setSwapMode(!swapMode)}
-          aria-label={swapMode ? "disable swap mode" : "enable swap mode"}
-          style={{
-            width: 32, height: 18, borderRadius: 999,
-            border: "none", cursor: "pointer", padding: 0,
-            background: swapMode ? theme.terra : theme.rule,
-            position: "relative",
-          }}
-        >
-          <span style={{
-            position: "absolute", top: 2,
-            left: swapMode ? 16 : 2,
-            width: 14, height: 14, borderRadius: "50%",
-            background: theme.cream,
-            transition: "left 0.18s ease",
-          }} />
-        </button>
-      </div>
       <div style={{
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
         color: theme.ash, lineHeight: 1.45, marginBottom: 12,
@@ -394,7 +357,6 @@ export const BestiaryView = ({
               isFeatured={isFeatured}
               toggleFeatured={toggleFeatured}
               swapFeatured={swapFeatured}
-              swapMode={swapMode}
               openId={openAttrId}
               setOpenId={setOpenAttrId}
               openAttr={openAttr}
@@ -422,7 +384,7 @@ export const BestiaryView = ({
 
 const AttributeShelf = ({
   creationCard, featured, reserve, featuredLimit,
-  isFeatured, toggleFeatured, swapFeatured, swapMode = true,
+  isFeatured, toggleFeatured, swapFeatured,
   openId, setOpenId, openAttr,
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -450,19 +412,15 @@ const AttributeShelf = ({
       (RARITY_RANK[b.rarity] || 0) - (RARITY_RANK[a.rarity] || 0)
     );
   })();
-  // swappingId: id of a currently-featured elemental the user has
-  // tapped to mark as the swap target. Tapping the same one again
-  // cancels; tapping a reserve tile swaps in place.
-  const [swappingId, setSwappingId] = useState(null);
-  const swappingAttr = swappingId
-    ? featured.find(a => a.id === swappingId)
-    : null;
   // incomingId: id of a RESERVE elemental the user picked to bring
   // into the featured row when main is full. The next featured-tile
-  // tap commits the swap. Reverse direction of swappingId — the
-  // path the user takes when they pin a reserve item with no empty
-  // slots. Either flow funnels through swapFeatured so order is
-  // preserved.
+  // tap commits the swap via swapFeatured, preserving slot order.
+  // Single explicit-swap path now that the swap-mode toggle and the
+  // tap-to-arm-featured flow have been removed — every change to
+  // the loaded spots requires the user to explicitly pick BOTH the
+  // reserve item to bring in (via the "choose a tile to swap with"
+  // button on the reserve's detail card) AND the featured tile to
+  // replace (via tapping it after arming).
   const [incomingId, setIncomingId] = useState(null);
   const incomingAttr = incomingId
     ? (revealedSorted.find(a => a.id === incomingId) || null)
@@ -472,13 +430,6 @@ const AttributeShelf = ({
   React.useEffect(() => {
     if (selecting && !hasEmptySlot) setSelecting(false);
   }, [selecting, hasEmptySlot]);
-  // Cancel swap mode if the user dismisses or the swap target
-  // somehow leaves the featured row from underneath us.
-  React.useEffect(() => {
-    if (swappingId && !featured.find(a => a.id === swappingId)) {
-      setSwappingId(null);
-    }
-  }, [swappingId, featured]);
   // Cancel reverse-swap if the incoming reserve tile vanishes (e.g.
   // gets pinned via another path) or main empties below the limit.
   React.useEffect(() => {
@@ -493,7 +444,9 @@ const AttributeShelf = ({
     const inReserve = !!reserve.find(x => x.id === a.id);
     const isFeaturedTile = !!featured.find(x => x.id === a.id);
     const isCreation = a.id === "_creation";
-    const isSwapTarget = swappingId === a.id;
+    // Indicate which featured tile would receive the incoming
+    // reserve item if the user taps it next.
+    const isSwapTarget = incomingId && isFeaturedTile && !isCreation;
     const handleClick = () => {
       // 1. Reverse-swap commit: a reserve tile is "incoming" and the
       //    user just tapped a featured tile. Replace that featured
@@ -513,28 +466,9 @@ const AttributeShelf = ({
         setSelecting(false);
         return;
       }
-      // 3. Swap-in-progress: reserve tile click while a featured
-      //    tile is marked → just open the reserve's detail card so
-      //    the user can read it. The swap itself is explicit via
-      //    a button inside the open detail card.
-      if (swappingId && inReserve) {
-        setOpenId(a.id);
-        return;
-      }
-      // 4. Featured tile (non-creation): tap toggles swap mode
-      //    on that slot. Tap same again cancels. Skipped entirely
-      //    when swap mode is off — falls through to default detail
-      //    open behavior, so users in read-only browsing don't
-      //    accidentally arm a swap.
-      if (swapMode && isFeaturedTile && !isCreation && swapFeatured) {
-        setSwappingId(prev => prev === a.id ? null : a.id);
-        setSelecting(false);
-        // Also surface the detail card while in swap mode so the
-        // user can read what they're swapping out.
-        setOpenId(a.id === swappingId ? null : a.id);
-        return;
-      }
-      // 5. Default: toggle the detail card.
+      // 3. Default: toggle the detail card. Swap arming lives
+      //    behind an explicit detail-card button so a stray tile
+      //    tap can't reorganize the featured row.
       setOpenId(prev => prev === a.id ? null : a.id);
     };
     return (
@@ -588,7 +522,7 @@ const AttributeShelf = ({
   const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
   const featuredFull = featured.length >= featuredLimit;
   const openInReserve = openAttr && reserve.find(a => a.id === openAttr.id);
-  const reserveOpen = expanded || !!openInReserve || selecting || !!swappingId;
+  const reserveOpen = expanded || !!openInReserve || selecting || !!incomingId;
 
   return (
     <>
@@ -627,39 +561,6 @@ const AttributeShelf = ({
               {openAttr.desc}
             </div>
             {(() => {
-              // Swap-in-progress: a featured tile is marked AND the
-              // open detail belongs to a reserve tile (not the marked
-              // one). Replace the standard pin/remove button with an
-              // explicit 'swap with X' so the user can read both
-              // descriptions before committing.
-              const swapPending = swappingId
-                && swappingAttr
-                && openAttr.id !== swappingId
-                && !!reserve.find(a => a.id === openAttr.id)
-                && swapFeatured;
-              if (swapPending) {
-                return (
-                  <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                      onClick={() => {
-                        swapFeatured(swappingId, openAttr.id);
-                        setSwappingId(null);
-                        setOpenId(null);
-                      }}
-                      style={{
-                        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.10em",
-                        textTransform: "uppercase",
-                        color: theme.cream,
-                        background: theme.terra,
-                        border: `1px solid ${theme.terra}`, borderRadius: 999,
-                        padding: "6px 14px", cursor: "pointer",
-                      }}
-                    >
-                      swap in for {swappingAttr.displayName || swappingAttr.name}
-                    </button>
-                  </div>
-                );
-              }
               if (canToggleOpen) {
                 // When main is full + open detail is a reserve tile,
                 // pinning requires the user to pick which featured
@@ -749,34 +650,6 @@ const AttributeShelf = ({
           {" "}
           <button
             onClick={() => setIncomingId(null)}
-            style={{
-              background: "transparent", border: "none", padding: 0,
-              fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
-              color: theme.terra, textDecoration: "underline",
-              textDecorationStyle: "dotted", textUnderlineOffset: 3,
-              cursor: "pointer",
-            }}
-          >cancel</button>
-        </div>
-      )}
-
-      {swappingId && swappingAttr && (
-        <div style={{
-          marginTop: 10, padding: "6px 10px", borderRadius: 6,
-          background: "rgba(176,84,47,0.08)",
-          border: `1px solid rgba(176,84,47,0.22)`,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-          color: theme.inkSoft, lineHeight: 1.45, textAlign: "center",
-        }}>
-          Open a reserve elemental to read it, then tap{" "}
-          <em style={{ color: theme.terra, fontStyle: "normal" }}>swap in</em>{" "}
-          to replace{" "}
-          <em style={{ color: theme.terra, fontStyle: "normal" }}>
-            {swappingAttr.displayName || swappingAttr.name}
-          </em>
-          .{" "}
-          <button
-            onClick={() => setSwappingId(null)}
             style={{
               background: "transparent", border: "none", padding: 0,
               fontFamily: "inherit", fontSize: "inherit", fontStyle: "normal",
