@@ -378,7 +378,7 @@ export default function App() {
   // synth IDs (dusk, hearth) that getBlend can't resolve. Without
   // a version bump the user keeps seeing empty session rows because
   // their persisted sessions hold IDs that render to null.
-  const SEED_VERSION = "7";
+  const SEED_VERSION = "8";
   const [seedVersion, setSeedVersion] = usePersistedState("seedVersion", null);
 
   // Apply a seed mode in full — covers every persisted flow state

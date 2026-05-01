@@ -246,6 +246,105 @@ export const SEED_MODES = {
         style: "low-temp",
         experimental: true, synthetic: false,
       },
+      // Legacy blendIds the power seed's session log references —
+      // narrative names ("dusk", "morning", etc.) carried over from
+      // earlier app versions when these were curated catalog blends.
+      // They no longer live in BLENDS, so without these synthetic
+      // hydrations, half the power-user's sessions would contribute
+      // no flavor data to the mood-crystal aggregation. Each mirrors
+      // the cup the seed's note implies: calm-evening / energy-morning
+      // / focus-desk / comfort-roasted / sencha low-temp / throat
+      // soothing / hojicha quiet / golden-milk warming.
+      {
+        id: "dusk", name: "Dusk",
+        subtitle: "the evening calm cup",
+        ingredients: [
+          { id: "chamomile", g: 1.5 },
+          { id: "lavender",  g: 0.5, role: "accent" },
+          { id: "rose",      g: 0.3, role: "accent" },
+        ],
+        tempC: 95, timeS: 480,
+        mood: "calm", flavor: "floral",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "morning", name: "Morning Lift",
+        subtitle: "the first cup of the day",
+        ingredients: [
+          { id: "assam", g: 2.5 },
+        ],
+        tempC: 100, timeS: 240,
+        mood: "energy", flavor: "earthy",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "study", name: "Desk Hours",
+        subtitle: "the long focus cup",
+        ingredients: [
+          { id: "sencha", g: 2.0 },
+          { id: "lemonbalm", g: 0.5, role: "accent" },
+        ],
+        tempC: 75, timeS: 90,
+        mood: "focus", flavor: "grassy",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "hearth", name: "Hearth",
+        subtitle: "the comfort cup, soft and round",
+        ingredients: [
+          { id: "rooibos", g: 2.0 },
+          { id: "vanilla", g: 0.3, role: "accent" },
+          { id: "cinnamon", g: 0.2, role: "accent" },
+        ],
+        tempC: 95, timeS: 360,
+        mood: "comfort", flavor: "sweet",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "sencha-properly", name: "Sencha, Properly",
+        subtitle: "70°C; the way the cup wants to read",
+        ingredients: [
+          { id: "sencha", g: 2.5 },
+        ],
+        tempC: 70, timeS: 60,
+        mood: "focus", flavor: "umami",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "throat-coat", name: "Throat Coat",
+        subtitle: "soothing for a sore throat",
+        ingredients: [
+          { id: "licorice-root", g: 1.0 },
+          { id: "ginger",        g: 0.5, role: "accent" },
+          { id: "lemon-peel",    g: 0.3, role: "accent" },
+        ],
+        tempC: 100, timeS: 600,
+        mood: "soothing", flavor: "sweet",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "hojicha-evening", name: "Hojicha Evening",
+        subtitle: "roasted leaves, low caffeine",
+        ingredients: [
+          { id: "hojicha", g: 2.5 },
+        ],
+        tempC: 95, timeS: 60,
+        mood: "comfort", flavor: "roasted",
+        experimental: true, synthetic: false,
+      },
+      {
+        id: "golden-milk", name: "Golden Milk",
+        subtitle: "turmeric warmed through",
+        ingredients: [
+          { id: "turmeric", g: 1.0 },
+          { id: "ginger",   g: 0.5, role: "accent" },
+          { id: "black-pepper", g: 0.05, role: "catalyst" },
+          { id: "cinnamon", g: 0.3, role: "accent" },
+        ],
+        tempC: 95, timeS: 600,
+        mood: "warming", flavor: "spiced",
+        experimental: true, synthetic: false,
+      },
     ],
   },
 
