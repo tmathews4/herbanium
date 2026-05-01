@@ -318,6 +318,14 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           box-shadow: ${shadow.pressed};
           transform: translateY(0.5px);
         }
+        /* Thin variant — same surface treatment as the square CTAs above
+           (cream + rule + lifted shadow + sage-on-hover) but flat-row
+           layout for the secondary HERBANIUM doorway. */
+        .home-cta-thin {
+          aspect-ratio: auto;
+          padding: 8px 14px 9px;
+          gap: 3px;
+        }
       `}</style>
       <div style={{
         display: "grid",
@@ -365,33 +373,14 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           apothecary's compendium of every leaf, flower, root, and bark. */}
       <button
         onClick={() => go("apothecary", { mode: "compendium" })}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = theme.sage;
-          e.currentTarget.style.background = "rgba(125,140,108,0.06)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = theme.rule;
-          e.currentTarget.style.background = theme.cream;
-        }}
+        className="home-cta home-cta-thin"
         style={{
-          width: "100%",
           marginTop: -16,
           marginBottom: 24,
-          padding: "8px 14px 9px",
-          background: theme.cream,
-          color: theme.inkSoft,
-          border: `1px solid ${theme.rule}`,
-          borderRadius: radius.lg,
           fontFamily: ff.sans,
           fontSize: 11,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          cursor: "pointer",
-          transition: "border-color 0.18s ease, background 0.18s ease",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 3,
         }}
       >
         {/* Open-book glyph — thin-stroke pages with a center spine,
