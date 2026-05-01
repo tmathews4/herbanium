@@ -262,26 +262,39 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             }
           }
           if (flagged) {
-            // Name the actual ingredient(s) carrying the heads-up so
-            // the user doesn't have to scan the recipe to find it.
-            // Joined with commas for 2+, "and" before the last entry
-            // when listing more than one. Lookup falls back to the
-            // raw id if a meta record is missing (shouldn't happen
-            // since `flagged` already gated on INGREDIENTS[id]).
-            const flaggedNames = (b.ingredients || [])
-              .filter(ing => INGREDIENTS[ing.id]?.headsUp)
-              .map(ing => INGREDIENTS[ing.id]?.name || ing.id);
-            const namesSentence = flaggedNames.length === 1
-              ? flaggedNames[0]
-              : flaggedNames.length === 2
-                ? `${flaggedNames[0]} and ${flaggedNames[1]}`
-                : `${flaggedNames.slice(0, -1).join(", ")}, and ${flaggedNames[flaggedNames.length - 1]}`;
+            // Pull the actual heads-up text per ingredient so the
+            // body of the tag is the warning itself, not a generic
+            // "common reasons" pamphlet. Each entry: ingredient
+            // name (terra) + its specific note. Falls back to the
+            // raw id if a meta record is missing — shouldn't happen
+            // since `flagged` already gated on INGREDIENTS[id].
+            const flaggedItems = (b.ingredients || [])
+              .map(ing => ({ meta: INGREDIENTS[ing.id], id: ing.id }))
+              .filter(({ meta }) => meta?.headsUp)
+              .map(({ meta, id }) => ({
+                name: meta.name || id,
+                note: meta.headsUp,
+              }));
+            const summaryLead = flaggedItems.length === 1
+              ? "One ingredient in this blend has interactions worth knowing about."
+              : "Some ingredients in this blend have interactions worth knowing about.";
             tags.push({
               label: "heads-up",
-              summary: flaggedNames.length === 1
-                ? `Caution — ${namesSentence} has a heads-up note.`
-                : `Caution — ${namesSentence} have heads-up notes.`,
-              body: `Common reasons: drug interactions, pregnancy concerns, sedative effects, blood-pressure shifts. Open ${flaggedNames.length === 1 ? "it" : "either"} on the recipe list above to read the specific note. Herbanium is a brewing companion, not medical advice — verify with a clinician.`,
+              summary: summaryLead,
+              body: (
+                <div>
+                  {flaggedItems.map((item, idx) => (
+                    <div key={item.name} style={{
+                      marginTop: idx === 0 ? 0 : 8,
+                    }}>
+                      <span style={{ color: theme.terra, fontWeight: 600 }}>
+                        {item.name}
+                      </span>
+                      {" — "}{item.note}
+                    </div>
+                  ))}
+                </div>
+              ),
               tone: "terra",
               fg: theme.terra, bg: "transparent", border: theme.terra, dashed: true,
             });
