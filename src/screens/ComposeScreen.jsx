@@ -294,31 +294,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
   return (
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
-      {/* First-visit tutorial — different copy per section. */}
-      {section === "apothecary" && !composeHintShown && dismissComposeHint && (
-        <HintCard
-          icon={<Sprig size={18} c={theme.sageDeep} />}
-          title="Apothecary"
-          body={<>
-            <div><strong style={{ color: theme.terra }}>Blend</strong> — Build From Scratch.</div>
-            <div><strong style={{ color: theme.terra }}>Vibe</strong> — Brew For a Mood.</div>
-            <div><strong style={{ color: theme.terra }}>Compendium</strong> — Every Ingredient.</div>
-          </>}
-          onDismiss={dismissComposeHint}
-        />
-      )}
-      {section === "shelf" && !composeHintShown && dismissComposeHint && (
-        <HintCard
-          icon={<Pencil size={16} c={theme.terra} />}
-          title="Shelf"
-          body={<>
-            <div><strong style={{ color: theme.terra }}>Recipes</strong> — Your Saved Cups.</div>
-            <div><strong style={{ color: theme.terra }}>Cabinet</strong> — Your Ingredients.</div>
-            <div><strong style={{ color: theme.terra }}>Journal</strong> — Your Brews and Notes.</div>
-          </>}
-          onDismiss={dismissComposeHint}
-        />
-      )}
       {mode === "forward" && (
         <>
           {/* Primary-axis toggle — "by feel" (mood leads) vs "by taste" (flavor leads).
@@ -1576,6 +1551,63 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}
         />
+      )}
+
+      {/* First-visit tutorial — anchored at the bottom of the
+          scroll surface so it sits directly above the bottom dock,
+          drawing the user's eye to the sub-tab strip the copy
+          describes. Different content per section. */}
+      {section === "apothecary" && !composeHintShown && dismissComposeHint && (
+        <div style={{ marginTop: 24 }}>
+          <HintCard
+            icon={<Sprig size={18} c={theme.sageDeep} />}
+            title="Apothecary"
+            body={<>
+              <div style={{ marginBottom: 6 }}>
+                <strong style={{ color: theme.terra }}>Blend</strong> —
+                {" "}Build a recipe from scratch. Pick ingredients, see
+                how they read together, save your formula.
+              </div>
+              <div style={{ marginBottom: 6 }}>
+                <strong style={{ color: theme.terra }}>Vibe</strong> —
+                {" "}Tell the kettle how you want to feel; we'll suggest
+                blends that hit that mood at the strength you'd brew them.
+              </div>
+              <div>
+                <strong style={{ color: theme.terra }}>Compendium</strong> —
+                {" "}Every leaf, flower, root, and bark Herbanium tracks.
+                Tap one to read its profile.
+              </div>
+            </>}
+            onDismiss={dismissComposeHint}
+          />
+        </div>
+      )}
+      {section === "shelf" && !composeHintShown && dismissComposeHint && (
+        <div style={{ marginTop: 24 }}>
+          <HintCard
+            icon={<Pencil size={16} c={theme.terra} />}
+            title="Shelf"
+            body={<>
+              <div style={{ marginBottom: 6 }}>
+                <strong style={{ color: theme.terra }}>Recipes</strong> —
+                {" "}Curated picks you've held onto plus your own
+                creations, all in one place to brew again.
+              </div>
+              <div style={{ marginBottom: 6 }}>
+                <strong style={{ color: theme.terra }}>Cabinet</strong> —
+                {" "}Ingredients you actually keep at home. Filter
+                blends to use only what's in stock.
+              </div>
+              <div>
+                <strong style={{ color: theme.terra }}>Journal</strong> —
+                {" "}Cup logs, free-form entries, and mood arcs.
+                Your tea-meets-mood diary.
+              </div>
+            </>}
+            onDismiss={dismissComposeHint}
+          />
+        </div>
       )}
 
     </div>
