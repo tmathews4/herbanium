@@ -102,31 +102,35 @@ const FLAVOR_ADJECTIVES = {
   body:    "Stone",
 };
 
-// One short poetic phrase per effect family — the dominant register's
-// "voice." Reused in the description when this family leads.
+// One short poetic phrase per family — used as the description's
+// dominant or secondary "voice." Each is a single noun-phrase
+// fragment with no internal commas and no leading article, so it
+// reads cleanly whether it's the subject of the sentence or the
+// object of any pattern verb (threaded with X, swirling into X,
+// dotted with X, misted into X). Cross-family register words are
+// avoided too — flavor.spiced doesn't say "warming" since that's
+// an effect family, etc.
 const EFFECT_VOICE = {
-  calm:   "moss-cool, a hush at the center",
-  focus:  "clear water lit from within",
-  energy: "amber, crackling at the edges",
-  warm:   "a hearth-light, dusk-glow",
-  cool:   "tide-cool, mineral and held",
-  body:   "stone-warm, settled low",
-  sleep:  "candle-low, drifting",
+  calm:   "moss-cool stillness",
+  focus:  "clear glass lit from within",
+  energy: "amber crackling at its edges",
+  warm:   "hearth-light at dusk",
+  cool:   "mineral tide held still",
+  body:   "stone warmed by the sun",
+  sleep:  "low candle drift",
 };
 
-// One short phrase per flavor family — the secondary "color"
-// register, used when a flavor family is the lead or a strong tail.
 const FLAVOR_VOICE = {
-  fruit:   "the bright tart of fruit",
-  floral:  "petal-soft and fragrant",
+  fruit:   "bright fruit-skin tart",
+  floral:  "petal-soft perfume",
   earthy:  "deep wood and damp soil",
-  spiced:  "warming and cinder-bright",
-  smoky:   "cinder and pine smoke",
-  fresh:   "mint-clean, a cool breath",
+  spiced:  "kindling and clove",
+  smoky:   "pine smoke and ash",
+  fresh:   "mint-clean breath",
   vegetal: "fresh leaf and grass",
-  marine:  "kelp-green and oceanic",
-  sweet:   "honeyed, slow caramel",
-  body:    "the body of a finished cup",
+  marine:  "kelp-green oceanic",
+  sweet:   "slow honey",
+  body:    "the cup's quiet body",
 };
 
 const articleFor = (word) => /^[aeiou]/i.test(word || "") ? "An" : "A";
@@ -141,14 +145,14 @@ const articleFor = (word) => /^[aeiou]/i.test(word || "") ? "An" : "A";
 // Each entry: [Title-Case word, transition phrase used in the
 // description, single-color phrase when only one family lands].
 const CRYSTAL_PATTERNS = [
-  ["Threaded", "threaded with",   "drawn through with a single clear strand"],
-  ["Swirling", "swirling into",   "the color spirals slow at its heart"],
-  ["Veined",   "veined with",     "thin currents branch across the cut"],
-  ["Misted",   "misted into",     "softened toward a hazed center"],
-  ["Banded",   "banded with",     "neat layers stack within the stone"],
-  ["Blotted",  "blotted into",    "irregular patches drift in the depth"],
-  ["Dotted",   "dotted through with", "small bright points scatter through it"],
-  ["Cloudy",   "clouded into",    "the color hangs in a soft suspension"],
+  ["Threaded", "threaded with", "drawn through with a single clear strand"],
+  ["Swirling", "swirling into", "the color spirals slow at its heart"],
+  ["Veined",   "veined with",   "thin currents branch across the cut"],
+  ["Misted",   "misted into",   "softened toward a hazed center"],
+  ["Banded",   "banded with",   "neat layers stack within the stone"],
+  ["Blotted",  "blotted with",  "irregular patches drift in the depth"],
+  ["Dotted",   "dotted with",   "small bright points scatter through it"],
+  ["Cloudy",   "clouded with",  "the color hangs in a soft suspension"],
 ];
 
 function hashStr(s) {
