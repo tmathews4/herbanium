@@ -334,10 +334,10 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             placeholder="Personal notes…"
             className="steep-intent-input"
             style={{
-              width: "100%", background: "rgba(255,255,255,0.35)",
+              width: "100%", background: "rgba(var(--hi-rgb),0.05)",
               border: `1px dashed ${theme.rule}`, borderRadius: 10,
               fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
-              fontSize: 14, color: intent ? theme.ink : theme.ruleSoft,
+              fontSize: 14, color: intent ? theme.ink : theme.ash,
               padding: "10px 34px 10px 14px", outline: "none",
               boxSizing: "border-box",
             }}

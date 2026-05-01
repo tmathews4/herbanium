@@ -988,7 +988,7 @@ const TrackMap = ({
             background: theme.terra,
             borderRadius: 1,
             pointerEvents: "none",
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.55)",
+            boxShadow: "0 0 0 1px rgba(var(--hi-rgb),0.55)",
           }} />
         </div>
       </div>

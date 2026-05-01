@@ -245,7 +245,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
           style={{
             width: "100%", boxSizing: "border-box",
             fontFamily: ff.serif, fontSize: 14, color: theme.ink,
-            background: "rgba(255,255,255,0.4)",
+            background: "rgba(var(--hi-rgb),0.05)",
             border: `1px dashed ${theme.rule}`, borderRadius: 8,
             padding: "10px 12px", outline: "none",
             resize: "vertical", minHeight: 90,
@@ -353,7 +353,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               style={{
                 width: "100%", boxSizing: "border-box",
                 fontFamily: ff.serif, fontSize: 13, color: theme.ink,
-                background: "rgba(255,255,255,0.4)",
+                background: "rgba(var(--hi-rgb),0.05)",
                 border: `1px dashed ${theme.rule}`, borderRadius: 8,
                 padding: "8px 10px", outline: "none",
                 resize: "vertical", minHeight: 50,
@@ -463,7 +463,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               style={{
                 width: "100%", boxSizing: "border-box",
                 fontFamily: ff.serif, fontSize: 13, color: theme.ink,
-                background: "rgba(255,255,255,0.4)",
+                background: "rgba(var(--hi-rgb),0.05)",
                 border: `1px dashed ${theme.rule}`, borderRadius: 8,
                 padding: "8px 10px", outline: "none",
                 resize: "vertical", minHeight: 50,
@@ -502,7 +502,7 @@ export const JournalComposer = ({ onSave, onCancel }) => {
               width: "100%", boxSizing: "border-box",
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
               color: theme.ink, lineHeight: 1.7,
-              background: "rgba(255,255,255,0.4)",
+              background: "rgba(var(--hi-rgb),0.05)",
               border: `1px dashed ${theme.rule}`, borderRadius: 8,
               padding: "10px 12px", outline: "none",
               resize: "vertical", minHeight: 130,
