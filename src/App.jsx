@@ -28,6 +28,7 @@ import { computeMoodCrystal } from "./data/moodCrystal";
 import { configureStatusBar, hapticTap } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
+import { useAppBackNav } from "./hooks/useAppBackNav";
 
 /* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
@@ -682,6 +683,18 @@ export default function App() {
     overlayHistory.length > 0
     || (tab !== "home" && tabHistory.length > 0)
     || tab !== "home";
+
+  // Browser back button + left-edge swipe gesture both route through
+  // the app's goBack() so users get the same in-app step-back behavior
+  // they'd get from the on-screen back button. navKey covers the four
+  // axes that meaningfully change the visible screen: tab, overlay,
+  // overlay-stack depth, and the active sub-mode for whichever tab
+  // exposes one. Sub-mode jumps (Blend → Vibe → Herbanium) become
+  // their own browser history entries so the user can step them back.
+  const navKey = `${tab}|${overlay || ""}|${overlayHistory.length}|${
+    tab === "apothecary" ? apothecaryMode : tab === "shelf" ? shelfMode : ""
+  }`;
+  useAppBackNav({ goBack, canGoBack, navKey });
   // Recipes filter is a structured object: collection is single-select,
   // moods + flavors are arrays for multi-select sub-filtering. Selections
   // across rows AND together (collection ∩ moods ∩ flavors); within mood
