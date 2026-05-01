@@ -377,7 +377,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           width: "100%",
           marginTop: -16,
           marginBottom: 24,
-          padding: "9px 14px",
+          padding: "8px 14px 9px",
           background: theme.cream,
           color: theme.inkSoft,
           border: `1px solid ${theme.rule}`,
@@ -388,8 +388,27 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           textTransform: "uppercase",
           cursor: "pointer",
           transition: "border-color 0.18s ease, background 0.18s ease",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 3,
         }}
       >
+        {/* Open-book glyph — thin-stroke pages with a center spine,
+            a couple of faint binding marks. Sits centered above the
+            HERBANIUM label as the visual anchor for the reference button. */}
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden>
+          <path
+            d="M1.5 3 C 3.5 2.2, 6 2.2, 9 3 C 12 2.2, 14.5 2.2, 16.5 3
+               L 16.5 11.5
+               C 14.5 10.7, 12 10.7, 9 11.5
+               C 6 10.7, 3.5 10.7, 1.5 11.5 Z"
+            stroke={theme.sageDeep} strokeWidth="1" strokeLinejoin="round" fill="none"
+          />
+          <path d="M9 3 L 9 11.5" stroke={theme.sageDeep} strokeWidth="1" strokeLinecap="round" />
+          <path d="M3.5 5.2 L 7 4.8 M11 4.8 L 14.5 5.2"
+            stroke={theme.sageDeep} strokeWidth="0.7" strokeLinecap="round" opacity="0.6" />
+        </svg>
         Herbanium
       </button>
 
