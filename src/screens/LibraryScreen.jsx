@@ -124,7 +124,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             <input
               value={shelfSearch}
               onChange={(e) => setShelfSearch(e.target.value)}
-              placeholder="search the apothecary…"
+              placeholder="search the herbanium…"
               style={{
                 flex: 1, background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: shelfSearch ? "normal" : "italic",

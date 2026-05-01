@@ -1986,7 +1986,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="search the apothecary…"
+            placeholder="search the herbanium…"
             style={{
               flex: 1, background: "transparent", border: "none",
               fontFamily: ff.serif, fontStyle: search ? "normal" : "italic",
