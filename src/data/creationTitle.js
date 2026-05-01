@@ -100,7 +100,7 @@ const COMMON_BY_MOOD = {
 const MYTHICAL_BY_MOOD = {
   calm:      ["Halcyon", "Caladrius", "Unicorn", "Amphithere"],
   focus:     ["Sphinx", "Yale", "Bakeneko", "Cockatrice"],
-  energy:    ["Pegasus", "Griffon", "Garuda", "Sleipnir", "Hippogriff", "Buraq"],
+  energy:    ["Pegasus", "Griffon", "Garuda", "Eight-Legged Steed", "Hippogriff", "Winged-Steed"],
   sleepy:    ["Ouroboros", "Bunyip", "Yeti", "Behemoth"],
   comfort:   ["Kirin", "Jackalope", "Bonnacon", "Sasquatch"],
   digestive: ["Wyvern", "Bennu", "Catoblepas", "Tarasque"],
@@ -126,7 +126,7 @@ const MYTHICAL_BY_FLAVOR = {
   spiced:  ["Phoenix", "Salamander", "Wyrm", "Manticore", "Chimera", "Garuda"],
   minty:   ["Kelpie", "Hippocampus", "Cetus", "Knucker"],
   earthy:  ["Catoblepas", "Bonnacon", "Yale", "Behemoth", "Tarasque"],
-  smoky:   ["Cerberus", "Fenrir", "Wyvern", "Cockatrice", "Basilisk"],
+  smoky:   ["Cerberus", "Doom-Wolf", "Wyvern", "Cockatrice", "Basilisk"],
   _none:   ["Sphinx", "Phoenix", "Pegasus", "Wyrm", "Kirin", "Griffon"],
 };
 
@@ -207,8 +207,8 @@ export function generateCreationTitle(profile) {
 }
 
 // Brief, plain-language descriptions of each creature so users meeting
-// an unfamiliar mythical beast (Caladrius, Tarasque, Buraq, etc.) get
-// a one-liner of context rather than a name with no anchor.
+// an unfamiliar mythical beast (Caladrius, Tarasque, Catoblepas, etc.)
+// get a one-liner of context rather than a name with no anchor.
 const CREATURE_DESCRIPTIONS = {
   // Common animals
   Heron: "Long-legged wading bird, motionless in the shallows until it strikes.",
@@ -284,9 +284,9 @@ const CREATURE_DESCRIPTIONS = {
   Pegasus: "Winged white horse of Greek myth, born of sea-foam and sprung from a hero's wound.",
   Griffon: "Eagle-headed, lion-bodied guardian of treasure in northern bestiaries.",
   Garuda: "Eagle-king of South Asian myth, sky-rider and slayer of serpents.",
-  Sleipnir: "Eight-legged grey horse of Norse legend, fastest mount between worlds.",
+  "Eight-Legged Steed": "Eight-legged grey horse of old northern legend, fastest mount between worlds.",
   Hippogriff: "Half-eagle, half-horse hybrid born to the unlikeliest pair of parents.",
-  Buraq: "White winged steed of Persian and Arabian legend with a peacock's tail.",
+  "Winged-Steed": "White winged steed of older eastern legend with a peacock's tail.",
   Ouroboros: "Serpent swallowing its own tail — the world-circle that closes on itself.",
   Bunyip: "Australian water-beast of swamps and billabongs, more often heard than seen.",
   Yeti: "Snow-coated mountain ape of the high Himalayan passes.",
@@ -310,8 +310,8 @@ const CREATURE_DESCRIPTIONS = {
   Kelpie: "Scottish water-horse that lures riders into the loch and never lets them surface.",
   Cetus: "Great Greek sea-monster the constellation Cetus is named for.",
   Knucker: "English water-dragon dwelling in deep round pools the locals call knuckerholes.",
-  Cerberus: "Three-headed dog of Greek myth that guards the gates of the underworld.",
-  Fenrir: "Gigantic Norse wolf prophesied to swallow the sun at the world's end.",
+  Cerberus: "Three-headed hound of older Mediterranean legend, guardian of the underworld's gates.",
+  "Doom-Wolf": "Gigantic wolf of old prophecy said to swallow the sun at the world's end.",
   Basilisk: "Crowned serpent of Mediterranean legend whose gaze turns living things to stone.",
 
   // Legacy entries — older profiles may still hold creature names from
@@ -320,7 +320,7 @@ const CREATURE_DESCRIPTIONS = {
   Naiad: "Greek freshwater nymph dwelling in springs and quiet rivers.",
   Lilith: "Night-spirit of older Mesopotamian legend, taking many forms.",
   Brownie: "Small Scottish house-spirit doing quiet work overnight at the hearth.",
-  Hestia: "Greek goddess of the hearth-fire, veiled and silent at the home's center.",
+  Hestia: "Veiled hearth-spirit of older Mediterranean legend, silent at the home's center.",
   Kobold: "Small Germanic mine-spirit, mischievous and territorial.",
   Mandrake: "Forked-root spirit-plant said to scream when pulled from the ground.",
   Dryad: "Tree-nymph of Greek myth bound to a particular oak.",

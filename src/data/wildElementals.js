@@ -22,7 +22,7 @@ import {
 // rolls reach into the cosmic-adjective pool and the great-beast
 // creature pool; legendary into folk-spirit creatures; rare into
 // real animals + workmanlike adjectives. Each tier specifies its
-// own pools so a "rare" wild can never land "Fenrir Sleipnir,"
+// own pools so a "rare" wild can never land "Doom-Wolf Wyvern,"
 // and a "mythic" wild won't be a "Mist Hare."
 const TIER_TABLE = [
   { rarity: "rare",      weight: 75, adjPool: RARE_TIER_ADJECTIVES,   crePool: RARE_TIER_CREATURES },

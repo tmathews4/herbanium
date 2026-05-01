@@ -357,10 +357,10 @@ export const LEGENDARY_TIER_CREATURES = [
 // roll feels of a piece with the user's signature elemental.
 export const MYTHIC_TIER_CREATURES = [
   "Sphinx", "Yale", "Cockatrice", "Pegasus", "Griffon", "Garuda",
-  "Sleipnir", "Hippogriff", "Buraq", "Ouroboros", "Yeti", "Behemoth",
+  "Eight-Legged Steed", "Hippogriff", "Winged-Steed", "Ouroboros", "Yeti", "Behemoth",
   "Kirin", "Bonnacon", "Sasquatch", "Wyvern", "Bennu", "Catoblepas",
   "Tarasque", "Simurgh", "Hippocampus", "Wyrm", "Manticore",
-  "Chimera", "Kelpie", "Cetus", "Knucker", "Cerberus", "Fenrir",
+  "Chimera", "Kelpie", "Cetus", "Knucker", "Cerberus", "Doom-Wolf",
   "Basilisk", "Unicorn", "Amphithere",
 ];
 
