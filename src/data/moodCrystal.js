@@ -488,11 +488,12 @@ export function computeMoodCrystal({
     }
     if (trailing) {
       // Trailing mention reads as a hint of unrealized color
-      // visible at the crystal's edge — same in-stone register
-      // as the rest of the description, no journey/destination
-      // metaphor.
+      // visible at the crystal's edge. The adjective alone reads
+      // vague ("a faint Sky"); pairing it with "glow" anchors it
+      // as a color noun ("a faint Sky-glow") that fits the
+      // in-stone luminous register.
       description = description.replace(/\.$/, "")
-        + `, with a faint ${trailing.adj} just stirring at the edge.`;
+        + `, with a faint ${trailing.adj}-glow just stirring at the edge.`;
     }
   }
 
