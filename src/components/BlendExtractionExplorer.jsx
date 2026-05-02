@@ -738,8 +738,8 @@ export const BlendExtractionExplorer = ({
                     borderLeft: `2px solid ${theme.terra}`,
                     background: "rgba(176,84,47,0.08)",
                     borderRadius: "2px 6px 6px 2px",
-                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                    color: theme.inkSoft, lineHeight: 1.5,
+                    fontFamily: ff.serif, fontSize: 12.5,
+                    color: theme.ink, lineHeight: 1.5,
                   }}>
                     <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
                       No shared steep window.
@@ -807,12 +807,12 @@ export const BlendExtractionExplorer = ({
           ? "The stretch is the tradition — read these as character notes the cup expects, not flaws to fix."
           : "This house recipe is tuned with the stretch baked in — these are the trade-offs that make it work.";
         return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4, marginBottom: 14 }}>
             {showTraditionPreface && (
               <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                color: theme.sageDeep, lineHeight: 1.4,
-                paddingBottom: 4,
+                fontFamily: ff.serif, fontSize: 12.5,
+                color: theme.inkSoft, lineHeight: 1.5,
+                paddingBottom: 6,
                 borderBottom: `1px dashed ${theme.ruleSoft}`,
               }}>
                 {prefaceText}
@@ -827,10 +827,17 @@ export const BlendExtractionExplorer = ({
                 : theme.ash;
               return (
                 <div key={i} style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                  color: accent, lineHeight: 1.4,
+                  display: "flex", alignItems: "flex-start", gap: 8,
+                  paddingLeft: 8,
+                  borderLeft: `2px solid ${accent}`,
                 }}>
-                  {renderText(w.text)}
+                  <div style={{
+                    fontFamily: ff.serif, fontSize: 13,
+                    color: theme.ink, lineHeight: 1.45,
+                    fontWeight: 400,
+                  }}>
+                    {renderText(w.text)}
+                  </div>
                 </div>
               );
             })}
