@@ -111,10 +111,9 @@ export const EFFECT_DESCRIPTIONS = {
       [5, "Deep comfort; the day's edges round off entirely."],
     ],
   },
-  digestive: {
-    summary: "Easing the body, especially the gut.",
-    body: "Maps to the digestive effect. Peppermint, fennel, ginger, dandelion root, pu-erh — the post-meal cup across cultures.",
-  },
+  // (Note: a previous "digestive" alias here shadowed the main
+  // `digestive` entry above and dropped its 1/3/5 ladder. The main
+  // entry's copy already covers the same ground; alias removed.)
 
   // ── Brewing-intent aliases (used by IngredientDetail Brewing tab) ──
   sleep: {
