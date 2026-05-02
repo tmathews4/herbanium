@@ -579,35 +579,27 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                         )}
                       </div>
                     )}
-                    {/* Header row — type icon (with optional CAF pill
-                        beside it) on the left; subcategory eyebrow on
-                        the right. Both anchor in the same baseline so
-                        the row reads as a unit. */}
+                    {/* Header row — just the type icon (and optional
+                        CAF pill). Subcategory moved out so the row
+                        breathes; it lands bottom-right under the
+                        latin name as a quieter footer label. */}
                     <div style={{
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      display: "flex", alignItems: "center", gap: 7,
                       paddingRight: togglePantry ? 28 : 0, marginBottom: 4,
                     }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                        {ing.category === "flower"    && <Flower size={20} c={accent} />}
-                        {ing.category === "herbal"    && <Sprig  size={20} c={accent} />}
-                        {ing.category === "true tea"  && <Leaf   size={20} c={accent} />}
-                        {ing.category === "spice"     && <Flower size={20} c={accent} />}
-                        {ing.category === "adaptogen" && <Sprig  size={20} c={accent} />}
-                        {hasCaffeine && (
-                          <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
-                            padding: "1px 7px", borderRadius: 999,
-                            background: theme.terra, color: theme.cream,
-                            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.10em",
-                            textTransform: "uppercase", fontWeight: 700,
-                          }}>caf</div>
-                        )}
-                      </div>
-                      <span style={{
-                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-                        textTransform: "uppercase", color: theme.ash,
-                      }}>
-                        {ing.subcategory || ing.category}
-                      </span>
+                      {ing.category === "flower"    && <Flower size={20} c={accent} />}
+                      {ing.category === "herbal"    && <Sprig  size={20} c={accent} />}
+                      {ing.category === "true tea"  && <Leaf   size={20} c={accent} />}
+                      {ing.category === "spice"     && <Flower size={20} c={accent} />}
+                      {ing.category === "adaptogen" && <Sprig  size={20} c={accent} />}
+                      {hasCaffeine && (
+                        <div title={`caffeine ~${ing.caffeine}mg per cup`} style={{
+                          padding: "1px 7px", borderRadius: 999,
+                          background: theme.terra, color: theme.cream,
+                          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.10em",
+                          textTransform: "uppercase", fontWeight: 700,
+                        }}>caf</div>
+                      )}
                     </div>
                     <div style={{
                       fontFamily: ff.serif, fontSize: 16, color: theme.ink,
@@ -615,11 +607,26 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                     }}>
                       {ing.name}
                     </div>
+                    {/* Footer row — latin name on the left, subcategory
+                        eyebrow tucked to the bottom-right so the type
+                        label lands as the card's last visual beat. */}
                     <div style={{
-                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-                      color: theme.ash, marginTop: 2, lineHeight: 1.3,
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                      gap: 8, marginTop: 2,
                     }}>
-                      {ing.latin}
+                      <div style={{
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                        color: theme.ash, lineHeight: 1.3, minWidth: 0,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {ing.latin}
+                      </div>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+                        textTransform: "uppercase", color: theme.ash, flexShrink: 0,
+                      }}>
+                        {ing.subcategory || ing.category}
+                      </span>
                     </div>
                   </button>
                 );
