@@ -183,20 +183,26 @@ export const BestiaryView = ({
     ? validFeatured.slice(0, FEATURED_LIMIT)
     : revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
 
-  // Cold-start auto-pin: once anything is revealed and the user
-  // hasn't curated yet (validFeatured empty), freeze the current
-  // top-N-by-rarity into featuredElementals. After this fires
-  // once, the auto-fallback above stops mattering — new high-
-  // rarity arrivals don't bump existing items out of main; they
-  // settle into reserve instead, where the user can swap them in.
-  // Functional update to avoid stale-closure overwrites if the
-  // arrival-dismiss handler also fires in the same tick.
+  // Cold-start auto-pin: freeze the current top-N-by-rarity into
+  // featuredElementals as soon as the user has anything revealed
+  // AND no real pinned ids of their own. The validity check matters
+  // because seed presets (or legacy state) can persist ids that
+  // aren't actually in earnedAttrs — those ids don't render anywhere
+  // and shouldn't block this pin from running. Without it, the
+  // displayed featured row falls back to "top 5 by rarity in
+  // revealedSorted" every render, and a freshly-logged high-rarity
+  // elemental slips into slot 1 of that fallback view.
   React.useEffect(() => {
     if (!setFeaturedElementals) return;
     if (revealedSorted.length === 0) return;
     setFeaturedElementals(prev => {
       const cur = prev || [];
-      if (cur.length > 0) return cur;
+      const validCur = cur.filter(id =>
+        revealedSorted.some(a => a.id === id));
+      // User has at least one real pin — keep their list intact.
+      if (validCur.length > 0) return cur;
+      // No valid pins; lock in the current top-5 by rarity so
+      // subsequent arrivals can't bump them out of the displayed row.
       return revealedSorted.slice(0, FEATURED_LIMIT).map(a => a.id);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
