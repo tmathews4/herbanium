@@ -76,8 +76,8 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
   const inCaution = mg >= CAFFEINE_CAUTION_MG && !past && !atEdge;
   const fillColor = past
     ? "#B0542F"
-    : (atEdge ? "#C37959" : (inCaution ? "#C37959" : "rgba(176,84,47,0.55)"));
-  const labelColor = past ? "#B0542F" : (atEdge ? "#C37959" : theme.inkSoft);
+    : (atEdge ? "#A57836" : (inCaution ? "#C37959" : "rgba(176,84,47,0.55)"));
+  const labelColor = past ? "#B0542F" : (atEdge ? "#A57836" : theme.inkSoft);
   return (
     <div style={{
       display: "flex", flexDirection: "column", gap: 6,
@@ -148,14 +148,14 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           position: "absolute",
           left: `${(CAFFEINE_WARN_MG / CAFFEINE_MAX_MG) * 100}%`,
           transform: "translateX(-50%)",
-          color: past ? "#B0542F" : (atEdge ? "#C37959" : theme.ash),
+          color: past ? "#B0542F" : (atEdge ? "#A57836" : theme.ash),
         }}>too much</span>
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
       {atEdge && (
         <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-          color: "#C37959", lineHeight: 1.4, marginTop: 2,
+          fontFamily: ff.serif, fontSize: 12.5,
+          color: "#A57836", lineHeight: 1.4, marginTop: 2,
         }}>
           right at the edge — a deliberate strong cup, but one more part and it tips over.
         </div>
