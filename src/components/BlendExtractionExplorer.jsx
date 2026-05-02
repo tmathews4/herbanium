@@ -202,43 +202,54 @@ export const BlendExtractionExplorer = ({
           specific notes/leaf effects. Palate doesn't have a
           comparable hierarchy and reads the same in either mode. */}
       <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Simple / Detailed toggle — full-row binder-style square
+            tabs matching the journal mode chooser pattern. Each tab
+            takes equal width (1fr / 1fr) so the toggle reads as the
+            primary control above the flavor + mood strips, not a
+            tucked-away corner pill. Ink-fill on the active side. */}
         <div style={{
-          display: "flex", justifyContent: "flex-end", alignItems: "center",
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6,
         }}>
-          <span style={{
-            display: "inline-flex",
-            border: `1px solid ${theme.ruleSoft}`,
-            borderRadius: 999,
-            overflow: "hidden",
-          }}>
-            {[
-              { id: "simple",   label: "Simple"   },
-              { id: "detailed", label: "Detailed" },
-            ].map(opt => {
-              const active = (opt.id === "simple") === familyMode;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => {
-                    const want = opt.id === "simple";
-                    if (want === familyMode) return;
-                    setFamilyMode(want);
-                  }}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 9.5,
-                    letterSpacing: "0.12em", textTransform: "uppercase",
-                    padding: "3px 9px",
-                    background: active ? theme.terra : "transparent",
-                    color: active ? theme.cream : theme.ash,
-                    border: "none",
-                    cursor: active ? "default" : "pointer",
-                  }}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </span>
+          {[
+            { id: "simple",   label: "Simple",   hint: "registers" },
+            { id: "detailed", label: "Detailed", hint: "specific notes" },
+          ].map(opt => {
+            const active = (opt.id === "simple") === familyMode;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => {
+                  const want = opt.id === "simple";
+                  if (want === familyMode) return;
+                  setFamilyMode(want);
+                }}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  gap: 2, padding: "8px 6px",
+                  background: active ? theme.ink : theme.cream,
+                  color: active ? theme.cream : theme.inkSoft,
+                  border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                  borderRadius: 10,
+                  cursor: active ? "default" : "pointer",
+                  boxShadow: active
+                    ? "0 2px 6px -1px rgba(30,24,18,0.22)"
+                    : "0 1px 2px rgba(30,24,18,0.05)",
+                  transition: "all 0.18s ease",
+                }}
+              >
+                <span style={{
+                  fontFamily: ff.serif, fontSize: 13.5,
+                  color: active ? theme.cream : theme.ink,
+                  lineHeight: 1.1,
+                }}>{opt.label}</span>
+                <span style={{
+                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.04em",
+                  color: active ? "rgba(232,220,192,0.65)" : theme.ash,
+                  lineHeight: 1.2,
+                }}>{opt.hint}</span>
+              </button>
+            );
+          })}
         </div>
         <FlavorMap
           ingredients={ingredients}
