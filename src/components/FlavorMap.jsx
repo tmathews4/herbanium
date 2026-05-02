@@ -183,16 +183,16 @@ const PALATE_COLORS = {
 };
 const colorForPalate = (axis) => PALATE_COLORS[axis] || "var(--ash)";
 
-// Per-axis "unpleasant" thresholds for the palate strip. The
-// bitterness axis sums bitter + bitterness + astringent, so it
-// can register high on a cup that reads as grippy/tannic without
-// being meaningfully bitter — kept the threshold conservative so
-// the ⚠ doesn't fire on cups that are just confidently brewed.
-// Astringency stays tighter because tannic at moderate levels is
-// already a 'pull back' signal in tea-drinker terms.
+// Per-axis "unpleasant" thresholds for the palate strip. Aligned
+// with the cup-level tannin warning ladder in perception.js so the
+// bar's ⚠ fires the moment the text warning does — a user reading
+// "3.4 bitter, 2.4 astringent" off the bars never sees a quiet bar
+// alongside a loud warning band (or vice versa). Tartness and
+// menthol stay tighter because their text-warning paths have
+// different thresholds.
 const PALATE_WARNINGS = {
-  bitterness:  { threshold: 3.8, label: "bitter" },
-  astringency: { threshold: 3.0, label: "tannic" },
+  bitterness:  { threshold: 2.5, label: "bitter" },
+  astringency: { threshold: 2.0, label: "tannic" },
   tartness:    { threshold: 4.0, label: "sour" },
   menthol:     { threshold: 4.0, label: "burning" },
 };
