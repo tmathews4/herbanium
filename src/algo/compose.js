@@ -1317,8 +1317,16 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     if (ingRole !== "catalyst" && profile?.flavors) {
       const fMap = Object.fromEntries(profile.flavors);
       const eMap = Object.fromEntries(profile.effects || []);
-      const bitter = (fMap.bitter || 0) + (fMap.bitterness || 0) + (eMap.bitterness || 0);
-      const astringent = fMap.astringent || 0;
+      // Aligned with the cup-level bitterBar / astringencyBar in
+      // perception.js so the per-ingredient state machine and the
+      // cup-level warning fire on the same numeric values. Earlier
+      // bitter excluded astringent and astringent excluded tannic,
+      // letting tannic-heavy profiles (like over-pulled gunpowder)
+      // dodge per-ingredient warnings even when the cup bars were
+      // loud.
+      const bitter = (fMap.bitter || 0) + (fMap.bitterness || 0)
+                   + (fMap.astringent || 0) + (eMap.bitterness || 0);
+      const astringent = (fMap.astringent || 0) + (fMap.tannic || 0);
       // Off-notes from the standalone profile.
       const offThresholds = { camphor: 1.8, soapy: 0.5, muddy: 1, medicinal: 1.5, harsh: 1.5, acrid: 1, burnt: 1 };
       let triggeredOff = null;
@@ -1328,7 +1336,11 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
           break;
         }
       }
-      if (bitter + astringent >= 4) standaloneOverPull = "tannic";
+      // Same ladder as cup-level: bitter ≥ 4 (tannins taking over),
+      // astringent ≥ 2 (astringent edge), bitter ≥ 2.5 (bitter side).
+      // bitter already includes astringent so the combined "tannic"
+      // tier is just bitter ≥ 4, not bitter+astringent ≥ 4.
+      if (bitter >= 4) standaloneOverPull = "tannic";
       else if (astringent >= 2) standaloneOverPull = "astringent";
       else if (bitter >= 2.5) standaloneOverPull = "bitter";
       else if (triggeredOff) standaloneOverPull = triggeredOff;
