@@ -1,17 +1,17 @@
 /* ──────────────────────────────────────────────────────────────
-   screens/HomeScreen.jsx — Home screen plus its row components (FavoriteCard, CompactSessionRow, SessionRow).
+   screens/HomeScreen.jsx — Home screen plus its row components
+   (CompactSessionRow, SessionRow).
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
 import {
-  Flask, Flower, Kettle, Leaf, Ornament, Pencil, Sprig, MOOD_ICONS,
+  Flask, Kettle, Leaf, Ornament, Pencil,
 } from "../components/icons";
 import {
-  Button, FitText, SectionLabel, FitOneLine,
+  Button, FitText, SectionLabel,
 } from "../components/layout";
-import { BLENDS } from "../data/blends";
 import { WAIT_POEMS } from "../data/waitContent";
-import { getBlend, mmss, sessionAgo } from "../helpers/misc";
+import { getBlend, sessionAgo } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
 } from "../theme";
@@ -80,14 +80,6 @@ const pickHomePoem = (date) => {
 };
 
 export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, addJournalEntry, journalEntries = [] }) => {
-  // Favorite cards open the blend recipe directly. The "Recent
-  // brews" row below the favorites is the right place to land on
-  // a journal entry — keeping the two destinations distinct means
-  // a tap on Favorites always answers "what is this blend?" and a
-  // tap on Recent brews always answers "what was that cup like?"
-  const openFavorite = (blendId) => {
-    if (openBlend) openBlend(blendId);
-  };
   // Pick a poem ONCE per mount so the line is stable within a visit
   // but fresh on each return to Home. Rotation comes from coming back
   // to Home through the day rather than from re-rendering in place.
@@ -134,26 +126,8 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   // by design; the filter also drops any malformed session without a
   // blendId so the cup log stays clean.
   const yourSessions = sessions.filter(s => s.who === "you" && s.blendId);
-  // Home shows true favorites — the curated tier — and falls back to all
-  // saved blends until the user has marked any. Resolve every id through
-  // getBlend so user-generated / LOCAL_BLENDS entries (the algorithmic
-  // experimentals seeded at onboarding) appear alongside catalog blends.
-  const favSet = favoriteBlendIds || new Set();
-  const sourceIds = favSet.size > 0 ? [...favSet] : [...(savedBlendIds || [])];
-  const favoriteBlends = sourceIds
-    .map(id => getBlend(id))
-    .filter(Boolean);
-  const isEmpty = yourSessions.length === 0 && favoriteBlends.length === 0;
+  const isEmpty = yourSessions.length === 0;
   const name = profile?.name || "friend";
-
-  // Seeded-favorites notice — fires once on Home for fresh users
-  // who got starter blends auto-added at onboarding, so they know
-  // the recipes weren't ones they brewed.
-  const showSeededNotice = !seededFavoritesNoticeShown
-    && dismissSeededFavoritesNotice
-    && profile
-    && favoriteBlends.length > 0
-    && yourSessions.length === 0;
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
@@ -413,9 +387,9 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
       </button>
 
       {/* Mood follow-up card — surfaces pending mood logs from cups
-          brewed in the last 24h. Sits above the favorites/recent rail
-          because it's the most time-sensitive thing on the page; the
-          longer we wait to ask, the worse the user's recall. */}
+          brewed in the last 24h. Sits above the recent rail because
+          it's the most time-sensitive thing on the page; the longer
+          we wait to ask, the worse the user's recall. */}
       {pendingMoodSession && (
         <MoodFollowUpCard
           session={pendingMoodSession}
@@ -424,78 +398,10 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         />
       )}
 
-      {/* Seeded-favorites notice — sits right above Favorites so the
-          'we added these' framing is adjacent to the rail it's
-          describing. One-time, dismissible. */}
-      {showSeededNotice && (
-        <div style={{
-          marginBottom: 14, padding: "10px 12px",
-          borderRadius: 10,
-          background: "rgba(98, 124, 92, 0.08)",
-          border: `1px solid ${theme.sageDeep}`,
-          display: "flex", alignItems: "flex-start", gap: 10,
-        }}>
-          <div style={{
-            flex: 1, minWidth: 0,
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-            color: theme.inkSoft, lineHeight: 1.5,
-          }}>
-            We added a few starter blends to your{" "}
-            <strong style={{ color: theme.terra, fontStyle: "normal" }}>Recipes</strong>{" "}
-            so the shelf isn't empty on day one. Keep what fits, remove what doesn't.
-          </div>
-          <button
-            onClick={dismissSeededFavoritesNotice}
-            aria-label="dismiss"
-            style={{
-              flexShrink: 0,
-              background: "transparent", border: "none", cursor: "pointer",
-              color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",
-            }}
-          >×</button>
-        </div>
-      )}
-
-      {/* Favorites — horizontal scrollable row. Native scrollbar is
-          hidden; a soft right-edge fade suggests there's more to scroll
-          when the rail overflows. */}
-      {favoriteBlends.length > 0 && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-            <SectionLabel n="i">Favorites</SectionLabel>
-            <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash }}>
-              {favoriteBlends.length} saved
-            </span>
-          </div>
-          <div style={{ position: "relative", marginBottom: 16 }}>
-            <div className="fav-scroll" style={{
-              display: "flex", gap: 10, overflowX: "auto",
-              paddingBottom: 4, marginLeft: -2, paddingLeft: 2,
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}>
-              {favoriteBlends.map(b => (
-                <FavoriteCard key={b.id} b={b} onTap={() => openFavorite(b.id)} />
-              ))}
-            </div>
-            {favoriteBlends.length > 2 && (
-              <div style={{
-                position: "absolute", right: 0, top: 0, bottom: 4,
-                width: 32, pointerEvents: "none",
-                background: `linear-gradient(to right, rgba(232,220,192,0), ${theme.ivory})`,
-              }} />
-            )}
-          </div>
-          <style>{`
-            .fav-scroll::-webkit-scrollbar { display: none; }
-          `}</style>
-        </>
-      )}
-
       {/* Your recent cups — header stays even before any brew so a
           new user sees this is the window where their cups will land. */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-        <SectionLabel n={favoriteBlends.length > 0 ? "ii" : "i"}>Recent brews</SectionLabel>
+        <SectionLabel n="i">Recent brews</SectionLabel>
         {yourSessions.length > 0 && (
           <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
             background: "transparent", border: "none",
@@ -523,52 +429,6 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
       )}
 
     </div>
-  );
-};
-
-// Favorite cards — compact snapshots of saved blends in the Home's favorites row.
-// One tap opens Compose with the blend pre-selected so intent capture happens.
-export const FavoriteCard = ({ b, onTap }) => {
-  const { unit, weightUnit } = useUnit();
-  return (
-    <button onClick={onTap} style={{
-      flex: "0 0 auto", width: 150,
-      textAlign: "left",
-      background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-      borderRadius: radius.md, padding: "10px 12px", cursor: "pointer",
-      display: "flex", flexDirection: "column", gap: 6,
-      boxShadow: shadow.card,
-      transition: "box-shadow 0.18s ease, border-color 0.18s ease",
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadow.hover; e.currentTarget.style.borderColor = theme.rule; }}
-    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadow.card;  e.currentTarget.style.borderColor = theme.ruleSoft; }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        {(() => {
-          const Icon = MOOD_ICONS[b.mood] || Flower;
-          return <Icon size={18} />;
-        })()}
-        <span style={{
-          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
-          color: theme.ash,
-        }}>{b.mood}</span>
-      </div>
-      <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink, lineHeight: 1.15 }}>
-        {b.name}
-      </div>
-      <FitOneLine
-        text={b.subtitle}
-        baseSize={11}
-        minSize={8.5}
-        style={{
-          fontFamily: ff.serif, fontStyle: "italic",
-          color: theme.ash, lineHeight: 1.3,
-        }}
-      />
-      <div style={{ fontFamily: ff.mono, fontSize: 10, color: theme.inkSoft, marginTop: 2 }}>
-        {formatTempShort(b.tempC, b.tempC, unit)} · {mmss(b.timeS)}
-      </div>
-    </button>
   );
 };
 
