@@ -316,10 +316,22 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {mode === "forward" && (
         <>
           {(() => {
+            // Sub-eyebrow style — small, tracked-out caps that read as
+            // facets of the unified "your direction" header rather than
+            // independent section labels. Tighter than SectionLabel so
+            // mood and flavor read as one band, mixing into one cup.
+            const subEyebrow = {
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash,
+            };
+
             const moodRow = (
               <div key="mood-row">
-                <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <SectionLabel n="ii">Desired mood</SectionLabel>
+                <div style={{
+                  marginTop: 20, display: "flex",
+                  justifyContent: "space-between", alignItems: "baseline",
+                }}>
+                  <SectionLabel n="ii">Your direction</SectionLabel>
                   <span style={{
                     fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
                   }}>
@@ -330,7 +342,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                      "4 selected · at the limit"}
                   </span>
                 </div>
-                <div style={{ marginTop: 10 }}>
+                <div style={{ marginTop: 12, ...subEyebrow }}>mood</div>
+                <div style={{ marginTop: 6 }}>
                   <ChipRows
                     items={MOODS}
                     renderItem={(m) => (
@@ -347,7 +360,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
                 {blend.conflict && (
                   <div style={{
-                    marginTop: 12, padding: "10px 12px", borderRadius: 8,
+                    marginTop: 10, padding: "10px 12px", borderRadius: 8,
                     background: "rgba(176, 84, 47, 0.07)",
                     border: `1px solid rgba(176, 84, 47, 0.22)`,
                     display: "flex", gap: 10, alignItems: "flex-start",
@@ -364,10 +377,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
             const flavorRow = (
               <div key="flavor-row">
-                <div style={{ marginTop: 20 }}>
-                  <SectionLabel n="iii">Flavor direction</SectionLabel>
-                </div>
-                <div style={{ marginTop: 10 }}>
+                {/* No section label here — flavor is a facet of the
+                    "your direction" header that mood already opened.
+                    Tightened marginTop (10 vs prior 20) so the two
+                    chip groups read as one nested band. */}
+                <div style={{ marginTop: 10, ...subEyebrow }}>flavor</div>
+                <div style={{ marginTop: 6 }}>
                   <ChipRows
                     items={FLAVORS}
                     renderItem={(f) => {
