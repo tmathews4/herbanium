@@ -252,6 +252,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 term={openEffect}
                 summary={EFFECT_DESCRIPTIONS[openEffect].summary}
                 body={EFFECT_DESCRIPTIONS[openEffect].body}
+                ladder={EFFECT_DESCRIPTIONS[openEffect].ladder}
                 tone="sage"
                 onClose={() => setOpenEffect(null)}
               />
@@ -284,6 +285,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 term={openFlavor}
                 summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
                 body={FLAVOR_DESCRIPTIONS[openFlavor].body}
+                ladder={FLAVOR_DESCRIPTIONS[openFlavor].ladder}
                 tone="terra"
                 onClose={() => setOpenFlavor(null)}
               />

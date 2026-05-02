@@ -376,6 +376,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               term={openTag.label}
               summary={openTag.summary}
               body={openTag.body}
+              ladder={openTag.ladder}
               tone={openTag.tone}
               onClose={() => setOpenTag(null)}
             />
@@ -386,6 +387,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             <VocabInfoCard
               term={openMood}
               summary={EFFECT_DESCRIPTIONS[openMood].summary}
+              ladder={EFFECT_DESCRIPTIONS[openMood].ladder}
               tone="sage"
               onClose={() => setOpenMood(null)}
             />

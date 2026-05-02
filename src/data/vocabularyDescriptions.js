@@ -13,48 +13,103 @@ export const EFFECT_DESCRIPTIONS = {
   calm: {
     summary: "A slow exhale. Quieting the chatter without dulling presence.",
     body: "GABAergic relaxation; not sedation. Lemon balm, chamomile, linden, lavender, tulsi, passionflower live here.",
+    ladder: [
+      [1, "A slight settle — easy enough to ignore."],
+      [3, "A clear quieting; the chatter's softer, you'd notice."],
+      [5, "Deep stillness; the body unwinds and the day recedes."],
+    ],
   },
   soothing: {
     summary: "General comfort, warmth-of-spirit. Sweetness without sugar.",
     body: "The wrapped-blanket register — rooibos, vanilla, hojicha, licorice root. Different from calm: this is the body's cup, not the mind's.",
+    ladder: [
+      [1, "A faint warmth-of-spirit; ambient, easy to overlook."],
+      [3, "Wrapped-blanket cozy — the cup's clearly working."],
+      [5, "Deep comfort; the day's edges round off entirely."],
+    ],
   },
   digestive: {
     summary: "Settles the stomach. The post-meal cup across cultures.",
     body: "Peppermint's menthol is the most studied for easing the gut; fennel, ginger, dandelion root, and pu-erh all pull in the same direction.",
+    ladder: [
+      [1, "A hint of settling in the gut."],
+      [3, "A clear easing; the post-meal cup doing its job."],
+      [5, "A strong digestive push — peppermint, fennel, or ginger at strength."],
+    ],
   },
   uplifting: {
     summary: "Lightening, brightening, mood-lifting.",
     body: "Jasmine, bergamot, light oolongs, and citrus-forward herbs. Darjeeling's muscatel character lifts the same way — aromatics that read on the nose before the tongue.",
+    ladder: [
+      [1, "A soft brightness on the nose; mood-neutral but not flat."],
+      [3, "A noticeable lift; the cup smiles back."],
+      [5, "Brisk and bright — jasmine or bergamot at peak."],
+    ],
   },
   warming: {
     summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
     body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it: cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog.",
+    ladder: [
+      [1, "A faint internal warmth; ambient, more felt than named."],
+      [3, "A clear warmth in the chest; the cup heats from within."],
+      [5, "A thermogenic push — ginger-driven; you feel it in the limbs."],
+    ],
   },
   focus: {
     summary: "Meditative clarity. Alert without jitter.",
     body: "L-theanine paired with caffeine — the shaded-green signature. Gyokuro and matcha hold the top of this register, with sencha, dragonwell, and oolong following the same chemistry at lower amplitude. Lion's mane works on a longer arc through nerve-growth-factor support.",
+    ladder: [
+      [1, "A gentle steadying — you might or might not name it."],
+      [3, "Clear attention; reading or writing flows."],
+      [5, "Sharp, sustained focus — gyokuro and matcha territory."],
+    ],
   },
   energy: {
     summary: "Stimulating, awakening — the wake-up cup.",
     body: "Usually the smoother caffeine + L-theanine register rather than a stimulant edge. Assam carries the most caffeine of the true teas; matcha lands close behind through its shaded-tea chemistry, and yerba-mate gets there a different way — caffeine with theobromine in support.",
+    ladder: [
+      [1, "A soft lift, barely above flat."],
+      [3, "A clean wake-up cup; the morning starts."],
+      [5, "Brisk and alert — assam or yerba-mate at strength."],
+    ],
   },
   sleepy: {
     summary: "Sedating, drowsiness-adjacent.",
     body: "Heavier than calm — a downward drift. Valerian's valerenic acid is the strongest sedative in the kitchen, with reishi's triterpenes close behind; passionflower, chamomile, and ashwagandha all pull in the same direction more gently.",
+    ladder: [
+      [1, "Edge of drowsy — hard to name unless you're already tired."],
+      [3, "A real downward pull; the cup wants to sit still."],
+      [5, "Heavy sedation — valerian or reishi; pair with rest, not driving."],
+    ],
   },
   cooling: {
     summary: "Refreshes and clarifies. The settling-down register opposite warming.",
     body: "Green tea, white tea, hibiscus, mints, light oolongs. Distinct from menthol's mouthfeel cool, though the two can co-occur.",
+    ladder: [
+      [1, "A slight refresh on first sip."],
+      [3, "A clear cooling; the cup settles the body down."],
+      [5, "Deeply cooling — green tea or hibiscus on a hot day."],
+    ],
   },
   grounding: {
     summary: "Settling, centering, earthy.",
     body: "Reishi's triterpenes carry this most strongly, with ashwagandha and ripe pu-erh close behind. Lapsang's pine smoke and dandelion root pull here too — the deeper, low-pitched register.",
+    ladder: [
+      [1, "A faint settling, easy to overlook."],
+      [3, "Noticeably centering; the body feels held."],
+      [5, "Deeply rooted — reishi, pu-erh, ashwagandha territory."],
+    ],
   },
 
   // ── User-facing mood aliases (mapped to effects above) ──
   comfort: {
     summary: "A wrapped-blanket feeling — soothing without sedating.",
     body: "Maps to the soothing effect. Rooibos and hojicha are the prototypes; vanilla and licorice root round any blend toward this register.",
+    ladder: [
+      [1, "A faint warmth-of-spirit; ambient, easy to overlook."],
+      [3, "Wrapped-blanket cozy — the cup's clearly working."],
+      [5, "Deep comfort; the day's edges round off entirely."],
+    ],
   },
   digestive: {
     summary: "Easing the body, especially the gut.",
@@ -88,6 +143,11 @@ export const EFFECT_DESCRIPTIONS = {
   sweetness: {
     summary: "Natural sugar-without-sugar — amino acids and polysaccharides.",
     body: "Licorice, rooibos, white tea, vanilla, honey-rich herbs all touch this. Balances bitterness; a sweetness-low / bitterness-high cup is the over-pull register.",
+    ladder: [
+      [1, "A faint suggestion of sweet — easy to miss."],
+      [3, "A clear natural sweetness; balances any bitter notes."],
+      [5, "Full sweet body — rooibos, licorice root, or honey-rich herbs."],
+    ],
   },
   astringency: {
     summary: "Tongue-drying tannin grip — different from bitter.",

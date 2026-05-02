@@ -413,7 +413,12 @@ export const Chip = ({ active, onClick, children, tone = "default", caution = fa
 // (effect or flavor). Appears below the section that triggered it on
 // detail pages; dismissible via × or by tapping the same chip again.
 // Tone defaults sage (effect register); pass tone="terra" for flavor.
-export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) => {
+//
+// Optional `ladder` prop is an array of [level, description] pairs
+// that surface what the axis feels like at that strength. Renders
+// as a small numbered ladder under the body so the user can read
+// e.g. "focus = 3" against "Clear attention; reading or writing flows."
+export const VocabInfoCard = ({ term, summary, body, ladder, tone = "sage", onClose }) => {
   const accent = tone === "terra" ? theme.terra : theme.sageDeep;
   const bg = tone === "terra" ? "rgba(176, 84, 47, 0.05)" : "rgba(98, 124, 92, 0.06)";
   const bd = tone === "terra" ? "rgba(176, 84, 47, 0.20)" : "rgba(98, 124, 92, 0.22)";
@@ -445,6 +450,34 @@ export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) =
           fontFamily: ff.serif, fontSize: 12.5, color: theme.inkSoft,
           lineHeight: 1.5, marginTop: 6,
         }}>{body}</div>
+      )}
+      {Array.isArray(ladder) && ladder.length > 0 && (
+        <div style={{
+          marginTop: 10, paddingTop: 8,
+          borderTop: `1px solid ${bd}`,
+          display: "flex", flexDirection: "column", gap: 4,
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: accent, opacity: 0.85,
+            marginBottom: 2,
+          }}>what it feels like</div>
+          {ladder.map(([level, text]) => (
+            <div key={level} style={{
+              display: "flex", gap: 8, alignItems: "baseline",
+              fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
+              lineHeight: 1.45,
+            }}>
+              <span style={{
+                flexShrink: 0,
+                fontFamily: ff.mono, fontSize: 11,
+                color: accent, fontWeight: 600,
+                minWidth: 12, textAlign: "right",
+              }}>{level}</span>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
