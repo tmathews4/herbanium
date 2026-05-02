@@ -1194,8 +1194,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           )}
         </div>
 
-        {/* Category filter pills */}
+        {/* Category filter pills — matched to the flavor row's eyebrow
+            + spread layout so the two filter axes share visual style.
+            7 chips spread across 2 rows of 4 so they breathe rather
+            than crowd flush-left at half-width. */}
         <div style={{ marginTop: 8 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.ash, marginBottom: 5,
+          }}>category</div>
           <ChipRows
             items={[
               ["all",       "all"],
@@ -1208,16 +1215,21 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             ]}
             gap={4}
             rowGap={4}
-            renderItem={([key, label]) => (
-              <button key={key} onClick={() => setFilter(key)} style={{
-                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                padding: "3px 9px", borderRadius: 999,
-                border: `1px solid ${filter === key ? theme.ink : theme.ruleSoft}`,
-                background: filter === key ? theme.ink : "transparent",
-                color: filter === key ? theme.cream : theme.ash,
-                cursor: "pointer",
-              }}>{label}</button>
-            )}
+            maxPerRow={4}
+            align="spread"
+            renderItem={([key, label]) => {
+              const active = filter === key;
+              return (
+                <button key={key} onClick={() => setFilter(key)} style={{
+                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                  padding: "3px 9px", borderRadius: 999,
+                  border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                  background: active ? theme.ink : "transparent",
+                  color: active ? theme.cream : theme.ash,
+                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                }}>{label}</button>
+              );
+            }}
           />
         </div>
 
