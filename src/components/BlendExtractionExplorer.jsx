@@ -33,15 +33,17 @@ import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 
-// Caffeine load thresholds (mg). Tuned to the same model the
-// high-caffeine warning in perception.js fires on (≥60mg combined
-// with strong energy/focus): a sub-60 cup reads as "trace"; the
-// caution band starts where the cup begins to feel like coffee
-// territory; the warning band lines up with multi-source stacks
-// where caffeine-sensitive bodies are likely to feel wired.
+// Caffeine load thresholds (mg). Tuned so the bar's "too much"
+// tick lines up with where the perception.js high-caffeine warning
+// path fires on a real morning cup — masala chai at recommended
+// brew lands at ~120mg and that should already read as "pushing
+// it" on the bar, not sit quietly mid-track. Caution begins at
+// 60mg (the warning's bare trigger when stacked with strong
+// energy/focus); too-much at 120mg (a strong single cup); the
+// 250mg ceiling holds for stacked caffeine-bearing leaves.
 const CAFFEINE_MAX_MG = 250;
-const CAFFEINE_CAUTION_MG = 80;
-const CAFFEINE_WARN_MG = 150;
+const CAFFEINE_CAUTION_MG = 60;
+const CAFFEINE_WARN_MG = 120;
 
 // Single-row caffeine load gauge — sits in the Balance section
 // alongside the bitter/astringent palate axes. Reads as a fixed

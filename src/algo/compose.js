@@ -1190,13 +1190,31 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 
   const totalG = ingredients.reduce((s, { g }) => s + g, 0);
   // Total caffeine in mg for the cup, weighted by per-ingredient
-  // grams. Used by the cup-level caffeine-load warning so a stack
-  // of caffeine-bearing leaves can flag "may read jittery" even
-  // when no axis is over-extracted.
+  // grams AND modulated by extraction efficiency at the current
+  // temp/time. Hotter water + longer steep pulls more caffeine
+  // (cold brew tea runs ~50-70% the caffeine of a hot pour, by
+  // way of comparison); the previous gram-only formula gave a
+  // static number that didn't move when the user dragged the
+  // sliders. Used by the cup-level caffeine-load warning so a
+  // stack of caffeine-bearing leaves can flag "may read jittery"
+  // even when no axis is over-extracted.
+  const caffeineExtractionFactor = (meta) => {
+    const tempRange = meta.tempC || [85, 95];
+    const timeRange = meta.timeS || [180, 240];
+    const recTempC = (tempRange[0] + tempRange[1]) / 2;
+    const recTimeS = (timeRange[0] + timeRange[1]) / 2;
+    // Linear ramps with floors and ceilings — caffeine extraction
+    // follows roughly the same curve as everything else but stays
+    // a bit more extractable past peak (it's a small molecule that
+    // keeps coming out as the tannins start to bite).
+    const tempEff = Math.max(0.5, Math.min(1.1, 0.5 + 0.5 * (tempC / Math.max(50, recTempC))));
+    const timeEff = Math.max(0.5, Math.min(1.1, 0.4 + 0.6 * (timeS / Math.max(60, recTimeS))));
+    return 0.5 * tempEff + 0.5 * timeEff;
+  };
   const totalCaffeineMg = ingredients.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
     if (!meta || !meta.caffeine) return sum;
-    return sum + meta.caffeine * (g || 0);
+    return sum + meta.caffeine * (g || 0) * caffeineExtractionFactor(meta);
   }, 0);
 
   // (1) Per-ingredient contributions. Falls back to flat ingredient
