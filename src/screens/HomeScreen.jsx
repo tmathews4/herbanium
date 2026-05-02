@@ -510,6 +510,7 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
       padding: "10px 2px", cursor: "pointer",
       display: "flex", flexDirection: "column", gap: 3,
     }}>
+      {/* Row 1 — blend name (left, ellipsis) + relative time (right). */}
       <div style={{
         display: "flex", alignItems: "baseline", gap: 10, minWidth: 0,
       }}>
@@ -521,24 +522,43 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
           {b.name}
         </span>
         <span style={{
-          flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
-        }}>
-          {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
-        </span>
-        <span style={{
           flexShrink: 0, fontSize: 10, color: theme.ash, letterSpacing: "0.06em",
         }}>{sessionAgo(s) || s.ago}</span>
       </div>
 
-      {(desiredMood || endMood) && (
+      {/* Row 2 — mood arc on the left, taste dots beneath the time on
+          the right. Matches the Notebook journal row layout so the
+          two timelines read as one consistent register. */}
+      {(desiredMood || endMood || s.taste != null) && (
         <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-          color: theme.ash, lineHeight: 1.35,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          display: "flex", alignItems: "baseline", gap: 8, minWidth: 0,
         }}>
-          {desiredMood && (<span>for <span style={{ color: theme.inkSoft, fontStyle: "normal" }}>{desiredMood}</span></span>)}
-          <span style={{ margin: "0 6px", color: theme.rule, fontStyle: "normal" }}>→</span>
-          {endMood && (<span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>)}
+          <span style={{
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+            lineHeight: 1.35,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {desiredMood && (
+              <>
+                <span style={{ color: theme.ash, fontStyle: "italic" }}>for </span>
+                <span style={{ color: theme.ochre, fontStyle: "normal" }}>{desiredMood}</span>
+              </>
+            )}
+            {(desiredMood || endMood) && (
+              <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+            )}
+            {endMood && (
+              <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>
+            )}
+          </span>
+          {s.taste != null && (
+            <span style={{
+              flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
+            }}>
+              {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
+            </span>
+          )}
         </div>
       )}
 
