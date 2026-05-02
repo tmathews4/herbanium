@@ -363,17 +363,15 @@ const TrackMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, kind]);
 
-  // For a family, the display name to use in Simple mode: the family
-  // id if multiple tokens contribute, the single contributor's name
-  // if only one. Lets a vegetal band stay labeled "grassy" when
-  // grassy is the only vegetal-family member in the cup, while
-  // still rolling up to "vegetal" in cups that carry both grassy
-  // AND umami / marine / etc.
-  const familyDisplayKey = (familyName) => {
-    const contribs = globalFamilyContributors.get(familyName);
-    if (contribs && contribs.size === 1) return [...contribs][0];
-    return familyName;
-  };
+  // Simple view always renders the family name, never a single-
+  // contributor shortcut. The user's chip canon (data/canon.js)
+  // teaches them to think in 7 mood families and 10 flavor families
+  // — when Simple view dropped to leaf names ("grassy" instead of
+  // "vegetal", "umami" instead of "vegetal", "soothing" instead of
+  // "calm") it broke that contract. Detail mode still shows the
+  // leaf names. The contributors-list in the popup explains which
+  // specific tokens rolled into the family.
+  const familyDisplayKey = (familyName) => familyName;
 
   const aggregateToFamilies = (sourceMap) => {
     const fam = {};
@@ -559,7 +557,25 @@ const TrackMap = ({
   // and mood/balance strip conventions — every other label across the
   // strips is lowercase, so capitalizing only the family slugs would
   // read as a stylistic outlier.
-  const labelFor = (name) => name;
+  //
+  // Family slugs are translated to the parent canon labels the user
+  // picks from in chip rows (data/canon.js): warm→comfort, cool→cooling,
+  // body→digestive (mood) or creamy (flavor), sleep→sleepy, fruit→fruity.
+  // Without the map the strip would show "warm" / "body" / "fruit" while
+  // the chip rows show "Comfort" / "Digestive" / "Fruity" — same family,
+  // different word, breaking the contract.
+  const FAMILY_LABEL_MOOD = {
+    warm: "comfort", cool: "cooling", body: "digestive", sleep: "sleepy",
+  };
+  const FAMILY_LABEL_FLAVOR = {
+    fruit: "fruity", body: "creamy",
+  };
+  const labelFor = (name) => {
+    if (!useFamilyMode) return name;
+    if (kind === "mood") return FAMILY_LABEL_MOOD[name] || name;
+    if (kind === "flavor") return FAMILY_LABEL_FLAVOR[name] || name;
+    return name;
+  };
 
   // For a family-mode selected track, list the specific members that
   // contributed to it (any token that mapped into this family AND
