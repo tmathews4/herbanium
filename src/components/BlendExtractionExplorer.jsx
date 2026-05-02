@@ -920,25 +920,38 @@ export const BlendExtractionExplorer = ({
               </div>
             )}
             {filtered.map((w, i) => {
-              const accent = w.kind === "ceiling" ? theme.terra
-                : w.kind === "tannin" ? theme.terra
-                : w.kind === "aromatic" ? theme.terra
-                : w.kind === "caffeine" ? theme.terra
-                : w.kind === "paradox" ? theme.sageDeep
-                : theme.ash;
+              // Warning severity → matching advisory-band styling from
+              // the caffeine bar, so all the "this cup is pushing too
+              // hard" signals share one visual language.
+              //   red (terra)  — over the line: tannin, aromatic, ceiling
+              //   yellow (ochre) — heads-up: edge cases (e.g. masking,
+              //                    where one note is starting to bury
+              //                    another but the cup isn't broken)
+              //   sage         — paradox / informational: notable, not a
+              //                    flaw — the cup walks both sides
+              const sev = (w.kind === "tannin" || w.kind === "aromatic" || w.kind === "ceiling")
+                ? "over"
+                : (w.kind === "paradox") ? "info" : "edge";
+              const advisory = sev === "over"
+                ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling" : (w.kind === "aromatic" ? "aromatic" : "over the line") }
+                : sev === "edge"
+                ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)", tag: w.kind === "masking" ? "masking" : "heads up" }
+                : { accent: "#627C5C", bg: "rgba(98, 124, 92, 0.08)", tag: w.kind === "paradox" ? "paradox" : "note" };
               return (
                 <div key={i} style={{
-                  display: "flex", alignItems: "flex-start", gap: 8,
-                  paddingLeft: 8,
-                  borderLeft: `2px solid ${accent}`,
+                  padding: "8px 10px 8px 12px",
+                  borderLeft: `2px solid ${advisory.accent}`,
+                  background: advisory.bg,
+                  borderRadius: "0 6px 6px 0",
+                  fontFamily: ff.serif, fontSize: 12.5,
+                  color: theme.ink, lineHeight: 1.45,
                 }}>
-                  <div style={{
-                    fontFamily: ff.serif, fontSize: 13,
-                    color: theme.ink, lineHeight: 1.45,
-                    fontWeight: 400,
-                  }}>
-                    {renderText(w.text)}
-                  </div>
+                  <span style={{
+                    fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+                    textTransform: "uppercase", color: advisory.accent,
+                    marginRight: 8, fontWeight: 600,
+                  }}>{advisory.tag}</span>
+                  {renderText(w.text)}
                 </div>
               );
             })}
