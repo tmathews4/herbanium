@@ -112,6 +112,49 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
       )}
 
       <>
+        {/* Browse-the-herbanium CTA — only on the Cabinet surface
+            (forcePantryOnly). Cabinet is now strictly your stock list;
+            adding new ingredients happens by walking through the
+            full reference (Apothecary → Herbanium) and tapping the
+            pantry plus on a card there. The CTA is a quiet outline
+            so it sits as a doorway, not a primary action. */}
+        {forcePantryOnly && (
+          <button
+            onClick={() => go("apothecary", { mode: "compendium" })}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(125,140,108,0.06)";
+              e.currentTarget.style.borderColor = theme.sage;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.borderColor = theme.ruleSoft;
+            }}
+            style={{
+              width: "100%",
+              padding: "9px 14px",
+              marginBottom: 10,
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: theme.inkSoft,
+              background: "transparent",
+              border: `1px solid ${theme.ruleSoft}`,
+              borderRadius: 10,
+              cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "background 0.18s ease, border-color 0.18s ease",
+            }}
+          >
+            <svg width="14" height="11" viewBox="0 0 18 14" fill="none" aria-hidden>
+              <path d="M1.5 3 C 3.5 2.2, 6 2.2, 9 3 C 12 2.2, 14.5 2.2, 16.5 3
+                       L 16.5 11.5 C 14.5 10.7, 12 10.7, 9 11.5
+                       C 6 10.7, 3.5 10.7, 1.5 11.5 Z"
+                stroke={theme.sageDeep} strokeWidth="1" strokeLinejoin="round" fill="none" />
+              <path d="M9 3 L 9 11.5" stroke={theme.sageDeep} strokeWidth="1" strokeLinecap="round" />
+            </svg>
+            browse the herbanium to add
+          </button>
+        )}
+
         {/* Search input */}
         <div style={{
             display: "flex", alignItems: "center", gap: 8,
@@ -124,7 +167,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             <input
               value={shelfSearch}
               onChange={(e) => setShelfSearch(e.target.value)}
-              placeholder="search the herbanium…"
+              placeholder={forcePantryOnly ? "search your cabinet…" : "search the herbanium…"}
               style={{
                 flex: 1, background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: shelfSearch ? "normal" : "italic",
@@ -297,18 +340,50 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
               textTransform: "uppercase", color: theme.ash,
             }}>
-              {shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span>
+              {forcePantryOnly
+                ? `${shelfItems.length} in cabinet`
+                : (<>{shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span></>)
+              }
             </span>
           </div>
 
           {/* The catalog grid */}
           {shelfItems.length === 0 ? (
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-              color: theme.ash, padding: "18px 0", textAlign: "center",
-            }}>
-              no ingredients match your filters.
-            </div>
+            forcePantryOnly && pantryIds.size === 0 ? (
+              <div style={{
+                marginTop: 8, padding: "24px 18px", borderRadius: 12,
+                border: `1px dashed ${theme.ruleSoft}`,
+                background: theme.cream,
+                fontFamily: ff.serif, fontSize: 13.5, color: theme.inkSoft,
+                lineHeight: 1.55, textAlign: "center",
+              }}>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 8,
+                }}>your cabinet is empty</div>
+                <div style={{ fontStyle: "italic", color: theme.ash, marginBottom: 14 }}>
+                  Mark what you keep at home so the apothecary knows what
+                  you can actually brew right now.
+                </div>
+                <button
+                  onClick={() => go("apothecary", { mode: "compendium" })}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    padding: "8px 18px", borderRadius: 999,
+                    border: `1px solid ${theme.sageDeep}`, background: theme.sageDeep,
+                    color: theme.cream, cursor: "pointer",
+                  }}
+                >open the herbanium</button>
+              </div>
+            ) : (
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                color: theme.ash, padding: "18px 0", textAlign: "center",
+              }}>
+                no ingredients match your filters.
+              </div>
+            )
           ) : (
             <div style={{
               display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,

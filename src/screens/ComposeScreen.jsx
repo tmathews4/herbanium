@@ -1749,16 +1749,19 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         />
       )}
 
-      {/* Shelf · Pantry — full ingredient browse defaulted to "only
-          what's in my pantry" (so it lands as a personal stock list),
-          with the toggle visible so the user can flip it off to browse
-          and add new ingredients without leaving the tab. */}
+      {/* Shelf · Cabinet — strictly the user's stock list. The full
+          reference and "browse-to-add" flow lives in Apothecary →
+          Herbanium; the Cabinet keeps a tighter mental model of "what
+          I keep at home." forcePantryOnly locks the filter on and
+          hides the toggle; LibraryScreen renders a "browse the
+          herbanium to add" CTA at the top instead. */}
       {mode === "pantry" && (
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          defaultPantryOnly
+          forcePantryOnly
+          hidePantryToggle
           hideHeader
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}
