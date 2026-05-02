@@ -54,6 +54,17 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
   const [plannerOpen, setPlannerOpen] = useState(false);
+  // Over-steep counter — increments by 1 each second after remaining
+  // hits zero, until the user pours (resets) or logs the cup. Drives
+  // a soft warning band ("getting bitter — pour soon") so users who
+  // walk away and come back know the cup is past its sweet spot.
+  // Reset to 0 by both the manual reset and any natural finish path.
+  const [overSteepS, setOverSteepS] = useState(0);
+  // True for ~1.8s after remaining first hits zero — drives the
+  // one-time arrival pulse on the countdown ring + READY label
+  // fade-in. Cleared by a timeout so the pulse plays once per
+  // brew cycle rather than looping.
+  const [justFinished, setJustFinished] = useState(false);
 
   // Past brews of this blend — only meaningful if the blend has an id (saved
   // or previously-logged). Freshly-composed blends won't have prior sessions.
@@ -80,12 +91,34 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   // Fade state — briefly hides the card during transitions for a gentle feel
   const [waitFading, setWaitFading] = useState(false);
 
+  // One interval handles both the countdown and the over-steep tick
+  // so we don't tear down + recreate every second. A ref keeps the
+  // remaining value fresh inside the interval body without resetting
+  // the timer on each state change.
+  const remainingRef = useRef(remaining);
+  remainingRef.current = remaining;
   useEffect(() => {
     if (paused) return;
-    if (remaining <= 0) return;
-    const t = setInterval(() => setRemaining(r => Math.max(0, r - 1)), 1000);
+    const t = setInterval(() => {
+      if (remainingRef.current > 0) {
+        setRemaining(r => Math.max(0, r - 1));
+      } else {
+        setOverSteepS(s => s + 1);
+      }
+    }, 1000);
     return () => clearInterval(t);
-  }, [paused, remaining]);
+  }, [paused]);
+
+  // First-zero arrival: flash the pulse + READY label once when
+  // remaining transitions to zero. setJustFinished gates the CSS
+  // animation; cleared after 1.8s so subsequent renders don't keep
+  // re-pulsing while the user sits at zero.
+  useEffect(() => {
+    if (remaining !== 0) return;
+    setJustFinished(true);
+    const t = setTimeout(() => setJustFinished(false), 1800);
+    return () => clearTimeout(t);
+  }, [remaining]);
 
   // Native steep alarm — schedule a local notification that fires
   // when the brew finishes, so the user can leave the app or lock
@@ -247,20 +280,29 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         })()}
       </div>
 
-      {/* countdown ring */}
+      {/* countdown ring — at zero the stroke shifts to sage and a
+          one-shot pulse plays via .steep-ring-arrived. The center
+          label swaps from "remaining / m:ss / of m:ss" to
+          "READY / POUR NOW / m:ss steeped" so the moment reads as
+          an arrival rather than a state change. */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 12, position: "relative" }}>
-        <svg width="200" height="200" viewBox="-100 -100 200 200" style={{
-          animation: paused ? "none" : "breathe 4.5s ease-in-out infinite",
-        }}>
+        <svg
+          width="200" height="200" viewBox="-100 -100 200 200"
+          className={justFinished ? "steep-ring-arrived" : ""}
+          style={{
+            animation: paused ? "none" : "breathe 4.5s ease-in-out infinite",
+          }}
+        >
           <circle cx="0" cy="0" r={R} stroke={theme.ruleSoft} strokeWidth="1.5" fill="none" />
           <circle
             cx="0" cy="0" r={R}
-            stroke={theme.terra} strokeWidth="2.5" fill="none"
+            stroke={remaining === 0 ? theme.sageDeep : theme.terra}
+            strokeWidth="2.5" fill="none"
             strokeDasharray={C}
             strokeDashoffset={C * (1 - pct)}
             transform="rotate(-90)"
             strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset .8s linear" }}
+            style={{ transition: "stroke-dashoffset .8s linear, stroke 0.6s ease" }}
           />
           {/* landmark ticks */}
           {landmarks.map((lm, i) => {
@@ -274,13 +316,34 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", pointerEvents: "none",
         }}>
-          <div style={{ fontFamily: ff.serif, fontSize: 10.5, fontStyle: "italic", color: theme.ash }}>remaining</div>
-          <div style={{ fontFamily: ff.serif, fontSize: 36, fontWeight: 400, color: theme.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
-            {mmss(remaining)}
-          </div>
-          <div style={{ marginTop: 3, fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-            of {mmss(total)}
-          </div>
+          {remaining === 0 ? (
+            <>
+              <div className="steep-ready-eyebrow" style={{
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.28em",
+                textTransform: "uppercase", color: theme.sageDeep, fontWeight: 600,
+              }}>ready</div>
+              <div className="steep-ready-headline" style={{
+                fontFamily: ff.serif, fontSize: 30, fontWeight: 400,
+                color: theme.ink, letterSpacing: "-0.01em", lineHeight: 1, marginTop: 2,
+              }}>pour now</div>
+              <div style={{
+                marginTop: 4, fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.ash,
+              }}>
+                {overSteepS > 0 ? `+${mmss(overSteepS)} past` : `${mmss(total)} steeped`}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontFamily: ff.serif, fontSize: 10.5, fontStyle: "italic", color: theme.ash }}>remaining</div>
+              <div style={{ fontFamily: ff.serif, fontSize: 36, fontWeight: 400, color: theme.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
+                {mmss(remaining)}
+              </div>
+              <div style={{ marginTop: 3, fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+                of {mmss(total)}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -451,20 +514,57 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         )}
       </div>
 
-      {/* controls */}
+      {/* controls — pause is meaningless after zero (nothing to
+          pause), so we drop it and rename reset to "steep again"
+          since the natural intent at zero is a second infusion. The
+          primary CTA flips from ink "done early" to a terra-filled,
+          softly pulsing "log this cup" so the arrival moment carries
+          its own visual weight. */}
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-        <button onClick={() => setPaused(!paused)} style={iconBtn()}>
-          {paused ? "▶ resume" : "❚❚ pause"}
+        {remaining > 0 && (
+          <button onClick={() => setPaused(!paused)} style={iconBtn()}>
+            {paused ? "▶ resume" : "❚❚ pause"}
+          </button>
+        )}
+        <button
+          onClick={() => { setRemaining(total); setOverSteepS(0); }}
+          style={iconBtn()}
+        >
+          {remaining === 0 ? "↺ steep again" : "↺ reset"}
         </button>
-        <button onClick={() => setRemaining(total)} style={iconBtn()}>↺ reset</button>
-        <button onClick={() => onDone(blend, intent, targetMoods)} style={{
-          flex: 1, fontFamily: ff.serif, fontSize: 15,
-          padding: "12px 14px", borderRadius: 10,
-          background: theme.ink, color: theme.cream, border: "none", cursor: "pointer",
-        }}>
+        <button
+          onClick={() => onDone(blend, intent, targetMoods)}
+          className={remaining === 0 ? "steep-cta-arrived" : ""}
+          style={{
+            flex: 1, fontFamily: ff.serif, fontSize: 15,
+            padding: "12px 14px", borderRadius: 10,
+            background: remaining === 0 ? theme.terra : theme.ink,
+            color: theme.cream, border: "none", cursor: "pointer",
+            transition: "background 0.4s ease, box-shadow 0.4s ease",
+          }}
+        >
           {remaining === 0 ? "log this cup →" : "done early →"}
         </button>
       </div>
+
+      {/* Over-steep warning — ambient band that fades in past 30s of
+          over-steep, escalates past 2m. Lives below the controls so it
+          stays out of the way until it actually has something to say.
+          Disappears when the user pours (steep again) or logs the cup. */}
+      {remaining === 0 && overSteepS > 30 && (
+        <div style={{
+          marginTop: 10, padding: "8px 12px",
+          borderLeft: `2px solid ${overSteepS > 120 ? theme.terra : theme.ochre}`,
+          background: overSteepS > 120 ? "rgba(176,84,47,0.06)" : "rgba(165,120,54,0.06)",
+          borderRadius: "0 6px 6px 0",
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.inkSoft, lineHeight: 1.4,
+        }}>
+          {overSteepS > 120
+            ? "Tannins climbing — pour now, or it'll bite."
+            : "Getting bitter — pour soon."}
+        </div>
+      )}
 
       <style>{`
         @keyframes breathe {
@@ -475,6 +575,41 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           color: ${theme.ash};
           opacity: 0.55;
           font-style: italic;
+        }
+        /* One-shot arrival pulse on the countdown ring — a single
+           grow-and-settle cycle that draws the eye back to the timer
+           the moment the brew finishes. Animation is added/removed
+           by toggling the .steep-ring-arrived class so it doesn't
+           loop while the user sits at zero. */
+        @keyframes steep-arrived-pulse {
+          0%   { transform: scale(1);    filter: drop-shadow(0 0 0 rgba(125,140,108,0)); }
+          35%  { transform: scale(1.06); filter: drop-shadow(0 0 14px rgba(125,140,108,0.45)); }
+          100% { transform: scale(1);    filter: drop-shadow(0 0 0 rgba(125,140,108,0)); }
+        }
+        .steep-ring-arrived {
+          animation: steep-arrived-pulse 1.6s ease-out;
+        }
+        /* Ready-label fade-in — small upward slide so the words
+           appear to arrive rather than swap in place. */
+        @keyframes steep-ready-fade-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .steep-ready-eyebrow,
+        .steep-ready-headline {
+          animation: steep-ready-fade-in 0.6s ease-out both;
+        }
+        .steep-ready-headline { animation-delay: 0.08s; }
+        /* CTA arrival — soft outer glow that breathes once and rests
+           into a steady terra-tinted shadow so the button reads as
+           the page's natural next step at zero without screaming. */
+        @keyframes steep-cta-arrived-pulse {
+          0%   { box-shadow: 0 0 0 rgba(176,84,47,0); }
+          40%  { box-shadow: 0 4px 18px -2px rgba(176,84,47,0.55); }
+          100% { box-shadow: 0 2px 8px -1px rgba(176,84,47,0.30); }
+        }
+        .steep-cta-arrived {
+          animation: steep-cta-arrived-pulse 1.6s ease-out forwards;
         }
       `}</style>
 
