@@ -1075,6 +1075,45 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // picker's at-rest state stays compact (search + category chips).
   // Mirrors the Recipes/Herbanium pattern.
   const [pickerFiltersExpanded, setPickerFiltersExpanded] = useState(false);
+
+  // Picker compatibility scoring — for each candidate, how well does
+  // it fit the blend's CURRENT brewing-window intersection on both
+  // axes (temp + time)? The blend's intersection is the band where
+  // every existing ingredient is at home; adding a candidate that
+  // fits in that band keeps the blend cohesive. Score:
+  //   2 — both temp and time overlap (green: full overlap)
+  //   1 — only one axis overlaps      (yellow: partial)
+  //   0 — neither axis overlaps        (red: poor fit)
+  //   null — pot is empty, no comparison possible (neutral)
+  // Declared above filteredAvailable because the sort callback below
+  // calls overlapScore — keeping it after would put the helper in TDZ
+  // and crash the page on first render.
+  const blendOverlap = React.useMemo(() => {
+    if (reverseIngs.length === 0) return null;
+    let tLo = -Infinity, tHi = Infinity;
+    let sLo = -Infinity, sHi = Infinity;
+    for (const id of reverseIngs) {
+      const ing = INGREDIENTS[id];
+      if (!ing) continue;
+      tLo = Math.max(tLo, ing.tempC[0]);
+      tHi = Math.min(tHi, ing.tempC[1]);
+      sLo = Math.max(sLo, ing.timeS[0]);
+      sHi = Math.min(sHi, ing.timeS[1]);
+    }
+    return { tLo, tHi, sLo, sHi };
+  }, [reverseIngs]);
+
+  const overlapScore = (candidateId) => {
+    if (!blendOverlap) return null;
+    const c = INGREDIENTS[candidateId];
+    if (!c) return null;
+    const tempOK = Math.max(c.tempC[0], blendOverlap.tLo)
+                <= Math.min(c.tempC[1], blendOverlap.tHi);
+    const timeOK = Math.max(c.timeS[0], blendOverlap.sLo)
+                <= Math.min(c.timeS[1], blendOverlap.sHi);
+    return (tempOK ? 1 : 0) + (timeOK ? 1 : 0);
+  };
+
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
   const filteredAvailable = available
     .filter(id => {
@@ -1160,42 +1199,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // in (the generators are already filtered), so the warning matters
   // most here.
   const rcSafetyFlags = checkIngredientInteractions(reverseIngs);
-
-  // Picker compatibility scoring — for each candidate, how well does
-  // it fit the blend's CURRENT brewing-window intersection on both
-  // axes (temp + time)? The blend's intersection is the band where
-  // every existing ingredient is at home; adding a candidate that
-  // fits in that band keeps the blend cohesive. Score:
-  //   2 — both temp and time overlap (green: full overlap)
-  //   1 — only one axis overlaps      (yellow: partial)
-  //   0 — neither axis overlaps        (red: poor fit)
-  //   null — pot is empty, no comparison possible (neutral)
-  // Ranges [a,b] and [c,d] overlap iff max(a,c) <= min(b,d).
-  const blendOverlap = React.useMemo(() => {
-    if (reverseIngs.length === 0) return null;
-    let tLo = -Infinity, tHi = Infinity;
-    let sLo = -Infinity, sHi = Infinity;
-    for (const id of reverseIngs) {
-      const ing = INGREDIENTS[id];
-      if (!ing) continue;
-      tLo = Math.max(tLo, ing.tempC[0]);
-      tHi = Math.min(tHi, ing.tempC[1]);
-      sLo = Math.max(sLo, ing.timeS[0]);
-      sHi = Math.min(sHi, ing.timeS[1]);
-    }
-    return { tLo, tHi, sLo, sHi };
-  }, [reverseIngs]);
-
-  const overlapScore = (candidateId) => {
-    if (!blendOverlap) return null;
-    const c = INGREDIENTS[candidateId];
-    if (!c) return null;
-    const tempOK = Math.max(c.tempC[0], blendOverlap.tLo)
-                <= Math.min(c.tempC[1], blendOverlap.tHi);
-    const timeOK = Math.max(c.timeS[0], blendOverlap.sLo)
-                <= Math.min(c.timeS[1], blendOverlap.sHi);
-    return (tempOK ? 1 : 0) + (timeOK ? 1 : 0);
-  };
 
   return (
     <>
