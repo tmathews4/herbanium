@@ -993,7 +993,14 @@ const TrackMap = ({
 
   const tempLabel = (c) => unit === "F" ? `${cToF(c)}°F` : `${c}°C`;
 
-  const TRACK_H   = 14;
+  const TRACK_H_PARENT = 14;
+  const TRACK_H_CHILD  = 11;  // children compressed slightly so a wide
+                              // family with 3-4 leaves doesn't push the
+                              // strip's overall height past comfort —
+                              // parents stay at full height as anchors.
+  const TRACK_H   = TRACK_H_PARENT;  // legacy alias for the band column
+                                     // outer flex gap calc; per-row height
+                                     // is set inline based on depth.
   const TRACK_GAP = 3;
   const LABEL_W   = 86;
   // Detail-mode child rows indent their LABEL by this many pixels so
@@ -1001,6 +1008,7 @@ const TrackMap = ({
   // Bands all start at the same left edge — only the label column
   // carries the hierarchy via padding + a ↳ arrow prefix.
   const CHILD_INDENT_PX = 12;
+  const heightForItem = (item) => item.depth > 0 ? TRACK_H_CHILD : TRACK_H_PARENT;
 
   return (
     <div style={{
@@ -1038,7 +1046,7 @@ const TrackMap = ({
                 onClick={hasDescription ? () => toggleSelected(name) : undefined}
                 title={hasDescription ? "tap for definition" : undefined}
                 style={{
-                  height: TRACK_H,
+                  height: heightForItem(item),
                   fontFamily: ff.sans, fontSize: isParent ? 10 : 9.5,
                   color: here ? theme.terra : (isSelected ? theme.ink : (depth > 0 ? theme.ash : theme.inkSoft)),
                   fontWeight: isParent ? 500 : (here || isSelected ? 500 : 400),
@@ -1125,7 +1133,7 @@ const TrackMap = ({
             const fill = Math.max(0, Math.min(1, current / 5));
             return (
               <div key={name} style={{
-                height: TRACK_H,
+                height: heightForItem(item),
                 position: "relative",
                 background: theme.ruleSoft,
                 borderRadius: 1,
@@ -1158,7 +1166,7 @@ const TrackMap = ({
                 onClick={hasDescription ? () => toggleSelected(name) : undefined}
                 style={{
                   position: "relative",
-                  height: TRACK_H,
+                  height: heightForItem(item),
                   borderRadius: 3,
                   background: gradientFor(name),
                   boxShadow: isSelected
