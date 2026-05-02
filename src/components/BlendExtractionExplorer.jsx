@@ -79,7 +79,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
         display: "flex", justifyContent: "space-between", alignItems: "baseline",
       }}>
         <div style={{
-          display: "flex", alignItems: "baseline", gap: 8,
+          display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap",
         }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
@@ -88,7 +88,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           {gramsLabel && (
             <div style={{
               fontFamily: ff.mono, fontSize: 9.5, color: theme.ash,
-            }}>· {gramsLabel}</div>
+            }}>· {gramsLabel} · 250 ml cup</div>
           )}
         </div>
         <div style={{
