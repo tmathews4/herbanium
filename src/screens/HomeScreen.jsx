@@ -570,56 +570,78 @@ export const SessionRow = ({ s, openCup, first }) => {
   // "brewed" is the placeholder the log writes when no specific
   // landing-moods were captured — treat it as no ending logged.
   const end = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
-  const arrow = (
-    <span style={{ margin: "0 4px", color: theme.rule, fontStyle: "normal" }}>→</span>
-  );
+  const ago = sessionAgo(s) || s.ago;
 
+  // Two-row layout matching JournalEntryRow so cups and entries scan
+  // as one consistent timeline:
+  //   row 1 — leading glyph + blend name on left, time far right
+  //   row 2 — mood arc (start → end, colored) on left, taste dots right
+  // The mood arc gets explicit colors to read as a transition: ochre
+  // for the coming-in mood (the unsettled state), terra arrow for the
+  // change, sage-deep for the landed mood (where the cup left you).
   return (
     <button onClick={() => openCup?.(s.id)} style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       borderLeft: `2px solid ${theme.sage}`,
-      padding: "8px 2px 8px 10px", cursor: "pointer",
-      display: "flex", alignItems: "center", gap: 8, minWidth: 0,
+      padding: "10px 2px 10px 10px", cursor: "pointer",
+      display: "flex", gap: 8, minWidth: 0,
     }}>
-      {/* Leading glyph — kettle accent so the journal timeline reads
-          cup vs entry at a glance. Sage-tinted to match the left edge. */}
-      <span style={{ flexShrink: 0, display: "inline-flex" }}>
+      <span style={{ flexShrink: 0, display: "inline-flex", paddingTop: 2 }}>
         <Kettle size={14} c={theme.sageDeep} />
       </span>
-      <span style={{
-        flexShrink: 1, minWidth: 0,
-        fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
-        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-      }}>
-        {b.name}
-        {s.who !== "you" && (
-          <span style={{ fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
-            · {s.who}
-          </span>
-        )}
-      </span>
-      {(start || end) && (
-        <span style={{
-          flexShrink: 1, minWidth: 0,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-          color: theme.ash, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        {/* Header: blend name (left, ellipsis) + relative time (right) */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
         }}>
-          {start && (<span>{start}</span>)}
-          {arrow}
-          {end && (
-            <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
-          )}
-        </span>
-      )}
-      <span style={{
-        flexShrink: 0, fontSize: 10, color: theme.terra, letterSpacing: "0.08em",
-      }}>
-        {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
-      </span>
-      <span style={{
-        flexShrink: 0, fontSize: 10, color: theme.ash, letterSpacing: "0.06em",
-      }}>{sessionAgo(s) || s.ago}</span>
+          <span style={{
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {b.name}
+            {s.who !== "you" && (
+              <span style={{ fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
+                · {s.who}
+              </span>
+            )}
+          </span>
+          <span style={{
+            flexShrink: 0, fontFamily: ff.serif, fontStyle: "italic",
+            fontSize: 11, color: theme.ash,
+          }}>{ago}</span>
+        </div>
+        {/* Sub-row: colored mood-arc on left, taste dots on right */}
+        {(start || end || s.taste != null) && (
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
+          }}>
+            <span style={{
+              flex: 1, minWidth: 0,
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            }}>
+              {start && (
+                <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
+              )}
+              {(start || end) && (
+                <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+              )}
+              {end && (
+                <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
+              )}
+            </span>
+            {s.taste != null && (
+              <span style={{
+                flexShrink: 0, fontSize: 10, color: theme.terra, letterSpacing: "0.08em",
+              }}>
+                {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </button>
   );
 };
