@@ -51,8 +51,13 @@ const CAFFEINE_WARN_MG = 120;
 // a terra fill that intensifies past warning. Shares the palate
 // strip's visual register so users learn one bar shape applies
 // across all "is this cup pushing too hard?" signals.
-const CaffeineBar = ({ caffeineMg = 0 }) => {
+const CaffeineBar = ({ caffeineMg = 0, totalG = 0 }) => {
   const mg = Math.max(0, Math.round(caffeineMg));
+  const grams = Math.max(0, Number(totalG) || 0);
+  // Round to nearest 0.5g for a tidy "≈" hint; suppress when no
+  // grams were passed (keeps the bar usable when the caller hasn't
+  // wired the total through yet).
+  const gramsLabel = grams > 0 ? `${(Math.round(grams * 2) / 2).toFixed(1)} g leaf` : null;
   const pct = Math.min(100, (mg / CAFFEINE_MAX_MG) * 100);
   const past = mg >= CAFFEINE_WARN_MG;
   const inCaution = mg >= CAFFEINE_CAUTION_MG && !past;
@@ -67,9 +72,18 @@ const CaffeineBar = ({ caffeineMg = 0 }) => {
         display: "flex", justifyContent: "space-between", alignItems: "baseline",
       }}>
         <div style={{
-          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-          textTransform: "uppercase", color: theme.ash,
-        }}>caffeine load</div>
+          display: "flex", alignItems: "baseline", gap: 8,
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>caffeine load</div>
+          {gramsLabel && (
+            <div style={{
+              fontFamily: ff.mono, fontSize: 9.5, color: theme.ash,
+            }}>· {gramsLabel}</div>
+          )}
+        </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 6,
           fontFamily: ff.mono, fontSize: 11, color: labelColor,
@@ -372,7 +386,10 @@ export const BlendExtractionExplorer = ({
             largely temp-flat for the user's purposes), so it renders
             as a static gauge rather than a per-temperature band. */}
         {brew?.caffeineMg != null && brew.caffeineMg > 0 && (
-          <CaffeineBar caffeineMg={brew.caffeineMg} />
+          <CaffeineBar
+            caffeineMg={brew.caffeineMg}
+            totalG={(ingredients || []).reduce((s, it) => s + (Number(it?.g) || 0), 0)}
+          />
         )}
       </div>
 
