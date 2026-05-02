@@ -424,6 +424,13 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           we wait to ask, the worse the user's recall. */}
       {pendingMoodSession && (
         <MoodFollowUpCard
+          // Stable key on session id forces React to unmount and
+          // remount when the pending session changes — without this,
+          // submitting the first of several pending cards leaves the
+          // component instance alive with `submitted: true` and a
+          // `null` score, so the second card opens with its save
+          // button disabled even after the user picks a strength.
+          key={pendingMoodSession.id}
           session={pendingMoodSession}
           onSubmit={(payload) => patchSessionMoods?.(pendingMoodSession.id, payload)}
           onDismiss={() => dismissSessionMoods?.(pendingMoodSession.id)}
