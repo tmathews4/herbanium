@@ -1600,9 +1600,10 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
             textTransform: "uppercase", color: theme.ash,
-            marginBottom: 8,
+            marginBottom: 8, lineHeight: 1.5,
           }}>
-            1 part ≈ 1 g of dry leaf (about ½ tsp) — caffeine + balance scale from total
+            <div>1 part ≈ 1 g of dry leaf (about ½ tsp)</div>
+            <div>caffeine + balance scale from total</div>
           </div>
         )}
         {reverseIngs.map(id => {
