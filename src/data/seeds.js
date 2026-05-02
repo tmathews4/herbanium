@@ -211,6 +211,7 @@ export const SEED_MODES = {
     hints: {
       firstCupHintShown: true,
       composeHintShown:  true,
+      shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  true,
       pantryHintShown:   true,
@@ -385,6 +386,7 @@ export const SEED_MODES = {
     hints: {
       firstCupHintShown: true,
       composeHintShown:  true,
+      shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  false,
       pantryHintShown:   false,
@@ -419,6 +421,7 @@ export const SEED_MODES = {
     hints: {
       firstCupHintShown: false,
       composeHintShown:  false,
+      shelfHintShown:    false,
       journalHintShown:  false,
       profileHintShown:  false,
       pantryHintShown:   false,
