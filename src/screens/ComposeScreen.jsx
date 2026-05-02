@@ -1107,10 +1107,20 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     if (!blendOverlap) return null;
     const c = INGREDIENTS[candidateId];
     if (!c) return null;
-    const tempOK = Math.max(c.tempC[0], blendOverlap.tLo)
-                <= Math.min(c.tempC[1], blendOverlap.tHi);
-    const timeOK = Math.max(c.timeS[0], blendOverlap.sLo)
-                <= Math.min(c.timeS[1], blendOverlap.sHi);
+    // Strict inequality (>, not >=) on each axis so a candidate that
+    // only meets the blend at a single boundary point doesn't score
+    // green. The BlendExtractionExplorer requires a strictly-positive
+    // intersection band before it paints the green sweet-spot bar
+    // (a zero-width intersect falls back to the yellow compromise
+    // zone). Matching its rule here keeps the picker's color and the
+    // explorer's bar in sync — pick all-green and the explorer lights
+    // up green on both axes.
+    const newTLo = Math.max(c.tempC[0], blendOverlap.tLo);
+    const newTHi = Math.min(c.tempC[1], blendOverlap.tHi);
+    const tempOK = newTHi > newTLo;
+    const newSLo = Math.max(c.timeS[0], blendOverlap.sLo);
+    const newSHi = Math.min(c.timeS[1], blendOverlap.sHi);
+    const timeOK = newSHi > newSLo;
     return (tempOK ? 1 : 0) + (timeOK ? 1 : 0);
   };
 
