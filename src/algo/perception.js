@@ -491,25 +491,34 @@ export function buildWarnings({
     });
   }
 
-  // Tannin creep — bitter and astringent climbing past their gentler register.
-  // Combines flavor-side bitter/bitterness/astringent with the bitterness
-  // effect (some extraction profiles render bitterness as an effect bar).
-  const bitterLevel = (perceivedFlavors.bitter || 0)
-                    + (perceivedFlavors.bitterness || 0)
-                    + (perceivedEffects.bitterness || 0);
-  const astringentLevel = perceivedFlavors.astringent || 0;
+  // Tannin creep — bitter and astringent climbing past their gentler
+  // register. The math here mirrors the bitterness / astringency
+  // balance bars exactly so a user reading "3.4 bitter, 2.4 astringent"
+  // off the bars never wonders why no warning fires:
+  //   • bitterBar      = bitter + bitterness + astringent + effect:bitterness
+  //   • astringencyBar = astringent + tannic
+  // Earlier the warning math read raw perceivedFlavors[bitter,
+  // bitterness] only, so a cup whose bar values came mostly from
+  // astringent + tannic (e.g. an over-pulled gunpowder cup) showed
+  // a loud bar but stayed silent on the warning side.
+  const bitterBar = (perceivedFlavors.bitter || 0)
+                  + (perceivedFlavors.bitterness || 0)
+                  + (perceivedFlavors.astringent || 0)
+                  + (perceivedEffects.bitterness || 0);
+  const astringencyBar = (perceivedFlavors.astringent || 0)
+                       + (perceivedFlavors.tannic || 0);
 
-  if (bitterLevel + astringentLevel >= 4) {
+  if (bitterBar >= 4) {
     warnings.push({
       kind: "tannin",
       text: "Tannins are taking over — drop a few degrees or shave the steep.",
     });
-  } else if (astringentLevel >= 2) {
+  } else if (astringencyBar >= 2) {
     warnings.push({
       kind: "tannin",
       text: "Astringent edge climbing — gentler heat or a shorter steep would soften it.",
     });
-  } else if (bitterLevel >= 2.5) {
+  } else if (bitterBar >= 2.5) {
     warnings.push({
       kind: "tannin",
       text: "The bitter side is starting to dominate — pull back the steep or drop a few degrees.",
