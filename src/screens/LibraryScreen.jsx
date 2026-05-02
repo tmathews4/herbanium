@@ -428,7 +428,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                   textTransform: "uppercase", color: theme.ash, marginBottom: 8,
                 }}>your cabinet is empty</div>
                 <div style={{ fontStyle: "italic", color: theme.ash, marginBottom: 14 }}>
-                  Mark what you keep at home so the apothecary knows what
+                  Mark what you keep at home so the apothecarium knows what
                   you can actually brew right now.
                 </div>
                 <button

@@ -956,11 +956,11 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 
   const isApothecary = section === "apothecary";
   const Icon  = isApothecary ? Sprig : Pencil;
-  const title = isApothecary ? "Apothecary" : "Notebook";
+  const title = isApothecary ? "Apothecarium" : "Notebook";
   const items = isApothecary
     ? [
         ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
-        ["Herbanium", "The full reference — every leaf, flower, root, and bark the apothecary tracks. Tap one to read its profile."],
+        ["Herbanium", "The full reference — every leaf, flower, root, and bark the apothecarium tracks. Tap one to read its profile."],
       ]
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
@@ -1228,7 +1228,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         }}>
           <span>add ingredient</span>
           <span style={{ letterSpacing: 0, textTransform: "none", fontStyle: "italic", fontFamily: ff.serif, fontSize: 11 }}>
-            {filteredAvailable.length} in the apothecary
+            {filteredAvailable.length} in the apothecarium
           </span>
         </div>
 

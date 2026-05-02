@@ -42,7 +42,7 @@ import { useAppBackNav } from "./hooks/useAppBackNav";
 const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
-    { k: "apothecary", label: "Apothecary", icon: <Flower size={18} /> },
+    { k: "apothecary", label: "Apothecarium", icon: <Flower size={18} /> },
     { k: "shelf",      label: "Notebook",   icon: <Leaf size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
