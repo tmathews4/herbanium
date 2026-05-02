@@ -814,11 +814,15 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
     </div>
     {/* Right-side temp/time meta — bracketed by a soft vertical
         rule so the brew parameters read as their own band, not
-        as text floating off the right edge. */}
+        as text floating off the right edge. Bottom-aligned within
+        its grid cell so the values sit at the card's lower-right
+        corner — out of the way of the × delete affordance that
+        floats top-right on user-removable Recipes rows. */}
     <div style={{
       textAlign: "right", flexShrink: 0,
       paddingLeft: 12,
       borderLeft: `1px solid ${theme.ruleSoft}`,
+      alignSelf: "end",
     }}>
       <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink, lineHeight: 1.1 }}>{formatTempShort(b.tempC, b.tempC, unit)}</div>
       <div style={{ fontFamily: ff.mono, fontSize: 10.5, color: theme.ash, marginTop: 2 }}>{mmss(b.timeS)}</div>
