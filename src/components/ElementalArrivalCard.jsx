@@ -105,7 +105,7 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
         <div style={{
           fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.22em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 10,
-        }}>An elemental finds you</div>
+        }}>You note an elemental</div>
 
         <div style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 18,
