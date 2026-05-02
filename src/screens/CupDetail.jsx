@@ -17,9 +17,9 @@
    the recipe view, but the default landing is the journal entry.
    ────────────────────────────────────────────────────────────── */
 
-import React from "react";
+import React, { useState } from "react";
 import { Flower } from "../components/icons";
-import { SectionLabel } from "../components/layout";
+import { Button, SectionLabel } from "../components/layout";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import { ff, theme } from "../theme";
 import { formatTempShort, useUnit } from "../units/units";
@@ -31,9 +31,29 @@ const formatBrewTime = (s) => {
   return r === 0 ? `${m} min` : `${m}m ${r}s`;
 };
 
-export const CupDetail = ({ session, onClose, openBlend }) => {
+export const CupDetail = ({ session, onClose, openBlend, appendSessionNote }) => {
   const { unit } = useUnit();
   const blend = session ? getBlend(session.blendId) : null;
+  // Append-a-note state — collapsed by default. Opens to a dashed
+  // textarea + save/cancel pair below the marginalia. Each save
+  // appends with a paragraph break so the note reads as a stack
+  // of small entries (brew-time → follow-up → later reflection).
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [noteJustSaved, setNoteJustSaved] = useState(false);
+  const handleNoteSave = () => {
+    const text = noteDraft.trim();
+    if (!text || !appendSessionNote || !session?.id) return;
+    appendSessionNote(session.id, text);
+    setNoteDraft("");
+    setNoteOpen(false);
+    setNoteJustSaved(true);
+    setTimeout(() => setNoteJustSaved(false), 1800);
+  };
+  const handleNoteCancel = () => {
+    setNoteDraft("");
+    setNoteOpen(false);
+  };
 
   if (!session || !blend) {
     return (
@@ -263,10 +283,10 @@ export const CupDetail = ({ session, onClose, openBlend }) => {
         </div>
       )}
 
-      {/* Marginalia — combined brew-time + follow-up note. Render
-          with whitespace preserved so the paragraph break inserted
-          when the follow-up text was appended reads as a small two-
-          act log instead of a wall of text. */}
+      {/* Marginalia — combined brew-time + follow-up note + any
+          later-added reflections. Render with whitespace preserved
+          so the paragraph break inserted between appended notes
+          reads as a small stacked log instead of a wall of text. */}
       {session.note && session.note.trim() && (
         <div style={{ marginTop: 18 }}>
           <SectionLabel>Marginalia</SectionLabel>
@@ -279,6 +299,69 @@ export const CupDetail = ({ session, onClose, openBlend }) => {
           }}>
             {session.note}
           </div>
+        </div>
+      )}
+
+      {/* Add-a-note composer — collapsed by default to a quiet
+          "+ add a note" link, opens to a dashed-rule textarea with
+          save/cancel. Each save appends with a paragraph break, so
+          the user can keep adding reflections to a cup over time
+          (next-day impressions, what they remember, what changed). */}
+      {appendSessionNote && (
+        <div style={{ marginTop: 14 }}>
+          {!noteOpen && !noteJustSaved && (
+            <button
+              onClick={() => setNoteOpen(true)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(176,84,47,0.06)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              style={{
+                width: "100%", padding: "9px 14px",
+                background: "transparent",
+                border: `1px dashed ${theme.terra}`,
+                borderRadius: 10,
+                fontFamily: ff.serif, fontSize: 13,
+                color: theme.terra, cursor: "pointer",
+                transition: "background 0.18s ease",
+              }}
+            >+ add a note</button>
+          )}
+          {noteJustSaved && (
+            <div style={{
+              padding: "9px 14px", textAlign: "center",
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+              color: theme.sageDeep,
+              border: `1px solid ${theme.ruleSoft}`,
+              background: "rgba(98,124,92,0.08)",
+              borderRadius: 10,
+            }}>note added.</div>
+          )}
+          {noteOpen && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <textarea
+                autoFocus
+                value={noteDraft}
+                onChange={(e) => setNoteDraft(e.target.value)}
+                placeholder="anything to add about this cup?"
+                style={{
+                  width: "100%", minHeight: 90, boxSizing: "border-box",
+                  background: "rgba(var(--hi-rgb),0.05)",
+                  border: `1px dashed ${theme.rule}`,
+                  borderRadius: 8, padding: "10px 12px",
+                  fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+                  lineHeight: 1.5, resize: "vertical", outline: "none",
+                }}
+              />
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <Button variant="ghost" onClick={handleNoteCancel}>Cancel</Button>
+                <Button
+                  variant="primary" tone="ink"
+                  onClick={handleNoteSave}
+                  disabled={!noteDraft.trim()}
+                  style={{ fontSize: 14, padding: "10px 22px" }}
+                >Add note</Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

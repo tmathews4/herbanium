@@ -945,6 +945,23 @@ export default function App() {
     ));
   };
 
+  // Append text to a session's note from the cup detail screen —
+  // lets the user keep adding reflections to a cup after the initial
+  // brew + follow-up. Each append separates with a paragraph break
+  // so the note reads as a stack of small entries rather than a wall.
+  const appendSessionNote = (sessionId, text) => {
+    if (!text || !text.trim()) return;
+    const trimmed = text.trim();
+    setSessions(prev => prev.map(s => {
+      if (s.id !== sessionId) return s;
+      const merged = (s.note && s.note.trim())
+        ? `${s.note.trim()}\n\n${trimmed}`
+        : trimmed;
+      return { ...s, note: merged };
+    }));
+    hapticTap();
+  };
+
   // Append a free-form journal entry. Entries live alongside cup
   // sessions in the chronology and render via JournalEntryRow on the
   // Compose · Shelf · Journal tab.
@@ -1263,6 +1280,7 @@ export default function App() {
         <CupDetail
           session={sessions.find(s => s.id === cupOverlayId)}
           onClose={popOverlayHistory}
+          appendSessionNote={appendSessionNote}
           openBlend={(id) => {
             // Stack the recipe overlay on top of the cup detail so
             // back from the recipe lands the user back on the cup,
