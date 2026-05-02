@@ -1157,14 +1157,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           immediately. The pot below fills as ingredients are added,
           sitting next to the brewer so the pot contents stay visible
           while the user slides temperature/time. */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <SectionLabel n="i">Add from the apothecarium</SectionLabel>
-        <span style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-        }}>
-          {filteredAvailable.length} {filteredAvailable.length === 1 ? "match" : "matches"}
-        </span>
-      </div>
+      <SectionLabel n="i">Add from the apothecarium</SectionLabel>
       <div style={{
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
@@ -1264,9 +1257,35 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           />
         </div>
 
-        {/* Scrollable results */}
+        {/* Filter / results divider — hairline rule spans the card's
+            full width via negative horizontal margins, with a small
+            "results" eyebrow + match count anchoring it as a labeled
+            band rather than a bare line. Reads as: filters above,
+            results below — no ambiguity. */}
         <div style={{
-          marginTop: 10, maxHeight: 180, overflowY: "auto",
+          marginTop: 14,
+          marginLeft: -14, marginRight: -14,
+          borderTop: `1px solid ${theme.rule}`,
+        }} />
+        <div style={{
+          marginTop: 10, marginBottom: 8,
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>results</div>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+          }}>
+            {filteredAvailable.length} {filteredAvailable.length === 1 ? "match" : "matches"}
+          </div>
+        </div>
+
+        {/* Scrollable results — soft ivory wash so the chip list reads
+            as a distinct zone from the filter chips above. */}
+        <div style={{
+          maxHeight: 180, overflowY: "auto",
           paddingRight: 4,
         }}>
           {filteredAvailable.length === 0 ? (
