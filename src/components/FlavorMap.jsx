@@ -384,16 +384,42 @@ const TrackMap = ({
   // specific tokens rolled into the family.
   const familyDisplayKey = (familyName) => familyName;
 
+  // Sub-linear stacking aggregation. Family strength = peak child +
+  // half the sum of remaining children raised to STACK_EXPONENT
+  // (0.85, the same exponent used in perception.js for cross-
+  // ingredient effect stacking). The peak still drives the bar so
+  // a quiet cup doesn't over-claim, but reinforcing children nudge
+  // the family up the way they'd actually be felt — a cup with
+  // comfort 1.0 + warming 0.4 reads slightly stronger in the warm
+  // register than just comfort 1.0 alone, instead of warming
+  // disappearing entirely. Capped at 5 so multi-contributor stacks
+  // can't overshoot the strength scale.
+  const STACK_EXP = 0.85;
   const aggregateToFamilies = (sourceMap) => {
-    const fam = {};
+    const buckets = {};
     for (const [name, strength] of Object.entries(sourceMap)) {
+      if (!(strength > 0)) continue;
       const familyName = (familyColors && familyColors[name])
         ? name
         : (familyOf[name] || "body");
       const key = familyDisplayKey(familyName);
-      if (!fam[key] || strength > fam[key]) {
-        fam[key] = strength;
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(strength);
+    }
+    const fam = {};
+    for (const [key, strengths] of Object.entries(buckets)) {
+      if (strengths.length === 1) {
+        fam[key] = strengths[0];
+        continue;
       }
+      const peak = Math.max(...strengths);
+      let reinforcement = 0;
+      let peakConsumed = false;
+      for (const s of strengths) {
+        if (!peakConsumed && s === peak) { peakConsumed = true; continue; }
+        reinforcement += Math.pow(s, STACK_EXP);
+      }
+      fam[key] = Math.min(5, peak + 0.5 * reinforcement);
     }
     return fam;
   };
