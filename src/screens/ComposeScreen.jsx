@@ -11,7 +11,7 @@ import {
   Kettle, Ornament,
 } from "../components/icons";
 import {
-  Button, ChipRows, Rule, SectionLabel, FitOneLine,
+  Button, ChipRows, SectionLabel, FitOneLine,
 } from "../components/layout";
 import {
   BLENDS, FLAVOR_FAMILY_CHIPS,
@@ -1057,6 +1057,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const { unit, weightUnit } = useUnit();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  // Flavor sub-filter — multi-select families, same chip set as
+  // Cabinet/Recipes so the filter vocabulary stays consistent across
+  // the app. Empty = no constraint; selections narrow to ingredients
+  // whose flavors map to a chosen family via FAMILY_BY_FLAVOR.
+  const [pickerFlavors, setPickerFlavors] = useState([]);
+  const togglePickerFlavor = (fam) =>
+    setPickerFlavors(prev => prev.includes(fam)
+      ? prev.filter(x => x !== fam)
+      : [...prev, fam]);
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
   const filteredAvailable = available
     .filter(id => {
@@ -1072,6 +1081,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         if (!isFruit) return false;
       } else if (filter !== "all" && ing.category !== filter) {
         return false;
+      }
+      if (pickerFlavors.length > 0) {
+        const fams = new Set(pickerFlavors);
+        const ingFlavors = ing.flavors || [];
+        const hit = ingFlavors.some(fl => {
+          const fam = FAMILY_BY_FLAVOR[fl] || fl;
+          return fams.has(fam) || fams.has(fl);
+        });
+        if (!hit) return false;
       }
       if (search.trim()) {
         const q = search.trim().toLowerCase();
@@ -1221,20 +1239,38 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           );
         })}
 
-        <Rule soft />
-        <div style={{
-          marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center",
-          fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash, fontFamily: ff.sans,
-        }}>
-          <span>add ingredient</span>
-          <span style={{ letterSpacing: 0, textTransform: "none", fontStyle: "italic", fontFamily: ff.serif, fontSize: 11 }}>
-            {filteredAvailable.length} in the apothecarium
-          </span>
-        </div>
+        {/* Pot empty-state — when no ingredients are selected, this card
+            would otherwise be just an empty box. The hint nudges the
+            user to the picker below as the obvious next move. */}
+        {reverseIngs.length === 0 && rcSafetyFlags.length === 0 && (
+          <div style={{
+            padding: "12px 4px", textAlign: "center",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.ash, lineHeight: 1.5,
+          }}>
+            Pick a few ingredients below to start your blend.
+          </div>
+        )}
+      </div>
 
+      {/* Picker — split out of the pot card so "what I have" and "what
+          I could add" read as two distinct moves. The pot card above is
+          your in-progress list; this card is a browse interface. */}
+      <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <SectionLabel n="ii">Add from the apothecarium</SectionLabel>
+        <span style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+        }}>
+          {filteredAvailable.length} {filteredAvailable.length === 1 ? "match" : "matches"}
+        </span>
+      </div>
+      <div style={{
+        marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
+        background: theme.cream,
+      }}>
         {/* Search input */}
         <div style={{
-          marginTop: 8, display: "flex", alignItems: "center", gap: 8,
+          display: "flex", alignItems: "center", gap: 8,
           padding: "8px 10px", borderRadius: 8,
           background: theme.ivory, border: `1px solid ${theme.ruleSoft}`,
         }}>
@@ -1284,6 +1320,37 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           />
         </div>
 
+        {/* Flavor filter — multi-select family chips. Lets the user
+            compose by register ("I want a floral accent") rather than
+            only by botanical category, matching how the rest of the
+            app's filter surfaces work. */}
+        <div style={{ marginTop: 8 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.ash, marginBottom: 5,
+          }}>flavor</div>
+          <ChipRows
+            items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
+            gap={4}
+            rowGap={4}
+            maxPerRow={5}
+            align="spread"
+            renderItem={([key, label]) => {
+              const active = pickerFlavors.includes(key);
+              return (
+                <button key={key} onClick={() => togglePickerFlavor(key)} style={{
+                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                  padding: "3px 9px", borderRadius: 999,
+                  border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                  background: active ? theme.ink : "transparent",
+                  color: active ? theme.cream : theme.ash,
+                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                }}>{label.toLowerCase()}</button>
+              );
+            }}
+          />
+        </div>
+
         {/* Scrollable results */}
         <div style={{
           marginTop: 10, maxHeight: 180, overflowY: "auto",
@@ -1294,7 +1361,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
               color: theme.ash, padding: "12px 0", textAlign: "center",
             }}>
-              no match in your apothecary.
+              no match in your apothecarium.
             </div>
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -1338,7 +1405,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}><SectionLabel n="ii">The blender — see how it brews</SectionLabel></div>
+      <div style={{ marginTop: 20 }}><SectionLabel n="iii">The blender — see how it brews</SectionLabel></div>
       {ingsForProfile.length === 0 ? (
         <div style={{
           marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
