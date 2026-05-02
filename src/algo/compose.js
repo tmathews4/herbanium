@@ -1633,14 +1633,17 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   const traditionNote = atCuratedBaseline && isTraditional
     && (meaningfulDeviation || baselineWarningFires);
 
-  // Merge cup-level and individual warnings. Drop a cup-level tannin
-  // duplicate if any individual warning of the same kind already fires
-  // — the named version is more actionable.
+  // Merge cup-level and individual warnings. The earlier suppression
+  // (drop cup-level when same-kind individual fires) silently broke
+  // the explorer's tannin/aromatic display: per-ingredient warnings
+  // get filtered OUT of the cup-warning surface (they render in the
+  // per-pill detail box instead), so suppressing the cup-level too
+  // left the user with no warning at all even when the bitter /
+  // astringent bars clearly said the cup needed pulling back. Keep
+  // both: cup-level shows the overall reading; per-ingredient shows
+  // which leaf is the source — different audiences, both useful.
   const warnings = [
-    ...cupWarnings.filter(w => {
-      if (w.kind !== "tannin" && w.kind !== "aromatic") return true;
-      return !individualWarnings.some(iw => iw.kind === w.kind);
-    }),
+    ...cupWarnings,
     ...individualWarnings,
   ];
 
