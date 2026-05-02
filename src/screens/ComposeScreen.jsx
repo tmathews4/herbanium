@@ -1055,7 +1055,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   // Per-ingredient parts — explicit user-set values keyed by id.
-  // Defaults: first ingredient added = 4 parts (the lead), every
+  // Defaults: first ingredient added = 2 parts (the lead), every
   // subsequent addition = 1 part. The user can override via the
   // per-row stepper. We don't seed partsById on add because letting
   // defaults flow from the function below means a user re-arranging
@@ -1077,10 +1077,13 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   }, [reverseIngs]);
   const partsFor = (id) => {
     if (partsById[id] != null) return partsById[id];
-    // First-added is the default lead at 4 parts; the rest start
+    // First-added is the default lead at 2 parts; the rest start
     // as 1-part accents. The user can change the ratio anytime
     // via the row stepper without engaging if they don't want to.
-    return id === reverseIngs[0] ? 4 : 1;
+    // 2:1 lands closer to a typical hand-mix where the lead carries
+    // about twice the weight of the accents, instead of the older
+    // 4:1 split that pushed strong leads into over-pull territory.
+    return id === reverseIngs[0] ? 2 : 1;
   };
   const setParts = (id, n) => {
     const clamped = Math.max(1, Math.min(9, Math.round(n)));
@@ -1241,7 +1244,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // Uses range intersection when possible, weighted-grams dominance when not.
   // Weighted ingredient list — parts double as grams so the
   // perception pipeline sees the user's exact ratio choice. The
-  // first-added defaults to 4 parts; subsequent ingredients land as
+  // first-added defaults to 2 parts; subsequent ingredients land as
   // 1-part accents. Users who never engage with the stepper get
   // the same lead/accent shape curated recipes use; users who do
   // engage can dial any ratio they want.
