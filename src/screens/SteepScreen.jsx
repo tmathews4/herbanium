@@ -15,38 +15,16 @@ import { PlannerModal } from "../components/Planner";
 import {
   scheduleSteepNotification, cancelSteepNotification, hapticDone,
 } from "../helpers/native";
+import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-// Two chip rows on the Steep screen. The "right now" row includes the
-// rough-edged states a tea ritual is often addressing (anxious, stressed,
-// tired, restless); the "I'd like to feel" row stays positive-only since
-// no one aspires to feel anxious.
-//
-// Each positive chip corresponds to one master mood family from the
-// TrackMap hierarchy (FAMILY_BY_EFFECT in FlavorMap.jsx). Exactly
-// one chip per family — using leaf-effect keys (sleepy, comfort,
-// cooling, digestive) for compatibility with existing saved sessions
-// that already store these keys; the `family` field is the
-// correlation link to the master register.
-const DESIRED_MOOD_CHIPS = [
-  { key: "calm",      family: "calm",   label: "Calm" },
-  { key: "focus",     family: "focus",  label: "Focus" },
-  { key: "energy",    family: "energy", label: "Energy" },
-  { key: "comfort",   family: "warm",   label: "Comfort" },
-  { key: "cooling",   family: "cool",   label: "Cooling" },
-  { key: "digestive", family: "body",   label: "Digestive" },
-  { key: "sleepy",    family: "sleep",  label: "Sleep" },
-];
-const CURRENT_MOOD_CHIPS = [
-  ...DESIRED_MOOD_CHIPS,
-  { key: "anxious",   label: "Anxious" },
-  { key: "stressed",  label: "Stressed" },
-  { key: "tired",     label: "Tired" },
-  { key: "restless",  label: "Restless" },
-];
+// Pickers pull from the parent-mood canon: target row uses
+// PARENT_MOODS only (positive-only — no one aspires to feel
+// anxious), current-feel row concats the rough-edged extras.
+const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
 export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems }) => {
   const total = blend.timeS || 360;

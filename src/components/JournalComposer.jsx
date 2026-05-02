@@ -15,36 +15,22 @@
 
 import React, { useState } from "react";
 import { theme, ff } from "../theme";
+import { Button } from "./layout";
 import {
   HAIKU_PROMPTS, assembleHaiku, HAIKU_TEMPLATE_COUNT,
 } from "../data/haikuAdlibs";
 import {
   LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
 } from "../data/limerickAdlibs";
+import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 
-// Shared mood vocabulary for the journal — one chip per master mood
-// family (the TrackMap hierarchy in FlavorMap.jsx) plus the rough-
-// edged states the journal often surfaces ("anxious", "tired" etc).
-// Previously had separate Uplifting and Soothing chips that doubled
-// up with Energy and Calm at the family level — collapsed so the
-// user picks at the family register the rest of the app uses, and
-// added Cooling for the cool family that was missing here.
-const JOURNAL_MOOD_CHIPS = [
-  { key: "calm",      family: "calm",   label: "Calm" },
-  { key: "focus",     family: "focus",  label: "Focus" },
-  { key: "energy",    family: "energy", label: "Energy" },
-  { key: "comfort",   family: "warm",   label: "Comfort" },
-  { key: "cooling",   family: "cool",   label: "Cooling" },
-  { key: "digestive", family: "body",   label: "Digestive" },
-  { key: "sleepy",    family: "sleep",  label: "Sleep" },
-  { key: "anxious",   label: "Anxious" },
-  { key: "stressed",  label: "Stressed" },
-  { key: "tired",     label: "Tired" },
-  { key: "restless",  label: "Restless" },
-];
-
-const MoodChipRow = ({ label, value, setValue, glyph }) => (
-  <ChipPickerRow label={label} chips={JOURNAL_MOOD_CHIPS} value={value} setValue={setValue} glyph={glyph} />
+// Mood pickers pull from the parent canon. The coming-in row uses the
+// fuller current-feel set (positives + rough-edged extras like
+// anxious/tired) since the journal often opens with the user naming
+// a hard state. The where-it-left-me row is positive-only —
+// landings are positive states or absence-of, not aspirations.
+const MoodChipRow = ({ label, value, setValue, glyph, chips }) => (
+  <ChipPickerRow label={label} chips={chips || PARENT_MOODS} value={value} setValue={setValue} glyph={glyph} />
 );
 
 // Shared chip picker — used for the current and landed mood rows.
@@ -233,6 +219,7 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
         glyph="→"
         value={currentMoods}
         setValue={setCurrentMoods}
+        chips={CURRENT_MOOD_CHIPS}
       />
 
       <div style={{ height: 14 }} />
@@ -571,34 +558,15 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
 
       <div style={{
         marginTop: 4, display: "flex", gap: 8, justifyContent: "flex-end",
+        alignItems: "center",
       }}>
-        <button
-          onClick={onCancel}
-          style={{
-            fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-            color: theme.ash,
-            background: "transparent", border: "none",
-            cursor: "pointer", padding: "8px 12px",
-          }}
-        >cancel</button>
-        <button
+        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button
+          variant="primary" tone="ink"
           onClick={handleSave}
           disabled={!ready}
-          style={{
-            fontFamily: ff.serif, fontSize: 14,
-            padding: "8px 18px", borderRadius: 999,
-            // Disabled keeps a visible silhouette in BOTH themes.
-            // The naive bg=theme.rule/color=theme.cream pair was
-            // dark-on-dark in dark mode (rule and cream are both
-            // forest greens). Now: translucent --hi-rgb wash with
-            // ash text + ruleSoft outline matches the layout.jsx
-            // Button's disabled treatment.
-            background: ready ? theme.ink : "rgba(var(--hi-rgb),0.18)",
-            color: ready ? theme.cream : theme.ash,
-            border: ready ? "none" : `1px solid ${theme.ruleSoft}`,
-            cursor: ready ? "pointer" : "not-allowed",
-          }}
-        >save entry</button>
+          style={{ fontSize: 14, padding: "10px 22px" }}
+        >Save entry</Button>
       </div>
     </div>
   );

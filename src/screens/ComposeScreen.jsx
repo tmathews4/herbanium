@@ -16,6 +16,7 @@ import {
 import {
   BLENDS, FLAVOR_FAMILY_CHIPS,
 } from "../data/blends";
+import { PARENT_MOODS } from "../data/canon";
 import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
@@ -767,12 +768,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   <FilterRow
                     label="mood"
                     multi
-                    items={[
-                      ["calm",    "Calm"],
-                      ["focus",   "Focus"],
-                      ["energy",  "Energy"],
-                      ["comfort", "Comfort"],
-                    ]}
+                    perRow={4}
+                    items={PARENT_MOODS.map(m => [m.key, m.label])}
                     value={cf.moods}
                     setValue={(m) => toggleInList("moods", m)}
                   />

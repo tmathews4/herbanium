@@ -33,6 +33,98 @@ import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 
+// Caffeine load thresholds (mg). Tuned to the same model the
+// high-caffeine warning in perception.js fires on (≥60mg combined
+// with strong energy/focus): a sub-60 cup reads as "trace"; the
+// caution band starts where the cup begins to feel like coffee
+// territory; the warning band lines up with multi-source stacks
+// where caffeine-sensitive bodies are likely to feel wired.
+const CAFFEINE_MAX_MG = 250;
+const CAFFEINE_CAUTION_MG = 80;
+const CAFFEINE_WARN_MG = 150;
+
+// Single-row caffeine load gauge — sits in the Balance section
+// alongside the bitter/astringent palate axes. Reads as a fixed
+// 0-250mg track with two threshold ticks (caution / warning) and
+// a terra fill that intensifies past warning. Shares the palate
+// strip's visual register so users learn one bar shape applies
+// across all "is this cup pushing too hard?" signals.
+const CaffeineBar = ({ caffeineMg = 0 }) => {
+  const mg = Math.max(0, Math.round(caffeineMg));
+  const pct = Math.min(100, (mg / CAFFEINE_MAX_MG) * 100);
+  const past = mg >= CAFFEINE_WARN_MG;
+  const inCaution = mg >= CAFFEINE_CAUTION_MG && !past;
+  const fillColor = past ? "#B0542F" : (inCaution ? "#C37959" : "rgba(176,84,47,0.55)");
+  const labelColor = past ? "#B0542F" : theme.inkSoft;
+  return (
+    <div style={{
+      display: "flex", flexDirection: "column", gap: 6,
+      paddingTop: 4,
+    }}>
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+      }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>caffeine load</div>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          fontFamily: ff.mono, fontSize: 11, color: labelColor,
+        }}>
+          {past && <span style={{ color: "#B0542F" }}>⚠</span>}
+          <span>{mg} mg</span>
+        </div>
+      </div>
+      <div style={{
+        position: "relative", height: 10, borderRadius: 999,
+        background: "rgba(var(--hi-rgb), 0.06)",
+        border: `1px solid ${theme.ruleSoft}`,
+        overflow: "hidden",
+      }}>
+        {/* Filled portion */}
+        <div style={{
+          position: "absolute", inset: 0,
+          width: `${pct}%`,
+          background: `linear-gradient(90deg, rgba(176,84,47,0.35) 0%, ${fillColor} 100%)`,
+          transition: "width 0.18s ease, background 0.18s ease",
+        }} />
+        {/* Caution tick (~80mg) */}
+        <div style={{
+          position: "absolute", top: 0, bottom: 0,
+          left: `${(CAFFEINE_CAUTION_MG / CAFFEINE_MAX_MG) * 100}%`,
+          width: 1, background: "rgba(176,84,47,0.30)",
+        }} />
+        {/* Warning tick (~150mg) */}
+        <div style={{
+          position: "absolute", top: 0, bottom: 0,
+          left: `${(CAFFEINE_WARN_MG / CAFFEINE_MAX_MG) * 100}%`,
+          width: 1, background: "rgba(176,84,47,0.65)",
+        }} />
+      </div>
+      <div style={{
+        position: "relative", height: 11,
+        fontFamily: ff.mono, fontSize: 8.5, color: theme.ash,
+        letterSpacing: "0.08em",
+      }}>
+        <span style={{ position: "absolute", left: 0 }}>0</span>
+        <span style={{
+          position: "absolute",
+          left: `${(CAFFEINE_CAUTION_MG / CAFFEINE_MAX_MG) * 100}%`,
+          transform: "translateX(-50%)",
+        }}>caution</span>
+        <span style={{
+          position: "absolute",
+          left: `${(CAFFEINE_WARN_MG / CAFFEINE_MAX_MG) * 100}%`,
+          transform: "translateX(-50%)",
+          color: past ? "#B0542F" : theme.ash,
+        }}>too much</span>
+        <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
+      </div>
+    </div>
+  );
+};
+
 // Slider bounds — union of every ingredient's range, padded with
 // experimentation room. Single source of truth in algo/brewBounds.
 
@@ -266,6 +358,15 @@ export const BlendExtractionExplorer = ({
           defaultTempC={defaultTempC}
           defaultTimeS={defaultTimeS}
         />
+        {/* Caffeine load — sits inside the Balance section under the
+            palate strip so the user reads bitter/astringent/caffeine
+            as one "is the cup pushing too hard?" group. The number
+            doesn't shift meaningfully across temp/time (caffeine is
+            largely temp-flat for the user's purposes), so it renders
+            as a static gauge rather than a per-temperature band. */}
+        {brew?.caffeineMg != null && brew.caffeineMg > 0 && (
+          <CaffeineBar caffeineMg={brew.caffeineMg} />
+        )}
       </div>
 
       {/* Range bands — three states:

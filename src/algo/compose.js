@@ -1682,6 +1682,11 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     traditionNote,
     moodSummary,
     flavorSummary,
+    // Cup-level caffeine load in mg — surfaced so the Balance section
+    // can render a caffeine bar alongside bitter/astringent. Already
+    // used internally by buildWarnings for the high-caffeine-load
+    // alert; same number, now visualized.
+    caffeineMg: totalCaffeineMg,
   };
 }
 

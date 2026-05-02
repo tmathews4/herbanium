@@ -318,32 +318,33 @@ const StepTimeOfDay = ({ value, setValue }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Step 3: What draws you — condensed 6-mood list for first-run.
+   Step 3: What draws you — parent-mood canon (7 families).
 
-   Each option carries a `family` field that ties the user-facing
-   pick to the master mood-family hierarchy used by the TrackMap
-   strip and the engine's matching logic. Keeping the keys stable
-   (calm, focus, energy, sleepy, comfort, digestive) protects
-   seed/profile code that already reads them; the family field is
-   the additive correlation link.
-
-   Mapping:
-     calm      → calm   (calm + soothing + grounding)
-     focus     → focus  (focus)
-     energy    → energy (energy + uplifting)
-     sleepy    → sleep  (sleepy)
-     comfort   → warm   (warming + comfort)
-     digestive → body   (digestive)
+   Pulls from data/canon.PARENT_MOODS so first-run onboarding picks
+   at the same register every other capture surface uses (Steep,
+   Journal, Recipes filter). Cooling joined the list so the canon
+   stays consistent across all 7 families instead of dropping cool
+   only here.
    ────────────────────────────────────────────────────────────── */
 
-const DRAW_OPTIONS = [
-  { key: "calm",      family: "calm",   label: "Calm",      note: "a settling, a softening" },
-  { key: "focus",     family: "focus",  label: "Focus",     note: "attention, the clear mind" },
-  { key: "energy",    family: "energy", label: "Energy",    note: "lift, the spark to begin" },
-  { key: "sleepy",    family: "sleep",  label: "Sleep",     note: "the drift toward rest" },
-  { key: "comfort",   family: "warm",   label: "Comfort",   note: "warmth, the familiar cup" },
-  { key: "digestive", family: "body",   label: "Digestive", note: "fennel, after-supper ease" },
-];
+import { PARENT_MOODS, PARENT_FLAVORS } from "../data/canon";
+
+// First-run copy — slightly more evocative than the canon's terse
+// engine-side notes. Keeps key/family/label aligned to canon so the
+// onboarding pick lands in the same shape the rest of the app reads.
+const DRAW_NOTES = {
+  calm:      "a settling, a softening",
+  focus:     "attention, the clear mind",
+  energy:    "lift, the spark to begin",
+  comfort:   "warmth, the familiar cup",
+  cooling:   "a felt-temperature breath",
+  digestive: "fennel, after-supper ease",
+  sleepy:    "the drift toward rest",
+};
+const DRAW_OPTIONS = PARENT_MOODS.map(m => ({
+  ...m,
+  note: DRAW_NOTES[m.key] || m.note,
+}));
 
 const StepDraw = ({ value, setValue }) => {
   const toggle = (key) => {
@@ -358,38 +359,15 @@ const StepDraw = ({ value, setValue }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Step 4: Flavors — condensed 8-flavor list for first-run.
+   Step 4: Flavors — parent-flavor canon (10 families).
 
-   Each option carries a `family` field tying the user-facing pick
-   to the master flavor-family hierarchy (FAMILY_BY_FLAVOR in
-   FlavorMap.jsx). Citrus and minty both correlate to the 'fresh'
-   family — kept as separate picks because users distinguish them
-   on the palate even though the master family rolls them together.
-   Sweet sits in the floral family for now per FAMILY_BY_FLAVOR;
-   if we promote 'sweet' to its own family later, this is the
-   single line to update.
-
-   Mapping:
-     floral → floral
-     citrus → fresh    (citrus rolls into the fresh register)
-     fruity → fruit
-     sweet  → floral   (current FAMILY_BY_FLAVOR lumping)
-     spiced → spiced
-     minty  → fresh    (minty rolls into the fresh register)
-     earthy → earthy
-     smoky  → smoky
+   Pulls from data/canon.PARENT_FLAVORS so first-run onboarding
+   picks at the same register every other surface uses. Sweet is
+   its own family now (no longer lumped under floral); fresh
+   covers citrus + minty together at family register.
    ────────────────────────────────────────────────────────────── */
 
-const FLAVOR_OPTIONS = [
-  { key: "floral", family: "floral", label: "Floral" },
-  { key: "citrus", family: "fresh",  label: "Citrus" },
-  { key: "fruity", family: "fruit",  label: "Fruity" },
-  { key: "sweet",  family: "floral", label: "Sweet"  },
-  { key: "spiced", family: "spiced", label: "Spiced" },
-  { key: "minty",  family: "fresh",  label: "Minty"  },
-  { key: "earthy", family: "earthy", label: "Earthy" },
-  { key: "smoky",  family: "smoky",  label: "Smoky"  },
-];
+const FLAVOR_OPTIONS = PARENT_FLAVORS;
 
 const StepFlavors = ({ value, setValue }) => {
   const toggle = (key) => {
