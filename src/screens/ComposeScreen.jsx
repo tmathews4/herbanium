@@ -1588,31 +1588,22 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
       }}>
-        {/* Helper text — explains the parts model so a new user
-            sees what the steppers do at a glance. The default 4:1
-            split (first-added vs accents) means tapping isn't
-            required to get sensible weighting; the steppers are
-            for fine-tuning. The grams hint anchors the abstract
-            "parts" number to a physical measurement so the
-            caffeine and balance numbers downstream don't read as
-            arbitrary — 1 part is roughly 1 gram of dry leaf
-            (about half a teaspoon for most loose teas). */}
+        {/* Helper eyebrow — anchors "parts" to a physical
+            measurement so the caffeine and balance numbers
+            downstream don't read as arbitrary. The implicit
+            message: each tap on the stepper adds roughly a
+            gram of dry leaf, and the bars below scale from the
+            total dose. Single uppercase line keeps the at-rest
+            visual weight light while the steppers themselves
+            carry the interaction. */}
         {reverseIngs.length > 0 && (
-          <>
-            <div style={{
-              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: theme.ash,
-              marginBottom: 4,
-            }}>
-              adjust parts to weight ingredients — first added defaults to 4 parts
-            </div>
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.inkSoft, marginBottom: 8,
-            }}>
-              1 part ≈ 1 g of dry leaf (about ½ tsp). Caffeine and balance numbers below scale from the total.
-            </div>
-          </>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+            textTransform: "uppercase", color: theme.ash,
+            marginBottom: 8,
+          }}>
+            1 part ≈ 1 g of dry leaf (about ½ tsp) — caffeine + balance scale from total
+          </div>
         )}
         {reverseIngs.map(id => {
           const primary = isPrimary(id);
