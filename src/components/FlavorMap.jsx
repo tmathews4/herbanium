@@ -98,32 +98,42 @@ export const FAMILY_BY_FLAVOR = {
   muscatel: "fruit", fruit: "fruit", fruity: "fruit", peach: "fruit",
   apricot: "fruit", berry: "fruit", tart: "fruit", cranberry: "fruit",
   bright: "fruit", melon: "fruit",
+  apple: "fruit", "dried-apple": "fruit", lychee: "fruit",
   // floral
   floral: "floral", rose: "floral", orchid: "floral", delicate: "floral",
+  heady: "floral",
   // sweet — its own register (was lumped under floral). honey,
   // honeyed, "honey-sweet" sit here too because they're sweetness-
   // forward rather than perfume-forward.
   sweet: "sweet", honey: "sweet", honeyed: "sweet",
   "honey-sweet": "sweet", vanilla: "sweet", caramel: "sweet",
+  bittersweet: "sweet", "caramel-roasted": "sweet",
   // earthy / dark / woody — caramel moved to sweet family above
   earthy: "earthy", woody: "earthy", mushroom: "earthy", leather: "earthy",
   dark: "earthy", mineral: "earthy", malty: "earthy", cocoa: "earthy",
   rich: "earthy", chestnut: "earthy", nutty: "earthy",
   toasted: "earthy", roasted: "earthy", warm: "earthy", bold: "earthy",
   robust: "earthy", brisk: "earthy", musky: "earthy", musty: "earthy",
+  mushroomy: "earthy", toasty: "earthy", "coffee-adjacent": "earthy",
   // spiced / warming
   spiced: "spiced", clove: "spiced", peppery: "spiced", aromatic: "spiced",
   pungent: "spiced", numbing: "spiced", hot: "spiced",
+  anise: "spiced", "black-pepper": "spiced", tingling: "spiced",
   // smoky
   smoky: "smoky", smoked: "smoky", campfire: "smoky", pine: "smoky",
   tar: "smoky", coal: "smoky",
   // fresh / cooling / mint / citrus
   citrus: "fresh", minty: "fresh", mint: "fresh", cool: "fresh",
   cooling: "fresh", fresh: "fresh", camphor: "fresh", licorice: "fresh",
+  bergamot: "fresh", citrusy: "fresh",
+  lemon: "fresh", "lemon-peel": "fresh",
+  orange: "fresh", "orange-peel": "fresh",
   // vegetal / grassy
   grassy: "vegetal", umami: "vegetal", vegetal: "vegetal",
   buttery: "vegetal", savory: "vegetal",
   hay: "vegetal", bean: "vegetal",
+  herbaceous: "vegetal", herbal: "vegetal",
+  rice: "vegetal", sage: "vegetal", "spinach-like": "vegetal",
   // marine — kelp, oceanic, seafood register. Lives in shaded
   // Japanese greens (gyokuro, matcha) and a few mushroom decoctions.
   marine: "marine", oceanic: "marine", seaweed: "marine",
@@ -133,6 +143,7 @@ export const FAMILY_BY_FLAVOR = {
   // off / diagnostic
   bitter: "off", bitterness: "off", astringent: "off", tannic: "off",
   harsh: "off", acrid: "off", soapy: "off", muddy: "off", medicinal: "off",
+  pith: "off", sharp: "off",
 };
 
 const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "var(--ash)";
