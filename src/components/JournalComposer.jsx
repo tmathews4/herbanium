@@ -43,14 +43,20 @@ const JOURNAL_MOOD_CHIPS = [
   { key: "restless",  label: "Restless" },
 ];
 
-const MoodChipRow = ({ label, value, setValue }) => (
-  <ChipPickerRow label={label} chips={JOURNAL_MOOD_CHIPS} value={value} setValue={setValue} />
+const MoodChipRow = ({ label, value, setValue, glyph }) => (
+  <ChipPickerRow label={label} chips={JOURNAL_MOOD_CHIPS} value={value} setValue={setValue} glyph={glyph} />
 );
 
 // Shared chip picker — used for the current and landed mood rows.
 // Chips can be `{key, label}` or `{key, family, label}`; the row
 // only reads key + label.
-const ChipPickerRow = ({ label, chips, value, setValue }) => {
+//
+// The mood-capture rows are wrapped in a tinted band with a terra
+// left-rule so they read as a distinct action zone, separate from
+// the writing surface above/below. The eye was drifting past the
+// thin-eyebrow versions and landing in the textarea without ever
+// picking a mood; the band makes the mood-arc beats unmissable.
+const ChipPickerRow = ({ label, chips, value, setValue, glyph }) => {
   const selected = new Set(value || []);
   const toggle = (key) => {
     const cur = value || [];
@@ -58,11 +64,23 @@ const ChipPickerRow = ({ label, chips, value, setValue }) => {
     setValue(next);
   };
   return (
-    <div style={{ marginBottom: 10 }}>
+    <div style={{
+      marginBottom: 10,
+      padding: "10px 12px",
+      borderLeft: `2px solid ${theme.terra}`,
+      background: "rgba(176, 84, 47, 0.05)",
+      borderRadius: "0 8px 8px 0",
+    }}>
       <div style={{
-        fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-        textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-      }}>{label}</div>
+        display: "flex", alignItems: "baseline", gap: 6,
+        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
+        textTransform: "uppercase", color: theme.terra,
+        fontWeight: 600,
+        marginBottom: 8,
+      }}>
+        {glyph && <span style={{ letterSpacing: 0 }}>{glyph}</span>}
+        <span>{label}</span>
+      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {chips.map(c => {
           const isOn = selected.has(c.key);
@@ -73,7 +91,7 @@ const ChipPickerRow = ({ label, chips, value, setValue }) => {
               style={{
                 fontFamily: ff.serif, fontSize: 11.5,
                 padding: "4px 10px", borderRadius: 999,
-                background: isOn ? theme.terra : "transparent",
+                background: isOn ? theme.terra : theme.cream,
                 color: isOn ? theme.cream : theme.inkSoft,
                 border: `1px solid ${isOn ? theme.terra : theme.rule}`,
                 cursor: "pointer", transition: "all 0.15s ease",
@@ -200,22 +218,17 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
       {/* Coming-in mood — optional per entry, but the journal is
           a tea-meets-mood log and we want the act of opening the
           composer to invite the user to name how they're feeling
-          before they put it on the page. */}
+          before they put it on the page. The terra band + → glyph
+          flag this as a distinct beat so the eye doesn't slide past
+          it and land in the writing surface unread. */}
       <MoodChipRow
         label="Coming in"
+        glyph="→"
         value={currentMoods}
         setValue={setCurrentMoods}
       />
 
-      {/* Section divider — separates mood capture from the writing
-          surface so the composer reads as three discrete bands
-          (mood in → text → mood out) rather than one tall scroll.
-          Negative horizontal margin lets the rule span the card's
-          full width despite the inner padding. */}
-      <div style={{
-        height: 1, background: theme.rule,
-        margin: "14px -14px 14px",
-      }} />
+      <div style={{ height: 14 }} />
 
       {/* Mode label — the chooser lives in the parent now, but we
           echo the active mode here as a small eyebrow so the writing
@@ -515,18 +528,15 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
         </>
       )}
 
-      {/* Section divider — closes the writing band before the
-          landing-mood capture. Mirrors the rule above the tabs so
-          the composer reads as three named bands. */}
-      <div style={{
-        height: 1, background: theme.rule,
-        margin: "16px -14px 14px",
-      }} />
+      <div style={{ height: 14 }} />
 
       {/* Where-I-landed mood — the close of the arc. Same chip
-          set; user picks how the entry left them. */}
+          set; user picks how the entry left them. The ← glyph
+          mirrors the → on the coming-in band so the two read as
+          bookends around the writing surface in the middle. */}
       <MoodChipRow
         label="Where it left me"
+        glyph="←"
         value={landedMoods}
         setValue={setLandedMoods}
       />
