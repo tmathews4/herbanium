@@ -1117,7 +1117,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
       }
       return true;
     })
-    .sort((a, b) => INGREDIENTS[a].name.localeCompare(INGREDIENTS[b].name));
+    // Sort: best fit first (green → yellow → red), then alphabetical
+    // within each band. When the pot is empty everything scores null
+    // so the list collapses to plain alphabetical order. Pre-compute
+    // each candidate's score once so the comparator stays cheap.
+    .map(id => ({ id, score: overlapScore(id) }))
+    .sort((a, b) => {
+      const sa = a.score ?? -1;
+      const sb = b.score ?? -1;
+      if (sa !== sb) return sb - sa;
+      return INGREDIENTS[a.id].name.localeCompare(INGREDIENTS[b.id].name);
+    })
+    .map(x => x.id);
 
   // Derive temperature and time from the actual ingredients rather than hardcoding.
   // Uses range intersection when possible, weighted-grams dominance when not.
