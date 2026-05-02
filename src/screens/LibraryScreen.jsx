@@ -12,6 +12,8 @@ import {
   ChipRows, SectionLabel,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import { FLAVOR_FAMILY_CHIPS } from "../data/blends";
+import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import {
   ff, theme,
 } from "../theme";
@@ -54,6 +56,20 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
+  // Flavor sub-filter — multi-select families. Empty = no constraint;
+  // any selection narrows to ingredients whose flavors map to one of
+  // the selected family keys via FAMILY_BY_FLAVOR. Same chip set as
+  // the Recipes screen so the two surfaces share filter vocabulary.
+  const [flavorFamilies, setFlavorFamilies] = useState([]);
+  // "More filters" disclosure — only used on the Cabinet surface
+  // (forcePantryOnly). Cabinet's at-rest state stays compact (search
+  // + category chips); Herbanium keeps the full filter strip flat
+  // because browsing is the whole point of that surface.
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const toggleFlavorFamily = (fam) =>
+    setFlavorFamilies(prev => prev.includes(fam)
+      ? prev.filter(x => x !== fam)
+      : [...prev, fam]);
   // Remove-from-cabinet confirmation. Cabinet is the only place
   // where the toggle reads as "remove" rather than "add" (the X
   // icon is shown only in forcePantryOnly mode), and adding back
@@ -92,6 +108,15 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
       if (effectFilter !== "any") {
         const eff = (ing.effects || []).find(([t]) => t === effectFilter);
         if (!eff || eff[1] < 3) return false;
+      }
+      if (flavorFamilies.length > 0) {
+        const fams = new Set(flavorFamilies);
+        const ingFlavors = ing.flavors || [];
+        const hit = ingFlavors.some(fl => {
+          const fam = FAMILY_BY_FLAVOR[fl] || fl;
+          return fams.has(fam) || fams.has(fl);
+        });
+        if (!hit) return false;
       }
       if (shelfSearch.trim()) {
         const q = shelfSearch.trim().toLowerCase();
@@ -250,65 +275,150 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             </div>
           )}
 
-          {/* Caffeine — labeled row, three pills span full width */}
-          <div style={{ marginBottom: 8 }}>
-            <div style={{
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-            }}>caffeine</div>
-            <div style={{ display: "flex", gap: 4 }}>
-              {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => {
-                const active = caffeineFilter === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setCaffeineFilter(key)}
-                    style={{
-                      fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                      padding: "5px 10px", borderRadius: 999,
-                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
-                      background: active ? theme.ink : "transparent",
-                      color: active ? theme.cream : theme.ash,
-                      cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                      boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.20)" : "0 1px 2px rgba(30,24,18,0.05)",
-                      transition: "all 0.18s ease",
-                    }}
-                  >{label}</button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Sub-filter rows (caffeine / effect / flavor). On the
+              Cabinet surface (forcePantryOnly) these collapse behind
+              a "more filters" disclosure to match the Recipes page;
+              on the Herbanium they stay flat because browsing the
+              full reference benefits from seeing every axis at rest. */}
+          {(() => {
+            const caffeineRow = (
+              <div key="caffeine" style={{ marginBottom: 8 }}>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+                }}>caffeine</div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[["any", "any"], ["free", "caffeine-free"], ["has", "caffeinated"]].map(([key, label]) => {
+                    const active = caffeineFilter === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setCaffeineFilter(key)}
+                        style={{
+                          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                          padding: "5px 10px", borderRadius: 999,
+                          border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                          background: active ? theme.ink : "transparent",
+                          color: active ? theme.cream : theme.ash,
+                          cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                          boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.20)" : "0 1px 2px rgba(30,24,18,0.05)",
+                          transition: "all 0.18s ease",
+                        }}
+                      >{label}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
 
-          {/* Effect filter — labeled row, spread pills */}
-          <div style={{ marginBottom: 10 }}>
-            <div style={{
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-            }}>effect</div>
-            <ChipRows
-              items={["any", ...EFFECT_FILTERS]}
-              gap={4}
-              rowGap={4}
-              maxPerRow={5}
-              align="spread"
-              renderItem={(key) => {
-                const active = effectFilter === key;
-                return (
-                  <button key={key} onClick={() => setEffectFilter(key)} style={{
-                    fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                    padding: "4px 10px", borderRadius: 999,
-                    border: `1px solid ${active ? theme.sageDeep : theme.ruleSoft}`,
-                    background: active ? theme.sageDeep : "transparent",
-                    color: active ? theme.cream : theme.ash,
-                    cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                    boxShadow: active ? "0 2px 6px -1px rgba(74,87,58,0.30)" : "0 1px 2px rgba(30,24,18,0.05)",
-                    transition: "all 0.18s ease",
-                  }}>{key === "any" ? "any" : key}</button>
-                );
-              }}
-            />
-          </div>
+            const effectRow = (
+              <div key="effect" style={{ marginBottom: 8 }}>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+                }}>effect</div>
+                <ChipRows
+                  items={["any", ...EFFECT_FILTERS]}
+                  gap={4}
+                  rowGap={4}
+                  maxPerRow={5}
+                  align="spread"
+                  renderItem={(key) => {
+                    const active = effectFilter === key;
+                    return (
+                      <button key={key} onClick={() => setEffectFilter(key)} style={{
+                        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                        padding: "4px 10px", borderRadius: 999,
+                        border: `1px solid ${active ? theme.sageDeep : theme.ruleSoft}`,
+                        background: active ? theme.sageDeep : "transparent",
+                        color: active ? theme.cream : theme.ash,
+                        cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                        boxShadow: active ? "0 2px 6px -1px rgba(74,87,58,0.30)" : "0 1px 2px rgba(30,24,18,0.05)",
+                        transition: "all 0.18s ease",
+                      }}>{key === "any" ? "any" : key}</button>
+                    );
+                  }}
+                />
+              </div>
+            );
+
+            const flavorRow = (
+              <div key="flavor" style={{ marginBottom: 10 }}>
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+                }}>flavor</div>
+                <ChipRows
+                  items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
+                  gap={4}
+                  rowGap={4}
+                  maxPerRow={5}
+                  align="spread"
+                  renderItem={([key, label]) => {
+                    const active = flavorFamilies.includes(key);
+                    return (
+                      <button key={key} onClick={() => toggleFlavorFamily(key)} style={{
+                        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                        padding: "4px 10px", borderRadius: 999,
+                        border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                        background: active ? theme.ink : "transparent",
+                        color: active ? theme.cream : theme.ash,
+                        cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                        boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.20)" : "0 1px 2px rgba(30,24,18,0.05)",
+                        transition: "all 0.18s ease",
+                      }}>{label.toLowerCase()}</button>
+                    );
+                  }}
+                />
+              </div>
+            );
+
+            const subFilterRows = [caffeineRow, effectRow, flavorRow];
+
+            if (!forcePantryOnly) {
+              return subFilterRows;
+            }
+
+            // Cabinet — collapse behind disclosure with active-count badge.
+            const activeCount =
+              (caffeineFilter !== "any" ? 1 : 0)
+              + (effectFilter !== "any" ? 1 : 0)
+              + (flavorFamilies.length > 0 ? 1 : 0);
+            return (
+              <>
+                <button
+                  onClick={() => setFiltersExpanded(v => !v)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    marginTop: 2, marginBottom: filtersExpanded ? 8 : 4,
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                    color: theme.inkSoft, background: "transparent",
+                    border: "none", padding: "4px 0", cursor: "pointer",
+                  }}
+                >
+                  {filtersExpanded ? "less" : "more filters"}
+                  {activeCount > 0 && !filtersExpanded && (
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      minWidth: 16, height: 16, padding: "0 5px",
+                      borderRadius: 999, background: theme.terra, color: theme.cream,
+                      fontFamily: ff.sans, fontSize: 9, fontWeight: 600,
+                    }}>{activeCount}</span>
+                  )}
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
+                       style={{
+                         transition: "transform 0.18s ease",
+                         transform: filtersExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                       }}>
+                    <path d="M1.5 3 L4.5 6 L7.5 3" stroke={theme.inkSoft}
+                          strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  </svg>
+                </button>
+                {filtersExpanded && subFilterRows}
+              </>
+            );
+          })()}
 
           {/* Pantry-only toggle + count. Sits in a quiet meta band
               with a hairline above it so the filters above feel
