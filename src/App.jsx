@@ -944,7 +944,7 @@ export default function App() {
   // Append a free-form journal entry. Entries live alongside cup
   // sessions in the chronology and render via JournalEntryRow on the
   // Compose · Shelf · Journal tab.
-  const addJournalEntry = (text, kind, note, currentMoods, landedMoods, flavors) => {
+  const addJournalEntry = (text, kind, note, currentMoods, landedMoods, flavors, title) => {
     if (!text || !text.trim()) return;
     const validKind =
       kind === "haiku" ? "haiku"
@@ -954,6 +954,11 @@ export default function App() {
     const entry = {
       id: `entry-${Date.now()}`,
       ts: Date.now(),
+      // User-provided title — drives the journal-row headline so the
+      // timeline reads like a list of named pieces rather than a
+      // sea of preview-stub text. Optional; row falls back to the
+      // text preview when absent (legacy entries pre-title field).
+      title: typeof title === "string" ? title.trim() : "",
       text: text.trim(),
       kind: validKind,
       note: note && note.trim ? note.trim() : "",

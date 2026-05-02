@@ -437,8 +437,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 mode={journalMode}
                 setMode={setJournalMode}
                 onCancel={() => setJournalComposerOpen(false)}
-                onSave={(text, kind, note) => {
-                  if (addJournalEntry) addJournalEntry(text, kind, note);
+                onSave={(text, kind, note, currentMoods, landedMoods, flavors, title) => {
+                  if (addJournalEntry) addJournalEntry(text, kind, note, currentMoods, landedMoods, flavors, title);
                   setJournalComposerOpen(false);
                 }}
               />
@@ -1817,14 +1817,20 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
     : isLimerick ? "a limerick"
     : isPoem    ? "a poem"
     : "an entry";
-  // Single-line preview of the entry body. The detail screen carries
-  // the full text, line breaks, and mood arc; the row only needs to
-  // hint at the content so the user can tell entries apart at a
-  // glance. Strip newlines and trim so a haiku doesn't blow the row
-  // height open.
+  // Single-line preview of the entry body. Used as a fallback
+  // headline when the entry has no title (legacy entries from
+  // before the title field landed) so the timeline doesn't show
+  // empty rows for those.
   const preview = (entry.text || "")
     .replace(/\s+/g, " ")
     .trim();
+  // Headline rendered for the row: prefer the user's title; fall
+  // back to a truncated preview; last-resort, the kind label.
+  const headline = (entry.title && entry.title.trim()) || preview || label;
+  // Mood arc — same registers as SessionRow so cup rows and entry
+  // rows share visual vocabulary in the timeline.
+  const start = (entry.currentMoods || []).join(", ").trim();
+  const end   = (entry.landedMoods   || []).join(", ").trim();
   // Edge color + glyph differ for verse vs prose so the journal
   // timeline tells them apart at a glance. Sprig (sage) for verse —
   // a poetic flourish; Pencil (terra) for prose entries — the
@@ -1847,28 +1853,40 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
         <Glyph size={12} c={glyphColor} />
       </span>
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        {/* Header: headline (title || preview) on left, time on right. */}
         <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
         }}>
           <span style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-            textTransform: "uppercase", color: theme.ash,
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif,
+            fontStyle: isVerse && !entry.title ? "italic" : "normal",
+            fontSize: 13.5, color: theme.ink,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
-            {label}
+            {headline}
           </span>
           <span style={{
+            flexShrink: 0,
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
           }}>{ago}</span>
         </div>
-        {preview && (
-          <span style={{
-            fontFamily: ff.serif,
-            fontStyle: isVerse ? "italic" : "normal",
-            fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
+        {/* Mood arc — same coloring as cups (ochre coming-in → terra
+            arrow → sage-deep landed). Only renders when at least one
+            side of the arc is logged so untouched entries stay quiet. */}
+        {(start || end) && (
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
-            {preview}
-          </span>
+            {start && (
+              <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
+            )}
+            <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+            {end && (
+              <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
+            )}
+          </div>
         )}
       </div>
     </button>
