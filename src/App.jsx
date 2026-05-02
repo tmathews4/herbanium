@@ -51,7 +51,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   // up when the user's on a section that has them. They share the
   // dock's background so the whole bottom bar reads as one GUI unit.
   const subTabs = tab === "apothecary"
-    ? [["reverse", "Blend"], ["forward", "Vibe"], ["compendium", "Herbanium"]]
+    ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
       ? [["recipes", "Recipes"], ["journal", "Journal"], ["pantry", "Cabinet"]]
       : null;
@@ -638,6 +638,13 @@ export default function App() {
   // other side's last position, and a full reload doesn't drop the
   // user back to defaults if they were mid-flow on a sub-tab.
   const [apothecaryMode, setApothecaryMode] = usePersistedState("apothecaryMode", "reverse");
+  // Migrate users who had Vibe (mode "forward") persisted from before
+  // it was retired. The Recipes filter on Shelf now covers the same
+  // mood + flavor → blend flow; this just keeps deep-links and saved
+  // state from landing on a removed sub-tab.
+  React.useEffect(() => {
+    if (apothecaryMode === "forward") setApothecaryMode("reverse");
+  }, [apothecaryMode]);
   const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");
 
   // Tab navigation history. Every tab change pushes the previous
