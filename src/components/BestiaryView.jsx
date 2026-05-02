@@ -138,18 +138,16 @@ export const BestiaryView = ({
   const onArrivalDismiss = (id) => {
     markElementalSeen(id);
     setSummonTarget(null);
-    // Auto-add to featured row when there's room. Once main is
-    // full, the new elemental settles into reserve — the user's
-    // curated top five stays intact and they can swap it in
-    // manually via swap mode if they want.
-    if (setFeaturedElementals) {
-      setFeaturedElementals(prev => {
-        const cur = prev || [];
-        if (cur.includes(id)) return cur;
-        if (cur.length >= FEATURED_LIMIT) return cur;
-        return [...cur, id];
-      });
-    }
+    // Newly-logged elementals always settle into reserve. The
+    // previous behavior auto-appended to featuredElementals when
+    // cur.length was below FEATURED_LIMIT, but that compared
+    // against the *persisted* array — which can hold ids no longer
+    // valid (legacy / unearned). When the displayed top-N was being
+    // filled by the rarity-fallback in effectiveFeaturedIds, the
+    // append left validFeatured = [new] alone and the displayed row
+    // collapsed to a single slot with the fallback evicted. Reserve-
+    // by-default keeps the user's visible top five stable; manual
+    // pinning (or swap mode) is how they curate the front page. */
   };
 
   // Creation card — unique elemental, decorated with element + gem
