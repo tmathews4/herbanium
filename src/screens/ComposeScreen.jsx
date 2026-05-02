@@ -1623,18 +1623,30 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 transition: "background 0.18s ease, border-color 0.18s ease",
               }}
             >
-              <span style={{
-                flex: 1, minWidth: 0,
-                fontFamily: ff.serif, fontSize: 15,
-                color: primary ? theme.ink : theme.inkSoft,
-                fontWeight: primary ? 500 : 400,
-                display: "flex", alignItems: "baseline", gap: 4,
-              }}>
+              {/* Name + brewing window — clickable, routes to the
+                  ingredient detail page. Now that the row no longer
+                  doubles as a primary-toggle target, there's no
+                  competing tap, so the name + parameters can carry
+                  the navigation directly (no separate ⓘ button). */}
+              <button
+                onClick={() => go("ingredient", id)}
+                style={{
+                  flex: 1, minWidth: 0,
+                  background: "transparent", border: "none", padding: 0,
+                  textAlign: "left", cursor: "pointer",
+                  fontFamily: ff.serif, fontSize: 15,
+                  color: primary ? theme.ink : theme.inkSoft,
+                  fontWeight: primary ? 500 : 400,
+                  display: "flex", alignItems: "baseline", gap: 4,
+                }}
+              >
                 {INGREDIENTS[id].name}
                 <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
                   {formatTempShort(INGREDIENTS[id].tempC[0], INGREDIENTS[id].tempC[1], unit)}
+                  {" · "}
+                  {Math.round(INGREDIENTS[id].timeS[0] / 60)}–{Math.round(INGREDIENTS[id].timeS[1] / 60)}m
                 </span>
-              </span>
+              </button>
 
               {/* Parts stepper — − N + cluster. Bumps clamp 1..9 so
                   a single ingredient can't run away to 100. Active
@@ -1687,26 +1699,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 >+</button>
               </div>
 
-              <button
-                onClick={() => go("ingredient", id)}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = theme.terra; e.currentTarget.style.color = theme.terra; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = theme.ruleSoft; e.currentTarget.style.color = theme.ash; }}
-                title={`About ${INGREDIENTS[id].name}`}
-                aria-label={`open ${INGREDIENTS[id].name} details`}
-                style={{
-                  flexShrink: 0,
-                  width: 20, height: 20, borderRadius: "50%",
-                  background: "transparent",
-                  border: `1px solid ${theme.ruleSoft}`,
-                  color: theme.ash,
-                  fontFamily: ff.serif, fontStyle: "italic",
-                  fontSize: 12, lineHeight: 1,
-                  cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  transition: "color 0.15s ease, border-color 0.15s ease",
-                  padding: 0,
-                }}
-              >i</button>
               <button
                 onClick={() => setReverseIngs(reverseIngs.filter(x => x !== id))}
                 style={{
