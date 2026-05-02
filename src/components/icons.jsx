@@ -152,12 +152,11 @@ export const MoodSoothing = ({ size = 28, c = theme.sage }) => (
 );
 
 export const MoodWarming = ({ size = 28, c = theme.terra }) => (
-  // Single-curve flame teardrop — a clean candle silhouette without
-  // the previous version's intricate inner-flame detail (which read
-  // as visual noise at small sizes). One sweeping path.
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3 C8 7 6.5 12 8.5 16 C10 19 14 19 15.5 16 C17.5 12 16 7 12 3 Z" />
-    <path d="M11.5 13.5 C11 12.5 11 11 11.5 10" />
+    {/* outer flame */}
+    <path d="M12 22 C6 22 4 17 5.5 13 C7 9.5 9 9 9 6 C9 4 11 2.5 12 2 C13 4 14 5 14 7.5 C14 9 13 10 13 11 C13 12 14 12.5 15 11.5 C16 10.5 16 9 16 9 C18 11 19 14 18 17 C17 20 14.5 22 12 22 Z" />
+    {/* inner flame */}
+    <path d="M12 18 C9.5 18 9 15.5 10 13.5 C11 11.5 12 11 12 9 C13 11 13.5 13 13 14.5 C12.5 16.5 13 17 14 16.5" />
   </svg>
 );
 
