@@ -154,10 +154,20 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
       </div>
       {atEdge && (
         <div style={{
+          marginTop: 8,
+          padding: "8px 10px 8px 12px",
+          borderLeft: `2px solid #A57836`,
+          background: "rgba(165, 120, 54, 0.07)",
+          borderRadius: "0 6px 6px 0",
           fontFamily: ff.serif, fontSize: 12.5,
-          color: "#A57836", lineHeight: 1.4, marginTop: 2,
+          color: theme.ink, lineHeight: 1.45,
         }}>
-          right at the edge — a deliberate strong cup, but one more part and it tips over.
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+            textTransform: "uppercase", color: "#A57836",
+            marginRight: 8, fontWeight: 600,
+          }}>at the edge</span>
+          a deliberate strong cup — one more part and it tips over.
         </div>
       )}
     </div>
