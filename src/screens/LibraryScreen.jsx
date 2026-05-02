@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import {
-  Flower, Leaf, Sprig,
+  Flower, Leaf, Sprig, MOOD_ICONS,
 } from "../components/icons";
 import {
   ChipRows, SectionLabel,
@@ -773,6 +773,19 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
     }}>
     <div style={{ minWidth: 0 }}>
       <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        {/* Main impact sigil — the blend's primary mood/effect icon
+            sits left of the name as a visual anchor for the cup's
+            register (calm waves, focus rings, warming flame, etc.).
+            Falls back silently when the blend has no mapped mood. */}
+        {(() => {
+          const Sigil = b.mood && MOOD_ICONS[b.mood];
+          if (!Sigil) return null;
+          return (
+            <span title={`primary impact: ${b.mood}`} style={{ flexShrink: 0, display: "inline-flex" }}>
+              <Sigil size={18} c={theme.terra} />
+            </span>
+          );
+        })()}
         <span>{b.name}</span>
         {caffeineDisplay > 0 && (
           <span title={`~${caffeineDisplay}mg caffeine per cup`} style={{
