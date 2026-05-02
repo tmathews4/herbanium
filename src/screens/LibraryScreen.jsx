@@ -767,47 +767,63 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
       border: "none",
       borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       borderLeft: highlighted ? `3px solid ${theme.terra}` : "3px solid transparent",
-      padding: "14px 12px 14px 12px", cursor: "pointer",
-      display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "center",
+      padding: "14px 14px",
+      cursor: "pointer",
+      display: "flex", flexDirection: "column", gap: 6,
       transition: "background 0.18s ease",
     }}>
-    <div style={{ minWidth: 0 }}>
-      <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        {/* Main impact sigil — the blend's primary mood/effect icon
-            sits left of the name as a visual anchor for the cup's
-            register (calm waves, focus rings, warming flame, etc.).
-            Falls back silently when the blend has no mapped mood. */}
+      {/* Eyebrow — author / collection tier (Traditional, Herbanium
+          house, your composition, etc.). Quiet ash caps so it reads
+          as the cup's lineage without competing with the name. */}
+      {author && (
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>{author}</div>
+      )}
+
+      {/* Title — main-impact mood sigil + blend name. The sigil
+          carries the cup's primary register (calm waves, focus rings,
+          warming flame...) as a visual anchor. */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10, minWidth: 0,
+      }}>
         {(() => {
           const Sigil = b.mood && MOOD_ICONS[b.mood];
           if (!Sigil) return null;
           return (
             <span title={`primary impact: ${b.mood}`} style={{ flexShrink: 0, display: "inline-flex" }}>
-              <Sigil size={18} c={theme.terra} />
+              <Sigil size={20} c={theme.terra} />
             </span>
           );
         })()}
-        <span>{b.name}</span>
-        {caffeineDisplay > 0 && (
-          <span title={`~${caffeineDisplay}mg caffeine per cup`} style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.10em",
-            textTransform: "uppercase", fontWeight: 700,
-            padding: "1px 7px", borderRadius: 999,
-            background: theme.terra, color: theme.cream,
-          }}>caf</span>
-        )}
-        {author && (
-          <span style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-            textTransform: "uppercase", color: theme.ash,
-          }}>· {author}</span>
-        )}
+        <span style={{
+          flex: 1, minWidth: 0,
+          fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2,
+        }}>
+          {b.name}
+        </span>
       </div>
+
+      {/* Subtitle — italic ash, the curator's quick framing. */}
       {b.subtitle && (
-        <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5, color: theme.ash, marginTop: 3, lineHeight: 1.35 }}>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.ash, lineHeight: 1.4,
+        }}>
           {b.subtitle}
         </div>
       )}
-      <div style={{ display: "flex", gap: 4, marginTop: 7, flexWrap: "wrap" }}>
+
+      {/* Ingredient chips — minimal: a category-colored dot followed
+          by the ingredient name. No bg or border so they read as
+          "what's in this cup" rather than as buttons competing for
+          tap weight. Each name still routes to its detail page. */}
+      <div style={{
+        display: "flex", flexWrap: "wrap",
+        rowGap: 5, columnGap: 12,
+        marginTop: 2,
+      }}>
         {b.ingredients.map(ing => INGREDIENTS[ing.id] && (
           <span
             key={ing.id}
@@ -816,30 +832,42 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
               go("ingredient", ing.id);
             }}
             style={{
-              fontFamily: ff.sans, fontSize: 10.5, color: theme.inkSoft, letterSpacing: "0.02em",
-              padding: "2px 8px", background: "rgba(var(--hi-rgb),0.05)", borderRadius: 999, border: `1px solid ${theme.ruleSoft}`,
+              display: "inline-flex", alignItems: "center", gap: 6,
+              fontFamily: ff.sans, fontSize: 11, color: theme.inkSoft,
               cursor: "pointer",
-              transition: "background 0.15s ease, border-color 0.15s ease",
             }}
-          >{INGREDIENTS[ing.id].name}</span>
+          >
+            <span style={{
+              width: 5, height: 5, borderRadius: "50%",
+              background: categoryColor(INGREDIENTS[ing.id].category, theme),
+              flexShrink: 0,
+            }} />
+            {INGREDIENTS[ing.id].name}
+          </span>
         ))}
       </div>
-    </div>
-    {/* Right-side temp/time meta — bracketed by a soft vertical
-        rule so the brew parameters read as their own band, not
-        as text floating off the right edge. Bottom-aligned within
-        its grid cell so the values sit at the card's lower-right
-        corner — out of the way of the × delete affordance that
-        floats top-right on user-removable Recipes rows. */}
-    <div style={{
-      textAlign: "right", flexShrink: 0,
-      paddingLeft: 12,
-      borderLeft: `1px solid ${theme.ruleSoft}`,
-      alignSelf: "end",
-    }}>
-      <div style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink, lineHeight: 1.1 }}>{formatTempShort(b.tempC, b.tempC, unit)}</div>
-      <div style={{ fontFamily: ff.mono, fontSize: 10.5, color: theme.ash, marginTop: 2 }}>{mmss(b.timeS)}</div>
-    </div>
+
+      {/* Bottom meta strip — caffeine on the left, brew params on
+          the right, separated by a hairline rule above so the strip
+          reads as a labeled band rather than text floating after
+          the chips. Mono font keeps the numeric values aligned. */}
+      <div style={{
+        marginTop: 6, paddingTop: 8,
+        borderTop: `1px solid ${theme.ruleSoft}`,
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        fontFamily: ff.mono, fontSize: 11, color: theme.ash, letterSpacing: "0.04em",
+      }}>
+        <span>
+          {caffeineDisplay > 0
+            ? `caf ~${caffeineDisplay}mg`
+            : <span style={{ color: theme.rule }}>caffeine-free</span>}
+        </span>
+        <span style={{ color: theme.inkSoft }}>
+          {formatTempShort(b.tempC, b.tempC, unit)}
+          <span style={{ color: theme.rule, margin: "0 6px" }}>·</span>
+          {mmss(b.timeS)}
+        </span>
+      </div>
   </button>
   );
 };
