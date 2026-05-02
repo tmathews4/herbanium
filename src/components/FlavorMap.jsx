@@ -995,12 +995,12 @@ const TrackMap = ({
 
   const TRACK_H   = 14;
   const TRACK_GAP = 3;
-  const LABEL_W   = 64;
-  // Detail-mode child rows inset their band by this many pixels so
-  // the leaf descriptors sit visually below their parent — same right
-  // edge, narrower bar. Aligned with the label column's small dot
-  // prefix that marks children as nested under their parent.
-  const CHILD_INDENT_PX = 14;
+  const LABEL_W   = 86;
+  // Detail-mode child rows indent their LABEL by this many pixels so
+  // the leaf descriptor reads as nested under its parent row above.
+  // Bands all start at the same left edge — only the label column
+  // carries the hierarchy via padding + a ↳ arrow prefix.
+  const CHILD_INDENT_PX = 12;
 
   return (
     <div style={{
@@ -1042,9 +1042,16 @@ const TrackMap = ({
                   fontFamily: ff.sans, fontSize: isParent ? 10 : 9.5,
                   color: here ? theme.terra : (isSelected ? theme.ink : (depth > 0 ? theme.ash : theme.inkSoft)),
                   fontWeight: isParent ? 500 : (here || isSelected ? 500 : 400),
-                  display: "flex", alignItems: "center", justifyContent: "flex-end",
+                  // Two-zone layout: indent zone on the left grows with
+                  // depth (empty for parents, arrow + space for children
+                  // so leaves visually nest under their parent row);
+                  // text + numeric on the right, justified so the value
+                  // hugs the band's left edge for a tidy column.
+                  display: "flex", alignItems: "center",
+                  justifyContent: "space-between",
                   gap: 3,
                   minWidth: LABEL_W,
+                  paddingLeft: depth * CHILD_INDENT_PX,
                   cursor: hasDescription ? "pointer" : "default",
                   textDecoration: isSelected ? "underline" : "none",
                   textDecorationColor: theme.terra,
@@ -1052,32 +1059,44 @@ const TrackMap = ({
                   textUnderlineOffset: 2,
                 }}
               >
-                {/* ⚠ only fires when the CURRENT slider position is
-                    inside a warning zone — not just because a warning
-                    zone exists somewhere in the envelope. The terra
-                    underlay stripe in the band still shows where the
-                    bad region IS, so the user gets a region preview
-                    without a false 'your cup is bitter' alarm when
-                    the current brew is fine. */}
-                {here && (
-                  <span
-                    title={`this brew is in ${warn.label} territory`}
-                    style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
-                  >⚠</span>
-                )}
-                <span>{labelFor(name)}</span>
-                {/* Strength at the user's current slider position, on
-                    the engine's 0-5 scale. Per-track normalization
-                    makes every band fill its own track by alpha
-                    (great for shape) but hides cross-band loudness;
-                    the numeric restores that signal — and tied to
-                    the current slider rather than the envelope peak,
-                    so a diagnostic axis (bitterness/astringency) at
-                    a brew where it's silent reads "0.0", not the
-                    peak it would hit at the extreme corner. */}
+                {/* Left zone: indent arrow for children (↳) plus the
+                    name. Children read as nested under the parent
+                    above. Parents render with no arrow at depth 0. */}
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  minWidth: 0, overflow: "hidden",
+                }}>
+                  {depth > 0 && (
+                    <span style={{
+                      color: theme.ash, opacity: 0.7,
+                      fontSize: 9, lineHeight: 1, flexShrink: 0,
+                    }}>↳</span>
+                  )}
+                  {/* ⚠ only fires when the CURRENT slider position is
+                      inside a warning zone — not just because a warning
+                      zone exists somewhere in the envelope. The terra
+                      underlay stripe in the band still shows where the
+                      bad region IS, so the user gets a region preview
+                      without a false 'your cup is bitter' alarm when
+                      the current brew is fine. */}
+                  {here && (
+                    <span
+                      title={`this brew is in ${warn.label} territory`}
+                      style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
+                    >⚠</span>
+                  )}
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {labelFor(name)}
+                  </span>
+                </span>
+                {/* Right zone: per-track numeric strength at the user's
+                    current slider position, on the engine's 0-5 scale.
+                    Hugged to the band's left edge by space-between so
+                    the numeric column is visually consistent across
+                    rows even when label widths vary. */}
                 <span style={{
                   fontFamily: ff.mono, fontSize: 9, color: theme.ash,
-                  marginLeft: 2,
+                  marginLeft: 6, flexShrink: 0,
                 }}>
                   {valueAtCurrent(name).toFixed(1)}
                 </span>
@@ -1129,7 +1148,7 @@ const TrackMap = ({
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
           {displayList.map(item => {
-            const { name, depth } = item;
+            const { name } = item;
             const warn = warningFor(name);
             const isSelected = selectedTrack === name;
             const hasDescription = !!descriptionFor(name);
@@ -1140,7 +1159,6 @@ const TrackMap = ({
                 style={{
                   position: "relative",
                   height: TRACK_H,
-                  marginLeft: depth > 0 ? CHILD_INDENT_PX : 0,
                   borderRadius: 3,
                   background: gradientFor(name),
                   boxShadow: isSelected
