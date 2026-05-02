@@ -1058,19 +1058,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   // Primary ingredient — the lead the rest of the blend is built
-  // around. Stored as an id (or null). When set, it gets a heavier
-  // gram weight in the perception pipeline so a single-tsp accent
-  // can't drive the cup the same way a tablespoon base does. When
-  // null, the first ingredient added is treated as primary.
+  // around. Null = no primary picked, all ingredients weighted
+  // equally. When set, the primary gets a heavier gram weight in
+  // the perception pipeline so a single-tsp accent can't drive
+  // the cup the way a tablespoon base does.
   const [primaryId, setPrimaryId] = useState(null);
   // If the marked primary gets removed from the pot, clear the
-  // selection so the next render's fallback (first-added) takes over.
+  // selection so the row goes back to all-equal weighting.
   React.useEffect(() => {
     if (primaryId && !reverseIngs.includes(primaryId)) {
       setPrimaryId(null);
     }
   }, [primaryId, reverseIngs]);
-  const effectivePrimaryId = primaryId || reverseIngs[0] || null;
   // Mood + flavor sub-filters — multi-select. Same vocabulary as
   // Recipes (mood) and Cabinet/Herbanium (flavor) so filter language
   // stays consistent. Both empty = no constraint; either narrows the
@@ -1217,16 +1216,16 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
   // Derive temperature and time from the actual ingredients rather than hardcoding.
   // Uses range intersection when possible, weighted-grams dominance when not.
-  // Weighted ingredient list — primary at 4.0g (a real lead-base),
-  // accents at 1.0g. Mirrors how curated recipes encode lead vs
-  // accent grams (chai's 4g black tea / 1g cardamom etc.) so the
-  // perception pipeline sees the same weighting register on user-
-  // built blends. The 4:1 ratio reflects the typical tablespoon-
-  // base / teaspoon-accent split rather than any precise gram math.
+  // Weighted ingredient list:
+  //   • No primary picked  → all ingredients at g: 1.0 (equal weight).
+  //   • Primary picked     → primary at 4.0g, others at 1.0g. Mirrors
+  //     curated recipes (chai's 4g black tea / 1g cardamom etc.) so
+  //     the perception pipeline sees a real lead/accent split. 4:1
+  //     reflects the typical tablespoon-base / teaspoon-accent split.
   const ingsForProfile = reverseIngs.map(id => ({
     id,
-    g: id === effectivePrimaryId ? 4.0 : 1.0,
-    role: id === effectivePrimaryId ? "lead" : "accent",
+    g: primaryId && id === primaryId ? 4.0 : 1.0,
+    role: primaryId && id === primaryId ? "lead" : (primaryId ? "accent" : "lead"),
   }));
   const profile = computeBrewProfile(ingsForProfile);
 
@@ -1566,48 +1565,57 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
       }}>
+        {/* Primary-selection helper text — sits above the rows so the
+            user knows tapping an ingredient marks it as the lead.
+            Quiet eyebrow style so it explains without competing with
+            the rows themselves. */}
+        {reverseIngs.length > 0 && (
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+            textTransform: "uppercase", color: theme.ash,
+            marginBottom: 6,
+          }}>
+            tap an ingredient to mark it primary — no selection treats them equal
+          </div>
+        )}
         {reverseIngs.map(id => {
-          const isPrimary = id === effectivePrimaryId;
-          // Distinguish "user explicitly picked this as primary" (terra,
-          // strong) from "fallback first-added inherits primary"
-          // (sage, softer). Reads as: solid star = your choice, hollow
-          // star = automatic until you pick.
-          const isExplicit = primaryId === id;
+          const isPrimary = primaryId === id;
+          // Whole-row tap toggles primary. The ingredient-link and
+          // delete buttons live inside the row but stop propagation
+          // so they keep their own behavior. Selected row gets a
+          // terra wash + left-rule + bold title; unselected stays
+          // quiet. Spans the cream card's full width via negative
+          // horizontal margins so the highlight reads as a banded
+          // selection rather than a floating chip.
           return (
-            <div key={id} style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "6px 0", gap: 6,
-            }}>
+            <div
+              key={id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setPrimaryId(isPrimary ? null : id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setPrimaryId(isPrimary ? null : id);
+                }
+              }}
+              title={isPrimary
+                ? "Primary ingredient — tap to clear (back to equal)"
+                : "Tap to mark as primary (heavier weight in the cup)"}
+              style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "8px 14px",
+                margin: "0 -14px",
+                gap: 6, cursor: "pointer",
+                background: isPrimary ? "rgba(176,84,47,0.08)" : "transparent",
+                borderLeft: isPrimary
+                  ? `3px solid ${theme.terra}`
+                  : "3px solid transparent",
+                transition: "background 0.18s ease, border-color 0.18s ease",
+              }}
+            >
               <button
-                onClick={() => setPrimaryId(isExplicit ? null : id)}
-                title={isExplicit
-                  ? "Primary ingredient — tap to clear"
-                  : isPrimary
-                    ? "First-added is the fallback primary — tap to lock in"
-                    : "Mark as primary (heavier weight in the cup)"}
-                style={{
-                  flexShrink: 0,
-                  width: 22, height: 22, borderRadius: "50%",
-                  background: isExplicit ? theme.terra : "transparent",
-                  border: `1px solid ${isExplicit ? theme.terra : isPrimary ? theme.sage : theme.ruleSoft}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", padding: 0,
-                  transition: "background 0.18s ease, border-color 0.18s ease",
-                }}
-                aria-label={isPrimary ? "primary ingredient" : "mark as primary"}
-              >
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
-                  <path
-                    d="M5.5 1 L6.85 4.15 L10.25 4.5 L7.7 6.85 L8.4 10.2 L5.5 8.5 L2.6 10.2 L3.3 6.85 L0.75 4.5 L4.15 4.15 Z"
-                    fill={isExplicit ? theme.cream : isPrimary ? theme.sage : "transparent"}
-                    stroke={isExplicit ? theme.cream : isPrimary ? theme.sage : theme.ash}
-                    strokeWidth="0.9"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() => go("ingredient", id)}
+                onClick={(e) => { e.stopPropagation(); go("ingredient", id); }}
                 style={{
                   flex: 1, minWidth: 0,
                   background: "transparent", border: "none", padding: 0,
@@ -1623,10 +1631,25 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
                   {formatTempShort(INGREDIENTS[id].tempC[0], INGREDIENTS[id].tempC[1], unit)}
                 </span>
+                {isPrimary && (
+                  <span style={{
+                    marginLeft: 6,
+                    fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.16em",
+                    textTransform: "uppercase", fontWeight: 600,
+                    color: theme.terra,
+                  }}>primary</span>
+                )}
               </button>
-              <button onClick={() => setReverseIngs(reverseIngs.filter(x => x !== id))} style={{
-                background: "transparent", border: "none", color: theme.ash, fontSize: 14, cursor: "pointer",
-              }}>×</button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReverseIngs(reverseIngs.filter(x => x !== id));
+                }}
+                style={{
+                  background: "transparent", border: "none", color: theme.ash,
+                  fontSize: 14, cursor: "pointer", padding: "0 4px",
+                }}
+              >×</button>
             </div>
           );
         })}
