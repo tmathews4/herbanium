@@ -445,28 +445,6 @@ export const BlendExtractionExplorer = ({
           defaultTempC={defaultTempC}
           defaultTimeS={defaultTimeS}
         />
-        {/* Caffeine load — sits inside the Balance section under the
-            palate strip so the user reads bitter/astringent/caffeine
-            as one "is the cup pushing too hard?" group. The number
-            doesn't shift meaningfully across temp/time (caffeine is
-            largely temp-flat for the user's purposes), so it renders
-            as a static gauge rather than a per-temperature band. */}
-        {brew?.caffeineMg != null && brew.caffeineMg > 0 && (
-          <CaffeineBar
-            caffeineMg={brew.caffeineMg}
-            totalG={(ingredients || []).reduce((s, it) => s + (Number(it?.g) || 0), 0)}
-            // Tsp totals are category-aware: each ingredient
-            // converts at its own density (true tea ≈ 2 g/tsp, spice
-            // ≈ 2.5, herbal ≈ 1.2…) so the cup's total reflects the
-            // actual scoop count, not a flat divisor.
-            totalTsp={(ingredients || []).reduce((s, it) => {
-              const meta = INGREDIENTS[it?.id];
-              if (!meta) return s;
-              return s + gramsToTsp(Number(it?.g) || 0, meta.category);
-            }, 0)}
-            weightUnit={weightUnit}
-          />
-        )}
       </div>
 
       {/* Range bands — three states:
@@ -855,6 +833,29 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
+
+      {/* Caffeine load — pulled out of the panorama group and parked
+          here in the consequence cluster, just below the sliders. The
+          three temp-axis strips (flavor / mood / balance) above share
+          an envelope and read as one panorama; caffeine is a scalar
+          gauge whose value barely shifts with temp/time. Living with
+          the warnings keeps related "is this cup pushing too hard?"
+          signals together and reduces eye-travel during slider drag —
+          the user's finger is already in this region. */}
+      {brew?.caffeineMg != null && brew.caffeineMg > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <CaffeineBar
+            caffeineMg={brew.caffeineMg}
+            totalG={(ingredients || []).reduce((s, it) => s + (Number(it?.g) || 0), 0)}
+            totalTsp={(ingredients || []).reduce((s, it) => {
+              const meta = INGREDIENTS[it?.id];
+              if (!meta) return s;
+              return s + gramsToTsp(Number(it?.g) || 0, meta.category);
+            }, 0)}
+            weightUnit={weightUnit}
+          />
+        </div>
+      )}
 
       {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
           Sit between the slider levers and the profile bars so the user
