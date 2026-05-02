@@ -141,6 +141,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   const [moods, setMoods] = useState([]);        // start empty — user sets their intent
   const [flavors, setFlavors] = useState([]);    // multi-select, same pattern as moods
   const [onlyPantry, setOnlyPantry] = useState(false);
+  // Recipes-tab "More filters" disclosure state. Default collapsed so the
+  // filter strip lands quiet (collection row + cabinet toggle). Expands
+  // to reveal mood + flavor rows when the user wants to narrow further.
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [reverseIngs, setReverseIngs] = useState([]);
   // Which axis leads: "feel" (mood-primary) or "taste" (flavor-primary).
   // Changes which side shows as the prominent row and which axis the
@@ -1418,13 +1422,30 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               : `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
           }
 
+          // One-line meta header: count + the active sub-filters that
+          // narrowed it. Replaces the two-line description band so the
+          // filter strip stays compact when the user knows what they
+          // picked. Reads "12 traditional · calm · floral · in cabinet".
+          const collectionLabels = {
+            favorites: "favorites", all: "all recipes",
+            traditional: "traditional", twists: "twists",
+            "house recipes": "house",
+          };
+          const metaBits = [
+            `${catVisible.length} ${collectionLabels[cf.collection] || cf.collection}`,
+            ...((cf.moods || []).length ? [(cf.moods).join(" / ")] : []),
+            ...((cf.flavors || []).length ? [(cf.flavors).map(f => {
+              const c = FLAVOR_FAMILY_CHIPS.find(x => x.family === f);
+              return c ? c.label.toLowerCase() : f;
+            }).join(" / ")] : []),
+            ...(cf.pantryOnly ? ["in cabinet"] : []),
+          ];
+          const subFilterCount = (cf.moods || []).length + (cf.flavors || []).length;
+
           return (
             <div style={{ marginTop: 4 }}>
-              {/* Filters — three rows with eyebrow labels: COLLECTION
-                  (single-select bucket), MOOD (multi-select), FLAVOR
-                  (multi-select). Each row is a flex-1 grid so the
-                  strip extends edge-to-edge. Selections AND across
-                  rows; chips within a multi-select row OR together. */}
+              {/* Collection row — always visible. Single-select bucket
+                  for what kind of recipes to browse. */}
               <FilterRow
                 label="collection"
                 items={[
@@ -1437,57 +1458,97 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 value={cf.collection}
                 setValue={setCollection}
               />
-              <FilterRow
-                label="mood"
-                multi
-                items={[
-                  ["calm",    "Calm"],
-                  ["focus",   "Focus"],
-                  ["energy",  "Energy"],
-                  ["comfort", "Comfort"],
-                ]}
-                value={cf.moods}
-                setValue={(m) => toggleInList("moods", m)}
-              />
-              <FilterRow
-                label="flavor"
-                multi
-                perRow={5}
-                items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
-                value={cf.flavors}
-                setValue={(f) => toggleInList("flavors", f)}
-              />
 
-              {/* Cabinet toggle — narrows the visible recipes to ones the
-                  user can actually brew right now from what they've marked
-                  as in their pantry. Same pill switch pattern as the Vibe
-                  screen "only use what's in my cabinet" toggle so the two
-                  flows feel like one control vocabulary. */}
-              <label style={{
-                display: "flex", alignItems: "center", gap: 10,
-                marginTop: 4, marginBottom: 12,
-                fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
+              {/* Cabinet toggle + "More filters" disclosure live on one
+                  row so the two secondary controls share visual weight
+                  and the filter strip's at-rest height stays compact. */}
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                gap: 12, marginTop: 4, marginBottom: 10,
               }}>
-                <span style={{
-                  width: 30, height: 18, borderRadius: 999,
-                  background: cf.pantryOnly ? theme.sageDeep : theme.rule,
-                  position: "relative", transition: "background .2s",
-                  flexShrink: 0,
-                }} onClick={togglePantryOnly}>
+                <label style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
+                }}>
                   <span style={{
-                    position: "absolute", top: 2, left: cf.pantryOnly ? 14 : 2,
-                    width: 14, height: 14, borderRadius: "50%", background: theme.cream,
-                    transition: "left .2s",
-                  }} />
-                </span>
-                only recipes I have ingredients for
-              </label>
+                    width: 30, height: 18, borderRadius: 999,
+                    background: cf.pantryOnly ? theme.sageDeep : theme.rule,
+                    position: "relative", transition: "background .2s",
+                    flexShrink: 0,
+                  }} onClick={togglePantryOnly}>
+                    <span style={{
+                      position: "absolute", top: 2, left: cf.pantryOnly ? 14 : 2,
+                      width: 14, height: 14, borderRadius: "50%", background: theme.cream,
+                      transition: "left .2s",
+                    }} />
+                  </span>
+                  in cabinet
+                </label>
 
-              {/* Add-recipe CTA — sends the user to the Apothecary's
-                  Blend (reverse-compose) page where they can build
-                  one of their own from ingredients. Solid secondary-
-                  style button with a thin-stroke SVG plus, replacing
-                  the prior dashed-border placeholder look. */}
+                {/* Disclosure — opens the mood + flavor rows below.
+                    Shows a small count badge when sub-filters are
+                    active so the user can spot "narrowed" at a glance
+                    without expanding. */}
+                <button
+                  onClick={() => setFiltersExpanded(v => !v)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                    color: theme.inkSoft, background: "transparent",
+                    border: "none", padding: "4px 0", cursor: "pointer",
+                  }}
+                >
+                  {filtersExpanded ? "less" : "more filters"}
+                  {subFilterCount > 0 && !filtersExpanded && (
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      minWidth: 16, height: 16, padding: "0 5px",
+                      borderRadius: 999, background: theme.terra, color: theme.cream,
+                      fontFamily: ff.sans, fontSize: 9, fontWeight: 600,
+                    }}>{subFilterCount}</span>
+                  )}
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
+                       style={{
+                         transition: "transform 0.18s ease",
+                         transform: filtersExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                       }}>
+                    <path d="M1.5 3 L4.5 6 L7.5 3" stroke={theme.inkSoft}
+                          strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Mood + flavor rows live behind the disclosure. Hidden
+                  by default so the filter strip lands at three controls
+                  (chips + cabinet + more); expanded for power users. */}
+              {filtersExpanded && (
+                <div style={{ marginBottom: 4 }}>
+                  <FilterRow
+                    label="mood"
+                    multi
+                    items={[
+                      ["calm",    "Calm"],
+                      ["focus",   "Focus"],
+                      ["energy",  "Energy"],
+                      ["comfort", "Comfort"],
+                    ]}
+                    value={cf.moods}
+                    setValue={(m) => toggleInList("moods", m)}
+                  />
+                  <FilterRow
+                    label="flavor"
+                    multi
+                    perRow={5}
+                    items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
+                    value={cf.flavors}
+                    setValue={(f) => toggleInList("flavors", f)}
+                  />
+                </div>
+              )}
+
+              {/* Add-recipe CTA — quieter outline button now lives below
+                  the meta row so the filter zone reads as one block and
+                  the create-action sits adjacent to the list it adds to. */}
               <button
                 onClick={() => go("apothecary", { mode: "reverse" })}
                 onMouseEnter={(e) => {
@@ -1500,9 +1561,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 }}
                 style={{
                   width: "100%",
-                  padding: "11px 14px",
-                  marginBottom: 14,
-                  fontFamily: ff.serif, fontSize: 14,
+                  padding: "9px 14px",
+                  marginTop: 6, marginBottom: 12,
+                  fontFamily: ff.serif, fontSize: 13,
                   color: theme.terra,
                   background: "transparent",
                   border: `1px solid ${theme.ruleSoft}`,
@@ -1512,60 +1573,26 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   transition: "background 0.18s ease, border-color 0.18s ease",
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden>
                   <path d="M6 2.5 L6 9.5 M2.5 6 L9.5 6" stroke={theme.terra} strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 add a recipe
               </button>
 
-              {/* Per-filter description band — soft left-rule + meta
-                  count line so each filter's context reads as a band,
-                  not a paragraph dropped into the page. */}
-              {(() => {
-                const descriptions = {
-                  all: {
-                    count: `${traditional.length + experimental.length} recipes`,
-                    body: `The full Recipe Book — ${traditional.length} traditional preparations and ${experimental.length} Herbanium house recipes, plus any blend you've composed and saved.`,
-                  },
-                  favorites: {
-                    count: "your starred picks",
-                    body: "Blends you've starred. Same set as your Home favorites — tap the star on any blend to add or remove it.",
-                  },
-                  traditional: {
-                    count: `${traditional.length} classics`,
-                    body: "Classic preparations, taught the way they're traditionally made. Tap any to open its recipe or start brewing.",
-                  },
-                  "house recipes": {
-                    count: `${experimental.length} from the kettle`,
-                    body: "Herbanium's own recipes — combinations the catalog's chemistry suggests but no tradition has codified. Try, log, judge for yourself.",
-                  },
-                  twists: {
-                    count: "tradition with intent",
-                    body: "Traditional preparations with one or two intentional deviations — a layered accent, a swapped base, a tighter steep. Each twist comes with a short note on why the change works.",
-                  },
-                };
-                const d = descriptions[cf.collection];
-                if (!d) return null;
-                return (
-                  <div style={{
-                    marginBottom: 14, padding: "10px 12px",
-                    borderLeft: `2px solid ${theme.terra}`,
-                    background: "rgba(176,84,47,0.04)",
-                    borderRadius: "0 6px 6px 0",
-                  }}>
-                    <div style={{
-                      fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-                      textTransform: "uppercase", color: theme.terra, marginBottom: 4,
-                    }}>{d.count}</div>
-                    <div style={{
-                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                      color: theme.inkSoft, lineHeight: 1.5,
-                    }}>
-                      {d.body}
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* Compact one-line meta — count + active sub-filters,
+                  separated by middle-dots. Replaces the prior two-line
+                  description band; the per-collection blurbs were nice
+                  but ate vertical space the user paid for every visit. */}
+              <div style={{
+                marginBottom: 12, padding: "7px 12px",
+                borderLeft: `2px solid ${theme.terra}`,
+                background: "rgba(176,84,47,0.04)",
+                borderRadius: "0 6px 6px 0",
+                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.06em",
+                color: theme.inkSoft, lineHeight: 1.45,
+              }}>
+                {metaBits.join(" · ")}
+              </div>
 
 
               {catVisible.length === 0 ? (
