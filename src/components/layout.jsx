@@ -54,9 +54,14 @@ import { theme, ff, shadow, radius } from "../theme";
 
 // Slightly lighter terra used for the hover fill on primary terra
 // buttons. Computed once so we don't pay a string concat per render.
-const TERRA_HOVER = "#BC5D33";
-const INK_HOVER   = "#2A211A";
-const BARK_HOVER  = "#714A28";
+// Theme-aware hover fills — the values themselves live in index.css
+// under :root (light) and the prefers-color-scheme: dark override.
+// Dark mode flips ink from a deep brown to a sage-cream, so the
+// hardcoded hex hovers used to drop hover-bg + hover-text into the
+// same dark forest hue and the button text would vanish.
+const TERRA_HOVER = "var(--terra-hover)";
+const INK_HOVER   = "var(--ink-hover)";
+const BARK_HOVER  = "var(--bark-hover)";
 
 export const Button = ({
   variant = "primary",   // primary | secondary | ghost

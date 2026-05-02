@@ -41,6 +41,14 @@
   --ivory-rgb:  243, 236, 220;     /* translucent surfaces (TabBar dock) */
   --terra-rgb:  176, 84, 47;       /* active-tab pill tint */
 
+  /* Hover fills for filled buttons. Light mode = slightly lifted from
+     the rest accent (ink hover sits brighter than ink, terra hover
+     brighter than terra). Dark mode redefines below so a hovered
+     button doesn't drop into a lower-contrast color than its rest. */
+  --ink-hover:    #2A211A;
+  --terra-hover:  #BC5D33;
+  --bark-hover:   #714A28;
+
   /* Family bar colors — used by the graph strips (FlavorMap /
      EffectMap / palate maps). Light-mode values match the existing
      ink-on-cream palette; dark mode below brightens each register
@@ -128,6 +136,15 @@
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
     --terra-rgb:  168, 96, 64;
+
+    /* Dark-mode hover fills — the rest accent (ink) is a light
+       sage-cream, so the hover should be a *darker* dim of that to
+       read as "pressed in." Hardcoding the light-mode brown-black
+       on hover instead made the button text vanish — bg #2A211A on
+       dark forest, text the same dark forest. These keep contrast. */
+    --ink-hover:    #C8D2C5;
+    --terra-hover:  #BB7050;
+    --bark-hover:   #A47C5C;
 
     /* Family bars — vibrant variants sized between the muted light
        palette and the crystal's fluorescent gem tones. Each register
