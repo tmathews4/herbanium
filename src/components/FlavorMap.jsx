@@ -473,7 +473,7 @@ const TrackMap = ({
   // OR a single-contributor token ("grassy") that got demoted from
   // its family. Resolve both — direct family lookup first, then
   // route through the family map for child tokens.
-  const colorForName =
+  const colorForName_raw =
     kind === "flavor"
       ? (useFamilyMode
           ? (n) => FAMILY_COLORS[n] || FAMILY_COLORS[FAMILY_BY_FLAVOR[n]] || "var(--ash)"
@@ -483,6 +483,17 @@ const TrackMap = ({
           ? (n) => EFFECT_FAMILY_COLORS[n] || EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[n]] || "var(--ash)"
           : colorForEffect)
       : colorForPalate;
+  // Wrap so synthetic parent rows in Detail mode resolve their color
+  // through the family palette (FAMILY_COLORS / EFFECT_FAMILY_COLORS),
+  // since the leaf-mode color helpers don't recognize the prefixed key.
+  const colorForName = (n) => {
+    if (typeof n === "string" && n.startsWith("__fam:")) {
+      const fam = n.slice("__fam:".length);
+      if (kind === "flavor") return FAMILY_COLORS[fam] || "var(--ash)";
+      if (kind === "mood")   return EFFECT_FAMILY_COLORS[fam] || "var(--ash)";
+    }
+    return colorForName_raw(n);
+  };
 
   // Compute peak strengths once, then split into two tiers:
   //   - primary: top MAX_TRACKS with peak ≥ PRIMARY_THRESHOLD
@@ -552,10 +563,59 @@ const TrackMap = ({
     setSelectedTrack(null);
   }, [familyMode]);
   const tracks = trackData.tracks;
-  // If the displayed track set changes (timeS slider drag drops a
-  // track) and the previously-selected track is no longer present,
-  // close the panel so it never points at something off-screen.
-  if (selectedTrack && !tracks.includes(selectedTrack)) {
+
+  // Detail-view hierarchy. In mood/flavor Detail mode, group leaf
+  // tokens under their parent family and prepend a synthetic parent
+  // row above each group. The parent row reads as the canonical
+  // chip label ("comfort", "fruity"…) and carries the same sub-
+  // linear stack the Simple view shows; children sit slightly
+  // indented underneath. Single-child groups whose only leaf shares
+  // the family name (calm/calm, focus/focus) skip the parent row to
+  // avoid duplicate labels. Family/palate kinds and Simple mode
+  // pass through the flat track list unchanged.
+  const FAMILY_KEY_PREFIX = "__fam:";
+  const isParentKey = (n) => typeof n === "string" && n.startsWith(FAMILY_KEY_PREFIX);
+  const familyOfKey = (n) => isParentKey(n) ? n.slice(FAMILY_KEY_PREFIX.length) : null;
+  const displayList = useMemo(() => {
+    if (useFamilyMode) return tracks.map(t => ({ name: t, depth: 0, isParent: false }));
+    if (kind !== "flavor" && kind !== "mood") {
+      return tracks.map(t => ({ name: t, depth: 0, isParent: false }));
+    }
+    const groups = new Map();
+    for (const t of tracks) {
+      const fam = familyOf[t] || t;
+      if (!groups.has(fam)) groups.set(fam, []);
+      groups.get(fam).push(t);
+    }
+    const list = [];
+    for (const [fam, leaves] of groups.entries()) {
+      const onlyChildIsFamily = leaves.length === 1 && leaves[0] === fam;
+      if (!onlyChildIsFamily) {
+        list.push({
+          name: FAMILY_KEY_PREFIX + fam,
+          depth: 0,
+          isParent: true,
+          familySlug: fam,
+        });
+      }
+      for (const leaf of leaves) {
+        list.push({
+          name: leaf,
+          depth: onlyChildIsFamily ? 0 : 1,
+          isParent: false,
+          parent: fam,
+        });
+      }
+    }
+    return list;
+  }, [tracks, useFamilyMode, kind, familyOf]);
+  // If the displayed row set changes (timeS slider drag drops a
+  // track, or Simple↔Detailed flip changes the row layout) and the
+  // previously-selected name is no longer rendered, close the panel
+  // so it never points at something off-screen. Check against the
+  // full displayList so synthetic parent rows are recognized.
+  const _allDisplayNames = displayList.map(d => d.name);
+  if (selectedTrack && !_allDisplayNames.includes(selectedTrack)) {
     // Defer to avoid a setState-in-render warning on the same row.
     setTimeout(() => setSelectedTrack(null), 0);
   }
@@ -576,6 +636,22 @@ const TrackMap = ({
     sleep: "sleepy",
   };
   const descriptionFor = (name) => {
+    // Synthetic parent rows in Detail mode use the family-level
+    // description (same one Simple mode shows when the row is
+    // selected) so a tap on the parent reveals the family blurb,
+    // and a tap on a child reveals the leaf-specific blurb.
+    if (typeof name === "string" && name.startsWith("__fam:")) {
+      const fam = name.slice("__fam:".length);
+      if (kind === "flavor") {
+        const key = FLAVOR_FAMILY_DESC_ALIAS[fam] || fam;
+        return FLAVOR_DESCRIPTIONS[key] || null;
+      }
+      if (kind === "mood") {
+        const key = MOOD_FAMILY_DESC_ALIAS[fam] || fam;
+        return EFFECT_DESCRIPTIONS[key] || null;
+      }
+      return null;
+    }
     if (kind === "flavor") {
       const key = useFamilyMode
         ? (FLAVOR_FAMILY_DESC_ALIAS[name] || name)
@@ -608,6 +684,15 @@ const TrackMap = ({
     fruit: "fruity", body: "creamy",
   };
   const labelFor = (name) => {
+    // Synthetic parent rows in Detail mode — strip the prefix and
+    // apply the canon-label map so the parent reads "comfort" /
+    // "fruity" / "creamy" alongside its indented children below.
+    if (typeof name === "string" && name.startsWith("__fam:")) {
+      const fam = name.slice("__fam:".length);
+      if (kind === "mood") return FAMILY_LABEL_MOOD[fam] || fam;
+      if (kind === "flavor") return FAMILY_LABEL_FLAVOR[fam] || fam;
+      return fam;
+    }
     if (!useFamilyMode) return name;
     if (kind === "mood") return FAMILY_LABEL_MOOD[name] || name;
     if (kind === "flavor") return FAMILY_LABEL_FLAVOR[name] || name;
@@ -770,15 +855,38 @@ const TrackMap = ({
   const filledSeriesCache = {};
   const filledSeriesFor = (name) => {
     if (filledSeriesCache[name]) return filledSeriesCache[name];
-    const raw = samples.map(s => pickMap(s)[name] || 0);
+    let raw;
+    if (typeof name === "string" && name.startsWith(FAMILY_KEY_PREFIX)) {
+      // Synthetic parent track in Detail mode — aggregate the leaf
+      // map to family strengths via the same sub-linear stack the
+      // Simple view uses, then read this family's value at each
+      // sample.
+      const fam = name.slice(FAMILY_KEY_PREFIX.length);
+      raw = samples.map(s => {
+        const fams = aggregateToFamilies(pickMap(s));
+        return fams[fam] || 0;
+      });
+    } else {
+      raw = samples.map(s => pickMap(s)[name] || 0);
+    }
     const filled = fillGaps(raw);
     filledSeriesCache[name] = filled;
     return filled;
   };
+  // Peak lookup that handles parent rows. Parent peaks aren't in
+  // trackData.peaks (they're a synthetic Detail-mode construct); fall
+  // back to deriving from the parent's series cache.
+  const peakFor = (name) => {
+    if (typeof name === "string" && name.startsWith(FAMILY_KEY_PREFIX)) {
+      const series = filledSeriesFor(name);
+      return Math.max(0, ...series);
+    }
+    return trackData.peaks[name] || 0;
+  };
 
   const gradientFor = (name) => {
     const rgb = hexToRgb(colorForName(name));
-    const peak = trackData.peaks[name] || 1;
+    const peak = peakFor(name) || 1;
     // Cross-band loudness factor. Each band's alpha cap multiplies
     // by sqrt(peak/5), so a peak-0.5 band reaches ~26% alpha at
     // its own peak while a peak-3.0 band reaches ~63%. Quiet bands
@@ -888,6 +996,11 @@ const TrackMap = ({
   const TRACK_H   = 14;
   const TRACK_GAP = 3;
   const LABEL_W   = 64;
+  // Detail-mode child rows inset their band by this many pixels so
+  // the leaf descriptors sit visually below their parent — same right
+  // edge, narrower bar. Aligned with the label column's small dot
+  // prefix that marks children as nested under their parent.
+  const CHILD_INDENT_PX = 14;
 
   return (
     <div style={{
@@ -913,7 +1026,8 @@ const TrackMap = ({
           flex: "0 0 auto",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(name => {
+          {displayList.map(item => {
+            const { name, depth, isParent } = item;
             const warn = warningFor(name);
             const here = isWarningHere(warn);
             const isSelected = selectedTrack === name;
@@ -925,9 +1039,9 @@ const TrackMap = ({
                 title={hasDescription ? "tap for definition" : undefined}
                 style={{
                   height: TRACK_H,
-                  fontFamily: ff.sans, fontSize: 10,
-                  color: here ? theme.terra : (isSelected ? theme.ink : theme.inkSoft),
-                  fontWeight: here || isSelected ? 500 : 400,
+                  fontFamily: ff.sans, fontSize: isParent ? 10 : 9.5,
+                  color: here ? theme.terra : (isSelected ? theme.ink : (depth > 0 ? theme.ash : theme.inkSoft)),
+                  fontWeight: isParent ? 500 : (here || isSelected ? 500 : 400),
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
                   gap: 3,
                   minWidth: LABEL_W,
@@ -986,7 +1100,8 @@ const TrackMap = ({
           width: 4,
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(name => {
+          {displayList.map(item => {
+            const { name } = item;
             const current = valueAtCurrent(name);
             const fill = Math.max(0, Math.min(1, current / 5));
             return (
@@ -1013,7 +1128,8 @@ const TrackMap = ({
           flex: 1, position: "relative",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {tracks.map(name => {
+          {displayList.map(item => {
+            const { name, depth } = item;
             const warn = warningFor(name);
             const isSelected = selectedTrack === name;
             const hasDescription = !!descriptionFor(name);
@@ -1024,6 +1140,7 @@ const TrackMap = ({
                 style={{
                   position: "relative",
                   height: TRACK_H,
+                  marginLeft: depth > 0 ? CHILD_INDENT_PX : 0,
                   borderRadius: 3,
                   background: gradientFor(name),
                   boxShadow: isSelected
