@@ -1152,112 +1152,13 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
   return (
     <>
-      <SectionLabel n="i">What's in the pot?</SectionLabel>
-      <div style={{
-        marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
-        background: theme.cream,
-      }}>
-        {reverseIngs.map(id => (
-          <div key={id} style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "6px 0",
-          }}>
-            <button
-              onClick={() => go("ingredient", id)}
-              style={{
-                background: "transparent", border: "none", padding: 0,
-                textAlign: "left", cursor: "pointer",
-                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-                display: "flex", alignItems: "baseline", gap: 4,
-              }}
-            >
-              {INGREDIENTS[id].name}
-              <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
-              <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
-                {formatTempShort(INGREDIENTS[id].tempC[0], INGREDIENTS[id].tempC[1], unit)}
-              </span>
-            </button>
-            <button onClick={() => setReverseIngs(reverseIngs.filter(x => x !== id))} style={{
-              background: "transparent", border: "none", color: theme.ash, fontSize: 14, cursor: "pointer",
-            }}>×</button>
-          </div>
-        ))}
 
-        {/* Temperature-compatibility notice — reactive to the user's current
-            slider values in the explorer below. Disappears when the user moves
-            the temp into a range where every ingredient fits. */}
-        {reverseIngs.length > 1 && liveOutsiders.length > 0 && (
-          <div style={{
-            marginTop: 10, padding: "8px 10px", borderRadius: 6,
-            background: "rgba(165, 120, 54, 0.08)",
-            border: `1px solid rgba(165, 120, 54, 0.22)`,
-            display: "flex", gap: 8, alignItems: "flex-start",
-          }}>
-            <Kettle size={14} c={theme.ochre} />
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.inkSoft, lineHeight: 1.45 }}>
-              <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
-              at <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>,{" "}
-              <em>
-                {liveOutsiders.map((c, i) => (
-                  <React.Fragment key={c.id}>
-                    {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
-                    <button
-                      onClick={() => go("ingredient", c.id)}
-                      style={{
-                        background: "transparent", border: "none", padding: 0, cursor: "pointer",
-                        color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
-                        textDecorationStyle: "dotted", textUnderlineOffset: 3,
-                        fontFamily: "inherit", fontSize: "inherit",
-                      }}
-                    >{c.name}</button>
-                  </React.Fragment>
-                ))}
-              </em>
-              {" "}will extract lightly.
-            </div>
-          </div>
-        )}
-
-        {/* Ingredient-interaction safety banners — reverse mode. */}
-        {rcSafetyFlags.map(flag => {
-          const high = flag.severity === "high";
-          return (
-            <div key={flag.id} style={{
-              marginTop: 10, padding: "8px 10px", borderRadius: 6,
-              background: high ? "rgba(176, 64, 48, 0.10)" : "rgba(165, 120, 54, 0.08)",
-              border: high ? `1px solid rgba(176, 64, 48, 0.30)` : `1px solid rgba(165, 120, 54, 0.22)`,
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.inkSoft, lineHeight: 1.45,
-            }}>
-              <em style={{
-                color: high ? "rgb(176, 64, 48)" : theme.ochre,
-                fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
-                letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
-              }}>{high ? "skip this combination" : "heads up"} · {flag.title}</em>
-              {flag.message}
-            </div>
-          );
-        })}
-
-        {/* Pot empty-state — when no ingredients are selected, this card
-            would otherwise be just an empty box. The hint nudges the
-            user to the picker below as the obvious next move. */}
-        {reverseIngs.length === 0 && rcSafetyFlags.length === 0 && (
-          <div style={{
-            padding: "12px 4px", textAlign: "center",
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-            color: theme.ash, lineHeight: 1.5,
-          }}>
-            Pick a few ingredients below to start your blend.
-          </div>
-        )}
-      </div>
-
-      {/* Picker — split out of the pot card so "what I have" and "what
-          I could add" read as two distinct moves. The pot card above is
-          your in-progress list; this card is a browse interface. */}
-      <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <SectionLabel n="ii">Add from the apothecarium</SectionLabel>
+      {/* Picker leads the page so a fresh user sees the active surface
+          immediately. The pot below fills as ingredients are added,
+          sitting next to the brewer so the pot contents stay visible
+          while the user slides temperature/time. */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <SectionLabel n="i">Add from the apothecarium</SectionLabel>
         <span style={{
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
         }}>
@@ -1403,6 +1304,107 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             </div>
           )}
         </div>
+      </div>
+
+      <div style={{ marginTop: 20 }}><SectionLabel n="ii">What's in the pot?</SectionLabel></div>
+      <div style={{
+        marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
+        background: theme.cream,
+      }}>
+        {reverseIngs.map(id => (
+          <div key={id} style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            padding: "6px 0",
+          }}>
+            <button
+              onClick={() => go("ingredient", id)}
+              style={{
+                background: "transparent", border: "none", padding: 0,
+                textAlign: "left", cursor: "pointer",
+                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+                display: "flex", alignItems: "baseline", gap: 4,
+              }}
+            >
+              {INGREDIENTS[id].name}
+              <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+              <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
+                {formatTempShort(INGREDIENTS[id].tempC[0], INGREDIENTS[id].tempC[1], unit)}
+              </span>
+            </button>
+            <button onClick={() => setReverseIngs(reverseIngs.filter(x => x !== id))} style={{
+              background: "transparent", border: "none", color: theme.ash, fontSize: 14, cursor: "pointer",
+            }}>×</button>
+          </div>
+        ))}
+
+        {/* Temperature-compatibility notice — reactive to the user's current
+            slider values in the explorer below. Disappears when the user moves
+            the temp into a range where every ingredient fits. */}
+        {reverseIngs.length > 1 && liveOutsiders.length > 0 && (
+          <div style={{
+            marginTop: 10, padding: "8px 10px", borderRadius: 6,
+            background: "rgba(165, 120, 54, 0.08)",
+            border: `1px solid rgba(165, 120, 54, 0.22)`,
+            display: "flex", gap: 8, alignItems: "flex-start",
+          }}>
+            <Kettle size={14} c={theme.ochre} />
+            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5, color: theme.inkSoft, lineHeight: 1.45 }}>
+              <em style={{ color: theme.ochre, fontStyle: "normal", fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6 }}>temperature compromise</em>
+              at <em style={{ fontStyle: "normal" }}>{formatTemp(brewTempC, unit)}</em>,{" "}
+              <em>
+                {liveOutsiders.map((c, i) => (
+                  <React.Fragment key={c.id}>
+                    {i > 0 && (i === liveOutsiders.length - 1 ? " and " : ", ")}
+                    <button
+                      onClick={() => go("ingredient", c.id)}
+                      style={{
+                        background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                        color: theme.ochre, fontStyle: "italic", textDecoration: "underline",
+                        textDecorationStyle: "dotted", textUnderlineOffset: 3,
+                        fontFamily: "inherit", fontSize: "inherit",
+                      }}
+                    >{c.name}</button>
+                  </React.Fragment>
+                ))}
+              </em>
+              {" "}will extract lightly.
+            </div>
+          </div>
+        )}
+
+        {/* Ingredient-interaction safety banners — reverse mode. */}
+        {rcSafetyFlags.map(flag => {
+          const high = flag.severity === "high";
+          return (
+            <div key={flag.id} style={{
+              marginTop: 10, padding: "8px 10px", borderRadius: 6,
+              background: high ? "rgba(176, 64, 48, 0.10)" : "rgba(165, 120, 54, 0.08)",
+              border: high ? `1px solid rgba(176, 64, 48, 0.30)` : `1px solid rgba(165, 120, 54, 0.22)`,
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+              color: theme.inkSoft, lineHeight: 1.45,
+            }}>
+              <em style={{
+                color: high ? "rgb(176, 64, 48)" : theme.ochre,
+                fontStyle: "normal", fontFamily: ff.sans, fontSize: 10,
+                letterSpacing: "0.16em", textTransform: "uppercase", marginRight: 6,
+              }}>{high ? "skip this combination" : "heads up"} · {flag.title}</em>
+              {flag.message}
+            </div>
+          );
+        })}
+
+        {/* Pot empty-state — when no ingredients are selected, this card
+            would otherwise be just an empty box. The hint nudges the
+            user to the picker below as the obvious next move. */}
+        {reverseIngs.length === 0 && rcSafetyFlags.length === 0 && (
+          <div style={{
+            padding: "12px 4px", textAlign: "center",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.ash, lineHeight: 1.5,
+          }}>
+            Pick a few ingredients above to start your blend.
+          </div>
+        )}
       </div>
 
       <div style={{ marginTop: 20 }}><SectionLabel n="iii">The blender — see how it brews</SectionLabel></div>
