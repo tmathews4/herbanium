@@ -27,7 +27,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { theme, ff } from "../theme";
-import { useUnit, cToF } from "../units/units";
+import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
@@ -51,13 +51,20 @@ const CAFFEINE_WARN_MG = 120;
 // a terra fill that intensifies past warning. Shares the palate
 // strip's visual register so users learn one bar shape applies
 // across all "is this cup pushing too hard?" signals.
-const CaffeineBar = ({ caffeineMg = 0, totalG = 0 }) => {
+const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g" }) => {
   const mg = Math.max(0, Math.round(caffeineMg));
   const grams = Math.max(0, Number(totalG) || 0);
-  // Round to nearest 0.5g for a tidy "≈" hint; suppress when no
-  // grams were passed (keeps the bar usable when the caller hasn't
-  // wired the total through yet).
-  const gramsLabel = grams > 0 ? `${(Math.round(grams * 2) / 2).toFixed(1)} g leaf` : null;
+  const tsp = Math.max(0, Number(totalTsp) || 0);
+  // Respect the user's weight-unit preference rather than always
+  // showing grams. Grams: round to half-gram for a tidy hint.
+  // Teaspoons: hand off to formatTsp so the rendering matches the
+  // rest of the app's tsp/tbsp/pinch ladder. Suppress when the
+  // caller hasn't wired the total through.
+  const gramsLabel = grams > 0
+    ? (weightUnit === "g"
+        ? `${(Math.round(grams * 2) / 2).toFixed(1)} g leaf`
+        : `${formatTsp(tsp)} leaf`)
+    : null;
   const pct = Math.min(100, (mg / CAFFEINE_MAX_MG) * 100);
   const past = mg >= CAFFEINE_WARN_MG;
   const inCaution = mg >= CAFFEINE_CAUTION_MG && !past;
@@ -189,7 +196,7 @@ export const BlendExtractionExplorer = ({
                             // out of moodSummary if the perception
                             // pipeline doesn't surface it on its own.
 }) => {
-  const { unit } = useUnit();
+  const { unit, weightUnit } = useUnit();
 
   // Shared Simple/Detailed mode for the flavor + mood strips. One
   // toggle at the top of the explorer drives both at once so the
@@ -389,6 +396,16 @@ export const BlendExtractionExplorer = ({
           <CaffeineBar
             caffeineMg={brew.caffeineMg}
             totalG={(ingredients || []).reduce((s, it) => s + (Number(it?.g) || 0), 0)}
+            // Tsp totals are category-aware: each ingredient
+            // converts at its own density (true tea ≈ 2 g/tsp, spice
+            // ≈ 2.5, herbal ≈ 1.2…) so the cup's total reflects the
+            // actual scoop count, not a flat divisor.
+            totalTsp={(ingredients || []).reduce((s, it) => {
+              const meta = INGREDIENTS[it?.id];
+              if (!meta) return s;
+              return s + gramsToTsp(Number(it?.g) || 0, meta.category);
+            }, 0)}
+            weightUnit={weightUnit}
           />
         )}
       </div>
