@@ -1114,6 +1114,23 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     return (tempOK ? 1 : 0) + (timeOK ? 1 : 0);
   };
 
+  // Set of candidate ids that would introduce a high-severity safety
+  // flag ("skip this combination") if added to the pot. We force these
+  // to red in the picker even when their temp/time overlap is fine —
+  // a high-severity interaction overrides brewing-window math, and
+  // letting a clean-looking green chip carry that risk would mislead.
+  // Recomputed only when the pot itself changes; we run the safety
+  // check once per available candidate at that point.
+  const dangerousCandidates = React.useMemo(() => {
+    const set = new Set();
+    for (const id of Object.keys(INGREDIENTS)) {
+      if (reverseIngs.includes(id)) continue;
+      const flags = checkIngredientInteractions([...reverseIngs, id]);
+      if (flags.some(f => f.severity === "high")) set.add(id);
+    }
+    return set;
+  }, [reverseIngs]);
+
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
   const filteredAvailable = available
     .filter(id => {
@@ -1158,9 +1175,14 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     })
     // Sort: best fit first (green → yellow → red), then alphabetical
     // within each band. When the pot is empty everything scores null
-    // so the list collapses to plain alphabetical order. Pre-compute
-    // each candidate's score once so the comparator stays cheap.
-    .map(id => ({ id, score: overlapScore(id) }))
+    // so the list collapses to plain alphabetical order. Dangerous
+    // candidates (high-severity safety flag) score as 0 so they sink
+    // alongside other red chips — keeps the display order matched to
+    // what the user sees rendered. Pre-compute scores once.
+    .map(id => ({
+      id,
+      score: dangerousCandidates.has(id) ? 0 : overlapScore(id),
+    }))
     .sort((a, b) => {
       const sa = a.score ?? -1;
       const sb = b.score ?? -1;
@@ -1446,7 +1468,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 // chip's border + tinted background so the user can
                 // see at a glance which candidates fit cleanly into
                 // what's already in the pot.
-                const score = overlapScore(id);
+                //
+                // Safety override: if adding this candidate would
+                // trigger a high-severity "skip this combination"
+                // interaction, force red regardless of brewing-window
+                // overlap. Safety beats fit; we don't want a green
+                // chip ever to introduce a flagged combination.
+                const isDangerous = dangerousCandidates.has(id);
+                const rawScore = overlapScore(id);
+                const score = isDangerous ? 0 : rawScore;
                 const fitColor =
                   score === 2 ? theme.sageDeep
                   : score === 1 ? theme.ochre
@@ -1462,8 +1492,9 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   : score === 1 ? "rgba(165,120,54,0.09)"
                   : score === 0 ? "rgba(176,84,47,0.18)"
                   : "transparent";
-                const fitTitle =
-                  score === 2 ? "Full overlap with the pot's brew window"
+                const fitTitle = isDangerous
+                  ? "Skip this combination — flagged interaction with what's in the pot"
+                  : score === 2 ? "Full overlap with the pot's brew window"
                   : score === 1 ? "Matches the pot on temp or time, not both"
                   : score === 0 ? "Doesn't share a brew window with the pot"
                   : undefined;
