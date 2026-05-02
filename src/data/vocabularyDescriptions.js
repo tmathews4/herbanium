@@ -138,6 +138,11 @@ export const EFFECT_DESCRIPTIONS = {
   bitterness: {
     summary: "Tongue-back bitter taste — total tannin pressure.",
     body: "Sums effect bitterness with flavor bitter and astringent signals, since the warning math treats them as one axis. Climbs when catechins and tannins release past their balance point — too long or too hot.",
+    ladder: [
+      [1, "Barely there — a clean cup with the faintest grip."],
+      [3, "Clearly bitter — back-of-tongue lingering you'd notice."],
+      [5, "Aggressive — over-pulled territory; pull the steep back."],
+    ],
   },
   sweetness: {
     summary: "Natural sugar-without-sugar — amino acids and polysaccharides.",
@@ -151,14 +156,29 @@ export const EFFECT_DESCRIPTIONS = {
   astringency: {
     summary: "Tongue-drying tannin grip — different from bitter.",
     body: "Catechins binding to mouth proteins. Strong black teas, over-steeped greens, persimmon-adjacent. Closely tracks bitterness but the sensation lands on the cheeks and tongue surface, not the back of the throat.",
+    ladder: [
+      [1, "Barely drying — a clean finish."],
+      [3, "Clearly drying — the cheeks and tongue feel it."],
+      [5, "Mouth-grippy — over-extracted; pull the steep back."],
+    ],
   },
   tartness: {
     summary: "Fruity-acidic lift — bright, lemon-and-cranberry register.",
     body: "Hibiscus, rosehip, citrus-leaning herbs. Not the same as bitter — tartness is up-front and lifting, where bitterness is back-of-tongue and lingering.",
+    ladder: [
+      [1, "A faint brightness — a subtle lift."],
+      [3, "Clearly tart — the cup has zip."],
+      [5, "Sharp acidic — hibiscus or rosehip in full force."],
+    ],
   },
   menthol: {
     summary: "Mouth-cooling sensation — TRPM8 activation.",
     body: "Peppermint's menthol is sharp and direct; spearmint's carvone is gentler. Distinct from the cooling mood (felt-temperature register); menthol is the physical mouthfeel.",
+    ladder: [
+      [1, "A faint cool exhale at the finish."],
+      [3, "Clearly cooling — peppermint's signature sensation."],
+      [5, "Icy, almost burning — TRPM8 maxed, peppermint at strength."],
+    ],
   },
 };
 
@@ -167,6 +187,11 @@ export const FLAVOR_DESCRIPTIONS = {
   floral: {
     summary: "Petals, perfume, soft aromatics.",
     body: "Volatile compounds that lift on first sip. Rose, jasmine, lavender, chamomile, elderflower, linden.",
+    ladder: [
+      [1, "A faint perfume on first sip."],
+      [3, "Clearly perfumed; the cup carries flowers."],
+      [5, "Fully in flower — jasmine or rose at peak."],
+    ],
   },
   heady: {
     summary: "Rich, complex, animalic-floral depth.",
@@ -179,6 +204,11 @@ export const FLAVOR_DESCRIPTIONS = {
   fruity: {
     summary: "Berry, stone fruit, tropical aromatics.",
     body: "Hibiscus's cranberry, elderflower's lychee, darjeeling's muscatel grape, white tea's melon.",
+    ladder: [
+      [1, "A faint fruit suggestion in the background."],
+      [3, "Clearly fruity — the cup reads like its source berries or stone fruit."],
+      [5, "Dominant fruit — hibiscus or rosehip in full lift."],
+    ],
   },
   citrus: {
     summary: "Bright, lifting, lemon-adjacent without being sour.",
@@ -195,9 +225,22 @@ export const FLAVOR_DESCRIPTIONS = {
   vegetal: {
     summary: "Fresh-cut greens, steamed leaves.",
     body: "Sencha's grass, gyokuro's seaweed, matcha's deep umami-vegetal, dragonwell's chestnut-bean.",
+    ladder: [
+      [1, "A hint of green — a leaf-edge in the cup."],
+      [3, "Clearly green — sencha-style cut grass and steamed leaf."],
+      [5, "Deep green wash — matcha or gyokuro at strength."],
+    ],
   },
   grassy: { summary: "Fresh-cut grass, green-leaf register.", body: "Sencha, dragonwell, lemongrass, lemon balm, matcha's lighter side." },
-  marine: { summary: "Seaweed, oceanic notes.", body: "Distinctive to Japanese shaded greens — gyokuro especially." },
+  marine: {
+    summary: "Seaweed, oceanic notes.",
+    body: "Distinctive to Japanese shaded greens — gyokuro especially.",
+    ladder: [
+      [1, "A faint salt-edge — barely there."],
+      [3, "Clearly oceanic — seaweed and kelp forward."],
+      [5, "Kelp-front — full gyokuro or mushroom-decoction marine."],
+    ],
+  },
   seaweed: { summary: "Oceanic-vegetal — the kelp register.", body: "Shaded Japanese greens; matcha, gyokuro." },
   umami: { summary: "Savory, brothy depth.", body: "L-theanine + glutamate — the shaded-green signature. Matcha, gyokuro, lion's mane." },
 
@@ -212,17 +255,38 @@ export const FLAVOR_DESCRIPTIONS = {
   sweet: {
     summary: "Natural sugar-without-sugar, from amino acids and polysaccharides.",
     body: "Licorice root sets the ceiling at 5 (50× sucrose by weight); rooibos, vanilla, white tea hold the gentler middle.",
+    ladder: [
+      [1, "A faint suggestion of sweet — easy to miss."],
+      [3, "Clearly sweet; balances the cup without sugar added."],
+      [5, "Sugar-like — licorice root, rooibos, or vanilla at full strength."],
+    ],
   },
   honey: { summary: "Soft amber sweetness — flower and dried-grass.", body: "White tea, chamomile, linden, rooibos." },
   caramel: { summary: "Browned-sugar warmth.", body: "Hojicha's roast, dandelion root, rooibos." },
   vanilla: { summary: "Creamy floral-sweet — the dessert lean.", body: "Vanilla bean's signature; lifts any blend toward dessert without sugar." },
-  creamy: { summary: "Body quality, not flavor — milk-like roundness.", body: "Vanilla, gyokuro's broth, oat-base lattes." },
+  creamy: {
+    summary: "Body quality, not flavor — milk-like roundness.",
+    body: "Vanilla, gyokuro's broth, oat-base lattes.",
+    ladder: [
+      [1, "A faint round mouthfeel — light-bodied."],
+      [3, "Clearly creamy — vanilla and high-amino tea body."],
+      [5, "Cream-rich — gyokuro broth or vanilla in full body."],
+    ],
+  },
 
   // ── Roasted family ──
   roasted: { summary: "Pan-fired or oven-roasted depth.", body: "Hojicha, dark oolongs, dandelion root, gunpowder." },
   toasted: { summary: "The lighter end of roasted — pan-fired character.", body: "Hojicha, gunpowder, genmaicha's rice." },
   toasty: { summary: "Genmaicha and hojicha's signature register.", body: "Gentle browning, not char." },
-  smoky: { summary: "Pine-smoke, campfire.", body: "Lapsang Souchong's signature — dried over pine fires in Fujian." },
+  smoky: {
+    summary: "Pine-smoke, campfire.",
+    body: "Lapsang Souchong's signature — dried over pine fires in Fujian.",
+    ladder: [
+      [1, "A whisper of smoke — easy to overlook."],
+      [3, "Clearly smoky — campfire on the breeze."],
+      [5, "Heavy smoke — full Lapsang Souchong, love-or-never-again."],
+    ],
+  },
   smoked: { summary: "Same as smoky — pine-smoke register.", body: "Lapsang Souchong; some yerba mate via barbacuá processing." },
   pine: { summary: "Resinous coniferous note.", body: "Lapsang's pine-smoke; lavender's camphor edge." },
   charcoal: { summary: "Deep-roasted register.", body: "Heavier roasts; dark oolongs, charcoal-fired teas." },
@@ -233,6 +297,20 @@ export const FLAVOR_DESCRIPTIONS = {
   earthy: {
     summary: "Forest floor, root cellar, deep loam.",
     body: "The grounded register — pu-erh's leather, reishi's bitter wood, ashwagandha's musk, dandelion root.",
+    ladder: [
+      [1, "A faint earth-edge underneath the cup."],
+      [3, "Clearly grounded — root and bark forward."],
+      [5, "Deep loam — aged pu-erh, reishi, or root-decoction territory."],
+    ],
+  },
+  bold: {
+    summary: "Robust, full-bodied register — the heavy-cup edge of earthy.",
+    body: "Strong black teas, dark roasts, and rich decoctions — assertively-flavored cups that don't whisper. Lives in the earthy family.",
+    ladder: [
+      [1, "A faint robustness; the cup has presence but stays light."],
+      [3, "Clearly bold — the cup doesn't whisper, it speaks."],
+      [5, "Heavy and full — assam, dark oolongs, deep-roast at strength."],
+    ],
   },
   woody: { summary: "Aged-tea, roasted-oolong character.", body: "Pu-erh, hojicha, lapsang, valerian, vanilla bean." },
   wood: { summary: "Direct timber-and-bark register.", body: "Aged teas, root-based herbals." },
@@ -244,8 +322,24 @@ export const FLAVOR_DESCRIPTIONS = {
   dark: { summary: "Heavy, low-pitched register.", body: "Pu-erh, deeply roasted oolongs." },
 
   // ── Spicy family ──
-  spicy: { summary: "Pantry warmth — peppery, woody, aromatic.", body: "Cinnamon, cardamom, ginger, cloves, black pepper, tulsi." },
-  spiced: { summary: "The chai cluster — warm-spice register.", body: "Cinnamon, cardamom, ginger, cloves, black pepper." },
+  spicy: {
+    summary: "Pantry warmth — peppery, woody, aromatic.",
+    body: "Cinnamon, cardamom, ginger, cloves, black pepper, tulsi.",
+    ladder: [
+      [1, "A faint spice-edge — pantry-warm at the back."],
+      [3, "Clearly spiced — cinnamon and cardamom forward."],
+      [5, "Pantry-on-fire — full chai with ginger and clove at strength."],
+    ],
+  },
+  spiced: {
+    summary: "The chai cluster — warm-spice register.",
+    body: "Cinnamon, cardamom, ginger, cloves, black pepper.",
+    ladder: [
+      [1, "A faint spice-edge — pantry-warm at the back."],
+      [3, "Clearly spiced — cinnamon and cardamom forward."],
+      [5, "Pantry-on-fire — full chai with ginger and clove at strength."],
+    ],
+  },
   pungent: { summary: "Sharp aromatic heat.", body: "Black pepper, ginger, clove, valerian." },
   warm: { summary: "Pantry-warm aromatics — the cinnamon-cardamom register.", body: "Spice family; also rooibos, vanilla." },
   numbing: { summary: "Eugenol's tongue-tingling anesthetic.", body: "Cloves' signature; small amounts of black pepper." },
@@ -261,7 +355,15 @@ export const FLAVOR_DESCRIPTIONS = {
   mint: { summary: "Same as minty — cool aromatic register.", body: "Peppermint, spearmint, lemon balm's mint family edge." },
   cool: { summary: "Mouthfeel cooling — TRPM8 activation from menthol.", body: "Peppermint, lavender, eucalyptus." },
   cooling: { summary: "Refreshing, clarifying register.", body: "Both mouthfeel (menthol) and felt-temperature effect — they often co-occur." },
-  fresh: { summary: "Just-picked-greens register.", body: "Sencha, lemongrass, dandelion leaf." },
+  fresh: {
+    summary: "Just-picked-greens register; cool, clarifying, citrus-or-mint forward.",
+    body: "Sencha, lemongrass, dandelion leaf, peppermint, citrus peels — the lifting/clarifying cluster.",
+    ladder: [
+      [1, "A faint cool-lift — easy to overlook."],
+      [3, "Clearly fresh — citrus and mint forward."],
+      [5, "Cooling sweep — peppermint or strong citrus at peak."],
+    ],
+  },
 
   // ── Mouthfeel ──
   brisk: { summary: "Lively, refreshing finish.", body: "Black teas (Assam, Ceylon) and well-made greens." },
