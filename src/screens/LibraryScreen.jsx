@@ -61,10 +61,10 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
   // the selected family keys via FAMILY_BY_FLAVOR. Same chip set as
   // the Recipes screen so the two surfaces share filter vocabulary.
   const [flavorFamilies, setFlavorFamilies] = useState([]);
-  // "More filters" disclosure — only used on the Cabinet surface
-  // (forcePantryOnly). Cabinet's at-rest state stays compact (search
-  // + category chips); Herbanium keeps the full filter strip flat
-  // because browsing is the whole point of that surface.
+  // "More filters" disclosure — applied on both Cabinet and Herbanium
+  // surfaces. The default at-rest layout (search + category chips)
+  // covers the most common browse intent; caffeine, effect, and flavor
+  // narrow further only when the user wants to dig in.
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const toggleFlavorFamily = (fam) =>
     setFlavorFamilies(prev => prev.includes(fam)
@@ -376,11 +376,8 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
 
             const subFilterRows = [caffeineRow, effectRow, flavorRow];
 
-            if (!forcePantryOnly) {
-              return subFilterRows;
-            }
-
-            // Cabinet — collapse behind disclosure with active-count badge.
+            // Disclosure applies on both Cabinet and Herbanium so the
+            // filter strip lands compact at rest on either surface.
             const activeCount =
               (caffeineFilter !== "any" ? 1 : 0)
               + (effectFilter !== "any" ? 1 : 0)
