@@ -263,9 +263,9 @@ export const BestiaryView = ({
           icon={<Sprig size={18} c={theme.sageDeep} />}
           title="Bestiary"
           body={<>
-            A side game in the kettle — earn elementals as you brew
-            and write. Not your thing? Disable under{" "}
-            <strong style={{ color: theme.terra }}>Profile → Preferences</strong>.
+            A fun side game — collect elementals drawn from your mood
+            arc and brewing history. Entirely optional; turn it off
+            under <strong style={{ color: theme.terra }}>Profile → Preferences</strong>.
           </>}
           onDismiss={dismissBestiaryHint}
         />
@@ -325,10 +325,11 @@ export const BestiaryView = ({
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
         color: theme.ash, lineHeight: 1.45, marginBottom: 12,
       }}>
-        Your field notebook of elementals — engage with the kettle in
-        different ways and earn a specimen to log. Tap{" "}
+        A fun side game — elementals find you based on your mood
+        history and brewing patterns. Tap{" "}
         <em style={{ color: theme.terra, fontStyle: "normal" }}>Log</em>{" "}
-        to observe the next one waiting and enter it into the bestiary.
+        to observe the next one waiting. Not for you? Turn it off in
+        <em style={{ color: theme.terra, fontStyle: "normal" }}> Profile → Preferences</em>.
       </div>
 
       {omenShown && (
