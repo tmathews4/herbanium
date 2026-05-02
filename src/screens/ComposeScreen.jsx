@@ -1818,10 +1818,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             placeholder="name your blend"
             maxLength={48}
             style={{
-              fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-              background: "transparent", border: "none",
-              borderBottom: `1px solid ${theme.terra}`,
-              padding: "4px 2px", outline: "none",
+              width: "100%", boxSizing: "border-box",
+              fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+              background: "rgba(var(--hi-rgb),0.05)",
+              border: `1px dashed ${theme.rule}`, borderRadius: 8,
+              padding: "10px 12px", outline: "none",
             }}
           />
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>

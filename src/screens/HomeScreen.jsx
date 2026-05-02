@@ -701,16 +701,16 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   return (
     <div style={{
       marginBottom: 14, padding: "12px 14px",
-      borderRadius: 10,
-      background: "rgba(165, 120, 54, 0.07)",
-      border: `1px solid ${theme.ochre}`,
+      borderRadius: "0 6px 6px 0",
+      background: "rgba(176, 84, 47, 0.05)",
+      borderLeft: `2px solid ${theme.terra}`,
       display: "flex", flexDirection: "column", gap: 10,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: theme.ochre, marginBottom: 4,
+            textTransform: "uppercase", color: theme.terra, marginBottom: 4,
           }}>
             How did it land?
           </div>
