@@ -66,10 +66,18 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
         : `${formatTsp(tsp)} leaf`)
     : null;
   const pct = Math.min(100, (mg / CAFFEINE_MAX_MG) * 100);
-  const past = mg >= CAFFEINE_WARN_MG;
-  const inCaution = mg >= CAFFEINE_CAUTION_MG && !past;
-  const fillColor = past ? "#B0542F" : (inCaution ? "#C37959" : "rgba(176,84,47,0.55)");
-  const labelColor = past ? "#B0542F" : theme.inkSoft;
+  // Three-tier read at the warning line: exactly AT the threshold
+  // is "right on the edge" — softer rose tone, no ⚠, small note —
+  // while >threshold flips to the full terra+⚠ warning. Lets a cup
+  // that lands at the limit feel like a deliberate choice rather
+  // than a violation, and reserves the alarm for actual overshoot.
+  const past = mg > CAFFEINE_WARN_MG;
+  const atEdge = mg === CAFFEINE_WARN_MG;
+  const inCaution = mg >= CAFFEINE_CAUTION_MG && !past && !atEdge;
+  const fillColor = past
+    ? "#B0542F"
+    : (atEdge ? "#C37959" : (inCaution ? "#C37959" : "rgba(176,84,47,0.55)"));
+  const labelColor = past ? "#B0542F" : (atEdge ? "#C37959" : theme.inkSoft);
   return (
     <div style={{
       display: "flex", flexDirection: "column", gap: 6,
@@ -140,10 +148,18 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           position: "absolute",
           left: `${(CAFFEINE_WARN_MG / CAFFEINE_MAX_MG) * 100}%`,
           transform: "translateX(-50%)",
-          color: past ? "#B0542F" : theme.ash,
+          color: past ? "#B0542F" : (atEdge ? "#C37959" : theme.ash),
         }}>too much</span>
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
+      {atEdge && (
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: "#C37959", lineHeight: 1.4, marginTop: 2,
+        }}>
+          right at the edge — a deliberate strong cup, but one more part and it tips over.
+        </div>
+      )}
     </div>
   );
 };
