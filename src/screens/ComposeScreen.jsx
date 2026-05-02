@@ -1347,10 +1347,16 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 <button key={key} onClick={() => setFilter(key)} style={{
                   fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
                   padding: "3px 9px", borderRadius: 999,
-                  border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
-                  background: active ? theme.ink : "transparent",
-                  color: active ? theme.cream : theme.ash,
+                  // Inactive chips sit on a faint card wash + slightly
+                  // stronger rule so they read as distinct surfaces
+                  // against the dark-mode background, where transparent
+                  // chips were melting into the page. Active stays the
+                  // solid ink fill so the picked state still pops.
+                  border: `1px solid ${active ? theme.ink : theme.rule}`,
+                  background: active ? theme.ink : "rgba(var(--hi-rgb), 0.05)",
+                  color: active ? theme.cream : theme.inkSoft,
                   cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                  boxShadow: active ? "none" : "0 1px 2px rgba(0,0,0,0.04)",
                 }}>{label}</button>
               );
             }}
