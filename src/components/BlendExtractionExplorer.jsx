@@ -160,6 +160,11 @@ export const BlendExtractionExplorer = ({
   experimental = false,     // user-built blend — every warning fires
                             // immediately, no baseline-at-rest suppression.
                             // The user is exploring; spell out what's wrong.
+  isHouse = false,          // Herbanium house signature — a research-
+                            // driven recipe tuned with deliberate stretch.
+                            // Used alongside isTraditional to soften the
+                            // warning band's tone: warnings are reframed
+                            // as character notes the recipe expects.
   isTraditional = false,    // genuine cultural tradition (chai, sencha…).
                             // Required for the tradition-over-literature
                             // notice to fire; experimentals and synths
@@ -789,8 +794,30 @@ export const BlendExtractionExplorer = ({
             </>
           );
         };
+        // Tradition / house preface — when warnings fire on a curated
+        // traditional or a Herbanium house signature, prepend a short
+        // italic note reframing them as character notes the recipe
+        // expects. The model's bitter/tannic ladder is tuned for a
+        // generic palate; in chai or yancha the push is the point,
+        // and the user shouldn't read the warning band as "this cup
+        // is broken." The warnings still render so the user sees
+        // WHY the tradition stretches the leaf.
+        const showTraditionPreface = isTraditional || isHouse;
+        const prefaceText = isTraditional
+          ? "The stretch is the tradition — read these as character notes the cup expects, not flaws to fix."
+          : "This house recipe is tuned with the stretch baked in — these are the trade-offs that make it work.";
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 14 }}>
+            {showTraditionPreface && (
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                color: theme.sageDeep, lineHeight: 1.4,
+                paddingBottom: 4,
+                borderBottom: `1px dashed ${theme.ruleSoft}`,
+              }}>
+                {prefaceText}
+              </div>
+            )}
             {filtered.map((w, i) => {
               const accent = w.kind === "ceiling" ? theme.terra
                 : w.kind === "tannin" ? theme.terra

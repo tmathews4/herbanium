@@ -577,6 +577,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
               declaredEffects={b.effects}
               curated
               isTraditional={!!b.tradition}
+              isHouse={!!b.house}
             />
             {b.ml && (
               <div style={{
