@@ -1150,22 +1150,40 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // most here.
   const rcSafetyFlags = checkIngredientInteractions(reverseIngs);
 
-  // For the picker: would adding this ingredient conflict with ANY ingredient
-  // already in the pot? The rule: flag the candidate if there exists at least
-  // one pot member whose temp range has zero overlap with the candidate's.
-  // This is stricter as the pot grows — more pairs to check, more chances
-  // of a conflict — which matches user intuition ("more stuff in = more risk").
-  const tempConflictsWithPot = (candidateId) => {
-    if (reverseIngs.length === 0) return false;
-    const candidate = INGREDIENTS[candidateId];
-    if (!candidate) return false;
-    const [cLo, cHi] = candidate.tempC;
-    return reverseIngs.some(id => {
-      const [pLo, pHi] = INGREDIENTS[id].tempC;
-      // Ranges [cLo,cHi] and [pLo,pHi] overlap iff max(cLo,pLo) <= min(cHi,pHi).
-      // So they fail to overlap when max(cLo,pLo) > min(cHi,pHi).
-      return Math.max(cLo, pLo) > Math.min(cHi, pHi);
-    });
+  // Picker compatibility scoring — for each candidate, how well does
+  // it fit the blend's CURRENT brewing-window intersection on both
+  // axes (temp + time)? The blend's intersection is the band where
+  // every existing ingredient is at home; adding a candidate that
+  // fits in that band keeps the blend cohesive. Score:
+  //   2 — both temp and time overlap (green: full overlap)
+  //   1 — only one axis overlaps      (yellow: partial)
+  //   0 — neither axis overlaps        (red: poor fit)
+  //   null — pot is empty, no comparison possible (neutral)
+  // Ranges [a,b] and [c,d] overlap iff max(a,c) <= min(b,d).
+  const blendOverlap = React.useMemo(() => {
+    if (reverseIngs.length === 0) return null;
+    let tLo = -Infinity, tHi = Infinity;
+    let sLo = -Infinity, sHi = Infinity;
+    for (const id of reverseIngs) {
+      const ing = INGREDIENTS[id];
+      if (!ing) continue;
+      tLo = Math.max(tLo, ing.tempC[0]);
+      tHi = Math.min(tHi, ing.tempC[1]);
+      sLo = Math.max(sLo, ing.timeS[0]);
+      sHi = Math.min(sHi, ing.timeS[1]);
+    }
+    return { tLo, tHi, sLo, sHi };
+  }, [reverseIngs]);
+
+  const overlapScore = (candidateId) => {
+    if (!blendOverlap) return null;
+    const c = INGREDIENTS[candidateId];
+    if (!c) return null;
+    const tempOK = Math.max(c.tempC[0], blendOverlap.tLo)
+                <= Math.min(c.tempC[1], blendOverlap.tHi);
+    const timeOK = Math.max(c.timeS[0], blendOverlap.sLo)
+                <= Math.min(c.timeS[1], blendOverlap.sHi);
+    return (tempOK ? 1 : 0) + (timeOK ? 1 : 0);
   };
 
   return (
@@ -1408,19 +1426,39 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   : ing.category === "spice"    ? theme.terra
                   : ing.category === "adaptogen" ? theme.plum
                   : theme.ash;
-                const isCaution = tempConflictsWithPot(id);
+                // Compatibility score with the current pot's brewing
+                // window: 2 = full overlap (temp + time), 1 = partial,
+                // 0 = neither — null when the pot is empty. Drives the
+                // chip's border + tinted background so the user can
+                // see at a glance which candidates fit cleanly into
+                // what's already in the pot.
+                const score = overlapScore(id);
+                const fitColor =
+                  score === 2 ? theme.sageDeep
+                  : score === 1 ? theme.ochre
+                  : score === 0 ? theme.terra
+                  : theme.rule;
+                const fitBg =
+                  score === 2 ? "rgba(125,140,108,0.07)"
+                  : score === 1 ? "rgba(165,120,54,0.07)"
+                  : score === 0 ? "rgba(176,84,47,0.07)"
+                  : "transparent";
+                const fitTitle =
+                  score === 2 ? "Full overlap with the pot's brew window"
+                  : score === 1 ? "Matches the pot on temp or time, not both"
+                  : score === 0 ? "Doesn't share a brew window with the pot"
+                  : undefined;
                 return (
                   <button
                     key={id}
                     onClick={() => setReverseIngs([...reverseIngs, id])}
-                    title={isCaution ? "Brewing temp doesn't overlap with the current pot" : undefined}
+                    title={fitTitle}
                     style={{
                       fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.02em",
                       padding: "5px 10px 5px 8px", borderRadius: 999,
-                      border: isCaution ? `1px dashed ${theme.ochre}` : `1px solid ${theme.rule}`,
-                      background: "transparent",
-                      color: isCaution ? theme.ochre : theme.inkSoft,
-                      opacity: isCaution ? 0.75 : 1,
+                      border: `1px solid ${fitColor}`,
+                      background: fitBg,
+                      color: score === 0 ? theme.terra : theme.inkSoft,
                       cursor: "pointer",
                       display: "inline-flex", alignItems: "center", gap: 6,
                       transition: "all .15s ease",
