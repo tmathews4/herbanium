@@ -255,9 +255,9 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
         <div style={{ marginTop: 6, display: "flex", gap: 16, justifyContent: "center" }}>
           <Stat label="Cups"      value={cupCount}    onClick={() => go("shelf", { mode: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
-          <Stat label="Cabinet"   value={shelfCount}  onClick={() => go("shelf", { mode: "pantry" })} />
+          <Stat label="Cabinet"   value={shelfCount}  onClick={() => go("apothecary", { mode: "compendium" })} />
           {!elementalsDisabled && (
-            <Stat label="Bestiary"  value={earnedCount + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} onClick={() => go("shelf", { mode: "journal", journalSubTab: "bestiary" })} />
+            <Stat label="Bestiary"  value={earnedCount + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} onClick={() => go("shelf", { mode: "bestiary" })} />
           )}
         </div>
       </div>

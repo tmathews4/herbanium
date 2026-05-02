@@ -98,7 +98,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // "pantry" (Cabinet) was retired; pantry management is now a
     // toggle inside the Apothecary → Herbanium reference. Stale
     // persisted state lands back on the section's default.
-    const shelfModes      = new Set(["recipes", "journal"]);
+    // Bestiary was previously a sub-toggle inside Journal; promoted to
+    // a top-level Notebook sub-tab so it surfaces in the dock and gets
+    // the discoverability the feature deserves.
+    const shelfModes      = new Set(["recipes", "journal", "bestiary"]);
     if (section === "apothecary" && !apothecaryModes.has(mode)) {
       setMode("reverse");
     } else if (section === "shelf" && !shelfModes.has(mode)) {
@@ -131,13 +134,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Secondary toggle inside the Journal sub-tab — flips between the
   // brew/entry timeline and the elemental Bestiary that used to sit
   // as its own primary tab.
-  const [journalSubTab, setJournalSubTab] = useState("journal"); // journal | bestiary
-  // Switching between Journal and Bestiary inside the journal mode
-  // also dismisses an open composer — the writing surface belongs
-  // to the journal sub-tab and shouldn't bleed across.
-  React.useEffect(() => {
-    setJournalComposerOpen(false);
-  }, [journalSubTab]);
   // Recipes-tab "More filters" disclosure state. Default collapsed so the
   // filter strip lands quiet (collection row + cabinet toggle). Expands
   // to reveal mood + flavor rows when the user wants to narrow further.
@@ -165,7 +161,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     if (composeView.section && composeView.section !== section) return;
     if (composeView.mode) setMode(composeView.mode);
     if (composeView.journalFilter) setJournalFilter(composeView.journalFilter);
-    if (composeView.journalSubTab) setJournalSubTab(composeView.journalSubTab);
+    // Legacy deep-link compat — old links carried journalSubTab "bestiary"
+    // when Bestiary was nested inside Journal. Bestiary is now its own
+    // top-level Notebook sub-mode, so route the deep-link there instead.
+    if (composeView.journalSubTab === "bestiary") setMode("bestiary");
   }, [composeView?.at]);
 
   return (
@@ -175,28 +174,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
-      {mode === "journal" && (
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr",
-          border: `1px solid ${theme.rule}`, borderRadius: 10, overflow: "hidden",
-          marginBottom: 14, background: theme.cream,
-        }}>
-          {[
-            ["journal",  "Journal"],
-            ["bestiary", "Bestiary"],
-          ].map(([k, label]) => (
-            <button key={k} onClick={() => setJournalSubTab(k)} style={{
-              fontFamily: ff.serif, fontSize: 13, fontStyle: "italic",
-              padding: "9px 4px", cursor: "pointer",
-              background: journalSubTab === k ? theme.terra : "transparent",
-              color: journalSubTab === k ? theme.cream : theme.inkSoft,
-              border: "none",
-            }}>{label}</button>
-          ))}
-        </div>
-      )}
-
-      {mode === "journal" && journalSubTab === "bestiary" && (
+      {mode === "bestiary" && (
         <BestiaryView
           profile={profile}
           sessions={sessions}
@@ -217,7 +195,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         />
       )}
 
-      {mode === "journal" && journalSubTab === "journal" && (() => {
+      {mode === "journal" && (() => {
         // Merge cup sessions and free-form journal entries by
         // timestamp so the journal reads as a single chronology.
         // Sessions stamp ts off their numeric id (sess-<ts>); entries
@@ -978,7 +956,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 
   const isApothecary = section === "apothecary";
   const Icon  = isApothecary ? Sprig : Pencil;
-  const title = isApothecary ? "Apothecary" : "Shelf";
+  const title = isApothecary ? "Apothecary" : "Notebook";
   const items = isApothecary
     ? [
         ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
@@ -987,6 +965,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
         ["Journal", "Cup logs, free-form entries, and mood arcs. Your tea-meets-mood diary."],
+        ["Bestiary", "Elementals you've earned and the wild ones drawn to your cups. Your apothecary's familiars."],
       ];
 
   return (
