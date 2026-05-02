@@ -152,24 +152,57 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
         }}>too much</span>
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
-      {atEdge && (
-        <div style={{
-          marginTop: 8,
-          padding: "8px 10px 8px 12px",
-          borderLeft: `2px solid #A57836`,
-          background: "rgba(165, 120, 54, 0.07)",
-          borderRadius: "0 6px 6px 0",
-          fontFamily: ff.serif, fontSize: 12.5,
-          color: theme.ink, lineHeight: 1.45,
-        }}>
-          <span style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-            textTransform: "uppercase", color: "#A57836",
-            marginRight: 8, fontWeight: 600,
-          }}>at the edge</span>
-          a deliberate strong cup — one more part and it tips over.
-        </div>
-      )}
+      {/* State-aware advisory band. Three flavors share one shape:
+          - gentle (< 60 mg): sage/green — well below the line
+          - at edge (= 120 mg): ochre/yellow — right on the line
+          - over (> 120 mg): terra/red — past the line, alarm
+          Caution band (60-119) gets no advisory — the bar's color
+          already carries the "approaching" read; an extra note
+          there would feel naggy on every normal strong cup. */}
+      {(() => {
+        const gentle = mg > 0 && mg < CAFFEINE_CAUTION_MG;
+        const advisory = past
+          ? {
+              accent: "#B0542F",
+              bg: "rgba(176, 84, 47, 0.07)",
+              tag: "over the line",
+              body: "likely to read wired or jittery for caffeine-sensitive bodies.",
+            }
+          : atEdge
+          ? {
+              accent: "#A57836",
+              bg: "rgba(165, 120, 54, 0.07)",
+              tag: "at the edge",
+              body: "a deliberate strong cup — one more part and it tips over.",
+            }
+          : gentle
+          ? {
+              accent: "#627C5C",  // sageDeep
+              bg: "rgba(98, 124, 92, 0.08)",
+              tag: "gentle pour",
+              body: "well under the heads-up line — easy on the system.",
+            }
+          : null;
+        if (!advisory) return null;
+        return (
+          <div style={{
+            marginTop: 8,
+            padding: "8px 10px 8px 12px",
+            borderLeft: `2px solid ${advisory.accent}`,
+            background: advisory.bg,
+            borderRadius: "0 6px 6px 0",
+            fontFamily: ff.serif, fontSize: 12.5,
+            color: theme.ink, lineHeight: 1.45,
+          }}>
+            <span style={{
+              fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: advisory.accent,
+              marginRight: 8, fontWeight: 600,
+            }}>{advisory.tag}</span>
+            {advisory.body}
+          </div>
+        );
+      })()}
     </div>
   );
 };
