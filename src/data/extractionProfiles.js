@@ -291,27 +291,83 @@ export const EXTRACTION_PROFILES = {
   ],
 
   gunpowder: [
-    { tempC: 80,  timeS: 90,  flavors: ["toasted", "vegetal", "brisk"],
+    // Tightly-rolled leaf — releases gradually. The cooler/shorter
+    // anchor was previously the floor and read as "barely there"
+    // because position-based strengths gave only toasted 4/vegetal 3.
+    // Bumped to explicit strengths and added a 75°C anchor so even
+    // Maghrebi-style cool first pours carry recognizable gunpowder
+    // identity (toasted-mineral with brisk edge), not whisper-light
+    // background. Real gunpowder does extract at 75-80°C — it just
+    // needs the time to unfurl.
+    { tempC: 75,  timeS: 90,
+      flavorStrengths: [
+        ["toasted", 2.0], ["vegetal", 1.4], ["brisk", 1.0],
+        ["bold", 0.8], ["mineral", 0.6],
+      ],
       effects: [["focus", 2], ["energy", 2]],
+      character: "Cool first pour — gunpowder unfurling, toasted-mineral lead with a quiet brisk edge." },
+    { tempC: 80,  timeS: 120,
+      flavorStrengths: [
+        ["toasted", 2.6], ["bold", 2.0], ["vegetal", 1.8],
+        ["mineral", 1.4], ["brisk", 1.2],
+      ],
+      effects: [["focus", 2.5], ["energy", 2.5]],
       character: "Light gunpowder — toasted and clean, approachable." },
-    { tempC: 85,  timeS: 135, flavors: ["toasted", "bold", "vegetal", "mineral", "brisk"],
+    { tempC: 85,  timeS: 150,
+      flavorStrengths: [
+        ["toasted", 3.0], ["bold", 2.8], ["vegetal", 2.0],
+        ["mineral", 1.8], ["brisk", 1.6],
+      ],
       effects: [["focus", 3], ["energy", 3], ["comfort", 2]],
       character: "The standard cup. Full toasted-mineral character, bold body, brisk finish." },
-    { tempC: 90,  timeS: 180, flavors: ["bold", "toasted", "vegetal", "mineral", "brisk", "astringent"],
+    { tempC: 90,  timeS: 180,
+      flavorStrengths: [
+        ["bold", 3.2], ["toasted", 3.0], ["astringent", 2.4],
+        ["vegetal", 2.0], ["mineral", 1.8], ["brisk", 1.6],
+      ],
       effects: [["focus", 3], ["energy", 4], ["comfort", 2], ["bitterness", 2]],
       character: "Strong and tannic. Toast deepens; drinks more assertive." },
   ],
 
   hojicha: [
-    { tempC: 95,  timeS: 30,  flavors: ["roasted", "warm", "woody"],
+    // Already-roasted leaf — character is largely baked-in, not
+    // pulled by water. Hotter brewing barely intensifies (the
+    // roast did the work in the kiln), so the profile pins
+    // explicit strengths and PLATEAUS at the top end rather than
+    // letting extrapolation amplify roast/caramel/nutty into
+    // unrealistic 5.0/4.0/2.0 readings at 105°C+. The previous
+    // profile used auto-position strengths and ran away because
+    // there was nothing past 100°C × 60s holding the curve flat.
+    { tempC: 90,  timeS: 30,
+      flavorStrengths: [
+        ["roasted", 2.6], ["warm", 1.6], ["woody", 0.8],
+      ],
       effects: [["comfort", 2], ["digestive", 2]],
       character: "Quick hojicha — roasted warmth, minimal caffeine." },
-    { tempC: 98,  timeS: 45,  flavors: ["roasted", "caramel", "warm", "nutty", "toasted", "sweet", "woody"],
+    { tempC: 95,  timeS: 45,
+      flavorStrengths: [
+        ["roasted", 3.4], ["caramel", 2.2], ["warm", 1.8],
+        ["nutty", 1.4], ["toasted", 1.2], ["sweet", 0.9],
+        ["woody", 0.8],
+      ],
+      effects: [["comfort", 2.6], ["digestive", 2.6]],
+      character: "Approaching the standard cup — caramel-toast leading, body filling in." },
+    { tempC: 98,  timeS: 60,
+      flavorStrengths: [
+        ["roasted", 3.8], ["caramel", 2.6], ["warm", 2.0],
+        ["nutty", 1.6], ["toasted", 1.4], ["sweet", 1.0],
+        ["woody", 0.9],
+      ],
       effects: [["comfort", 3], ["digestive", 3]],
       character: "The standard cup. Full hojicha — caramel-toasted, warm and sweet, the evening-safe green tea." },
-    { tempC: 100, timeS: 60,  flavors: ["roasted", "caramel", "warm", "nutty", "toasted", "sweet", "woody"],
+    { tempC: 105, timeS: 120,
+      flavorStrengths: [
+        ["roasted", 4.0], ["caramel", 2.8], ["warm", 2.1],
+        ["nutty", 1.7], ["toasted", 1.5], ["sweet", 1.0],
+        ["woody", 1.0],
+      ],
       effects: [["comfort", 3], ["digestive", 3]],
-      character: "Fuller extraction. Toast notes deepen; stays gentle." },
+      character: "Pushed brew — character barely moves, the roast already did the work in the kiln." },
   ],
 
   // Dragonwell — non-monotonic Maillard peak. Pan-fired chestnut /
