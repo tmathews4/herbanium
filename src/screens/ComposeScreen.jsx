@@ -95,7 +95,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // covers that flow. Any deep-link or stale persisted state with
     // "forward" gets snapped back to "reverse" by the section guard.
     const apothecaryModes = new Set(["reverse", "compendium"]);
-    const shelfModes      = new Set(["recipes", "journal", "pantry"]);
+    // "pantry" (Cabinet) was retired; pantry management is now a
+    // toggle inside the Apothecary → Herbanium reference. Stale
+    // persisted state lands back on the section's default.
+    const shelfModes      = new Set(["recipes", "journal"]);
     if (section === "apothecary" && !apothecaryModes.has(mode)) {
       setMode("reverse");
     } else if (section === "shelf" && !shelfModes.has(mode)) {
@@ -124,7 +127,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Mode universe per section (state lives in App so the bottom
   // TabBar can render the sub-tabs as part of the same dock):
   //   apothecary: reverse (Blend) | compendium (Herbanium)
-  //   shelf:      recipes | journal | pantry (bestiary nested under journal)
+  //   shelf:      recipes | journal (bestiary nested under journal)
   // Secondary toggle inside the Journal sub-tab — flips between the
   // brew/entry timeline and the elemental Bestiary that used to sit
   // as its own primary tab.
@@ -943,29 +946,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           my pantry" filter is hidden here; that filter is reserved for
           the Shelf · Pantry surface. Compendium always shows every
           ingredient at full presence. */}
+      {/* Apothecary · Herbanium — full ingredient reference and the
+          home for pantry management. The "only what's in my cabinet"
+          toggle lives here so the same surface flips between "browse
+          the catalog" and "review what I have." */}
       {mode === "compendium" && (
         <LibraryScreen
           go={go}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          hideHeader
-          hidePantryToggle
-        />
-      )}
-
-      {/* Shelf · Cabinet — strictly the user's stock list. The full
-          reference and "browse-to-add" flow lives in Apothecary →
-          Herbanium; the Cabinet keeps a tighter mental model of "what
-          I keep at home." forcePantryOnly locks the filter on and
-          hides the toggle; LibraryScreen renders a "browse the
-          herbanium to add" CTA at the top instead. */}
-      {mode === "pantry" && (
-        <LibraryScreen
-          go={go}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
-          forcePantryOnly
-          hidePantryToggle
           hideHeader
           pantryHintShown={pantryHintShown}
           dismissPantryHint={dismissPantryHint}
@@ -997,7 +986,6 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
       ]
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
-        ["Cabinet", "Ingredients you actually keep at home. Filter blends to use only what's in stock."],
         ["Journal", "Cup logs, free-form entries, and mood arcs. Your tea-meets-mood diary."],
       ];
 

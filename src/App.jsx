@@ -53,7 +53,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   const subTabs = tab === "apothecary"
     ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["journal", "Journal"], ["pantry", "Cabinet"]]
+      ? [["recipes", "Recipes"], ["journal", "Journal"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode
@@ -646,6 +646,13 @@ export default function App() {
     if (apothecaryMode === "forward") setApothecaryMode("reverse");
   }, [apothecaryMode]);
   const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");
+  // Migrate users who had Cabinet (mode "pantry") persisted from
+  // before it was retired. Cabinet was just LibraryScreen with
+  // forcePantryOnly; that capability is now a toggle inside the
+  // Apothecary → Herbanium reference itself.
+  React.useEffect(() => {
+    if (shelfMode === "pantry") setShelfMode("recipes");
+  }, [shelfMode]);
 
   // Tab navigation history. Every tab change pushes the previous
   // tab onto the stack so the back button can return to whatever

@@ -49,10 +49,10 @@ const categoryColor = (cat, theme) => {
   }
 };
 
-export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, dismissPantryHint, forcePantryOnly = false, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
+export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, dismissPantryHint, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
-  const [pantryOnly, setPantryOnly] = useState(forcePantryOnly || defaultPantryOnly);
+  const [pantryOnly, setPantryOnly] = useState(defaultPantryOnly);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
@@ -70,18 +70,12 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
     setFlavorFamilies(prev => prev.includes(fam)
       ? prev.filter(x => x !== fam)
       : [...prev, fam]);
-  // Remove-from-cabinet confirmation. Cabinet is the only place
-  // where the toggle reads as "remove" rather than "add" (the X
-  // icon is shown only in forcePantryOnly mode), and adding back
-  // requires walking to the Herbanium — so a quick "are you sure?"
-  // gate keeps an accidental tap from costing the user a trip.
+  // Remove-from-cabinet confirmation. When pantryOnly is on the toggle
+  // reads as "remove" rather than "add" (the X icon replaces the check),
+  // and pulling something out of the cabinet by accident means walking
+  // back to the full herbanium to find it again. The "are you sure?"
+  // gate keeps a stray tap from costing the user that trip.
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
-
-  // Force pantryOnly from parent when this view is hosted inside the
-  // Shelf · Pantry sub-tab, where the toggle would be redundant.
-  React.useEffect(() => {
-    if (forcePantryOnly) setPantryOnly(true);
-  }, [forcePantryOnly]);
 
   // All ingredients, filtered then sorted alphabetically by display name.
   const shelfItems = Object.entries(INGREDIENTS)
@@ -143,50 +137,9 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
       )}
 
       <>
-        {/* Browse-the-herbanium CTA — only on the Cabinet surface
-            (forcePantryOnly). Cabinet is now strictly your stock list;
-            adding new ingredients happens by walking through the
-            full reference (Apothecary → Herbanium) and tapping the
-            pantry plus on a card there. The CTA is a quiet outline
-            so it sits as a doorway, not a primary action. */}
-        {forcePantryOnly && (
-          <button
-            onClick={() => go("apothecary", { mode: "compendium" })}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(125,140,108,0.06)";
-              e.currentTarget.style.borderColor = theme.sage;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.borderColor = theme.ruleSoft;
-            }}
-            style={{
-              width: "100%",
-              padding: "9px 14px",
-              marginBottom: 10,
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: theme.inkSoft,
-              background: "transparent",
-              border: `1px solid ${theme.ruleSoft}`,
-              borderRadius: 10,
-              cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-              transition: "background 0.18s ease, border-color 0.18s ease",
-            }}
-          >
-            <svg width="14" height="11" viewBox="0 0 18 14" fill="none" aria-hidden>
-              <path d="M1.5 3 C 3.5 2.2, 6 2.2, 9 3 C 12 2.2, 14.5 2.2, 16.5 3
-                       L 16.5 11.5 C 14.5 10.7, 12 10.7, 9 11.5
-                       C 6 10.7, 3.5 10.7, 1.5 11.5 Z"
-                stroke={theme.sageDeep} strokeWidth="1" strokeLinejoin="round" fill="none" />
-              <path d="M9 3 L 9 11.5" stroke={theme.sageDeep} strokeWidth="1" strokeLinecap="round" />
-            </svg>
-            browse the herbanium to add
-          </button>
-        )}
-
-        {/* Search input */}
+        {/* Search input — placeholder reflects whether the user is
+            browsing the full herbanium or filtering down to their own
+            cabinet via the toggle below. */}
         <div style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 12px", borderRadius: 10,
@@ -198,7 +151,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             <input
               value={shelfSearch}
               onChange={(e) => setShelfSearch(e.target.value)}
-              placeholder={forcePantryOnly ? "search your cabinet…" : "search the herbanium…"}
+              placeholder={pantryOnly ? "search your cabinet…" : "search the herbanium…"}
               style={{
                 flex: 1, background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: shelfSearch ? "normal" : "italic",
@@ -276,7 +229,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
           )}
 
           {/* Sub-filter rows (caffeine / effect / flavor). On the
-              Cabinet surface (forcePantryOnly) these collapse behind
+              Cabinet (pantryOnly) view these collapse behind
               a "more filters" disclosure to match the Recipes page;
               on the Herbanium they stay flat because browsing the
               full reference benefits from seeing every axis at rest. */}
@@ -453,7 +406,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
               textTransform: "uppercase", color: theme.ash,
             }}>
-              {forcePantryOnly
+              {pantryOnly
                 ? `${shelfItems.length} in cabinet`
                 : (<>{shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span></>)
               }
@@ -462,7 +415,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
 
           {/* The catalog grid */}
           {shelfItems.length === 0 ? (
-            forcePantryOnly && pantryIds.size === 0 ? (
+            pantryOnly && pantryIds.size === 0 ? (
               <div style={{
                 marginTop: 8, padding: "24px 18px", borderRadius: 12,
                 border: `1px dashed ${theme.ruleSoft}`,
@@ -549,7 +502,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                         tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (forcePantryOnly && inPantry) {
+                          if (pantryOnly && inPantry) {
                             setConfirmRemoveId(id);
                           } else {
                             togglePantry(id);
@@ -559,7 +512,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (forcePantryOnly && inPantry) {
+                            if (pantryOnly && inPantry) {
                               setConfirmRemoveId(id);
                             } else {
                               togglePantry(id);
@@ -567,7 +520,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                           }
                         }}
                         title={
-                          forcePantryOnly && inPantry
+                          pantryOnly && inPantry
                             ? "remove from cabinet"
                             : inPantry
                               ? "in cabinet — tap to remove"
@@ -578,13 +531,13 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                         style={{
                           position: "absolute", top: 8, right: 8,
                           width: 24, height: 24, borderRadius: "50%",
-                          background: forcePantryOnly && inPantry
+                          background: pantryOnly && inPantry
                             ? "transparent"
                             : inPantry
                               ? theme.sage
                               : "transparent",
                           border: `1px solid ${
-                            forcePantryOnly && inPantry
+                            pantryOnly && inPantry
                               ? theme.terra
                               : inPantry
                                 ? theme.sage
@@ -595,7 +548,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                           transition: "background 0.18s ease, border-color 0.18s ease, transform 0.12s ease",
                         }}
                       >
-                        {forcePantryOnly && inPantry ? (
+                        {pantryOnly && inPantry ? (
                           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
                             <path
                               d="M2.5 2.5 L9.5 9.5 M9.5 2.5 L2.5 9.5"
@@ -673,11 +626,11 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               })}
             </div>
           )}
-          {/* Pantry-bottom CTA — when the user's looking at their pantry
-              (pantryOnly = true) and the toggle isn't forced on, drop a
-              clear button at the end of the list that flips the filter
-              off so the full ingredient library appears with + buttons. */}
-          {pantryOnly && !forcePantryOnly && (
+          {/* Pantry-bottom CTA — when the user's filtered down to their
+              cabinet, drop a clear button at the end of the list that
+              flips the filter off so the full herbanium appears with
+              the plus button on each card to add new ingredients. */}
+          {pantryOnly && (
             <button
               onClick={() => setPantryOnly(false)}
               style={{
@@ -689,7 +642,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                 border: `1px dashed ${theme.terra}`,
                 borderRadius: 10, cursor: "pointer",
               }}
-            >Add ingredients?</button>
+            >Browse the herbanium to add</button>
           )}
       </>
 
