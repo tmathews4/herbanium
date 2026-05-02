@@ -1045,6 +1045,40 @@ const TrackMap = ({
               {descriptionFor(selectedTrack).body}
             </div>
           )}
+          {/* 1/3/5 ladder — surfaces what the axis feels like at each
+              strength so a user reading "focus 4" knows what they
+              should expect from the cup at that level. Mirrors the
+              ladder rendered inside VocabInfoCard on detail pages,
+              kept compact here since this is the in-strip popup. */}
+          {Array.isArray(descriptionFor(selectedTrack).ladder)
+           && descriptionFor(selectedTrack).ladder.length > 0 && (
+            <div style={{
+              marginTop: 8, paddingTop: 6,
+              borderTop: `1px solid rgba(176,84,47,0.18)`,
+              display: "flex", flexDirection: "column", gap: 3,
+            }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.terra, opacity: 0.85,
+                marginBottom: 1,
+              }}>what it feels like</div>
+              {descriptionFor(selectedTrack).ladder.map(([level, text]) => (
+                <div key={level} style={{
+                  display: "flex", gap: 8, alignItems: "baseline",
+                  fontFamily: ff.serif, fontSize: 11.5, color: theme.inkSoft,
+                  lineHeight: 1.4,
+                }}>
+                  <span style={{
+                    flexShrink: 0,
+                    fontFamily: ff.mono, fontSize: 10,
+                    color: theme.terra, fontWeight: 600,
+                    minWidth: 12, textAlign: "right",
+                  }}>{level}</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {/* Contributors — for the flavor strip in family mode, list
               the specific notes the cup carries that rolled into this
               family. Only shows when there's more than one (a single

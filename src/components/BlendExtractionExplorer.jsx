@@ -692,6 +692,7 @@ export const BlendExtractionExplorer = ({
               const accent = w.kind === "ceiling" ? theme.terra
                 : w.kind === "tannin" ? theme.terra
                 : w.kind === "aromatic" ? theme.terra
+                : w.kind === "caffeine" ? theme.terra
                 : w.kind === "paradox" ? theme.sageDeep
                 : theme.ash;
               return (

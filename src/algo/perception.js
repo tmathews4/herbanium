@@ -453,6 +453,7 @@ export function buildWarnings({
   perceivedEffects = {},
   perceivedFlavors = {},
   paradoxTags = [],
+  caffeineMg = 0,
 } = {}) {
   const warnings = [];
 
@@ -549,6 +550,22 @@ export function buildWarnings({
   const sedativePressure = (perceivedEffects.sleepy || 0) + (perceivedEffects.calm || 0) * 0.5;
   if (sedativePressure >= 6) {
     warnings.push({ kind: "ceiling", text: "This stack of sedatives is at the ceiling — don't drive after." });
+  }
+
+  // Caffeine-load warning — high-caffeine cups can read jittery for
+  // sensitive bodies even when no axis is over-extracted. Fires when
+  // total caffeine clears 60mg AND the cup also expresses energy or
+  // focus strongly (the registers most associated with the adverse
+  // mirror — "wired" instead of "alert"). Healthy adults tolerate
+  // this fine; the warning is a heads-up for caffeine sensitivity,
+  // not a contraindication.
+  const energyHigh = (perceivedEffects.energy || 0) >= 4;
+  const focusHigh = (perceivedEffects.focus || 0) >= 4;
+  if (caffeineMg >= 60 && (energyHigh || focusHigh)) {
+    warnings.push({
+      kind: "caffeine",
+      text: `High caffeine load (~${Math.round(caffeineMg)}mg) — may read wired or jittery for caffeine-sensitive bodies.`,
+    });
   }
 
   for (const [a, b] of paradoxTags) {

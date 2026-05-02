@@ -1189,6 +1189,15 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   }
 
   const totalG = ingredients.reduce((s, { g }) => s + g, 0);
+  // Total caffeine in mg for the cup, weighted by per-ingredient
+  // grams. Used by the cup-level caffeine-load warning so a stack
+  // of caffeine-bearing leaves can flag "may read jittery" even
+  // when no axis is over-extracted.
+  const totalCaffeineMg = ingredients.reduce((sum, { id, g }) => {
+    const meta = INGREDIENTS[id];
+    if (!meta || !meta.caffeine) return sum;
+    return sum + meta.caffeine * (g || 0);
+  }, 0);
 
   // (1) Per-ingredient contributions. Falls back to flat ingredient
   // flavors/effects if no extraction profile exists for that id.
@@ -1556,6 +1565,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     perceivedEffects: perceivedEffectMap,
     perceivedFlavors: perceivedFlavorMap,
     paradoxTags,
+    caffeineMg: totalCaffeineMg,
   });
   // Traditionals at baseline also drop tannin/aromatic cup warnings —
   // the whole purpose of the tradition note is to acknowledge the
