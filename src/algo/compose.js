@@ -1211,11 +1211,24 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const timeEff = Math.max(0.5, Math.min(1.1, 0.4 + 0.6 * (timeS / Math.max(60, recTimeS))));
     return 0.5 * tempEff + 0.5 * timeEff;
   };
-  const totalCaffeineMg = ingredients.reduce((sum, { id, g }) => {
+  const rawCaffeineMg = ingredients.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
     if (!meta || !meta.caffeine) return sum;
     return sum + meta.caffeine * (g || 0) * caffeineExtractionFactor(meta);
   }, 0);
+  // Soft cap on cup-level caffeine. Past about 200 mg the linear
+  // grams×mg/g sum stops being physically honest — diffusion at
+  // high leaf:water ratios plateaus, and a single steep tops out
+  // around 80-90% of the total leaf pool no matter how much leaf
+  // you pile in. Roll the sum off toward an asymptote at 350 mg
+  // so the bar stays believable when a user drags ten ingredients
+  // to 9 parts each. Below 200 mg the cap is a no-op (real cups
+  // live there); above, tanh smoothly approaches the ceiling.
+  const SOFT_MG = 200;
+  const HARD_MG = 350;
+  const totalCaffeineMg = rawCaffeineMg <= SOFT_MG
+    ? rawCaffeineMg
+    : SOFT_MG + (HARD_MG - SOFT_MG) * Math.tanh((rawCaffeineMg - SOFT_MG) / (HARD_MG - SOFT_MG));
 
   // (1) Per-ingredient contributions. Falls back to flat ingredient
   // flavors/effects if no extraction profile exists for that id.
