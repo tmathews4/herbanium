@@ -868,8 +868,15 @@ export const BlendExtractionExplorer = ({
         // over-pull warnings now surface in the selected-pill detail
         // box. Cup-level tannin/aromatic (no ingredient-name prefix)
         // and masking/paradox/ceiling stay here.
+        //
+        // Caffeine-kind warnings are also filtered out — the caffeine
+        // bar's own advisory band (gentle / at-edge / over-the-line)
+        // above this list now carries the caffeine signal in a more
+        // structured form, so the prose warning here would duplicate it.
         const filtered = (brew.warnings || []).filter(w =>
-          w.kind !== "outsider" && !/is being over-pulled/.test(w.text || "")
+          w.kind !== "outsider"
+          && w.kind !== "caffeine"
+          && !/is being over-pulled/.test(w.text || "")
         );
         if (filtered.length === 0) return null;
         // Per-ingredient over-pull warnings always start with the
