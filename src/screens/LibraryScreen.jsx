@@ -54,6 +54,12 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
+  // Remove-from-cabinet confirmation. Cabinet is the only place
+  // where the toggle reads as "remove" rather than "add" (the X
+  // icon is shown only in forcePantryOnly mode), and adding back
+  // requires walking to the Herbanium — so a quick "are you sure?"
+  // gate keeps an accidental tap from costing the user a trip.
+  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
   // Force pantryOnly from parent when this view is hosted inside the
   // Shelf · Pantry sub-tab, where the toggle would be redundant.
@@ -421,37 +427,77 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                       position: "absolute", left: 0, top: 0, bottom: 0,
                       width: 3, background: accent, opacity: 0.85,
                     }} />
-                    {/* Pantry toggle — modern thin-stroke icon button.
-                        Empty state: ghost circle with a hairline plus
-                        in ash. Active state: sage-filled with a clean
-                        check stroke. Same 24px target either way; no
-                        bold text glyphs, no dashed edges. */}
+                    {/* Pantry toggle — three visual states:
+                        • Not in pantry (any surface): ghost circle + plus.
+                        • In pantry, browsing the Herbanium: sage-filled
+                          check (the affirmative "yes, in cabinet" badge).
+                        • In pantry, on the Cabinet surface: terra-outline
+                          X (the action here is "remove"; reads as a
+                          delete affordance, not a status badge).
+                        Cabinet remove is gated behind a confirm prompt
+                        because adding back costs a trip to the Herbanium. */}
                     {togglePantry && (
                       <div
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => { e.stopPropagation(); togglePantry(id); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (forcePantryOnly && inPantry) {
+                            setConfirmRemoveId(id);
+                          } else {
+                            togglePantry(id);
+                          }
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             e.stopPropagation();
-                            togglePantry(id);
+                            if (forcePantryOnly && inPantry) {
+                              setConfirmRemoveId(id);
+                            } else {
+                              togglePantry(id);
+                            }
                           }
                         }}
-                        title={inPantry ? "in cabinet — tap to remove" : "tap to add to cabinet"}
+                        title={
+                          forcePantryOnly && inPantry
+                            ? "remove from cabinet"
+                            : inPantry
+                              ? "in cabinet — tap to remove"
+                              : "tap to add to cabinet"
+                        }
                         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.08)"; }}
                         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                         style={{
                           position: "absolute", top: 8, right: 8,
                           width: 24, height: 24, borderRadius: "50%",
-                          background: inPantry ? theme.sage : "transparent",
-                          border: `1px solid ${inPantry ? theme.sage : theme.ruleSoft}`,
+                          background: forcePantryOnly && inPantry
+                            ? "transparent"
+                            : inPantry
+                              ? theme.sage
+                              : "transparent",
+                          border: `1px solid ${
+                            forcePantryOnly && inPantry
+                              ? theme.terra
+                              : inPantry
+                                ? theme.sage
+                                : theme.ruleSoft
+                          }`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           cursor: "pointer",
                           transition: "background 0.18s ease, border-color 0.18s ease, transform 0.12s ease",
                         }}
                       >
-                        {inPantry ? (
+                        {forcePantryOnly && inPantry ? (
+                          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
+                            <path
+                              d="M2.5 2.5 L9.5 9.5 M9.5 2.5 L2.5 9.5"
+                              stroke={theme.terra}
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        ) : inPantry ? (
                           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
                             <path
                               d="M2.5 6.2 L5 8.5 L9.5 3.7"
@@ -539,6 +585,84 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             >Add ingredients?</button>
           )}
       </>
+
+      {/* Cabinet remove confirmation — only fires from the Cabinet
+          surface, where adding back means walking to the Herbanium.
+          Modal is centered, dim-overlay backed; Cancel is the
+          default-weighted action (outline) and Remove is terra-filled
+          to read as the destructive choice without screaming. */}
+      {confirmRemoveId && (() => {
+        const ing = INGREDIENTS[confirmRemoveId];
+        const ingName = ing?.name || "this ingredient";
+        const close = () => setConfirmRemoveId(null);
+        const confirm = () => {
+          if (togglePantry) togglePantry(confirmRemoveId);
+          setConfirmRemoveId(null);
+        };
+        return (
+          <div
+            onClick={close}
+            style={{
+              position: "fixed", inset: 0, zIndex: 220,
+              background: "rgba(30,24,18,0.45)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "0 24px",
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: 380, width: "100%",
+                background: theme.cream,
+                border: `1px solid ${theme.ruleSoft}`,
+                borderRadius: 14, padding: "20px 22px 18px",
+                boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
+              }}
+            >
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.terra, marginBottom: 8,
+              }}>remove from cabinet</div>
+              <div style={{
+                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+                lineHeight: 1.45, marginBottom: 6,
+              }}>
+                Remove <em style={{ color: theme.terra, fontStyle: "normal" }}>{ingName}</em> from your cabinet?
+              </div>
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                color: theme.ash, lineHeight: 1.5, marginBottom: 16,
+              }}>
+                You can add it back from the Herbanium reference any time.
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <button
+                  onClick={close}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    padding: "8px 16px", borderRadius: 999,
+                    background: "transparent",
+                    border: `1px solid ${theme.ruleSoft}`,
+                    color: theme.inkSoft, cursor: "pointer",
+                  }}
+                >cancel</button>
+                <button
+                  onClick={confirm}
+                  style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    padding: "8px 16px", borderRadius: 999,
+                    background: theme.terra, border: `1px solid ${theme.terra}`,
+                    color: theme.cream, cursor: "pointer",
+                    boxShadow: "0 2px 6px -1px rgba(176,84,47,0.32)",
+                  }}
+                >remove</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
