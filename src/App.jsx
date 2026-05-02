@@ -905,15 +905,20 @@ export default function App() {
   // session's existing brew-time note with a paragraph break so the
   // single `note` field on the session reads as a small two-act log:
   // first sip impressions on top, post-cup reflection underneath.
-  const patchSessionMoods = (sessionId, { landed, extra, noteAppend }) => {
+  const patchSessionMoods = (sessionId, { moodScore, noteAppend }) => {
     setSessions(prev => prev.map(s => {
       if (s.id !== sessionId) return s;
       const targetMoods = s.targetMoods || [];
-      const landedMoods = targetMoods.filter(m => landed?.[m]);
-      const extraMoods = extra || [];
-      const actual = landedMoods.length > 0 ? landedMoods.join(", ")
-                   : extraMoods.length > 0 ? extraMoods.join(", ")
-                   : "brewed";
+      // Single 1-5 score replaces the per-mood landed/missed pills.
+      // The cup-row arrow keeps showing the *target* mood (what the
+      // user reached for) and the score dots after it tell how
+      // strongly the cup delivered. `actual` stays populated for
+      // back-compat so any downstream readers (bestiary triggers,
+      // legacy renderers) still get a string.
+      const score = Math.max(1, Math.min(5, Math.round(Number(moodScore) || 0)));
+      const actual = targetMoods.length > 0
+        ? targetMoods.join(", ")
+        : "brewed";
       const trimmedAppend = (noteAppend || "").trim();
       const mergedNote = trimmedAppend
         ? (s.note && s.note.trim()
@@ -923,8 +928,7 @@ export default function App() {
       return {
         ...s,
         actual,
-        landed: landed || {},
-        extra: extraMoods,
+        moodScore: score,
         note: mergedNote,
         moodsPending: false,
       };

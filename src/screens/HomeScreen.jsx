@@ -484,9 +484,18 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
   const { unit } = useUnit();
+  // Cup-level "for X" reads from the blend's primary mood (what the
+  // cup is known for) so it's available even on sessions that didn't
+  // capture user-specific currentMoods. The "→ X" half prefers the
+  // user's reached-for targetMoods, falling back to the legacy actual
+  // string. Mood-score dots after that tell how strongly the cup
+  // delivered.
   const desiredMood = b.mood || "";
+  const targets = (s.targetMoods || []).join(", ").trim();
   const endRaw = (s.actual || "").trim();
-  const endMood = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const endMood = targets || endFallback;
+  const moodScore = coerceMoodScore(s);
   const flavor = b.flavor
     || (Array.isArray(b.flavors) && b.flavors[0])
     || "";
@@ -551,6 +560,14 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
             {endMood && (
               <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>
             )}
+            {moodScore != null && (
+              <span style={{
+                marginLeft: 6,
+                fontSize: 10, color: theme.sageDeep, letterSpacing: "0.08em",
+              }}>
+                {"◉".repeat(moodScore)}<span style={{ color: theme.rule }}>{"◉".repeat(5 - moodScore)}</span>
+              </span>
+            )}
           </span>
           {s.taste != null && (
             <span style={{
@@ -581,24 +598,48 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
 // hangs on the absent side as a tiny tell — "tired →" for a logged
 // starting mood without a recorded landing, "→ calm" for a logged
 // landing without a recorded start.
+// Coerce a legacy landed-map (per-mood true/false) into a single
+// 1-5 mood arrival score so older sessions render with the new
+// dot-strength UI. all-true → 5, mixed → 3, all-false → 1, empty
+// → null. Newer sessions carry s.moodScore directly and skip this.
+const coerceMoodScore = (s) => {
+  if (typeof s?.moodScore === "number") return s.moodScore;
+  const landed = s?.landed;
+  if (!landed || typeof landed !== "object") return null;
+  const vals = Object.values(landed);
+  if (vals.length === 0) return null;
+  const trueCount = vals.filter(Boolean).length;
+  if (trueCount === 0) return 1;
+  if (trueCount === vals.length) return 5;
+  return 3;
+};
+
 export const SessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
 
   const start = (s.currentMoods || []).join(", ").trim();
+  // End label is the user's reached-for target — what they wanted.
+  // Falls back to the legacy `actual` string for sessions logged
+  // before targetMoods existed. The mood-score dots after this
+  // label tell how strongly the cup actually delivered.
+  const targets = (s.targetMoods || []).join(", ").trim();
   const endRaw = (s.actual || "").trim();
-  // "brewed" is the placeholder the log writes when no specific
-  // landing-moods were captured — treat it as no ending logged.
-  const end = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
+  const end = targets || endFallback;
+  const moodScore = coerceMoodScore(s);
   const ago = sessionAgo(s) || s.ago;
 
   // Two-row layout matching JournalEntryRow so cups and entries scan
   // as one consistent timeline:
   //   row 1 — leading glyph + blend name on left, time far right
-  //   row 2 — mood arc (start → end, colored) on left, taste dots right
+  //   row 2 — mood arc (start → target + mood-score dots) on left,
+  //           taste dots on right
   // The mood arc gets explicit colors to read as a transition: ochre
-  // for the coming-in mood (the unsettled state), terra arrow for the
-  // change, sage-deep for the landed mood (where the cup left you).
+  // for the coming-in mood, terra arrow for the change, sage-deep for
+  // the target. Mood-score dots are sage-deep filled / rule-color
+  // hollow — distinct from the terra taste dots so the eye reads
+  // them as two named axes, not interchangeable rings.
   return (
     <button onClick={() => openCup?.(s.id)} style={{
       width: "100%", textAlign: "left", background: "transparent",
@@ -632,7 +673,7 @@ export const SessionRow = ({ s, openCup, first }) => {
             fontSize: 11, color: theme.ash,
           }}>{ago}</span>
         </div>
-        {/* Sub-row: colored mood-arc on left, taste dots on right */}
+        {/* Sub-row: colored mood-arc + arrival dots on left, taste dots on right */}
         {(start || end || s.taste != null) && (
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
@@ -650,6 +691,14 @@ export const SessionRow = ({ s, openCup, first }) => {
               )}
               {end && (
                 <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
+              )}
+              {moodScore != null && (
+                <span style={{
+                  marginLeft: 6,
+                  fontSize: 10, color: theme.sageDeep, letterSpacing: "0.08em",
+                }}>
+                  {"◉".repeat(moodScore)}<span style={{ color: theme.rule }}>{"◉".repeat(5 - moodScore)}</span>
+                </span>
               )}
             </span>
             {s.taste != null && (
@@ -679,9 +728,11 @@ export const SessionRow = ({ s, openCup, first }) => {
 const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   const blend = getBlend(session.blendId);
   const targets = session.targetMoods || [];
-  const [landed, setLanded] = React.useState(() =>
-    Object.fromEntries(targets.map(m => [m, true]))
-  );
+  // Single 1-5 score replaces the per-mood landed/missed pills.
+  // 1 = barely felt, 5 = strongly felt. Whole-cup arrival, not
+  // axis-by-axis. Initial null forces the user to pick before the
+  // save button enables.
+  const [score, setScore] = React.useState(null);
   const [followNote, setFollowNote] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
 
@@ -691,11 +742,14 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   const timeLabel = minutesAgo < 60
     ? `${minutesAgo} min ago`
     : `${Math.round(minutesAgo / 60)}h ago`;
+  const reachedFor = targets.length === 1
+    ? targets[0]
+    : targets.slice(0, -1).join(", ") + " and " + targets[targets.length - 1];
 
   const submit = () => {
-    if (submitted) return;
+    if (submitted || score == null) return;
     setSubmitted(true);
-    onSubmit?.({ landed, extra: [], noteAppend: followNote.trim() });
+    onSubmit?.({ moodScore: score, noteAppend: followNote.trim() });
   };
 
   return (
@@ -719,7 +773,8 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
             color: theme.inkSoft, lineHeight: 1.4,
           }}>
             Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
-            {" "}from {timeLabel} — did the moods you reached for actually arrive?
+            {" "}from {timeLabel} — how strongly did the cup deliver
+            {" "}<em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?
           </div>
         </div>
         <button
@@ -733,60 +788,61 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         >×</button>
       </div>
 
+      {/* 1-5 dot picker — strength of arrival. Cumulative fill (tap
+          a dot, that and all earlier dots fill) so the user can read
+          their own pick at a glance. Sage-deep so the score reads as
+          a settled / arrival register, distinct from terra taste
+          dots elsewhere. */}
       <div style={{
         display: "flex", flexDirection: "column", gap: 6,
-        background: theme.cream, borderRadius: 8, padding: "8px 10px",
+        background: theme.cream, borderRadius: 8, padding: "10px 12px",
         border: `1px solid ${theme.ruleSoft}`,
       }}>
-        {targets.map(m => (
-          <div key={m} style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-          }}>
-            <span style={{ fontFamily: ff.serif, fontSize: 14, color: theme.ink }}>
-              <em style={{ color: theme.terra, fontStyle: "normal" }}>{m}</em>
-            </span>
-            <div style={{ display: "flex", gap: 5 }}>
-              {[
-                ["landed", true],
-                ["missed", false],
-              ].map(([label, v]) => {
-                const isActive = landed[m] === v;
-                return (
-                  <button
-                    key={label}
-                    onClick={() => setLanded(prev => ({ ...prev, [m]: v }))}
-                    style={{
-                      fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                      padding: "3px 9px", borderRadius: 999,
-                      border: `1px solid ${isActive ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
-                      background: isActive ? (v ? theme.sageDeep : theme.terra) : "transparent",
-                      color: isActive ? theme.cream : theme.inkSoft,
-                      cursor: "pointer",
-                      transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
-                      boxShadow: isActive
-                        ? (v ? "0 2px 6px -1px rgba(74,87,58,0.30)" : "0 2px 6px -1px rgba(176,84,47,0.30)")
-                        : "0 1px 2px rgba(30,24,18,0.05)",
-                    }}
-                  >{label}</button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>
+          <span>barely</span>
+          <span>strongly</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
+          {[1, 2, 3, 4, 5].map(n => {
+            const filled = score != null && score >= n;
+            return (
+              <button
+                key={n}
+                onClick={() => setScore(n)}
+                aria-label={`rate arrival ${n} of 5`}
+                style={{
+                  flex: 1,
+                  height: 32, borderRadius: 999,
+                  background: filled ? theme.sageDeep : "transparent",
+                  border: `1px solid ${filled ? theme.sageDeep : theme.ruleSoft}`,
+                  cursor: "pointer", padding: 0,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: ff.mono, fontSize: 11,
+                  color: filled ? theme.cream : theme.ash,
+                  fontWeight: filled ? 600 : 500,
+                  transition: "all 0.18s ease",
+                }}
+              >{n}</button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Optional follow-up note. Lives below the landed/missed pills
-          because mood is what the user is reflecting on by the time
-          they reach this field — anything they want to say about how
-          the cup actually played out gets appended onto the session's
-          existing brew-time note. */}
+      {/* Optional follow-up note. Where the score is the number, this
+          is the texture — anything the user wants to add gets appended
+          onto the session's existing brew-time note. */}
       <textarea
         value={followNote}
         onChange={(e) => setFollowNote(e.target.value)}
         placeholder="anything to add about how it played out?"
         style={{
           width: "100%", minHeight: 44,
-          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+          background: "rgba(var(--hi-rgb),0.05)",
+          border: `1px dashed ${theme.rule}`,
           borderRadius: 8, padding: "8px 10px",
           fontFamily: ff.serif, fontSize: 13, color: theme.ink,
           resize: "vertical", outline: "none",
@@ -797,10 +853,10 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       <Button
         variant="primary" tone="ink" fullWidth
         onClick={submit}
-        disabled={submitted}
+        disabled={submitted || score == null}
         style={{ fontSize: 14, padding: "11px" }}
       >
-        {submitted ? "saved" : "save mood"}
+        {submitted ? "saved" : score == null ? "pick a strength" : "save mood"}
       </Button>
     </div>
   );
