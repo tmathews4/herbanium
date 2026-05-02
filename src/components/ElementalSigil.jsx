@@ -46,13 +46,17 @@ function hashStr(s) {
 // co-opted by hate groups; the remaining 22 carry the alphabet's
 // older, broader register.
 const RUNES = {
-  // Fehu ᚠ — cattle, wealth. Branches end at x=4 (box edge),
-  // y extrapolated along the original slope, so the hex clip
-  // extends them to the right face.
+  // Fehu ᚠ — cattle, wealth. Branches extended along their
+  // original slope to x=8 (well past the rune box and hex
+  // perimeter) so the clipPath cuts them cleanly at the hex
+  // upper-right edge — without the extension the geometric
+  // endpoint at x=4 (cx+0.67r) sits INSIDE the hex's right
+  // perimeter (cx+0.87r), and the line stops short of the
+  // frame instead of meeting it.
   fehu: [
     [[2, 0], [2, 6]],
-    [[2, 0.6], [4, -0.4]],
-    [[2, 2.2], [4, 1.2]],
+    [[2, 0.6], [8, -2.4]],
+    [[2, 2.2], [8, -0.8]],
   ],
   // Uruz ᚢ — aurochs, strength
   uruz: [
@@ -66,13 +70,15 @@ const RUNES = {
     [[1.5, 1.6], [3.2, 3]],
     [[3.2, 3], [1.5, 4.4]],
   ],
-  // Ansuz ᚨ — divine breath. Branches end at x=4 (box edge) so
-  // the hex clip extends them out to the right face like the
-  // other border-reaching runes.
+  // Ansuz ᚨ — divine breath. Branches extended along their
+  // original slope to x=8 (well past the rune box) so the hex
+  // clip cuts them at the right perimeter — without the extension
+  // the endpoints at x=4 (cx+0.67r) sit inside the hex's right
+  // face (cx+0.87r) and the lines stop short of the frame.
   ansuz: [
     [[1.5, 0], [1.5, 6]],
-    [[1.5, 0.8], [4, 1.4]],
-    [[1.5, 2.4], [4, 3]],
+    [[1.5, 0.8], [8, 2.36]],
+    [[1.5, 2.4], [8, 3.96]],
   ],
   // Raidho ᚱ — journey
   raidho: [
