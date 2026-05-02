@@ -441,8 +441,8 @@ const BLENDS = [
     subtitle: "The maker's sneaky cup",
     ingredients: [
       { id: "gunpowder", g: 1.5 },
-      { id: "spearmint", g: 0.25, role: "accent" },
-      { id: "tulsi", g: 0.8, role: "accent" },
+      { id: "spearmint", g: 0.5, role: "accent" },
+      { id: "tulsi", g: 1.0, role: "accent" },
     ],
     tempC: 80, timeS: 150, ml: 250,
     mood: "focus", flavor: "minty",
