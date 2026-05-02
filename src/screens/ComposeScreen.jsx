@@ -1614,20 +1614,17 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 transition: "background 0.18s ease, border-color 0.18s ease",
               }}
             >
-              <button
-                onClick={(e) => { e.stopPropagation(); go("ingredient", id); }}
-                style={{
-                  flex: 1, minWidth: 0,
-                  background: "transparent", border: "none", padding: 0,
-                  textAlign: "left", cursor: "pointer",
-                  fontFamily: ff.serif, fontSize: 15,
-                  color: isPrimary ? theme.ink : theme.inkSoft,
-                  fontWeight: isPrimary ? 500 : 400,
-                  display: "flex", alignItems: "baseline", gap: 4,
-                }}
-              >
+              {/* Row content is now plain text — no nested click target.
+                  Tapping the name/temp area still hits the parent row
+                  and toggles primary, the way the highlight invites. */}
+              <span style={{
+                flex: 1, minWidth: 0,
+                fontFamily: ff.serif, fontSize: 15,
+                color: isPrimary ? theme.ink : theme.inkSoft,
+                fontWeight: isPrimary ? 500 : 400,
+                display: "flex", alignItems: "baseline", gap: 4,
+              }}>
                 {INGREDIENTS[id].name}
-                <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                 <span style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash, marginLeft: 6 }}>
                   {formatTempShort(INGREDIENTS[id].tempC[0], INGREDIENTS[id].tempC[1], unit)}
                 </span>
@@ -1639,7 +1636,32 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                     color: theme.terra,
                   }}>primary</span>
                 )}
-              </button>
+              </span>
+              {/* Info button — opens the ingredient detail page. Lives
+                  apart from the row's primary-toggle target so the two
+                  actions don't fight over the same tap. ⓘ in a thin
+                  ring; ash by default, terra on hover so it reads as
+                  "not the primary action, but available." */}
+              <button
+                onClick={(e) => { e.stopPropagation(); go("ingredient", id); }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = theme.terra; e.currentTarget.style.color = theme.terra; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = theme.ruleSoft; e.currentTarget.style.color = theme.ash; }}
+                title={`About ${INGREDIENTS[id].name}`}
+                aria-label={`open ${INGREDIENTS[id].name} details`}
+                style={{
+                  flexShrink: 0,
+                  width: 20, height: 20, borderRadius: "50%",
+                  background: "transparent",
+                  border: `1px solid ${theme.ruleSoft}`,
+                  color: theme.ash,
+                  fontFamily: ff.serif, fontStyle: "italic",
+                  fontSize: 12, lineHeight: 1,
+                  cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  transition: "color 0.15s ease, border-color 0.15s ease",
+                  padding: 0,
+                }}
+              >i</button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
