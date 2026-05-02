@@ -86,8 +86,13 @@ const ChipPickerRow = ({ label, chips, value, setValue }) => {
   );
 };
 
-export const JournalComposer = ({ onSave, onCancel }) => {
-  const [mode, setMode] = useState("free");
+// Mode is controlled externally — the parent surfaces the four
+// form-style chips (free / haiku / limerick / poem) above the
+// composer so the choice of journal mode reads as the first
+// decision rather than a buried tab strip mid-form. setMode lets
+// the composer ask the parent to switch (used by the inline
+// "switch mode" link beside the cancel button).
+export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) => {
   const [text, setText] = useState("");
   const [slots, setSlots] = useState({ thing: "", sound: "", color: "", feeling: "" });
   const [haikuSeed, setHaikuSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
@@ -137,7 +142,9 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     setPoemText("");
     setCurrentMoods([]);
     setLandedMoods([]);
-    setMode("free");
+    // Mode is parent-controlled — don't reset it here so saving
+    // an entry leaves the user in the same mode they chose if
+    // they want to keep going.
   };
 
   const handleSave = () => {
@@ -185,17 +192,6 @@ export const JournalComposer = ({ onSave, onCancel }) => {
     </div>
   );
 
-  const tabBtnStyle = (active) => ({
-    flex: 1,
-    fontFamily: ff.serif, fontSize: 13,
-    padding: "8px 10px",
-    background: active ? theme.cream : "transparent",
-    color: active ? theme.ink : theme.ash,
-    border: "none",
-    borderBottom: active ? `2px solid ${theme.terra}` : "2px solid transparent",
-    cursor: "pointer",
-  });
-
   return (
     <div style={{
       marginBottom: 14, padding: "12px 14px", borderRadius: 10,
@@ -221,20 +217,27 @@ export const JournalComposer = ({ onSave, onCancel }) => {
         margin: "14px -14px 14px",
       }} />
 
-      <div style={{ display: "flex", marginBottom: 10, borderBottom: `1px solid ${theme.ruleSoft}` }}>
-        <button onClick={() => setMode("free")} style={tabBtnStyle(mode === "free")}>
-          write freely
-        </button>
-        <button onClick={() => setMode("haiku")} style={tabBtnStyle(mode === "haiku")}>
-          haiku
-        </button>
-        <button onClick={() => setMode("limerick")} style={tabBtnStyle(mode === "limerick")}>
-          limerick
-        </button>
-        <button onClick={() => setMode("poem")} style={tabBtnStyle(mode === "poem")}>
-          poem
-        </button>
-      </div>
+      {/* Mode label — the chooser lives in the parent now, but we
+          echo the active mode here as a small eyebrow so the writing
+          surface is unmistakably tagged. Keeps the composer's content
+          oriented when the form switches under the user's hand. */}
+      {(() => {
+        const modeLabels = {
+          free: "writing freely",
+          haiku: "writing a haiku",
+          limerick: "writing a limerick",
+          poem: "writing a poem",
+        };
+        return (
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.terra,
+            marginBottom: 10,
+          }}>
+            {modeLabels[mode] || modeLabels.free}
+          </div>
+        );
+      })()}
 
       {mode === "free" && (
         <textarea

@@ -77,6 +77,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
+  // Active form-style mode for the journal composer. Lifted out of
+  // JournalComposer so the chooser can live in the parent and the
+  // four entry-points (free / haiku / limerick / poem) double as
+  // both "open the composer" and "switch the active mode" — the
+  // tab strip that used to sit inside the composer is gone.
+  const [journalMode, setJournalMode] = useState("free");
   // Close the composer whenever the user navigates away from the
   // journal sub-view — switching apothecary/shelf mode, switching
   // section, or moving to a different journal sub-tab. Without this
@@ -1141,60 +1147,110 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 );
               })()}
             </div>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              gap: 8, marginBottom: 10, flexWrap: "wrap",
-            }}>
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                {[
-                  ["all",     "All"],
-                  ["cups",    "Cups"],
-                  ["entries", "Entries"],
-                ].map(([key, label]) => {
-                  const active = journalFilter === key;
-                  const count = key === "cups"
-                    ? sessionItems.length
-                    : key === "entries"
-                      ? entryItems.length
-                      : timelineFull.length;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setJournalFilter(key)}
-                      style={{
-                        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.04em",
-                        padding: "4px 10px", borderRadius: 999, cursor: "pointer",
-                        background: active ? theme.ink : "transparent",
-                        color: active ? theme.cream : theme.ash,
-                        border: `1px solid ${active ? theme.ink : theme.rule}`,
-                        boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.22)" : "0 1px 2px rgba(30,24,18,0.05)",
-                        transition: "all 0.18s ease",
-                      }}
-                    >{label}{count > 0 && (
-                      <span style={{
-                        marginLeft: 5, opacity: 0.7,
-                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
-                      }}>{count}</span>
-                    )}</button>
-                  );
-                })}
-              </div>
-              <button
-                onClick={() => setJournalComposerOpen(o => !o)}
-                style={{
-                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-                  color: theme.terra,
-                  background: "transparent",
-                  border: `1px solid ${theme.terra}`, borderRadius: 999,
-                  padding: "5px 12px", cursor: "pointer",
-                  flexShrink: 0,
-                  boxShadow: "0 1px 3px rgba(176,84,47,0.12)",
-                  transition: "all 0.18s ease",
-                }}
-              >{journalComposerOpen ? "× cancel" : "+ new entry"}</button>
+            {/* Timeline filter chips — All / Cups / Entries — narrow
+                what the user sees in the journal scroll below. */}
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 12 }}>
+              {[
+                ["all",     "All"],
+                ["cups",    "Cups"],
+                ["entries", "Entries"],
+              ].map(([key, label]) => {
+                const active = journalFilter === key;
+                const count = key === "cups"
+                  ? sessionItems.length
+                  : key === "entries"
+                    ? entryItems.length
+                    : timelineFull.length;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setJournalFilter(key)}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.04em",
+                      padding: "4px 10px", borderRadius: 999, cursor: "pointer",
+                      background: active ? theme.ink : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      border: `1px solid ${active ? theme.ink : theme.rule}`,
+                      boxShadow: active ? "0 2px 6px -1px rgba(30,24,18,0.22)" : "0 1px 2px rgba(30,24,18,0.05)",
+                      transition: "all 0.18s ease",
+                    }}
+                  >{label}{count > 0 && (
+                    <span style={{
+                      marginLeft: 5, opacity: 0.7,
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                    }}>{count}</span>
+                  )}</button>
+                );
+              })}
             </div>
+
+            {/* Mode chooser — the form-style decision is now the FIRST
+                journaling action, surfaced as four equal-width cards
+                instead of a tab strip buried inside the composer. Tap
+                any card to open the composer locked to that mode. The
+                active card is highlighted and a second tap closes the
+                composer entirely. The eyebrow above ("write something")
+                tells a first-time user this row is what they're looking
+                for when they want to add something to the journal. */}
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash,
+              marginBottom: 6,
+            }}>write something</div>
+            <div style={{
+              display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
+              gap: 6, marginBottom: 12,
+            }}>
+              {[
+                ["free",     "Free",     "open page"],
+                ["haiku",    "Haiku",    "5 / 7 / 5"],
+                ["limerick", "Limerick", "5 lines, A-A-B-B-A"],
+                ["poem",     "Poem",     "any short form"],
+              ].map(([key, label, hint]) => {
+                const active = journalComposerOpen && journalMode === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      if (active) {
+                        setJournalComposerOpen(false);
+                      } else {
+                        setJournalMode(key);
+                        setJournalComposerOpen(true);
+                      }
+                    }}
+                    style={{
+                      display: "flex", flexDirection: "column", alignItems: "center",
+                      gap: 2, padding: "10px 6px",
+                      background: active ? theme.ink : theme.cream,
+                      color: active ? theme.cream : theme.inkSoft,
+                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                      borderRadius: 10, cursor: "pointer",
+                      boxShadow: active
+                        ? "0 2px 6px -1px rgba(30,24,18,0.22)"
+                        : "0 1px 2px rgba(30,24,18,0.05)",
+                      transition: "all 0.18s ease",
+                    }}
+                  >
+                    <span style={{
+                      fontFamily: ff.serif, fontSize: 13.5,
+                      color: active ? theme.cream : theme.ink,
+                      lineHeight: 1.1,
+                    }}>{label}</span>
+                    <span style={{
+                      fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.04em",
+                      color: active ? "rgba(232,220,192,0.65)" : theme.ash,
+                      lineHeight: 1.2,
+                    }}>{hint}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             {journalComposerOpen && (
               <JournalComposer
+                mode={journalMode}
+                setMode={setJournalMode}
                 onCancel={() => setJournalComposerOpen(false)}
                 onSave={(text, kind, note) => {
                   if (addJournalEntry) addJournalEntry(text, kind, note);
