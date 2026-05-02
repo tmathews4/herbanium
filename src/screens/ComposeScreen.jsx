@@ -1449,10 +1449,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   : score === 1 ? theme.ochre
                   : score === 0 ? theme.terra
                   : theme.rule;
+                // Green gets a noticeably stronger fill than yellow so
+                // the two bands separate at a glance. Yellow stays
+                // soft so it reads as "ok-ish" rather than competing
+                // with green's "best-fit" register. Red matches green
+                // in saturation so a poor fit reads as a real warning.
                 const fitBg =
-                  score === 2 ? "rgba(125,140,108,0.07)"
-                  : score === 1 ? "rgba(165,120,54,0.07)"
-                  : score === 0 ? "rgba(176,84,47,0.07)"
+                  score === 2 ? "rgba(125,140,108,0.20)"
+                  : score === 1 ? "rgba(165,120,54,0.09)"
+                  : score === 0 ? "rgba(176,84,47,0.18)"
                   : "transparent";
                 const fitTitle =
                   score === 2 ? "Full overlap with the pot's brew window"
