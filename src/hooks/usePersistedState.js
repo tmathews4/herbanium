@@ -33,7 +33,7 @@ import { useState, useEffect, useCallback } from "react";
 
 const KEY_PREFIX = "herbanium.";
 const SCHEMA_KEY = KEY_PREFIX + "schemaVersion";
-const CURRENT_SCHEMA = "5";
+const CURRENT_SCHEMA = "6";
 
 // Check schema once on module load. If mismatched, wipe all herbanium.* keys.
 // Portfolio phase: acceptable to clear. Post-launch: implement real migration.
