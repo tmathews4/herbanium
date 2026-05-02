@@ -152,7 +152,7 @@ const ADDITIVE_CAP = 5;
 // phantom heat. A multi-leaf cup with one trace-astringent
 // contributor each won't stack; a cup with three honestly-tannic
 // tea bases will.
-const STACKING_MIN_STRENGTH = 2.0;
+export const STACKING_MIN_STRENGTH = 2.0;
 
 // Stacking exponent. weight^0.85 sits between dose-weighted (1) and
 // pure unweighted (0). Chosen so single-source full-weight ingredients
@@ -163,7 +163,7 @@ const STACKING_MIN_STRENGTH = 2.0;
 // (0.5, 0.7) flagged accent-stretched curated blends as tannic at
 // baseline; 0.85 keeps those blends clean while still surfacing
 // honestly tannic multi-leaf cups. 1.0 would be no stacking at all.
-const STACK_EXPONENT = 0.85;
+export const STACK_EXPONENT = 0.85;
 
 /**
  * Combine raw flavor contributions across ingredients. Two paths:

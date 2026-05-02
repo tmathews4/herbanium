@@ -1075,6 +1075,7 @@ import {
   applyMasking, applyEffectSynergies, buildWarnings,
   attenuateFragileEffects, applyEffectFloor,
   combineFlavors,
+  STACK_EXPONENT, STACKING_MIN_STRENGTH,
 } from "./perception.js";
 
 /**
@@ -1399,14 +1400,50 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   //   - Everything else: dose-weighted × loudness (the saturating
   //     behavior — two citrus at 50/50 still reads as one citrus).
   //
-  // Effects stay dose-weighted across the board — no effect tag
-  // currently behaves like "heat" in the additive sense.
+  // Effects use the same sub-linear stacking model as additive
+  // flavors — but applied to ALL effects, not a curated subset.
+  // When 2+ LEAD ingredients each contribute to the same effect
+  // at strength ≥ STACKING_MIN_STRENGTH, those leads accumulate
+  // via weight^STACK_EXPONENT instead of plain dose-weighted sum.
+  // Lifts the cup's calm / focus / energy reading when multiple
+  // ingredients honestly contribute, so a chamomile + lemon balm
+  // combo reads more calming than chamomile alone — without
+  // running away to the cap. Single-source blends are unchanged
+  // (any weight^k = same when weight = 1, so curated 1-leaf
+  // catalog entries keep their existing calibration).
   const rawFlavors = combineFlavors(contributions);
   const rawEffects = {};
-  for (const { weight, profile } of contributions) {
+  // First pass — count strong LEAD contributors per effect tag.
+  // An effect only switches to stacking when 2+ leads independently
+  // express it at meaningful strength.
+  const effectStrongCount = {};
+  for (const { profile, role } of contributions) {
+    if ((role || "lead") !== "lead") continue;
+    if (!profile?.effects) continue;
     for (const [tag, strength] of profile.effects) {
-      rawEffects[tag] = (rawEffects[tag] || 0) + strength * weight;
+      if (strength >= STACKING_MIN_STRENGTH) {
+        effectStrongCount[tag] = (effectStrongCount[tag] || 0) + 1;
+      }
     }
+  }
+  // Second pass — accumulate. Lead contributions to effects with
+  // ≥2 strong leads use the stacking path; everything else uses
+  // dose-weighted (today's behavior).
+  for (const { weight, profile, role } of contributions) {
+    if (!profile?.effects) continue;
+    const isLead = (role || "lead") === "lead";
+    for (const [tag, strength] of profile.effects) {
+      const stack = isLead && (effectStrongCount[tag] || 0) >= 2;
+      const w = stack
+        ? Math.pow(Math.max(0, weight), STACK_EXPONENT)
+        : weight;
+      rawEffects[tag] = (rawEffects[tag] || 0) + strength * w;
+    }
+  }
+  // Cap stacked effects at 5 so a chai-style stack of warming
+  // contributors can climb without overflowing the bar's range.
+  for (const k of Object.keys(rawEffects)) {
+    if (rawEffects[k] > 5) rawEffects[k] = 5;
   }
 
   const { perceived: perceivedFlavorMap, maskingNotes } = applyMasking(rawFlavors);
