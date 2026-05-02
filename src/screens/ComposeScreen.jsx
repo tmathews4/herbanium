@@ -1057,15 +1057,24 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const { unit, weightUnit } = useUnit();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  // Flavor sub-filter — multi-select families, same chip set as
-  // Cabinet/Recipes so the filter vocabulary stays consistent across
-  // the app. Empty = no constraint; selections narrow to ingredients
-  // whose flavors map to a chosen family via FAMILY_BY_FLAVOR.
+  // Mood + flavor sub-filters — multi-select. Same vocabulary as
+  // Recipes (mood) and Cabinet/Herbanium (flavor) so filter language
+  // stays consistent. Both empty = no constraint; either narrows the
+  // ingredient pool via the matching field on each ingredient.
+  const [pickerMoods, setPickerMoods] = useState([]);
   const [pickerFlavors, setPickerFlavors] = useState([]);
+  const togglePickerMood = (m) =>
+    setPickerMoods(prev => prev.includes(m)
+      ? prev.filter(x => x !== m)
+      : [...prev, m]);
   const togglePickerFlavor = (fam) =>
     setPickerFlavors(prev => prev.includes(fam)
       ? prev.filter(x => x !== fam)
       : [...prev, fam]);
+  // "More filters" disclosure — collapses mood + flavor rows so the
+  // picker's at-rest state stays compact (search + category chips).
+  // Mirrors the Recipes/Herbanium pattern.
+  const [pickerFiltersExpanded, setPickerFiltersExpanded] = useState(false);
   const available = Object.keys(INGREDIENTS).filter(id => !reverseIngs.includes(id));
   const filteredAvailable = available
     .filter(id => {
@@ -1081,6 +1090,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         if (!isFruit) return false;
       } else if (filter !== "all" && ing.category !== filter) {
         return false;
+      }
+      if (pickerMoods.length > 0) {
+        const moods = new Set(pickerMoods);
+        const effects = ing.effects || [];
+        // Match an ingredient when at least one of the selected moods
+        // is expressed at strength >= 3 — same threshold the Herbanium
+        // effect filter uses, so weak/incidental matches don't bubble.
+        const hit = effects.some(([t, s]) => moods.has(t) && (s || 0) >= 3);
+        if (!hit) return false;
       }
       if (pickerFlavors.length > 0) {
         const fams = new Set(pickerFlavors);
@@ -1226,36 +1244,120 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           />
         </div>
 
-        {/* Flavor filter — multi-select family chips. Lets the user
-            compose by register ("I want a floral accent") rather than
-            only by botanical category, matching how the rest of the
-            app's filter surfaces work. */}
-        <div style={{ marginTop: 8 }}>
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: theme.ash, marginBottom: 5,
-          }}>flavor</div>
-          <ChipRows
-            items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
-            gap={4}
-            rowGap={4}
-            maxPerRow={5}
-            align="spread"
-            renderItem={([key, label]) => {
-              const active = pickerFlavors.includes(key);
-              return (
-                <button key={key} onClick={() => togglePickerFlavor(key)} style={{
-                  fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
-                  padding: "3px 9px", borderRadius: 999,
-                  border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
-                  background: active ? theme.ink : "transparent",
-                  color: active ? theme.cream : theme.ash,
-                  cursor: "pointer", flex: 1, whiteSpace: "nowrap",
-                }}>{label.toLowerCase()}</button>
-              );
-            }}
-          />
-        </div>
+        {/* "More filters" disclosure — collapses mood + flavor rows
+            so the picker's at-rest state stays compact. Same pattern
+            as Recipes / Herbanium so the filter strip vocabulary is
+            consistent across the app. Active-count badge surfaces
+            when sub-filters are narrowing the list behind the fold. */}
+        {(() => {
+          const subFilterCount = pickerMoods.length + pickerFlavors.length;
+          return (
+            <button
+              onClick={() => setPickerFiltersExpanded(v => !v)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                marginTop: 6, marginBottom: pickerFiltersExpanded ? 4 : 0,
+                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                color: theme.inkSoft, background: "transparent",
+                border: "none", padding: "4px 0", cursor: "pointer",
+              }}
+            >
+              {pickerFiltersExpanded ? "less" : "more filters"}
+              {subFilterCount > 0 && !pickerFiltersExpanded && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  minWidth: 16, height: 16, padding: "0 5px",
+                  borderRadius: 999, background: theme.terra, color: theme.cream,
+                  fontFamily: ff.sans, fontSize: 9, fontWeight: 600,
+                }}>{subFilterCount}</span>
+              )}
+              <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
+                   style={{
+                     transition: "transform 0.18s ease",
+                     transform: pickerFiltersExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                   }}>
+                <path d="M1.5 3 L4.5 6 L7.5 3" stroke={theme.inkSoft}
+                      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+            </button>
+          );
+        })()}
+
+        {pickerFiltersExpanded && (
+          <>
+            {/* Mood filter — multi-select. Matches an ingredient when
+                one of its effects expresses the selected mood at
+                strength >= 3 (same threshold Herbanium's effect
+                filter uses). */}
+            <div style={{ marginTop: 6 }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.ash, marginBottom: 5,
+              }}>mood</div>
+              <ChipRows
+                items={[
+                  ["calm",      "Calm"],
+                  ["focus",     "Focus"],
+                  ["energy",    "Energy"],
+                  ["comfort",   "Comfort"],
+                  ["sleepy",    "Sleepy"],
+                  ["soothing",  "Soothing"],
+                  ["warming",   "Warming"],
+                  ["cooling",   "Cooling"],
+                  ["digestive", "Digestive"],
+                ]}
+                gap={4}
+                rowGap={4}
+                maxPerRow={5}
+                align="spread"
+                renderItem={([key, label]) => {
+                  const active = pickerMoods.includes(key);
+                  return (
+                    <button key={key} onClick={() => togglePickerMood(key)} style={{
+                      fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                      padding: "3px 9px", borderRadius: 999,
+                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                      background: active ? theme.ink : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                    }}>{label.toLowerCase()}</button>
+                  );
+                }}
+              />
+            </div>
+
+            {/* Flavor filter — multi-select family chips. Lets the user
+                compose by register ("I want a floral accent") rather
+                than only by botanical category, matching how the rest
+                of the app's filter surfaces work. */}
+            <div style={{ marginTop: 8 }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: theme.ash, marginBottom: 5,
+              }}>flavor</div>
+              <ChipRows
+                items={FLAVOR_FAMILY_CHIPS.map(c => [c.family, c.label])}
+                gap={4}
+                rowGap={4}
+                maxPerRow={5}
+                align="spread"
+                renderItem={([key, label]) => {
+                  const active = pickerFlavors.includes(key);
+                  return (
+                    <button key={key} onClick={() => togglePickerFlavor(key)} style={{
+                      fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.02em",
+                      padding: "3px 9px", borderRadius: 999,
+                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
+                      background: active ? theme.ink : "transparent",
+                      color: active ? theme.cream : theme.ash,
+                      cursor: "pointer", flex: 1, whiteSpace: "nowrap",
+                    }}>{label.toLowerCase()}</button>
+                  );
+                }}
+              />
+            </div>
+          </>
+        )}
 
         {/* Filter / results divider — hairline rule spans the card's
             full width via negative horizontal margins, with a small
