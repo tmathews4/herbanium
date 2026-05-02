@@ -175,9 +175,16 @@ export const MoodCooling = ({ size = 28, c = theme.sky || theme.sage }) => (
 );
 
 export const MoodDigestive = ({ size = 28, c = theme.ochre }) => (
+  // Concentric ripples — reads as a settled stomach. The previous
+  // version used arc commands with a near-zero (0.01) displacement
+  // to fake closed circles, which some renderers drew as slivers
+  // hugging the top of the canvas instead of full rings. Plain
+  // <circle> elements render unambiguously and stay centered.
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-    {/* spiral */}
-    <path d="M12 12 m0 -1 a1 1 0 1 1 0.01 0 M12 12 m0 -3 a3 3 0 1 1 0.01 0 M12 12 m0 -5 a5 5 0 1 1 0.01 0 M12 12 m0 -7.5 a7.5 7.5 0 1 1 0.01 0" />
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="12" cy="12" r="3.5" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="9" />
   </svg>
 );
 
