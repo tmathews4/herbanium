@@ -5,7 +5,7 @@ import {
   SEED_MODES, materializeSeedSessions,
   materializeSeedJournalEntries, materializeSeedPlannerItems,
 } from "./data/seeds";
-import { Sprig, Flower, Leaf, Kettle, Ornament } from "./components/icons";
+import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
 import { DemoHint } from "./components/DemoHint";
 import { FirstCupHintCard } from "./components/FirstCupHintCard";
 // Screens
@@ -42,8 +42,8 @@ import { useAppBackNav } from "./hooks/useAppBackNav";
 const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
-    { k: "apothecary", label: "Apothecarium", icon: <Flower size={18} /> },
-    { k: "shelf",      label: "Notebook",   icon: <Leaf size={18} /> },
+    { k: "apothecary", label: "Apothecarium", icon: <Flask size={18} /> },
+    { k: "shelf",      label: "Notebook",   icon: <Pencil size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
 
