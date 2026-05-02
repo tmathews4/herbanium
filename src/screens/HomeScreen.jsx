@@ -131,18 +131,50 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
 
   return (
     <div style={{ padding: "18px 20px 32px", fontFamily: ff.sans }}>
-      {/* Empty-state welcome header — first-time users see this
-          before any poem card. Returning users get their greeting
-          below the poem instead so the time-of-day moment lands
-          first. */}
+      {/* Empty-state welcome — first-time users get a quiet poem
+          (Tagore's Stray Birds #1, the opening of the whole work,
+          chosen for its arrival-at-a-window image) above the named
+          welcome line. Returning users skip this and get the
+          time-of-day card below instead, so the welcome moment is
+          a one-time first-visit landing rather than a recurring
+          band that gets stale. */}
       {isEmpty && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
-              <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
-            </FitText>
+        <>
+          <div style={{
+            marginBottom: 14,
+            padding: "16px 22px 18px",
+            borderRadius: radius.md,
+            background: theme.cream,
+            border: `1px solid ${theme.ruleSoft}`,
+            boxShadow: shadow.card,
+            textAlign: "center",
+          }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+              <Ornament w={80} c={theme.ochre} />
+            </div>
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+              color: theme.inkSoft, lineHeight: 1.55,
+              whiteSpace: "pre-line",
+            }}>
+              {"Stray birds of summer come to my window to sing and fly away.\nAnd yellow leaves of autumn, which have no songs,\nflutter and fall there with a sigh."}
+            </div>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+              color: theme.ash, marginTop: 8,
+            }}>
+              — Rabindranath Tagore (Stray Birds, 1916)
+            </div>
           </div>
-        </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
+                <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
+              </FitText>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Time-of-day contextual card + greeting (returning users only).
