@@ -456,7 +456,14 @@ export const BestiaryView = ({
       {!elementalsDisabled && (() => {
         const stamps = rolledElementalAt || {};
         const items = [];
+        // Only include elementals the user has actually summoned via
+        // the lodestone (id present in seenElementalIds). The roll
+        // moment writes the id into rolledElementalIds + queues a
+        // glimpse banner; the timeline shouldn't pre-spoil what's
+        // still pulsing in the stone, only what the user has
+        // actually observed by tapping the lodestone.
         for (const a of earnedAttrs) {
+          if (!seenIds.has(a.id)) continue;
           const ts = stamps[a.id];
           items.push({
             id: a.id,
@@ -466,11 +473,26 @@ export const BestiaryView = ({
           });
         }
         for (const w of (wildElementals || [])) {
+          if (!seenIds.has(w.id)) continue;
           items.push({
             id: w.id,
             displayName: w.displayName || w.name,
             rarity: w.rarity,
             ts: typeof w.ts === "number" ? w.ts : 0,
+          });
+        }
+        // Unique creation-title elemental — counts as "summoned" once
+        // the omen card has been dismissed, since dismissing the omen
+        // is the user's first act of observing the stone. Stamped
+        // with the profile creation date so it sits at the bottom of
+        // the timeline as the originating moment, with later
+        // arrivals stacking above it.
+        if (creationCard && omenShown) {
+          items.push({
+            id: creationCard.id,
+            displayName: creationCard.displayName,
+            rarity: creationCard.rarity,
+            ts: typeof profile?.createdAt === "number" ? profile.createdAt : 0,
           });
         }
         if (items.length === 0) return null;
