@@ -51,52 +51,48 @@ function timeOfDayPhrase(ts) {
   if (h >= 20 && h < 23) return "in the evening";
   return "well into the dark";
 }
-function contextPhrase(ts, sessions, journalEntries, getBlend) {
+// Action-driven context phrase — the surface that triggered the
+// roll dictates how we narrate the moment, so a notebook visit
+// doesn't get described as "with chai in the cup" just because
+// the user happened to brew within the last hour.
+function contextPhraseForAction(action, ts, sessions, journalEntries, getBlend) {
   if (!ts) return null;
-  const NEAR_MS = 90 * 60 * 1000;
-  const RECENT_MS = 24 * 60 * 60 * 1000;
-  // Co-incident brew within ~90 min — the cup that was steeping
-  // when the lodestone caught the visitor.
-  for (const s of sessions || []) {
-    if (s.who !== "you") continue;
-    const t = s.brewedAt || 0;
-    if (!t) continue;
-    if (Math.abs(t - ts) <= NEAR_MS) {
-      const b = getBlend(s.blendId);
-      if (b?.name) return `with ${b.name.toLowerCase()} in the cup`;
+  const NEAR_MS = 30 * 60 * 1000;
+  if (action === "brew") {
+    // Find the brew co-incident with the roll. The brew action
+    // fires inside addSession, so the matching session is the most
+    // recent one before the timestamp.
+    for (const s of sessions || []) {
+      if (s.who !== "you") continue;
+      const t = s.brewedAt || 0;
+      if (!t) continue;
+      if (Math.abs(t - ts) <= NEAR_MS) {
+        const b = getBlend(s.blendId);
+        if (b?.name) return `with ${b.name.toLowerCase()} in the cup`;
+        return "with a fresh cup steeping";
+      }
     }
+    return "with a fresh cup steeping";
   }
-  // Co-incident journal entry — the writing turn that called it in.
-  for (const e of journalEntries || []) {
-    const t = e.ts || 0;
-    if (!t) continue;
-    if (Math.abs(t - ts) <= NEAR_MS) {
-      return "during a writing turn";
-    }
+  if (action === "journal") {
+    return "during a writing turn";
   }
-  // Recent dominant mood across the last few cups — the streak
-  // the visitor seems to have followed in.
-  const recent = (sessions || [])
-    .filter(s => s.who === "you" && (s.brewedAt || 0) > 0 && (s.brewedAt || 0) < ts && (ts - s.brewedAt) <= 5 * RECENT_MS)
-    .slice(0, 5);
-  if (recent.length >= 2) {
-    const moodCount = new Map();
-    for (const s of recent) {
-      const b = getBlend(s.blendId);
-      if (b?.mood) moodCount.set(b.mood, (moodCount.get(b.mood) || 0) + 1);
-    }
-    if (moodCount.size > 0) {
-      const top = [...moodCount.entries()].sort((a, b) => b[1] - a[1])[0];
-      return `during a ${top[0]} stretch`;
-    }
-  }
+  if (action === "visit:apothecary") return "while wandering the apothecary";
+  if (action === "visit:shelf")      return "while turning notebook pages";
+  if (action === "visit:home")       return "while crossing the threshold home";
+  if (action === "visit:profile")    return "while looking inward";
+  if (action === "pantry")           return "while sorting the pantry";
+  if (action === "favorite")         return "while marking a recipe to keep";
+  if (action === "compose")          return "while building a blend at the bench";
+  if (action === "any")              return "passing on its own course";
+  if (action === "milestone")        return "as a marker of a threshold crossed";
   return null;
 }
-function arrivalNote(ts, sessions, journalEntries, getBlend, isCreation) {
+function arrivalNote(ts, sessions, journalEntries, getBlend, isCreation, action) {
   if (isCreation) return "noted the day the lodestone was carved";
   if (!ts) return "from before the journal began";
   const t = timeOfDayPhrase(ts);
-  const c = contextPhrase(ts, sessions, journalEntries, getBlend);
+  const c = contextPhraseForAction(action, ts, sessions, journalEntries, getBlend);
   if (t && c) return `${t} — ${c}`;
   if (t) return t;
   if (c) return c;
@@ -128,6 +124,7 @@ export const BestiaryView = ({
   wildElementals = [],
   rolledElementalIds,
   rolledElementalAt,
+  rolledElementalAction,
   // Auto-open hint passed by App when the user taps "Log it" on the
   // end-of-brew glimpse card. The bestiary lands with this elemental's
   // arrival card already open, so the user doesn't have to tap a
@@ -598,7 +595,8 @@ export const BestiaryView = ({
             }}>
               {items.map((it, i) => {
                 const isCreation = it.id === "_creation";
-                const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation);
+                const action = (rolledElementalAction || {})[it.id];
+                const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation, action);
                 const dateLabel = fmtDate(it.ts);
                 return (
                   <div key={it.id} style={{
