@@ -387,10 +387,11 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       <div style={{
         flex: 1, minWidth: 0,
         // Reserve room at the bottom of the text column for the
-        // absolutely-positioned 'details' pill. Without this, longer
-        // descriptions wrap close to the pill's corner and the two
-        // start crashing into each other.
-        paddingBottom: 26,
+        // absolutely-positioned 'details' pill. Bumped to 38 (was
+        // 26) so wrapped descriptions get a clear gap before the
+        // pill — at 26 the last line of italic copy could still
+        // crowd the pill's edge.
+        paddingBottom: 38,
       }}>
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
@@ -437,14 +438,14 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         style={{
           position: "absolute",
           right: 10, bottom: 10,
-          display: "inline-flex", alignItems: "center", gap: 4,
-          padding: "3px 8px",
+          display: "inline-flex", alignItems: "center", gap: 3,
+          padding: "2px 7px",
           borderRadius: 999,
           background: expanded ? "rgba(176,84,47,0.10)" : `${crystal.gradient[0]}14`,
           border: `1px solid ${expanded ? theme.terra : crystal.gradient[0]}55`,
-          fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.14em",
+          fontFamily: ff.sans, fontSize: 8, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.terra,
-          fontWeight: 600,
+          fontWeight: 600, lineHeight: 1,
           animation: expanded ? "none" : "crystalExpandPulse 2.4s ease-in-out infinite",
           transition: "background 0.18s ease, border-color 0.18s ease",
         }}
