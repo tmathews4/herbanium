@@ -337,6 +337,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         all: "unset", cursor: "pointer", width: "100%", boxSizing: "border-box",
         display: "flex", alignItems: "center", gap: 14,
         padding: "12px 14px",
+        position: "relative",
       }}
     >
       <div style={{
@@ -386,12 +387,9 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
               }} title="locked at a pinned snapshot">· locked</span>
             )}
           </span>
-          <span style={{
-            fontSize: 9, color: theme.ash, opacity: 0.7,
-            transition: "transform 0.2s ease",
-            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            display: "inline-block",
-          }}>▾</span>
+          {/* Top-right chevron retired in favor of the more visible
+              bottom-right affordance below — keeps the eyebrow row
+              clean and makes the expand intent more discoverable. */}
         </div>
         <div style={{
           fontFamily: ff.serif, fontSize: 15, color: theme.ink,
@@ -406,6 +404,42 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
           {crystal.description}
         </div>
       </div>
+      {/* Bottom-right expand affordance — a small terra-tinted pill
+          with a caret that nudges the eye toward the breakdown
+          panel. Rotates 180° when expanded so the same affordance
+          reads as "tap to collapse" without re-anchoring the user
+          to a different control. The pill pulses gently when
+          collapsed (faint terra glow) so it reads as an invitation,
+          not just decoration; pulse stops when expanded since the
+          panel below is the visible answer to the invitation. */}
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          right: 10, bottom: 10,
+          display: "inline-flex", alignItems: "center", gap: 4,
+          padding: "3px 8px",
+          borderRadius: 999,
+          background: expanded ? "rgba(176,84,47,0.10)" : `${crystal.gradient[0]}14`,
+          border: `1px solid ${expanded ? theme.terra : crystal.gradient[0]}55`,
+          fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: theme.terra,
+          fontWeight: 600,
+          animation: expanded ? "none" : "crystalExpandPulse 2.4s ease-in-out infinite",
+          transition: "background 0.18s ease, border-color 0.18s ease",
+        }}
+      >
+        <span>{expanded ? "less" : "details"}</span>
+        <svg width="9" height="9" viewBox="0 0 9 9" fill="none"
+             style={{
+               transition: "transform 0.22s ease",
+               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+             }}>
+          <path d="M1.5 3 L4.5 6 L7.5 3" stroke={theme.terra}
+                strokeWidth="1.5" strokeLinecap="round"
+                strokeLinejoin="round" fill="none" />
+        </svg>
+      </span>
     </button>
     {/* Crystal-shift banner — surfaces the moment a user lands on
         the bestiary AFTER the crystal has changed identity (different
@@ -442,6 +476,10 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         4%   { opacity: 1; transform: translateY(0); }
         94%  { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(0); }
+      }
+      @keyframes crystalExpandPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.0); }
+        50%      { box-shadow: 0 0 0 3px rgba(176,84,47,0.16); }
       }
     `}</style>
     {expanded && (
