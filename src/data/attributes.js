@@ -1261,13 +1261,16 @@ export const ATTRIBUTES = [
     glyph: "leaf", tint: "sage", frame: "hex", accent: "dot",
     desc: "Velvet-coated burrower keeping a dozen tunnels in the same dark soil. Drawn by returning to the apothecarium, again and again.",
     earned: ctx => tabVisitedAtLeast(ctx, "apothecary", 10) },
+  // Internal tab id stays "shelf" — that's the long-lived visit-counter
+  // key from before the rename. User-facing copy uses the new name
+  // "notebook" so the description matches the bottom-tab label.
   { id: "first-shelf", name: "The Magpie-Visitor", rarity: "common", window: "lifetime",
     glyph: "scroll", tint: "ochre", frame: "circle", accent: "dot",
-    desc: "Black-and-white collector inspecting the small bright objects on the shelf. Drawn by your first visit to the shelf.",
+    desc: "Black-and-white collector turning the pages of an open book left in the rain. Drawn by your first visit to the notebook.",
     earned: ctx => tabVisitedAtLeast(ctx, "shelf", 1) },
   { id: "shelf-regular", name: "The Squirrel-Keeper", rarity: "uncommon", window: "lifetime",
     glyph: "scroll", tint: "terra", frame: "square", accent: "dot",
-    desc: "Bushy-tailed hoarder counting through the cache, again and again. Drawn by returning to the shelf to take stock.",
+    desc: "Bushy-tailed hoarder thumbing the same handful of pages, again and again. Drawn by returning to the notebook to take stock.",
     earned: ctx => tabVisitedAtLeast(ctx, "shelf", 10) },
   { id: "first-profile", name: "The Mirror-Hare", rarity: "common", window: "lifetime",
     glyph: "feather", tint: "plum", frame: "circle", accent: "rays",
@@ -1275,7 +1278,7 @@ export const ATTRIBUTES = [
     earned: ctx => tabVisitedAtLeast(ctx, "profile", 1) },
   { id: "four-corners", name: "The Wandering-Fox", rarity: "uncommon", window: "lifetime",
     glyph: "compass", tint: "ochre", frame: "diamond", accent: "rays",
-    desc: "Russet-coated walker who has set foot in every corner of the wood. Drawn by visiting all four surfaces — home, apothecary, shelf, profile.",
+    desc: "Russet-coated walker who has set foot in every corner of the wood. Drawn by visiting all four surfaces — home, apothecarium, notebook, profile.",
     earned: ctx =>
          tabVisitedAtLeast(ctx, "home", 1)
       && tabVisitedAtLeast(ctx, "apothecary", 1)
