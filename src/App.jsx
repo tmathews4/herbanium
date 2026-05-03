@@ -189,77 +189,111 @@ const PhoneFrame = ({ children }) => {
    without the card itself feeling busy.
    ────────────────────────────────────────────────────────────── */
 
-const ElementalGlimpseCard = ({ onLogIt, onLater }) => {
+/* ──────────────────────────────────────────────────────────────
+   ElementalGlimpseBanner — a top-of-screen ribbon that fades in
+   when a freshly-rolled elemental is waiting to be noted, and
+   stays visible across tab changes until the user taps it (which
+   navigates to the bestiary and auto-opens the arrival card) or
+   dismisses it (which leaves the elemental queued in the bestiary's
+   summon list — same end state as Log button there). The banner
+   replaces the older modal-card glimpse: less interrupting, easier
+   to ignore, and persists across navigation so a user who's mid-
+   thought when the roll lands isn't pushed off their current page.
+
+   Animation: fade-in on mount via CSS keyframe, fade-out triggered
+   by toggling the `dismissing` state which swaps the animation to
+   the reverse keyframe; onClick callbacks fire after the fade
+   so the screen doesn't flash a half-disappeared banner mid-route.
+   ────────────────────────────────────────────────────────────── */
+
+const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
+  const [dismissing, setDismissing] = React.useState(false);
+  const handle = (cb) => {
+    if (dismissing) return;
+    setDismissing(true);
+    // Wait for the 0.32s fade-out to land before firing the callback,
+    // so navigation/dismissal happens after the visual completes.
+    setTimeout(() => cb && cb(), 320);
+  };
   return (
     <div
-      onClick={onLater}
       style={{
-        position: "fixed", inset: 0, zIndex: 80,
-        background: "rgba(30,24,18,0.42)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 24,
-        animation: "glimpseFadeIn 0.28s ease",
+        position: "fixed",
+        top: "max(12px, env(safe-area-inset-top))",
+        left: 12, right: 12,
+        zIndex: 70,
+        display: "flex", justifyContent: "center",
+        pointerEvents: "none",
+        animation: dismissing
+          ? "glimpseBannerOut 0.32s ease forwards"
+          : "glimpseBannerIn 0.42s ease forwards",
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={() => handle(onLogIt)}
+        role="button"
         style={{
-          width: "100%", maxWidth: 360,
-          padding: "20px 22px 18px",
+          pointerEvents: "auto",
+          width: "100%", maxWidth: 460,
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "10px 12px",
           background: theme.cream,
-          border: `1px solid ${theme.ruleSoft}`,
-          borderRadius: 14,
-          boxShadow: "0 8px 32px rgba(30,24,18,0.18)",
-          textAlign: "center",
+          border: `1px solid ${theme.terra}`,
+          borderRadius: 12,
+          boxShadow: "0 6px 22px rgba(30,24,18,0.18)",
+          cursor: "pointer",
         }}
       >
-        {/* Glowing teacup — Kettle glyph with a pulsing terra halo. */}
+        {/* Glowing teacup — Kettle glyph in a pulsing terra halo so
+            the eye lands on it without the banner needing to grow. */}
         <div style={{
-          margin: "4px auto 14px",
-          width: 64, height: 64,
+          flexShrink: 0,
+          width: 38, height: 38,
           display: "flex", alignItems: "center", justifyContent: "center",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(176,84,47,0.25) 0%, transparent 70%)",
-          animation: "glimpseGlow 1.6s ease-in-out infinite",
+          background: "radial-gradient(circle, rgba(176,84,47,0.22) 0%, transparent 70%)",
+          animation: "glimpseGlow 1.8s ease-in-out infinite",
         }}>
-          <Kettle size={42} c={theme.terra} />
+          <Kettle size={26} c={theme.terra} />
         </div>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: theme.terra,
-          marginBottom: 6, fontWeight: 600,
-        }}>
-          something at the window
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.terra,
+            fontWeight: 600, marginBottom: 1,
+          }}>
+            an elemental at the window
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+            lineHeight: 1.35,
+          }}>
+            You glimpse an elemental — <em style={{ color: theme.terra, fontStyle: "normal" }}>tap to note it</em>
+          </div>
         </div>
-        <div style={{
-          fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-          lineHeight: 1.4, marginBottom: 4,
-        }}>
-          You glimpsed an elemental as the kettle settled.
-        </div>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-          color: theme.inkSoft, lineHeight: 1.5,
-          marginBottom: 18,
-        }}>
-          A shape passed at the edge of sight. Want to note it in your bestiary while it's still close?
-        </div>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-          <Button variant="ghost" onClick={onLater}>Later</Button>
-          <Button variant="primary" tone="terra" onClick={onLogIt}
-            style={{ padding: "10px 22px" }}>
-            Log it →
-          </Button>
-        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); handle(onLater); }}
+          aria-label="dismiss"
+          style={{
+            flexShrink: 0,
+            background: "transparent", border: "none",
+            color: theme.ash, fontSize: 18, lineHeight: 1,
+            padding: "4px 8px", cursor: "pointer",
+          }}
+        >×</button>
       </div>
       <style>{`
-        @keyframes glimpseFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
+        @keyframes glimpseBannerIn {
+          from { opacity: 0; transform: translateY(-12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes glimpseBannerOut {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(-12px); }
         }
         @keyframes glimpseGlow {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
-          50%      { box-shadow: 0 0 28px 6px rgba(176,84,47,0.45); }
+          50%      { box-shadow: 0 0 18px 4px rgba(176,84,47,0.42); }
         }
       `}</style>
     </div>
@@ -1525,16 +1559,16 @@ export default function App() {
           onDelete={deleteJournalEntry}
         />
       )}
-      {/* End-of-brew elemental glimpse — fires once after a logged
-          cup unlocks a new elemental. The card sits as a soft overlay
-          on top of Home (the user has already navigated there) so
-          the moment of "the brew called something in" is the last
-          thing the user sees, not a banner buried mid-screen. Tap
-          "log it" to navigate to the bestiary where the existing
-          arrival flow takes over; tap "later" to dismiss — the
-          elemental will still be waiting on the next bestiary visit. */}
+      {/* End-of-brew elemental glimpse banner — fires when a roll
+          lands a new elemental and persists across tab changes
+          until the user taps it (navigating to the bestiary with
+          the arrival card auto-opened) or dismisses it (the
+          elemental stays in the bestiary's pendingArrivals so the
+          Log/summon button there picks it up later). Less
+          interrupting than the previous modal card; the user can
+          keep doing whatever they were doing. */}
       {glimpseElemental && (
-        <ElementalGlimpseCard
+        <ElementalGlimpseBanner
           onLogIt={() => {
             // Pin the bestiary destination via composeView. ComposeScreen
             // has a deep-link useEffect that reads composeView on mount
@@ -1549,10 +1583,7 @@ export default function App() {
             setComposeView({ section: "shelf", mode: "bestiary", at: Date.now() });
             setShelfModeAction("bestiary");
             // Hand the bestiary the id of the just-glimpsed elemental
-            // so it auto-opens the arrival card on landing. The
-            // bestiary's effect handles the omen-not-shown gate, so
-            // brand-new users still see their creation-title intro
-            // first instead of getting whisked to a rolled creature.
+            // so it auto-opens the arrival card on landing.
             const ids = (glimpseElemental && glimpseElemental.ids) || [];
             if (ids.length > 0) setAutoOpenArrivalId(ids[0]);
             setGlimpseElemental(null);
