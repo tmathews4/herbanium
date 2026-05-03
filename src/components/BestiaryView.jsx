@@ -59,6 +59,7 @@ export const BestiaryView = ({
   setFeaturedElementals,
   wildElementals = [],
   rolledElementalIds,
+  rolledElementalAt,
   // Auto-open hint passed by App when the user taps "Log it" on the
   // end-of-brew glimpse card. The bestiary lands with this elemental's
   // arrival card already open, so the user doesn't have to tap a
@@ -432,6 +433,91 @@ export const BestiaryView = ({
           )}
         </div>
       )}
+
+      {/* Arrivals — date-stamped chronological list of every
+          elemental noted in this user's lodestone. Reframes the
+          collection from a trophy grid into a journal of visitors:
+          the most recent first, dropping in date markers, with a
+          small sigil + name beside each. Rolled-id timestamps come
+          from rolledElementalAt; legacy migrations carry a sentinel
+          0 timestamp and render as "earlier" instead of a date.
+          Wild elementals already carry their own ts. */}
+      {!elementalsDisabled && (() => {
+        const stamps = rolledElementalAt || {};
+        const items = [];
+        for (const a of earnedAttrs) {
+          const ts = stamps[a.id];
+          items.push({
+            id: a.id,
+            displayName: a.displayName,
+            rarity: a.rarity,
+            ts: typeof ts === "number" ? ts : 0,
+          });
+        }
+        for (const w of (wildElementals || [])) {
+          items.push({
+            id: w.id,
+            displayName: w.displayName || w.name,
+            rarity: w.rarity,
+            ts: typeof w.ts === "number" ? w.ts : 0,
+          });
+        }
+        if (items.length === 0) return null;
+        // Sort newest-first; legacy zeros land at the bottom.
+        items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        const fmtDate = (ts) => {
+          if (!ts) return "earlier";
+          const d = new Date(ts);
+          const now = new Date();
+          const sameDay = d.toDateString() === now.toDateString();
+          const yest = new Date(now); yest.setDate(now.getDate() - 1);
+          if (sameDay) return "today";
+          if (d.toDateString() === yest.toDateString()) return "yesterday";
+          const diffDays = Math.round((now - d) / (24 * 60 * 60 * 1000));
+          if (diffDays < 7) return `${diffDays} days ago`;
+          // Fall back to a short month-day; same-year entries omit
+          // the year so the column reads tight.
+          const sameYear = d.getFullYear() === now.getFullYear();
+          const opts = sameYear
+            ? { month: "short", day: "numeric" }
+            : { year: "numeric", month: "short", day: "numeric" };
+          return d.toLocaleDateString(undefined, opts);
+        };
+        return (
+          <div style={{ marginTop: 22 }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 8,
+            }}>arrivals</div>
+            <div style={{
+              border: `1px solid ${theme.ruleSoft}`,
+              borderRadius: 10,
+              background: theme.cream,
+              overflow: "hidden",
+            }}>
+              {items.map((it, i) => (
+                <div key={it.id} style={{
+                  padding: "9px 12px",
+                  borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                  display: "flex", alignItems: "baseline",
+                  justifyContent: "space-between", gap: 12,
+                  fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                }}>
+                  <span style={{
+                    overflow: "hidden", textOverflow: "ellipsis",
+                    whiteSpace: "nowrap", flex: 1, minWidth: 0,
+                  }}>{it.displayName}</span>
+                  <span style={{
+                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.04em",
+                    color: theme.ash, flexShrink: 0,
+                    fontStyle: it.ts ? "normal" : "italic",
+                  }}>{fmtDate(it.ts)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

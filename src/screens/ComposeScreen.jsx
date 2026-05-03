@@ -64,7 +64,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -95,14 +95,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // "forward" (Vibe) was retired; the Recipes filter on Shelf now
     // covers that flow. Any deep-link or stale persisted state with
     // "forward" gets snapped back to "reverse" by the section guard.
-    const apothecaryModes = new Set(["reverse", "compendium"]);
+    const apothecaryModes = new Set(["reverse", "compendium", "crystalarium"]);
     // "pantry" (Cabinet) was retired; pantry management is now a
     // toggle inside the Apothecary → Herbanium reference. Stale
     // persisted state lands back on the section's default.
     // Bestiary was previously a sub-toggle inside Journal; promoted to
     // a top-level Notebook sub-tab so it surfaces in the dock and gets
     // the discoverability the feature deserves.
-    const shelfModes      = new Set(["recipes", "journal", "bestiary"]);
+    const shelfModes      = new Set(["recipes", "journal"]);
     if (section === "apothecary" && !apothecaryModes.has(mode)) {
       setMode("reverse");
     } else if (section === "shelf" && !shelfModes.has(mode)) {
@@ -175,7 +175,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
-      {mode === "bestiary" && (
+      {/* Crystalarium — the apothecary's third sub-tab. Lives where
+          the lodestone sits and the elementals are observed. The
+          bestiary view itself is unchanged; only its address moved
+          from Notebook → Bestiary to Apothecarium → Crystalarium. */}
+      {mode === "crystalarium" && (
         <BestiaryView
           profile={profile}
           sessions={sessions}
@@ -192,6 +196,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           setFeaturedElementals={setFeaturedElementals}
           wildElementals={wildElementals}
           rolledElementalIds={rolledElementalIds}
+          rolledElementalAt={rolledElementalAt}
           autoOpenArrivalId={autoOpenArrivalId}
           onAutoOpenConsumed={onAutoOpenConsumed}
           lockedCrystal={lockedCrystal}

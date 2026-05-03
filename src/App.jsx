@@ -54,9 +54,9 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   // up when the user's on a section that has them. They share the
   // dock's background so the whole bottom bar reads as one GUI unit.
   const subTabs = tab === "apothecary"
-    ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
+    ? [["reverse", "Blend"], ["compendium", "Herbanium"], ["crystalarium", "Crystalarium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["journal", "Journal"], ["bestiary", "Bestiary"]]
+      ? [["recipes", "Recipes"], ["journal", "Journal"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode
@@ -843,6 +843,20 @@ export default function App() {
   const [rolledElementalIds, setRolledElementalIds] = usePersistedState("rolledElementalIds", new Set());
   const [lastElementalRollAt, setLastElementalRollAt] = usePersistedState("lastElementalRollAt", 0);
   const [legacyMigrated, setLegacyMigrated] = usePersistedState("elementalLegacyMigrated", false);
+  // Per-id timestamp of when each elemental was first noted. Powers
+  // the arrivals-list at the bottom of the crystalarium so the
+  // bestiary reads as a journal of visitors with dates rather than
+  // a trophy grid. Stored as plain object {id: ts} since
+  // usePersistedState's serializer handles Map → object faithfully
+  // but plain objects round-trip through localStorage with less
+  // ceremony.
+  const [rolledElementalAt, setRolledElementalAt] = usePersistedState("rolledElementalAt", {});
+  // Pity-timer streak counter — increments every time tryRollOnAction
+  // is invoked and the chance gate fails (or the cooldown passes
+  // without landing). Resets to 0 the moment a roll succeeds. The
+  // roller folds the streak into a multiplier (1× → 3× across 12-24
+  // dry actions) so users don't sit in silence for weeks at a time.
+  const [elementalDryStreak, setElementalDryStreak] = usePersistedState("elementalDryStreak", 0);
   // Locked-crystal snapshot. When non-null, the bestiary's lead
   // crystal renders this frozen configuration instead of computing
   // fresh from recent sessions/journalEntries — lets the user pin
@@ -967,6 +981,11 @@ export default function App() {
   // Apothecary → Herbanium reference itself.
   React.useEffect(() => {
     if (shelfMode === "pantry") setShelfMode("recipes");
+    // Bestiary moved out of Notebook and into Apothecarium →
+    // Crystalarium. Anyone landing with the old persisted mode
+    // gets bumped to Recipes; the crystalarium itself is still
+    // reachable via the dock's Apothecarium sub-tabs.
+    if (shelfMode === "bestiary") setShelfMode("recipes");
   }, [shelfMode]);
 
   // Tab navigation history. Every tab change pushes the previous
@@ -1151,6 +1170,16 @@ export default function App() {
         seeded.forEach(id => next.add(id));
         return next;
       });
+      // Stamp legacy migrations as "long ago" so the arrival
+      // timeline keeps them at the bottom — they were earned
+      // pre-feature so we don't have a real first-noted moment.
+      // Using a sentinel of 0 lets the renderer show "earlier" in
+      // place of a date instead of midnight 1970.
+      setRolledElementalAt(prev => {
+        const next = { ...(prev || {}) };
+        seeded.forEach(id => { if (next[id] == null) next[id] = 0; });
+        return next;
+      });
     }
     setLegacyMigrated(true);
   }, [legacyMigrated, sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits, elementalsDisabled, setLegacyMigrated, setRolledElementalIds]);
@@ -1161,17 +1190,79 @@ export default function App() {
   // rolledElementalIds and the bestiary's existing arrival flow
   // surfaces it as a "you glimpsed an elemental" moment. Internal
   // cooldown is enforced inside rollOnAction.
+  // Milestone elementals — guaranteed drops at meaningful thresholds.
+  // Mixes intentional engagement with RNG without diluting either:
+  // milestone-rolled creatures feel earned ("for your tenth cup");
+  // chance-rolled ones feel found. Each milestone only fires once
+  // (id stays in rolledElementalIds permanently after the first hit)
+  // and uses the existing predicate to detect the threshold so the
+  // catalog remains the single source of truth.
+  const MILESTONE_IDS = [
+    "first-brew",        // first logged cup
+    "ten-cups",          // 10 cups
+    "half-centurion",    // 50 cups
+    "centurion",         // 100 cups
+    "first-journal",     // first journal entry
+    "journal-streak",    // 7 days of journaling
+  ];
+  const tryMilestones = () => {
+    if (elementalsDisabled) return;
+    const earned = rolledElementalIds || new Set();
+    const ctx = buildAttributeContext({
+      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
+    });
+    const justEarned = [];
+    for (const id of MILESTONE_IDS) {
+      if (earned.has(id)) continue;
+      const attr = ATTRIBUTES.find(a => a.id === id);
+      if (!attr || typeof attr.earned !== "function") continue;
+      try {
+        if (attr.earned(ctx)) justEarned.push(id);
+      } catch {
+        // Predicate threw on a missing field — skip and try again later.
+      }
+    }
+    if (justEarned.length === 0) return;
+    setRolledElementalIds(prev => {
+      const next = new Set(prev || []);
+      justEarned.forEach(id => next.add(id));
+      return next;
+    });
+    setRolledElementalAt(prev => {
+      const next = { ...(prev || {}) };
+      const ts = Date.now();
+      justEarned.forEach(id => { if (next[id] == null) next[id] = ts; });
+      return next;
+    });
+  };
+
   const tryRollOnAction = (action) => {
     if (elementalsDisabled) return;
     const earned = rolledElementalIds || new Set();
-    const result = rollOnAction(action, ATTRIBUTES, earned, lastElementalRollAt || 0);
-    if (!result) return;
+    const result = rollOnAction(
+      action, ATTRIBUTES, earned,
+      lastElementalRollAt || 0,
+      Date.now(), Math.random,
+      elementalDryStreak || 0,
+    );
+    if (!result) {
+      // Dry attempt — bump the pity counter so the next eligible
+      // action gets a slightly higher chance. Cooldown rejections
+      // don't increment (they're not real attempts).
+      const sinceLast = Date.now() - (lastElementalRollAt || 0);
+      if (sinceLast >= 25 * 1000) {
+        setElementalDryStreak(s => (s || 0) + 1);
+      }
+      return;
+    }
     setRolledElementalIds(prev => {
       const next = new Set(prev || []);
       next.add(result.id);
       return next;
     });
+    setRolledElementalAt(prev => ({ ...(prev || {}), [result.id]: result.ts }));
     setLastElementalRollAt(result.ts);
+    setElementalDryStreak(0);
   };
 
   // Snapshot of currently-earned elemental ids — recomputed on every
@@ -1299,6 +1390,7 @@ export default function App() {
     hapticTap();
     tryRollWildElemental();
     tryRollOnAction("brew");
+    tryMilestones();
   };
 
   // Patch a pending session with mood data once the user fills in the
@@ -1402,6 +1494,7 @@ export default function App() {
     setJournalEntries(prev => [entry, ...(prev || [])]);
     tryRollWildElemental();
     tryRollOnAction("journal");
+    tryMilestones();
   };
   const deleteJournalEntry = (id) => {
     setJournalEntries(prev => (prev || []).filter(e => e.id !== id));
@@ -1568,7 +1661,7 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
@@ -1592,6 +1685,7 @@ export default function App() {
             n.add(next.id);
             return n;
           });
+          setRolledElementalAt(prev => ({ ...(prev || {}), [next.id]: Date.now() }));
           // Critical for the dev path on seed-loaded profiles where
           // some ids are pre-marked seen: clear the chosen id from
           // seenElementalIds so pendingArrivals includes it. Without
@@ -1793,24 +1887,20 @@ export default function App() {
       {glimpseElemental && (
         <ElementalGlimpseBanner
           onLogIt={() => {
-            // Pin the bestiary destination via composeView. ComposeScreen
-            // has a deep-link useEffect that reads composeView on mount
-            // and calls setMode(composeView.mode). If a previous "see
-            // all journal entries" deep-link left composeView pointing
-            // at section:"shelf"/mode:"journal", that effect would
-            // clobber our setShelfMode("bestiary") the moment the shelf
-            // ComposeScreen mounts and silently land the user on Journal.
-            // Replacing composeView with an explicit bestiary intent
-            // keeps the deep-link path coherent: the same useEffect
-            // that was fighting us now propagates "bestiary" instead.
-            setComposeView({ section: "shelf", mode: "bestiary", at: Date.now() });
-            setShelfModeAction("bestiary");
-            // Hand the bestiary the id of the just-glimpsed elemental
-            // so it auto-opens the arrival card on landing.
+            // Crystalarium lives under Apothecarium now (was Notebook →
+            // Bestiary). composeView pin + sub-mode set + tab switch
+            // are batched in the same event handler so the next render
+            // mounts directly into the crystalarium without flashing
+            // the previously-active apothecary mode (Blend or
+            // Compendium) for one frame.
+            setComposeView({ section: "apothecary", mode: "crystalarium", at: Date.now() });
+            setApothecaryMode("crystalarium");
+            // Hand the crystalarium the id of the just-glimpsed
+            // elemental so it auto-opens the arrival card on landing.
             const ids = (glimpseElemental && glimpseElemental.ids) || [];
             if (ids.length > 0) setAutoOpenArrivalId(ids[0]);
             setGlimpseElemental(null);
-            navigateTab("shelf");
+            navigateTab("apothecary");
           }}
           onLater={() => setGlimpseElemental(null)}
         />

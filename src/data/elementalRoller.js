@@ -73,6 +73,20 @@ function chanceMultiplier(earnedCount) {
   return 1.0;
 }
 
+// Pity-timer multiplier. Once a user goes 12+ actions without a
+// roll landing, the chance ramps up linearly so they don't sit in
+// silence for weeks. Caps at 3× by ~24 dry actions. Resets to 0
+// every time a roll lands. The intent isn't to rig the rate — it's
+// to round off the long-tail droughts that the small base chance
+// produces by accident.
+const PITY_START = 12;
+const PITY_FULL  = 24;
+function pityMultiplier(dryStreak) {
+  if (!dryStreak || dryStreak < PITY_START) return 1.0;
+  const t = Math.min(1, (dryStreak - PITY_START) / (PITY_FULL - PITY_START));
+  return 1.0 + 2.0 * t;  // 1.0 → 3.0 across the ramp
+}
+
 // Cooldown between rolls. Without this a user mashing tabs in
 // quick succession (a real pattern when navigating around) could
 // land 4 elementals in 10 seconds, which feels like a slot-machine
@@ -181,13 +195,16 @@ function pickByRarity(pool, rng = Math.random) {
  * @param {fn}     rng          — random source (default Math.random) — stub for tests
  * @returns {object|null}       — { id, action, ts } on hit, null otherwise
  */
-export function rollOnAction(action, allAttrs, earnedIds, lastRollAt, now = Date.now(), rng = Math.random) {
+export function rollOnAction(action, allAttrs, earnedIds, lastRollAt, now = Date.now(), rng = Math.random, dryStreak = 0) {
   if (!ELEMENTAL_ACTIONS.includes(action)) return null;
   if (now - (lastRollAt || 0) < ROLL_COOLDOWN_MS) return null;
   const pool = eligibleFor(action, allAttrs || [], earnedIds || new Set());
   if (pool.length === 0) return null;
   const earnedCount = (earnedIds && earnedIds.size) || 0;
-  const chance = Math.min(1, BASE_CHANCE * chanceMultiplier(earnedCount));
+  const chance = Math.min(
+    1,
+    BASE_CHANCE * chanceMultiplier(earnedCount) * pityMultiplier(dryStreak),
+  );
   if (rng() >= chance) return null;
   const picked = pickByRarity(pool, rng);
   if (!picked) return null;
