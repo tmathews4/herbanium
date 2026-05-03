@@ -1059,6 +1059,18 @@ export default function App() {
       // user lands on Apothecary, since both section instances of
       // ComposeScreen read the same composeView on mount.
       setComposeView({ ...arg, section: to, at: Date.now() });
+      // Eager sub-mode set, batched with the upcoming navigateTab.
+      // composeView's deep-link useEffect inside ComposeScreen
+      // also propagates `mode`, but that path runs only AFTER the
+      // first render under the new tab — meaning we'd render one
+      // frame of the section's previously-persisted sub-mode (e.g.
+      // the user's last Blend view) before flipping. Setting the
+      // mode here in the same batch as navigateTab avoids that
+      // intermediate flash entirely.
+      if (arg.mode) {
+        if (to === "apothecary") setApothecaryMode(arg.mode);
+        else if (to === "shelf") setShelfMode(arg.mode);
+      }
     }
     navigateTab(to);
   };
