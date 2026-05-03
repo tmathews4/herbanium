@@ -69,6 +69,11 @@ export const BestiaryView = ({
   // first time around.
   autoOpenArrivalId = null,
   onAutoOpenConsumed,
+  // Locked-crystal snapshot + setter. Null = crystal tracks live
+  // recent activity (default); object = crystal renders the pinned
+  // snapshot until the user unlocks it.
+  lockedCrystal,
+  setLockedCrystal,
   bestiaryHintShown,
   dismissBestiaryHint,
 }) => {
@@ -339,6 +344,8 @@ export const BestiaryView = ({
         journalEntries={journalEntries}
         getBlend={getBlend}
         profile={profile}
+        lockedCrystal={lockedCrystal}
+        setLockedCrystal={setLockedCrystal}
       />
 
       <div style={{

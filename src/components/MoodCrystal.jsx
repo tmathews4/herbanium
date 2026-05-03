@@ -213,11 +213,20 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
   );
 };
 
-export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => {
-  const crystal = React.useMemo(
+export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal }) => {
+  // Live crystal — always computed from current activity, even when
+  // locked, so we can stash a fresh snapshot into lockedCrystal when
+  // the user taps "lock at this state."
+  const liveCrystal = React.useMemo(
     () => computeMoodCrystal({ sessions, journalEntries, getBlend, profile }),
     [sessions, journalEntries, getBlend, profile],
   );
+  // Displayed crystal — the locked snapshot if one is set, otherwise
+  // the live crystal. The shape is the same in both cases so every
+  // downstream renderer (gradient, glow halos, name, description,
+  // detail panel) works without branching.
+  const isLocked = !!lockedCrystal;
+  const crystal = isLocked ? lockedCrystal : liveCrystal;
 
   // Stable id suffix so multiple crystals on a page don't share
   // the same gradient definition (would cause the second to render
@@ -264,6 +273,10 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
       setLastCrystalName(crystal.name);
       return;
     }
+    // While locked, the crystal isn't actually shifting from the
+    // user's perspective — they pinned it. Skip the flare so the
+    // band doesn't spuriously fire on every visit while locked.
+    if (isLocked) return;
     if (lastCrystalSig !== crystalSig) {
       setShifting(true);
       // Coerce shiftFrom to a real, trimmed string. If lastCrystalName
@@ -362,8 +375,17 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 4,
           display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          gap: 6,
         }}>
-          <span>your crystal</span>
+          <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
+            <span>your crystal</span>
+            {isLocked && (
+              <span style={{
+                fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.14em",
+                color: crystal.gradient[0], opacity: 0.85,
+              }} title="locked at a pinned snapshot">· locked</span>
+            )}
+          </span>
           <span style={{
             fontSize: 9, color: theme.ash, opacity: 0.7,
             transition: "transform 0.2s ease",
@@ -422,7 +444,19 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         100% { opacity: 0; transform: translateY(0); }
       }
     `}</style>
-    {expanded && <CrystalDetail crystal={crystal} profile={profile} />}
+    {expanded && (
+      <CrystalDetail
+        crystal={crystal}
+        profile={profile}
+        isLocked={isLocked}
+        liveCrystal={liveCrystal}
+        onToggleLock={() => {
+          if (!setLockedCrystal) return;
+          if (isLocked) setLockedCrystal(null);
+          else setLockedCrystal(liveCrystal);
+        }}
+      />
+    )}
     </div>
   );
 };
@@ -432,7 +466,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
 // their activity actually clusters; onboarding intent tells them
 // what they said they wanted, so they can see whether they're
 // brewing toward it or away from it.
-const CrystalDetail = ({ crystal, profile }) => {
+const CrystalDetail = ({ crystal, profile, isLocked, liveCrystal, onToggleLock }) => {
   const intentMoods   = (profile?.draw    || []).join(", ");
   const intentFlavors = (profile?.flavors || [])
     .map(e => Array.isArray(e) ? e[0] : e)
@@ -493,6 +527,45 @@ const CrystalDetail = ({ crystal, profile }) => {
           {intentMoods && intentFlavors && " and "}
           {intentFlavors && <em style={{ fontStyle: "normal", color: theme.terra }}>{intentFlavors}</em>}
           {" "}draw{(intentMoods.split(",").length + (intentFlavors ? intentFlavors.split(",").length : 0)) === 1 ? "s" : ""} you.
+        </div>
+      )}
+      {/* Lock toggle — pin the crystal at its current mood/flavor
+          profile so it stops drifting as recent activity changes,
+          or unlock to let it track live again. The button copy
+          flips with state so the action and its effect read cleanly.
+          Tap propagation is stopped so the surrounding header
+          collapse doesn't fire when this button is tapped. */}
+      {onToggleLock && (
+        <div style={{
+          marginTop: 10, paddingTop: 10,
+          borderTop: `1px dashed ${theme.ruleSoft}`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 12,
+        }}>
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+            color: theme.inkSoft, lineHeight: 1.4, flex: 1, minWidth: 0,
+          }}>
+            {isLocked
+              ? "pinned at this profile — the crystal won't drift while locked."
+              : "lock to pin this profile so the crystal holds steady, even if your brewing patterns shift."}
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
+            style={{
+              flexShrink: 0,
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.12em",
+              textTransform: "uppercase", fontWeight: 600,
+              padding: "6px 12px", borderRadius: 999,
+              border: `1px solid ${isLocked ? theme.terra : theme.ruleSoft}`,
+              background: isLocked ? theme.terra : "transparent",
+              color: isLocked ? theme.cream : theme.inkSoft,
+              cursor: "pointer",
+              transition: "background 0.18s ease, color 0.18s ease, border-color 0.18s ease",
+            }}
+          >
+            {isLocked ? "unlock" : "lock"}
+          </button>
         </div>
       )}
     </div>
