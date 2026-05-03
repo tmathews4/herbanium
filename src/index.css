@@ -125,7 +125,14 @@
     --sage:      #9DB582;
     --sage-deep: #C0D2AB;
     --ochre:     #C19450;
-    --terra:     #A86040;
+    /* Terra in dark mode pulls toward walnut-cocoa rather than the
+       coppery #A86040 it used to wear — that read too orange against
+       the forest-noir ground and clashed with the witchy-woods voice
+       of the rest of the palette. The new tone keeps warmth and
+       enough chroma to mark CTA buttons (Start brewing, Brew this
+       cup) but lands on the brown side of the scale, more leather/
+       walnut than copper/orange. */
+    --terra:     #8B6346;
     --bark:      #936B4C;
     --rose:      #C68567;
     --sky:       #88AEB7;
@@ -135,7 +142,7 @@
     --shadow-rgb: 0, 0, 0;
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
-    --terra-rgb:  168, 96, 64;
+    --terra-rgb:  139, 99, 70;
 
     /* Dark-mode hover fills — the rest accent (ink) is a light
        sage-cream, so the hover should be a *darker* dim of that to
@@ -143,7 +150,9 @@
        on hover instead made the button text vanish — bg #2A211A on
        dark forest, text the same dark forest. These keep contrast. */
     --ink-hover:    #C8D2C5;
-    --terra-hover:  #BB7050;
+    /* Terra hover: lifted walnut, distinguishable on hover without
+       reverting to the orange register. */
+    --terra-hover:  #A07A5A;
     --bark-hover:   #A47C5C;
 
     /* Family bars — vibrant variants sized between the muted light
