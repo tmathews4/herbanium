@@ -391,6 +391,26 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
           transition: "box-shadow 0.4s ease, opacity 0.3s ease",
           animation: summonReady ? "lodestoneSummonPulse 2.0s ease-in-out infinite" : undefined,
         }}>
+        {/* Continuous aura — a rhythmic breathing layer underneath
+            the crystal that pulses opacity 0.45 → 1.0 → 0.45 across
+            a slow 3.6s cycle. Sits behind the CrystalShape so it
+            adds a soft halo without competing with the state-driven
+            shadow ladder above (resting / activity pulse / shift
+            flare / summon-ready scale). The box-shadow uses the
+            primary gradient color at moderate alpha; opacity
+            keyframe handles the breathing. */}
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 4,
+            borderRadius: "50%",
+            boxShadow: `0 0 22px 6px ${crystal.gradient[0]}66`,
+            opacity: crystal.isFaint ? 0.3 : 0.65,
+            pointerEvents: "none",
+            animation: "lodestoneAuraBreath 3.6s ease-in-out infinite",
+          }}
+        />
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} />
         {/* Pending-arrivals badge — small terra dot with count,
             anchored at the top-right of the crystal halo. Visibility
@@ -540,6 +560,15 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       @keyframes lodestoneSummonPulse {
         0%, 100% { transform: scale(1); }
         50%      { transform: scale(1.06); }
+      }
+      /* Continuous aura breath — slow 3.6s opacity pulse on the
+         halo layer behind the crystal so the lodestone reads as
+         alive at all times rather than only flaring on events.
+         Subtle enough to read as "the stone is humming" rather
+         than asking for attention. */
+      @keyframes lodestoneAuraBreath {
+        0%, 100% { opacity: 0.40; }
+        50%      { opacity: 1.00; }
       }
     `}</style>
     {expanded && (
