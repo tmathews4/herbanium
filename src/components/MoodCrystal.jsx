@@ -243,21 +243,58 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
     }
   }, [activityCount, lastSeenCount, setLastSeenCount]);
 
+  // Crystal shift detection — when the crystal's identity actually
+  // changes (different name + different primary color), fire a longer
+  // multi-pulse "shift" animation and surface a small banner naming
+  // what changed. The activity-count pulse above only signals "you
+  // just brewed"; this signals "your crystal moved." We persist a
+  // signature of the LAST-SEEN crystal (name + gradient[0]) and
+  // compare; mismatch fires the shift mode and stores the previous
+  // signature so the banner can read it back ("from X to Y").
+  const crystalSig = `${crystal.name}|${crystal.gradient[0]}`;
+  const [lastCrystalSig, setLastCrystalSig] = usePersistedState("crystalLastSeenSig", "");
+  const [lastCrystalName, setLastCrystalName] = usePersistedState("crystalLastSeenName", "");
+  const [shifting, setShifting] = React.useState(false);
+  const [shiftFrom, setShiftFrom] = React.useState(null);
+  React.useEffect(() => {
+    // Don't fire on cold-start (no prior signature stored) — the
+    // first ever read of a crystal isn't a "shift," it's an arrival.
+    if (!lastCrystalSig) {
+      setLastCrystalSig(crystalSig);
+      setLastCrystalName(crystal.name);
+      return;
+    }
+    if (lastCrystalSig !== crystalSig) {
+      setShifting(true);
+      setShiftFrom(lastCrystalName || null);
+      const t = setTimeout(() => {
+        setShifting(false);
+        setLastCrystalSig(crystalSig);
+        setLastCrystalName(crystal.name);
+        // Clear the from-name a moment after the banner fades so a
+        // re-render doesn't re-display it.
+        setTimeout(() => setShiftFrom(null), 600);
+      }, 2400);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crystalSig]);
+
   // Tap to expand — opens a small detail panel below the card
   // showing what's powering the crystal: top families per axis
   // plus the user's onboarding intent for context.
   const [expanded, setExpanded] = React.useState(false);
 
-  // Pulse multiplier — when active, glow alphas roughly double so
-  // the crystal flares briefly. The CSS transition on the inner
-  // div eases the change in and back.
-  const pulseMul = pulsing ? 2 : 1;
+  // Pulse multiplier — shifting >> activity pulse > resting. Shift
+  // is a stronger flare so the crystal-identity-change reads as a
+  // bigger event than just "you brewed something."
+  const pulseMul = shifting ? 3 : (pulsing ? 2 : 1);
   // Halo alphas lifted hard for the fluorescent palette — the
   // crystal now reads as actively emitting light, not just tinted.
   // Resting state still distinguishable from the pulse state.
-  const innerAlpha = pulseMul === 2 ? "D0" : "85";  // 0xD0 ≈ 82%, 0x85 ≈ 52%
-  const outerAlpha = pulseMul === 2 ? "C0" : "78";  // 0xC0 ≈ 75%, 0x78 ≈ 47%
-  const ambAlpha   = pulseMul === 2 ? "70" : "3A";  // 0x70 ≈ 44%, 0x3A ≈ 23%
+  const innerAlpha = pulseMul === 3 ? "F0" : pulseMul === 2 ? "D0" : "85";  // 0xF0 ≈ 94%, D0 ≈ 82%, 85 ≈ 52%
+  const outerAlpha = pulseMul === 3 ? "E0" : pulseMul === 2 ? "C0" : "78";  // 0xE0 ≈ 88%, C0 ≈ 75%, 78 ≈ 47%
+  const ambAlpha   = pulseMul === 3 ? "90" : pulseMul === 2 ? "70" : "3A";  // 0x90 ≈ 56%, 70 ≈ 44%, 3A ≈ 23%
 
   return (
     <div style={{
@@ -337,6 +374,39 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         </div>
       </div>
     </button>
+    {/* Crystal-shift banner — surfaces the moment a user lands on
+        the bestiary AFTER the crystal has changed identity (different
+        name + different primary color than last seen). The 2.4s
+        animation flare above is the visual cue; this is the textual
+        cue that names what shifted. Fades out a beat after the flare
+        ends so the page settles back to the resting view. */}
+    {shifting && shiftFrom && (
+      <div style={{
+        margin: "0 14px 12px",
+        padding: "8px 10px 8px 12px",
+        borderLeft: `2px solid ${crystal.gradient[0]}`,
+        background: `${crystal.gradient[0]}11`,
+        borderRadius: "0 6px 6px 0",
+        fontFamily: ff.serif, fontSize: 12.5,
+        color: theme.ink, lineHeight: 1.45,
+        animation: "crystalShiftFade 2.4s ease",
+      }}>
+        <span style={{
+          fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: crystal.gradient[0],
+          marginRight: 8, fontWeight: 600,
+        }}>your crystal shifted</span>
+        from <em style={{ color: theme.inkSoft }}>{shiftFrom}</em> to <em style={{ color: theme.ink }}>{crystal.name}</em> — the last few cups changed which way it points.
+      </div>
+    )}
+    <style>{`
+      @keyframes crystalShiftFade {
+        0%   { opacity: 0; transform: translateY(-4px); }
+        15%  { opacity: 1; transform: translateY(0); }
+        85%  { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(0); }
+      }
+    `}</style>
     {expanded && <CrystalDetail crystal={crystal} profile={profile} />}
     </div>
   );

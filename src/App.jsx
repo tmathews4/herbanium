@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
@@ -6,6 +6,7 @@ import {
   materializeSeedJournalEntries, materializeSeedPlannerItems,
 } from "./data/seeds";
 import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
+import { Button } from "./components/layout";
 import { DemoHint } from "./components/DemoHint";
 import { FirstCupHintCard } from "./components/FirstCupHintCard";
 // Screens
@@ -25,6 +26,7 @@ import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
+import { buildAttributeContext, evaluateAttributes } from "./data/attributes";
 import { configureStatusBar, hapticTap } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
@@ -175,6 +177,94 @@ const PhoneFrame = ({ children }) => {
    Root app
    ────────────────────────────────────────────────────────────── */
 
+/* ──────────────────────────────────────────────────────────────
+   ElementalGlimpseCard — modal that appears at the end of a brew
+   when the just-logged cup has unlocked a new elemental. Soft
+   centered card on a faint backdrop, glowing teacup glyph + a short
+   prompt: "log it" navigates to the bestiary; "later" dismisses
+   without losing the find (the bestiary's pendingArrivals list
+   still has the elemental queued for the next visit).
+   The teacup glow is a CSS keyframe pulse so the eye lands on it
+   without the card itself feeling busy.
+   ────────────────────────────────────────────────────────────── */
+
+const ElementalGlimpseCard = ({ onLogIt, onLater }) => {
+  return (
+    <div
+      onClick={onLater}
+      style={{
+        position: "fixed", inset: 0, zIndex: 80,
+        background: "rgba(30,24,18,0.42)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+        animation: "glimpseFadeIn 0.28s ease",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 360,
+          padding: "20px 22px 18px",
+          background: theme.cream,
+          border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: 14,
+          boxShadow: "0 8px 32px rgba(30,24,18,0.18)",
+          textAlign: "center",
+        }}
+      >
+        {/* Glowing teacup — Kettle glyph with a pulsing terra halo. */}
+        <div style={{
+          margin: "4px auto 14px",
+          width: 64, height: 64,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(176,84,47,0.25) 0%, transparent 70%)",
+          animation: "glimpseGlow 1.6s ease-in-out infinite",
+        }}>
+          <Kettle size={42} c={theme.terra} />
+        </div>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.terra,
+          marginBottom: 6, fontWeight: 600,
+        }}>
+          something at the window
+        </div>
+        <div style={{
+          fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+          lineHeight: 1.4, marginBottom: 4,
+        }}>
+          You glimpsed an elemental as the kettle settled.
+        </div>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+          color: theme.inkSoft, lineHeight: 1.5,
+          marginBottom: 18,
+        }}>
+          A shape passed at the edge of sight. Want to note it in your bestiary while it's still close?
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+          <Button variant="ghost" onClick={onLater}>Later</Button>
+          <Button variant="primary" tone="terra" onClick={onLogIt}
+            style={{ padding: "10px 22px" }}>
+            Log it →
+          </Button>
+        </div>
+      </div>
+      <style>{`
+        @keyframes glimpseFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes glimpseGlow {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
+          50%      { box-shadow: 0 0 28px 6px rgba(176,84,47,0.45); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export default function App() {
   // URL flag: ?dev skips onboarding, loads SEED_MODES.power as starting state.
   // Useful for testing without going through onboarding every time localStorage
@@ -230,7 +320,19 @@ export default function App() {
   // as a plain object keyed by tab id ("home" | "apothecary" | "shelf"
   // | "profile") so it serializes cleanly without Set/Map gymnastics.
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
-  const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend" | "cup" | "entry"
+  const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
+  // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
+  // a new elemental, we surface a small "you glimpsed something" card
+  // before sending the user home. The card invites them to navigate
+  // to the bestiary to log the find. We track two pieces of state:
+  //   - glimpsePendingBefore: the set of earned-elemental ids captured
+  //     just before the new session was added, so the post-update
+  //     useEffect can compute the diff
+  //   - glimpseElemental: when set, the glimpse overlay renders. Holds
+  //     the first newly-earned elemental (others queue naturally on
+  //     the bestiary's pendingArrivals path)
+  const [glimpsePendingBefore, setGlimpsePendingBefore] = useState(null);
+  const [glimpseElemental, setGlimpseElemental] = useState(null);
   const [ingredientId, setIngredientId] = useState("chamomile");
   // Overlay history stack — back-button returns to the previous
   // overlay rather than dropping the user all the way out. Supports
@@ -798,6 +900,36 @@ export default function App() {
     setPantryIds(next);
   };
 
+  // Snapshot of currently-earned elemental ids — recomputed on every
+  // change to the inputs. Used by the end-of-brew glimpse path: capture
+  // the set just before addSession runs, then diff after the session +
+  // wild-roll state has settled to find what JUST became earned by
+  // this cup. Includes both attribute-based earns and wild rolls so
+  // either path can trigger the glimpse card.
+  const earnedElementalIds = useMemo(() => {
+    const ctx = buildAttributeContext({
+      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
+    });
+    const attrIds = evaluateAttributes(ctx).filter(a => a.earned).map(a => a.id);
+    const wildIds = (wildElementals || []).map(w => w.id);
+    return new Set([...attrIds, ...wildIds]);
+  }, [sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits, wildElementals]);
+
+  // Glimpse-detection effect — fires once per pending check, after the
+  // earned-elementals set has settled following addSession + the wild
+  // roll. Compares to the snapshot captured before the brew was logged;
+  // if anything new became earned, we set glimpseElemental so the
+  // overlay renders. Otherwise we just clear the pending flag and the
+  // home navigation already queued by LogScreen onSubmit takes over.
+  useEffect(() => {
+    if (!glimpsePendingBefore) return;
+    const newOnes = [...earnedElementalIds].filter(id => !glimpsePendingBefore.has(id));
+    if (newOnes.length > 0) {
+      setGlimpseElemental({ ids: newOnes });
+    }
+    setGlimpsePendingBefore(null);
+  }, [glimpsePendingBefore, earnedElementalIds]);
+
   // Append a newly-logged cup to the sessions list. Called when the user
   // completes a brew+log cycle. This is what makes newly-brewed cups show
   // up in Home's "Your cups, lately" and Apothecary's history.
@@ -1227,6 +1359,11 @@ export default function App() {
           targetMoods={session.targetMoods}
           currentMoods={session.currentMoods}
           onSubmit={(logData) => {
+            // Capture the earned-elementals snapshot BEFORE addSession
+            // runs so the post-update useEffect can diff and decide
+            // whether a "you glimpsed an elemental" overlay should
+            // intercept the home navigation.
+            setGlimpsePendingBefore(new Set(earnedElementalIds));
             addSession({
               blend: session.blend,
               intent: session.intent,
@@ -1296,6 +1433,24 @@ export default function App() {
           entry={(journalEntries || []).find(e => e.id === entryOverlayId)}
           onClose={popOverlayHistory}
           onDelete={deleteJournalEntry}
+        />
+      )}
+      {/* End-of-brew elemental glimpse — fires once after a logged
+          cup unlocks a new elemental. The card sits as a soft overlay
+          on top of Home (the user has already navigated there) so
+          the moment of "the brew called something in" is the last
+          thing the user sees, not a banner buried mid-screen. Tap
+          "log it" to navigate to the bestiary where the existing
+          arrival flow takes over; tap "later" to dismiss — the
+          elemental will still be waiting on the next bestiary visit. */}
+      {glimpseElemental && (
+        <ElementalGlimpseCard
+          onLogIt={() => {
+            setGlimpseElemental(null);
+            setTab("shelf");
+            setShelfMode("bestiary");
+          }}
+          onLater={() => setGlimpseElemental(null)}
         />
       )}
     </div>
