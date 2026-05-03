@@ -233,7 +233,7 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }
   );
 };
 
-export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal }) => {
+export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal, summonReady = false, summonPendingCount = 0, onSummon }) => {
   // Live crystal — always computed from current activity, even when
   // locked, so we can stash a fresh snapshot into lockedCrystal when
   // the user taps "lock at this state."
@@ -360,36 +360,56 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         position: "relative",
       }}
     >
-      <div style={{
-        flexShrink: 0,
-        // Faint backplate behind the crystal so the shape pops on
-        // both the cream light surface and the forest-noir dark
-        // surface. Uses the primary color at low alpha — the back
-        // glow tints subtly without competing with the shape.
-        background: `radial-gradient(ellipse at center, ${crystal.gradient[0]}22 0%, transparent 70%)`,
-        borderRadius: "50%",
-        padding: 4,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        // Two-layer glow, each tied to a phrase in the description:
-        //   inner aura → secondary current color ("drifting into X")
-        //   outer halo → trailing forecast ("with faint X ahead")
-        // Either can be missing (null) and the corresponding layer
-        // drops cleanly. Always include a faint primary-color
-        // ambient at the very inside so the shape pops on the page
-        // even when both axis-glows are absent. Pulse boosts every
-        // alpha briefly when the user just logged a new entry.
-        boxShadow: [
-          `0 0 ${pulsing ? 18 : 12}px 2px ${crystal.gradient[0]}${ambAlpha}`,
-          crystal.innerGlowColor && `0 0 ${pulsing ? 28 : 20}px 4px ${crystal.innerGlowColor}${innerAlpha}`,
-          crystal.outerGlowColor && `0 0 ${pulsing ? 50 : 38}px 10px ${crystal.outerGlowColor}${outerAlpha}`,
-        ].filter(Boolean).join(", "),
-        // Faint crystals (profile-only forecast) render dimmer so
-        // the visual matches the description's "still gathering"
-        // voice — the color is there, just not yet realized.
-        opacity: crystal.isFaint ? 0.55 : 1,
-        transition: "box-shadow 0.4s ease, opacity 0.3s ease",
-      }}>
+      <div
+        onClick={summonReady ? (e) => { e.stopPropagation(); if (onSummon) onSummon(); } : undefined}
+        role={summonReady ? "button" : undefined}
+        title={summonReady ? "tap the lodestone to observe what's pulsing" : undefined}
+        style={{
+          flexShrink: 0,
+          position: "relative",
+          // Faint backplate behind the crystal so the shape pops on
+          // both the cream light surface and the forest-noir dark
+          // surface. Uses the primary color at low alpha — the back
+          // glow tints subtly without competing with the shape.
+          background: `radial-gradient(ellipse at center, ${crystal.gradient[0]}22 0%, transparent 70%)`,
+          borderRadius: "50%",
+          padding: 4,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: summonReady ? "pointer" : "default",
+          // Two-layer glow, each tied to a phrase in the description.
+          // When a summon is ready (pendingArrivals waiting), a
+          // separate keyframe animation overlays a rhythmic ring
+          // expansion in terra so the lodestone reads as actively
+          // calling — distinct from the resting glow + activity
+          // pulse + identity-shift flare.
+          boxShadow: [
+            `0 0 ${pulsing ? 18 : 12}px 2px ${crystal.gradient[0]}${ambAlpha}`,
+            crystal.innerGlowColor && `0 0 ${pulsing ? 28 : 20}px 4px ${crystal.innerGlowColor}${innerAlpha}`,
+            crystal.outerGlowColor && `0 0 ${pulsing ? 50 : 38}px 10px ${crystal.outerGlowColor}${outerAlpha}`,
+          ].filter(Boolean).join(", "),
+          opacity: crystal.isFaint ? 0.55 : 1,
+          transition: "box-shadow 0.4s ease, opacity 0.3s ease",
+          animation: summonReady ? "lodestoneSummonPulse 2.0s ease-in-out infinite" : undefined,
+        }}>
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} />
+        {/* Pending-arrivals badge — small terra dot with count,
+            anchored at the top-right of the crystal halo when
+            something is waiting to be summoned. Reads at a glance
+            as "this lodestone has visitors to introduce." Hidden
+            otherwise so the resting state stays clean. */}
+        {summonReady && summonPendingCount > 0 && (
+          <span style={{
+            position: "absolute",
+            top: 0, right: 0,
+            minWidth: 18, height: 18, padding: "0 5px",
+            borderRadius: 999,
+            background: theme.terra, color: theme.cream,
+            fontFamily: ff.sans, fontSize: 10, fontWeight: 700,
+            letterSpacing: "0.02em",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 0 0 2px " + theme.cream,
+          }}>{summonPendingCount}</span>
+        )}
       </div>
       <div style={{
         flex: 1, minWidth: 0,
@@ -508,6 +528,14 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       @keyframes crystalExpandPulse {
         0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.0); }
         50%      { box-shadow: 0 0 0 3px rgba(176,84,47,0.16); }
+      }
+      /* Summon-ready pulse — overlays a rhythmic terra ring on the
+         lodestone's halo to indicate visitors waiting to be observed.
+         Distinct from the activity pulse + identity-shift flare so
+         users can read "something to summon" at a glance. */
+      @keyframes lodestoneSummonPulse {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.06); }
       }
     `}</style>
     {expanded && (

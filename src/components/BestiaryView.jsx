@@ -347,6 +347,9 @@ export const BestiaryView = ({
         profile={profile}
         lockedCrystal={lockedCrystal}
         setLockedCrystal={setLockedCrystal}
+        summonReady={summonReady && !summonTarget}
+        summonPendingCount={!omenShown ? 1 : pendingArrivals.length}
+        onSummon={onSummonClick}
       />
 
       <div style={{
@@ -354,26 +357,21 @@ export const BestiaryView = ({
         gap: 10, marginBottom: 6,
       }}>
         <SectionLabel n="i">Elemental Bestiary</SectionLabel>
-        <button
-          onClick={onSummonClick}
-          disabled={!summonReady || !!summonTarget}
-          style={{
-            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: summonExhausted ? theme.ash : theme.cream,
-            background: summonExhausted ? "transparent" : theme.terra,
-            border: `1px solid ${summonExhausted ? theme.rule : theme.terra}`,
-            borderRadius: 999, padding: "6px 12px",
-            cursor: summonExhausted ? "default" : "pointer",
-            opacity: summonExhausted ? 0.55 : 1,
-            transition: "all 0.18s ease",
-          }}
-        >
+        {/* Pending-count read replaces the old Log button — the
+            lodestone above is now the tap target for summoning, and
+            this row just reports how many arrivals are waiting (or
+            says so when none are). */}
+        <span style={{
+          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: summonExhausted ? theme.ash : theme.terra,
+          opacity: summonExhausted ? 0.55 : 1,
+        }}>
           {summonExhausted ? "no specimen waiting"
-            : !omenShown ? "log your first"
-            : pendingArrivals.length > 1 ? `log (${pendingArrivals.length} waiting)`
-            : "log elemental"}
-        </button>
+            : !omenShown ? "creation waiting"
+            : pendingArrivals.length > 1 ? `${pendingArrivals.length} waiting`
+            : "1 waiting"}
+        </span>
       </div>
       <div style={{
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
@@ -381,8 +379,9 @@ export const BestiaryView = ({
       }}>
         A fun side game — elementals find you based on your mood
         history and brewing patterns. Tap{" "}
-        <em style={{ color: theme.terra, fontStyle: "normal" }}>Log</em>{" "}
-        to observe the next one waiting. Not for you? Turn it off in
+        <em style={{ color: theme.terra, fontStyle: "normal" }}>your lodestone</em>{" "}
+        when it pulses to observe the next visitor. Not for you?
+        Turn it off in
         <em style={{ color: theme.terra, fontStyle: "normal" }}> Profile → Preferences</em>.
       </div>
 

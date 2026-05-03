@@ -244,11 +244,12 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           cursor: "pointer",
         }}
       >
-        {/* Pulsing window — small four-pane casement glyph standing in
-            for "an elemental at the window." The outer halo pulses on
-            the same 1.8s cycle as before; the window's interior fill
-            also pulses so the panes look like backlit glass with
-            something passing on the other side. */}
+        {/* Pulsing crystal — small bipyramid glyph standing in for
+            the lodestone's pulse. Mirrors the larger lodestone in
+            the Visitors view so the banner reads as "your crystal
+            is calling" — the same shape catching the same kind of
+            light, just at icon scale. The interior fill pulses on
+            the same 1.8s cycle as the surrounding halo. */}
         <div style={{
           flexShrink: 0,
           width: 38, height: 38,
@@ -258,29 +259,30 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           animation: "glimpseGlow 1.8s ease-in-out infinite",
         }}>
           <svg width="22" height="26" viewBox="0 0 22 26" aria-hidden>
-            {/* Backlit pane fill — a soft terra wash that pulses
-                between low and high opacity so the window reads as
-                briefly illuminated, like a candle behind it. The
-                rect is taller than wide (14×22) so the silhouette
-                reads as a casement window rather than a square
-                frame. */}
-            <rect
-              x="4" y="2" width="14" height="22" rx="1.2"
+            {/* Crystal silhouette — six-faceted bipyramid scaled down
+                from the bestiary's lodestone shape so the banner
+                reads as "your lodestone is pulsing" at icon size. */}
+            <polygon
+              points="11,2 18,8 17,18 11,24 5,18 4,8"
               fill={theme.terra}
               style={{
-                animation: "glimpseWindowPaneGlow 1.8s ease-in-out infinite",
+                animation: "glimpseCrystalPaneGlow 1.8s ease-in-out infinite",
                 transformOrigin: "center",
               }}
             />
-            {/* Casement frame — outer + cross bars in solid terra so
-                the silhouette stays legible even when the pane fill
-                is at its low-opacity moment. */}
-            <rect
-              x="4" y="2" width="14" height="22" rx="1.2"
-              fill="none" stroke={theme.terra} strokeWidth="1.8"
+            <polygon
+              points="11,2 18,8 17,18 11,24 5,18 4,8"
+              fill="none" stroke={theme.terra} strokeWidth="1.6"
+              strokeLinejoin="round"
             />
-            <line x1="11" y1="2" x2="11" y2="24" stroke={theme.terra} strokeWidth="1.5" />
-            <line x1="4"  y1="13" x2="18" y2="13" stroke={theme.terra} strokeWidth="1.5" />
+            {/* Inner facet edges so the shape reads as cut, not flat. */}
+            <polyline
+              points="4,8 11,11 18,8"
+              fill="none" stroke={theme.terra} strokeOpacity="0.5"
+              strokeWidth="0.9"
+            />
+            <line x1="11" y1="11" x2="11" y2="24"
+              stroke={theme.terra} strokeOpacity="0.4" strokeWidth="0.9" />
           </svg>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -289,13 +291,13 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
             textTransform: "uppercase", color: theme.terra,
             fontWeight: 600, marginBottom: 1,
           }}>
-            an elemental at the window
+            your lodestone is pulsing
           </div>
           <div style={{
             fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
             lineHeight: 1.35,
           }}>
-            You glimpse an elemental — <em style={{ color: theme.terra, fontStyle: "normal" }}>tap to note it</em>
+            Something stirs in the stone — <em style={{ color: theme.terra, fontStyle: "normal" }}>tap to visit</em>
           </div>
         </div>
         <button
@@ -322,9 +324,9 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
           50%      { box-shadow: 0 0 18px 4px rgba(176,84,47,0.42); }
         }
-        @keyframes glimpseWindowPaneGlow {
-          0%, 100% { fill-opacity: 0.10; }
-          50%      { fill-opacity: 0.45; }
+        @keyframes glimpseCrystalPaneGlow {
+          0%, 100% { fill-opacity: 0.18; }
+          50%      { fill-opacity: 0.55; }
         }
       `}</style>
     </div>
@@ -1894,14 +1896,14 @@ export default function App() {
             // Visitors). composeView pin + sub-mode set + tab switch
             // are batched in the same event handler so the next render
             // mounts directly into Visitors without flashing the
-            // previously-active shelf mode (Recipes or Journal) for
-            // one frame.
+            // previously-active shelf mode for one frame.
+            //
+            // The banner no longer auto-opens the arrival card —
+            // that became the lodestone's job. The user lands on
+            // Visitors, sees the lodestone pulsing in place, and
+            // taps the stone itself to summon the arrival.
             setComposeView({ section: "shelf", mode: "visitors", at: Date.now() });
             setShelfMode("visitors");
-            // Hand the visitors view the id of the just-glimpsed
-            // elemental so it auto-opens the arrival card on landing.
-            const ids = (glimpseElemental && glimpseElemental.ids) || [];
-            if (ids.length > 0) setAutoOpenArrivalId(ids[0]);
             setGlimpseElemental(null);
             navigateTab("shelf");
           }}
