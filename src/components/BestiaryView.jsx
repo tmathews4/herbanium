@@ -348,7 +348,19 @@ export const BestiaryView = ({
         lockedCrystal={lockedCrystal}
         setLockedCrystal={setLockedCrystal}
         summonReady={summonReady && !summonTarget}
-        summonPendingCount={!omenShown ? 1 : pendingArrivals.length}
+        // Pending count stays honest while an arrival card is open:
+        // subtract one for the visitor currently being observed so
+        // the badge reads "the rest of what's still waiting" instead
+        // of disappearing or counting the open card. On the omen
+        // path (no arrivals yet, just the creation intro), keep at 1
+        // until the omen is dismissed.
+        summonPendingCount={
+          summonTarget?.kind === "arrival"
+            ? Math.max(0, pendingArrivals.length - 1)
+            : summonTarget?.kind === "omen"
+              ? 0
+              : (!omenShown ? 1 : pendingArrivals.length)
+        }
         onSummon={onSummonClick}
       />
 

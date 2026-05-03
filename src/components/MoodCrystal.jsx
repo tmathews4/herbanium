@@ -393,11 +393,14 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         }}>
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} />
         {/* Pending-arrivals badge — small terra dot with count,
-            anchored at the top-right of the crystal halo when
-            something is waiting to be summoned. Reads at a glance
-            as "this lodestone has visitors to introduce." Hidden
-            otherwise so the resting state stays clean. */}
-        {summonReady && summonPendingCount > 0 && (
+            anchored at the top-right of the crystal halo. Visibility
+            is decoupled from summonReady so the badge persists
+            behind an open arrival card and updates down as the user
+            views each visitor: the parent passes a count that
+            already excludes the one currently being observed, so
+            tapping with 3 waiting flips the badge to 2 immediately
+            and so on. Hidden once the count hits zero. */}
+        {summonPendingCount > 0 && (
           <span style={{
             position: "absolute",
             top: 0, right: 0,
@@ -408,6 +411,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
             letterSpacing: "0.02em",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 0 0 2px " + theme.cream,
+            transition: "opacity 0.18s ease",
           }}>{summonPendingCount}</span>
         )}
       </div>
