@@ -95,14 +95,14 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // "forward" (Vibe) was retired; the Recipes filter on Shelf now
     // covers that flow. Any deep-link or stale persisted state with
     // "forward" gets snapped back to "reverse" by the section guard.
-    const apothecaryModes = new Set(["reverse", "compendium", "crystalarium"]);
+    const apothecaryModes = new Set(["reverse", "compendium"]);
     // "pantry" (Cabinet) was retired; pantry management is now a
     // toggle inside the Apothecary → Herbanium reference. Stale
     // persisted state lands back on the section's default.
     // Bestiary was previously a sub-toggle inside Journal; promoted to
     // a top-level Notebook sub-tab so it surfaces in the dock and gets
     // the discoverability the feature deserves.
-    const shelfModes      = new Set(["recipes", "journal"]);
+    const shelfModes      = new Set(["recipes", "journal", "visitors"]);
     if (section === "apothecary" && !apothecaryModes.has(mode)) {
       setMode("reverse");
     } else if (section === "shelf" && !shelfModes.has(mode)) {
@@ -175,11 +175,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
       )}
 
-      {/* Crystalarium — the apothecary's third sub-tab. Lives where
-          the lodestone sits and the elementals are observed. The
-          bestiary view itself is unchanged; only its address moved
-          from Notebook → Bestiary to Apothecarium → Crystalarium. */}
-      {mode === "crystalarium" && (
+      {/* Visitors — the notebook's third sub-tab. The lodestone
+          plus the journal of observed elementals. Notebook is the
+          collection-and-record register (Recipes / Journal /
+          Visitors); the apothecary stays focused on the active
+          making tools (Blend / Herbanium reference). */}
+      {mode === "visitors" && (
         <BestiaryView
           profile={profile}
           sessions={sessions}

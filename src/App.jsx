@@ -54,9 +54,9 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   // up when the user's on a section that has them. They share the
   // dock's background so the whole bottom bar reads as one GUI unit.
   const subTabs = tab === "apothecary"
-    ? [["reverse", "Blend"], ["compendium", "Herbanium"], ["crystalarium", "Crystalarium"]]
+    ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["journal", "Journal"]]
+      ? [["recipes", "Recipes"], ["journal", "Journal"], ["visitors", "Visitors"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode
@@ -973,6 +973,10 @@ export default function App() {
   // state from landing on a removed sub-tab.
   React.useEffect(() => {
     if (apothecaryMode === "forward") setApothecaryMode("reverse");
+    // The Crystalarium experiment briefly lived here; rolled back
+    // to Notebook → Visitors. Bump anyone persisted there back to
+    // the apothecarium's default Blend mode.
+    if (apothecaryMode === "crystalarium") setApothecaryMode("reverse");
   }, [apothecaryMode]);
   const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");
   // Migrate users who had Cabinet (mode "pantry") persisted from
@@ -981,11 +985,10 @@ export default function App() {
   // Apothecary → Herbanium reference itself.
   React.useEffect(() => {
     if (shelfMode === "pantry") setShelfMode("recipes");
-    // Bestiary moved out of Notebook and into Apothecarium →
-    // Crystalarium. Anyone landing with the old persisted mode
-    // gets bumped to Recipes; the crystalarium itself is still
-    // reachable via the dock's Apothecarium sub-tabs.
-    if (shelfMode === "bestiary") setShelfMode("recipes");
+    // The Bestiary sub-tab is now called "Visitors" — same view,
+    // same content, friendlier label. Migrate any persisted
+    // "bestiary" mode forward.
+    if (shelfMode === "bestiary") setShelfMode("visitors");
   }, [shelfMode]);
 
   // Tab navigation history. Every tab change pushes the previous
@@ -1661,8 +1664,8 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // bestiary will treat the tap-through as a real first
@@ -1887,20 +1890,20 @@ export default function App() {
       {glimpseElemental && (
         <ElementalGlimpseBanner
           onLogIt={() => {
-            // Crystalarium lives under Apothecarium now (was Notebook →
-            // Bestiary). composeView pin + sub-mode set + tab switch
+            // Visitors lives under Notebook (Recipes / Journal /
+            // Visitors). composeView pin + sub-mode set + tab switch
             // are batched in the same event handler so the next render
-            // mounts directly into the crystalarium without flashing
-            // the previously-active apothecary mode (Blend or
-            // Compendium) for one frame.
-            setComposeView({ section: "apothecary", mode: "crystalarium", at: Date.now() });
-            setApothecaryMode("crystalarium");
-            // Hand the crystalarium the id of the just-glimpsed
+            // mounts directly into Visitors without flashing the
+            // previously-active shelf mode (Recipes or Journal) for
+            // one frame.
+            setComposeView({ section: "shelf", mode: "visitors", at: Date.now() });
+            setShelfMode("visitors");
+            // Hand the visitors view the id of the just-glimpsed
             // elemental so it auto-opens the arrival card on landing.
             const ids = (glimpseElemental && glimpseElemental.ids) || [];
             if (ids.length > 0) setAutoOpenArrivalId(ids[0]);
             setGlimpseElemental(null);
-            navigateTab("apothecary");
+            navigateTab("shelf");
           }}
           onLater={() => setGlimpseElemental(null)}
         />
