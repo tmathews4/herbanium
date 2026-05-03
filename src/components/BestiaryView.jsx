@@ -599,34 +599,33 @@ export const BestiaryView = ({
               {items.map((it, i) => {
                 const isCreation = it.id === "_creation";
                 const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation);
+                const dateLabel = fmtDate(it.ts);
                 return (
                   <div key={it.id} style={{
                     padding: "9px 12px 10px",
                     borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                    textAlign: "left",
                   }}>
+                    {/* Name on its own line, left-aligned. The date
+                        moves down into the note line so the row reads
+                        as a journal stamp ("yesterday · at dusk —
+                        with chai in the cup") rather than a
+                        right-justified table. */}
                     <div style={{
-                      display: "flex", alignItems: "baseline",
-                      justifyContent: "space-between", gap: 12,
                       fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                      lineHeight: 1.3,
+                      overflow: "hidden", textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}>{it.displayName}</div>
+                    <div style={{
+                      marginTop: 2,
+                      fontFamily: ff.serif, fontStyle: "italic",
+                      fontSize: 11.5, color: theme.ash,
+                      lineHeight: 1.4,
                     }}>
-                      <span style={{
-                        overflow: "hidden", textOverflow: "ellipsis",
-                        whiteSpace: "nowrap", flex: 1, minWidth: 0,
-                      }}>{it.displayName}</span>
-                      <span style={{
-                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.04em",
-                        color: theme.ash, flexShrink: 0,
-                        fontStyle: it.ts ? "normal" : "italic",
-                      }}>{fmtDate(it.ts)}</span>
+                      <span style={{ fontStyle: it.ts ? "italic" : "italic" }}>{dateLabel}</span>
+                      {note && <> · {note}</>}
                     </div>
-                    {note && (
-                      <div style={{
-                        marginTop: 2,
-                        fontFamily: ff.serif, fontStyle: "italic",
-                        fontSize: 11.5, color: theme.ash,
-                        lineHeight: 1.4,
-                      }}>{note}</div>
-                    )}
                   </div>
                 );
               })}
