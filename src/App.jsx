@@ -300,6 +300,109 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
   );
 };
 
+/* ──────────────────────────────────────────────────────────────
+   BrewTimerBanner — top-of-screen ribbon shown while the steep
+   timer is minimized. Lets the user navigate the rest of the app
+   while their brew runs. Tap to restore the steep overlay; the
+   timer never paused, so the countdown the banner shows is the
+   same value the steep page would show on restore.
+   ────────────────────────────────────────────────────────────── */
+
+const mmssShort = (s) => {
+  const total = Math.max(0, Math.round(s));
+  const m = Math.floor(total / 60);
+  const r = total % 60;
+  return `${m}:${r.toString().padStart(2, "0")}`;
+};
+
+const BrewTimerBanner = ({ blendName, remaining, onTap }) => {
+  const ready = remaining <= 0;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "max(12px, env(safe-area-inset-top))",
+        left: 12, right: 12,
+        zIndex: 70,
+        display: "flex", justifyContent: "center",
+        pointerEvents: "none",
+        animation: "brewTimerBannerIn 0.32s ease forwards",
+      }}
+    >
+      <div
+        onClick={onTap}
+        role="button"
+        style={{
+          pointerEvents: "auto",
+          width: "100%", maxWidth: 460,
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "10px 12px",
+          background: theme.cream,
+          border: `1px solid ${ready ? theme.sageDeep : theme.terra}`,
+          borderRadius: 12,
+          boxShadow: "0 6px 22px rgba(30,24,18,0.18)",
+          cursor: "pointer",
+        }}
+      >
+        {/* Pulsing kettle while brewing; steady sage when ready. */}
+        <div style={{
+          flexShrink: 0,
+          width: 38, height: 38,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          borderRadius: "50%",
+          background: ready
+            ? "radial-gradient(circle, rgba(98,124,92,0.20) 0%, transparent 70%)"
+            : "radial-gradient(circle, rgba(176,84,47,0.22) 0%, transparent 70%)",
+          animation: ready
+            ? "brewTimerReadyPulse 2.2s ease-in-out infinite"
+            : "brewTimerActiveGlow 1.8s ease-in-out infinite",
+        }}>
+          <Kettle size={26} c={ready ? theme.sageDeep : theme.terra} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: ready ? theme.sageDeep : theme.terra,
+            fontWeight: 600, marginBottom: 1,
+          }}>
+            {ready ? "ready to pour" : "brewing"}
+          </div>
+          <div style={{
+            fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+            lineHeight: 1.35, whiteSpace: "nowrap",
+            overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {blendName}
+          </div>
+        </div>
+        <div style={{
+          flexShrink: 0,
+          fontFamily: ff.mono, fontSize: 16, fontWeight: 600,
+          color: ready ? theme.sageDeep : theme.ink,
+          letterSpacing: "0.02em", paddingRight: 4,
+        }}>
+          {ready ? "—:—" : mmssShort(remaining)}
+        </div>
+      </div>
+      <style>{`
+        @keyframes brewTimerBannerIn {
+          from { opacity: 0; transform: translateY(-12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes brewTimerActiveGlow {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
+          50%      { box-shadow: 0 0 18px 4px rgba(176,84,47,0.42); }
+        }
+        @keyframes brewTimerReadyPulse {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(98,124,92,0.0); }
+          50%      { box-shadow: 0 0 22px 6px rgba(98,124,92,0.55); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export default function App() {
   // URL flag: ?dev skips onboarding, loads SEED_MODES.power as starting state.
   // Useful for testing without going through onboarding every time localStorage
@@ -377,6 +480,17 @@ export default function App() {
   // the user hasn't seen the omen — the creation-title intro needs
   // to play first; the bestiary's own effect handles that gating.
   const [autoOpenArrivalId, setAutoOpenArrivalId] = useState(null);
+  // Steep-screen minimize state. When true, the steep overlay is
+  // hidden via display:none (still mounted so the timer keeps
+  // ticking and notification scheduling stays alive) and a small
+  // BrewTimerBanner surfaces at the top of the screen — letting
+  // users navigate the rest of the app while the brew runs. Tapping
+  // the banner restores the steep overlay. SteepScreen reports its
+  // current remaining seconds via onRemainingChange so the banner
+  // can show a live countdown without lifting the entire timer
+  // engine out of SteepScreen.
+  const [steepMinimized, setSteepMinimized] = useState(false);
+  const [steepRemaining, setSteepRemaining] = useState(0);
   const [ingredientId, setIngredientId] = useState("chamomile");
   // Overlay history stack — back-button returns to the previous
   // overlay rather than dropping the user all the way out. Supports
@@ -1511,8 +1625,24 @@ export default function App() {
           editPlannerItem={editPlannerItem}
           deletePlannerItem={deletePlannerItem}
           clearDonePlannerItems={clearDonePlannerItems}
-          onDone={() => setOverlay("log")}
-          onCancel={() => { setOverlay(null); clearOverlayHistory(); setSession(null); }}
+          minimized={steepMinimized}
+          onMinimize={() => setSteepMinimized(true)}
+          onRemainingChange={setSteepRemaining}
+          onDone={() => { setSteepMinimized(false); setOverlay("log"); }}
+          onCancel={() => { setSteepMinimized(false); setOverlay(null); clearOverlayHistory(); setSession(null); }}
+        />
+      )}
+      {/* Brew-timer banner — surfaces at the top of the viewport
+          when the user has minimized an active steep, lets them
+          navigate the rest of the app while the timer runs, and
+          restores the steep overlay on tap. Persists across tab
+          changes since it lives at App level, outside any tab
+          wrapper. */}
+      {overlay === "steep" && steepMinimized && session && (
+        <BrewTimerBanner
+          blendName={session.blend?.name || "your brew"}
+          remaining={steepRemaining}
+          onTap={() => setSteepMinimized(false)}
         />
       )}
       {overlay === "log" && session && (

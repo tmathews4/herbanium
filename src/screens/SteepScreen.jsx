@@ -26,7 +26,7 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, minimized = false, onMinimize, onRemainingChange }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -86,6 +86,14 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
     }, 1000);
     return () => clearInterval(t);
   }, [paused]);
+
+  // Push the live remaining value up to the parent so the
+  // BrewTimerBanner can show a synchronized countdown while the
+  // steep is minimized. Called on every tick AND on mount so the
+  // banner has an initial value the moment the user minimizes.
+  useEffect(() => {
+    if (onRemainingChange) onRemainingChange(remaining);
+  }, [remaining, onRemainingChange]);
 
   // First-zero arrival: flash the pulse + READY label once when
   // remaining transitions to zero. setJustFinished gates the CSS
@@ -213,15 +221,43 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
     <div style={{
       position: "absolute", inset: 0, zIndex: 30,
       background: `radial-gradient(ellipse at 50% 20%, ${theme.cream} 0%, ${theme.paper} 60%, ${theme.ivory} 100%)`,
-      display: "flex", flexDirection: "column",
+      // Minimize hides the steep page via display:none — keeps the
+      // component mounted (timer ticks continue, native steep
+      // notification stays scheduled) so restoring is instant and
+      // synchronized. The BrewTimerBanner up in App renders in
+      // place of the visible steep while minimized.
+      display: minimized ? "none" : "flex",
+      flexDirection: "column",
       padding: "22px 22px 26px",
     }}>
       {/* header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <button onClick={onCancel} style={{
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
         }}>← cancel</button>
+        {/* Minimize — collapses the steep page into a top-of-screen
+            banner so the user can navigate the rest of the app
+            while the brew runs. Hidden when no onMinimize handler
+            is wired (defensive — caller can opt out). */}
+        {onMinimize && (
+          <button
+            onClick={onMinimize}
+            title="minimize timer to a top banner"
+            style={{
+              background: "transparent", border: "none", color: theme.inkSoft,
+              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+              textTransform: "uppercase", cursor: "pointer",
+              padding: 0,
+              display: "flex", alignItems: "center", gap: 4,
+            }}
+          >
+            <span style={{
+              fontFamily: ff.mono, fontSize: 14, lineHeight: 1, fontWeight: 600,
+            }}>—</span>
+            <span>minimize</span>
+          </button>
+        )}
         {(() => {
           const openCount = plannerItems.filter(i => !i.done).length;
           return (
