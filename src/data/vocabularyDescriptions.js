@@ -7,6 +7,13 @@
 
    See docs/vocabulary.md for the canonical reference. Anything
    missing here is just non-clickable in the UI; safe to extend.
+
+   Audit policy: every flavor / effect entry carries summary +
+   body + ladder so the click-to-expand card has the same
+   robustness across the catalog. The four brewing-intent aliases
+   (sleep, digestion, everyday, full) are the only entries that
+   skip the ladder — they describe brew presets, not perceived
+   strength curves, so a 1/3/5 ramp doesn't apply.
    ────────────────────────────────────────────────────────────── */
 
 export const EFFECT_DESCRIPTIONS = {
@@ -116,6 +123,8 @@ export const EFFECT_DESCRIPTIONS = {
   // entry's copy already covers the same ground; alias removed.)
 
   // ── Brewing-intent aliases (used by IngredientDetail Brewing tab) ──
+  // These describe brew PRESETS, not perceived strengths, so they
+  // skip the 1/3/5 ladder by design.
   sleep: {
     summary: "Sedating brew — the cup pulled toward rest.",
     body: "Same register as the sleepy effect: longer steep at higher temperature pulls more apigenin (chamomile) or valerenic acid (valerian) out of the leaf.",
@@ -196,9 +205,30 @@ export const FLAVOR_DESCRIPTIONS = {
   heady: {
     summary: "Rich, complex, animalic-floral depth.",
     body: "The full-bloom register — jasmine's signature. Tea-community word for what perfumery calls 'indolic'.",
+    ladder: [
+      [1, "A whisper of bloom — depth barely surfaced."],
+      [3, "Clearly rich — full-bloom jasmine character."],
+      [5, "Indolic peak — jasmine pulled hard, the room aware of it."],
+    ],
   },
-  honeyed: { summary: "Soft amber sweetness — the dried-flower-and-honey register.", body: "Linden, chamomile, white tea, rooibos all touch this." },
-  "honey-sweet": { summary: "Honey-leaning sweetness — flower nectar more than sugar.", body: "Linden's signature; soft amber sweetness that sits forward without cloying." },
+  honeyed: {
+    summary: "Soft amber sweetness — the dried-flower-and-honey register.",
+    body: "Linden, chamomile, white tea, rooibos all touch this.",
+    ladder: [
+      [1, "A faint amber edge — sweetness at the periphery."],
+      [3, "Clearly honeyed — dried-flower warmth in the cup."],
+      [5, "Deep amber — linden and rooibos in full sweetness."],
+    ],
+  },
+  "honey-sweet": {
+    summary: "Honey-leaning sweetness — flower nectar more than sugar.",
+    body: "Linden's signature; soft amber sweetness that sits forward without cloying.",
+    ladder: [
+      [1, "A faint nectar suggestion at the finish."],
+      [3, "Clearly nectar-sweet — linden's amber heart."],
+      [5, "Honeycomb-rich — the cup tastes spooned, not steeped."],
+    ],
+  },
 
   // ── Fruity family ──
   fruity: {
@@ -213,13 +243,66 @@ export const FLAVOR_DESCRIPTIONS = {
   citrus: {
     summary: "Bright, lifting, lemon-adjacent without being sour.",
     body: "Lemongrass, lemon balm, hibiscus's tartness, ceylon's lift, darjeeling's muscatel.",
+    ladder: [
+      [1, "A faint lemon-edge — subtle lift, easy to miss."],
+      [3, "Clearly citrus — lemongrass and rind forward."],
+      [5, "Full citrus — bergamot or lemongrass in peak brightness."],
+    ],
   },
-  citrusy: { summary: "Citrus-leaning lift — lemon-and-rind brightness.", body: "Adjective form of citrus; lemongrass, lemon balm, linden, bergamot." },
-  muscatel: { summary: "Grape-like aromatics — Darjeeling's signature.", body: "Use specifically for Darjeeling and Darjeeling-adjacent teas." },
-  tart: { summary: "Fruity-acidic character.", body: "Hibiscus, rosehip — the cranberry-edge register." },
-  bright: { summary: "Lively, refreshing acidity.", body: "Tea-community preference over 'acidic'. Ceylon, darjeeling, lemongrass." },
-  cranberry: { summary: "Hibiscus's defining fruit-tartness.", body: "Bright sourness rounded by anthocyanins." },
-  fruit: { summary: "General fruit register — most often stone fruit or berry.", body: "Oolong's peach edge, darjeeling's grape, white tea's melon." },
+  citrusy: {
+    summary: "Citrus-leaning lift — lemon-and-rind brightness.",
+    body: "Adjective form of citrus; lemongrass, lemon balm, linden, bergamot.",
+    ladder: [
+      [1, "A faint brightness; almost-lemon at the periphery."],
+      [3, "Clearly citrus-leaning — rind aromatics in the cup."],
+      [5, "Sharp citrus lift — lemon balm and bergamot in full register."],
+    ],
+  },
+  muscatel: {
+    summary: "Grape-like aromatics — Darjeeling's signature.",
+    body: "Use specifically for Darjeeling and Darjeeling-adjacent teas.",
+    ladder: [
+      [1, "A faint grape-edge — the leaf hinting at its origin."],
+      [3, "Clearly muscatel — Darjeeling's signature aromatic."],
+      [5, "Full muscatel lift — first-flush Darjeeling at peak."],
+    ],
+  },
+  tart: {
+    summary: "Fruity-acidic character.",
+    body: "Hibiscus, rosehip — the cranberry-edge register.",
+    ladder: [
+      [1, "A faint sour-fruit edge."],
+      [3, "Clearly tart — hibiscus and rosehip forward."],
+      [5, "Sharp tartness — hibiscus pulled hard, cranberry-bright."],
+    ],
+  },
+  bright: {
+    summary: "Lively, refreshing acidity.",
+    body: "Tea-community preference over 'acidic'. Ceylon, darjeeling, lemongrass.",
+    ladder: [
+      [1, "A faint zing on the finish."],
+      [3, "Clearly bright — the cup has lift."],
+      [5, "Sparkling — ceylon or darjeeling at first-flush strength."],
+    ],
+  },
+  cranberry: {
+    summary: "Hibiscus's defining fruit-tartness.",
+    body: "Bright sourness rounded by anthocyanins.",
+    ladder: [
+      [1, "A faint tart-fruit edge."],
+      [3, "Clearly cranberry-bright — hibiscus' signature."],
+      [5, "Full hibiscus tart-bloom — the cup shouts berry."],
+    ],
+  },
+  fruit: {
+    summary: "General fruit register — most often stone fruit or berry.",
+    body: "Oolong's peach edge, darjeeling's grape, white tea's melon.",
+    ladder: [
+      [1, "A faint orchard-suggestion at the back."],
+      [3, "Clearly fruit-forward — peach or berry surfaces."],
+      [5, "Dominant fruit — oolong's peach or white tea's melon at peak."],
+    ],
+  },
 
   // ── Vegetal family ──
   vegetal: {
@@ -231,7 +314,15 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Deep green wash — matcha or gyokuro at strength."],
     ],
   },
-  grassy: { summary: "Fresh-cut grass, green-leaf register.", body: "Sencha, dragonwell, lemongrass, lemon balm, matcha's lighter side." },
+  grassy: {
+    summary: "Fresh-cut grass, green-leaf register.",
+    body: "Sencha, dragonwell, lemongrass, lemon balm, matcha's lighter side.",
+    ladder: [
+      [1, "A faint green edge — the leaf almost-fresh."],
+      [3, "Clearly grassy — sencha and dragonwell forward."],
+      [5, "Full just-cut grass — sencha pulled hard."],
+    ],
+  },
   marine: {
     summary: "Seaweed, oceanic notes.",
     body: "Distinctive to Japanese shaded greens — gyokuro especially.",
@@ -241,15 +332,71 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Kelp-front — full gyokuro or mushroom-decoction marine."],
     ],
   },
-  seaweed: { summary: "Oceanic-vegetal — the kelp register.", body: "Shaded Japanese greens; matcha, gyokuro." },
-  umami: { summary: "Savory, brothy depth.", body: "L-theanine + glutamate — the shaded-green signature. Matcha, gyokuro, lion's mane." },
+  seaweed: {
+    summary: "Oceanic-vegetal — the kelp register.",
+    body: "Shaded Japanese greens; matcha, gyokuro.",
+    ladder: [
+      [1, "A faint salt-and-leaf edge."],
+      [3, "Clearly kelp — gyokuro's signature deep-vegetal."],
+      [5, "Full marine — high-shade gyokuro at peak."],
+    ],
+  },
+  umami: {
+    summary: "Savory, brothy depth.",
+    body: "L-theanine + glutamate — the shaded-green signature. Matcha, gyokuro, lion's mane.",
+    ladder: [
+      [1, "A faint savory edge under everything."],
+      [3, "Clearly brothy — gyokuro and matcha territory."],
+      [5, "Full umami wash — high-grade gyokuro or lion's mane decoction."],
+    ],
+  },
 
   // ── Nutty family ──
-  nutty: { summary: "Almond, chestnut, toasted-grain register.", body: "Dragonwell's chestnut, genmaicha's roasted rice, hojicha's depth." },
-  chestnut: { summary: "The pan-fired Chinese green signature.", body: "Specifically Dragonwell — sweet, faintly buttery." },
-  bean: { summary: "Cooked-bean vegetal register.", body: "Dragonwell and some Chinese greens." },
-  malty: { summary: "Cocoa-grain depth.", body: "Assam's signature; some Ceylon and Yunnan blacks." },
-  cocoa: { summary: "Chocolate-without-sugar register.", body: "Assam, ripe pu-erh, some roasted oolongs." },
+  nutty: {
+    summary: "Almond, chestnut, toasted-grain register.",
+    body: "Dragonwell's chestnut, genmaicha's roasted rice, hojicha's depth.",
+    ladder: [
+      [1, "A faint nut-suggestion at the finish."],
+      [3, "Clearly nutty — chestnut or toasted-grain forward."],
+      [5, "Roasted-nut peak — dragonwell or genmaicha at strength."],
+    ],
+  },
+  chestnut: {
+    summary: "The pan-fired Chinese green signature.",
+    body: "Specifically Dragonwell — sweet, faintly buttery.",
+    ladder: [
+      [1, "A faint pan-fired edge."],
+      [3, "Clearly chestnut — dragonwell's signature note."],
+      [5, "Full chestnut sweetness — dragonwell at its peak window."],
+    ],
+  },
+  bean: {
+    summary: "Cooked-bean vegetal register.",
+    body: "Dragonwell and some Chinese greens.",
+    ladder: [
+      [1, "A faint legume edge under the green."],
+      [3, "Clearly bean-leaning — cooked-vegetal in the cup."],
+      [5, "Full bean register — long-pulled Chinese green."],
+    ],
+  },
+  malty: {
+    summary: "Cocoa-grain depth.",
+    body: "Assam's signature; some Ceylon and Yunnan blacks.",
+    ladder: [
+      [1, "A faint grain-warmth at the back."],
+      [3, "Clearly malty — assam's cocoa-grain signature."],
+      [5, "Full malt depth — strong assam at full extraction."],
+    ],
+  },
+  cocoa: {
+    summary: "Chocolate-without-sugar register.",
+    body: "Assam, ripe pu-erh, some roasted oolongs.",
+    ladder: [
+      [1, "A faint dark-cocoa edge."],
+      [3, "Clearly chocolatey — assam or ripe pu-erh forward."],
+      [5, "Deep cocoa — full ripe pu-erh territory."],
+    ],
+  },
 
   // ── Sweet family ──
   sweet: {
@@ -261,9 +408,33 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Sugar-like — licorice root, rooibos, or vanilla at full strength."],
     ],
   },
-  honey: { summary: "Soft amber sweetness — flower and dried-grass.", body: "White tea, chamomile, linden, rooibos." },
-  caramel: { summary: "Browned-sugar warmth.", body: "Hojicha's roast, dandelion root, rooibos." },
-  vanilla: { summary: "Creamy floral-sweet — the dessert lean.", body: "Vanilla bean's signature; lifts any blend toward dessert without sugar." },
+  honey: {
+    summary: "Soft amber sweetness — flower and dried-grass.",
+    body: "White tea, chamomile, linden, rooibos.",
+    ladder: [
+      [1, "A faint sweet-amber suggestion."],
+      [3, "Clearly honeyed — white tea and chamomile forward."],
+      [5, "Full honey body — well-aged white or steeped linden."],
+    ],
+  },
+  caramel: {
+    summary: "Browned-sugar warmth.",
+    body: "Hojicha's roast, dandelion root, rooibos.",
+    ladder: [
+      [1, "A faint browned-edge in the cup."],
+      [3, "Clearly caramel — hojicha's signature warmth."],
+      [5, "Full caramel-roast — long hojicha pull or roasted-root depth."],
+    ],
+  },
+  vanilla: {
+    summary: "Creamy floral-sweet — the dessert lean.",
+    body: "Vanilla bean's signature; lifts any blend toward dessert without sugar.",
+    ladder: [
+      [1, "A faint dessert-edge — barely perceptible."],
+      [3, "Clearly vanilla — the cup leans cream-and-flower."],
+      [5, "Full vanilla bean — dessert-register dominant."],
+    ],
+  },
   creamy: {
     summary: "Body quality, not flavor — milk-like roundness.",
     body: "Vanilla, gyokuro's broth, oat-base lattes.",
@@ -275,9 +446,33 @@ export const FLAVOR_DESCRIPTIONS = {
   },
 
   // ── Roasted family ──
-  roasted: { summary: "Pan-fired or oven-roasted depth.", body: "Hojicha, dark oolongs, dandelion root, gunpowder." },
-  toasted: { summary: "The lighter end of roasted — pan-fired character.", body: "Hojicha, gunpowder, genmaicha's rice." },
-  toasty: { summary: "Genmaicha and hojicha's signature register.", body: "Gentle browning, not char." },
+  roasted: {
+    summary: "Pan-fired or oven-roasted depth.",
+    body: "Hojicha, dark oolongs, dandelion root, gunpowder.",
+    ladder: [
+      [1, "A faint toast-edge under the cup."],
+      [3, "Clearly roasted — hojicha and dark-oolong territory."],
+      [5, "Deep roast — full hojicha or charcoal-fired oolong."],
+    ],
+  },
+  toasted: {
+    summary: "The lighter end of roasted — pan-fired character.",
+    body: "Hojicha, gunpowder, genmaicha's rice.",
+    ladder: [
+      [1, "A faint pan-fired edge."],
+      [3, "Clearly toasted — gunpowder and genmaicha forward."],
+      [5, "Full toast — long-fired hojicha at strength."],
+    ],
+  },
+  toasty: {
+    summary: "Genmaicha and hojicha's signature register.",
+    body: "Gentle browning, not char.",
+    ladder: [
+      [1, "A faint browning edge — toasted rice glimpsed."],
+      [3, "Clearly toasty — genmaicha's signature warmth."],
+      [5, "Full toast — generous hojicha or roasted-rice cup."],
+    ],
+  },
   smoky: {
     summary: "Pine-smoke, campfire.",
     body: "Lapsang Souchong's signature — dried over pine fires in Fujian.",
@@ -287,11 +482,51 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Heavy smoke — full Lapsang Souchong, love-or-never-again."],
     ],
   },
-  smoked: { summary: "Same as smoky — pine-smoke register.", body: "Lapsang Souchong; some yerba mate via barbacuá processing." },
-  pine: { summary: "Resinous coniferous note.", body: "Lapsang's pine-smoke; lavender's camphor edge." },
-  charcoal: { summary: "Deep-roasted register.", body: "Heavier roasts; dark oolongs, charcoal-fired teas." },
-  campfire: { summary: "Lapsang's full-throat smoke note.", body: "The 'love or never again' register." },
-  tar: { summary: "Heaviest-end smoke note.", body: "Old-style Lapsang — pitch-and-pine." },
+  smoked: {
+    summary: "Same as smoky — pine-smoke register.",
+    body: "Lapsang Souchong; some yerba mate via barbacuá processing.",
+    ladder: [
+      [1, "A faint kiln-edge in the cup."],
+      [3, "Clearly smoked — pine and woodfire forward."],
+      [5, "Full smoke wash — old-style Lapsang or barbacuá yerba mate."],
+    ],
+  },
+  pine: {
+    summary: "Resinous coniferous note.",
+    body: "Lapsang's pine-smoke; lavender's camphor edge.",
+    ladder: [
+      [1, "A faint resin-edge at the back."],
+      [3, "Clearly piney — coniferous lift in the cup."],
+      [5, "Sap-rich pine — Lapsang's full resin signature."],
+    ],
+  },
+  charcoal: {
+    summary: "Deep-roasted register.",
+    body: "Heavier roasts; dark oolongs, charcoal-fired teas.",
+    ladder: [
+      [1, "A faint kiln-warmth in the finish."],
+      [3, "Clearly charcoaled — dark oolong and roasted depth."],
+      [5, "Full char-roast — heavy-fired oolong at peak."],
+    ],
+  },
+  campfire: {
+    summary: "Lapsang's full-throat smoke note.",
+    body: "The 'love or never again' register.",
+    ladder: [
+      [1, "A faint hearth-edge in the cup."],
+      [3, "Clearly campfire — the room remembers it after."],
+      [5, "Full bonfire — the cup carries Lapsang's deepest smoke."],
+    ],
+  },
+  tar: {
+    summary: "Heaviest-end smoke note.",
+    body: "Old-style Lapsang — pitch-and-pine.",
+    ladder: [
+      [1, "A faint pitch-edge under the smoke."],
+      [3, "Clearly tar-leaning — heaviest end of the smoke register."],
+      [5, "Full pitch-and-pine — old-style Lapsang at strength."],
+    ],
+  },
 
   // ── Earthy family ──
   earthy: {
@@ -312,14 +547,78 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Heavy and full — assam, dark oolongs, deep-roast at strength."],
     ],
   },
-  woody: { summary: "Aged-tea, roasted-oolong character.", body: "Pu-erh, hojicha, lapsang, valerian, vanilla bean." },
-  wood: { summary: "Direct timber-and-bark register.", body: "Aged teas, root-based herbals." },
-  mineral: { summary: "Stone, wet rock, high-mountain register.", body: "Wuyi rock oolong, gyokuro's depth, nettle, dandelion leaf." },
-  mushroom: { summary: "Funghi register — the umami-earthy crossover.", body: "Reishi, lion's mane, aged pu-erh." },
-  mushroomy: { summary: "Same as mushroom — funghi-vegetal earthy.", body: "Reishi's bitter side; lion's mane's seafood-mushroom." },
-  loam: { summary: "Wet-soil register.", body: "Fermented teas, mushroom decoctions." },
-  leather: { summary: "Animalic-aged register.", body: "Old shou pu-erh, well-aged sheng." },
-  dark: { summary: "Heavy, low-pitched register.", body: "Pu-erh, deeply roasted oolongs." },
+  woody: {
+    summary: "Aged-tea, roasted-oolong character.",
+    body: "Pu-erh, hojicha, lapsang, valerian, vanilla bean.",
+    ladder: [
+      [1, "A faint timber-edge at the back."],
+      [3, "Clearly woody — aged-leaf and roasted-bark forward."],
+      [5, "Full timber depth — deep pu-erh or charcoal oolong."],
+    ],
+  },
+  wood: {
+    summary: "Direct timber-and-bark register.",
+    body: "Aged teas, root-based herbals.",
+    ladder: [
+      [1, "A faint bark-edge in the cup."],
+      [3, "Clearly wood-leaning — aged leaf and root forward."],
+      [5, "Deep wood register — long-aged pu-erh or root decoction."],
+    ],
+  },
+  mineral: {
+    summary: "Stone, wet rock, high-mountain register.",
+    body: "Wuyi rock oolong, gyokuro's depth, nettle, dandelion leaf.",
+    ladder: [
+      [1, "A faint stone-edge — barely surfaced."],
+      [3, "Clearly mineral — wet rock and high-mountain depth."],
+      [5, "Full mineral wash — Wuyi yancha or deep gyokuro."],
+    ],
+  },
+  mushroom: {
+    summary: "Funghi register — the umami-earthy crossover.",
+    body: "Reishi, lion's mane, aged pu-erh.",
+    ladder: [
+      [1, "A faint funghi-edge under the cup."],
+      [3, "Clearly mushroom — umami-earthy depth forward."],
+      [5, "Full reishi or lion's-mane register — long decoction at strength."],
+    ],
+  },
+  mushroomy: {
+    summary: "Same as mushroom — funghi-vegetal earthy.",
+    body: "Reishi's bitter side; lion's mane's seafood-mushroom.",
+    ladder: [
+      [1, "A faint funghi suggestion at the periphery."],
+      [3, "Clearly mushroomy — vegetal-earthy crossover forward."],
+      [5, "Deep funghi wash — reishi pulled long."],
+    ],
+  },
+  loam: {
+    summary: "Wet-soil register.",
+    body: "Fermented teas, mushroom decoctions.",
+    ladder: [
+      [1, "A faint damp-soil edge."],
+      [3, "Clearly loamy — fermented-leaf depth forward."],
+      [5, "Wet-earth wash — long shou pu-erh or mushroom soak."],
+    ],
+  },
+  leather: {
+    summary: "Animalic-aged register.",
+    body: "Old shou pu-erh, well-aged sheng.",
+    ladder: [
+      [1, "A faint hide-edge under the leaf."],
+      [3, "Clearly leather — well-aged pu-erh's signature."],
+      [5, "Full animalic depth — decade-aged shou at strength."],
+    ],
+  },
+  dark: {
+    summary: "Heavy, low-pitched register.",
+    body: "Pu-erh, deeply roasted oolongs.",
+    ladder: [
+      [1, "A faint low-pitch under the cup."],
+      [3, "Clearly dark — heavy-pitched pu-erh and dark-oolong territory."],
+      [5, "Full dark register — deep ripe pu-erh at extraction peak."],
+    ],
+  },
 
   // ── Spicy family ──
   spicy: {
@@ -340,21 +639,98 @@ export const FLAVOR_DESCRIPTIONS = {
       [5, "Pantry-on-fire — full chai with ginger and clove at strength."],
     ],
   },
-  pungent: { summary: "Sharp aromatic heat.", body: "Black pepper, ginger, clove, valerian." },
-  warm: { summary: "Pantry-warm aromatics — the cinnamon-cardamom register.", body: "Spice family; also rooibos, vanilla." },
-  numbing: { summary: "Eugenol's tongue-tingling anesthetic.", body: "Cloves' signature; small amounts of black pepper." },
+  pungent: {
+    summary: "Sharp aromatic heat.",
+    body: "Black pepper, ginger, clove, valerian.",
+    ladder: [
+      [1, "A faint sharp-edge in the cup."],
+      [3, "Clearly pungent — pepper and ginger forward."],
+      [5, "Full aromatic heat — black pepper or fresh ginger at strength."],
+    ],
+  },
+  warm: {
+    summary: "Pantry-warm aromatics — the cinnamon-cardamom register.",
+    body: "Spice family; also rooibos, vanilla.",
+    ladder: [
+      [1, "A faint pantry-warmth at the finish."],
+      [3, "Clearly warm — cinnamon and cardamom forward."],
+      [5, "Full warm-spice wash — chai-spice cluster at strength."],
+    ],
+  },
+  numbing: {
+    summary: "Eugenol's tongue-tingling anesthetic.",
+    body: "Cloves' signature; small amounts of black pepper.",
+    ladder: [
+      [1, "A faint tongue-tingle on the finish."],
+      [3, "Clearly numbing — clove's signature anesthetic warmth."],
+      [5, "Full tongue-tingle — clove pulled hard, eugenol forward."],
+    ],
+  },
 
   // ── Herbaceous family ──
-  herbaceous: { summary: "General herbal-green register.", body: "Cured leaves, garden herbs." },
-  hay: { summary: "Cured-grass, dried-herbal register.", body: "Chamomile, passionflower, white tea." },
-  camphor: { summary: "Cool resinous note.", body: "Lavender's signature; some old-style oolongs." },
+  herbaceous: {
+    summary: "General herbal-green register.",
+    body: "Cured leaves, garden herbs.",
+    ladder: [
+      [1, "A faint garden-edge in the cup."],
+      [3, "Clearly herbaceous — cured-leaf and garden-herb forward."],
+      [5, "Full herbal wash — well-extracted dried herbs at strength."],
+    ],
+  },
+  hay: {
+    summary: "Cured-grass, dried-herbal register.",
+    body: "Chamomile, passionflower, white tea.",
+    ladder: [
+      [1, "A faint cured-grass edge."],
+      [3, "Clearly hay-like — chamomile and passionflower forward."],
+      [5, "Deep hay wash — long-pulled chamomile or aged white tea."],
+    ],
+  },
+  camphor: {
+    summary: "Cool resinous note.",
+    body: "Lavender's signature; some old-style oolongs.",
+    ladder: [
+      [1, "A faint resin-edge at the back."],
+      [3, "Clearly camphored — lavender's cool aromatic forward."],
+      [5, "Full camphor lift — lavender or aged-oolong resin at strength."],
+    ],
+  },
   minty: {
     summary: "Cool exhale through the back of the throat.",
     body: "Two different cools: peppermint's menthol is direct and sharp; spearmint's carvone is sweeter and gentler.",
+    ladder: [
+      [1, "A faint cool-edge on the breath."],
+      [3, "Clearly minty — peppermint or spearmint forward."],
+      [5, "Full cool sweep — peppermint at strength, throat-back deep."],
+    ],
   },
-  mint: { summary: "Same as minty — cool aromatic register.", body: "Peppermint, spearmint, lemon balm's mint family edge." },
-  cool: { summary: "Mouthfeel cooling — TRPM8 activation from menthol.", body: "Peppermint, lavender, eucalyptus." },
-  cooling: { summary: "Refreshing, clarifying register.", body: "Both mouthfeel (menthol) and felt-temperature effect — they often co-occur." },
+  mint: {
+    summary: "Same as minty — cool aromatic register.",
+    body: "Peppermint, spearmint, lemon balm's mint family edge.",
+    ladder: [
+      [1, "A faint mint-edge — cool ghost on the finish."],
+      [3, "Clearly mint — peppermint and spearmint forward."],
+      [5, "Full mint wash — peppermint cup at peak."],
+    ],
+  },
+  cool: {
+    summary: "Mouthfeel cooling — TRPM8 activation from menthol.",
+    body: "Peppermint, lavender, eucalyptus.",
+    ladder: [
+      [1, "A faint cool exhale at the back of the throat."],
+      [3, "Clearly cooling — TRPM8 register engaged."],
+      [5, "Icy mouthfeel — peppermint at full menthol strength."],
+    ],
+  },
+  cooling: {
+    summary: "Refreshing, clarifying register.",
+    body: "Both mouthfeel (menthol) and felt-temperature effect — they often co-occur.",
+    ladder: [
+      [1, "A faint refresh — barely-noticed lift."],
+      [3, "Clearly cooling — the cup clarifies and settles."],
+      [5, "Deep cool wash — peppermint or hibiscus on a hot day."],
+    ],
+  },
   fresh: {
     summary: "Just-picked-greens register; cool, clarifying, citrus-or-mint forward.",
     body: "Sencha, lemongrass, dandelion leaf, peppermint, citrus peels — the lifting/clarifying cluster.",
@@ -366,31 +742,231 @@ export const FLAVOR_DESCRIPTIONS = {
   },
 
   // ── Mouthfeel ──
-  brisk: { summary: "Lively, refreshing finish.", body: "Black teas (Assam, Ceylon) and well-made greens." },
-  astringent: { summary: "Tongue-drying tannin sensation.", body: "Different from bitter. Strong black teas, over-steeped greens." },
-  bitter: { summary: "Back-of-tongue taste.", body: "Catechins, gentian, dandelion, reishi, valerian. A flavor, not an effect." },
-  bittersweet: { summary: "The coffee-adjacent register.", body: "Dandelion root, dark roasted oolongs." },
+  brisk: {
+    summary: "Lively, refreshing finish.",
+    body: "Black teas (Assam, Ceylon) and well-made greens.",
+    ladder: [
+      [1, "A faint zip on the finish."],
+      [3, "Clearly brisk — the cup's lively without being sharp."],
+      [5, "Full brisk lift — assam or ceylon at strength."],
+    ],
+  },
+  astringent: {
+    summary: "Tongue-drying tannin sensation.",
+    body: "Different from bitter. Strong black teas, over-steeped greens.",
+    ladder: [
+      [1, "A faint dry edge on the cheeks."],
+      [3, "Clearly astringent — the tongue and cheeks tighten."],
+      [5, "Mouth-grippy — over-extracted black or long-pulled green."],
+    ],
+  },
+  bitter: {
+    summary: "Back-of-tongue taste.",
+    body: "Catechins, gentian, dandelion, reishi, valerian. A flavor, not an effect.",
+    ladder: [
+      [1, "A faint back-of-tongue edge."],
+      [3, "Clearly bitter — the back of the throat lingers."],
+      [5, "Aggressive bitter — gentian or over-pulled green at strength."],
+    ],
+  },
+  bittersweet: {
+    summary: "The coffee-adjacent register.",
+    body: "Dandelion root, dark roasted oolongs.",
+    ladder: [
+      [1, "A faint coffee-edge under the cup."],
+      [3, "Clearly bittersweet — dandelion-root and dark-oolong forward."],
+      [5, "Full coffee-adjacent — long-pulled root or charcoal oolong."],
+    ],
+  },
 
   // ── Other ──
-  apple: { summary: "Chamomile's defining note.", body: "Soft, rounded, faintly tart-sweet." },
-  aromatic: { summary: "Volatile, perfumed lift — what hits the nose before the tongue.", body: "Cardamom, lavender, jasmine, lemon balm. Often the first impression of a cup." },
-  buttery: { summary: "Cream-and-butter mouthfeel — the rich vegetal register.", body: "Gyokuro, dragonwell, well-shaded greens. Comes from lipid-soluble compounds and high amino acids." },
-  "caramel-roasted": { summary: "Browned-sugar plus pan-fired depth.", body: "Hojicha's signature register — caramel sweetness layered with toast." },
-  clove: { summary: "Eugenol-driven warmth — sweet, woody, slightly numbing.", body: "Clove buds; trace amounts in tulsi and some allspice-touched chai blends." },
-  "coffee-adjacent": { summary: "Roasted-bitter register that drinks like coffee without the bean.", body: "Dandelion root, deeply roasted hojicha, ripe pu-erh." },
-  hot: { summary: "Capsaicin or zingerone heat — the throat-and-chest warmth.", body: "Ginger, black pepper, chili. Different from 'warm' aromatics." },
-  licorice: { summary: "Glycyrrhizin sweetness — anise-adjacent, dense, lingering.", body: "Licorice root and star anise; touches fennel seed." },
-  melon: { summary: "Honeydew-soft fruit register.", body: "White tea's signature; some shaded greens and high-altitude oolongs." },
-  peppery: { summary: "Sharp aromatic bite — black pepper register.", body: "Black pepper, fresh ginger, tulsi's sharper side, watercress-adjacent greens." },
-  savory: { summary: "Umami-and-broth register — the not-sweet, not-bitter axis.", body: "Matcha, gyokuro, mushroom decoctions, lion's mane." },
-  "seafood-like": { summary: "Marine-mushroom register — lion's mane's signature.", body: "Crab-and-kelp aromatic that comes through in long decoctions." },
-  "spinach-like": { summary: "Cooked-greens vegetal register.", body: "Matcha, gyokuro, deep-shaded sencha — the steamed-leaf cluster." },
-  tannic: { summary: "Tea-tannin mouthfeel — drying without sourness.", body: "Black teas, over-steeped greens, persimmon-adjacent. Adjacent to astringent but with more grip." },
-  musky: { summary: "Deep mature aromatic register.", body: "Ashwagandha, valerian, turmeric." },
-  musty: { summary: "Damp-attic register — root and fungus character.", body: "Ashwagandha, reishi, aged sheng." },
-  delicate: { summary: "Light-bodied, faint-aromatic register.", body: "White tea, linden, elderflower." },
-  oceanic: { summary: "Marine, salt-air register.", body: "Matcha, gyokuro, kelp-adjacent greens." },
-  lychee: { summary: "Tropical-floral fruit register.", body: "Elderflower's signature aromatic." },
-  anise: { summary: "Fennel and licorice family register.", body: "Fennel seed, licorice root, star anise." },
-  complex: { summary: "Multi-layered, hard to pin to one note.", body: "Cardamom, well-made oolong, aged pu-erh." },
+  apple: {
+    summary: "Chamomile's defining note.",
+    body: "Soft, rounded, faintly tart-sweet.",
+    ladder: [
+      [1, "A faint orchard-edge in the cup."],
+      [3, "Clearly apple — chamomile's signature pome-fruit note."],
+      [5, "Full apple bloom — chamomile-rich brew at strength."],
+    ],
+  },
+  aromatic: {
+    summary: "Volatile, perfumed lift — what hits the nose before the tongue.",
+    body: "Cardamom, lavender, jasmine, lemon balm. Often the first impression of a cup.",
+    ladder: [
+      [1, "A faint perfume on first sniff."],
+      [3, "Clearly aromatic — cardamom, lavender, or jasmine forward."],
+      [5, "Full aromatic lift — the room smells the cup before tasting it."],
+    ],
+  },
+  buttery: {
+    summary: "Cream-and-butter mouthfeel — the rich vegetal register.",
+    body: "Gyokuro, dragonwell, well-shaded greens. Comes from lipid-soluble compounds and high amino acids.",
+    ladder: [
+      [1, "A faint round mouthfeel under the cup."],
+      [3, "Clearly buttery — gyokuro and dragonwell forward."],
+      [5, "Full butter-rich body — high-grade gyokuro at peak."],
+    ],
+  },
+  "caramel-roasted": {
+    summary: "Browned-sugar plus pan-fired depth.",
+    body: "Hojicha's signature register — caramel sweetness layered with toast.",
+    ladder: [
+      [1, "A faint caramel-and-toast edge."],
+      [3, "Clearly caramel-roasted — hojicha's signature."],
+      [5, "Full caramel-roast — long-fired hojicha at peak."],
+    ],
+  },
+  clove: {
+    summary: "Eugenol-driven warmth — sweet, woody, slightly numbing.",
+    body: "Clove buds; trace amounts in tulsi and some allspice-touched chai blends.",
+    ladder: [
+      [1, "A faint clove-edge — sweet warmth at the back."],
+      [3, "Clearly clove — sweet, woody, faintly tongue-tingling."],
+      [5, "Full clove register — tongue-numbing, eugenol forward."],
+    ],
+  },
+  "coffee-adjacent": {
+    summary: "Roasted-bitter register that drinks like coffee without the bean.",
+    body: "Dandelion root, deeply roasted hojicha, ripe pu-erh.",
+    ladder: [
+      [1, "A faint roasted-bitter edge."],
+      [3, "Clearly coffee-leaning — the cup drinks like dark roast."],
+      [5, "Full coffee-adjacent — long-pulled dandelion root or deep hojicha."],
+    ],
+  },
+  hot: {
+    summary: "Capsaicin or zingerone heat — the throat-and-chest warmth.",
+    body: "Ginger, black pepper, chili. Different from 'warm' aromatics.",
+    ladder: [
+      [1, "A faint heat — easy to ignore."],
+      [3, "Clearly hot — ginger or pepper forward in the throat."],
+      [5, "Full thermogenic heat — fresh ginger or pepper-rich brew."],
+    ],
+  },
+  licorice: {
+    summary: "Glycyrrhizin sweetness — anise-adjacent, dense, lingering.",
+    body: "Licorice root and star anise; touches fennel seed.",
+    ladder: [
+      [1, "A faint anise-edge under the cup."],
+      [3, "Clearly licorice — glycyrrhizin sweetness forward."],
+      [5, "Full licorice depth — root-rich brew at strength."],
+    ],
+  },
+  melon: {
+    summary: "Honeydew-soft fruit register.",
+    body: "White tea's signature; some shaded greens and high-altitude oolongs.",
+    ladder: [
+      [1, "A faint melon-edge — soft fruit ghost."],
+      [3, "Clearly melon — white tea's signature forward."],
+      [5, "Full honeydew bloom — well-aged silver needle at peak."],
+    ],
+  },
+  peppery: {
+    summary: "Sharp aromatic bite — black pepper register.",
+    body: "Black pepper, fresh ginger, tulsi's sharper side, watercress-adjacent greens.",
+    ladder: [
+      [1, "A faint pepper-bite at the finish."],
+      [3, "Clearly peppery — black pepper and tulsi forward."],
+      [5, "Full pepper-sharp lift — black pepper pulled hard."],
+    ],
+  },
+  savory: {
+    summary: "Umami-and-broth register — the not-sweet, not-bitter axis.",
+    body: "Matcha, gyokuro, mushroom decoctions, lion's mane.",
+    ladder: [
+      [1, "A faint broth-edge under the cup."],
+      [3, "Clearly savory — umami and stock-depth forward."],
+      [5, "Full savory wash — gyokuro broth or mushroom decoction at peak."],
+    ],
+  },
+  "seafood-like": {
+    summary: "Marine-mushroom register — lion's mane's signature.",
+    body: "Crab-and-kelp aromatic that comes through in long decoctions.",
+    ladder: [
+      [1, "A faint marine-mushroom edge."],
+      [3, "Clearly seafood-leaning — lion's mane forward."],
+      [5, "Full kelp-and-crab register — long lion's-mane decoction at peak."],
+    ],
+  },
+  "spinach-like": {
+    summary: "Cooked-greens vegetal register.",
+    body: "Matcha, gyokuro, deep-shaded sencha — the steamed-leaf cluster.",
+    ladder: [
+      [1, "A faint cooked-greens edge."],
+      [3, "Clearly spinach-leaning — steamed-leaf and matcha forward."],
+      [5, "Full cooked-greens wash — high-shade gyokuro at peak."],
+    ],
+  },
+  tannic: {
+    summary: "Tea-tannin mouthfeel — drying without sourness.",
+    body: "Black teas, over-steeped greens, persimmon-adjacent. Adjacent to astringent but with more grip.",
+    ladder: [
+      [1, "A faint dry grip on the cheeks."],
+      [3, "Clearly tannic — over-steeped tea forward in the mouthfeel."],
+      [5, "Mouth-grippy — heavy black or long-pulled green at peak."],
+    ],
+  },
+  musky: {
+    summary: "Deep mature aromatic register.",
+    body: "Ashwagandha, valerian, turmeric.",
+    ladder: [
+      [1, "A faint mature-aromatic edge."],
+      [3, "Clearly musky — ashwagandha and valerian forward."],
+      [5, "Full musk depth — long-pulled adaptogen decoction at peak."],
+    ],
+  },
+  musty: {
+    summary: "Damp-attic register — root and fungus character.",
+    body: "Ashwagandha, reishi, aged sheng.",
+    ladder: [
+      [1, "A faint dust-and-damp edge."],
+      [3, "Clearly musty — root-and-fungus forward."],
+      [5, "Full damp-attic register — aged sheng or reishi pulled long."],
+    ],
+  },
+  delicate: {
+    summary: "Light-bodied, faint-aromatic register.",
+    body: "White tea, linden, elderflower.",
+    ladder: [
+      [1, "A faint whisper-cup — barely there."],
+      [3, "Clearly delicate — light-bodied with subtle aromatics."],
+      [5, "Full delicacy — silver needle or fresh elderflower at strength."],
+    ],
+  },
+  oceanic: {
+    summary: "Marine, salt-air register.",
+    body: "Matcha, gyokuro, kelp-adjacent greens.",
+    ladder: [
+      [1, "A faint salt-edge in the cup."],
+      [3, "Clearly oceanic — kelp-adjacent matcha or gyokuro forward."],
+      [5, "Full marine sweep — high-shade gyokuro at peak."],
+    ],
+  },
+  lychee: {
+    summary: "Tropical-floral fruit register.",
+    body: "Elderflower's signature aromatic.",
+    ladder: [
+      [1, "A faint tropical-floral edge."],
+      [3, "Clearly lychee — elderflower's signature aromatic forward."],
+      [5, "Full lychee bloom — elderflower-rich brew at strength."],
+    ],
+  },
+  anise: {
+    summary: "Fennel and licorice family register.",
+    body: "Fennel seed, licorice root, star anise.",
+    ladder: [
+      [1, "A faint anise-edge under the cup."],
+      [3, "Clearly anise — fennel and licorice forward."],
+      [5, "Full anise lift — fennel-rich digestif brew at strength."],
+    ],
+  },
+  complex: {
+    summary: "Multi-layered, hard to pin to one note.",
+    body: "Cardamom, well-made oolong, aged pu-erh.",
+    ladder: [
+      [1, "A faint multi-layered edge — more than one register hinted."],
+      [3, "Clearly complex — several flavor families speaking at once."],
+      [5, "Deeply layered — well-made oolong or aged pu-erh at full bloom."],
+    ],
+  },
 };
