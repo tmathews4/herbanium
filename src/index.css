@@ -133,7 +133,12 @@
        cup) but lands on the brown side of the scale, more leather/
        walnut than copper/orange. */
     --terra:     #8B6346;
-    --bark:      #936B4C;
+    /* Bark is the default-tone button color (Save, Brew this cup,
+       Start brewing on Blend page, most primary CTAs). The prior
+       #936B4C still read as orange-warm against the forest-noir
+       ground; shifted darker and cooler toward true walnut so the
+       palette holds the witchy-woods register without copper bleed. */
+    --bark:      #7C5A40;
     --rose:      #C68567;
     --sky:       #88AEB7;
     --plum:      #9A647F;
@@ -153,7 +158,9 @@
     /* Terra hover: lifted walnut, distinguishable on hover without
        reverting to the orange register. */
     --terra-hover:  #A07A5A;
-    --bark-hover:   #A47C5C;
+    /* Bark hover: lifted walnut, distinct from base without
+       reverting to the orange-warm register. */
+    --bark-hover:   #936B4C;
 
     /* Family bars — vibrant variants sized between the muted light
        palette and the crystal's fluorescent gem tones. Each register
