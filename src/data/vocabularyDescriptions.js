@@ -77,7 +77,7 @@ export const EFFECT_DESCRIPTIONS = {
     ladder: [
       [1, "A soft lift, barely above flat."],
       [3, "A clean wake-up cup; the morning starts."],
-      [5, "Brisk and alert — assam or yerba-mate at strength."],
+      [5, "Brisk and alert — assam at full strength."],
     ],
   },
   sleepy: {

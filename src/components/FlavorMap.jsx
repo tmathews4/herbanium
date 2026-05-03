@@ -1260,7 +1260,7 @@ const TrackMap = ({
               }}>what it feels like</div>
               {descriptionFor(selectedTrack).ladder.map(([level, text]) => (
                 <div key={level} style={{
-                  display: "flex", gap: 8, alignItems: "baseline",
+                  display: "flex", gap: 8, alignItems: "flex-start",
                   fontFamily: ff.serif, fontSize: 11.5, color: theme.inkSoft,
                   lineHeight: 1.4,
                 }}>
@@ -1268,9 +1268,10 @@ const TrackMap = ({
                     flexShrink: 0,
                     fontFamily: ff.mono, fontSize: 10,
                     color: theme.terra, fontWeight: 600,
-                    minWidth: 12, textAlign: "right",
+                    width: 14, textAlign: "right",
+                    lineHeight: 1.4,
                   }}>{level}</span>
-                  <span>{text}</span>
+                  <span style={{ flex: 1, minWidth: 0 }}>{text}</span>
                 </div>
               ))}
             </div>
