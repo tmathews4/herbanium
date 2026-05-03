@@ -80,13 +80,14 @@ export const OnboardingScreen = ({ onComplete }) => {
         <img
           src="/herbanium-logo-icon.svg"
           alt="Herbanium"
-          width={30}
-          height={30}
-          style={{ display: "block", opacity: 0.92 }}
+          width={44}
+          height={44}
+          style={{ display: "block", opacity: 0.94 }}
         />
         <div style={{
-          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.28em",
+          fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.30em",
           textTransform: "uppercase", color: theme.inkSoft,
+          marginTop: 2,
         }}>
           Herbanium
         </div>
