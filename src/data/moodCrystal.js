@@ -63,7 +63,9 @@ const CRYSTAL_EFFECT_COLORS = {
 const CRYSTAL_FLAVOR_COLORS = {
   fruit:   "#FF4A2D", // neon scarlet
   floral:  "#FF8DC3", // bright rose-pink
-  earthy:  "#B58E55", // luminous walnut
+  earthy:  "#6B4D8C", // luminous dark amethyst — Onyx leans purple-black
+                       // rather than brown so the stone reads as a deep
+                       // gem rather than a wood-grain accent.
   spiced:  "#FFA240", // bright amber-orange
   smoky:   "#9684C8", // bright indigo-violet
   fresh:   "#4FECF0", // neon mint-cyan
@@ -121,7 +123,7 @@ const EFFECT_VOICE = {
 const FLAVOR_VOICE = {
   fruit:   "scarlet flicker",
   floral:  "rose-pink shimmer",
-  earthy:  "walnut-dark grain",
+  earthy:  "deep amethyst grain",
   spiced:  "orange ember pulse",
   smoky:   "indigo haze",
   fresh:   "cyan ripple",
