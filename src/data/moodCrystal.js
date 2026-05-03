@@ -393,8 +393,10 @@ export function computeMoodCrystal({
   // than "A Sage Threaded Crystal" when there's nothing to thread
   // it with.
   let namePieces;
+  let name;
   if (!secondaryAdj) {
     namePieces = [primaryAdj];
+    name = `${articleFor(namePieces[0])} ${namePieces.join(" ")} Crystal`;
   } else {
     // Run the same "sounds good" pass the unique creation title
     // uses (see data/titleEuphony.js): order the two color
@@ -411,8 +413,16 @@ export function computeMoodCrystal({
     namePieces = euphonyOK(rankedSeq) ? rankedSeq
               : euphonyOK(swappedSeq) ? swappedSeq
               : rankedSeq;
+    // Connect the two color adjectives with "and" so they read as
+    // two distinct color names instead of one modifying the other.
+    // The previous "Rose-Quartz Sage Dotted Crystal" form scanned
+    // as a compound English adjective (sage-colored dots in a
+    // rose-quartz stone) when the renderer actually shows a sage-
+    // and-rose-quartz body with dots in one of the two colors —
+    // the "and" makes the two-color relationship explicit.
+    const [adj1, adj2, pat] = namePieces;
+    name = `${articleFor(adj1)} ${adj1} and ${adj2} ${pat} Crystal`;
   }
-  const name = `${articleFor(namePieces[0])} ${namePieces.join(" ")} Crystal`;
 
   // Description voice — names both registers when both exist,
   // otherwise stays single-color. Built from the family voice
