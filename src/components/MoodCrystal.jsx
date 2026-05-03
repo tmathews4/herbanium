@@ -400,7 +400,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
           gap: 6,
         }}>
           <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-            <span>your crystal</span>
+            <span>your lodestone</span>
             {isLocked && (
               <span style={{
                 fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.14em",
