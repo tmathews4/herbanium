@@ -370,6 +370,7 @@ export function computeMoodCrystal({
       gradient: ["#D8CDB3", "#B8AC92"],
       innerGlowColor: null,
       outerGlowColor: null,
+      patternColor: "#B8AC92",
       families: { effect: [], flavor: [] },
       isNeutral: true,
       isFaint: false,
@@ -424,6 +425,24 @@ export function computeMoodCrystal({
     // the "and" makes the two-color relationship explicit.
     const [adj1, adj2, pat] = namePieces;
     name = `${articleFor(adj1)} ${adj1} and ${adj2} ${pat} Crystal`;
+  }
+
+  // Pattern-overlay color (dots / veins) — match whichever adjective
+  // sits next to the pattern word in the name so the read scans
+  // naturally: in "An Onyx and Sage Dotted Crystal" the dots should
+  // be Sage-colored because Sage is the word adjacent to "Dotted".
+  // Without this, the dots tracked the gradient's c2 slot, which is
+  // mapped to "secondary" (not necessarily the second-named adjective
+  // — orderModifiers reorders by English adjective rank), so the
+  // dot color often pointed at the wrong word in the name.
+  let patternColor;
+  if (!secondaryAdj) {
+    patternColor = primary.color;
+  } else {
+    const adjacentAdj = namePieces[1];
+    if (adjacentAdj === primaryAdj) patternColor = primary.color;
+    else if (adjacentAdj === secondaryAdj) patternColor = secondary.color;
+    else patternColor = secondary.color;  // defensive fallback
   }
 
   // Description voice — names both registers when both exist,
@@ -550,6 +569,7 @@ export function computeMoodCrystal({
     innerGlowColor,
     outerGlowColor,
     pattern: patternWord,
+    patternColor,
     families: {
       effect: effectFams.ranked,
       flavor: flavorFams.ranked,

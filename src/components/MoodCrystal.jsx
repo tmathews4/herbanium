@@ -117,12 +117,19 @@ const patternConfig = (pattern, c1, c2) => {
   }
 };
 
-const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
+const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }) => {
   const gradId = `crystal-grad-${idSuffix}`;
   const glowId = `crystal-glow-${idSuffix}`;
   const clipId = `crystal-clip-${idSuffix}`;
   const [c1, c2] = gradient;
   const config = patternConfig(pattern, c1, c2);
+  // Pattern overlays (Veined / Dotted) use whichever color sits next
+  // to the pattern word in the crystal's name — keeps the dot/vein
+  // color tracking the user-readable association ("Onyx and Sage
+  // Dotted" → Sage-colored dots) instead of the gradient's c2 slot,
+  // which only happens to be the secondary by adjective rank.
+  // Falls back to c2 when no patternColor is supplied (legacy shape).
+  const overlayColor = patternColor || c2;
 
   // Crystal silhouette polygon — six-faceted bipyramid.
   const silhouette = "36,6 60,28 56,58 36,80 16,58 12,28";
@@ -182,14 +189,14 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded" }) => {
           Dotted scatters small bright points. Both clipped to the
           silhouette so they don't bleed past the cut. */}
       {pattern === "Veined" && (
-        <g clipPath={`url(#${clipId})`} stroke={c2} strokeOpacity="0.7" strokeWidth="0.7" fill="none">
+        <g clipPath={`url(#${clipId})`} stroke={overlayColor} strokeOpacity="0.7" strokeWidth="0.7" fill="none">
           <path d="M22,16 Q34,38 30,72" />
           <path d="M50,18 Q40,40 46,68" />
           <path d="M30,24 Q40,42 38,60" />
         </g>
       )}
       {pattern === "Dotted" && (
-        <g clipPath={`url(#${clipId})`} fill={c2} fillOpacity="0.85">
+        <g clipPath={`url(#${clipId})`} fill={overlayColor} fillOpacity="0.85">
           <circle cx="26" cy="32" r="1.6" />
           <circle cx="44" cy="40" r="1.2" />
           <circle cx="32" cy="50" r="1.4" />
@@ -382,7 +389,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         opacity: crystal.isFaint ? 0.55 : 1,
         transition: "box-shadow 0.4s ease, opacity 0.3s ease",
       }}>
-        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} />
+        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} />
       </div>
       <div style={{
         flex: 1, minWidth: 0,
