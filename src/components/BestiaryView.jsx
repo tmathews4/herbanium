@@ -35,6 +35,74 @@ import { generateCreationTitle, describeCreationTitle } from "../data/creationTi
 
 const FEATURED_LIMIT = 5;
 
+// Naturalist field-journal note for a single arrival. Combines a
+// time-of-day phrase with a short context line derived from the
+// nearest brewing/writing activity (or a recent-mood streak when
+// nothing's nearby). Returns null when there's nothing meaningful
+// to say — caller suppresses the line entirely in that case.
+function timeOfDayPhrase(ts) {
+  if (!ts) return null;
+  const h = new Date(ts).getHours();
+  if (h >= 5 && h < 9)   return "at first light";
+  if (h >= 9 && h < 11)  return "in the morning";
+  if (h >= 11 && h < 14) return "in midday quiet";
+  if (h >= 14 && h < 17) return "in the afternoon hush";
+  if (h >= 17 && h < 20) return "at dusk";
+  if (h >= 20 && h < 23) return "in the evening";
+  return "well into the dark";
+}
+function contextPhrase(ts, sessions, journalEntries, getBlend) {
+  if (!ts) return null;
+  const NEAR_MS = 90 * 60 * 1000;
+  const RECENT_MS = 24 * 60 * 60 * 1000;
+  // Co-incident brew within ~90 min — the cup that was steeping
+  // when the lodestone caught the visitor.
+  for (const s of sessions || []) {
+    if (s.who !== "you") continue;
+    const t = s.brewedAt || 0;
+    if (!t) continue;
+    if (Math.abs(t - ts) <= NEAR_MS) {
+      const b = getBlend(s.blendId);
+      if (b?.name) return `with ${b.name.toLowerCase()} in the cup`;
+    }
+  }
+  // Co-incident journal entry — the writing turn that called it in.
+  for (const e of journalEntries || []) {
+    const t = e.ts || 0;
+    if (!t) continue;
+    if (Math.abs(t - ts) <= NEAR_MS) {
+      return "during a writing turn";
+    }
+  }
+  // Recent dominant mood across the last few cups — the streak
+  // the visitor seems to have followed in.
+  const recent = (sessions || [])
+    .filter(s => s.who === "you" && (s.brewedAt || 0) > 0 && (s.brewedAt || 0) < ts && (ts - s.brewedAt) <= 5 * RECENT_MS)
+    .slice(0, 5);
+  if (recent.length >= 2) {
+    const moodCount = new Map();
+    for (const s of recent) {
+      const b = getBlend(s.blendId);
+      if (b?.mood) moodCount.set(b.mood, (moodCount.get(b.mood) || 0) + 1);
+    }
+    if (moodCount.size > 0) {
+      const top = [...moodCount.entries()].sort((a, b) => b[1] - a[1])[0];
+      return `during a ${top[0]} stretch`;
+    }
+  }
+  return null;
+}
+function arrivalNote(ts, sessions, journalEntries, getBlend, isCreation) {
+  if (isCreation) return "noted the day the lodestone was carved";
+  if (!ts) return "from before the journal began";
+  const t = timeOfDayPhrase(ts);
+  const c = contextPhrase(ts, sessions, journalEntries, getBlend);
+  if (t && c) return `${t} — ${c}`;
+  if (t) return t;
+  if (c) return c;
+  return null;
+}
+
 const RARITY_TONE = {
   common:    { color: theme.ash,      label: "common",    bg: "rgba(140,140,140,0.05)" },
   uncommon:  { color: theme.sageDeep, label: "uncommon",  bg: "rgba(98,124,92,0.07)" },
@@ -528,25 +596,40 @@ export const BestiaryView = ({
               background: theme.cream,
               overflow: "hidden",
             }}>
-              {items.map((it, i) => (
-                <div key={it.id} style={{
-                  padding: "9px 12px",
-                  borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                  display: "flex", alignItems: "baseline",
-                  justifyContent: "space-between", gap: 12,
-                  fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
-                }}>
-                  <span style={{
-                    overflow: "hidden", textOverflow: "ellipsis",
-                    whiteSpace: "nowrap", flex: 1, minWidth: 0,
-                  }}>{it.displayName}</span>
-                  <span style={{
-                    fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.04em",
-                    color: theme.ash, flexShrink: 0,
-                    fontStyle: it.ts ? "normal" : "italic",
-                  }}>{fmtDate(it.ts)}</span>
-                </div>
-              ))}
+              {items.map((it, i) => {
+                const isCreation = it.id === "_creation";
+                const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation);
+                return (
+                  <div key={it.id} style={{
+                    padding: "9px 12px 10px",
+                    borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                  }}>
+                    <div style={{
+                      display: "flex", alignItems: "baseline",
+                      justifyContent: "space-between", gap: 12,
+                      fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
+                    }}>
+                      <span style={{
+                        overflow: "hidden", textOverflow: "ellipsis",
+                        whiteSpace: "nowrap", flex: 1, minWidth: 0,
+                      }}>{it.displayName}</span>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.04em",
+                        color: theme.ash, flexShrink: 0,
+                        fontStyle: it.ts ? "normal" : "italic",
+                      }}>{fmtDate(it.ts)}</span>
+                    </div>
+                    {note && (
+                      <div style={{
+                        marginTop: 2,
+                        fontFamily: ff.serif, fontStyle: "italic",
+                        fontSize: 11.5, color: theme.ash,
+                        lineHeight: 1.4,
+                      }}>{note}</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
