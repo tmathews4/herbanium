@@ -1446,9 +1446,19 @@ export default function App() {
       {glimpseElemental && (
         <ElementalGlimpseCard
           onLogIt={() => {
+            // Set the sub-mode FIRST, then navigate. If we navigate
+            // first, the ComposeScreen may render once with the stale
+            // shelfMode (typically "recipes") before the second
+            // batched update flips it to "bestiary" — visually that
+            // landed on the recipes list. Setting bestiary first means
+            // by the time ComposeScreen mounts under section="shelf",
+            // the persisted mode is already correct. Using
+            // setShelfModeAction (not the raw setter) keeps the
+            // catalogue-filter side effect path consistent with the
+            // dock's manual sub-tab clicks.
+            setShelfModeAction("bestiary");
             setGlimpseElemental(null);
-            setTab("shelf");
-            setShelfMode("bestiary");
+            navigateTab("shelf");
           }}
           onLater={() => setGlimpseElemental(null)}
         />
