@@ -267,14 +267,18 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
     if (lastCrystalSig !== crystalSig) {
       setShifting(true);
       setShiftFrom(lastCrystalName || null);
+      // 5.5s gives the eye time to register the flare AND read the
+      // banner ("your crystal shifted from X to Y") at a comfortable
+      // pace; the prior 2.4s passed before the user could finish the
+      // sentence. Banner fade-out is the last beat of the keyframe
+      // animation; the from-name clears another moment after so a
+      // re-render doesn't re-display it.
       const t = setTimeout(() => {
         setShifting(false);
         setLastCrystalSig(crystalSig);
         setLastCrystalName(crystal.name);
-        // Clear the from-name a moment after the banner fades so a
-        // re-render doesn't re-display it.
-        setTimeout(() => setShiftFrom(null), 600);
-      }, 2400);
+        setTimeout(() => setShiftFrom(null), 800);
+      }, 5500);
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -389,7 +393,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         borderRadius: "0 6px 6px 0",
         fontFamily: ff.serif, fontSize: 12.5,
         color: theme.ink, lineHeight: 1.45,
-        animation: "crystalShiftFade 2.4s ease",
+        animation: "crystalShiftFade 5.5s ease",
       }}>
         <span style={{
           fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
@@ -402,8 +406,8 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
     <style>{`
       @keyframes crystalShiftFade {
         0%   { opacity: 0; transform: translateY(-4px); }
-        15%  { opacity: 1; transform: translateY(0); }
-        85%  { opacity: 1; transform: translateY(0); }
+        7%   { opacity: 1; transform: translateY(0); }
+        92%  { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(0); }
       }
     `}</style>
