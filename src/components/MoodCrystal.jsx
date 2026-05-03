@@ -266,19 +266,26 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
     }
     if (lastCrystalSig !== crystalSig) {
       setShifting(true);
-      setShiftFrom(lastCrystalName || null);
-      // 5.5s gives the eye time to register the flare AND read the
-      // banner ("your crystal shifted from X to Y") at a comfortable
-      // pace; the prior 2.4s passed before the user could finish the
-      // sentence. Banner fade-out is the last beat of the keyframe
-      // animation; the from-name clears another moment after so a
-      // re-render doesn't re-display it.
+      // Coerce shiftFrom to a real, trimmed string. If lastCrystalName
+      // is undefined / object / empty, fall back to null and the
+      // banner suppresses itself (the && shiftFrom guard below) rather
+      // than rendering a broken substitution.
+      const safePrev = (typeof lastCrystalName === "string" && lastCrystalName.trim())
+        ? lastCrystalName.trim()
+        : null;
+      setShiftFrom(safePrev);
+      // 9s gives a comfortable read window for the full sentence —
+      // 5.5s was still passing too quickly. The banner keyframe fades
+      // in fast, holds, then fades out over the last beat. Pulse-mul-3
+      // glow flare runs the whole time. The from-name clears another
+      // moment after the timeout so a re-render doesn't re-display
+      // a stale value.
       const t = setTimeout(() => {
         setShifting(false);
         setLastCrystalSig(crystalSig);
         setLastCrystalName(crystal.name);
-        setTimeout(() => setShiftFrom(null), 800);
-      }, 5500);
+        setTimeout(() => setShiftFrom(null), 1200);
+      }, 9000);
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -393,21 +400,25 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile }) => 
         borderRadius: "0 6px 6px 0",
         fontFamily: ff.serif, fontSize: 12.5,
         color: theme.ink, lineHeight: 1.45,
-        animation: "crystalShiftFade 5.5s ease",
+        animation: "crystalShiftFade 9s ease",
       }}>
         <span style={{
           fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
           textTransform: "uppercase", color: crystal.gradient[0],
           marginRight: 8, fontWeight: 600,
         }}>your crystal shifted</span>
-        from <em style={{ color: theme.inkSoft }}>{shiftFrom}</em> to <em style={{ color: theme.ink }}>{crystal.name}</em> — the last few cups changed which way it points.
+        {/* shiftFrom and crystal.name are coerced to safe strings —
+            shiftFrom by the safePrev guard above (banner suppresses
+            entirely if non-string), crystal.name by computeMoodCrystal
+            which always returns a fully-substituted name string. */}
+        from <em style={{ color: theme.inkSoft }}>{String(shiftFrom)}</em> to <em style={{ color: theme.ink }}>{String(crystal.name || "")}</em> — the last few cups changed which way it points.
       </div>
     )}
     <style>{`
       @keyframes crystalShiftFade {
         0%   { opacity: 0; transform: translateY(-4px); }
-        7%   { opacity: 1; transform: translateY(0); }
-        92%  { opacity: 1; transform: translateY(0); }
+        4%   { opacity: 1; transform: translateY(0); }
+        94%  { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(0); }
       }
     `}</style>

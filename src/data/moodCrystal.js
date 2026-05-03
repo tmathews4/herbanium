@@ -435,19 +435,29 @@ export function computeMoodCrystal({
   // stone rather than how two colors meet.
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const lc  = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+  // Defensive defaults. If a family slipped past the adjective/voice
+  // tables (e.g. data drift, an unusual family name), fall back to a
+  // neutral string instead of letting "undefined" surface in the
+  // description text. Same for patternVerb / patternSoloVoice in
+  // case the pattern table changes shape.
+  const _primaryAdj   = primaryAdj   || "Quiet";
+  const _primaryVoice = primaryVoice || "soft light pooling";
+  const _secondaryVoice = secondaryVoice || null;
+  const _patternVerb  = patternVerb  || "traced with";
+  const _patternSolo  = patternSoloVoice || "a single color held in suspension";
   let description;
   if (isFaint) {
-    if (secondaryVoice) {
-      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, ${patternVerb} traces of ${lc(secondaryVoice)} just stirring.`;
+    if (_secondaryVoice) {
+      description = `Faintly ${_primaryAdj} — ${lc(_primaryVoice)}, ${_patternVerb} traces of ${lc(_secondaryVoice)} just stirring.`;
     } else {
-      description = `Faintly ${primaryAdj} — ${lc(primaryVoice)}, still gathering.`;
+      description = `Faintly ${_primaryAdj} — ${lc(_primaryVoice)}, still gathering.`;
     }
-  } else if (secondaryVoice) {
-    description = cap(`${primaryVoice}, ${patternVerb} ${lc(secondaryVoice)}.`);
+  } else if (_secondaryVoice) {
+    description = cap(`${_primaryVoice}, ${_patternVerb} ${lc(_secondaryVoice)}.`);
   } else {
     // Pattern's solo phrase + the primary voice. Reads as the
     // pattern describing how the one color inhabits the stone.
-    description = cap(`${patternSoloVoice} — ${lc(primaryVoice)}.`);
+    description = cap(`${_patternSolo} — ${lc(_primaryVoice)}.`);
   }
 
   // "With faint X" trailing mention — surfaces an onboarding-
@@ -484,12 +494,14 @@ export function computeMoodCrystal({
         }
       }
     }
-    if (trailing) {
+    if (trailing && trailing.adj) {
       // Trailing mention reads as a hint of unrealized color
       // visible at the crystal's edge. The adjective alone reads
       // vague ("a faint Sky"); pairing it with "glow" anchors it
       // as a color noun ("a faint Sky-glow") that fits the
-      // in-stone luminous register.
+      // in-stone luminous register. The adj guard prevents an
+      // "undefined-glow" from appearing if the trailing record
+      // was assembled with a missing adjective.
       description = description.replace(/\.$/, "")
         + `, with a faint ${trailing.adj}-glow just stirring at the edge.`;
     }
