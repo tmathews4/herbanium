@@ -18,7 +18,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState } from "react";
-import { Flower } from "../components/icons";
+import { Flower, Kettle } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import { ff, theme } from "../theme";
@@ -31,7 +31,7 @@ const formatBrewTime = (s) => {
   return r === 0 ? `${m} min` : `${m}m ${r}s`;
 };
 
-export const CupDetail = ({ session, onClose, openBlend, appendSessionNote }) => {
+export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain }) => {
   const { unit } = useUnit();
   const blend = session ? getBlend(session.blendId) : null;
   // Append-a-note state — collapsed by default. Opens to a dashed
@@ -362,6 +362,25 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote }) =>
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Brew again — primary CTA tucked at the bottom so the
+          journal-y read of the cup comes first and the action lives
+          where the user lands when they finish reading. Hands the
+          blend straight to startBrew with the original target moods
+          carried forward as a sensible default; the user can still
+          adjust intent on the steep page. */}
+      {onBrewAgain && (
+        <div style={{ marginTop: 22 }}>
+          <Button
+            variant="primary" tone="terra" fullWidth
+            onClick={onBrewAgain}
+            icon={<Kettle size={18} c={theme.cream} />}
+            style={{ fontSize: 16, padding: "13px 16px", gap: 10 }}
+          >
+            Brew again →
+          </Button>
         </div>
       )}
     </div>

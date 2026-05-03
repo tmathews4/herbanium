@@ -1719,6 +1719,17 @@ export default function App() {
             setBlendOverlayId(id);
             setOverlay("blend");
           }}
+          onBrewAgain={() => {
+            const cupSession = sessions.find(s => s.id === cupOverlayId);
+            const b = cupSession ? getBlend(cupSession.blendId) : null;
+            if (!b) return;
+            // Drop overlay history so a back from the new steep
+            // doesn't fall back into the old cup detail. Carry the
+            // user's prior target moods forward as a starting point
+            // — they were aiming for this cup's experience again.
+            clearOverlayHistory();
+            startBrew(b, "", cupSession?.targetMoods || (b.mood ? [b.mood] : []));
+          }}
         />
       )}
       {overlay === "entry" && entryOverlayId && (
