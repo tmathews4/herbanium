@@ -535,39 +535,83 @@ const CrystalDetail = ({ crystal, profile, isLocked, liveCrystal, onToggleLock }
           flips with state so the action and its effect read cleanly.
           Tap propagation is stopped so the surrounding header
           collapse doesn't fire when this button is tapped. */}
-      {onToggleLock && (
+      {onToggleLock && (() => {
+        // Has the live crystal drifted away from the locked snapshot?
+        // If so, surface a small preview row of where it would
+        // settle on unlock — name + the gradient color as a small
+        // dot — so the user can decide without having to unlock
+        // and see what happens. Comparison is name-based since the
+        // name is the user-visible identity; identical names mean a
+        // de-facto no-op even if internals shifted slightly.
+        const driftedTo = (isLocked
+          && liveCrystal
+          && typeof liveCrystal.name === "string"
+          && liveCrystal.name !== crystal.name)
+          ? liveCrystal
+          : null;
+        return (
         <div style={{
           marginTop: 10, paddingTop: 10,
           borderTop: `1px dashed ${theme.ruleSoft}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          gap: 12,
+          display: "flex", flexDirection: "column", gap: 8,
         }}>
           <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-            color: theme.inkSoft, lineHeight: 1.4, flex: 1, minWidth: 0,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12,
           }}>
-            {isLocked
-              ? "pinned at this profile — the crystal won't drift while locked."
-              : "lock to pin this profile so the crystal holds steady, even if your brewing patterns shift."}
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+              color: theme.inkSoft, lineHeight: 1.4, flex: 1, minWidth: 0,
+            }}>
+              {isLocked
+                ? "pinned at this profile — the crystal won't drift while locked."
+                : "lock to pin this profile so the crystal holds steady, even if your brewing patterns shift."}
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
+              style={{
+                flexShrink: 0,
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.12em",
+                textTransform: "uppercase", fontWeight: 600,
+                padding: "6px 12px", borderRadius: 999,
+                border: `1px solid ${isLocked ? theme.terra : theme.ruleSoft}`,
+                background: isLocked ? theme.terra : "transparent",
+                color: isLocked ? theme.cream : theme.inkSoft,
+                cursor: "pointer",
+                transition: "background 0.18s ease, color 0.18s ease, border-color 0.18s ease",
+              }}
+            >
+              {isLocked ? "unlock" : "lock"}
+            </button>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
-            style={{
-              flexShrink: 0,
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.12em",
-              textTransform: "uppercase", fontWeight: 600,
-              padding: "6px 12px", borderRadius: 999,
-              border: `1px solid ${isLocked ? theme.terra : theme.ruleSoft}`,
-              background: isLocked ? theme.terra : "transparent",
-              color: isLocked ? theme.cream : theme.inkSoft,
-              cursor: "pointer",
-              transition: "background 0.18s ease, color 0.18s ease, border-color 0.18s ease",
-            }}
-          >
-            {isLocked ? "unlock" : "lock"}
-          </button>
+          {driftedTo && (
+            <div style={{
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.04em",
+              color: theme.ash, lineHeight: 1.5,
+              display: "flex", alignItems: "center", gap: 6,
+              flexWrap: "wrap",
+            }}>
+              <span style={{
+                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: theme.ash,
+              }}>on unlock →</span>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%",
+                background: driftedTo.gradient && driftedTo.gradient[0],
+                display: "inline-block", flexShrink: 0,
+                boxShadow: driftedTo.gradient && driftedTo.gradient[0]
+                  ? `0 0 6px ${driftedTo.gradient[0]}80`
+                  : "none",
+              }} />
+              <span style={{
+                fontFamily: ff.serif, fontSize: 12, color: theme.ink,
+                fontStyle: "italic",
+              }}>{driftedTo.name}</span>
+            </div>
+          )}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
