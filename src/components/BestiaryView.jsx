@@ -138,16 +138,28 @@ export const BestiaryView = ({
   const onArrivalDismiss = (id) => {
     markElementalSeen(id);
     setSummonTarget(null);
-    // Newly-logged elementals always settle into reserve. The
-    // previous behavior auto-appended to featuredElementals when
-    // cur.length was below FEATURED_LIMIT, but that compared
-    // against the *persisted* array — which can hold ids no longer
-    // valid (legacy / unearned). When the displayed top-N was being
-    // filled by the rarity-fallback in effectiveFeaturedIds, the
-    // append left validFeatured = [new] alone and the displayed row
-    // collapsed to a single slot with the fallback evicted. Reserve-
-    // by-default keeps the user's visible top five stable; manual
-    // pinning (or swap mode) is how they curate the front page. */
+    // Auto-fill any open featured slot when the user has fewer than
+    // FEATURED_LIMIT *real* pins. Once all five are filled, new
+    // arrivals settle into reserve and the user curates from there.
+    //
+    // The earlier bug (commented previously) was that auto-fill
+    // compared against the persisted array length, which could be
+    // small even when the displayed row was already full via the
+    // rarity-fallback — causing a freshly-logged elemental to
+    // collapse the visible row to a single slot. The fix is to
+    // count VALID pins (ids that correspond to currently-earned
+    // elementals) instead, and to only auto-append when the user
+    // has genuine slot openings, not when the fallback is masking
+    // an empty persisted array.
+    if (!setFeaturedElementals) return;
+    setFeaturedElementals(prev => {
+      const cur = prev || [];
+      if (cur.includes(id)) return cur;
+      const validCur = cur.filter(fid =>
+        revealedSorted.some(a => a.id === fid));
+      if (validCur.length >= FEATURED_LIMIT) return cur;
+      return [...cur, id];
+    });
   };
 
   // Creation card — unique elemental, decorated with element + gem
