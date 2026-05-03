@@ -1536,16 +1536,17 @@ export default function App() {
       {glimpseElemental && (
         <ElementalGlimpseCard
           onLogIt={() => {
-            // Set the sub-mode FIRST, then navigate. If we navigate
-            // first, the ComposeScreen may render once with the stale
-            // shelfMode (typically "recipes") before the second
-            // batched update flips it to "bestiary" — visually that
-            // landed on the recipes list. Setting bestiary first means
-            // by the time ComposeScreen mounts under section="shelf",
-            // the persisted mode is already correct. Using
-            // setShelfModeAction (not the raw setter) keeps the
-            // catalogue-filter side effect path consistent with the
-            // dock's manual sub-tab clicks.
+            // Pin the bestiary destination via composeView. ComposeScreen
+            // has a deep-link useEffect that reads composeView on mount
+            // and calls setMode(composeView.mode). If a previous "see
+            // all journal entries" deep-link left composeView pointing
+            // at section:"shelf"/mode:"journal", that effect would
+            // clobber our setShelfMode("bestiary") the moment the shelf
+            // ComposeScreen mounts and silently land the user on Journal.
+            // Replacing composeView with an explicit bestiary intent
+            // keeps the deep-link path coherent: the same useEffect
+            // that was fighting us now propagates "bestiary" instead.
+            setComposeView({ section: "shelf", mode: "bestiary", at: Date.now() });
             setShelfModeAction("bestiary");
             // Hand the bestiary the id of the just-glimpsed elemental
             // so it auto-opens the arrival card on landing. The
