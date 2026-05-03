@@ -244,8 +244,11 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           cursor: "pointer",
         }}
       >
-        {/* Glowing teacup — Kettle glyph in a pulsing terra halo so
-            the eye lands on it without the banner needing to grow. */}
+        {/* Pulsing window — small four-pane casement glyph standing in
+            for "an elemental at the window." The outer halo pulses on
+            the same 1.8s cycle as before; the window's interior fill
+            also pulses so the panes look like backlit glass with
+            something passing on the other side. */}
         <div style={{
           flexShrink: 0,
           width: 38, height: 38,
@@ -254,7 +257,28 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           background: "radial-gradient(circle, rgba(176,84,47,0.22) 0%, transparent 70%)",
           animation: "glimpseGlow 1.8s ease-in-out infinite",
         }}>
-          <Kettle size={26} c={theme.terra} />
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+            {/* Backlit pane fill — a soft terra wash that pulses
+                between low and high opacity so the window reads as
+                briefly illuminated, like a candle behind it. */}
+            <rect
+              x="3" y="3" width="18" height="18" rx="1.4"
+              fill={theme.terra}
+              style={{
+                animation: "glimpseWindowPaneGlow 1.8s ease-in-out infinite",
+                transformOrigin: "center",
+              }}
+            />
+            {/* Casement frame — outer + cross bars in solid terra so
+                the silhouette stays legible even when the pane fill
+                is at its low-opacity moment. */}
+            <rect
+              x="3" y="3" width="18" height="18" rx="1.4"
+              fill="none" stroke={theme.terra} strokeWidth="1.8"
+            />
+            <line x1="12" y1="3" x2="12" y2="21" stroke={theme.terra} strokeWidth="1.6" />
+            <line x1="3" y1="12" x2="21" y2="12" stroke={theme.terra} strokeWidth="1.6" />
+          </svg>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -294,6 +318,10 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
         @keyframes glimpseGlow {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
           50%      { box-shadow: 0 0 18px 4px rgba(176,84,47,0.42); }
+        }
+        @keyframes glimpseWindowPaneGlow {
+          0%, 100% { fill-opacity: 0.10; }
+          50%      { fill-opacity: 0.45; }
         }
       `}</style>
     </div>
