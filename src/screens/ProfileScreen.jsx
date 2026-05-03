@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [] }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -538,6 +538,43 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
               {SEED_MODES[seedMode].description}
             </div>
           </div>
+
+          {/* Glimpse-banner force-trigger. Drops the user straight
+              into the post-roll banner state without waiting for an
+              actual roll to land — useful when iterating on banner
+              copy, animation, or the navigate-to-bestiary handoff.
+              The id passed to the banner is whichever unrolled
+              attribute the catalog has next; if everything's already
+              rolled the banner still fires (the bestiary's
+              autoOpenArrivalId effect will then no-op gracefully
+              since the elemental isn't in pendingArrivals). */}
+          {devForceGlimpse && (
+            <div style={{
+              marginTop: 12,
+              padding: 12, borderRadius: 10,
+              border: `1px dashed ${theme.rule}`, background: "rgba(181,130,89,0.04)",
+            }}>
+              <div style={{
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
+                marginBottom: 10, lineHeight: 1.45,
+              }}>
+                Force the elemental-glimpse banner to appear so you can
+                check copy, animation, and the bestiary handoff without
+                waiting for an actual roll to land.
+              </div>
+              <button
+                onClick={devForceGlimpse}
+                style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.04em",
+                  padding: "6px 14px", borderRadius: 999,
+                  border: `1px solid ${theme.terra}`,
+                  background: "transparent",
+                  color: theme.terra, fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >Force glimpse banner →</button>
+            </div>
+          )}
         </>
       )}
 
