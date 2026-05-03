@@ -26,7 +26,7 @@ import { Sprig } from "./icons";
 import { MoodCrystal } from "./MoodCrystal";
 import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
 import { getBlend } from "../helpers/misc";
-import { buildAttributeContext, evaluateAttributes } from "../data/attributes";
+import { ATTRIBUTES } from "../data/attributes";
 import { hapticTap } from "../helpers/native";
 import {
   buildElementalNaming, flavorLineFor,
@@ -58,21 +58,24 @@ export const BestiaryView = ({
   featuredElementals,
   setFeaturedElementals,
   wildElementals = [],
+  rolledElementalIds,
   bestiaryHintShown,
   dismissBestiaryHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
 
-  const attrCtx = buildAttributeContext({
-    sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
-  });
-  const attrEvaluation = evaluateAttributes(attrCtx);
   const elementalSeed = profile?.createdAt || profile?.name || "anon";
 
+  // Earned attribute-based elementals come from the rolled-id store
+  // now (chance-based earning model). The legacy predicate-eval
+  // path was retired — the predicates still live on attribute
+  // entries for the one-time migration in App.jsx but are no longer
+  // consulted on every render.
+  const rolledIds = rolledElementalIds || new Set();
+  const earned = ATTRIBUTES.filter(a => rolledIds.has(a.id));
   // Per-user naming map: minimizes adjective/creature duplicates by
   // giving each user a permutation of the pools and assigning by
   // stable order, instead of independent per-attr hashing.
-  const earned = attrEvaluation.filter(a => a.earned);
   const naming = buildElementalNaming(earned, elementalSeed);
   // Earned elementals carry the "A {Adjective} {Creature}" indefinite
   // article — they're a kind, not a singular. Only the user's unique

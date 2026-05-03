@@ -26,7 +26,8 @@ import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
-import { buildAttributeContext, evaluateAttributes } from "./data/attributes";
+import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
+import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
 import { configureStatusBar, hapticTap } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
@@ -383,6 +384,11 @@ export default function App() {
       const cur = prev || {};
       return { ...cur, [tab]: (cur[tab] || 0) + 1 };
     });
+    // Chance-based elemental roll on tab visit. Each tab maps to its
+    // own action key — different elementals live in different visit
+    // pools, so opening apothecary can land an apothecarium-themed
+    // creature while opening notebook lands a journal-keeper.
+    tryRollOnAction(`visit:${tab}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
@@ -637,6 +643,18 @@ export default function App() {
   // evaluator. Read-and-merged into the bestiary alongside earned attrs.
   const [wildElementals, setWildElementals] = usePersistedState("wildElementals", []);
   const [lastWildAt, setLastWildAt] = usePersistedState("lastWildAt", 0);
+  // Roll-based earned elementals — replaces the legacy deterministic
+  // predicate model. Each action site (tab visit, brew, journal, etc.)
+  // calls tryRollOnAction(...), which has a small chance to add an id
+  // to this set. Once added, the elemental is permanently in the
+  // user's bestiary. lastElementalRollAt enforces a cooldown between
+  // attempts so rapid-fire actions don't mass-spawn elementals.
+  // legacyMigrated runs the one-time predicate-eval pass on first
+  // load with this version so users carrying earned elementals from
+  // the old model don't lose them.
+  const [rolledElementalIds, setRolledElementalIds] = usePersistedState("rolledElementalIds", new Set());
+  const [lastElementalRollAt, setLastElementalRollAt] = usePersistedState("lastElementalRollAt", 0);
+  const [legacyMigrated, setLegacyMigrated] = usePersistedState("elementalLegacyMigrated", false);
   // Disable elementals — hides every elemental surface (creation omen,
   // grove, profile stat) for users who'd rather not engage with the
   // mythic layer. Persisted key kept as legacy "animisBanished".
@@ -898,6 +916,55 @@ export default function App() {
     if (next.has(ingId)) next.delete(ingId);
     else next.add(ingId);
     setPantryIds(next);
+    tryRollOnAction("pantry");
+  };
+
+  // One-time legacy migration. The previous model evaluated `earned`
+  // predicates on every render to decide which attribute-based
+  // elementals were in the bestiary. The new chance-based model
+  // stores explicit ids in `rolledElementalIds`. On first load with
+  // the new code, evaluate the old predicates ONCE and seed the new
+  // set so anyone carrying a legitimately-earned bestiary doesn't
+  // see it disappear. Persisted flag prevents the migration from
+  // re-running and avoids feeding pre-existing-but-not-yet-rolled
+  // elementals (e.g. seed-preset users) into the new state.
+  useEffect(() => {
+    if (legacyMigrated) return;
+    if (elementalsDisabled) {
+      setLegacyMigrated(true);
+      return;
+    }
+    const ctx = buildAttributeContext({
+      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
+    });
+    const seeded = legacyEarnedIds(ATTRIBUTES, ctx);
+    if (seeded.size > 0) {
+      setRolledElementalIds(prev => {
+        const next = new Set(prev || []);
+        seeded.forEach(id => next.add(id));
+        return next;
+      });
+    }
+    setLegacyMigrated(true);
+  }, [legacyMigrated, sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits, elementalsDisabled, setLegacyMigrated, setRolledElementalIds]);
+
+  // Try a chance-based elemental roll on a user action. Called by
+  // every action site (tab visit, brew, journal, pantry, favorite,
+  // compose). If the roll lands, the new id is appended to
+  // rolledElementalIds and the bestiary's existing arrival flow
+  // surfaces it as a "you glimpsed an elemental" moment. Internal
+  // cooldown is enforced inside rollOnAction.
+  const tryRollOnAction = (action) => {
+    if (elementalsDisabled) return;
+    const earned = rolledElementalIds || new Set();
+    const result = rollOnAction(action, ATTRIBUTES, earned, lastElementalRollAt || 0);
+    if (!result) return;
+    setRolledElementalIds(prev => {
+      const next = new Set(prev || []);
+      next.add(result.id);
+      return next;
+    });
+    setLastElementalRollAt(result.ts);
   };
 
   // Snapshot of currently-earned elemental ids — recomputed on every
@@ -907,13 +974,14 @@ export default function App() {
   // this cup. Includes both attribute-based earns and wild rolls so
   // either path can trigger the glimpse card.
   const earnedElementalIds = useMemo(() => {
-    const ctx = buildAttributeContext({
-      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
-    });
-    const attrIds = evaluateAttributes(ctx).filter(a => a.earned).map(a => a.id);
+    // Attribute-based ids now come straight from rolledElementalIds
+    // (the chance-based earnings store) instead of evaluating the
+    // legacy predicates. Wild elementals continue to live in their
+    // own array since they carry full per-item data.
+    const attrIds = [...(rolledElementalIds || new Set())];
     const wildIds = (wildElementals || []).map(w => w.id);
     return new Set([...attrIds, ...wildIds]);
-  }, [sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits, wildElementals]);
+  }, [rolledElementalIds, wildElementals]);
 
   // Glimpse-detection effect — fires once per pending check, after the
   // earned-elementals set has settled following addSession + the wild
@@ -1023,6 +1091,7 @@ export default function App() {
 
     hapticTap();
     tryRollWildElemental();
+    tryRollOnAction("brew");
   };
 
   // Patch a pending session with mood data once the user fills in the
@@ -1125,6 +1194,7 @@ export default function App() {
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
     tryRollWildElemental();
+    tryRollOnAction("journal");
   };
   const deleteJournalEntry = (id) => {
     setJournalEntries(prev => (prev || []).filter(e => e.id !== id));
@@ -1194,6 +1264,7 @@ export default function App() {
       return next;
     });
     hapticTap();
+    tryRollOnAction("compose");
     return id;
   };
 
@@ -1214,6 +1285,9 @@ export default function App() {
     }
     setFavoriteBlendIds(nextFav);
     setSavedBlendIds(nextSaved);
+    // Only roll on the *adding* side — pinning a favorite is the
+    // intentional act; unpinning shouldn't pay out.
+    if (!wasFav) tryRollOnAction("favorite");
   };
 
   const scrollRef = useRef(null);
@@ -1287,7 +1361,7 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} />}
       </div>
