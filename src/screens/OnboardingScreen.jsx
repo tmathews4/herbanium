@@ -66,13 +66,24 @@ export const OnboardingScreen = ({ onComplete }) => {
       fontFamily: ff.sans,
       overflow: "auto",
     }}>
-      {/* Top: brand + progress */}
+      {/* Top: brand + progress. The header mark is the herbanium
+          logo's H glyph at 30px — gives every onboarding step a
+          continuous brand anchor at the top instead of relying on a
+          single welcome-step splash. The wordmark + progress dots
+          sit below; the whole header reads as one stacked brand
+          composition. */}
       <div style={{
         padding: "28px 24px 12px",
         display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
         flexShrink: 0,
       }}>
-        <Flower size={26} c={theme.terra} />
+        <img
+          src="/herbanium-logo-icon.svg"
+          alt="Herbanium"
+          width={30}
+          height={30}
+          style={{ display: "block", opacity: 0.92 }}
+        />
         <div style={{
           fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.28em",
           textTransform: "uppercase", color: theme.inkSoft,
@@ -182,23 +193,6 @@ export const OnboardingScreen = ({ onComplete }) => {
 
 const StepWelcome = () => (
   <div style={{ textAlign: "center" }}>
-    {/* Brand mark — the icon-only lockup at ~96px sits above the
-        welcome title so the user's first encounter with the app
-        anchors on the logo. The mark uses the brand's forest green;
-        the wordmark beneath stays in the existing Fraunces serif so
-        the type and the icon read as one composition rather than
-        competing. */}
-    <img
-      src="/herbanium-logo-icon.svg"
-      alt="Herbanium"
-      width={96}
-      height={96}
-      style={{
-        display: "block",
-        margin: "0 auto 18px",
-        opacity: 0.92,
-      }}
-    />
     <div style={{
       fontFamily: ff.serif, fontSize: 32, color: theme.ink,
       lineHeight: 1.15, marginBottom: 12,
