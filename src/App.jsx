@@ -257,12 +257,15 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
           background: "radial-gradient(circle, rgba(176,84,47,0.22) 0%, transparent 70%)",
           animation: "glimpseGlow 1.8s ease-in-out infinite",
         }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+          <svg width="22" height="26" viewBox="0 0 22 26" aria-hidden>
             {/* Backlit pane fill — a soft terra wash that pulses
                 between low and high opacity so the window reads as
-                briefly illuminated, like a candle behind it. */}
+                briefly illuminated, like a candle behind it. The
+                rect is taller than wide (14×22) so the silhouette
+                reads as a casement window rather than a square
+                frame. */}
             <rect
-              x="3" y="3" width="18" height="18" rx="1.4"
+              x="4" y="2" width="14" height="22" rx="1.2"
               fill={theme.terra}
               style={{
                 animation: "glimpseWindowPaneGlow 1.8s ease-in-out infinite",
@@ -273,11 +276,11 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
                 the silhouette stays legible even when the pane fill
                 is at its low-opacity moment. */}
             <rect
-              x="3" y="3" width="18" height="18" rx="1.4"
+              x="4" y="2" width="14" height="22" rx="1.2"
               fill="none" stroke={theme.terra} strokeWidth="1.8"
             />
-            <line x1="12" y1="3" x2="12" y2="21" stroke={theme.terra} strokeWidth="1.6" />
-            <line x1="3" y1="12" x2="21" y2="12" stroke={theme.terra} strokeWidth="1.6" />
+            <line x1="11" y1="2" x2="11" y2="24" stroke={theme.terra} strokeWidth="1.5" />
+            <line x1="4"  y1="13" x2="18" y2="13" stroke={theme.terra} strokeWidth="1.5" />
           </svg>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
