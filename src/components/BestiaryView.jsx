@@ -59,6 +59,16 @@ export const BestiaryView = ({
   setFeaturedElementals,
   wildElementals = [],
   rolledElementalIds,
+  // Auto-open hint passed by App when the user taps "Log it" on the
+  // end-of-brew glimpse card. The bestiary lands with this elemental's
+  // arrival card already open, so the user doesn't have to tap a
+  // second summon button to reach the moment they came here for.
+  // Skipped if the user hasn't seen the omen yet (i.e. their unique
+  // creation title) — that introduction needs to happen before any
+  // rolled arrival, otherwise the omen flow gets short-circuited the
+  // first time around.
+  autoOpenArrivalId = null,
+  onAutoOpenConsumed,
   bestiaryHintShown,
   dismissBestiaryHint,
 }) => {
@@ -134,6 +144,27 @@ export const BestiaryView = ({
     const next = pendingArrivals[0];
     if (next) setSummonTarget({ kind: "arrival", elemental: next });
   };
+
+  // Auto-open the requested arrival when arriving from a glimpse-card
+  // "Log it" tap. Runs once per autoOpenArrivalId value: finds the
+  // matching elemental in pendingArrivals, sets it as summonTarget,
+  // and signals App to clear the flag so the next render doesn't
+  // re-trigger. Skipped while the omen is unshown — the user's
+  // creation-title intro needs to land before any rolled arrival
+  // surfaces; otherwise we'd short-circuit the once-only welcome
+  // moment.
+  React.useEffect(() => {
+    if (!autoOpenArrivalId) return;
+    if (elementalsDisabled) return;
+    if (summonTarget) return;
+    if (!omenShown) return;
+    const target = pendingArrivals.find(a => a.id === autoOpenArrivalId);
+    if (target) {
+      setSummonTarget({ kind: "arrival", elemental: target });
+    }
+    if (onAutoOpenConsumed) onAutoOpenConsumed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenArrivalId, omenShown]);
   const onOmenDismiss = () => {
     if (dismissOmen) dismissOmen();
     setSummonTarget(null);
