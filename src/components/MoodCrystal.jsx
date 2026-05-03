@@ -52,15 +52,28 @@ const patternConfig = (pattern, c1, c2) => {
         ],
       };
     case "Banded":
-      // Hard 50/50 split so each color reads as its own stripe.
+      // Five diagonal bands with feathered edges — agate-style
+      // striping. The previous hard 50/50 split read as two
+      // solid blocks stacked on top of each other when the two
+      // colors landed close in value; this version stays
+      // recognizably "banded" (alternating stripes) but the
+      // diagonal angle, the multiple bands, and the soft 4%
+      // transitions between each color make it read as a layered
+      // stone instead of a flat two-tone fill.
       return {
         type: "linear",
-        coords: { x1: "0%", y1: "0%", x2: "0%", y2: "100%" },
+        coords: { x1: "10%", y1: "0%", x2: "90%", y2: "100%" },
         stops: [
           { offset: "0%",   color: c1, opacity: 1.00 },
-          { offset: "49%",  color: c1, opacity: 1.00 },
-          { offset: "51%",  color: c2, opacity: 0.98 },
-          { offset: "100%", color: c2, opacity: 0.98 },
+          { offset: "16%",  color: c1, opacity: 1.00 },
+          { offset: "20%",  color: c2, opacity: 0.96 },
+          { offset: "36%",  color: c2, opacity: 0.96 },
+          { offset: "40%",  color: c1, opacity: 0.98 },
+          { offset: "56%",  color: c1, opacity: 0.98 },
+          { offset: "60%",  color: c2, opacity: 0.94 },
+          { offset: "76%",  color: c2, opacity: 0.94 },
+          { offset: "80%",  color: c1, opacity: 0.96 },
+          { offset: "100%", color: c1, opacity: 0.96 },
         ],
       };
     case "Blotted":
@@ -371,7 +384,14 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       }}>
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{
+        flex: 1, minWidth: 0,
+        // Reserve room at the bottom of the text column for the
+        // absolutely-positioned 'details' pill. Without this, longer
+        // descriptions wrap close to the pill's corner and the two
+        // start crashing into each other.
+        paddingBottom: 26,
+      }}>
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 4,
