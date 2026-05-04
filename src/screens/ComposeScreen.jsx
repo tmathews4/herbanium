@@ -973,8 +973,8 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
       ]
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
-        ["Journal", "Cup logs, free-form entries, and mood arcs. Your tea-meets-mood diary."],
-        ["Bestiary", "Elementals you've earned and the wild ones drawn to your cups. Your apothecary's familiars."],
+        ["Reflections", "What you wrote while the kettle was hot — cup logs, lines jotted between sips, and the mood arcs around them."],
+        ["Visitors", "Elementals drawn to your cups. Your apothecary's familiars, observed through the lodestone."],
       ];
 
   return (

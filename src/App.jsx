@@ -56,7 +56,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   const subTabs = tab === "apothecary"
     ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["journal", "Journal"], ["visitors", "Visitors"]]
+      ? [["recipes", "Recipes"], ["journal", "Reflections"], ["visitors", "Visitors"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode

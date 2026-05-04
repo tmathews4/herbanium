@@ -401,29 +401,35 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         />
       </div>
 
-      {/* personal notes — free-text reflection, kept for anything the chips
-          don't cover. */}
-      <div style={{ marginTop: 12 }}>
-        <div style={{ position: "relative" }}>
-          <input
-            value={intent || ""}
-            onChange={(e) => setIntent && setIntent(e.target.value)}
-            placeholder="Personal notes…"
-            className="steep-intent-input"
-            style={{
-              width: "100%", background: "rgba(var(--hi-rgb),0.05)",
-              border: `1px dashed ${theme.rule}`, borderRadius: 10,
-              fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
-              fontSize: 14, color: intent ? theme.ink : theme.ash,
-              padding: "10px 34px 10px 14px", outline: "none",
-              boxSizing: "border-box",
-            }}
-          />
-          <span style={{
-            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-            color: theme.ash, fontSize: 12, pointerEvents: "none",
-          }}>✎</span>
-        </div>
+      {/* Steep-time reflection — promoted from a single-line
+          personal-notes input to a real writing surface. The brewing
+          wait is the strongest natural prompt-able moment in the
+          app (3-7 minutes of mandatory attention idling), so the
+          journal lives here as the primary path. The page is left
+          deliberately simple: serif text in a soft cream surface,
+          dashed rule, no chrome. The brew log's Notebook → Reflections
+          tab surfaces this writing later in chronological form. */}
+      <div style={{ marginTop: 18 }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+        }}>while it steeps</div>
+        <textarea
+          value={intent || ""}
+          onChange={(e) => setIntent && setIntent(e.target.value)}
+          placeholder="A line, a thought, a thing the day's holding…"
+          rows={6}
+          style={{
+            width: "100%", boxSizing: "border-box",
+            fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
+            fontSize: 16, color: intent ? theme.ink : theme.ash,
+            lineHeight: 1.7,
+            background: "rgba(var(--hi-rgb),0.05)",
+            border: `1px dashed ${theme.rule}`, borderRadius: 10,
+            padding: "14px 16px", outline: "none",
+            resize: "vertical", minHeight: 160,
+          }}
+        />
       </div>
 
       {/* while you wait — cycling fact/tradition/poem pool keyed to this blend
