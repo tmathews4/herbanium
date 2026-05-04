@@ -57,7 +57,7 @@ export const DEFAULT_REGISTER_MAPPING = Object.freeze({
 });
 
 /* ──────────────────────────────────────────────────────────────
-   Brewing profile — derive temp/time from constituent ingredients.
+   Brewing profile — derive temp/time from constituent ingredients.lets 
 
    The spec's prescription: "temperature as range intersection."
    - First try the intersection of all ingredient tempC ranges.
