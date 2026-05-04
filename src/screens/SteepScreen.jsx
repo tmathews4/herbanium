@@ -420,7 +420,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       <div
         onClick={advanceWaitCard}
         style={{
-          marginTop: 18, padding: "16px 18px 40px",
+          marginTop: 18, padding: "16px 18px 56px",
           border: `1px solid ${theme.rule}`, borderRadius: 12,
           background: theme.cream,
           boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
