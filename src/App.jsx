@@ -3,7 +3,7 @@ import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
   SEED_MODES, materializeSeedSessions,
-  materializeSeedJournalEntries, materializeSeedPlannerItems,
+  materializeSeedJournalEntries,
 } from "./data/seeds";
 import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
 import { Button } from "./components/layout";
@@ -610,40 +610,6 @@ export default function App() {
   // same chronology as cup sessions. Persisted as { id, ts, text, kind }
   // where kind is "entry" (free) or "haiku" (woven from prompts).
   const [journalEntries, setJournalEntries] = usePersistedState("journalEntries", []);
-  // Planner items — small list of "today's intentions" the user can
-  // jot down and tick off. Surfaces in Shelf > Journal as an inline
-  // section, and via a button in the Apothecary brew page that pops
-  // up the same list as a modal overlay.
-  const [plannerItems, setPlannerItems] = usePersistedState("plannerItems", []);
-  const addPlannerItem = (text) => {
-    const clean = (text || "").trim();
-    if (!clean) return;
-    const item = {
-      id: `plan-${Date.now()}`,
-      text: clean,
-      done: false,
-      ts: Date.now(),
-    };
-    setPlannerItems(prev => [item, ...(prev || [])]);
-  };
-  const togglePlannerItem = (id) => {
-    setPlannerItems(prev =>
-      (prev || []).map(p => p.id === id ? { ...p, done: !p.done } : p)
-    );
-  };
-  const editPlannerItem = (id, text) => {
-    const clean = (text || "").trim();
-    if (!clean) return;
-    setPlannerItems(prev =>
-      (prev || []).map(p => p.id === id ? { ...p, text: clean } : p)
-    );
-  };
-  const deletePlannerItem = (id) => {
-    setPlannerItems(prev => (prev || []).filter(p => p.id !== id));
-  };
-  const clearDonePlannerItems = () => {
-    setPlannerItems(prev => (prev || []).filter(p => !p.done));
-  };
   const [savedBlendIds, setSavedBlendIds] = usePersistedState(
     "savedBlendIds",
     isDev ? new Set(SEED_MODES.power.savedBlendIds) : new Set()
@@ -709,7 +675,6 @@ export default function App() {
     }
     setGeneratedBlends(mode.generatedBlends || []);
     setJournalEntries(materializeSeedJournalEntries(mode.journalEntries));
-    setPlannerItems(materializeSeedPlannerItems(mode.plannerItems));
     setTabVisits(mode.tabVisits || {});
     setSeenElementalIds(new Set(mode.seenElementalIds || []));
     setFeaturedElementals(mode.featuredElementals || []);
@@ -1677,8 +1642,8 @@ export default function App() {
         position: "relative",
       }}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} plannerItems={plannerItems} addPlannerItem={addPlannerItem} togglePlannerItem={togglePlannerItem} editPlannerItem={editPlannerItem} deletePlannerItem={deletePlannerItem} clearDonePlannerItems={clearDonePlannerItems} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // bestiary will treat the tap-through as a real first
@@ -1772,12 +1737,6 @@ export default function App() {
           sessions={sessions}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
-          plannerItems={plannerItems}
-          addPlannerItem={addPlannerItem}
-          togglePlannerItem={togglePlannerItem}
-          editPlannerItem={editPlannerItem}
-          deletePlannerItem={deletePlannerItem}
-          clearDonePlannerItems={clearDonePlannerItems}
           minimized={steepMinimized}
           onMinimize={() => setSteepMinimized(true)}
           onRemainingChange={setSteepRemaining}

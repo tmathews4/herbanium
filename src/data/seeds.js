@@ -41,22 +41,6 @@ export function materializeSeedJournalEntries(rawEntries) {
   });
 }
 
-// Materialize seed planner items: hoursAgo → ts so each item's
-// timestamp shifts forward on reset and the row order stays sane.
-export function materializeSeedPlannerItems(rawItems) {
-  const now = Date.now();
-  return (rawItems || []).map((p, i) => {
-    const hoursAgo = typeof p.hoursAgo === "number" ? p.hoursAgo : (i + 1);
-    const ts = now - hoursAgo * 3600000;
-    return {
-      id: p.id || `plan-${ts}`,
-      text: p.text || "",
-      done: !!p.done,
-      ts,
-    };
-  });
-}
-
 // Materialize seed sessions: each carries an `hoursAgo` offset (or
 // `minutesAgo` for fine-grained "just brewed" seeds) which resolves
 // to a fresh sess-<ms> id at apply time. Otherwise stored timestamps
@@ -188,13 +172,6 @@ export const SEED_MODES = {
       { hoursAgo: 192, kind: "entry",
         text: "Tried the Sencha cold-brewed. Won't go back to hot for July.",
         currentMoods: [], landedMoods: ["uplifting"] },
-    ],
-    // Planner — a few intentions for the day, mixed done/open so the
-    // counter and clear-done flow have something to show.
-    plannerItems: [
-      { id: "plan-seed-1", text: "Brew a pot of Dusk Lullaby tonight",        done: false, hoursAgo: 1 },
-      { id: "plan-seed-2", text: "Refill the chamomile jar",                  done: true,  hoursAgo: 8 },
-      { id: "plan-seed-3", text: "Note how the morning Assam landed",         done: false, hoursAgo: 12 },
     ],
     // Tab-visit counts feed the first-visit / regular-visit
     // elemental triggers. Power user has logged plenty of laps.
@@ -376,7 +353,6 @@ export const SEED_MODES = {
         text: "First quiet evening of the week. Tried the all-heal blend and watched the light go.",
         currentMoods: ["tired"], landedMoods: ["calm"] },
     ],
-    plannerItems: [],
     tabVisits: { home: 14, apothecary: 6, shelf: 4, profile: 2 },
     seenElementalIds: ["first-brew", "first-apothecary"],
     featuredElementals: [],
@@ -411,7 +387,6 @@ export const SEED_MODES = {
     },
     sessions: [],
     journalEntries: [],
-    plannerItems: [],
     tabVisits: {},
     seenElementalIds: [],
     featuredElementals: [],

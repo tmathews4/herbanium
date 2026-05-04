@@ -30,7 +30,6 @@ import {
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
-import { Planner } from "../components/Planner";
 import { HintCard } from "../components/HintCard";
 import { BestiaryView } from "../components/BestiaryView";
 import { Sprig, Pencil } from "../components/icons";
@@ -64,7 +63,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -114,19 +113,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Deep-links can preset it via composeView.journalFilter (e.g. the
   // Home recent-brews 'see all' link sets it to "cups").
   const [journalFilter, setJournalFilter] = useState("all");
-  // Planner inline collapse — folded by default in the journal so
-  // the timeline reads first. The brew-page modal is independent.
-  const [plannerInlineOpen, setPlannerInlineOpen] = useState(false);
-  // Planner props passed inline into the Shelf > Journal section.
-  // The brew-time modal trigger lives on SteepScreen, not here.
-  const plannerProps = {
-    items: plannerItems || [],
-    onAdd: addPlannerItem,
-    onToggle: togglePlannerItem,
-    onEdit: editPlannerItem,
-    onDelete: deletePlannerItem,
-    onClearDone: clearDonePlannerItems,
-  };
   const { unit, weightUnit } = useUnit();
   // Mode universe per section (state lives in App so the bottom
   // TabBar can render the sub-tabs as part of the same dock):
@@ -283,68 +269,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
 
         return (
           <div style={{ marginTop: 4 }}>
-            {/* Planner — collapsed by default; the journal timeline
-                reads first. Click the header to expand. The brew-page
-                modal still opens the same shared state. */}
-            <div style={{ marginBottom: 14 }}>
-              {(() => {
-                const items = plannerProps.items || [];
-                const openCount = items.filter(i => !i.done).length;
-                return (
-                  <div style={{
-                    borderRadius: 10,
-                    border: `1px solid ${theme.ruleSoft}`,
-                    background: theme.cream,
-                    overflow: "hidden",
-                  }}>
-                    <button
-                      onClick={() => setPlannerInlineOpen(o => !o)}
-                      aria-expanded={plannerInlineOpen}
-                      style={{
-                        width: "100%", textAlign: "left",
-                        background: "transparent", border: "none", cursor: "pointer",
-                        padding: "10px 14px",
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        gap: 8,
-                      }}
-                    >
-                      <div style={{
-                        display: "flex", alignItems: "center", gap: 8,
-                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
-                        textTransform: "uppercase", color: theme.sageDeep,
-                      }}>
-                        <span style={{
-                          display: "inline-block",
-                          transform: plannerInlineOpen ? "rotate(90deg)" : "rotate(0deg)",
-                          transition: "transform 0.15s ease",
-                          color: theme.terra,
-                        }}>›</span>
-                        <span>Planner</span>
-                      </div>
-                      <div style={{
-                        display: "flex", alignItems: "center", gap: 6,
-                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-                        color: theme.ash,
-                      }}>
-                        {items.length > 0 ? `${openCount}/${items.length} open` : "empty"}
-                        {openCount > 0 && (
-                          <span style={{
-                            width: 6, height: 6, borderRadius: "50%",
-                            background: theme.terra,
-                            display: "inline-block",
-                          }} />
-                        )}
-                      </div>
-                    </button>
-                    {plannerInlineOpen && (
-                      <div style={{ padding: "0 8px 8px" }}>
-                        <Planner {...plannerProps} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
             {/* Timeline filter chips — All / Cups / Entries — narrow
                 what the user sees in the journal scroll below. */}
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 12 }}>

@@ -11,7 +11,6 @@ import {
   ff, theme,
 } from "../theme";
 import { IngredientSheet } from "./IngredientSheet";
-import { PlannerModal } from "../components/Planner";
 import {
   scheduleSteepNotification, cancelSteepNotification, hapticDone,
 } from "../helpers/native";
@@ -26,12 +25,11 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, plannerItems = [], addPlannerItem, togglePlannerItem, editPlannerItem, deletePlannerItem, clearDonePlannerItems, minimized = false, onMinimize, onRemainingChange }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, minimized = false, onMinimize, onRemainingChange }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
-  const [plannerOpen, setPlannerOpen] = useState(false);
   // Over-steep counter — increments by 1 each second after remaining
   // hits zero, until the user pours (resets) or logs the cup. Drives
   // a soft warning band ("getting bitter — pour soon") so users who
@@ -237,7 +235,8 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       overflowY: "auto",
       WebkitOverflowScrolling: "touch",
     }}>
-      {/* header */}
+      {/* header — cancel on the left, minimize on the right (the
+          slot the now-retired planner button used to occupy). */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <button onClick={onCancel} style={{
           background: "transparent", border: "none", color: theme.ash,
@@ -265,40 +264,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             <span>minimize</span>
           </button>
         )}
-        {(() => {
-          const openCount = plannerItems.filter(i => !i.done).length;
-          return (
-            <button
-              onClick={() => setPlannerOpen(true)}
-              title={openCount > 0
-                ? `open today's plan — ${openCount} unchecked`
-                : "open today's plan and past brew notes"}
-              style={{
-                position: "relative",
-                background: "transparent", border: "none",
-                color: theme.terra,
-                fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 5,
-                padding: 0,
-              }}
-            >
-              <Pencil size={11} c={theme.terra} />
-              <span>planner</span>
-              {openCount > 0 && (
-                <span
-                  aria-label={`${openCount} unchecked`}
-                  style={{
-                    width: 6, height: 6, borderRadius: "50%",
-                    background: theme.terra,
-                    display: "inline-block",
-                    marginLeft: 1,
-                  }}
-                />
-              )}
-            </button>
-          );
-        })()}
       </div>
 
       {/* countdown ring — at zero the stroke shifts to sage and a
@@ -650,23 +615,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           onTogglePantry={() => togglePantry && togglePantry(activeIngredient)}
         />
       )}
-
-      <PlannerModal
-        open={plannerOpen}
-        onClose={() => setPlannerOpen(false)}
-        plannerProps={{
-          items: plannerItems,
-          onAdd: addPlannerItem,
-          onToggle: togglePlannerItem,
-          onEdit: editPlannerItem,
-          onDelete: deletePlannerItem,
-          onClearDone: clearDonePlannerItems,
-        }}
-        pastBrewNotes={{
-          blendName: blend.name,
-          sessions: pastNoteSessions,
-        }}
-      />
     </div>
   );
 };
