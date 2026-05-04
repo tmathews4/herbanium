@@ -1107,6 +1107,23 @@ export default function App() {
   };
 
   const startBrew = (blend, intent, targetMoods) => {
+    // Already steeping? Confirm before discarding the in-progress
+    // brew. Matches the rest of the app's confirm pattern (other
+    // delete-style flows use window.confirm too) so we don't grow
+    // a one-off modal component for a single edge case.
+    if (overlay === "steep" && session) {
+      const currentName = session.blend?.name || "your current brew";
+      const nextName = blend?.name || "a new brew";
+      const ok = window.confirm(
+        `${currentName} is still steeping. Cancel it and start ${nextName}?`
+      );
+      if (!ok) return;
+      // Drop the minimized banner; the SteepScreen `key` on
+      // blend identity (in render) handles full timer/state reset
+      // on the swap, and SteepScreen's own cleanup effect cancels
+      // the prior steep notification when blend.name changes.
+      setSteepMinimized(false);
+    }
     setSession({ blend, intent, targetMoods, currentMoods: [] });
     setOverlay("steep");
   };
@@ -1763,6 +1780,12 @@ export default function App() {
 
       {overlay === "steep" && session && (
         <SteepScreen
+          // Key on the blend id (or name fallback) so swapping the
+          // session to a different brew fully remounts SteepScreen —
+          // resets the timer state, intent textarea, wait-card index,
+          // etc. cleanly instead of inheriting the previous brew's
+          // countdown.
+          key={session.blend?.id || session.blend?.name || "steep"}
           blend={session.blend}
           intent={session.intent}
           setIntent={(v) => setSession(s => s ? { ...s, intent: v } : s)}
