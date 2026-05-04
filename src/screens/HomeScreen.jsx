@@ -503,6 +503,9 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
   const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
   const endMood = targets || endFallback;
   const moodScore = coerceMoodScore(s);
+  const verdict = moodScore == null ? null : moodScore >= 4 ? "up" : moodScore <= 2 ? "down" : null;
+  const extraMoodList = Array.isArray(s.extraMoods) ? s.extraMoods : [];
+  const flavorTally = flavorTallyFor(s);
   const flavor = b.flavor
     || (Array.isArray(b.flavors) && b.flavors[0])
     || "";
@@ -544,16 +547,20 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
 
       {/* Row 2 — mood arc on the left, taste dots beneath the time on
           the right. Matches the Notebook journal row layout so the
-          two timelines read as one consistent register. */}
+          two timelines read as one consistent register. The thumb
+          icon mirrors the follow-up verdict and replaces the older
+          5-dot strength bar; extraMoods (unexpected register) follow
+          the verdict. */}
       {(desiredMood || endMood || s.taste != null) && (
         <div style={{
-          display: "flex", alignItems: "baseline", gap: 8, minWidth: 0,
+          display: "flex", alignItems: "center", gap: 8, minWidth: 0,
         }}>
           <span style={{
             flex: 1, minWidth: 0,
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
             lineHeight: 1.35,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            display: "inline-flex", alignItems: "center", gap: 4,
           }}>
             {desiredMood && (
               <>
@@ -562,17 +569,21 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
               </>
             )}
             {(desiredMood || endMood) && (
-              <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+              <span style={{ color: theme.terra, fontStyle: "normal" }}>→</span>
             )}
             {endMood && (
               <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>
             )}
-            {moodScore != null && (
+            {verdict === "up"   && <ThumbUp   size={11} c={theme.sageDeep} />}
+            {verdict === "down" && <ThumbDown size={11} c={theme.terra} />}
+            {extraMoodList.length > 0 && (
               <span style={{
-                marginLeft: 6,
-                fontSize: 10, color: theme.sageDeep, letterSpacing: "0.08em",
+                color: theme.ash, fontStyle: "italic", fontSize: 11,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                minWidth: 0,
               }}>
-                {"◉".repeat(moodScore)}<span style={{ color: theme.rule }}>{"◉".repeat(5 - moodScore)}</span>
+                + {extraMoodList.slice(0, 2).join(", ")}
+                {extraMoodList.length > 2 && ` +${extraMoodList.length - 2}`}
               </span>
             )}
           </span>
@@ -586,13 +597,19 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
         </div>
       )}
 
-      {brewParts.length > 0 && (
+      {(brewParts.length > 0 || flavorTally) && (
         <div style={{
           fontFamily: ff.sans, fontSize: 10.5,
           color: theme.ash, letterSpacing: "0.04em",
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
           {brewParts.join(" · ")}
+          {flavorTally && (
+            <>
+              {brewParts.length > 0 && " · "}
+              <span style={{ color: theme.sageDeep }}>{flavorTally.hits}/{flavorTally.total}</span> notes
+            </>
+          )}
         </div>
       )}
     </button>
@@ -621,6 +638,18 @@ const coerceMoodScore = (s) => {
   return 3;
 };
 
+// Flavor tally — "n / m" notes that landed, derived from the
+// follow-up card's tasted/missed booleans against the predicted
+// flavor list. Returns null when there's no flavor data on the
+// session (older entries, blends without a published profile).
+const flavorTallyFor = (s) => {
+  const target = Array.isArray(s?.flavorsTarget) ? s.flavorsTarget : [];
+  const tasted = s?.flavorsTasted;
+  if (target.length === 0 || !tasted || typeof tasted !== "object") return null;
+  const hits = target.filter(f => tasted[f] === true).length;
+  return { hits, total: target.length };
+};
+
 export const SessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
@@ -628,13 +657,16 @@ export const SessionRow = ({ s, openCup, first }) => {
   const start = (s.currentMoods || []).join(", ").trim();
   // End label is the user's reached-for target — what they wanted.
   // Falls back to the legacy `actual` string for sessions logged
-  // before targetMoods existed. The mood-score dots after this
-  // label tell how strongly the cup actually delivered.
+  // before targetMoods existed. The thumb verdict + extraMoods
+  // (mapped from the unified follow-up card) sit alongside.
   const targets = (s.targetMoods || []).join(", ").trim();
   const endRaw = (s.actual || "").trim();
   const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
   const end = targets || endFallback;
   const moodScore = coerceMoodScore(s);
+  const verdict = moodScore == null ? null : moodScore >= 4 ? "up" : moodScore <= 2 ? "down" : null;
+  const extraMoodList = Array.isArray(s.extraMoods) ? s.extraMoods : [];
+  const flavorTally = flavorTallyFor(s);
   const ago = sessionAgo(s) || s.ago;
 
   // Two-row layout matching JournalEntryRow so cups and entries scan
@@ -680,31 +712,38 @@ export const SessionRow = ({ s, openCup, first }) => {
             fontSize: 11, color: theme.ash,
           }}>{ago}</span>
         </div>
-        {/* Sub-row: colored mood-arc + arrival dots on left, taste dots on right */}
+        {/* Sub-row: colored mood-arc + thumb verdict + extras on left,
+            taste dots on right. The thumb icon replaces the older
+            5-dot strength bar to mirror the follow-up card. */}
         {(start || end || s.taste != null) && (
           <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
+            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
           }}>
             <span style={{
               flex: 1, minWidth: 0,
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              display: "inline-flex", alignItems: "center", gap: 4,
             }}>
               {start && (
                 <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
               )}
               {(start || end) && (
-                <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+                <span style={{ color: theme.terra, fontStyle: "normal" }}>→</span>
               )}
               {end && (
                 <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
               )}
-              {moodScore != null && (
+              {verdict === "up"   && <ThumbUp   size={11} c={theme.sageDeep} />}
+              {verdict === "down" && <ThumbDown size={11} c={theme.terra} />}
+              {extraMoodList.length > 0 && (
                 <span style={{
-                  marginLeft: 6,
-                  fontSize: 10, color: theme.sageDeep, letterSpacing: "0.08em",
+                  color: theme.ash, fontStyle: "italic", fontSize: 11,
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  minWidth: 0,
                 }}>
-                  {"◉".repeat(moodScore)}<span style={{ color: theme.rule }}>{"◉".repeat(5 - moodScore)}</span>
+                  + {extraMoodList.slice(0, 2).join(", ")}
+                  {extraMoodList.length > 2 && ` +${extraMoodList.length - 2}`}
                 </span>
               )}
             </span>
@@ -715,6 +754,14 @@ export const SessionRow = ({ s, openCup, first }) => {
                 {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
               </span>
             )}
+          </div>
+        )}
+        {flavorTally && (
+          <div style={{
+            fontFamily: ff.sans, fontSize: 10,
+            color: theme.ash, letterSpacing: "0.04em",
+          }}>
+            <span style={{ color: theme.sageDeep }}>{flavorTally.hits}/{flavorTally.total}</span> notes landed
           </div>
         )}
       </div>
