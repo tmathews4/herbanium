@@ -889,7 +889,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 
   const isApothecary = section === "apothecary";
   const Icon  = isApothecary ? Sprig : Pencil;
-  const title = isApothecary ? "Apothecarium" : "Notebook";
+  const title = isApothecary ? "Apothecarium" : "Journal";
   const items = isApothecary
     ? [
         ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
@@ -898,7 +898,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
     : [
         ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
         ["Reflections", "What you wrote while the kettle was hot — cup logs, lines jotted between sips, and the mood arcs around them."],
-        ["Visitors", "Elementals drawn to your cups. Your apothecary's familiars, observed through the lodestone."],
+        ["Field Notes", "Elementals drawn to your cups. Your apothecary's familiars, observed through the lodestone."],
       ];
 
   return (

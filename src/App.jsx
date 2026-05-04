@@ -46,7 +46,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
     { k: "apothecary", label: "Apothecarium", icon: <Flask size={18} /> },
-    { k: "shelf",      label: "Notebook",   icon: <Pencil size={18} /> },
+    { k: "shelf",      label: "Journal",   icon: <Pencil size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
 
@@ -56,7 +56,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   const subTabs = tab === "apothecary"
     ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
-      ? [["recipes", "Recipes"], ["journal", "Reflections"], ["visitors", "Visitors"]]
+      ? [["recipes", "Recipes"], ["journal", "Reflections"], ["visitors", "Field Notes"]]
       : null;
   const subActive = tab === "apothecary" ? apothecaryMode
                   : tab === "shelf"      ? shelfMode
