@@ -1690,7 +1690,7 @@ const INGREDIENTS = {
     overPull: { timeS: 420, reason: "tannins overtake the malt, the cup turns biting" },
     effects: [["energy", 5], ["focus", 3], ["warming", 4]],
     flavors: ["malty", "bold", "robust", "brisk", "cocoa", "woody"],
-    pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper"],
+    pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper", "marshmallow-root"],
     dose: "1 tsp · 200ml",
     headsUp: "High caffeine — not for late afternoons.",
     blurb: "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight. The local variety, Camellia sinensis assamica, is bigger-leafed and stronger than its Chinese cousin — more caffeine, more malt. The cup demands milk and gets it; British breakfast culture was built on this leaf and on the labor that picked it.",
@@ -2282,7 +2282,7 @@ const INGREDIENTS = {
     effects: [["soothing", 4], ["digestive", 3], ["warming", 1], ["calm", 1], ["uplifting", 1]],
     flavors: ["sweet", "anise", "woody", "earthy", "bitter"],
     basicTastes: { sweet: 5, aromatic: 3, bitter: 1, astringent: 1, umami: 1 },
-    pairs: ["ginger", "cinnamon", "fennel", "peppermint"],
+    pairs: ["ginger", "cinnamon", "fennel", "peppermint", "marshmallow-root"],
     dose: "½–1 tsp · 250ml — less is more",
     headsUp: "More than ~3g per day or several weeks of continuous use can raise blood pressure and lower potassium. Talk to your doctor before using if you have heart, kidney, or blood-pressure conditions, are pregnant, or take diuretics or digoxin.",
     blurb: "Found in sixty percent of Chinese herbal formulas as the harmonizer — Gan Cao, the diplomat that smooths the rough edges of stronger herbs. Glycyrrhizin is fifty times sweeter than sugar, and the same molecule slows the liver's clearance of cortisol — which is why high daily doses can raise blood pressure and lower potassium. Treat it as you'd treat any sweet thing: fondly, in moderation.",
@@ -2326,6 +2326,80 @@ const INGREDIENTS = {
   },
 
   /* ── mineral-rich Western herbals ─────────────────────────── */
+
+  "marshmallow-root": {
+    name: "Marshmallow Root", latin: "Althaea officinalis", category: "herbal",
+    subcategory: "root",
+    aliases: ["althaea", "white mallow", "guimauve", "Khatmi"],
+    // Mucilage-forward demulcent. Unlike most roots, the active
+    // compound (long-chain polysaccharides ~25-35% of dried mass)
+    // is HEAT-SENSITIVE — the mucilage starts to denature past
+    // 95°C and the soothing effect drops. Traditional preparation
+    // is a long cold infusion (overnight at room temp or fridge);
+    // hot-brew works but wants moderate heat and long steeps so
+    // the mucilage has time to release and stays intact.
+    caffeine: 0, tempC: [80, 95], timeS: [600, 1200],
+    tempZones: [
+      { id: "under", tempC: [50, 70],  character: "cold-infusion territory — needs hours, not minutes.", moodImpact: "soothing held back at this timescale" },
+      { id: "cool",  tempC: [70, 85],  character: "mucilage releasing gently, fully intact.", moodImpact: "soothing forward; demulcent clean" },
+      { id: "warm",  tempC: [85, 95],  character: "full mucilage release, the working zone for hot brew.", moodImpact: "soothing solid; digestive present" },
+      { id: "hot",   tempC: [95, 100], character: "mucilage starts to denature; root grassiness rises.", moodImpact: "soothing dimming as the polysaccharides break down" },
+    ],
+    timeZones: [
+      { id: "under",  timeS: [0, 300],     character: "barely any mucilage in the cup yet.", moodImpact: "the demulcent hasn't bloomed" },
+      { id: "short",  timeS: [300, 600],   character: "lighter coat, top notes only.", moodImpact: "soothing settling in" },
+      { id: "medium", timeS: [600, 1200],  character: "the canonical hot-brew register — round mouthfeel, gentle vegetal sweet.", moodImpact: "soothing and digestive in clean balance" },
+      { id: "long",   timeS: [1200, 1800], character: "viscous body, pronounced silk to the cup.", moodImpact: "soothing peak; the throat-coat register" },
+      { id: "over",   timeS: [1800, 2400], character: "the cup goes heavy, almost slick on the tongue.", moodImpact: "soothing holds but the texture becomes the experience" },
+    ],
+    registerZones: [
+      { id: "faint",      character: "barely brewed.", moodImpact: "all moods muted" },
+      { id: "aromatic",   character: "lighter mucilage top, faint sweet vegetal.", moodImpact: "soothing gentle" },
+      { id: "balanced",   character: "the household throat-and-gut preparation — round, soft, neutral-tasting.", moodImpact: "soothing and digestive in clean balance" },
+      { id: "tonic",      character: "deep mucilage extraction — full silk body.", moodImpact: "soothing peak; demulcent at full coat" },
+      { id: "overpulled", character: "very heavy, the texture becomes the cup.", moodImpact: "soothing holds; cup is dense" },
+    ],
+    overPull: { timeS: 2400, reason: "the cup turns slick and dense; mucilage in solution past pleasant drinking texture" },
+    // Soothing 4 mirrors licorice — both are throat-coat demulcents.
+    // The mechanism here is purely physical (mucilage coating) rather
+    // than pharmacological (glycyrrhizin), which is why the safety
+    // ceiling is much higher — no daily-dose limit, no pseudoaldosteronism.
+    effects: [["soothing", 4], ["digestive", 3], ["calm", 1]],
+    flavors: ["sweet", "vegetal", "earthy"],
+    basicTastes: { sweet: 2, aromatic: 1, bitter: 0, astringent: 0, umami: 0 },
+    pairs: ["assam", "ceylon", "darjeeling", "licorice-root", "ginger", "chamomile", "lemonbalm", "fennel", "elderflower", "peppermint", "rooibos"],
+    dose: "1–2 tsp · 250ml — long steep, moderate heat",
+    headsUp: "Mucilage may slow absorption of other oral medications taken at the same time — separate by 1–2 hours to be safe. Otherwise broadly gentle: no daily-dose ceiling, no major drug interactions, safe in pregnancy at culinary amounts.",
+    blurb: "The candy was named after the plant, not the other way around — the original marshmallow confection was made by whipping the root's mucilage with sugar and egg white as a sore-throat remedy, then commercial production replaced the root with gelatin and the herbal connection faded. The chemistry is unusual for an herb: ~25-35% of the dried root by mass is mucilage — long-chain polysaccharides that swell in water and form a physical coat over irritated mucous membranes. The mechanism is mechanical, not pharmacological, which is why marshmallow has been used for sore throat, dry cough, and gut-lining irritation since ancient Egypt without ever needing to be 'isolated' into an active compound.",
+    facts: [
+      "The candy was named after the plant. Original marshmallows were made by whipping the root's mucilage with sugar and egg white as a sore-throat remedy; gelatin replaced the root in the 19th century and the herbal origin faded into a brand name.",
+      "Mucilage — long-chain polysaccharides — makes up roughly a quarter to a third of dried marshmallow root by mass. Few other herbs are this concentrated in a single class of compound.",
+      "The mechanism is physical, not pharmacological — the mucilage swells in water and forms a literal protective coating over irritated tissue. Modern in vitro studies confirm what Greek and Egyptian herbalists assumed.",
+      "Hippocrates wrote about marshmallow's wound-healing properties around 400 BC. Pliny the Elder later listed it among the most valuable plants in the Roman pharmacy.",
+      "Mucilage starts to denature above ~95°C — long cold infusion (room temperature or fridge, several hours) is the canonical herbalist preparation, preserving the polysaccharides intact.",
+      "Marshmallow is in family Malvaceae, the mallows — same family as hibiscus, cotton, and okra. The slick texture you get from cooked okra is closely related to the silk you get from a long marshmallow infusion.",
+      "Roots harvested in late autumn after the plant has stored polysaccharides for winter carry the highest mucilage content. Spring-harvested roots are weaker.",
+      "The Arabic name 'khatmi' was carried into Greco-Roman herbalism through medieval translations — marshmallow's pharmacy crosses Mediterranean, European, and Middle Eastern traditions almost continuously from antiquity.",
+      "Used in modern herbalism for any 'irritated mucous membrane' — sore throat, dry cough, esophagitis, gastritis, urinary irritation. The breadth comes from the breadth of the mucilage's mechanical action, not from a hundred different compounds.",
+      "Slippery elm and marshmallow are often paired or substituted — both are mucilage demulcents, both work by physical coating. Slippery elm has a stronger flavor; marshmallow is the more neutral of the two.",
+      "Confused sometimes with hibiscus (also Malvaceae) but the cup couldn't be more different — hibiscus is bright tart-red, marshmallow is faintly sweet and nearly colorless.",
+      "One of the few herbs with essentially no use ceiling — there's no glycyrrhizin to raise blood pressure, no alkaloids to monitor. The main caution is timing it away from oral medications so the coating doesn't slow absorption.",
+    ],
+    safetyFlags: {
+      medicationAbsorption: "may-slow-when-taken-together",
+      pregnancy: "safe-at-culinary-amounts",
+      breastfeeding: "safe-at-culinary-amounts",
+      // No daily-dose ceiling, no pseudoaldosteronism, no major
+      // drug interactions beyond the absorption-timing note.
+    },
+    confidenceMarkers: {
+      demulcentMechanism: "established",
+      mucilageContent: "established",
+      throatSoothing: "established",
+      giSoothing: "traditional-with-modest-modern-support",
+      safetyProfile: "established",
+    },
+  },
 
   nettle: {
     name: "Nettle", latin: "Urtica dioica", category: "herbal",
