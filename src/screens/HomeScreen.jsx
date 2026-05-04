@@ -781,21 +781,12 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       borderLeft: `2px solid ${theme.terra}`,
       display: "flex", flexDirection: "column", gap: 10,
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: theme.terra, marginBottom: 4,
-          }}>
-            How did it land?
-          </div>
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-            color: theme.inkSoft, lineHeight: 1.4,
-          }}>
-            Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
-            {" "}from {timeLabel} — how was it?
-          </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.terra,
+        }}>
+          How did it land?
         </div>
         <button
           onClick={onDismiss}
@@ -808,13 +799,22 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         >×</button>
       </div>
 
-      {/* Rating — overall cup quality (1-5). Dot row centers under
-          the label so the rating reads as a single composed beat. */}
+      {/* Rating — overall cup quality (1-5). The blend / time-ago
+          framing question sits above the dots, mirroring the "how
+          strongly did the cup deliver X?" line in the mood card
+          below so the two cards format the same way. */}
       <div style={{
-        display: "flex", flexDirection: "column", gap: 6,
+        display: "flex", flexDirection: "column", gap: 8,
         background: theme.cream, borderRadius: 8, padding: "10px 12px",
         border: `1px solid ${theme.ruleSoft}`,
       }}>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          color: theme.inkSoft, lineHeight: 1.4,
+        }}>
+          Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
+          {" "}from {timeLabel} — how was it?
+        </div>
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.ash,
