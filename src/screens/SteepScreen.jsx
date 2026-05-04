@@ -229,6 +229,13 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       display: minimized ? "none" : "flex",
       flexDirection: "column",
       padding: "22px 22px 26px",
+      // The steep page grew taller when the writing surface
+      // promoted from a single-line input to a 6-row textarea —
+      // the wait-card cycle was getting clipped at the bottom on
+      // shorter viewports. Make the whole page scroll vertically so
+      // the timer + mood + writing + wait-card stack always reaches.
+      overflowY: "auto",
+      WebkitOverflowScrolling: "touch",
     }}>
       {/* header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
@@ -383,21 +390,22 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         </div>
       </div>
 
-      {/* mood chips — captured into the session so the log retrospective
-          gets both the from-state (currentMoods) and to-state (targetMoods)
-          structured rather than buried in free text. */}
+      {/* Mood check-in — only the 'right now' read survives on the
+          Steep page. The 'I'd like to feel' target row used to live
+          here too but it duplicated the brewing-intent that the
+          recipe itself carries (every blend declares mood/effects),
+          and asking the user to predict their own arrival before
+          the cup steeps invites a wishful-target answer that the
+          post-brew follow-up then has to reconcile against. The
+          MoodFollowUpCard captures landed mood as a single 1–5
+          score after the cup arrives — that's the honest signal,
+          and it doesn't need a target to compare against. */}
       <div style={{ marginTop: 18 }}>
         <MoodChipRow
           label="Right now I feel…"
           value={currentMoods || []}
           setValue={setCurrentMoods}
           chips={CURRENT_MOOD_CHIPS}
-        />
-        <MoodChipRow
-          label="I'd like to feel…"
-          value={targetMoods || []}
-          setValue={setTargetMoods}
-          chips={DESIRED_MOOD_CHIPS}
         />
       </div>
 
