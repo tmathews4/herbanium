@@ -794,10 +794,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
             color: theme.inkSoft, lineHeight: 1.4,
           }}>
             Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
-            {" "}from {timeLabel}
-            {reachedFor
-              ? <> — how strongly did the cup deliver{" "}<em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?</>
-              : <> — how was it?</>}
+            {" "}from {timeLabel} — how was it?
           </div>
         </div>
         <button
@@ -811,7 +808,8 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         >×</button>
       </div>
 
-      {/* Rating — overall cup quality (1-5). */}
+      {/* Rating — overall cup quality (1-5). Dot row centers under
+          the label so the rating reads as a single composed beat. */}
       <div style={{
         display: "flex", flexDirection: "column", gap: 6,
         background: theme.cream, borderRadius: 8, padding: "10px 12px",
@@ -820,10 +818,11 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         <div style={{
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.ash,
+          textAlign: "center",
         }}>
           rating
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
           {[1,2,3,4,5].map(i => (
             <button key={i} onClick={() => setTaste(i)} aria-label={`rate cup ${i} of 5`} style={{
               background: "transparent", border: "none", cursor: "pointer",
@@ -891,16 +890,25 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
           register, distinct from terra rating dots above. */}
       {moodRequired && (
         <div style={{
-          display: "flex", flexDirection: "column", gap: 6,
+          display: "flex", flexDirection: "column", gap: 8,
           background: theme.cream, borderRadius: 8, padding: "10px 12px",
           border: `1px solid ${theme.ruleSoft}`,
         }}>
+          {reachedFor && (
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+              color: theme.inkSoft, lineHeight: 1.4,
+            }}>
+              How strongly did the cup deliver{" "}
+              <em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?
+            </div>
+          )}
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
             textTransform: "uppercase", color: theme.ash,
           }}>
-            <span>mood — barely</span>
+            <span>barely</span>
             <span>strongly</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
