@@ -258,11 +258,11 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
         maxLength={80}
         style={{
           width: "100%", boxSizing: "border-box",
-          fontFamily: ff.serif, fontSize: 17, color: theme.ink,
+          fontFamily: ff.serif, fontSize: 20, color: theme.ink,
           background: "transparent", border: "none",
           borderBottom: `1px solid ${theme.ruleSoft}`,
-          padding: "4px 2px 6px",
-          marginBottom: 10,
+          padding: "6px 2px 8px",
+          marginBottom: 12,
           outline: "none",
         }}
       />
@@ -272,14 +272,15 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="What's on your mind today?"
-          rows={4}
+          rows={9}
           style={{
             width: "100%", boxSizing: "border-box",
-            fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+            fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+            lineHeight: 1.7,
             background: "rgba(var(--hi-rgb),0.05)",
-            border: `1px dashed ${theme.rule}`, borderRadius: 8,
-            padding: "10px 12px", outline: "none",
-            resize: "vertical", minHeight: 90,
+            border: `1px dashed ${theme.rule}`, borderRadius: 10,
+            padding: "14px 16px", outline: "none",
+            resize: "vertical", minHeight: 240,
           }}
         />
       )}
@@ -296,8 +297,8 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
               rows={6}
               style={{
                 width: "100%", boxSizing: "border-box",
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-                color: theme.ink, lineHeight: 1.7,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 16,
+                color: theme.ink, lineHeight: 1.8,
                 background: "rgba(var(--hi-rgb),0.05)",
                 border: `1px solid ${theme.rule}`, borderRadius: 8,
                 padding: "10px 12px", outline: "none",
@@ -406,12 +407,12 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
               rows={9}
               style={{
                 width: "100%", boxSizing: "border-box",
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-                color: theme.ink, lineHeight: 1.7,
+                fontFamily: ff.serif, fontStyle: "italic", fontSize: 16,
+                color: theme.ink, lineHeight: 1.8,
                 background: "rgba(var(--hi-rgb),0.05)",
-                border: `1px solid ${theme.rule}`, borderRadius: 8,
-                padding: "10px 12px", outline: "none",
-                resize: "vertical", minHeight: 220,
+                border: `1px solid ${theme.rule}`, borderRadius: 10,
+                padding: "14px 16px", outline: "none",
+                resize: "vertical", minHeight: 260,
                 whiteSpace: "pre-wrap",
               }}
             />
@@ -528,15 +529,15 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
             value={poemText}
             onChange={(e) => setPoemText(e.target.value)}
             placeholder={"a line, however it lands\nanother, if it wants to follow"}
-            rows={6}
+            rows={9}
             style={{
               width: "100%", boxSizing: "border-box",
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 14,
-              color: theme.ink, lineHeight: 1.7,
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 16,
+              color: theme.ink, lineHeight: 1.8,
               background: "rgba(var(--hi-rgb),0.05)",
-              border: `1px dashed ${theme.rule}`, borderRadius: 8,
-              padding: "10px 12px", outline: "none",
-              resize: "vertical", minHeight: 130,
+              border: `1px dashed ${theme.rule}`, borderRadius: 10,
+              padding: "14px 16px", outline: "none",
+              resize: "vertical", minHeight: 220,
               whiteSpace: "pre-wrap",
             }}
           />
