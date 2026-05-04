@@ -49,6 +49,7 @@ export const CURRENT_FEEL_EXTRAS = [
   { key: "stressed",  label: "Stressed"  },
   { key: "tired",     label: "Tired"     },
   { key: "restless",  label: "Restless"  },
+  { key: "nauseous",  label: "Nauseous"  },
 ];
 
 // Subset of PARENT_MOODS that reads as a natural pre-cup state.
