@@ -291,13 +291,10 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           All three share the dark-ink filled treatment so the
           block reads as a unified navigator; the icons carry the
           color contrast (green leaf, orange sun, purple pen). */}
-      {/* Three primary actions. Equal-sized tiles so the row fits
-          any width cleanly; Brew gets the weighted-primary look
-          via background + border (ivory + sage) instead of width.
-          Cream tiles with a thin rule border replace the dark-ink
-          fill — reads as part of the apothecary palette. Sans-
-          uppercase labels match the eyebrow style used across the
-          app's section labels and tab bar. */}
+      {/* Three primary actions. Equal-sized cream tiles with a thin
+          rule border — reads as part of the apothecary palette.
+          Sans-uppercase labels match the eyebrow style used across
+          the app's section labels and tab bar. */}
       <style>{`
         .home-cta {
           aspect-ratio: 1 / 1;
@@ -351,14 +348,14 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
       }}>
         {[
           {
-            label: "Brew",
-            onClick: () => go("shelf", { mode: "recipes" }),
-            icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
-          },
-          {
             label: "Experiment",
             onClick: () => go("apothecary", { mode: "reverse" }),
             icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
+          },
+          {
+            label: "Brew",
+            onClick: () => go("shelf", { mode: "recipes" }),
+            icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
           },
           {
             label: "Write",
