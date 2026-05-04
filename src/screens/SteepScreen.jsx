@@ -426,6 +426,10 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           minHeight: 100,
           cursor: waitCards.length > 1 ? "pointer" : "default",
           position: "relative",
+          boxSizing: "border-box",
+          maxWidth: "100%",
+          overflow: "hidden",
+          minWidth: 0,
         }}
       >
         <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
@@ -463,7 +467,8 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           opacity: waitFading ? 0 : 1,
           transition: "opacity 0.4s ease",
           whiteSpace: waitCards[waitIdx]?.type === "poem" ? "pre-line" : "normal",
-          overflowWrap: "break-word", wordBreak: "break-word",
+          overflowWrap: "anywhere", wordBreak: "break-word",
+          hyphens: "auto", maxWidth: "100%", minWidth: 0,
         }}>
           {waitCards[waitIdx]?.text}
         </div>

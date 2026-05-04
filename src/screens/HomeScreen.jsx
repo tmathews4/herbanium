@@ -115,7 +115,6 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   const pendingMoodSession = (sessions || []).find(s => {
     if (s.who !== "you") return false;
     if (!s.moodsPending) return false;
-    if ((s.targetMoods?.length || 0) === 0) return false;
     const elapsed = Date.now() - (s.brewedAt || 0);
     return elapsed >= FOLLOWUP_MIN_MS && elapsed < FOLLOWUP_WINDOW_MS;
   });
@@ -735,28 +734,43 @@ export const SessionRow = ({ s, openCup, first }) => {
 const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   const blend = getBlend(session.blendId);
   const targets = session.targetMoods || [];
-  // Single 1-5 score replaces the per-mood landed/missed pills.
-  // 1 = barely felt, 5 = strongly felt. Whole-cup arrival, not
-  // axis-by-axis. Initial null forces the user to pick before the
-  // save button enables.
+  const predictedFlavors = React.useMemo(() => {
+    const list = Array.isArray(blend?.flavors) ? blend.flavors : [];
+    return list.slice(0, 6);
+  }, [blend]);
+
   const [score, setScore] = React.useState(null);
+  const [taste, setTaste] = React.useState(4);
+  const [tasted, setTasted] = React.useState(() =>
+    Object.fromEntries(predictedFlavors.map(f => [f, true]))
+  );
   const [followNote, setFollowNote] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
 
-  if (!blend || targets.length === 0) return null;
+  if (!blend) return null;
 
   const minutesAgo = Math.max(1, Math.round((Date.now() - (session.brewedAt || 0)) / 60000));
   const timeLabel = minutesAgo < 60
     ? `${minutesAgo} min ago`
     : `${Math.round(minutesAgo / 60)}h ago`;
-  const reachedFor = targets.length === 1
-    ? targets[0]
-    : targets.slice(0, -1).join(", ") + " and " + targets[targets.length - 1];
+  const reachedFor = targets.length === 0 ? null
+    : targets.length === 1
+      ? targets[0]
+      : targets.slice(0, -1).join(", ") + " and " + targets[targets.length - 1];
+
+  const moodRequired = targets.length > 0;
+  const canSubmit = !moodRequired || score != null;
 
   const submit = () => {
-    if (submitted || score == null) return;
+    if (submitted || !canSubmit) return;
     setSubmitted(true);
-    onSubmit?.({ moodScore: score, noteAppend: followNote.trim() });
+    onSubmit?.({
+      moodScore: score,
+      noteAppend: followNote.trim(),
+      taste,
+      flavorsTasted: tasted,
+      flavorsTarget: predictedFlavors,
+    });
   };
 
   return (
@@ -806,8 +820,10 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
             color: theme.inkSoft, lineHeight: 1.4,
           }}>
             Your <span style={{ color: theme.ink, fontStyle: "normal", fontWeight: 500 }}>{blend.name}</span>
-            {" "}from {timeLabel} — how strongly did the cup deliver
-            {" "}<em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?
+            {" "}from {timeLabel}
+            {reachedFor
+              ? <> — how strongly did the cup deliver{" "}<em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?</>
+              : <> — how was it?</>}
           </div>
         </div>
         <button
@@ -821,57 +837,129 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         >×</button>
       </div>
 
-      {/* 1-5 dot picker — strength of arrival. Cumulative fill (tap
-          a dot, that and all earlier dots fill) so the user can read
-          their own pick at a glance. Sage-deep so the score reads as
-          a settled / arrival register, distinct from terra taste
-          dots elsewhere. */}
+      {/* Rating — overall cup quality (1-5). */}
       <div style={{
         display: "flex", flexDirection: "column", gap: 6,
         background: theme.cream, borderRadius: 8, padding: "10px 12px",
         border: `1px solid ${theme.ruleSoft}`,
       }}>
         <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
           fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.ash,
         }}>
-          <span>barely</span>
-          <span>strongly</span>
+          rating
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-          {[1, 2, 3, 4, 5].map(n => {
-            const filled = score != null && score >= n;
-            return (
-              <button
-                key={n}
-                onClick={() => setScore(n)}
-                aria-label={`rate arrival ${n} of 5`}
-                style={{
-                  flex: 1,
-                  height: 32, borderRadius: 999,
-                  background: filled ? theme.sageDeep : "transparent",
-                  border: `1px solid ${filled ? theme.sageDeep : theme.ruleSoft}`,
-                  cursor: "pointer", padding: 0,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: ff.mono, fontSize: 11,
-                  color: filled ? theme.cream : theme.ash,
-                  fontWeight: filled ? 600 : 500,
-                  transition: "all 0.18s ease",
-                }}
-              >{n}</button>
-            );
-          })}
+        <div style={{ display: "flex", gap: 10 }}>
+          {[1,2,3,4,5].map(i => (
+            <button key={i} onClick={() => setTaste(i)} aria-label={`rate cup ${i} of 5`} style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              padding: 2, fontSize: 22, color: i <= taste ? theme.terra : theme.rule,
+            }}>●</button>
+          ))}
         </div>
       </div>
 
-      {/* Optional follow-up note. Where the score is the number, this
-          is the texture — anything the user wants to add gets appended
-          onto the session's existing brew-time note. */}
+      {/* Flavor — predicted-notes confirmation. Shown when the blend
+          had a published flavor profile; user marks tasted vs. missed. */}
+      {predictedFlavors.length > 0 && (
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 8,
+          background: theme.cream, borderRadius: 8, padding: "10px 12px",
+          border: `1px solid ${theme.ruleSoft}`,
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>
+            flavor
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {predictedFlavors.map((f, i) => (
+              <div key={f} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                gap: 8, padding: "6px 0",
+                borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+              }}>
+                <div style={{
+                  fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+                  minWidth: 0, overflow: "hidden", textOverflow: "ellipsis",
+                }}>
+                  <em style={{ color: theme.terra, fontStyle: "normal" }}>{f}</em>?
+                </div>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  {[
+                    ["tasted",  true],
+                    ["missed",  false],
+                  ].map(([label, v]) => {
+                    const isActive = tasted[f] === v;
+                    return (
+                      <button key={label} onClick={() => setTasted({ ...tasted, [f]: v })} style={{
+                        fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+                        padding: "4px 9px", borderRadius: 999,
+                        border: `1px solid ${isActive ? (v ? theme.sageDeep : theme.terra) : theme.rule}`,
+                        background: isActive ? (v ? theme.sageDeep : theme.terra) : "transparent",
+                        color: isActive ? theme.cream : theme.inkSoft,
+                        cursor: "pointer",
+                        transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+                      }}>{label}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mood strength — only when the cup was brewed for specific
+          target moods. Cumulative fill: tap a dot, that and all earlier
+          dots fill; sage-deep so the score reads as the arrival
+          register, distinct from terra rating dots above. */}
+      {moodRequired && (
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 6,
+          background: theme.cream, borderRadius: 8, padding: "10px 12px",
+          border: `1px solid ${theme.ruleSoft}`,
+        }}>
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+            textTransform: "uppercase", color: theme.ash,
+          }}>
+            <span>mood — barely</span>
+            <span>strongly</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
+            {[1, 2, 3, 4, 5].map(n => {
+              const filled = score != null && score >= n;
+              return (
+                <button
+                  key={n}
+                  onClick={() => setScore(n)}
+                  aria-label={`rate arrival ${n} of 5`}
+                  style={{
+                    flex: 1,
+                    height: 32, borderRadius: 999,
+                    background: filled ? theme.sageDeep : "transparent",
+                    border: `1px solid ${filled ? theme.sageDeep : theme.ruleSoft}`,
+                    cursor: "pointer", padding: 0,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: ff.mono, fontSize: 11,
+                    color: filled ? theme.cream : theme.ash,
+                    fontWeight: filled ? 600 : 500,
+                    transition: "all 0.18s ease",
+                  }}
+                >{n}</button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <textarea
         value={followNote}
         onChange={(e) => setFollowNote(e.target.value)}
-        placeholder="anything to add about how it played out?"
+        placeholder="a line or two about how it played out…"
         style={{
           width: "100%", minHeight: 44,
           background: "rgba(var(--hi-rgb),0.05)",
@@ -886,10 +974,10 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       <Button
         variant="primary" tone="ink" fullWidth
         onClick={submit}
-        disabled={submitted || score == null}
+        disabled={submitted || !canSubmit}
         style={{ fontSize: 14, padding: "11px" }}
       >
-        {submitted ? "saved" : score == null ? "pick a strength" : "save mood"}
+        {submitted ? "saved" : !canSubmit ? "pick a strength" : "log it"}
       </Button>
       </div>
     </>

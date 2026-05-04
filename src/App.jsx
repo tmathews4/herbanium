@@ -13,7 +13,6 @@ import { FirstCupHintCard } from "./components/FirstCupHintCard";
 import { HomeScreen } from "./screens/HomeScreen";
 import { ComposeScreen, ComposeTutorialOverlay } from "./screens/ComposeScreen";
 import { SteepScreen } from "./screens/SteepScreen";
-import { LogScreen } from "./screens/LogScreen";
 import { IngredientDetail } from "./screens/IngredientDetail";
 import { BlendDetail } from "./screens/BlendDetail";
 import { CupDetail } from "./screens/CupDetail";
@@ -491,7 +490,7 @@ export default function App() {
   // as a plain object keyed by tab id ("home" | "apothecary" | "shelf"
   // | "profile") so it serializes cleanly without Set/Map gymnastics.
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
-  const [overlay, setOverlay] = useState(null); // null | "steep" | "log" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
+  const [overlay, setOverlay] = useState(null); // null | "steep" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate
@@ -1267,7 +1266,7 @@ export default function App() {
   // roll. Compares to the snapshot captured before the brew was logged;
   // if anything new became earned, we set glimpseElemental so the
   // overlay renders. Otherwise we just clear the pending flag and the
-  // home navigation already queued by LogScreen onSubmit takes over.
+  // home navigation already queued by the brew onDone takes over.
   useEffect(() => {
     if (!glimpsePendingBefore) return;
     const newOnes = [...earnedElementalIds].filter(id => !glimpsePendingBefore.has(id));
@@ -1386,17 +1385,18 @@ export default function App() {
   // session's existing brew-time note with a paragraph break so the
   // single `note` field on the session reads as a small two-act log:
   // first sip impressions on top, post-cup reflection underneath.
-  const patchSessionMoods = (sessionId, { moodScore, noteAppend }) => {
+  const patchSessionMoods = (sessionId, { moodScore, noteAppend, taste, flavorsTasted, flavorsTarget }) => {
     setSessions(prev => prev.map(s => {
       if (s.id !== sessionId) return s;
       const targetMoods = s.targetMoods || [];
-      // Single 1-5 score replaces the per-mood landed/missed pills.
-      // The cup-row arrow keeps showing the *target* mood (what the
-      // user reached for) and the score dots after it tell how
-      // strongly the cup delivered. `actual` stays populated for
-      // back-compat so any downstream readers (bestiary triggers,
-      // legacy renderers) still get a string.
-      const score = Math.max(1, Math.min(5, Math.round(Number(moodScore) || 0)));
+      // Mood score is optional now — the unified follow-up runs even
+      // for cups without target moods so flavor + rating still get
+      // captured. Only stamp moodScore + actual when the user
+      // actually picked a strength.
+      const hasMood = moodScore != null;
+      const score = hasMood
+        ? Math.max(1, Math.min(5, Math.round(Number(moodScore) || 0)))
+        : undefined;
       const actual = targetMoods.length > 0
         ? targetMoods.join(", ")
         : "brewed";
@@ -1409,8 +1409,11 @@ export default function App() {
       return {
         ...s,
         actual,
-        moodScore: score,
+        ...(hasMood ? { moodScore: score } : {}),
         note: mergedNote,
+        ...(typeof taste === "number" ? { taste: Math.max(1, Math.min(5, Math.round(taste))) } : {}),
+        ...(flavorsTasted ? { flavorsTasted } : {}),
+        ...(flavorsTarget ? { flavorsTarget } : {}),
         moodsPending: false,
       };
     }));
@@ -1740,7 +1743,31 @@ export default function App() {
           minimized={steepMinimized}
           onMinimize={() => setSteepMinimized(true)}
           onRemainingChange={setSteepRemaining}
-          onDone={() => { setSteepMinimized(false); setOverlay("log"); }}
+          onDone={() => {
+            // Single-check-in flow: brew completion logs the session
+            // immediately with default flavor/taste (the unified
+            // follow-up card on Home captures rating, flavor, and
+            // mood once the cup has had a few minutes to settle).
+            setGlimpsePendingBefore(new Set(earnedElementalIds));
+            addSession({
+              blend: session.blend,
+              intent: session.intent,
+              targetMoods: session.targetMoods,
+              currentMoods: session.currentMoods,
+              flavorsTasted: {},
+              flavorsExtra: [],
+              flavorsTarget: Array.isArray(session.blend?.flavors) ? session.blend.flavors.slice(0, 6) : [],
+              taste: 4,
+              note: "",
+              save: true,
+              rename: "",
+            });
+            setSteepMinimized(false);
+            setOverlay(null);
+            clearOverlayHistory();
+            setSession(null);
+            setTab("home");
+          }}
           onCancel={() => { setSteepMinimized(false); setOverlay(null); clearOverlayHistory(); setSession(null); }}
         />
       )}
@@ -1755,33 +1782,6 @@ export default function App() {
           blendName={session.blend?.name || "your brew"}
           remaining={steepRemaining}
           onTap={() => setSteepMinimized(false)}
-        />
-      )}
-      {overlay === "log" && session && (
-        <LogScreen
-          blend={session.blend}
-          intent={session.intent}
-          targetMoods={session.targetMoods}
-          currentMoods={session.currentMoods}
-          onSubmit={(logData) => {
-            // Capture the earned-elementals snapshot BEFORE addSession
-            // runs so the post-update useEffect can diff and decide
-            // whether a "you glimpsed an elemental" overlay should
-            // intercept the home navigation.
-            setGlimpsePendingBefore(new Set(earnedElementalIds));
-            addSession({
-              blend: session.blend,
-              intent: session.intent,
-              targetMoods: session.targetMoods,
-              currentMoods: session.currentMoods,
-              ...logData,
-            });
-            setOverlay(null);
-            clearOverlayHistory();
-            setSession(null);
-            setTab("home");
-          }}
-          onCancel={() => { setOverlay(null); clearOverlayHistory(); }}
         />
       )}
       {overlay === "ingredient" && (
