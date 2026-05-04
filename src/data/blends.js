@@ -324,6 +324,26 @@ const BLENDS = [
     effects: [["focus", 3], ["calm", 3], ["warming", 2]],
   },
   {
+    // Validated against a real test brew — 97°C / 4 min came back
+    // "full-bodied and rich but not astringent or bitter," which
+    // the engine zones agree with: Assam sits in its `warm`/`medium`
+    // bands ("full malt, clean grip") and Tulsi at the `warm`→`hot`
+    // boundary at full aromatic release. Two-ingredient on purpose
+    // so the calibration is the test, not a recipe of accents.
+    id: "estate-and-doorstep",
+    name: "Estate & Doorstep",
+    subtitle: "Assam's malt under tulsi's adaptogen lift — full body, clean tannin",
+    ingredients: [
+      { id: "assam", g: 2.0 },
+      { id: "tulsi", g: 1.0 },
+    ],
+    tempC: 97, timeS: 240, ml: 250,
+    mood: "energy", flavor: "malty",
+    public: true,
+    tradition: "Indian household",
+    effects: [["energy", 4], ["focus", 3], ["uplifting", 3], ["warming", 3]],
+  },
+  {
     id: "pissenlit-cafe",
     name: "Pissenlit Café",
     subtitle: "the war-rationed coffee — caramel, bittersweet, root",
@@ -1231,6 +1251,12 @@ const BLEND_DIRECTIONS = {
     "Bring water to ~95°C.",
     "Pour over fresh or dried tulsi; cover to trap aromatics.",
     "Steep 6 minutes.",
+  ],
+  "estate-and-doorstep": [
+    "Heat water to 207°F (97°C) — full extraction without crossing into the hot-grip zone.",
+    "Combine 2g Assam + 1g tulsi in the pot.",
+    "Steep 4 minutes — Assam's medium zone, tulsi at full aromatic release.",
+    "No milk needed; the tulsi keeps the cup from getting heavy.",
   ],
   "pissenlit-cafe": [
     "Roast the dandelion root pieces in a dry pan or 180°C oven until fragrant and dark.",
