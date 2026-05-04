@@ -52,28 +52,22 @@ const patternConfig = (pattern, c1, c2) => {
         ],
       };
     case "Banded":
-      // Five diagonal bands with feathered edges — agate-style
-      // striping. The previous hard 50/50 split read as two
-      // solid blocks stacked on top of each other when the two
-      // colors landed close in value; this version stays
-      // recognizably "banded" (alternating stripes) but the
-      // diagonal angle, the multiple bands, and the soft 4%
-      // transitions between each color make it read as a layered
-      // stone instead of a flat two-tone fill.
+      // Diagonal alternation that melds rather than stripes — every
+      // color stop is a single peak with no plateau, so the fill
+      // continuously slides c1 → c2 → c1 → c2 → c1 across the
+      // diagonal. Reads as four bands of light rather than four
+      // hard-edged stripes; opacity dips between peaks let the
+      // underlying emit/glow bleed through, giving the bands the
+      // ethereal aurora register the brief asks for.
       return {
         type: "linear",
         coords: { x1: "10%", y1: "0%", x2: "90%", y2: "100%" },
         stops: [
-          { offset: "0%",   color: c1, opacity: 1.00 },
-          { offset: "16%",  color: c1, opacity: 1.00 },
-          { offset: "20%",  color: c2, opacity: 0.96 },
-          { offset: "36%",  color: c2, opacity: 0.96 },
-          { offset: "40%",  color: c1, opacity: 0.98 },
-          { offset: "56%",  color: c1, opacity: 0.98 },
-          { offset: "60%",  color: c2, opacity: 0.94 },
-          { offset: "76%",  color: c2, opacity: 0.94 },
-          { offset: "80%",  color: c1, opacity: 0.96 },
-          { offset: "100%", color: c1, opacity: 0.96 },
+          { offset: "0%",   color: c1, opacity: 0.94 },
+          { offset: "25%",  color: c2, opacity: 0.74 },
+          { offset: "50%",  color: c1, opacity: 0.78 },
+          { offset: "75%",  color: c2, opacity: 0.74 },
+          { offset: "100%", color: c1, opacity: 0.94 },
         ],
       };
     case "Blotted":
