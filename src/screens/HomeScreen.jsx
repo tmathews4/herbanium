@@ -497,14 +497,10 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
   // user's reached-for targetMoods, falling back to the legacy actual
   // string. Mood-score dots after that tell how strongly the cup
   // delivered.
-  const desiredMood = b.mood || "";
-  const targets = (s.targetMoods || []).join(", ").trim();
-  const endRaw = (s.actual || "").trim();
-  const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
-  const endMood = targets || endFallback;
+  const start = (s.currentMoods || []).join(", ").trim();
   const moodScore = coerceMoodScore(s);
   const verdict = moodScore == null ? null : moodScore >= 4 ? "up" : moodScore <= 2 ? "down" : null;
-  const extraMoodList = Array.isArray(s.extraMoods) ? s.extraMoods : [];
+  const moodArc = buildMoodArc(s, verdict);
   const flavorTally = flavorTallyFor(s);
   const flavor = b.flavor
     || (Array.isArray(b.flavors) && b.flavors[0])
@@ -545,13 +541,13 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
         }}>{sessionAgo(s) || s.ago}</span>
       </div>
 
-      {/* Row 2 — mood arc on the left, taste dots beneath the time on
-          the right. Matches the Notebook journal row layout so the
-          two timelines read as one consistent register. The thumb
-          icon mirrors the follow-up verdict and replaces the older
-          5-dot strength bar; extraMoods (unexpected register) follow
-          the verdict. */}
-      {(desiredMood || endMood || s.taste != null) && (
+      {/* Row 2 — mood arc on the left, taste dots on the right.
+          The arc reads "[coming-in mood] → [moods that emerged]"
+          where the right side is colored sage-deep on a delivered
+          cup, terra on a missed cup, and ink-soft on legacy / not-
+          yet-filled rows. The verdict color carries the signal so
+          we don't need a thumb icon or separate "+ extras" tag. */}
+      {(start || moodArc.endLabel || s.taste != null) && (
         <div style={{
           display: "flex", alignItems: "center", gap: 8, minWidth: 0,
         }}>
@@ -560,31 +556,15 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
             fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
             lineHeight: 1.35,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-            display: "inline-flex", alignItems: "center", gap: 4,
           }}>
-            {desiredMood && (
-              <>
-                <span style={{ color: theme.ash, fontStyle: "italic" }}>for </span>
-                <span style={{ color: theme.ochre, fontStyle: "normal" }}>{desiredMood}</span>
-              </>
+            {start && (
+              <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
             )}
-            {(desiredMood || endMood) && (
-              <span style={{ color: theme.terra, fontStyle: "normal" }}>→</span>
+            {(start && moodArc.endLabel) && (
+              <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
             )}
-            {endMood && (
-              <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{endMood}</span>
-            )}
-            {verdict === "up"   && <ThumbUp   size={11} c={theme.sageDeep} />}
-            {verdict === "down" && <ThumbDown size={11} c={theme.terra} />}
-            {extraMoodList.length > 0 && (
-              <span style={{
-                color: theme.ash, fontStyle: "italic", fontSize: 11,
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                minWidth: 0,
-              }}>
-                + {extraMoodList.slice(0, 2).join(", ")}
-                {extraMoodList.length > 2 && ` +${extraMoodList.length - 2}`}
-              </span>
+            {moodArc.endLabel && (
+              <span style={{ color: moodArc.endColor, fontStyle: "normal" }}>{moodArc.endLabel}</span>
             )}
           </span>
           {s.taste != null && (
@@ -650,22 +630,52 @@ const flavorTallyFor = (s) => {
   return { hits, total: target.length };
 };
 
+// Mood arc for cup rows. Returns the end-side label and color
+// derived from the follow-up verdict:
+//   thumbs up → targets + extras, sage-deep (cup delivered + any
+//               unexpected register that came along)
+//   thumbs down → extras alone (target missed); "—" if no extras,
+//               terra in either case
+//   no verdict → targets + extras, neutral ink-soft
+// `endLabel` is "" when there's nothing to say on the end side
+// (legacy session with no targets and no extras). Caller decides
+// whether to render the arrow at all based on start/end presence.
+const buildMoodArc = (s, verdict) => {
+  const targets = Array.isArray(s?.targetMoods) ? s.targetMoods.filter(Boolean) : [];
+  const extras  = Array.isArray(s?.extraMoods)  ? s.extraMoods.filter(Boolean)  : [];
+  const legacyEnd = (() => {
+    const a = (s?.actual || "").trim();
+    return (!a || a.toLowerCase() === "brewed") ? "" : a;
+  })();
+  let endParts = [];
+  let endColor;
+  if (verdict === "up") {
+    endParts = [...targets, ...extras];
+    endColor = theme.sageDeep;
+  } else if (verdict === "down") {
+    endParts = extras.length > 0 ? extras : [];
+    endColor = theme.terra;
+  } else {
+    // No verdict — fall back to targets / extras / legacy `actual`
+    endParts = targets.length > 0 || extras.length > 0
+      ? [...targets, ...extras]
+      : (legacyEnd ? [legacyEnd] : []);
+    endColor = theme.inkSoft;
+  }
+  const endLabel = verdict === "down" && endParts.length === 0
+    ? "—"
+    : endParts.join(", ");
+  return { endLabel, endColor };
+};
+
 export const SessionRow = ({ s, openCup, first }) => {
   const b = getBlend(s.blendId);
   if (!b) return null;
 
   const start = (s.currentMoods || []).join(", ").trim();
-  // End label is the user's reached-for target — what they wanted.
-  // Falls back to the legacy `actual` string for sessions logged
-  // before targetMoods existed. The thumb verdict + extraMoods
-  // (mapped from the unified follow-up card) sit alongside.
-  const targets = (s.targetMoods || []).join(", ").trim();
-  const endRaw = (s.actual || "").trim();
-  const endFallback = (!endRaw || endRaw.toLowerCase() === "brewed") ? "" : endRaw;
-  const end = targets || endFallback;
   const moodScore = coerceMoodScore(s);
   const verdict = moodScore == null ? null : moodScore >= 4 ? "up" : moodScore <= 2 ? "down" : null;
-  const extraMoodList = Array.isArray(s.extraMoods) ? s.extraMoods : [];
+  const moodArc = buildMoodArc(s, verdict);
   const flavorTally = flavorTallyFor(s);
   const ago = sessionAgo(s) || s.ago;
 
@@ -712,10 +722,10 @@ export const SessionRow = ({ s, openCup, first }) => {
             fontSize: 11, color: theme.ash,
           }}>{ago}</span>
         </div>
-        {/* Sub-row: colored mood-arc + thumb verdict + extras on left,
-            taste dots on right. The thumb icon replaces the older
-            5-dot strength bar to mirror the follow-up card. */}
-        {(start || end || s.taste != null) && (
+        {/* Sub-row: mood arc colored by verdict on left, taste dots
+            on right. Verdict color (sage-deep / terra / ink-soft)
+            carries the signal so no thumb icon or +extras tag. */}
+        {(start || moodArc.endLabel || s.taste != null) && (
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
           }}>
@@ -723,28 +733,15 @@ export const SessionRow = ({ s, openCup, first }) => {
               flex: 1, minWidth: 0,
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-              display: "inline-flex", alignItems: "center", gap: 4,
             }}>
               {start && (
                 <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
               )}
-              {(start || end) && (
-                <span style={{ color: theme.terra, fontStyle: "normal" }}>→</span>
+              {(start && moodArc.endLabel) && (
+                <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
               )}
-              {end && (
-                <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
-              )}
-              {verdict === "up"   && <ThumbUp   size={11} c={theme.sageDeep} />}
-              {verdict === "down" && <ThumbDown size={11} c={theme.terra} />}
-              {extraMoodList.length > 0 && (
-                <span style={{
-                  color: theme.ash, fontStyle: "italic", fontSize: 11,
-                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  minWidth: 0,
-                }}>
-                  + {extraMoodList.slice(0, 2).join(", ")}
-                  {extraMoodList.length > 2 && ` +${extraMoodList.length - 2}`}
-                </span>
+              {moodArc.endLabel && (
+                <span style={{ color: moodArc.endColor, fontStyle: "normal" }}>{moodArc.endLabel}</span>
               )}
             </span>
             {s.taste != null && (
