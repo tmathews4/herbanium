@@ -420,7 +420,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       <div
         onClick={advanceWaitCard}
         style={{
-          marginTop: 18, padding: "16px 18px 56px",
+          marginTop: 18, padding: "16px 18px 12px",
           border: `1px solid ${theme.rule}`, borderRadius: 12,
           background: theme.cream,
           boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
@@ -431,6 +431,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           maxWidth: "100%",
           overflow: "hidden",
           minWidth: 0,
+          display: "flex", flexDirection: "column",
         }}
       >
         {/* Header — back triangle (left), centered label, forward
@@ -542,25 +543,35 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             >+ note</button>
           </div>
         )}
-        {/* Countdown ring — bottom-right corner of the card, shrinks
-            as the auto-advance timer runs down. */}
+        {/* Bottom bar — dedicated row for the countdown ring with a
+            soft top rule and generous top margin so the timer never
+            sits next to (or overlaps) the wait-card body. Only the
+            ring lives down here; everything else stays in the body
+            block above. */}
         {waitCards.length > 1 && (
-          <svg
-            width="18" height="18" viewBox="-11 -11 22 22"
-            style={{ position: "absolute", right: 10, bottom: 10, display: "block" }}
-            aria-hidden="true"
-          >
-            <circle cx="0" cy="0" r="9" stroke={theme.ruleSoft} strokeWidth="1.5" fill="none" />
-            <circle
-              cx="0" cy="0" r="9"
-              stroke={theme.ash} strokeWidth="1.5" fill="none"
-              strokeDasharray={2 * Math.PI * 9}
-              strokeDashoffset={(2 * Math.PI * 9) * (1 - cardRemaining / CARD_CYCLE_S)}
-              transform="rotate(-90)"
-              strokeLinecap="round"
-              style={{ transition: "stroke-dashoffset 1s linear" }}
-            />
-          </svg>
+          <div style={{
+            marginTop: 16, paddingTop: 10,
+            borderTop: `1px solid ${theme.ruleSoft}`,
+            display: "flex", justifyContent: "flex-end", alignItems: "center",
+            minHeight: 22,
+          }}>
+            <svg
+              width="18" height="18" viewBox="-11 -11 22 22"
+              style={{ display: "block" }}
+              aria-hidden="true"
+            >
+              <circle cx="0" cy="0" r="9" stroke={theme.ruleSoft} strokeWidth="1.5" fill="none" />
+              <circle
+                cx="0" cy="0" r="9"
+                stroke={theme.ash} strokeWidth="1.5" fill="none"
+                strokeDasharray={2 * Math.PI * 9}
+                strokeDashoffset={(2 * Math.PI * 9) * (1 - cardRemaining / CARD_CYCLE_S)}
+                transform="rotate(-90)"
+                strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset 1s linear" }}
+              />
+            </svg>
+          </div>
         )}
       </div>
 
