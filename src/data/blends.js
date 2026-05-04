@@ -332,7 +332,7 @@ const BLENDS = [
     // so the calibration is the test, not a recipe of accents.
     id: "estate-and-doorstep",
     name: "Estate & Doorstep",
-    subtitle: "Assam's malt under tulsi's adaptogen lift — full body, clean tannin",
+    subtitle: "Assam's malt under tulsi's adaptogen lift — fast, full-bodied, clean tannin",
     ingredients: [
       { id: "assam", g: 2.0 },
       { id: "tulsi", g: 1.0 },
@@ -341,7 +341,7 @@ const BLENDS = [
     mood: "energy", flavor: "malty",
     public: true,
     tradition: "Indian household",
-    effects: [["energy", 4], ["focus", 3], ["uplifting", 3], ["warming", 3]],
+    effects: [["energy", 5], ["focus", 3], ["uplifting", 3], ["warming", 3]],
   },
   {
     id: "pissenlit-cafe",
