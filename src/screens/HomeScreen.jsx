@@ -169,8 +169,16 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <FitText style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, lineHeight: 1.05 }}>
-                <>Welcome, <em style={{ color: theme.terra }}>{name}</em>.</>
+              <FitText style={{
+                fontFamily: ff.serif, fontSize: 28, fontWeight: 400,
+                color: theme.ink, lineHeight: 1.05,
+                fontStyle: "italic",
+                letterSpacing: "-0.005em",
+              }}>
+                <>What's the tea, <em style={{
+                  color: theme.terra, fontStyle: "normal",
+                  fontWeight: 500,
+                }}>{name}</em>?</>
               </FitText>
             </div>
           </div>
