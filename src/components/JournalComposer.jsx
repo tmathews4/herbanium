@@ -134,6 +134,12 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
   // flavor picker here would imply a tasting that isn't there.
   const [currentMoods, setCurrentMoods] = useState([]);
   const [landedMoods, setLandedMoods] = useState([]);
+  // Save-popup state. Tapping "Save" on the writing surface no longer
+  // commits — it opens a small modal where the user can name the
+  // entry and pick the before/after mood arc. Keeps the writing
+  // screen itself a clean blank page until they're ready to ship it.
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [pendingTitle, setPendingTitle] = useState("");
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
   const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
@@ -161,27 +167,46 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
     setPoemText("");
     setCurrentMoods([]);
     setLandedMoods([]);
+    setSaveOpen(false);
+    setPendingTitle("");
     // Mode is parent-controlled — don't reset it here so saving
     // an entry leaves the user in the same mode they chose if
     // they want to keep going.
   };
 
-  const handleSave = () => {
-    if (!ready) return;
+  // Resolve the body for whatever the active mode is. Returns null
+  // when the form isn't ready to save (incomplete slots, empty text).
+  const resolveBody = () => {
+    if (!ready) return null;
+    if (mode === "haiku")    return haikuAdlib ? haikuPreview : haikuOwn.trim();
+    if (mode === "limerick") return limAdlib   ? limerickPreview : limOwn.trim();
+    if (mode === "poem")     return poemText.trim();
+    return text.trim();
+  };
+
+  // Tapping Save on the writing surface opens the save popup
+  // pre-filled with an auto-derived title. The popup is where
+  // title + moods get committed, then onSave fires.
+  const openSavePopup = () => {
+    const body = resolveBody();
+    if (!body) return;
+    setPendingTitle(autoTitle(body));
+    setSaveOpen(true);
+  };
+
+  const commitSave = () => {
+    const body = resolveBody();
+    if (!body) return;
+    const title = pendingTitle.trim() || autoTitle(body);
     if (mode === "haiku") {
-      const finalText = haikuAdlib ? haikuPreview : haikuOwn.trim();
-      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], autoTitle(finalText));
+      onSave(body, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], title);
     } else if (mode === "limerick") {
-      const finalText = limAdlib ? limerickPreview : limOwn.trim();
-      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods, [], autoTitle(finalText));
+      onSave(body, "limerick", limNote.trim(), currentMoods, landedMoods, [], title);
     } else if (mode === "poem") {
-      const body = poemText.trim();
-      onSave(body, "poem", "", currentMoods, landedMoods, [], autoTitle(body));
+      onSave(body, "poem", "", currentMoods, landedMoods, [], title);
     } else {
-      const body = text.trim();
-      onSave(body, "entry", "", currentMoods, landedMoods, [], autoTitle(body));
+      onSave(body, "entry", "", currentMoods, landedMoods, [], title);
     }
-    // Wipe the form so the next time the composer opens it's blank.
     resetForm();
   };
 
@@ -218,21 +243,9 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
       marginBottom: 14, padding: "12px 14px", borderRadius: 10,
       background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
     }}>
-      {/* Coming-in mood — optional per entry, but the journal is
-          a tea-meets-mood log and we want the act of opening the
-          composer to invite the user to name how they're feeling
-          before they put it on the page. The terra band + → glyph
-          flag this as a distinct beat so the eye doesn't slide past
-          it and land in the writing surface unread. */}
-      <MoodChipRow
-        label="Coming in"
-        glyph="→"
-        value={currentMoods}
-        setValue={setCurrentMoods}
-        chips={CURRENT_MOOD_CHIPS}
-      />
-
-      <div style={{ height: 14 }} />
+      {/* Mood pickers used to bracket the writing surface here;
+          they've moved into the save popup so the writing screen
+          stays a clean page until you're ready to commit. */}
 
       {/* Mode label — the chooser lives in the parent now, but we
           echo the active mode here as a small eyebrow so the writing
@@ -533,31 +546,111 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
         </>
       )}
 
-      <div style={{ height: 14 }} />
-
-      {/* Where-I-landed mood — the close of the arc. Same chip
-          set; user picks how the entry left them. The ← glyph
-          mirrors the → on the coming-in band so the two read as
-          bookends around the writing surface in the middle. */}
-      <MoodChipRow
-        label="Where it left me"
-        glyph="←"
-        value={landedMoods}
-        setValue={setLandedMoods}
-      />
-
       <div style={{
-        marginTop: 4, display: "flex", gap: 8, justifyContent: "flex-end",
+        marginTop: 16, display: "flex", gap: 8, justifyContent: "flex-end",
         alignItems: "center",
       }}>
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
         <Button
           variant="primary" tone="ink"
-          onClick={handleSave}
+          onClick={openSavePopup}
           disabled={!ready}
           style={{ fontSize: 14, padding: "10px 22px" }}
-        >Save entry</Button>
+        >Save…</Button>
       </div>
+
+      {saveOpen && (
+        <>
+          <div
+            onClick={() => setSaveOpen(false)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 50,
+              background: "rgba(30, 24, 18, 0.35)",
+              animation: "journalSaveFadeIn 0.18s ease-out",
+            }}
+          />
+          <div style={{
+            position: "fixed", zIndex: 51,
+            left: "50%", transform: "translateX(-50%)",
+            top: 28,
+            width: "calc(100% - 28px)", maxWidth: 492,
+            maxHeight: "calc(100dvh - 56px)",
+            overflowY: "auto", WebkitOverflowScrolling: "touch",
+            padding: "18px 20px 20px",
+            background: theme.ivory,
+            borderRadius: 20,
+            borderLeft: `3px solid ${theme.terra}`,
+            boxShadow: "0 18px 48px -16px rgba(30,24,18,0.45), 0 0 0 1px rgba(80,60,40,0.08)",
+            display: "flex", flexDirection: "column", gap: 14,
+            animation: "journalSaveFadeIn 0.2s ease-out",
+            boxSizing: "border-box",
+          }}>
+            <style>{`
+              @keyframes journalSaveFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+              }
+            `}</style>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.terra,
+            }}>
+              Name it & log the arc
+            </div>
+
+            <div>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
+                textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+              }}>
+                title
+              </div>
+              <input
+                value={pendingTitle}
+                onChange={(e) => setPendingTitle(e.target.value)}
+                placeholder={autoTitle(resolveBody() || "") || "Untitled"}
+                maxLength={80}
+                autoFocus
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  fontFamily: ff.serif, fontSize: 18, color: theme.ink,
+                  background: "transparent", border: "none",
+                  borderBottom: `1px solid ${theme.ruleSoft}`,
+                  padding: "6px 2px 8px",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            <MoodChipRow
+              label="Coming in"
+              glyph="→"
+              value={currentMoods}
+              setValue={setCurrentMoods}
+              chips={CURRENT_MOOD_CHIPS}
+            />
+
+            <MoodChipRow
+              label="Where it left me"
+              glyph="←"
+              value={landedMoods}
+              setValue={setLandedMoods}
+            />
+
+            <div style={{
+              display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center",
+              marginTop: 4,
+            }}>
+              <Button variant="ghost" onClick={() => setSaveOpen(false)}>Back</Button>
+              <Button
+                variant="primary" tone="ink"
+                onClick={commitSave}
+                style={{ fontSize: 14, padding: "10px 22px" }}
+              >Save entry</Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
