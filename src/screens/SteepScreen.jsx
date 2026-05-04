@@ -407,10 +407,11 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
             fontSize: 16, color: intent ? theme.ink : theme.ash,
             lineHeight: 1.7,
-            background: "rgba(var(--hi-rgb),0.05)",
-            border: `1px dashed ${theme.rule}`, borderRadius: 10,
+            background: theme.cream,
+            border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
             padding: "14px 16px", outline: "none",
             resize: "vertical", minHeight: 160,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
           }}
         />
       </div>
