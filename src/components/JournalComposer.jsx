@@ -96,12 +96,22 @@ const ChipPickerRow = ({ label, chips, value, setValue, glyph }) => {
 // decision rather than a buried tab strip mid-form. setMode lets
 // the composer ask the parent to switch (used by the inline
 // "switch mode" link beside the cancel button).
+// Auto-derive a one-line title from the body. Takes the first
+// non-empty line, capped at 80 chars on a word boundary so the
+// timeline shows a readable headline without asking the user to
+// invent one before they've finished writing.
+const autoTitle = (body) => {
+  const firstLine = (body || "")
+    .split("\n")
+    .map(s => s.trim())
+    .find(Boolean) || "";
+  if (firstLine.length <= 80) return firstLine;
+  const sliced = firstLine.slice(0, 80);
+  const onWordBoundary = sliced.replace(/\s\S*$/, "");
+  return (onWordBoundary || sliced).trim() + "…";
+};
+
 export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) => {
-  // Title — drives the entry's headline in the timeline. Optional;
-  // legacy entries without one fall back to the text preview, but
-  // newly-written entries get a name the user picks so the journal
-  // reads like a list of named pieces.
-  const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [slots, setSlots] = useState({ thing: "", sound: "", color: "", feeling: "" });
   const [haikuSeed, setHaikuSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
@@ -139,7 +149,6 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
     : false;
 
   const resetForm = () => {
-    setTitle("");
     setText("");
     setSlots({ thing: "", sound: "", color: "", feeling: "" });
     setHaikuNote("");
@@ -159,17 +168,18 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
 
   const handleSave = () => {
     if (!ready) return;
-    const t = title.trim();
     if (mode === "haiku") {
       const finalText = haikuAdlib ? haikuPreview : haikuOwn.trim();
-      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], t);
+      onSave(finalText, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], autoTitle(finalText));
     } else if (mode === "limerick") {
       const finalText = limAdlib ? limerickPreview : limOwn.trim();
-      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods, [], t);
+      onSave(finalText, "limerick", limNote.trim(), currentMoods, landedMoods, [], autoTitle(finalText));
     } else if (mode === "poem") {
-      onSave(poemText.trim(), "poem", "", currentMoods, landedMoods, [], t);
+      const body = poemText.trim();
+      onSave(body, "poem", "", currentMoods, landedMoods, [], autoTitle(body));
     } else {
-      onSave(text.trim(), "entry", "", currentMoods, landedMoods, [], t);
+      const body = text.trim();
+      onSave(body, "entry", "", currentMoods, landedMoods, [], autoTitle(body));
     }
     // Wipe the form so the next time the composer opens it's blank.
     resetForm();
@@ -245,27 +255,6 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
           </div>
         );
       })()}
-
-      {/* Title — single-line input; drives the entry's headline in
-          the Notebook journal list. Optional but encouraged: a named
-          piece is easier to scan than a preview-stub. Underline-only
-          styling so it reads as part of the writing surface, not as
-          a form field. */}
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        maxLength={80}
-        style={{
-          width: "100%", boxSizing: "border-box",
-          fontFamily: ff.serif, fontSize: 20, color: theme.ink,
-          background: "transparent", border: "none",
-          borderBottom: `1px solid ${theme.ruleSoft}`,
-          padding: "6px 2px 8px",
-          marginBottom: 12,
-          outline: "none",
-        }}
-      />
 
       {mode === "free" && (
         <textarea

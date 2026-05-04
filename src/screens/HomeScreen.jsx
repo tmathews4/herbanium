@@ -774,39 +774,13 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
   };
 
   return (
-    <>
-      {/* Backdrop — dims the app behind the floating follow-up card.
-          Tap-to-dismiss matches the standard sheet pattern. */}
-      <div
-        onClick={onDismiss}
-        style={{
-          position: "fixed", inset: 0, zIndex: 40,
-          background: "rgba(30, 24, 18, 0.35)",
-          animation: "moodFollowFadeIn 0.2s ease-out",
-        }}
-      />
-      <div style={{
-        position: "fixed", zIndex: 41,
-        left: "50%", transform: "translateX(-50%)",
-        top: 28,
-        width: "calc(100% - 28px)",
-        maxWidth: 492,
-        maxHeight: "calc(100dvh - 116px)",
-        overflowY: "auto", WebkitOverflowScrolling: "touch",
-        padding: "16px 18px",
-        background: theme.ivory,
-        borderRadius: 20,
-        borderLeft: `3px solid ${theme.terra}`,
-        boxShadow: "0 18px 48px -16px rgba(30,24,18,0.45), 0 0 0 1px rgba(80,60,40,0.08)",
-        display: "flex", flexDirection: "column", gap: 10,
-        animation: "moodFollowFadeIn 0.22s ease-out",
-      }}>
-      <style>{`
-        @keyframes moodFollowFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
+    <div style={{
+      marginBottom: 14, padding: "12px 14px",
+      borderRadius: "0 6px 6px 0",
+      background: "rgba(176, 84, 47, 0.05)",
+      borderLeft: `2px solid ${theme.terra}`,
+      display: "flex", flexDirection: "column", gap: 10,
+    }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -979,7 +953,6 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       >
         {submitted ? "saved" : !canSubmit ? "pick a strength" : "log it"}
       </Button>
-      </div>
-    </>
+    </div>
   );
 };
