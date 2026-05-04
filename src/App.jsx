@@ -1418,7 +1418,7 @@ export default function App() {
   // session's existing brew-time note with a paragraph break so the
   // single `note` field on the session reads as a small two-act log:
   // first sip impressions on top, post-cup reflection underneath.
-  const patchSessionMoods = (sessionId, { moodScore, noteAppend, taste, flavorsTasted, flavorsTarget }) => {
+  const patchSessionMoods = (sessionId, { moodScore, noteAppend, taste, flavorsTasted, flavorsTarget, extraMoods }) => {
     // Cancel the pending check-in nudge — the user is filling the
     // follow-up now, so the notification would just be noise.
     const target = sessions.find(s => s.id === sessionId);
@@ -1451,6 +1451,7 @@ export default function App() {
         ...(typeof taste === "number" ? { taste: Math.max(1, Math.min(5, Math.round(taste))) } : {}),
         ...(flavorsTasted ? { flavorsTasted } : {}),
         ...(flavorsTarget ? { flavorsTarget } : {}),
+        ...(Array.isArray(extraMoods) && extraMoods.length > 0 ? { extraMoods } : {}),
         moodsPending: false,
       };
     }));

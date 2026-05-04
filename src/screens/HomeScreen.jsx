@@ -11,6 +11,7 @@ import {
   Button, FitText, SectionLabel,
 } from "../components/layout";
 import { WAIT_POEMS } from "../data/waitContent";
+import { PARENT_MOODS, CURRENT_FEEL_EXTRAS } from "../data/canon";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
@@ -739,11 +740,17 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
     return list.slice(0, 6);
   }, [blend]);
 
-  const [score, setScore] = React.useState(null);
+  // Mood-landed verdict: null (unset) | true (👍) | false (👎). On
+  // submit we map true → 5 / false → 1 so the existing 0-5 dot
+  // renderers downstream still read correctly without a schema change.
+  const [moodLanded, setMoodLanded] = React.useState(null);
   const [taste, setTaste] = React.useState(4);
   const [tasted, setTasted] = React.useState(() =>
     Object.fromEntries(predictedFlavors.map(f => [f, true]))
   );
+  // Multi-select chip pool of moods the cup brought up that the
+  // user wasn't aiming for. Stored on the session as `extraMoods`.
+  const [extraMoods, setExtraMoods] = React.useState([]);
   const [followNote, setFollowNote] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
 
@@ -759,13 +766,28 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
       : targets.slice(0, -1).join(", ") + " and " + targets[targets.length - 1];
 
   const moodRequired = targets.length > 0;
-  const canSubmit = !moodRequired || score != null;
+  const canSubmit = !moodRequired || moodLanded != null;
+
+  // Chip pool for "anything else come through?" — drop the targets
+  // the user already aimed for (they're covered by the thumbs
+  // verdict above) so the picker only surfaces unexpected register.
+  const extraMoodChips = React.useMemo(() => {
+    const targetKeys = new Set(targets);
+    return [...PARENT_MOODS, ...CURRENT_FEEL_EXTRAS].filter(m => !targetKeys.has(m.key));
+  }, [targets]);
+  const toggleExtraMood = (key) => {
+    setExtraMoods(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
 
   const submit = () => {
     if (submitted || !canSubmit) return;
     setSubmitted(true);
+    const moodScore = moodLanded == null ? null : (moodLanded ? 5 : 1);
     onSubmit?.({
-      moodScore: score,
+      moodScore,
+      extraMoods,
       noteAppend: followNote.trim(),
       taste,
       flavorsTasted: tasted,
@@ -884,13 +906,12 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         </div>
       )}
 
-      {/* Mood strength — only when the cup was brewed for specific
-          target moods. Cumulative fill: tap a dot, that and all earlier
-          dots fill; sage-deep so the score reads as the arrival
-          register, distinct from terra rating dots above. */}
+      {/* Mood landed? Thumbs verdict. Sage-deep yes / terra no so
+          the two read as a settled vs. roughed-edge pair, distinct
+          from the terra rating dots above. */}
       {moodRequired && (
         <div style={{
-          display: "flex", flexDirection: "column", gap: 8,
+          display: "flex", flexDirection: "column", gap: 10,
           background: theme.cream, borderRadius: 8, padding: "10px 12px",
           border: `1px solid ${theme.ruleSoft}`,
         }}>
@@ -899,44 +920,81 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
               color: theme.inkSoft, lineHeight: 1.4,
             }}>
-              How strongly did the cup deliver{" "}
+              Did the cup deliver{" "}
               <em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?
             </div>
           )}
-          <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-            textTransform: "uppercase", color: theme.ash,
-          }}>
-            <span>barely</span>
-            <span>strongly</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-            {[1, 2, 3, 4, 5].map(n => {
-              const filled = score != null && score >= n;
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            {[
+              [true,  "👍", "yes"],
+              [false, "👎", "not really"],
+            ].map(([v, glyph, label]) => {
+              const active = moodLanded === v;
+              const accent = v ? theme.sageDeep : theme.terra;
               return (
                 <button
-                  key={n}
-                  onClick={() => setScore(n)}
-                  aria-label={`rate arrival ${n} of 5`}
+                  key={String(v)}
+                  onClick={() => setMoodLanded(v)}
+                  aria-label={label}
                   style={{
-                    flex: 1,
-                    height: 32, borderRadius: 999,
-                    background: filled ? theme.sageDeep : "transparent",
-                    border: `1px solid ${filled ? theme.sageDeep : theme.ruleSoft}`,
-                    cursor: "pointer", padding: 0,
+                    flex: 1, maxWidth: 140,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: ff.mono, fontSize: 11,
-                    color: filled ? theme.cream : theme.ash,
-                    fontWeight: filled ? 600 : 500,
+                    gap: 8, padding: "10px 14px",
+                    borderRadius: 999,
+                    background: active ? accent : "transparent",
+                    border: `1px solid ${active ? accent : theme.ruleSoft}`,
+                    color: active ? theme.cream : theme.inkSoft,
+                    cursor: "pointer",
                     transition: "all 0.18s ease",
                   }}
-                >{n}</button>
+                >
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>{glyph}</span>
+                  <span style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                  }}>{label}</span>
+                </button>
               );
             })}
           </div>
         </div>
       )}
+
+      {/* Anything else come through? Multi-select chip picker for
+          unexpected moods that emerged. Targets are filtered out
+          because the thumbs verdict already covers them. */}
+      <div style={{
+        display: "flex", flexDirection: "column", gap: 8,
+        background: theme.cream, borderRadius: 8, padding: "10px 12px",
+        border: `1px solid ${theme.ruleSoft}`,
+      }}>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+          color: theme.inkSoft, lineHeight: 1.4,
+        }}>
+          Anything else come through?
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {extraMoodChips.map(m => {
+            const isOn = extraMoods.includes(m.key);
+            return (
+              <button
+                key={m.key}
+                onClick={() => toggleExtraMood(m.key)}
+                style={{
+                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+                  padding: "5px 11px", borderRadius: 999,
+                  border: `1px solid ${isOn ? theme.terra : theme.rule}`,
+                  background: isOn ? theme.terra : "transparent",
+                  color: isOn ? theme.cream : theme.inkSoft,
+                  cursor: "pointer",
+                  transition: "all 0.18s ease",
+                }}
+              >{m.label}</button>
+            );
+          })}
+        </div>
+      </div>
 
       <textarea
         value={followNote}
@@ -959,7 +1017,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         disabled={submitted || !canSubmit}
         style={{ fontSize: 14, padding: "11px" }}
       >
-        {submitted ? "saved" : !canSubmit ? "pick a strength" : "log it"}
+        {submitted ? "saved" : !canSubmit ? "tap 👍 or 👎" : "log it"}
       </Button>
     </div>
   );
