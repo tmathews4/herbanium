@@ -127,6 +127,56 @@ export async function cancelSteepNotification(id) {
 }
 
 /**
+ * Schedule a "check in on your cup" notification — fires once the
+ * brew has had enough time to settle (currently ~10 min after pour)
+ * so the user can log mood/flavor when they get a moment. Returns
+ * an id the caller stashes so it can be cancelled if the user
+ * fills the follow-up first.
+ */
+export async function scheduleCheckInNotification({ blendName, secondsFromNow }) {
+  if (!isNativeApp()) return null;
+  if (!secondsFromNow || secondsFromNow <= 0) return null;
+  try {
+    const { LocalNotifications } = await ensureNotifications();
+    if (!LocalNotifications) return null;
+    const perm = await LocalNotifications.checkPermissions();
+    if (perm.display !== "granted") {
+      const req = await LocalNotifications.requestPermissions();
+      if (req.display !== "granted") return null;
+    }
+    // Offset id range from steep notifications so the two can't collide.
+    const id = (Math.floor(Date.now() / 1000) + 1_000_000) % 0x7fffffff;
+    await LocalNotifications.schedule({
+      notifications: [{
+        id,
+        title: "How did it land?",
+        body: blendName
+          ? `Your ${blendName} has had time to settle — log how it landed when you get a moment.`
+          : "Your cup has had time to settle — log how it landed when you get a moment.",
+        schedule: { at: new Date(Date.now() + secondsFromNow * 1000) },
+        smallIcon: "ic_launcher",
+      }],
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Cancel a check-in notification (mirror of cancelSteepNotification).
+ */
+export async function cancelCheckInNotification(id) {
+  if (!isNativeApp()) return;
+  if (id == null) return;
+  try {
+    const { LocalNotifications } = await ensureNotifications();
+    if (!LocalNotifications) return;
+    await LocalNotifications.cancel({ notifications: [{ id }] });
+  } catch {}
+}
+
+/**
  * Configure the system status bar:
  *   - Dark icons on the ivory background (style)
  *   - Ivory bar background to match the app shell (Android only)

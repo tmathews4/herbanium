@@ -27,7 +27,7 @@ import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
-import { configureStatusBar, hapticTap } from "./helpers/native";
+import { configureStatusBar, hapticTap, scheduleCheckInNotification, cancelCheckInNotification } from "./helpers/native";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 import { useAppBackNav } from "./hooks/useAppBackNav";
@@ -1367,6 +1367,22 @@ export default function App() {
       setSavedBlendIds(next);
     }
 
+    // Check-in nudge — schedule a local notification ~10 minutes out
+    // (matches FOLLOWUP_MIN_MS on HomeScreen) so the user gets a
+    // gentle ping when the follow-up card surfaces. No-op on web;
+    // returns null silently if the user denies notification perms.
+    // Stash the returned id on the session so we can cancel the
+    // ping if they fill the follow-up before it fires.
+    scheduleCheckInNotification({
+      blendName: blend?.name,
+      secondsFromNow: 10 * 60,
+    }).then(notifId => {
+      if (notifId == null) return;
+      setSessions(prev => prev.map(s =>
+        s.id === newSession.id ? { ...s, checkInNotifId: notifId } : s
+      ));
+    });
+
     hapticTap();
     tryRollWildElemental();
     tryRollOnAction("brew");
@@ -1386,6 +1402,10 @@ export default function App() {
   // single `note` field on the session reads as a small two-act log:
   // first sip impressions on top, post-cup reflection underneath.
   const patchSessionMoods = (sessionId, { moodScore, noteAppend, taste, flavorsTasted, flavorsTarget }) => {
+    // Cancel the pending check-in nudge — the user is filling the
+    // follow-up now, so the notification would just be noise.
+    const target = sessions.find(s => s.id === sessionId);
+    if (target?.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
     setSessions(prev => prev.map(s => {
       if (s.id !== sessionId) return s;
       const targetMoods = s.targetMoods || [];
@@ -1424,6 +1444,8 @@ export default function App() {
   // moodsPending so the card doesn't reappear, but leaves `actual`
   // as the "brewed" placeholder. The session still counts in the log.
   const dismissSessionMoods = (sessionId) => {
+    const target = sessions.find(s => s.id === sessionId);
+    if (target?.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
     setSessions(prev => prev.map(s =>
       s.id === sessionId ? { ...s, moodsPending: false } : s
     ));
