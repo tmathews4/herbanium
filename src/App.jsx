@@ -1721,7 +1721,18 @@ export default function App() {
 
       <TabBar
         tab={tab}
-        setTab={(k) => { setOverlay(null); clearOverlayHistory(); navigateTab(k); }}
+        setTab={(k) => {
+          // Preserve a minimized steep across tab changes so the
+          // BrewTimerBanner stays visible while the user navigates.
+          // Clearing the overlay here is what dropped the banner.
+          // Other overlays (ingredient/blend/cup detail) still get
+          // cleared since those aren't meant to follow you around.
+          if (!(overlay === "steep" && steepMinimized)) {
+            setOverlay(null);
+            clearOverlayHistory();
+          }
+          navigateTab(k);
+        }}
         apothecaryMode={apothecaryMode}
         shelfMode={shelfMode}
         setApothecaryModeAction={setApothecaryModeAction}
