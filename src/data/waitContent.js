@@ -1001,7 +1001,91 @@ export const WAIT_POEMS = [
   {
     text: "There was a Young Lady of Lynn,\nWho was so uncommonly thin\n  That when she essayed\n  To drink lemonade,\nShe slipped through the straw and fell in.",
     attribution: "— Anonymous (traditional)",
-    tags: ["whimsy", "summer", "energy"],
+    tags: ["whimsy", "summer", "energy", "afternoon", "evening", "humor"],
+  },
+
+  // ── Light verse — humor, whimsy, smile-on-the-page ──
+  // Public-domain limericks and nonsense; tagged with tod buckets
+  // so the Home rotation actually surfaces them. Calm is fine, but
+  // sometimes a smile or tear is also a welcome.
+  {
+    text: "There was an Old Man with a beard,\nWho said, 'It is just as I feared!—\n  Two Owls and a Hen,\n  Four Larks and a Wren,\nHave all built their nests in my beard!'",
+    attribution: "— Edward Lear (Book of Nonsense, 1846)",
+    tags: ["whimsy", "morning", "afternoon", "evening", "humor"],
+  },
+  {
+    text: "There was a Young Lady of Norway,\nWho casually sat in a doorway;\n  When the door squeezed her flat,\n  She exclaimed, 'What of that?'\nThis courageous Young Lady of Norway.",
+    attribution: "— Edward Lear (Book of Nonsense, 1846)",
+    tags: ["whimsy", "afternoon", "humor", "comfort"],
+  },
+  {
+    text: "I shoot the Hippopotamus\nWith bullets made of platinum,\nBecause if I use leaden ones\nHis hide is sure to flatten 'em.",
+    attribution: "— Hilaire Belloc (1896)",
+    tags: ["whimsy", "morning", "afternoon", "humor"],
+  },
+  {
+    text: "A flea and a fly in a flue\nWere imprisoned, so what could they do?\n  Said the fly, 'Let us flee!'\n  'Let us fly!' said the flea.\nSo they flew through a flaw in the flue.",
+    attribution: "— Anonymous (traditional)",
+    tags: ["whimsy", "morning", "afternoon", "humor"],
+  },
+  {
+    text: "If a pig wore a wig,\nWhat could we say?\nTreat him as a gentleman,\nAnd say 'Good day.'",
+    attribution: "— Christina Rossetti (Sing-Song, 1872)",
+    tags: ["whimsy", "morning", "afternoon", "humor"],
+  },
+  {
+    text: "The sun was shining on the sea,\nShining with all his might:\nHe did his very best to make\nThe billows smooth and bright—\nAnd this was odd, because it was\nThe middle of the night.",
+    attribution: "— Lewis Carroll (Through the Looking-Glass, 1871)",
+    tags: ["whimsy", "night", "afternoon", "humor"],
+  },
+
+  // ── Tender + bittersweet — the smile that's almost a tear, or
+  //    the small line that lands warm. Still PD; chosen for
+  //    emotional range rather than nature imagery. ──
+  {
+    text: "I'm Nobody! Who are you?\nAre you – Nobody – too?\nThen there's a pair of us!\nDon't tell! they'd advertise – you know!",
+    attribution: "— Emily Dickinson (c. 1861)",
+    tags: ["morning", "afternoon", "evening", "humor", "tender"],
+  },
+  {
+    text: "Better by far you should forget and smile\nThan that you should remember and be sad.",
+    attribution: "— Christina Rossetti (Remember, 1862)",
+    tags: ["evening", "night", "tender", "comfort"],
+  },
+  {
+    text: "I exist as I am, that is enough,\nIf no other in the world be aware I sit content,\nAnd if each and all be aware I sit content.",
+    attribution: "— Walt Whitman (Song of Myself, 1855)",
+    tags: ["morning", "afternoon", "calm", "comfort", "tender"],
+  },
+  {
+    text: "Loveliest of trees, the cherry now\nIs hung with bloom along the bough,\nAnd stands about the woodland ride\nWearing white for Eastertide.",
+    attribution: "— A. E. Housman (A Shropshire Lad, 1896)",
+    tags: ["spring", "morning", "afternoon", "tender"],
+  },
+  {
+    text: "I'm going out to clean the pasture spring;\nI'll only stop to rake the leaves away\n(And wait to watch the water clear, I may):\nI sha'n't be gone long. — You come too.",
+    attribution: "— Robert Frost (The Pasture, 1914)",
+    tags: ["spring", "morning", "afternoon", "tender", "calm"],
+  },
+  {
+    text: "When I was sick and lay a-bed,\nI had two pillows at my head,\nAnd all my toys beside me lay,\nTo keep me happy all the day.",
+    attribution: "— Robert Louis Stevenson (A Child's Garden of Verses, 1885)",
+    tags: ["morning", "afternoon", "tender", "comfort"],
+  },
+  {
+    text: "My candle burns at both ends;\nIt will not last the night;\nBut ah, my foes, and oh, my friends—\nIt gives a lovely light!",
+    attribution: "— Edna St. Vincent Millay (First Fig, 1920)",
+    tags: ["evening", "night", "humor", "energy", "tender"],
+  },
+  {
+    text: "The fog comes\non little cat feet.\nIt sits looking\nover harbor and city\non silent haunches\nand then moves on.",
+    attribution: "— Carl Sandburg (1916)",
+    tags: ["morning", "evening", "calm", "playful", "tender"],
+  },
+  {
+    text: "In winter I get up at night\nAnd dress by yellow candle-light.\nIn summer, quite the other way,\nI have to go to bed by day.",
+    attribution: "— Robert Louis Stevenson (Bed in Summer, 1885)",
+    tags: ["morning", "evening", "humor", "tender"],
   },
 ];
 
