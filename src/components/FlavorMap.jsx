@@ -576,6 +576,22 @@ const TrackMap = ({
   const FAMILY_KEY_PREFIX = "__fam:";
   const isParentKey = (n) => typeof n === "string" && n.startsWith(FAMILY_KEY_PREFIX);
   const familyOfKey = (n) => isParentKey(n) ? n.slice(FAMILY_KEY_PREFIX.length) : null;
+  // Family-label maps moved up here so the displayList memo (below)
+  // can compare a leaf's display label against its parent's display
+  // label. Without this, a leaf whose canonical label matches the
+  // family display label (warm→comfort with a "comfort" leaf, body→
+  // digestive with a "digestive" leaf) renders as a duplicate row.
+  const FAMILY_LABEL_MOOD = {
+    warm: "comfort", cool: "cooling", body: "digestive", sleep: "sleepy",
+  };
+  const FAMILY_LABEL_FLAVOR = {
+    fruit: "fruity", body: "creamy",
+  };
+  const familyDisplayLabel = (fam) => {
+    if (kind === "mood")   return FAMILY_LABEL_MOOD[fam]   || fam;
+    if (kind === "flavor") return FAMILY_LABEL_FLAVOR[fam] || fam;
+    return fam;
+  };
   const displayList = useMemo(() => {
     if (useFamilyMode) return tracks.map(t => ({ name: t, depth: 0, isParent: false }));
     if (kind !== "flavor" && kind !== "mood") {
@@ -589,7 +605,14 @@ const TrackMap = ({
     }
     const list = [];
     for (const [fam, leaves] of groups.entries()) {
-      const onlyChildIsFamily = leaves.length === 1 && leaves[0] === fam;
+      const famLabel = familyDisplayLabel(fam);
+      // Single-child collapse: if the only leaf would render with the
+      // same label as the parent (either matches the slug — calm/calm —
+      // or matches the family display label — body/digestive,
+      // warm/comfort — through the label maps above), skip the parent
+      // header and render just the leaf at depth 0.
+      const onlyChildIsFamily = leaves.length === 1 &&
+        (leaves[0] === fam || leaves[0] === famLabel);
       if (!onlyChildIsFamily) {
         list.push({
           name: FAMILY_KEY_PREFIX + fam,
@@ -599,6 +622,12 @@ const TrackMap = ({
         });
       }
       for (const leaf of leaves) {
+        // When the parent header IS rendered, suppress any leaf whose
+        // display label exactly matches the parent's display label —
+        // it would draw a redundant child bar right under the same
+        // label (e.g. "Comfort" parent with a "comfort" child, or
+        // "Digestive" parent with a "digestive" child).
+        if (!onlyChildIsFamily && (leaf === fam || leaf === famLabel)) continue;
         list.push({
           name: leaf,
           depth: onlyChildIsFamily ? 0 : 1,
@@ -677,12 +706,6 @@ const TrackMap = ({
   // Without the map the strip would show "warm" / "body" / "fruit" while
   // the chip rows show "Comfort" / "Digestive" / "Fruity" — same family,
   // different word, breaking the contract.
-  const FAMILY_LABEL_MOOD = {
-    warm: "comfort", cool: "cooling", body: "digestive", sleep: "sleepy",
-  };
-  const FAMILY_LABEL_FLAVOR = {
-    fruit: "fruity", body: "creamy",
-  };
   const labelFor = (name) => {
     // Synthetic parent rows in Detail mode — strip the prefix and
     // apply the canon-label map so the parent reads "comfort" /
