@@ -5,7 +5,7 @@
 
 import React from "react";
 import {
-  Flask, Kettle, Leaf, Ornament, Pencil,
+  Flask, Kettle, Leaf, Ornament, Pencil, ThumbUp, ThumbDown,
 } from "../components/icons";
 import {
   Button, FitText, SectionLabel,
@@ -926,11 +926,10 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
           )}
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             {[
-              [true,  "👍", "yes"],
-              [false, "👎", "not really"],
-            ].map(([v, glyph, label]) => {
+              [true,  ThumbUp,   "yes",        theme.sageDeep],
+              [false, ThumbDown, "not really", theme.terra],
+            ].map(([v, Icon, label, accent]) => {
               const active = moodLanded === v;
-              const accent = v ? theme.sageDeep : theme.terra;
               return (
                 <button
                   key={String(v)}
@@ -948,7 +947,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
                     transition: "all 0.18s ease",
                   }}
                 >
-                  <span style={{ fontSize: 18, lineHeight: 1 }}>{glyph}</span>
+                  <Icon size={16} c={active ? theme.cream : accent} />
                   <span style={{
                     fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
                     textTransform: "uppercase",
@@ -1017,7 +1016,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         disabled={submitted || !canSubmit}
         style={{ fontSize: 14, padding: "11px" }}
       >
-        {submitted ? "saved" : !canSubmit ? "tap 👍 or 👎" : "log it"}
+        {submitted ? "saved" : !canSubmit ? "pick a verdict" : "log it"}
       </Button>
     </div>
   );

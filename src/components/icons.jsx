@@ -82,6 +82,29 @@ export const Kettle = ({ size = 22, c = theme.ink }) => (
   </svg>
 );
 
+// Thumbs-up — line-art hand silhouette in the same register as the
+// other interface icons (24×24 viewBox, 1.1 stroke, rounded caps).
+// Two paths: a small wrist/cuff rectangle + the larger hand-with-
+// thumb shape above it.
+export const ThumbUp = ({ size = 18, c = theme.sageDeep }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21 L3 12 L7 12 L7 21 Z" />
+    <path d="M7 12 L10.5 4 C10.7 3.4 11.4 3 12 3 C12.8 3 13.3 3.6 13.3 4.4 V11 H19 C20 11 20.5 11.7 20.4 12.5 L19.3 19 C19.1 20.2 18 21 16.7 21 L7 21 Z" />
+  </svg>
+);
+
+// Thumbs-down — same shape rotated 180° around the icon center
+// so the wrist sits at the top and the thumb points down. Default
+// color leans terra so it reads as the warning/no register.
+export const ThumbDown = ({ size = 18, c = theme.terra }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
+    <g transform="rotate(180 12 12)">
+      <path d="M3 21 L3 12 L7 12 L7 21 Z" />
+      <path d="M7 12 L10.5 4 C10.7 3.4 11.4 3 12 3 C12.8 3 13.3 3.6 13.3 4.4 V11 H19 C20 11 20.5 11.7 20.4 12.5 L19.3 19 C19.1 20.2 18 21 16.7 21 L7 21 Z" />
+    </g>
+  </svg>
+);
+
 export const Ornament = ({ w = 120, c = theme.rule }) => (
   <svg width={w} height="12" viewBox="0 0 120 12" fill="none" stroke={c} strokeWidth="0.8" strokeLinecap="round">
     <path d="M0 6 H44" />
