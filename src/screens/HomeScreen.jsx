@@ -924,7 +924,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
               <em style={{ color: theme.terra, fontStyle: "normal" }}>{reachedFor}</em>?
             </div>
           )}
-          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+          <div style={{ display: "flex", gap: 14, justifyContent: "center" }}>
             {[
               [true,  ThumbUp,   "yes",        theme.sageDeep],
               [false, ThumbDown, "not really", theme.terra],
@@ -935,10 +935,11 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
                   key={String(v)}
                   onClick={() => setMoodLanded(v)}
                   aria-label={label}
+                  title={label}
                   style={{
-                    flex: 1, maxWidth: 140,
+                    width: 44, height: 44,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    gap: 8, padding: "10px 14px",
+                    padding: 0,
                     borderRadius: 999,
                     background: active ? accent : "transparent",
                     border: `1px solid ${active ? accent : theme.ruleSoft}`,
@@ -947,11 +948,7 @@ const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
                     transition: "all 0.18s ease",
                   }}
                 >
-                  <Icon size={16} c={active ? theme.cream : accent} />
-                  <span style={{
-                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                  }}>{label}</span>
+                  <Icon size={20} c={active ? theme.cream : accent} />
                 </button>
               );
             })}
