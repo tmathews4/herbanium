@@ -198,7 +198,7 @@ const StepWelcome = () => (
       fontFamily: ff.serif, fontSize: 32, color: theme.ink,
       lineHeight: 1.15, marginBottom: 12,
     }}>
-      Welcome to Herbanium.
+      What's the tea?
     </div>
     <div style={{
       fontFamily: ff.serif, fontStyle: "italic", fontSize: 15,
