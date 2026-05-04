@@ -73,6 +73,11 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // both "open the composer" and "switch the active mode" — the
   // tab strip that used to sit inside the composer is gone.
   const [journalMode, setJournalMode] = useState("free");
+  // Dropdown visibility for the "Write something" trigger. The four
+  // form choices (free / haiku / limerick / poem) used to occupy a
+  // four-card grid in the page; folding them behind a dropdown keeps
+  // the journal timeline as the page's center of gravity.
+  const [writeMenuOpen, setWriteMenuOpen] = useState(false);
   // Close the composer whenever the user navigates away from the
   // journal sub-view — switching apothecary/shelf mode, switching
   // section, or moving to a different journal sub-tab. Without this
@@ -81,6 +86,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // tab it could re-render an unintended writing surface.
   React.useEffect(() => {
     setJournalComposerOpen(false);
+    setWriteMenuOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, mode]);
   // Section-aware mode clamp. Each section has a fixed set of valid
@@ -306,68 +312,98 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               })}
             </div>
 
-            {/* Mode chooser — the form-style decision is now the FIRST
-                journaling action, surfaced as four equal-width cards
-                instead of a tab strip buried inside the composer. Tap
-                any card to open the composer locked to that mode. The
-                active card is highlighted and a second tap closes the
-                composer entirely. The eyebrow above ("write something")
-                tells a first-time user this row is what they're looking
-                for when they want to add something to the journal. */}
-            <div style={{
-              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: theme.ash,
-              marginBottom: 6,
-            }}>write something</div>
-            <div style={{
-              display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr",
-              gap: 6, marginBottom: 12,
-            }}>
-              {[
+            {/* Write trigger — folds the four form choices behind a
+                single dropdown so the timeline below stays the page's
+                center of gravity. Closed: "Write something ▾". Open:
+                a small menu of free / haiku / limerick / poem with
+                a one-line hint each. Picking a form collapses the
+                menu and opens the composer locked to that mode. */}
+            {(() => {
+              const choices = [
                 ["free",     "Free",     "open page"],
                 ["haiku",    "Haiku",    "5 / 7 / 5"],
                 ["limerick", "Limerick", "5 lines, A-A-B-B-A"],
                 ["poem",     "Poem",     "any short form"],
-              ].map(([key, label, hint]) => {
-                const active = journalComposerOpen && journalMode === key;
-                return (
+              ];
+              const activeChoice = choices.find(c => c[0] === journalMode) || choices[0];
+              const triggerLabel = journalComposerOpen
+                ? `Writing — ${activeChoice[1].toLowerCase()}`
+                : "Write something";
+              return (
+                <div style={{ marginBottom: 12, position: "relative" }}>
                   <button
-                    key={key}
-                    onClick={() => {
-                      if (active) {
-                        setJournalComposerOpen(false);
-                      } else {
-                        setJournalMode(key);
-                        setJournalComposerOpen(true);
-                      }
-                    }}
+                    onClick={() => setWriteMenuOpen(o => !o)}
+                    aria-haspopup="listbox"
+                    aria-expanded={writeMenuOpen}
                     style={{
-                      display: "flex", flexDirection: "column", alignItems: "center",
-                      gap: 2, padding: "10px 6px",
-                      background: active ? theme.ink : theme.cream,
-                      color: active ? theme.cream : theme.inkSoft,
-                      border: `1px solid ${active ? theme.ink : theme.ruleSoft}`,
-                      borderRadius: 10, cursor: "pointer",
-                      boxShadow: active
-                        ? "0 2px 6px -1px rgba(30,24,18,0.22)"
-                        : "0 1px 2px rgba(30,24,18,0.05)",
-                      transition: "all 0.18s ease",
+                      width: "100%",
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      gap: 8, padding: "10px 14px",
+                      background: theme.cream,
+                      border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
+                      cursor: "pointer",
+                      fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
+                      textTransform: "uppercase", color: theme.inkSoft,
+                      transition: "background 0.18s ease",
                     }}
                   >
+                    <span>{triggerLabel}</span>
                     <span style={{
-                      fontFamily: ff.serif, fontSize: 13.5,
-                      color: active ? theme.cream : theme.ink,
-                      lineHeight: 1.1,
-                    }}>{label}</span>
-                    <span style={{
-                      fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.04em",
-                      color: active ? "rgba(232,220,192,0.65)" : theme.ash,
-                      lineHeight: 1.2,
-                    }}>{hint}</span>
+                      display: "inline-block",
+                      transform: writeMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.18s ease",
+                      color: theme.ash, fontSize: 12,
+                    }}>▾</span>
                   </button>
-                );
-              })}
-            </div>
+                  {writeMenuOpen && (
+                    <div
+                      role="listbox"
+                      style={{
+                        marginTop: 6,
+                        background: theme.ivory,
+                        border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
+                        overflow: "hidden",
+                        boxShadow: "0 6px 18px -8px rgba(30,24,18,0.18)",
+                      }}
+                    >
+                      {choices.map(([key, label, hint], i) => {
+                        const active = journalComposerOpen && journalMode === key;
+                        return (
+                          <button
+                            key={key}
+                            role="option"
+                            aria-selected={active}
+                            onClick={() => {
+                              setJournalMode(key);
+                              setJournalComposerOpen(true);
+                              setWriteMenuOpen(false);
+                            }}
+                            style={{
+                              width: "100%", textAlign: "left",
+                              display: "flex", alignItems: "baseline", justifyContent: "space-between",
+                              gap: 10, padding: "10px 14px",
+                              background: active ? "rgba(176, 84, 47, 0.06)" : "transparent",
+                              border: "none",
+                              borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <span style={{
+                              fontFamily: ff.serif, fontSize: 15,
+                              color: active ? theme.terra : theme.ink,
+                            }}>{label}</span>
+                            <span style={{
+                              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                              color: theme.ash,
+                            }}>{hint}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {journalComposerOpen && (
               <JournalComposer
