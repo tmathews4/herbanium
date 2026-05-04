@@ -18,11 +18,8 @@
 
 import React, { useState } from "react";
 import { ff, theme } from "../theme";
-import { SectionLabel } from "./layout";
 import { OmenCard } from "./OmenCard";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
-import { HintCard } from "./HintCard";
-import { Sprig } from "./icons";
 import { MoodCrystal } from "./MoodCrystal";
 import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
 import { getBlend } from "../helpers/misc";
@@ -375,19 +372,6 @@ export const BestiaryView = ({
 
   return (
     <div style={{ marginTop: 4 }}>
-      {!bestiaryHintShown && dismissBestiaryHint && (
-        <HintCard
-          icon={<Sprig size={18} c={theme.sageDeep} />}
-          title="Bestiary"
-          body={<>
-            A fun side game — collect elementals drawn from your mood
-            arc and brewing history. Entirely optional; turn it off
-            under <strong style={{ color: theme.terra }}>Profile → Preferences</strong>.
-          </>}
-          onDismiss={dismissBestiaryHint}
-        />
-      )}
-
       {summonTarget?.kind === "omen" && profile?.title && (
         <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
       )}
@@ -430,14 +414,11 @@ export const BestiaryView = ({
       />
 
       <div style={{
-        display: "flex", alignItems: "baseline", justifyContent: "space-between",
-        gap: 10, marginBottom: 6,
+        display: "flex", alignItems: "baseline", justifyContent: "flex-end",
+        gap: 10, marginBottom: 12,
       }}>
-        <SectionLabel n="i">Elemental Bestiary</SectionLabel>
-        {/* Pending-count read replaces the old Log button — the
-            lodestone above is now the tap target for summoning, and
-            this row just reports how many arrivals are waiting (or
-            says so when none are). */}
+        {/* Pending-count read — the lodestone above is the tap target
+            for summoning; this row just reports what's waiting. */}
         <span style={{
           fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
           textTransform: "uppercase",
@@ -449,17 +430,6 @@ export const BestiaryView = ({
             : pendingArrivals.length > 1 ? `${pendingArrivals.length} waiting`
             : "1 waiting"}
         </span>
-      </div>
-      <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-        color: theme.ash, lineHeight: 1.45, marginBottom: 12,
-      }}>
-        A fun side game — elementals find you based on your mood
-        history and brewing patterns. Tap{" "}
-        <em style={{ color: theme.terra, fontStyle: "normal" }}>your lodestone</em>{" "}
-        when it pulses to observe the next visitor. Not for you?
-        Turn it off in
-        <em style={{ color: theme.terra, fontStyle: "normal" }}> Profile → Preferences</em>.
       </div>
 
       {omenShown && (
