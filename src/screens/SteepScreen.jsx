@@ -216,24 +216,33 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   ];
 
   return (
+    <>
+      {/* Backdrop — dims the app behind the floating steep card. We
+          intentionally don't dismiss on backdrop tap (steep is a
+          deliberate flow); cancel/minimize live in the card header. */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 30,
+        background: "rgba(30, 24, 18, 0.35)",
+        display: minimized ? "none" : "block",
+        animation: "sheetFadeIn 0.2s ease-out",
+      }} />
     <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
+      position: "absolute", left: 14, right: 14, top: 28, bottom: 88, zIndex: 31,
       background: `radial-gradient(ellipse at 50% 20%, ${theme.cream} 0%, ${theme.paper} 60%, ${theme.ivory} 100%)`,
-      // Minimize hides the steep page via display:none — keeps the
+      borderRadius: 20,
+      boxShadow: "0 18px 48px -16px rgba(30,24,18,0.45), 0 0 0 1px rgba(80,60,40,0.08)",
+      // Minimize hides the floating card via display:none — keeps the
       // component mounted (timer ticks continue, native steep
       // notification stays scheduled) so restoring is instant and
-      // synchronized. The BrewTimerBanner up in App renders in
-      // place of the visible steep while minimized.
+      // synchronized. BrewTimerBanner up in App renders in place
+      // while minimized.
       display: minimized ? "none" : "flex",
       flexDirection: "column",
-      padding: "22px 22px 26px",
-      // The steep page grew taller when the writing surface
-      // promoted from a single-line input to a 6-row textarea —
-      // the wait-card cycle was getting clipped at the bottom on
-      // shorter viewports. Make the whole page scroll vertically so
-      // the timer + mood + writing + wait-card stack always reaches.
+      padding: "20px 22px 24px",
+      // Card scrolls internally; the dim backdrop sits behind it.
       overflowY: "auto",
       WebkitOverflowScrolling: "touch",
+      animation: "sheetFadeIn 0.22s ease-out",
     }}>
       {/* header — cancel on the left, minimize on the right (the
           slot the now-retired planner button used to occupy). */}
@@ -616,6 +625,13 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         />
       )}
     </div>
+      <style>{`
+        @keyframes sheetFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+    </>
   );
 };
 
