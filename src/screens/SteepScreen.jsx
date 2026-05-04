@@ -172,6 +172,17 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
     }, 400);
   }, [waitCards.length]);
 
+  const reverseWaitCard = React.useCallback(() => {
+    if (waitCards.length <= 1) return;
+    setWaitFading(true);
+    setTimeout(() => {
+      setWaitIdx(i => (i - 1 + waitCards.length) % waitCards.length);
+      setWaitFading(false);
+      setLastAdvance(Date.now());
+      setCardRemaining(CARD_CYCLE_S);
+    }, 400);
+  }, [waitCards.length]);
+
   // Auto-cycle every CARD_CYCLE_S seconds. Clicking a card triggers
   // advanceWaitCard which updates lastAdvance, which re-runs this effect
   // with a fresh timer (so you never get a manual-then-auto double advance).
@@ -239,8 +250,9 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
       display: minimized ? "none" : "flex",
       flexDirection: "column",
       padding: "20px 22px 24px",
+      boxSizing: "border-box",
       // Card scrolls internally; the dim backdrop sits behind it.
-      overflowY: "auto",
+      overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
       animation: "sheetFadeIn 0.22s ease-out",
     }}>
@@ -432,10 +444,32 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           minWidth: 0,
         }}
       >
-        <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between", minWidth: 0 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", minWidth: 0, flex: 1 }}>
+            {waitCards.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); reverseWaitCard(); }}
+                aria-label="previous"
+                title="previous"
+                style={{
+                  flexShrink: 0,
+                  background: "transparent", border: "none",
+                  padding: 0, marginRight: 2, lineHeight: 0,
+                  cursor: "pointer", color: theme.ash,
+                  display: "inline-flex", alignItems: "center",
+                }}
+              >
+                <svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true">
+                  <polygon points="9,1 1,6 9,11" fill="currentColor" />
+                </svg>
+              </button>
+            )}
             <Leaf size={16} c={theme.sageDeep} />
-            <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash,
+              minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
               {waitCards[waitIdx]?.type === "poem"      ? "a verse" :
                waitCards[waitIdx]?.type === "tradition" ? "tradition" :
                waitCards[waitIdx]?.type === "prompt"    ? "a question for the cup" :
@@ -444,7 +478,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           </div>
           {waitCards.length > 1 && (
             /* Tiny countdown ring — shrinks as the time to next card runs down */
-            <svg width="18" height="18" viewBox="-11 -11 22 22" style={{ display: "block" }}>
+            <svg width="18" height="18" viewBox="-11 -11 22 22" style={{ display: "block", flexShrink: 0 }}>
               <circle
                 cx="0" cy="0" r="9"
                 stroke={theme.ruleSoft} strokeWidth="1.5" fill="none"
@@ -468,7 +502,10 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           transition: "opacity 0.4s ease",
           whiteSpace: waitCards[waitIdx]?.type === "poem" ? "pre-line" : "normal",
           overflowWrap: "anywhere", wordBreak: "break-word",
-          hyphens: "auto", maxWidth: "100%", minWidth: 0,
+          hyphens: "auto",
+          width: "100%", maxWidth: "100%", minWidth: 0,
+          boxSizing: "border-box",
+          display: "block",
         }}>
           {waitCards[waitIdx]?.text}
         </div>

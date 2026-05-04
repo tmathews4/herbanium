@@ -51,8 +51,18 @@ export const CURRENT_FEEL_EXTRAS = [
   { key: "restless",  label: "Restless"  },
 ];
 
+// Subset of PARENT_MOODS that reads as a natural pre-cup state.
+// Comfort, cooling, and digestive are brewing GOALS — things people
+// reach for a tea to GET — not states they show up with ("I feel
+// digestive" doesn't parse as something to log before a cup). Target
+// pickers still use the full PARENT_MOODS list so blend recipes can
+// keep referencing those families.
+const CURRENT_FEEL_PARENTS = PARENT_MOODS.filter(m =>
+  ["calm", "focus", "energy", "sleepy"].includes(m.key)
+);
+
 // Convenience export — what a "right now I feel" chip row offers.
-export const CURRENT_MOOD_CHIPS = [...PARENT_MOODS, ...CURRENT_FEEL_EXTRAS];
+export const CURRENT_MOOD_CHIPS = [...CURRENT_FEEL_PARENTS, ...CURRENT_FEEL_EXTRAS];
 
 // 10 parent flavor families, aligned to FAMILY_BY_FLAVOR. Mirrors
 // FLAVOR_FAMILY_CHIPS in data/blends.js — re-exported here so callers
