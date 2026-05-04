@@ -125,20 +125,18 @@
     --sage:      #9DB582;
     --sage-deep: #C0D2AB;
     --ochre:     #C19450;
-    /* Terra in dark mode pulls toward walnut-cocoa rather than the
-       coppery #A86040 it used to wear — that read too orange against
-       the forest-noir ground and clashed with the witchy-woods voice
-       of the rest of the palette. The new tone keeps warmth and
-       enough chroma to mark CTA buttons (Start brewing, Brew this
-       cup) but lands on the brown side of the scale, more leather/
-       walnut than copper/orange. */
-    --terra:     #8B6346;
+    /* Terra in dark mode previously sat at #8B6346 (walnut-cocoa) —
+       overcorrected for the older #A86040 that read too orange.
+       The walnut version went too dull against the forest-noir
+       ground; CTAs and accents lost their pop. Pulled back toward
+       a vibrant terracotta — same hue family as light-mode terra
+       (#B0542F) but slightly lighter for dark-bg legibility. */
+    --terra:     #C26642;
     /* Bark is the default-tone button color (Save, Brew this cup,
-       Start brewing on Blend page, most primary CTAs). The prior
-       #936B4C still read as orange-warm against the forest-noir
-       ground; shifted darker and cooler toward true walnut so the
-       palette holds the witchy-woods register without copper bleed. */
-    --bark:      #7C5A40;
+       Start brewing on Blend page, most primary CTAs). Lifted in
+       the same vibrancy direction as terra above — a touch deeper
+       so the primary CTA still reads heavier than terra accents. */
+    --bark:      #A85A38;
     --rose:      #C68567;
     --sky:       #88AEB7;
     --plum:      #9A647F;
@@ -147,7 +145,7 @@
     --shadow-rgb: 0, 0, 0;
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
-    --terra-rgb:  139, 99, 70;
+    --terra-rgb:  194, 102, 66;
 
     /* Dark-mode hover fills — the rest accent (ink) is a light
        sage-cream, so the hover should be a *darker* dim of that to
@@ -155,12 +153,11 @@
        on hover instead made the button text vanish — bg #2A211A on
        dark forest, text the same dark forest. These keep contrast. */
     --ink-hover:    #C8D2C5;
-    /* Terra hover: lifted walnut, distinguishable on hover without
-       reverting to the orange register. */
-    --terra-hover:  #A07A5A;
-    /* Bark hover: lifted walnut, distinct from base without
-       reverting to the orange-warm register. */
-    --bark-hover:   #936B4C;
+    /* Terra hover: a lift on the new vibrant terracotta — brighter,
+       slightly more saturated, distinguishable on hover. */
+    --terra-hover:  #D27451;
+    /* Bark hover: lifted from base bark, distinct on press. */
+    --bark-hover:   #BB6843;
 
     /* Family bars — vibrant variants sized between the muted light
        palette and the crystal's fluorescent gem tones. Each register
