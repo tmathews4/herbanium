@@ -425,11 +425,15 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           background: theme.cream,
           boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
           minHeight: 100,
+          flexShrink: 0,
           cursor: waitCards.length > 1 ? "pointer" : "default",
           position: "relative",
           boxSizing: "border-box",
           maxWidth: "100%",
-          overflow: "hidden",
+          // Long-word safeguards live on the inner text block; we
+          // don't clip vertically here so the card auto-grows to fit
+          // multi-line poems / longer facts without hiding any text.
+          overflowX: "hidden",
           minWidth: 0,
           display: "flex", flexDirection: "column",
         }}
