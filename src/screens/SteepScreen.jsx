@@ -444,17 +444,20 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           minWidth: 0,
         }}
       >
-        <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between", minWidth: 0 }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", minWidth: 0, flex: 1 }}>
+        {/* Header — back triangle (left), centered label, forward
+            triangle (right). Both triangles share identical SVG/style
+            so the row reads symmetrically. The countdown ring is
+            anchored to the card's bottom-right corner below. */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <div style={{ width: 14, flexShrink: 0, display: "flex", justifyContent: "flex-start" }}>
             {waitCards.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); reverseWaitCard(); }}
                 aria-label="previous"
                 title="previous"
                 style={{
-                  flexShrink: 0,
                   background: "transparent", border: "none",
-                  padding: 0, marginRight: 2, lineHeight: 0,
+                  padding: 0, lineHeight: 0,
                   cursor: "pointer", color: theme.ash,
                   display: "inline-flex", alignItems: "center",
                 }}
@@ -464,11 +467,17 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
                 </svg>
               </button>
             )}
+          </div>
+          <div style={{
+            flex: 1, minWidth: 0,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}>
             <Leaf size={16} c={theme.sageDeep} />
             <div style={{
               fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.18em",
               textTransform: "uppercase", color: theme.ash,
               minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              textAlign: "center",
             }}>
               {waitCards[waitIdx]?.type === "poem"      ? "a verse" :
                waitCards[waitIdx]?.type === "tradition" ? "tradition" :
@@ -476,24 +485,25 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
                "while you wait"}
             </div>
           </div>
-          {waitCards.length > 1 && (
-            /* Tiny countdown ring — shrinks as the time to next card runs down */
-            <svg width="18" height="18" viewBox="-11 -11 22 22" style={{ display: "block", flexShrink: 0 }}>
-              <circle
-                cx="0" cy="0" r="9"
-                stroke={theme.ruleSoft} strokeWidth="1.5" fill="none"
-              />
-              <circle
-                cx="0" cy="0" r="9"
-                stroke={theme.ash} strokeWidth="1.5" fill="none"
-                strokeDasharray={2 * Math.PI * 9}
-                strokeDashoffset={(2 * Math.PI * 9) * (1 - cardRemaining / CARD_CYCLE_S)}
-                transform="rotate(-90)"
-                strokeLinecap="round"
-                style={{ transition: "stroke-dashoffset 1s linear" }}
-              />
-            </svg>
-          )}
+          <div style={{ width: 14, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
+            {waitCards.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); advanceWaitCard(); }}
+                aria-label="next"
+                title="next"
+                style={{
+                  background: "transparent", border: "none",
+                  padding: 0, lineHeight: 0,
+                  cursor: "pointer", color: theme.ash,
+                  display: "inline-flex", alignItems: "center",
+                }}
+              >
+                <svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true">
+                  <polygon points="1,1 9,6 1,11" fill="currentColor" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
         <div style={{
           fontFamily: ff.serif, fontStyle: waitCards[waitIdx]?.type === "poem" ? "normal" : "italic",
@@ -543,17 +553,24 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             >+ note</button>
           </div>
         )}
-        {/* Tap-to-advance affordance: a small right-pointing triangle
-            in the bottom-right corner of the card */}
+        {/* Countdown ring — bottom-right corner of the card, shrinks
+            as the auto-advance timer runs down. */}
         {waitCards.length > 1 && (
           <svg
-            width="10" height="10" viewBox="0 0 10 10"
-            style={{
-              position: "absolute", right: 10, bottom: 10,
-              opacity: 0.55,
-            }}
+            width="18" height="18" viewBox="-11 -11 22 22"
+            style={{ position: "absolute", right: 10, bottom: 10, display: "block" }}
+            aria-hidden="true"
           >
-            <polygon points="2,1 9,5 2,9" fill={theme.ash} />
+            <circle cx="0" cy="0" r="9" stroke={theme.ruleSoft} strokeWidth="1.5" fill="none" />
+            <circle
+              cx="0" cy="0" r="9"
+              stroke={theme.ash} strokeWidth="1.5" fill="none"
+              strokeDasharray={2 * Math.PI * 9}
+              strokeDashoffset={(2 * Math.PI * 9) * (1 - cardRemaining / CARD_CYCLE_S)}
+              transform="rotate(-90)"
+              strokeLinecap="round"
+              style={{ transition: "stroke-dashoffset 1s linear" }}
+            />
           </svg>
         )}
       </div>
