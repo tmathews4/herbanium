@@ -1688,6 +1688,48 @@ const INGREDIENTS = {
       { id: "overpulled", character: "biting tannin, malt mostly buried.", moodImpact: "energy lost in the bite" },
     ],
     overPull: { timeS: 420, reason: "tannins overtake the malt, the cup turns biting" },
+    // Multi-infusion profile — Assam holds 3-4 Western-style infusions
+    // off the same leaves. The "second pour" is canonical Indian
+    // household practice; commercial tea-bag brewing pretends the
+    // leaves are spent after one cup, but loose-leaf gives more.
+    // Gongfu-style isn't traditional for Assam (that's the Chinese
+    // oolong/puerh register), so the time progression here stays
+    // Western-paced: temps hold at recipe range, time eases slightly
+    // for infusion 2 as the leaves are already open, then lengthens
+    // again for 3-4 to coax the deeper compounds out before the
+    // leaves give way. lifeRemaining is a 0-1 scale of how much the
+    // leaves have left in them — drives the engine's "another
+    // infusion in this?" hint.
+    infusions: [
+      {
+        n: 1,
+        character: "the breakfast Assam — full malt, brisk tannin grip, energetic top.",
+        moodImpact: "energy at anchor strength; warming solid",
+        tempC: [95, 100], timeS: [180, 300],
+        lifeRemaining: 1.0,
+      },
+      {
+        n: 2,
+        character: "malt softens, body smooths, the brisk tannin edge eases. The second-pour cup Indian households know.",
+        moodImpact: "energy still anchored; tannin grip relaxed",
+        tempC: [95, 100], timeS: [180, 240],
+        lifeRemaining: 0.75,
+      },
+      {
+        n: 3,
+        character: "lighter pour; sweeter undertones surface, tannin minimal.",
+        moodImpact: "energy gentler; warming present without the grip",
+        tempC: [95, 100], timeS: [240, 300],
+        lifeRemaining: 0.5,
+      },
+      {
+        n: 4,
+        character: "noticeably thinner; leaves giving way. Pull back time or stop here.",
+        moodImpact: "energy fading; cup more aromatic than substantive",
+        tempC: [95, 100], timeS: [240, 360],
+        lifeRemaining: 0.25,
+      },
+    ],
     effects: [["energy", 5], ["focus", 3], ["warming", 4]],
     flavors: ["malty", "bold", "robust", "brisk", "cocoa", "woody"],
     pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper", "marshmallow-root"],
