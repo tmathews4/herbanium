@@ -65,6 +65,13 @@ export const OnboardingScreen = ({ onComplete }) => {
       display: "flex", flexDirection: "column",
       fontFamily: ff.sans,
       overflow: "auto",
+      // Top buffer for the system status icons / camera cutout on
+      // edge-to-edge Android. Has to live HERE rather than on the
+      // App.jsx wrapper because this root is position:absolute, so
+      // a wrapper's paddingTop doesn't push it — same shape of bug
+      // as the home screen's PhoneFrame issue.
+      boxSizing: "border-box",
+      paddingTop: 72,
     }}>
       {/* Top: brand + progress. The header mark is the herbanium
           logo's H glyph at 30px — gives every onboarding step a

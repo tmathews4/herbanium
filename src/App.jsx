@@ -138,7 +138,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 // Build version marker — logged once on app load. Chrome://inspect
 // Console will show this so we can confirm bundle freshness when
 // debugging. Bumped when meaningful native-relevant CSS changes ship.
-console.log("HERBANIUM_BUILD: 2026-05-07-pad-48");
+console.log("HERBANIUM_BUILD: 2026-05-07-onboard-pad");
 
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
@@ -1960,13 +1960,9 @@ export default function App() {
           height: "100dvh", width: "100vw",
           overflow: "hidden",
           fontFamily: ff.sans,
-          // Larger top buffer than the main mobile path (which uses
-          // 48px) because the onboarding card leads with the H logo
-          // at the very top edge — needs extra clearance from the
-          // Pixel's camera cutout, which sits a touch lower than a
-          // standard status bar.
-          boxSizing: "border-box",
-          paddingTop: 72,
+          // No paddingTop here — OnboardingScreen's root is
+          // position:absolute and would ignore it. The status-bar
+          // buffer lives inside OnboardingScreen itself.
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
