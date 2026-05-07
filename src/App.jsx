@@ -163,9 +163,15 @@ const PhoneFrame = ({ children }) => {
         // invisible on mobile where width === maxWidth or smaller.
         boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
         background: theme.ivory,
-        // Honor the notch / status-bar inset when wrapped in Capacitor.
-        // No-op on web where the inset is 0.
-        paddingTop: "env(safe-area-inset-top)",
+        // Reserve a top strip painted in the app's ivory shell so the
+        // system status icons have breathing room above the in-app
+        // back button + content. Floored at 56px so it works even on
+        // edge-to-edge Android 15+ where env(safe-area-inset-top)
+        // doesn't reliably reach the WebView; expands to the device
+        // inset when that's larger (notches, deeper status bars).
+        // Strip is the same color as the rest of the app shell so it
+        // reads as an extension of the app, not a foreign bar.
+        paddingTop: "max(env(safe-area-inset-top), 56px)",
       }}>
         {children}
       </div>
