@@ -138,7 +138,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 // Build version marker — logged once on app load. If chrome://inspect
 // Console doesn't show this string, the running bundle isn't current.
 // Diagnostic for the May 2026 Android-edge-to-edge debug session.
-console.log("HERBANIUM_BUILD: 2026-05-07-overlay-bar");
+console.log("HERBANIUM_BUILD: 2026-05-07-RED-DIAGNOSTIC");
 
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
@@ -159,24 +159,31 @@ const PhoneFrame = ({ children }) => {
       height: "100dvh",
       width: "100vw",
     }}>
-      {/* Top safety bar — separate fixed-position overlay that paints
-          an ivory strip across the top of the viewport. Rendered as
-          its own positioned element rather than as padding on the
-          inner column, because the padding approach wasn't reliably
-          reserving space inside the Capacitor WebView on edge-to-
-          edge Android. position:fixed + top:0 doesn't depend on any
-          parent's flex/box-sizing/safe-area resolution; it just
-          paints over the top 80px regardless. z-index keeps it
-          above the app content so the chrome bar's back button
-          doesn't draw on top of where the system icons live. */}
+      {/* DIAGNOSTIC build — bright red bar with lime outline, 120px
+          tall, top: 0. If this isn't visible on the phone, the
+          fixed-positioned overlay approach isn't reaching the
+          viewport top at all. If it IS visible, the previous
+          ivory bars were rendering correctly and the issue was
+          that they were the same color as the surrounding page. */}
       <div style={{
         position: "fixed",
         top: 0, left: 0, right: 0,
-        height: 80,
-        background: theme.ivory,
-        zIndex: 100,
+        height: 120,
+        background: "red",
+        outline: "4px solid lime",
+        zIndex: 9999,
         pointerEvents: "none",
-      }} />
+      }}>
+        <div style={{
+          color: "white",
+          fontFamily: "monospace",
+          fontSize: 18,
+          padding: 20,
+          fontWeight: "bold",
+        }}>
+          TOP OF APP
+        </div>
+      </div>
       <div style={{
         width: "100%",
         maxWidth: 520,
