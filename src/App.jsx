@@ -135,6 +135,11 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
+// Build version marker — logged once on app load. If chrome://inspect
+// Console doesn't show this string, the running bundle isn't current.
+// Diagnostic for the May 2026 Android-edge-to-edge debug session.
+console.log("HERBANIUM_BUILD: 2026-05-07-overlay-bar");
+
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
   // readable column width and centered. The dark "phone bezel" desktop
@@ -154,6 +159,24 @@ const PhoneFrame = ({ children }) => {
       height: "100dvh",
       width: "100vw",
     }}>
+      {/* Top safety bar — separate fixed-position overlay that paints
+          an ivory strip across the top of the viewport. Rendered as
+          its own positioned element rather than as padding on the
+          inner column, because the padding approach wasn't reliably
+          reserving space inside the Capacitor WebView on edge-to-
+          edge Android. position:fixed + top:0 doesn't depend on any
+          parent's flex/box-sizing/safe-area resolution; it just
+          paints over the top 80px regardless. z-index keeps it
+          above the app content so the chrome bar's back button
+          doesn't draw on top of where the system icons live. */}
+      <div style={{
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        height: 80,
+        background: theme.ivory,
+        zIndex: 100,
+        pointerEvents: "none",
+      }} />
       <div style={{
         width: "100%",
         maxWidth: 520,
@@ -163,15 +186,9 @@ const PhoneFrame = ({ children }) => {
         // invisible on mobile where width === maxWidth or smaller.
         boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
         background: theme.ivory,
-        // Hardcoded top buffer (no env() / max()) — diagnostic for a
-        // Capacitor 8 + Android 16 edge-to-edge case where max() with
-        // env() was producing no visible padding. With a flat 80px
-        // we can confirm whether the value is being honored at all.
-        // box-sizing: border-box keeps padding inside the explicit
-        // height: 100% so the inner column doesn't overflow the
-        // outer fixed-position frame.
+        // Push the inner column's content below the 80px overlay bar.
         boxSizing: "border-box",
-        paddingTop: "80px",
+        paddingTop: 80,
       }}>
         {children}
       </div>
