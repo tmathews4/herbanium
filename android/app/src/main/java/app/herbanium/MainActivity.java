@@ -1,7 +1,5 @@
 package app.herbanium;
 
-import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 
@@ -37,19 +35,6 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-
-        // Paint the activity window background to match the app shell
-        // so the strip we reserve above the WebView (where the system
-        // status icons live) reads as part of the app rather than a
-        // foreign white bar. Picks light or dark ivory based on the
-        // system Configuration.UI_MODE_NIGHT bit, matching the React
-        // app's prefers-color-scheme handling.
-        int nightBit = getResources().getConfiguration().uiMode
-            & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isDark = nightBit == Configuration.UI_MODE_NIGHT_YES;
-        // Light: #F3ECDC (theme.ivory). Dark: #0F1410 (--ivory-rgb 15,20,16).
-        int shellColor = isDark ? 0xFF0F1410 : 0xFFF3ECDC;
-        getWindow().setBackgroundDrawable(new ColorDrawable(shellColor));
 
         View content = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, windowInsets) -> {
