@@ -1960,11 +1960,13 @@ export default function App() {
           height: "100dvh", width: "100vw",
           overflow: "hidden",
           fontFamily: ff.sans,
-          // Same top buffer as the main mobile path — keeps the H
-          // logo and welcome card from sliding under the system
-          // status icons / camera cutout on edge-to-edge Android.
+          // Larger top buffer than the main mobile path (which uses
+          // 48px) because the onboarding card leads with the H logo
+          // at the very top edge — needs extra clearance from the
+          // Pixel's camera cutout, which sits a touch lower than a
+          // standard status bar.
           boxSizing: "border-box",
-          paddingTop: 48,
+          paddingTop: 72,
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
