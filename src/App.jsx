@@ -138,7 +138,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 // Build version marker — logged once on app load. Chrome://inspect
 // Console will show this so we can confirm bundle freshness when
 // debugging. Bumped when meaningful native-relevant CSS changes ship.
-console.log("HERBANIUM_BUILD: 2026-05-07-isNarrow-pad");
+console.log("HERBANIUM_BUILD: 2026-05-07-pad-48");
 
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
@@ -1960,6 +1960,11 @@ export default function App() {
           height: "100dvh", width: "100vw",
           overflow: "hidden",
           fontFamily: ff.sans,
+          // Same top buffer as the main mobile path — keeps the H
+          // logo and welcome card from sliding under the system
+          // status icons / camera cutout on edge-to-edge Android.
+          boxSizing: "border-box",
+          paddingTop: 48,
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1990,10 +1995,10 @@ export default function App() {
           // in-app back button + content. Mobile path renders here
           // directly (bypassing PhoneFrame), so this is where the
           // padding has to live for the Pixel / Capacitor build.
-          // The earlier PhoneFrame edits had no effect on phone
-          // because that wrapper is desktop-only.
+          // 48px is enough room above standard Android status bars
+          // (~24-32dp) to clear icons + leave a small visual margin.
           boxSizing: "border-box",
-          paddingTop: 80,
+          paddingTop: 48,
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
