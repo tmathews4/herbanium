@@ -172,7 +172,7 @@ const PhoneFrame = ({ children }) => {
         // some emulators, web). The strip's background is the same
         // ivory as the app shell, so it reads as part of the app
         // rather than a foreign black bar.
-        paddingTop: "max(env(safe-area-inset-top), 40px)",
+        paddingTop: "max(env(safe-area-inset-top), 28px)",
       }}>
         {children}
       </div>
