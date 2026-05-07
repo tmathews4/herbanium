@@ -329,6 +329,21 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           box-shadow: ${shadow.pressed};
           transform: translateY(0.5px);
         }
+        /* Primary variant — used on the weighted Compose tile so it
+           reads as the marquee feature instead of one-of-three.
+           Filled terra ground, cream label, wider aspect so it
+           dominates the top row above the secondary tiles. */
+        .home-cta-primary {
+          aspect-ratio: auto;
+          background: ${theme.terra};
+          color: ${theme.cream};
+          border-color: ${theme.terra};
+          padding: 18px 14px;
+          gap: 10px;
+        }
+        .home-cta-primary:hover {
+          border-color: ${theme.terra};
+        }
         /* Thin variant — same surface treatment as the square CTAs above
            (cream + rule + lifted shadow + sage-on-hover) but flat-row
            layout for the secondary HERBANIUM doorway. Re-declares the
@@ -349,45 +364,66 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           transform: translateY(0.5px);
         }
       `}</style>
+      {/* Two-row CTA layout — the marquee Compose tile sits on top
+          spanning the full width, terra-filled to broadcast that
+          blending is what this app is for. Brew + Write sit below
+          as smaller secondary tiles, equally weighted to each
+          other but visually subordinate to Compose. */}
       <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
+        display: "flex", flexDirection: "column",
         gap: 8, marginBottom: 24,
       }}>
-        {[
-          {
-            label: "Experiment",
-            onClick: () => go("apothecary", { mode: "reverse" }),
-            icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
-          },
-          {
-            label: "Brew",
-            onClick: () => go("shelf", { mode: "recipes" }),
-            icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
-          },
-          {
-            label: "Write",
-            onClick: () => go("shelf", { mode: "journal" }),
-            icon: (sz) => <Pencil size={sz} c={theme.sageDeep} />,
-          },
-        ].map((cta, i) => (
-          <button
-            key={i}
-            onClick={cta.onClick}
-            className="home-cta"
-          >
-            {cta.icon(26)}
-            <div style={{
-              fontFamily: ff.sans,
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: theme.inkSoft,
-            }}>
-              {cta.label}
-            </div>
-          </button>
-        ))}
+        <button
+          onClick={() => go("apothecary", { mode: "reverse" })}
+          className="home-cta home-cta-primary"
+        >
+          <Flask size={28} c={theme.cream} />
+          <div style={{
+            fontFamily: ff.sans,
+            fontSize: 12,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: theme.cream,
+            fontWeight: 500,
+          }}>
+            Compose
+          </div>
+        </button>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 8,
+        }}>
+          {[
+            {
+              label: "Brew",
+              onClick: () => go("shelf", { mode: "recipes" }),
+              icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
+            },
+            {
+              label: "Write",
+              onClick: () => go("shelf", { mode: "journal" }),
+              icon: (sz) => <Pencil size={sz} c={theme.sageDeep} />,
+            },
+          ].map((cta, i) => (
+            <button
+              key={i}
+              onClick={cta.onClick}
+              className="home-cta"
+            >
+              {cta.icon(26)}
+              <div style={{
+                fontFamily: ff.sans,
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: theme.inkSoft,
+              }}>
+                {cta.label}
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Herbanium — the reference book. Thin full-width button sits

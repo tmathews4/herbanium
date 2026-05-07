@@ -928,7 +928,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
   const title = isApothecary ? "Apothecarium" : "Journal";
   const items = isApothecary
     ? [
-        ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
+        ["Compose", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
         ["Herbanium", "The full reference — every leaf, flower, root, and bark the apothecarium tracks. Tap one to read its profile."],
       ]
     : [
