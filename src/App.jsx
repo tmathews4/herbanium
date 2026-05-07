@@ -171,7 +171,7 @@ const PhoneFrame = ({ children }) => {
         // inset when that's larger (notches, deeper status bars).
         // Strip is the same color as the rest of the app shell so it
         // reads as an extension of the app, not a foreign bar.
-        paddingTop: "max(env(safe-area-inset-top), 56px)",
+        paddingTop: "max(env(safe-area-inset-top), 80px)",
       }}>
         {children}
       </div>
