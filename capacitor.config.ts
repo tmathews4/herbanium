@@ -42,6 +42,31 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
   },
+
+  // Plugin-level config — applied during native shell init, BEFORE
+  // the WebView renders its first frame. The runtime
+  // configureStatusBar() call in helpers/native.js stays as a
+  // belt-and-suspenders, but this static block is what prevents the
+  // first-paint state where the WebView lands behind the system
+  // status bar (and content like the home poem card or in-app back
+  // buttons end up unreachable under the phone's status icons).
+  plugins: {
+    StatusBar: {
+      // Keep the system bar visible as its own strip; the WebView
+      // starts below it instead of extending under it. Without
+      // this, env(safe-area-inset-top) resolves to 0 on Android.
+      overlaysWebView: false,
+      // Dark icons on the ivory background. "Dark" in the plugin's
+      // vocabulary means "dark icons for a light bg" — confusing
+      // naming, correct behavior for our light-mode default.
+      style: "DARK",
+      // Match the app shell's ivory so the status-bar strip blends
+      // with the page below it. Dark-mode flip is handled by the
+      // runtime configureStatusBar call once the page has mounted
+      // and prefers-color-scheme can be evaluated.
+      backgroundColor: "#F3ECDC",
+    },
+  },
 };
 
 export default config;
