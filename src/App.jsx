@@ -163,15 +163,15 @@ const PhoneFrame = ({ children }) => {
         // invisible on mobile where width === maxWidth or smaller.
         boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
         background: theme.ivory,
-        // Reserve a top strip painted in the app's ivory shell so the
-        // system status icons have breathing room above the in-app
-        // back button + content. Floored at 56px so it works even on
-        // edge-to-edge Android 15+ where env(safe-area-inset-top)
-        // doesn't reliably reach the WebView; expands to the device
-        // inset when that's larger (notches, deeper status bars).
-        // Strip is the same color as the rest of the app shell so it
-        // reads as an extension of the app, not a foreign bar.
-        paddingTop: "max(env(safe-area-inset-top), 80px)",
+        // Hardcoded top buffer (no env() / max()) — diagnostic for a
+        // Capacitor 8 + Android 16 edge-to-edge case where max() with
+        // env() was producing no visible padding. With a flat 80px
+        // we can confirm whether the value is being honored at all.
+        // box-sizing: border-box keeps padding inside the explicit
+        // height: 100% so the inner column doesn't overflow the
+        // outer fixed-position frame.
+        boxSizing: "border-box",
+        paddingTop: "80px",
       }}>
         {children}
       </div>
