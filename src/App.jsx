@@ -135,10 +135,10 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
    Phone frame
    ────────────────────────────────────────────────────────────── */
 
-// Build version marker — logged once on app load. If chrome://inspect
-// Console doesn't show this string, the running bundle isn't current.
-// Diagnostic for the May 2026 Android-edge-to-edge debug session.
-console.log("HERBANIUM_BUILD: 2026-05-07-RED-DIAGNOSTIC");
+// Build version marker — logged once on app load. Chrome://inspect
+// Console will show this so we can confirm bundle freshness when
+// debugging. Bumped when meaningful native-relevant CSS changes ship.
+console.log("HERBANIUM_BUILD: 2026-05-07-isNarrow-pad");
 
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
@@ -159,31 +159,6 @@ const PhoneFrame = ({ children }) => {
       height: "100dvh",
       width: "100vw",
     }}>
-      {/* DIAGNOSTIC build — bright red bar with lime outline, 120px
-          tall, top: 0. If this isn't visible on the phone, the
-          fixed-positioned overlay approach isn't reaching the
-          viewport top at all. If it IS visible, the previous
-          ivory bars were rendering correctly and the issue was
-          that they were the same color as the surrounding page. */}
-      <div style={{
-        position: "fixed",
-        top: 0, left: 0, right: 0,
-        height: 120,
-        background: "red",
-        outline: "4px solid lime",
-        zIndex: 9999,
-        pointerEvents: "none",
-      }}>
-        <div style={{
-          color: "white",
-          fontFamily: "monospace",
-          fontSize: 18,
-          padding: 20,
-          fontWeight: "bold",
-        }}>
-          TOP OF APP
-        </div>
-      </div>
       <div style={{
         width: "100%",
         maxWidth: 520,
@@ -193,7 +168,9 @@ const PhoneFrame = ({ children }) => {
         // invisible on mobile where width === maxWidth or smaller.
         boxShadow: "0 0 0 1px rgba(80,60,40,0.06)",
         background: theme.ivory,
-        // Push the inner column's content below the 80px overlay bar.
+        // Top buffer for the desktop wrapping path. Mobile takes a
+        // separate isNarrow branch in App() that has its own
+        // paddingTop set to match.
         boxSizing: "border-box",
         paddingTop: 80,
       }}>
@@ -2008,6 +1985,15 @@ export default function App() {
           height: "100dvh", width: "100vw",
           overflow: "hidden",
           fontFamily: ff.sans,
+          // Reserve a top strip painted in the app shell so the
+          // system status icons have breathing room above the
+          // in-app back button + content. Mobile path renders here
+          // directly (bypassing PhoneFrame), so this is where the
+          // padding has to live for the Pixel / Capacitor build.
+          // The earlier PhoneFrame edits had no effect on phone
+          // because that wrapper is desktop-only.
+          boxSizing: "border-box",
+          paddingTop: 80,
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
