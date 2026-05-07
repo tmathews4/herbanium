@@ -20,6 +20,7 @@ import { isNativeApp } from "./platform";
 let _haptics = null;
 let _notifications = null;
 let _statusBar = null;
+let _app = null;
 
 async function loadPlugin(name) {
   try {
@@ -45,6 +46,50 @@ async function ensureStatusBar() {
   if (_statusBar !== null) return _statusBar;
   _statusBar = (await loadPlugin("@capacitor/status-bar")) || {};
   return _statusBar;
+}
+
+async function ensureApp() {
+  if (_app !== null) return _app;
+  _app = (await loadPlugin("@capacitor/app")) || {};
+  return _app;
+}
+
+/**
+ * Subscribe to Android's system back gesture (and the hardware back
+ * button on devices that have one). Pass a callback that decides
+ * what to do — typically: if the app has internal back history,
+ * navigate one step; otherwise call exitApp() so the system gesture
+ * still feels right at the app's root.
+ *
+ * Returns a remove function. No-op on web (returns a noop remover).
+ */
+export async function subscribeBackButton(callback) {
+  if (!isNativeApp()) return () => {};
+  try {
+    const { App } = await ensureApp();
+    if (!App?.addListener) return () => {};
+    const handle = await App.addListener("backButton", (info) => {
+      try { callback(info); } catch {}
+    });
+    return () => {
+      try { handle.remove(); } catch {}
+    };
+  } catch {
+    return () => {};
+  }
+}
+
+/**
+ * Exit the app — fired from the back-button listener when the app
+ * is at its root (no internal back history). Mirrors what Android's
+ * default behavior would do without our listener.
+ */
+export async function exitApp() {
+  if (!isNativeApp()) return;
+  try {
+    const { App } = await ensureApp();
+    if (App?.exitApp) await App.exitApp();
+  } catch {}
 }
 
 /**

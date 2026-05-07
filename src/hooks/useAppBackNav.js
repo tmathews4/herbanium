@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────────────────────────
    hooks/useAppBackNav — wires the app's internal back navigation
-   into both the browser back button and a left-edge swipe gesture.
+   into the browser back button, a left-edge swipe gesture, and
+   Android's system back gesture (hardware/3-button or gesture nav).
 
    Browser back: every time the app's nav state changes we push a
    new history entry, so the browser back button has somewhere to
@@ -12,8 +13,15 @@
    Edge swipe: a quick rightward drag starting in the leftmost ~24px
    of the viewport mirrors the iOS back gesture. Only fires when
    canGoBack so root screens don't try to pop into nothing.
+
+   Android system back: the @capacitor/app plugin's backButton event
+   fires for both 3-button and gesture nav. Without an explicit
+   listener Capacitor exits the app on every press; with one, we
+   route through the same goBack() the in-app button uses, and only
+   call exitApp() when there's nothing left to pop.
    ────────────────────────────────────────────────────────────── */
 import { useEffect, useRef } from "react";
+import { subscribeBackButton, exitApp } from "../helpers/native";
 
 export function useAppBackNav({ goBack, canGoBack, navKey }) {
   // Set true right before we trigger goBack() in the popstate handler
@@ -94,4 +102,35 @@ export function useAppBackNav({ goBack, canGoBack, navKey }) {
       document.removeEventListener("touchend", onEnd);
     };
   }, [goBack, canGoBack]);
+
+  // Android system back gesture. Subscribe once, read latest goBack /
+  // canGoBack via refs so the listener always sees current values
+  // without re-subscribing on every state change. No-op on web.
+  const goBackRef = useRef(goBack);
+  const canGoBackRef = useRef(canGoBack);
+  goBackRef.current = goBack;
+  canGoBackRef.current = canGoBack;
+  useEffect(() => {
+    let cancelled = false;
+    let remove = null;
+    subscribeBackButton(() => {
+      if (canGoBackRef.current) {
+        goBackRef.current();
+      } else {
+        // At the app's root — same fallback Android would do without
+        // our listener: exit the app cleanly.
+        exitApp();
+      }
+    }).then(removeFn => {
+      if (cancelled) {
+        removeFn();
+      } else {
+        remove = removeFn;
+      }
+    });
+    return () => {
+      cancelled = true;
+      if (remove) remove();
+    };
+  }, []);
 }

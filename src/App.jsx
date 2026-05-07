@@ -138,7 +138,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 // Build version marker — logged once on app load. Chrome://inspect
 // Console will show this so we can confirm bundle freshness when
 // debugging. Bumped when meaningful native-relevant CSS changes ship.
-console.log("HERBANIUM_BUILD: 2026-05-07-onboard-pad");
+console.log("HERBANIUM_BUILD: 2026-05-07-back-gesture");
 
 const PhoneFrame = ({ children }) => {
   // Single layout for all viewports: full height, content capped at a
