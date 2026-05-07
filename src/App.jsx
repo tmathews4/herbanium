@@ -53,7 +53,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
   // up when the user's on a section that has them. They share the
   // dock's background so the whole bottom bar reads as one GUI unit.
   const subTabs = tab === "apothecary"
-    ? [["reverse", "Compose"], ["compendium", "Herbanium"]]
+    ? [["reverse", "Blend"], ["compendium", "Herbanium"]]
     : tab === "shelf"
       ? [["recipes", "Recipes"], ["journal", "Reflections"], ["visitors", "Field Notes"]]
       : null;
