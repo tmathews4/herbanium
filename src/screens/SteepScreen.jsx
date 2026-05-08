@@ -25,8 +25,40 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, minimized = false, onMinimize, onRemainingChange }) => {
-  const total = blend.timeS || 360;
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, infusionN = 1, setInfusionN, sessions, onDone, onCancel, pantryIds, togglePantry, minimized = false, onMinimize, onRemainingChange }) => {
+  // Multi-infusion ingredient lookup. The blend's highest-weight
+  // ingredient that carries an `infusions` profile drives the
+  // infusion picker; herbal-only blends won't surface it (they
+  // don't multi-infuse meaningfully). Chosen by weight rather
+  // than first-found because a blend like Estate & Doorstep
+  // (assam 2g + tulsi 1g) should follow the assam profile.
+  const primaryInfusionIngredient = useMemo(() => {
+    if (!Array.isArray(blend?.ingredients)) return null;
+    let best = null;
+    let bestWeight = -1;
+    for (const item of blend.ingredients) {
+      const ing = INGREDIENTS[item.id];
+      if (!ing?.infusions || ing.infusions.length === 0) continue;
+      const weight = item.g || 0;
+      if (weight > bestWeight) { bestWeight = weight; best = ing; }
+    }
+    return best;
+  }, [blend]);
+  const activeInfusion = useMemo(() => {
+    if (!primaryInfusionIngredient) return null;
+    return primaryInfusionIngredient.infusions.find(i => i.n === infusionN)
+      || primaryInfusionIngredient.infusions[0];
+  }, [primaryInfusionIngredient, infusionN]);
+  const [infusionMenuOpen, setInfusionMenuOpen] = useState(false);
+
+  // Per-infusion time defaults — each infusion has its own
+  // recommended timeS range; the timer's total + remaining shift
+  // to the midpoint when the user picks a different infusion.
+  // Falls back to the blend's curated time when there's no active
+  // infusion (herbal blends, single-infusion ingredients).
+  const total = activeInfusion?.timeS
+    ? Math.round((activeInfusion.timeS[0] + activeInfusion.timeS[1]) / 2)
+    : (blend.timeS || 360);
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
   const [activeIngredient, setActiveIngredient] = useState(null);
@@ -41,6 +73,25 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   // fade-in. Cleared by a timeout so the pulse plays once per
   // brew cycle rather than looping.
   const [justFinished, setJustFinished] = useState(false);
+
+  // Auto-shift the timer to the new infusion's recommended midpoint
+  // when the user picks a different infusion. Skips the initial mount
+  // (when `remaining` was already initialized to `total`). Also resets
+  // the over-steep counter and the just-finished flag so the new
+  // infusion starts clean. ref-based first-mount skip keeps a fresh
+  // brew from being interrupted by this effect's cleanup.
+  const isFirstInfusionMount = useRef(true);
+  useEffect(() => {
+    if (isFirstInfusionMount.current) {
+      isFirstInfusionMount.current = false;
+      return;
+    }
+    setRemaining(total);
+    setOverSteepS(0);
+    setJustFinished(false);
+    setPaused(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [infusionN]);
 
   // Past brews of this blend — only meaningful if the blend has an id (saved
   // or previously-logged). Freshly-composed blends won't have prior sessions.
@@ -275,6 +326,102 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           </button>
         )}
       </div>
+
+      {/* Infusion picker — surfaces only for blends whose primary
+          ingredient carries a multi-infusion profile (true teas
+          mostly: assam, oolong, puerh, sencha, etc.). Collapsed by
+          default; expert-level affordance for users who want to
+          re-steep the same leaves. Tap a row → updates infusion,
+          auto-shifts the timer to that infusion's recommended
+          midpoint, closes the menu. */}
+      {primaryInfusionIngredient && primaryInfusionIngredient.infusions.length > 1 && (
+        <div style={{ marginTop: 12, position: "relative" }}>
+          <button
+            onClick={() => setInfusionMenuOpen(o => !o)}
+            aria-haspopup="listbox"
+            aria-expanded={infusionMenuOpen}
+            style={{
+              width: "100%",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              gap: 8, padding: "9px 14px",
+              background: theme.cream,
+              border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
+              cursor: "pointer",
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: theme.inkSoft,
+              transition: "background 0.18s ease",
+            }}
+          >
+            <span>Infusion {infusionN}</span>
+            <span style={{
+              display: "inline-block",
+              transform: infusionMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.18s ease",
+              color: theme.ash, fontSize: 12,
+            }}>▾</span>
+          </button>
+          {infusionMenuOpen && (
+            <div role="listbox" style={{
+              marginTop: 6,
+              background: theme.ivory,
+              border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
+              overflow: "hidden",
+              boxShadow: "0 6px 18px -8px rgba(30,24,18,0.18)",
+            }}>
+              {primaryInfusionIngredient.infusions.map((inf, i) => {
+                const active = inf.n === infusionN;
+                const minMin = Math.round(inf.timeS[0] / 60);
+                const maxMin = Math.round(inf.timeS[1] / 60);
+                return (
+                  <button
+                    key={inf.n}
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => {
+                      if (setInfusionN) setInfusionN(inf.n);
+                      setInfusionMenuOpen(false);
+                    }}
+                    style={{
+                      width: "100%", textAlign: "left",
+                      padding: "10px 14px",
+                      background: active ? "rgba(176, 84, 47, 0.06)" : "transparent",
+                      border: "none",
+                      borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                      gap: 8, marginBottom: 4,
+                    }}>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        color: active ? theme.terra : theme.ash,
+                      }}>Infusion {inf.n}</span>
+                      <span style={{
+                        fontFamily: ff.sans, fontSize: 10, color: theme.ash,
+                      }}>{minMin === maxMin ? `${minMin} min` : `${minMin}–${maxMin} min`}</span>
+                    </div>
+                    <div style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+                      color: theme.ink, lineHeight: 1.4,
+                    }}>
+                      {inf.character}
+                    </div>
+                    <div style={{
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+                      color: theme.ash, marginTop: 2,
+                    }}>
+                      {inf.moodImpact}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* countdown ring — at zero the stroke shifts to sage and a
           one-shot pulse plays via .steep-ring-arrived. The center
