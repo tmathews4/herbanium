@@ -1700,6 +1700,30 @@ const INGREDIENTS = {
     // leaves give way. lifeRemaining is a 0-1 scale of how much the
     // leaves have left in them — drives the engine's "another
     // infusion in this?" hint.
+    //
+    // multipliers are per-axis dilution factors that the brewing
+    // engine will (eventually) apply to scale this ingredient's
+    // contribution to a blend's profile based on which infusion
+    // the user is on. Axes:
+    //   - strength: overall extract weight (drives body/malt baseline)
+    //   - tannin: astringency, the "grip" of black tea
+    //   - caffeine: alertness component of the energy effect
+    //   - aromaticTop: volatile top notes (bright, brisk, fresh)
+    //   - aromaticDeep: slow-extracting compounds (cocoa, deep malt)
+    //   - sweetness: sweet undertones (caramel, honey-edge)
+    //   - body: mouthfeel weight (separate from strength — body can
+    //     remain full while strength fades because polysaccharides
+    //     extract slower than tannins/caffeine)
+    //
+    // Values are honest approximations from tea-brewing literature
+    // + Indian household practice — NOT lab-measured. Tea-shop
+    // testers will likely refine these meaningfully on first contact.
+    // The shape is: infusion 1 is the baseline (some axes <1.0
+    // because slow-extracters haven't bloomed yet); infusion 2
+    // shifts the balance — fast extracters drop, slow extracters
+    // peak (this is why infusion 2 is often considered the smoother
+    // cup). Caffeine drops sharply because most caffeine extracts
+    // in the first 2-3 minutes. Tannin drops nearly as sharply.
     infusions: [
       {
         n: 1,
@@ -1707,6 +1731,15 @@ const INGREDIENTS = {
         moodImpact: "energy at anchor strength; warming solid",
         tempC: [95, 100], timeS: [180, 300],
         lifeRemaining: 1.0,
+        multipliers: {
+          strength: 1.00,
+          tannin: 1.00,
+          caffeine: 1.00,
+          aromaticTop: 1.00,
+          aromaticDeep: 0.70,
+          sweetness: 0.60,
+          body: 0.90,
+        },
       },
       {
         n: 2,
@@ -1714,6 +1747,15 @@ const INGREDIENTS = {
         moodImpact: "energy still anchored; tannin grip relaxed",
         tempC: [95, 100], timeS: [180, 240],
         lifeRemaining: 0.75,
+        multipliers: {
+          strength: 0.75,
+          tannin: 0.55,
+          caffeine: 0.50,
+          aromaticTop: 0.55,
+          aromaticDeep: 1.00,
+          sweetness: 1.10,
+          body: 1.00,
+        },
       },
       {
         n: 3,
@@ -1721,6 +1763,15 @@ const INGREDIENTS = {
         moodImpact: "energy gentler; warming present without the grip",
         tempC: [95, 100], timeS: [240, 300],
         lifeRemaining: 0.5,
+        multipliers: {
+          strength: 0.50,
+          tannin: 0.30,
+          caffeine: 0.25,
+          aromaticTop: 0.30,
+          aromaticDeep: 0.85,
+          sweetness: 1.05,
+          body: 0.75,
+        },
       },
       {
         n: 4,
@@ -1728,6 +1779,15 @@ const INGREDIENTS = {
         moodImpact: "energy fading; cup more aromatic than substantive",
         tempC: [95, 100], timeS: [240, 360],
         lifeRemaining: 0.25,
+        multipliers: {
+          strength: 0.30,
+          tannin: 0.15,
+          caffeine: 0.10,
+          aromaticTop: 0.15,
+          aromaticDeep: 0.55,
+          sweetness: 0.85,
+          body: 0.50,
+        },
       },
     ],
     effects: [["energy", 5], ["focus", 3], ["warming", 4]],
