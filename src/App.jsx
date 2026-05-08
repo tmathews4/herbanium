@@ -1131,7 +1131,7 @@ export default function App() {
       // the prior steep notification when blend.name changes.
       setSteepMinimized(false);
     }
-    setSession({ blend, intent, targetMoods, currentMoods: [], infusionN: 1 });
+    setSession({ blend, intent, targetMoods, currentMoods: [] });
     setOverlay("steep");
   };
 
@@ -1334,7 +1334,7 @@ export default function App() {
   const addSession = ({
     blend, intent, targetMoods, currentMoods,
     flavorsTasted, flavorsExtra, flavorsTarget,
-    taste, note, save, rename, infusionN,
+    taste, note, save, rename,
   }) => {
     // A blend composed via forward-compose won't have an id; stash it under
     // a synthetic id so the session can reference it via getBlend().
@@ -1375,11 +1375,6 @@ export default function App() {
       flavorsTarget: flavorsTarget || [],
       taste: taste ?? 4,
       note: note || "",
-      // Multi-infusion axis — for true-tea ingredients with an
-      // infusions profile, which infusion the user logged. Default
-      // 1 (first infusion); only stamped when present so legacy
-      // sessions without this field stay clean.
-      ...(typeof infusionN === "number" && infusionN > 1 ? { infusionN } : {}),
       // Capture the user's actual brew settings — the explorer
       // sliders may have moved the temp/time off the blend's
       // curated defaults, and downstream views want what the user
@@ -1806,8 +1801,6 @@ export default function App() {
           setTargetMoods={(v) => setSession(s => s ? { ...s, targetMoods: v } : s)}
           currentMoods={session.currentMoods || []}
           setCurrentMoods={(v) => setSession(s => s ? { ...s, currentMoods: v } : s)}
-          infusionN={session.infusionN || 1}
-          setInfusionN={(v) => setSession(s => s ? { ...s, infusionN: v } : s)}
           sessions={sessions}
           pantryIds={pantryIds}
           togglePantry={togglePantry}
@@ -1832,7 +1825,6 @@ export default function App() {
               note: "",
               save: true,
               rename: "",
-              infusionN: session.infusionN || 1,
             });
             setSteepMinimized(false);
             setOverlay(null);
