@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -148,12 +148,20 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
   });
   const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits });
   const attrEvaluation = evaluateAttributes(attrCtx);
-  // Random adjective + fixed creature, deterministic per (user, attr).
-  // The seed combines profile.createdAt with the attribute id so the
-  // same user always sees the same name for the same elemental but
-  // Bestiary itself lives under Shelf > Bestiary now; here we only
-  // need the count for the Summons stat that deep-links there.
-  const earnedCount = attrEvaluation.filter(a => a.earned).length + (wildElementals?.length || 0);
+  // Elementals stat — count what the user has actually summoned/
+  // observed (seenElementalIds), not what the engine has *earned*
+  // for them (which can include unsummoned arrivals queued at the
+  // lodestone). The Field Notes view filters its timeline by
+  // seenElementalIds too, so this number now matches what the user
+  // sees when they tap through. Falls back to the older earned-set
+  // calculation when the prop isn't passed (defensive — shouldn't
+  // happen now that App threads it through).
+  const seenSet = seenElementalIds instanceof Set
+    ? seenElementalIds
+    : new Set(Array.isArray(seenElementalIds) ? seenElementalIds : []);
+  const elementalsCount = seenSet.size > 0
+    ? seenSet.size
+    : (attrEvaluation.filter(a => a.earned).length + (wildElementals?.length || 0));
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
   return (
@@ -257,7 +265,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           <Stat label="Cabinet"   value={shelfCount}  onClick={() => go("apothecary", { mode: "compendium" })} />
           {!elementalsDisabled && (
-            <Stat label="Bestiary"  value={earnedCount + (profile?.title || generateCreationTitle(profile) ? 1 : 0)} onClick={() => go("shelf", { mode: "bestiary" })} />
+            <Stat label="Elementals"  value={elementalsCount} onClick={() => go("shelf", { mode: "visitors" })} />
           )}
         </div>
       </div>
