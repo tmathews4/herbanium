@@ -17,6 +17,7 @@ import React, { useState } from "react";
 import { theme, ff, shadow, radius } from "../theme";
 import { Button } from "../components/layout";
 import { Flower } from "../components/icons";
+import { isNativeApp } from "../helpers/platform";
 
 const STEPS = 5;
 
@@ -69,9 +70,10 @@ export const OnboardingScreen = ({ onComplete }) => {
       // edge-to-edge Android. Has to live HERE rather than on the
       // App.jsx wrapper because this root is position:absolute, so
       // a wrapper's paddingTop doesn't push it — same shape of bug
-      // as the home screen's PhoneFrame issue.
+      // as the home screen's PhoneFrame issue. Web (no system icons
+      // to clear) drops to a small visual margin only.
       boxSizing: "border-box",
-      paddingTop: 72,
+      paddingTop: isNativeApp() ? 72 : 16,
     }}>
       {/* Top: brand + progress. The header mark is the herbanium
           logo's H glyph at 30px — gives every onboarding step a

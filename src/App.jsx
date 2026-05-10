@@ -2041,8 +2041,11 @@ export default function App() {
           // padding has to live for the Pixel / Capacitor build.
           // 48px is enough room above standard Android status bars
           // (~24-32dp) to clear icons + leave a small visual margin.
+          // Web (mobile-sized viewport, e.g. desktop browser at
+          // narrow width) doesn't have system icons to clear, so
+          // the buffer drops to a small visual margin only.
           boxSizing: "border-box",
-          paddingTop: 48,
+          paddingTop: isNativeApp() ? 48 : 12,
         }}>
           {/* Google Fonts */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
