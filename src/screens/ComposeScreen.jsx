@@ -820,7 +820,33 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   {catEmpty}
                 </div>
               ) : (
-                catVisible.map((b, i) => {
+                <>
+                  {/* Day-one favorites hint — surfaces when the only
+                      pinned favorite is Tom Foolery (the seeded
+                      starter every new user receives). Steers them
+                      toward the curated Catalogue or their own
+                      saved compositions for the next picks rather
+                      than leaving them to wonder what else exists. */}
+                  {cf.collection === "favorites"
+                    && catVisible.length === 1
+                    && catVisible[0]?.id === "exp-tom-foolery" && (
+                    <div style={{
+                      marginTop: 14, marginBottom: 4,
+                      padding: "12px 14px",
+                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                      color: theme.inkSoft, lineHeight: 1.5,
+                      background: "rgba(176, 84, 47, 0.05)",
+                      borderLeft: `2px solid ${theme.terra}`,
+                      borderRadius: "0 6px 6px 0",
+                    }}>
+                      Tom Foolery is your starter cup. Add more here by
+                      tapping the star on any{" "}
+                      <em style={{ color: theme.terra, fontStyle: "normal" }}>curated recipe</em>{" "}
+                      in the Catalogue, or save a{" "}
+                      <em style={{ color: theme.terra, fontStyle: "normal" }}>blend you composed</em>.
+                    </div>
+                  )}
+                  {catVisible.map((b, i) => {
                   // House experimentals (Tom Foolery + the curated research
                   // blends) are permanent Catalogue staples — undeletable.
                   const isHouseStaple = b.house === true || b.id === "exp-tom-foolery";
@@ -876,7 +902,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                       )}
                     </div>
                   );
-                })
+                  })}
+                </>
               )}
 
               <RestoreDeletedPanel
