@@ -1532,6 +1532,43 @@ export default function App() {
     setJournalEntries(prev => (prev || []).filter(e => e.id !== id));
   };
 
+  // Edit a journal entry — pushes the current state into a
+  // revisions[] array as a snapshot of "what this entry was
+  // before this edit," then applies the updates. The top-level
+  // fields are always the current state; revisions[] is the
+  // history of prior versions, oldest first. Sets editedAt to
+  // the moment of the most recent edit so the detail view can
+  // show 'edited Xm ago'.
+  //
+  // Updates is a partial — { text, title, currentMoods, landedMoods, note }.
+  // Anything else (kind, ts, id) is preserved.
+  const editJournalEntry = (id, updates) => {
+    if (!id || !updates) return;
+    setJournalEntries(prev => (prev || []).map(e => {
+      if (e.id !== id) return e;
+      const now = Date.now();
+      const priorRevision = {
+        ts: e.editedAt || e.ts,
+        text: e.text || "",
+        title: e.title || "",
+        currentMoods: Array.isArray(e.currentMoods) ? [...e.currentMoods] : [],
+        landedMoods:  Array.isArray(e.landedMoods)  ? [...e.landedMoods]  : [],
+        note: e.note || "",
+      };
+      const nextRevisions = [...(Array.isArray(e.revisions) ? e.revisions : []), priorRevision];
+      return {
+        ...e,
+        ...(typeof updates.text === "string"  ? { text: updates.text.trim() }   : {}),
+        ...(typeof updates.title === "string" ? { title: updates.title.trim() } : {}),
+        ...(typeof updates.note === "string"  ? { note: updates.note.trim() }   : {}),
+        ...(Array.isArray(updates.currentMoods) ? { currentMoods: updates.currentMoods } : {}),
+        ...(Array.isArray(updates.landedMoods)  ? { landedMoods:  updates.landedMoods  } : {}),
+        editedAt: now,
+        revisions: nextRevisions,
+      };
+    }));
+  };
+
   // Open Compose with a blend pre-selected — used when user taps a favorite
   // on Home or a saved blend, opens Shelf · Recipe Book with the favorite
   // highlighted, ready to set intent and brew.
@@ -1914,6 +1951,7 @@ export default function App() {
           entry={(journalEntries || []).find(e => e.id === entryOverlayId)}
           onClose={popOverlayHistory}
           onDelete={deleteJournalEntry}
+          onEdit={editJournalEntry}
         />
       )}
       {/* End-of-brew elemental glimpse banner — fires when a roll

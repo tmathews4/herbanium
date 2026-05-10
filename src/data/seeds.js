@@ -42,6 +42,13 @@ export function materializeSeedJournalEntries(rawEntries) {
       // without them still render via the body-preview fallback.
       ...(e.title ? { title: e.title } : {}),
       ...(Array.isArray(e.flavors) && e.flavors.length > 0 ? { flavors: e.flavors } : {}),
+      // Edit-history pass-through. Optional. editedAt is a relative
+      // hoursAgo on the seed (so demos stay current across resets);
+      // we resolve it to an absolute ts here. revisions is verbatim.
+      ...(typeof e.editedHoursAgo === "number"
+        ? { editedAt: now - e.editedHoursAgo * 3600000 }
+        : (typeof e.editedAt === "number" ? { editedAt: e.editedAt } : {})),
+      ...(Array.isArray(e.revisions) && e.revisions.length > 0 ? { revisions: e.revisions } : {}),
     };
   });
 }
