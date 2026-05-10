@@ -21,6 +21,7 @@ import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
 import { getBlend, iconBtn, suggestBlendName, formatAgo } from "../helpers/misc";
+import { recommendBlends } from "../helpers/recommend";
 import {
   ff, theme, shadow, radius,
 } from "../theme";
@@ -821,31 +822,103 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 </div>
               ) : (
                 <>
-                  {/* Day-one favorites hint — surfaces when the only
-                      pinned favorite is Tom Foolery (the seeded
-                      starter every new user receives). Steers them
-                      toward the curated Catalogue or their own
-                      saved compositions for the next picks rather
-                      than leaving them to wonder what else exists. */}
-                  {cf.collection === "favorites"
-                    && catVisible.length === 1
-                    && catVisible[0]?.id === "exp-tom-foolery" && (
-                    <div style={{
-                      marginTop: 14, marginBottom: 4,
-                      padding: "12px 14px",
-                      fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                      color: theme.inkSoft, lineHeight: 1.5,
-                      background: "rgba(176, 84, 47, 0.05)",
-                      borderLeft: `2px solid ${theme.terra}`,
-                      borderRadius: "0 6px 6px 0",
-                    }}>
-                      Tom Foolery is your starter cup. Add more here by
-                      tapping the star on any{" "}
-                      <em style={{ color: theme.terra, fontStyle: "normal" }}>curated recipe</em>{" "}
-                      in the Catalogue, or save a{" "}
-                      <em style={{ color: theme.terra, fontStyle: "normal" }}>blend you composed</em>.
-                    </div>
-                  )}
+                  {/* "Try these" — recommendations carousel that
+                      surfaces in the favorites tab while the user's
+                      favorites list is sparse (≤3 pinned). Scoring
+                      lives in helpers/recommend.js and is driven by
+                      onboarding draws/flavors initially, evolving
+                      to incorporate last-30-days mood patterns and
+                      high-rated cups as the user logs more. Hides
+                      once they've built out their favorites or
+                      whenever the scorer returns nothing matching. */}
+                  {cf.collection === "favorites" && catVisible.length <= 3 && (() => {
+                    const recs = recommendBlends({
+                      blends: [...traditional, ...experimental],
+                      profile,
+                      sessions,
+                      favoriteIds: favoriteBlendIds,
+                      hiddenIds: hiddenBlendIds,
+                      limit: 3,
+                    });
+                    if (recs.length === 0) return null;
+                    return (
+                      <div style={{ marginTop: 14, marginBottom: 14 }}>
+                        <div style={{
+                          display: "flex", alignItems: "baseline",
+                          justifyContent: "space-between", gap: 8,
+                          marginBottom: 8,
+                        }}>
+                          <div style={{
+                            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
+                            textTransform: "uppercase", color: theme.terra,
+                            fontWeight: 600,
+                          }}>
+                            Try these
+                          </div>
+                          <div style={{
+                            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                            color: theme.ash,
+                          }}>
+                            picked for your taste
+                          </div>
+                        </div>
+                        <div style={{
+                          display: "flex", gap: 10, overflowX: "auto",
+                          paddingBottom: 4,
+                          scrollSnapType: "x mandatory",
+                          WebkitOverflowScrolling: "touch",
+                        }}>
+                          {recs.map(b => (
+                            <button
+                              key={b.id}
+                              onClick={() => openBlend && openBlend(b.id)}
+                              style={{
+                                flex: "0 0 200px",
+                                scrollSnapAlign: "start",
+                                textAlign: "left",
+                                background: theme.cream,
+                                border: `1px solid ${theme.ruleSoft}`,
+                                borderRadius: 12,
+                                padding: "12px 14px",
+                                cursor: "pointer",
+                                display: "flex", flexDirection: "column", gap: 6,
+                                boxShadow: shadow.card,
+                                transition: "border-color 0.18s ease, box-shadow 0.18s ease",
+                              }}
+                            >
+                              <div style={{
+                                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+                                lineHeight: 1.2,
+                                overflow: "hidden", textOverflow: "ellipsis",
+                                display: "-webkit-box", WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                              }}>
+                                {b.name}
+                              </div>
+                              {b.subtitle && (
+                                <div style={{
+                                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+                                  color: theme.inkSoft, lineHeight: 1.35,
+                                  overflow: "hidden", textOverflow: "ellipsis",
+                                  display: "-webkit-box", WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                }}>
+                                  {b.subtitle}
+                                </div>
+                              )}
+                              <div style={{
+                                marginTop: "auto", paddingTop: 4,
+                                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.12em",
+                                textTransform: "uppercase", color: theme.ash,
+                              }}>
+                                {[b.mood, b.flavor].filter(Boolean).join(" · ")}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                   {catVisible.map((b, i) => {
                   // House experimentals (Tom Foolery + the curated research
                   // blends) are permanent Catalogue staples — undeletable.
