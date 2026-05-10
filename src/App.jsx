@@ -28,6 +28,7 @@ import { computeMoodCrystal } from "./data/moodCrystal";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
 import { configureStatusBar, hapticTap, scheduleCheckInNotification, cancelCheckInNotification } from "./helpers/native";
+import { isNativeApp } from "./helpers/platform";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 import { useAppBackNav } from "./hooks/useAppBackNav";
@@ -1977,8 +1978,15 @@ export default function App() {
     );
   }
 
-  // Mobile: render app full-screen with no masthead/demo-hints/footer chrome.
-  if (isNarrow) {
+  // Mobile (or any native build): render app full-screen with no
+  // masthead / demo-hints / footer chrome. isNativeApp() catches
+  // foldables in unfolded wide-screen mode where the viewport
+  // crosses the isNarrow threshold but the user is still in a
+  // single-app context where the desktop dev-landing chrome doesn't
+  // apply — the dev-page wrapper's cream gradient was showing
+  // through next to PhoneFrame's centered 520px column on Pixel
+  // Fold's unfolded display.
+  if (isNarrow || isNativeApp()) {
     return (
       <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
         <div style={{
