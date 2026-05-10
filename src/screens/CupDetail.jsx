@@ -20,6 +20,7 @@
 import React, { useState } from "react";
 import { Flower, Kettle } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
+import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import { ff, theme } from "../theme";
 import { formatTempShort, useUnit } from "../units/units";
@@ -31,7 +32,7 @@ const formatBrewTime = (s) => {
   return r === 0 ? `${m} min` : `${m}m ${r}s`;
 };
 
-export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain }) => {
+export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain, patchSessionMoods, dismissSessionMoods }) => {
   const { unit } = useUnit();
   const blend = session ? getBlend(session.blendId) : null;
   // Append-a-note state — collapsed by default. Opens to a dashed
@@ -156,6 +157,30 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
         <div style={{ width: 40 }} />
       </div>
       <div style={{ padding: "0 22px 32px" }}>
+
+      {/* Review surface — surfaces whenever this cup hasn't yet
+          captured a moodScore. Covers three paths:
+            - Early review: user opens the cup before the Home
+              popup's 10-minute gate fires
+            - Missed popup: user dismissed the Home popup without
+              filling, but now wants to log how the cup landed
+            - Older cup never reviewed: outside Home's 24h surface
+              window but still has no captured review
+          When the user submits here, patchSessionMoods sets
+          moodScore + moodsPending=false, so the Home popup gate
+          stops firing for this cup. */}
+      {typeof session.moodScore !== "number" && patchSessionMoods && (
+        <div style={{ marginTop: 18 }}>
+          <MoodFollowUpCard
+            key={session.id}
+            session={session}
+            onSubmit={(payload) => patchSessionMoods(session.id, payload)}
+            onDismiss={dismissSessionMoods
+              ? () => dismissSessionMoods(session.id)
+              : undefined}
+          />
+        </div>
+      )}
 
       {/* Header: blend name as the link to the recipe, with a subtle
           right-arrow affordance so the user understands it's tappable.

@@ -1944,6 +1944,8 @@ export default function App() {
             clearOverlayHistory();
             startBrew(b, "", cupSession?.targetMoods || (b.mood ? [b.mood] : []));
           }}
+          patchSessionMoods={patchSessionMoods}
+          dismissSessionMoods={dismissSessionMoods}
         />
       )}
       {overlay === "entry" && entryOverlayId && (
