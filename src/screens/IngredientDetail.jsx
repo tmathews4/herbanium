@@ -122,94 +122,101 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
     <div style={{
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
+      padding: "22px 22px 130px",
+      boxSizing: "border-box",
     }}>
-      {/* Hero — solid paper background (no one-off gradient) and a
-          centered vertical stack matching the Steep / arrival-card
-          pattern: icon-circle on top, name + latin below, eyebrow
-          (category · subcategory) underneath. Reads as part of the
-          app's wider design vocabulary instead of its own register. */}
+      {/* Header — matches CupDetail / EntryDetail / BlendDetail
+          shape: back button on the left, "An ingredient" eyebrow
+          centered, fixed-width spacer on the right so the eyebrow
+          truly centers. The previous paper-banded hero broke the
+          rhythm of the rest of the app's detail screens. */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <button onClick={onClose} style={{
+          background: "transparent", border: "none", color: theme.ash,
+          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
+          textTransform: "uppercase", cursor: "pointer",
+        }}>← back</button>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>
+          An ingredient
+        </div>
+        <div style={{ width: 40 }} />
+      </div>
+
+      {/* Hero — centered icon-circle + name + latin + category, on
+          the same ivory ground as the rest of the screen. Reads as a
+          header through typography hierarchy alone, no separate band
+          needed. */}
       <div style={{
-        background: theme.paper,
-        padding: "22px 22px 0",
-        borderBottom: `1px solid ${theme.rule}`,
-        position: "relative",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        gap: 8, marginTop: 20, marginBottom: 16,
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <button onClick={onClose} style={{
-            background: "transparent", border: "none", color: theme.ash,
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
-          }}>← back</button>
-          <div style={{ flex: 1 }} />
-        </div>
-
         <div style={{
-          display: "flex", flexDirection: "column", alignItems: "center",
-          gap: 8, marginBottom: 14,
+          width: 64, height: 64, borderRadius: "50%",
+          background: theme.cream, border: `1px solid ${theme.rule}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
         }}>
+          {ing.category === "flower"    && <Flower size={34} c={theme.ochre} />}
+          {ing.category === "herbal"    && <Sprig  size={34} c={theme.sage} />}
+          {ing.category === "true tea"  && <Leaf   size={34} c={theme.sageDeep} />}
+          {ing.category === "spice"     && <Flower size={34} c={theme.terra} />}
+          {ing.category === "adaptogen" && <Sprig  size={34} c={theme.plum} />}
+        </div>
+        <div style={{ textAlign: "center", maxWidth: "100%" }}>
+          <h1 style={{ fontFamily: ff.serif, fontSize: 30, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.1 }}>
+            {ing.name}
+          </h1>
+          <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.2 }}>
+            {ing.latin}
+          </div>
           <div style={{
-            width: 64, height: 64, borderRadius: "50%",
-            background: theme.cream, border: `1px solid ${theme.rule}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.2em",
+            textTransform: "uppercase", color: theme.ash, marginTop: 8,
           }}>
-            {ing.category === "flower"    && <Flower size={34} c={theme.ochre} />}
-            {ing.category === "herbal"    && <Sprig  size={34} c={theme.sage} />}
-            {ing.category === "true tea"  && <Leaf   size={34} c={theme.sageDeep} />}
-            {ing.category === "spice"     && <Flower size={34} c={theme.terra} />}
-            {ing.category === "adaptogen" && <Sprig  size={34} c={theme.plum} />}
+            {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
           </div>
-          <div style={{ textAlign: "center", maxWidth: "100%" }}>
-            <h1 style={{ fontFamily: ff.serif, fontSize: 30, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.1 }}>
-              {ing.name}
-            </h1>
-            <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.2 }}>
-              {ing.latin}
-            </div>
-            <div style={{
-              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.2em",
-              textTransform: "uppercase", color: theme.ash, marginTop: 8,
-            }}>
-              {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs — match the Apothecarium/Notebook sub-tab dock pattern
-            (sans-uppercase, terra-on-active, weight-shift on active)
-            so the IngredientDetail's tabs read as part of the same
-            tab system instead of a one-off serif treatment. */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 4,
-          borderBottom: `1px solid ${theme.ruleSoft}`,
-        }}>
-          {[
-            ["overview", "Overview"],
-            ["brewing",  "Brewing"],
-            ["pairings", "Pairings"],
-          ].map(([k, label]) => {
-            const active = tab === k;
-            return (
-              <button key={k} onClick={() => setTab(k)} style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                padding: "8px 4px 10px",
-                fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontWeight: active ? 600 : 500,
-                color: active ? theme.terra : theme.inkSoft,
-                borderBottom: active
-                  ? `2px solid ${theme.terra}`
-                  : "2px solid transparent",
-                marginBottom: -1,
-                transition: "color 0.18s ease, border-color 0.18s ease",
-              }}>{label}</button>
-            );
-          })}
         </div>
       </div>
 
-      <div style={{ padding: "18px 22px 130px" }}>
+      {/* Tabs — match the Apothecarium/Journal sub-tab dock pattern
+          (sans-uppercase, terra-on-active, weight-shift on active)
+          so the IngredientDetail's tabs read as part of the same
+          tab system instead of a one-off serif treatment. */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 4,
+        borderBottom: `1px solid ${theme.ruleSoft}`,
+        marginBottom: 18,
+      }}>
+        {[
+          ["overview", "Overview"],
+          ["brewing",  "Brewing"],
+          ["pairings", "Pairings"],
+        ].map(([k, label]) => {
+          const active = tab === k;
+          return (
+            <button key={k} onClick={() => setTab(k)} style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              padding: "8px 4px 10px",
+              fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontWeight: active ? 600 : 500,
+              color: active ? theme.terra : theme.inkSoft,
+              borderBottom: active
+                ? `2px solid ${theme.terra}`
+                : "2px solid transparent",
+              marginBottom: -1,
+              transition: "color 0.18s ease, border-color 0.18s ease",
+            }}>{label}</button>
+          );
+        })}
+      </div>
+
+      <div>
         {!ingredientHintShown && dismissIngredientHint && (
           <HintCard
             title="Hint"
