@@ -139,13 +139,9 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
           textTransform: "uppercase", cursor: "pointer",
         }}>← back</button>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: theme.ash,
-        }}>
-          An ingredient
-        </div>
-        <div style={{ width: 40 }} />
+        {/* Eyebrow ('An ingredient') was visually off-center against
+            the centered hero below — back button + spacer widths
+            don't match — so the bar reads cleaner without it. */}
       </div>
 
       <div style={{ padding: "0 22px 130px" }}>
