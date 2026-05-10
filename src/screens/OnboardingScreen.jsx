@@ -65,7 +65,12 @@ export const OnboardingScreen = ({ onComplete }) => {
       background: theme.ivory,
       display: "flex", flexDirection: "column",
       fontFamily: ff.sans,
-      overflow: "auto",
+      // Vertical scroll only — overflow:auto allowed both axes,
+      // which let mobile Chrome users accidentally side-scroll the
+      // onboarding card off-screen via touch panning. Locking
+      // overflow-x to hidden constrains all gestures to vertical.
+      overflowY: "auto",
+      overflowX: "hidden",
       // Top buffer for the system status icons / camera cutout on
       // edge-to-edge Android. Has to live HERE rather than on the
       // App.jsx wrapper because this root is position:absolute, so

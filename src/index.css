@@ -186,8 +186,16 @@
   }
 }
 
-body {
+body, html {
   margin: 0;
+  /* Block any horizontal scroll at the document level. Anything
+     wider than the viewport (a stray fixed-width element, a long
+     unbreakable word, a stretched flex child) would otherwise
+     create a horizontal scroll on mobile Chrome that lets the
+     user side-pan the page off-screen. App-level wrappers each
+     handle their own overflow inside; this is the floor. */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Placeholder text — keep it visibly distinct from real input but
