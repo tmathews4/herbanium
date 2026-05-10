@@ -14,6 +14,10 @@ import { IngredientSheet } from "./IngredientSheet";
 import {
   scheduleSteepNotification, cancelSteepNotification, hapticDone,
 } from "../helpers/native";
+import { warmupChime, playBrewChime } from "../helpers/chime";
+import {
+  requestWebNotificationPermission, fireWebNotification,
+} from "../helpers/webNotification";
 import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 
 /* ──────────────────────────────────────────────────────────────
@@ -145,13 +149,32 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
     }
   }, [remaining, activeIngredient]);
 
-  // Brew finished — fire a success haptic so the phone in the
-  // user's pocket signals "done" alongside the OS notification.
+  // Brew finished — fire a success haptic, an audio chime, and a
+  // browser notification (web only; native users got the system
+  // LocalNotification scheduled at brew start). Each layer is
+  // best-effort; together they cover the matrix of "user is in
+  // app" / "user tabbed away" / "user backgrounded the phone."
   useEffect(() => {
     if (remaining === 0) {
       hapticDone();
+      playBrewChime();
+      fireWebNotification(
+        "Brew is ready",
+        blend?.name ? `${blend.name} is steeped — pour and enjoy.` : "Your steep is up.",
+      );
     }
-  }, [remaining]);
+  }, [remaining, blend?.name]);
+
+  // Warm up the audio context + request browser notification
+  // permission on SteepScreen mount. The mount itself happens on
+  // the heels of a user gesture (the Brew button tap), so audio
+  // is unblocked here for later auto-firing when the timer ends.
+  // Both are no-ops on native (where Capacitor handles audio /
+  // notification differently and these helpers gracefully decline).
+  useEffect(() => {
+    warmupChime();
+    requestWebNotificationPermission();
+  }, []);
 
   // Manual advance to the next card — shared by the click handler and
   // the auto-cycle interval. Bumps `lastAdvance` which resets the interval.
