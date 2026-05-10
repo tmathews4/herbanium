@@ -122,15 +122,18 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
     <div style={{
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
-      padding: "22px 22px 130px",
       boxSizing: "border-box",
     }}>
-      {/* Header — matches CupDetail / EntryDetail / BlendDetail
-          shape: back button on the left, "An ingredient" eyebrow
-          centered, fixed-width spacer on the right so the eyebrow
-          truly centers. The previous paper-banded hero broke the
-          rhythm of the rest of the app's detail screens. */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Sticky header row — back button + eyebrow stay pinned at
+          the top of the scroll viewport so they're always reachable
+          regardless of scroll depth. Opaque ivory bg so content
+          scrolling underneath doesn't bleed through. */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 10,
+        background: theme.ivory,
+        padding: "22px 22px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
         <button onClick={onClose} style={{
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
@@ -145,13 +148,15 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
         <div style={{ width: 40 }} />
       </div>
 
+      <div style={{ padding: "0 22px 130px" }}>
+
       {/* Hero — centered icon-circle + name + latin + category, on
           the same ivory ground as the rest of the screen. Reads as a
           header through typography hierarchy alone, no separate band
           needed. */}
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        gap: 8, marginTop: 20, marginBottom: 16,
+        gap: 8, marginTop: 6, marginBottom: 16,
       }}>
         <div style={{
           width: 64, height: 64, borderRadius: "50%",
@@ -510,6 +515,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

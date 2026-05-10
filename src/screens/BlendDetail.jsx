@@ -75,31 +75,40 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
     }}>
+      {/* Sticky header — back + eyebrow + favorite-star stay pinned
+          to the top of the scroll viewport. Pulled out of the cream
+          hero band below so it can stay visible at any scroll depth. */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 11,
+        background: theme.ivory,
+        padding: "22px 22px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <Button variant="ghost" onClick={onClose}>← back</Button>
+        <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
+          The Blend
+        </div>
+        {onToggleFavorite ? (
+          <button onClick={onToggleFavorite} style={{
+            background: "transparent", border: "none", cursor: "pointer",
+            padding: "4px 6px",
+            fontSize: 22, lineHeight: 1,
+            color: isFavorite ? theme.terra : theme.ash,
+          }} title={isFavorite ? "remove from favorites" : "add to favorites"}>
+            {isFavorite ? "★" : "☆"}
+          </button>
+        ) : <div style={{ width: 40 }} />}
+      </div>
+
       {/* Hero — flat cream with a soft drop shadow so it reads as a
           lifted card sitting on the ivory page rather than a heavier
           gradient strip. Mirrors Home's card-on-page elevation. */}
       <div style={{
         background: theme.cream,
-        padding: "22px 22px 20px",
+        padding: "8px 22px 20px",
         borderBottom: `1px solid ${theme.ruleSoft}`,
         boxShadow: shadow.card,
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <Button variant="ghost" onClick={onClose}>← back</Button>
-          <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-            The Blend
-          </div>
-          {onToggleFavorite ? (
-            <button onClick={onToggleFavorite} style={{
-              background: "transparent", border: "none", cursor: "pointer",
-              padding: "4px 6px",
-              fontSize: 22, lineHeight: 1,
-              color: isFavorite ? theme.terra : theme.ash,
-            }} title={isFavorite ? "remove from favorites" : "add to favorites"}>
-              {isFavorite ? "★" : "☆"}
-            </button>
-          ) : <div style={{ width: 40 }} />}
-        </div>
 
         {/* Header grid — three rows × two columns. Icon spans rows
             1-2 in the left column (alongside title + subtitle on the

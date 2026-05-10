@@ -133,9 +133,15 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
     <div style={{
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
-      padding: "22px 22px 32px",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Sticky header — back button + eyebrow stay pinned to the
+          top of the scroll viewport regardless of scroll depth. */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 10,
+        background: theme.ivory,
+        padding: "22px 22px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
         <button onClick={onClose} style={{
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
@@ -149,6 +155,7 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
         </div>
         <div style={{ width: 40 }} />
       </div>
+      <div style={{ padding: "0 22px 32px" }}>
 
       {/* Header: blend name as the link to the recipe, with a subtle
           right-arrow affordance so the user understands it's tappable.
@@ -383,6 +390,7 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
           </Button>
         </div>
       )}
+      </div>
     </div>
   );
 };

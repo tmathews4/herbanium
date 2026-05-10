@@ -85,9 +85,15 @@ export const EntryDetail = ({ entry, onClose, onDelete }) => {
     <div style={{
       position: "absolute", inset: 0, zIndex: 30,
       background: theme.ivory, overflowY: "auto",
-      padding: "22px 22px 32px",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Sticky header — back + eyebrow + delete stay pinned at the
+          top of the scroll viewport regardless of scroll depth. */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 10,
+        background: theme.ivory,
+        padding: "22px 22px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
         <button onClick={onClose} style={{
           background: "transparent", border: "none", color: theme.ash,
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
@@ -114,6 +120,7 @@ export const EntryDetail = ({ entry, onClose, onDelete }) => {
           <div style={{ width: 40 }} />
         )}
       </div>
+      <div style={{ padding: "0 22px 32px" }}>
 
       <div style={{ textAlign: "center", marginTop: 18 }}>
         <Pencil size={22} c={theme.ochre} />
@@ -173,6 +180,7 @@ export const EntryDetail = ({ entry, onClose, onDelete }) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
