@@ -65,6 +65,17 @@ const CURRENT_FEEL_PARENTS = PARENT_MOODS.filter(m =>
 // Convenience export — what a "right now I feel" chip row offers.
 export const CURRENT_MOOD_CHIPS = [...CURRENT_FEEL_PARENTS, ...CURRENT_FEEL_EXTRAS];
 
+// Journal-specific chip pools — exclude stomach/digestive moods.
+// Cup follow-ups care about digestive register because that's a real
+// effect tea has on the body; journal entries are about emotional /
+// mental arc, where 'digestive' or 'nauseous' read as physiological
+// symptoms rather than felt-states the user is reflecting on. The
+// stomach-related keys here are filtered out for both journal pickers
+// (Coming-in and Where-it-left-me) so they don't surface as chips.
+const STOMACH_MOOD_KEYS = new Set(["digestive", "nauseous"]);
+export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
+export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
+
 // 10 parent flavor families, aligned to FAMILY_BY_FLAVOR. Mirrors
 // FLAVOR_FAMILY_CHIPS in data/blends.js — re-exported here so callers
 // reach for `canon` whether they want moods or flavors and don't

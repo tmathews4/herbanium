@@ -21,7 +21,7 @@
 import React, { useState } from "react";
 import { Pencil } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
-import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
+import { JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS } from "../data/canon";
 import { ff, theme } from "../theme";
 
 const formatAgo = (date) => {
@@ -40,8 +40,9 @@ const formatAgo = (date) => {
 // Inline chip picker — same visual register as JournalComposer's
 // MoodChipRow but kept local so EntryDetail doesn't pull in the
 // composer's internals just for one row. Toggle on tap; multi-
-// select; chips render the canon vocabulary (PARENT_MOODS for the
-// landed row, CURRENT_MOOD_CHIPS for the coming-in row).
+// select; chips render the journal-filtered canon vocabulary
+// (JOURNAL_PARENT_MOODS for the landed row, JOURNAL_CURRENT_MOOD_CHIPS
+// for the coming-in row — both exclude stomach/digestive moods).
 const ChipPicker = ({ label, glyph, value, setValue, chips }) => {
   const selected = new Set(value || []);
   const toggle = (key) => {
@@ -319,7 +320,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
                 glyph="→"
                 value={draft.currentMoods}
                 setValue={(v) => setDraft(d => ({ ...d, currentMoods: v }))}
-                chips={CURRENT_MOOD_CHIPS}
+                chips={JOURNAL_CURRENT_MOOD_CHIPS}
               />
               <div style={{ height: 10 }} />
               <ChipPicker
@@ -327,7 +328,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
                 glyph="←"
                 value={draft.landedMoods}
                 setValue={(v) => setDraft(d => ({ ...d, landedMoods: v }))}
-                chips={PARENT_MOODS}
+                chips={JOURNAL_PARENT_MOODS}
               />
             </div>
 

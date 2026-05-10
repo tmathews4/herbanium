@@ -22,7 +22,7 @@ import {
 import {
   LIMERICK_PROMPTS, assembleLimerick, LIMERICK_TEMPLATE_COUNT,
 } from "../data/limerickAdlibs";
-import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
+import { JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS } from "../data/canon";
 
 // Mood pickers pull from the parent canon. The coming-in row uses the
 // fuller current-feel set (positives + rough-edged extras like
@@ -30,7 +30,7 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // a hard state. The where-it-left-me row is positive-only —
 // landings are positive states or absence-of, not aspirations.
 const MoodChipRow = ({ label, value, setValue, glyph, chips }) => (
-  <ChipPickerRow label={label} chips={chips || PARENT_MOODS} value={value} setValue={setValue} glyph={glyph} />
+  <ChipPickerRow label={label} chips={chips || JOURNAL_PARENT_MOODS} value={value} setValue={setValue} glyph={glyph} />
 );
 
 // Shared chip picker — used for the current and landed mood rows.
@@ -627,7 +627,7 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
               glyph="→"
               value={currentMoods}
               setValue={setCurrentMoods}
-              chips={CURRENT_MOOD_CHIPS}
+              chips={JOURNAL_CURRENT_MOOD_CHIPS}
             />
 
             <MoodChipRow
