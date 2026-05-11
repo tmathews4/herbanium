@@ -450,6 +450,111 @@ const BLENDS = [
     effects: [["comfort", 4], ["warming", 3], ["soothing", 3]],
   },
 
+  // Egyptian household staple; brewed strong and sweet, served hot
+  // in winter and chilled over ice in summer. The deep-ruby cup is
+  // sour-fruit-tart with a faint floral undertow — most distinctive
+  // hibiscus preparation outside of West Africa's bissap.
+  {
+    id: "karkadeh",
+    name: "Karkadeh",
+    subtitle: "Egyptian hibiscus — deep ruby, sour-fruit-tart, served hot in winter or chilled in summer",
+    ingredients: [
+      { id: "hibiscus",   g: 2.0 },
+      { id: "lemon-peel", g: 0.3, role: "accent" },
+    ],
+    tempC: 95, timeS: 600, ml: 250,
+    mood: "cooling", flavor: "tart",
+    public: true,
+    tradition: "Egyptian / North African",
+    effects: [["cooling", 4], ["uplifting", 3], ["soothing", 2]],
+  },
+
+  // Kashmiri green-tea preparation; saffron and slivered almonds are
+  // traditional but optional, the cardamom-cinnamon-rose foundation
+  // is the recognizable Kashmiri register either way. Drunk through
+  // long winters in the Kashmir Valley; the spices warm a green-tea
+  // base that would otherwise read too cool for the climate.
+  {
+    id: "kahwa",
+    name: "Kahwa",
+    subtitle: "Kashmiri green — cardamom, cinnamon, and rose warming a pan-fired leaf",
+    ingredients: [
+      { id: "dragonwell", g: 2.0 },
+      { id: "cardamom",   g: 0.3, role: "accent" },
+      { id: "cinnamon",   g: 0.2, role: "accent" },
+      { id: "rose",       g: 0.3, role: "accent" },
+    ],
+    tempC: 85, timeS: 300, ml: 250,
+    mood: "warming", flavor: "floral",
+    public: true,
+    tradition: "Kashmiri",
+    effects: [["warming", 4], ["comfort", 3], ["uplifting", 3], ["calm", 2]],
+  },
+
+  // Javanese / Indonesian household warming drink, served hot during
+  // rainy season and at street stalls everywhere. Ginger-led with
+  // whole-spice harmonics; palm sugar (gula merah) goes in the cup.
+  // Distinct register from Masala Chai — no black-tea base, no milk,
+  // and the cup is much more ginger-forward.
+  {
+    id: "wedang-jahe",
+    name: "Wedang Jahe",
+    subtitle: "Indonesian ginger warmer — bruised ginger, whole spices, palm-sugar sweet",
+    ingredients: [
+      { id: "ginger",       g: 2.0 },
+      { id: "cinnamon",     g: 0.3, role: "accent" },
+      { id: "cloves",       g: 0.2, role: "accent" },
+      { id: "black-pepper", g: 0.05, role: "catalyst" },
+    ],
+    tempC: 100, timeS: 600, ml: 250,
+    mood: "warming", flavor: "spiced",
+    public: true,
+    tradition: "Javanese / Indonesian",
+    style: "decoction",
+    effects: [["warming", 5], ["digestive", 3], ["energy", 2], ["soothing", 2]],
+  },
+
+  // Andalusian household after-dinner infusion; chamomile-led with
+  // lemon balm carrying the citrus-floral middle and spearmint as a
+  // bright top note. Drunk slowly with honey, often orange-blossom
+  // honey if you can get it. Lighter than All-Heal, more aromatic.
+  {
+    id: "tisana-andaluza",
+    name: "Tisana Andaluza",
+    subtitle: "Andalusian after-dinner infusion — chamomile spine, lemon-balm middle, a bright spearmint top",
+    ingredients: [
+      { id: "chamomile", g: 1.0 },
+      { id: "lemonbalm", g: 1.0 },
+      { id: "spearmint", g: 0.5, role: "accent" },
+    ],
+    tempC: 95, timeS: 360, ml: 250,
+    mood: "calm", flavor: "floral",
+    public: true,
+    tradition: "Andalusian / Mediterranean folk",
+    effects: [["calm", 4], ["soothing", 3], ["digestive", 2], ["cooling", 2]],
+  },
+
+  // Italian household post-meal infusion; the full carminative
+  // preparation distinct from Canarino's lemon-peel-only minimalism.
+  // Crushed fennel seeds release the anise-licorice register that
+  // settles a heavy meal, chamomile rounds it out, lemon peel keeps
+  // the cup from going syrupy.
+  {
+    id: "italian-digestivo",
+    name: "Italian Digestivo",
+    subtitle: "After-dinner fennel and chamomile, lemon peel for brightness — the nonna's preparation",
+    ingredients: [
+      { id: "fennel",     g: 1.0 },
+      { id: "chamomile",  g: 1.0 },
+      { id: "lemon-peel", g: 0.3, role: "accent" },
+    ],
+    tempC: 95, timeS: 480, ml: 250,
+    mood: "digestive", flavor: "sweet",
+    public: true,
+    tradition: "Italian household",
+    effects: [["digestive", 4], ["calm", 3], ["soothing", 2], ["warming", 2]],
+  },
+
   // ── Experimental house customs ─────────────────────────────
   // Not traditional — recipes the catalog's chemistry suggests but
   // no culture has codified. Marked `experimental: true` so the UI
@@ -1275,6 +1380,39 @@ const BLEND_DIRECTIONS = {
     "Steep 90–120 seconds.",
     "Pour completely, last drop included. Re-steep three or more times with progressively hotter water.",
   ],
+  "karkadeh": [
+    "Bring 1 cup water to just under a boil (~200°F).",
+    "Pour over 2 tsp dried hibiscus + a small strip of lemon peel.",
+    "Steep covered 8–10 minutes — the cup turns deep ruby.",
+    "Strain. Sweeten generously with sugar — Egyptian tradition is honest about the sour-fruit edge; start at 1–2 tsp and adjust.",
+    "Drink hot in winter. Pour over plenty of ice for summer karkadeh — the iconic version.",
+  ],
+  "kahwa": [
+    "Lightly crush 3–4 green cardamom pods and a small piece of cinnamon stick.",
+    "Bring 1 cup water to a simmer with the spices; cover and simmer 3 minutes.",
+    "Pull off heat. Add 1 tsp green tea (any pan-fired Chinese-style green) and 1 tsp dried rose petals.",
+    "Cover and steep 3–4 minutes off the heat — boiling the green leaf turns it bitter.",
+    "Strain into a small cup. Sweeten with sugar or honey to taste. A scatter of slivered almonds is traditional; skip if you don't have them, the leaves carry the cup.",
+  ],
+  "wedang-jahe": [
+    "Smash 2 tbsp fresh ginger with the flat of a knife (or use 1 tbsp dried, sliced).",
+    "Combine in a small pot with a piece of cinnamon stick, 3–4 whole cloves, and a few cracks of black pepper.",
+    "Add 1 cup water and bring to a low simmer; cover and simmer 8–10 minutes.",
+    "Strain into a warmed cup. Stir in 1–2 tsp palm sugar (gula merah) or brown sugar — the sweet is traditional, not optional.",
+    "Drink hot and slowly. The cup is warming all the way down.",
+  ],
+  "tisana-andaluza": [
+    "Heat 1 cup water to just under a boil (~200°F).",
+    "Pour over 1 tsp chamomile + 1 tsp lemon balm + a small pinch of spearmint.",
+    "Cover and steep 6 minutes — the cover keeps the lemon balm's volatiles in the cup rather than evaporating into the kitchen.",
+    "Strain. Add a spoon of honey if you like; orange-blossom honey is the Andalusian register, regular honey works fine.",
+  ],
+  "italian-digestivo": [
+    "Crush 1 tsp fennel seeds lightly between your fingers — releases the oils.",
+    "Combine with 1 tsp dried chamomile and a strip of lemon peel.",
+    "Pour 1 cup water just off the boil; cover and steep 8 minutes — the fennel needs time.",
+    "Strain. Traditionally drunk unsweetened after a heavy meal; a drizzle of honey is fine if you prefer.",
+  ],
 
   // ── House experimentals — the maker's curated steps ────────
   "exp-tom-foolery": [
@@ -1367,6 +1505,23 @@ const BLEND_TABLE_ACCENTS = {
   "pissenlit-cafe":    ["milk (optional)"],
   "exp-suns-roots":    ["honey (optional)"],
   "exp-steady-state":  ["milk (optional)"],
+  // Karkadeh is canonically sweet; the sour-fruit edge of strong
+  // hibiscus is meant to be balanced by a generous sugar. Egyptian
+  // households often drop in a stick of cinnamon at the table too.
+  "karkadeh":          ["sugar", "ice (for chilled service)"],
+  // Kahwa is sweet by tradition. Almonds (slivered) are the
+  // canonical garnish but skip-able for an American kitchen
+  // without specialty access.
+  "kahwa":             ["sugar or honey", "slivered almonds (optional)"],
+  // Wedang Jahe wants palm sugar (gula merah); brown sugar is the
+  // accessible substitute. Sweet is not optional in this tradition.
+  "wedang-jahe":       ["palm sugar or brown sugar"],
+  // Andalusian tisana is honey-sweetened when sweetened at all;
+  // orange-blossom honey is the regional register, plain honey is fine.
+  "tisana-andaluza":   ["honey (optional)"],
+  // Italian digestivo is traditionally unsweetened — the fennel
+  // carries enough sweet on its own — but honey is a permitted lift.
+  "italian-digestivo": ["honey (optional)"],
 };
 
 export {
