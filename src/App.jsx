@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
@@ -9,16 +9,20 @@ import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/ico
 import { Button } from "./components/layout";
 import { DemoHint } from "./components/DemoHint";
 import { FirstCupHintCard } from "./components/FirstCupHintCard";
-// Screens
+// Screens — first-paint surfaces are eager so there's no chunk-load
+// flash on cold start. Everything reached by navigation or overlay
+// is React.lazy so it ships in its own chunk and only downloads when
+// the user actually opens it.
 import { HomeScreen } from "./screens/HomeScreen";
-import { ComposeScreen, ComposeTutorialOverlay } from "./screens/ComposeScreen";
-import { SteepScreen } from "./screens/SteepScreen";
-import { IngredientDetail } from "./screens/IngredientDetail";
-import { BlendDetail } from "./screens/BlendDetail";
-import { CupDetail } from "./screens/CupDetail";
-import { EntryDetail } from "./screens/EntryDetail";
-import { ProfileScreen } from "./screens/ProfileScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
+const ComposeScreen = lazy(() => import("./screens/ComposeScreen").then(m => ({ default: m.ComposeScreen })));
+const ComposeTutorialOverlay = lazy(() => import("./screens/ComposeScreen").then(m => ({ default: m.ComposeTutorialOverlay })));
+const SteepScreen = lazy(() => import("./screens/SteepScreen").then(m => ({ default: m.SteepScreen })));
+const IngredientDetail = lazy(() => import("./screens/IngredientDetail").then(m => ({ default: m.IngredientDetail })));
+const BlendDetail = lazy(() => import("./screens/BlendDetail").then(m => ({ default: m.BlendDetail })));
+const CupDetail = lazy(() => import("./screens/CupDetail").then(m => ({ default: m.CupDetail })));
+const EntryDetail = lazy(() => import("./screens/EntryDetail").then(m => ({ default: m.EntryDetail })));
+const ProfileScreen = lazy(() => import("./screens/ProfileScreen").then(m => ({ default: m.ProfileScreen })));
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
@@ -1749,6 +1753,7 @@ export default function App() {
         overflowX: "hidden",
         position: "relative",
       }}>
+        <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
@@ -1793,6 +1798,7 @@ export default function App() {
           // force, so we set the banner state directly.
           setGlimpseElemental({ ids: [next.id] });
         }) : undefined} />}
+        </Suspense>
       </div>
 
       {/* First-visit welcome hint — anchored just above the tab bar
@@ -1810,18 +1816,22 @@ export default function App() {
           scroll. Each section has its own dismiss flag so seeing
           one doesn't pre-suppress the other. */}
       {tab === "apothecary" && (
-        <ComposeTutorialOverlay
-          section="apothecary"
-          hintShown={composeHintShown}
-          dismissHint={() => setComposeHintShown(true)}
-        />
+        <Suspense fallback={null}>
+          <ComposeTutorialOverlay
+            section="apothecary"
+            hintShown={composeHintShown}
+            dismissHint={() => setComposeHintShown(true)}
+          />
+        </Suspense>
       )}
       {tab === "shelf" && (
-        <ComposeTutorialOverlay
-          section="shelf"
-          hintShown={shelfHintShown}
-          dismissHint={() => setShelfHintShown(true)}
-        />
+        <Suspense fallback={null}>
+          <ComposeTutorialOverlay
+            section="shelf"
+            hintShown={shelfHintShown}
+            dismissHint={() => setShelfHintShown(true)}
+          />
+        </Suspense>
       )}
 
       <TabBar
@@ -1844,6 +1854,7 @@ export default function App() {
         setShelfModeAction={setShelfModeAction}
       />
 
+      <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory, zIndex: 50 }} />}>
       {overlay === "steep" && session && (
         <SteepScreen
           // Key on the blend id (or name fallback) so swapping the
@@ -1998,6 +2009,7 @@ export default function App() {
           onEdit={editJournalEntry}
         />
       )}
+      </Suspense>
       {/* End-of-brew elemental glimpse banner — fires when a roll
           lands a new elemental and persists across tab changes
           until the user taps it (navigating to the bestiary with
