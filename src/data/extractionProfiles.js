@@ -279,6 +279,13 @@ export const EXTRACTION_PROFILES = {
   ],
 
   gyokuro: [
+    // Gyokuro is shade-grown for 3+ weeks before harvest so theanine
+    // and chlorophyll outpace catechins — the sweet/umami signature
+    // depends on extracting at near-coffee-creamer temperatures.
+    // Above 65°C the catechin pool starts to outrun theanine; above
+    // 80°C the cup falls apart into spinach-water territory. The
+    // past-peak knots aren't a stylistic choice — they're what
+    // actually happens to the leaf when brewed wrong.
     { tempC: 50,  timeS: 60,  flavors: ["umami", "sweet"],
       effects: [["focus", 3], ["energy", 2]],
       character: "Ultra-gentle gyokuro — pure sweet umami, a delicate brew." },
@@ -288,6 +295,27 @@ export const EXTRACTION_PROFILES = {
     { tempC: 60,  timeS: 120, flavors: ["umami", "marine", "sweet", "buttery", "seaweed"],
       effects: [["focus", 5], ["energy", 3], ["bitterness", 1]],
       character: "Fuller body. Seaweed notes deepen; slight brisk edge." },
+    { tempC: 70,  timeS: 120,
+      flavorStrengths: [
+        ["umami", 3.0], ["marine", 3.0], ["vegetal", 2.0], ["seaweed", 2.0],
+        ["sweet", 1.5], ["buttery", 1.0], ["brisk", 1.5],
+      ],
+      effects: [["focus", 4], ["energy", 3], ["bitterness", 1.5]],
+      character: "Past the shaded-leaf optimum — theanine sweetness fading, vegetal-marine climbing into the foreground." },
+    { tempC: 80,  timeS: 120,
+      flavorStrengths: [
+        ["vegetal", 3.5], ["marine", 3.0], ["seaweed", 2.5], ["astringent", 2.2],
+        ["umami", 2.0], ["brisk", 1.8], ["sweet", 0.6],
+      ],
+      effects: [["focus", 3], ["energy", 3.5], ["bitterness", 2.5]],
+      character: "The shaded leaf can't handle this heat — sweetness and umami collapse, vegetal-bitter takes the cup." },
+    { tempC: 95,  timeS: 120,
+      flavorStrengths: [
+        ["vegetal", 4.0], ["astringent", 4.0], ["seaweed", 3.5], ["brisk", 2.5],
+        ["marine", 2.0], ["bitter", 2.0],
+      ],
+      effects: [["focus", 1.5], ["energy", 4], ["bitterness", 3.5]],
+      character: "Gyokuro destroyed — the cup reads spinach water with caffeine, theanine and L-glutamate gone." },
   ],
 
   gunpowder: [
