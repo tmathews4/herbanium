@@ -34,17 +34,15 @@ import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 
-// Caffeine load thresholds (mg). Tuned so the bar's "too much"
-// tick lines up with where the perception.js high-caffeine warning
-// path fires on a real morning cup — masala chai at recommended
-// brew lands at ~120mg and that should already read as "pushing
-// it" on the bar, not sit quietly mid-track. Caution begins at
-// 60mg (the warning's bare trigger when stacked with strong
-// energy/focus); too-much at 120mg (a strong single cup); the
+// Caffeine load thresholds (mg). The "too much" tick lines up with
+// where perception.js's high-caffeine warning fires (130mg — past a
+// normal cup of coffee, into doubled-up / strong-second-cup
+// territory). Caution at 80mg marks "this is a real cup of caffeine
+// now" — about where a regular black tea / mid-coffee lands. The
 // 250mg ceiling holds for stacked caffeine-bearing leaves.
 const CAFFEINE_MAX_MG = 250;
-const CAFFEINE_CAUTION_MG = 60;
-const CAFFEINE_WARN_MG = 120;
+const CAFFEINE_CAUTION_MG = 80;
+const CAFFEINE_WARN_MG = 130;
 
 // Single-row caffeine load gauge — sits in the Balance section
 // alongside the bitter/astringent palate axes. Reads as a fixed

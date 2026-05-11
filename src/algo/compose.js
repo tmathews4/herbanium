@@ -1203,13 +1203,18 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const timeRange = meta.timeS || [180, 240];
     const recTempC = (tempRange[0] + tempRange[1]) / 2;
     const recTimeS = (timeRange[0] + timeRange[1]) / 2;
-    // Linear ramps with floors and ceilings — caffeine extraction
-    // follows roughly the same curve as everything else but stays
-    // a bit more extractable past peak (it's a small molecule that
-    // keeps coming out as the tannins start to bite).
-    const tempEff = Math.max(0.5, Math.min(1.1, 0.5 + 0.5 * (tempC / Math.max(50, recTempC))));
-    const timeEff = Math.max(0.5, Math.min(1.1, 0.4 + 0.6 * (timeS / Math.max(60, recTimeS))));
-    return 0.5 * tempEff + 0.5 * timeEff;
+    // Caffeine extraction is multiplicative in temperature and time:
+    // both axes have to be present, and a short cold pour extracts
+    // essentially nothing. Previous formula used an additive 50%
+    // floor on each axis which gave ~66% yield at 55°C/15s (wildly
+    // over-stated). Now the factor approaches zero when either axis
+    // does, with a 5% floor so any contact registers something.
+    // Capped at 1.0 since you can't extract more caffeine than the
+    // leaves hold; the recommended brew is calibrated to land near
+    // full yield already.
+    const tempRatio = Math.min(1.0, Math.max(0, tempC) / Math.max(50, recTempC));
+    const timeRatio = Math.min(1.0, Math.max(0, timeS) / Math.max(60, recTimeS));
+    return Math.max(0.05, tempRatio * timeRatio);
   };
   const rawCaffeineMg = ingredients.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
