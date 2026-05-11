@@ -33,6 +33,7 @@ import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
+import { usePersistedState } from "../hooks/usePersistedState";
 
 // Caffeine load thresholds (mg). The "too much" tick lines up with
 // where perception.js's high-caffeine warning fires (130mg — past a
@@ -258,7 +259,12 @@ export const BlendExtractionExplorer = ({
   // toggle at the top of the explorer drives both at once so the
   // user picks a register (rolled-up families vs specific notes /
   // leaf effects) for the whole panorama, not per-strip.
-  const [familyMode, setFamilyMode] = useState(true);
+  // Default to Detailed (familyMode=false) — the leaf-level read is
+  // the explorer's reason for being, and curious users seeing
+  // "smoked / pine / tar / leather" learn more than the Smoky
+  // rollup. Persisted so users who prefer Simple keep that across
+  // sessions after flipping.
+  const [familyMode, setFamilyMode] = usePersistedState("explorerFamilyMode", false);
 
   // Range-band selection. Each axis ("tempC" / "timeS") gets its
   // own slot — tapping a band toggles a description panel below
