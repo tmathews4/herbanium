@@ -1005,6 +1005,20 @@ export const BlendExtractionExplorer = ({
           </div>
         </div>
       )}
+
+      {/* Honesty footer — the predictions are now precise enough
+          (caffeine in mg, calm to a tenth) that users could over-
+          trust them. This small italic line travels with the
+          explorer everywhere it appears (BlendDetail, IngredientDetail,
+          ComposeScreen) so the disclaimer is tied to the chart, not
+          buried in a separate About page. */}
+      <div style={{
+        marginTop: 16,
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+        color: theme.ash, lineHeight: 1.5, textAlign: "center",
+      }}>
+        How a cup lands is partly chemistry, partly you. Treat predictions as a starting point.
+      </div>
     </div>
   );
 };

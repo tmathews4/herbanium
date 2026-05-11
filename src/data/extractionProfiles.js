@@ -346,21 +346,21 @@ export const EXTRACTION_PROFILES = {
         ["toasted", 2.0], ["vegetal", 1.4], ["brisk", 1.0],
         ["bold", 0.8], ["mineral", 0.6],
       ],
-      effects: [["focus", 2], ["energy", 2]],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2]],
       character: "Cool first pour — gunpowder unfurling, toasted-mineral lead with a quiet brisk edge." },
     { tempC: 80,  timeS: 120,
       flavorStrengths: [
         ["toasted", 2.6], ["bold", 2.0], ["vegetal", 1.8],
         ["mineral", 1.4], ["brisk", 1.2],
       ],
-      effects: [["focus", 2.5], ["energy", 2.5]],
+      effects: [["focus", 2.5], ["calm", 2], ["energy", 2.5]],
       character: "Light gunpowder — toasted and clean, approachable." },
     { tempC: 85,  timeS: 150,
       flavorStrengths: [
         ["toasted", 3.0], ["bold", 2.8], ["vegetal", 2.0],
         ["mineral", 1.8], ["brisk", 1.6],
       ],
-      effects: [["focus", 3], ["energy", 3], ["comfort", 2]],
+      effects: [["focus", 3], ["calm", 1.5], ["energy", 3], ["comfort", 2]],
       character: "The standard cup. Full toasted-mineral character, bold body, brisk finish." },
     { tempC: 90,  timeS: 180,
       flavorStrengths: [
@@ -391,7 +391,7 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [
         ["roasted", 2.6], ["warm", 1.6], ["woody", 0.8],
       ],
-      effects: [["comfort", 2], ["digestive", 2]],
+      effects: [["comfort", 2], ["calm", 2], ["digestive", 2]],
       character: "Quick hojicha — roasted warmth, minimal caffeine." },
     { tempC: 95,  timeS: 45,
       flavorStrengths: [
@@ -399,7 +399,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.4], ["toasted", 1.2], ["sweet", 0.9],
         ["woody", 0.8],
       ],
-      effects: [["comfort", 2.6], ["digestive", 2.6]],
+      effects: [["comfort", 2.6], ["calm", 2.5], ["digestive", 2.6]],
       character: "Approaching the standard cup — caramel-toast leading, body filling in." },
     { tempC: 98,  timeS: 60,
       flavorStrengths: [
@@ -407,7 +407,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.6], ["toasted", 1.4], ["sweet", 1.0],
         ["woody", 0.9],
       ],
-      effects: [["comfort", 3], ["digestive", 3]],
+      effects: [["comfort", 3], ["calm", 3], ["digestive", 3]],
       character: "The standard cup. Full hojicha — caramel-toasted, warm and sweet, the evening-safe green tea." },
     { tempC: 105, timeS: 120,
       flavorStrengths: [
@@ -415,7 +415,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.7], ["toasted", 1.5], ["sweet", 1.0],
         ["woody", 1.0],
       ],
-      effects: [["comfort", 3], ["digestive", 3]],
+      effects: [["comfort", 3], ["calm", 3], ["digestive", 3]],
       character: "Pushed brew — character barely moves, the roast already did the work in the kiln." },
   ],
 
@@ -429,21 +429,21 @@ export const EXTRACTION_PROFILES = {
   // express. Light (idx 0) keeps auto-annotation.
   dragonwell: [
     { tempC: 75,  timeS: 75,  flavors: ["nutty", "sweet", "fresh"],
-      effects: [["focus", 3], ["energy", 2]],
+      effects: [["focus", 3], ["calm", 2], ["energy", 2]],
       character: "Light dragonwell — sweet chestnut, delicate sweetness, fresh top." },
     { tempC: 80,  timeS: 110,
       flavorStrengths: [
         ["chestnut", 4.2], ["nutty", 3.3], ["toasted", 2.5],
         ["sweet", 2.0], ["vegetal", 1.4], ["fresh", 1.2],
       ],
-      effects: [["focus", 4], ["energy", 3]],
+      effects: [["focus", 4], ["calm", 2], ["energy", 3]],
       character: "The classic cup. Pan-fired chestnut and toasted-bean character, bright focus." },
     { tempC: 82,  timeS: 125,
       flavorStrengths: [
         ["chestnut", 4.5], ["nutty", 3.5], ["toasted", 2.8],
         ["sweet", 2.2], ["vegetal", 1.5], ["fresh", 1.0],
       ],
-      effects: [["focus", 4], ["energy", 3]],
+      effects: [["focus", 4], ["calm", 1.5], ["energy", 3]],
       character: "The peak window — chestnut fullest, sweetness still leading, tannin not yet up." },
     { tempC: 85,  timeS: 150,
       flavorStrengths: [
@@ -508,13 +508,13 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Oolong ────────────────────────────────────────
   oolong: [
     { tempC: 85,  timeS: 90,  flavors: ["floral", "fruit", "orchid"],
-      effects: [["focus", 2], ["energy", 2]],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2]],
       character: "Light oolong — floral top with orchid edge, gentle lift, early extraction." },
     { tempC: 90,  timeS: 135, flavors: ["floral", "honey", "fruit", "orchid", "peach", "creamy", "toasted"],
-      effects: [["focus", 3], ["energy", 3], ["comfort", 2]],
+      effects: [["focus", 3], ["calm", 2], ["energy", 3], ["comfort", 2]],
       character: "The standard cup. Full oolong spectrum — orchid, stone fruit, honey-creamy body, toasted edge." },
     { tempC: 95,  timeS: 180, flavors: ["floral", "honey", "fruit", "peach", "toasted", "mineral", "astringent"],
-      effects: [["focus", 3], ["energy", 3], ["comfort", 3], ["bitterness", 2]],
+      effects: [["focus", 3], ["calm", 1], ["energy", 3], ["comfort", 3], ["bitterness", 2]],
       character: "Long pull. Floral notes thin, mineral and tannin take the stage." },
   ],
 
@@ -533,7 +533,7 @@ export const EXTRACTION_PROFILES = {
 
   darjeeling: [
     { tempC: 85,  timeS: 120, flavors: ["muscatel", "bright", "brisk"],
-      effects: [["energy", 2], ["focus", 2]],
+      effects: [["energy", 2], ["focus", 2], ["calm", 1]],
       character: "Light darjeeling — muscatel top, restrained and bright." },
     { tempC: 88,  timeS: 200, flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "rich"],
       effects: [["energy", 4], ["focus", 3]],
@@ -552,13 +552,13 @@ export const EXTRACTION_PROFILES = {
 
   ceylon: [
     { tempC: 95,  timeS: 120, flavors: ["citrus", "bright", "honey"],
-      effects: [["energy", 2], ["comfort", 2]],
+      effects: [["energy", 2], ["focus", 2], ["comfort", 2]],
       character: "Light ceylon — citrus-honey top, gentle lift, quick brew." },
     { tempC: 98,  timeS: 200, flavors: ["citrus", "bright", "brisk", "honey", "woody", "spiced"],
-      effects: [["energy", 3], ["comfort", 3]],
+      effects: [["energy", 3], ["focus", 3], ["comfort", 3]],
       character: "The standard cup. Full ceylon — crisp citrus, honeyed body, faint cinnamon edge, takes milk well." },
     { tempC: 100, timeS: 240, flavors: ["citrus", "bright", "brisk", "honey", "woody", "spiced", "astringent"],
-      effects: [["energy", 3], ["comfort", 3], ["bitterness", 2]],
+      effects: [["energy", 3], ["focus", 2], ["comfort", 3], ["bitterness", 2]],
       character: "Stronger pull. Tannins assert; classic English-breakfast strength." },
   ],
 
@@ -608,13 +608,13 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Pu-erh ────────────────────────────────────────
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2]],
+      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2], ["calm", 1.5]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 2]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["bitterness", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 1], ["bitterness", 2]],
       character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
@@ -712,13 +712,13 @@ export const EXTRACTION_PROFILES = {
 
   genmaicha: [
     { tempC: 70, timeS: 60,  flavors: ["toasted", "nutty", "rice"],
-      effects: [["comfort", 2], ["calm", 2]],
+      effects: [["comfort", 2], ["calm", 2], ["focus", 2]],
       character: "Tea-forward genmaicha — sencha leads, the toasted rice whispers." },
     { tempC: 78, timeS: 105, flavors: ["toasted", "rice", "nutty", "warm", "grassy", "sweet"],
-      effects: [["comfort", 3], ["calm", 3], ["digestive", 2]],
+      effects: [["comfort", 3], ["calm", 3], ["focus", 3], ["digestive", 2]],
       character: "The standard cup. Toasted rice forward, sencha grass underneath, warm and comforting." },
     { tempC: 85, timeS: 150, flavors: ["toasted", "rice", "nutty", "warm", "grassy", "astringent", "sweet"],
-      effects: [["comfort", 3], ["calm", 3], ["digestive", 2], ["bitterness", 2]],
+      effects: [["comfort", 3], ["calm", 3], ["focus", 2], ["digestive", 2], ["bitterness", 2]],
       character: "Past the rice's range. Tea base pulls tannin; the toast dulls." },
     { tempC: 95, timeS: 180,
       flavorStrengths: [
@@ -793,13 +793,13 @@ export const EXTRACTION_PROFILES = {
 
   elderflower: [
     { tempC: 85, timeS: 300, flavors: ["floral", "fruity"],
-      effects: [["comfort", 2]],
+      effects: [["comfort", 2], ["calm", 2]],
       character: "Light elderflower — delicate muscat aromatics." },
     { tempC: 90, timeS: 450, flavors: ["floral", "muscatel", "fruity", "sweet"],
-      effects: [["comfort", 3], ["uplifting", 2]],
+      effects: [["comfort", 3], ["calm", 3], ["uplifting", 2]],
       character: "The standard cup. Full lychee-muscat lift — the European cold-care." },
     { tempC: 95, timeS: 600, flavors: ["floral", "muscatel", "fruity", "sweet", "astringent"],
-      effects: [["comfort", 3], ["uplifting", 2], ["bitterness", 2]],
+      effects: [["comfort", 3], ["calm", 2], ["uplifting", 2], ["bitterness", 2]],
       character: "Pushed past the muscat. Aromatic thins; bitter follows." },
   ],
 
