@@ -46,6 +46,22 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   // brew cycle rather than looping.
   const [justFinished, setJustFinished] = useState(false);
 
+  // Journal textarea auto-grow — start compact (≈2 lines) so the
+  // wait card and bottom buttons stay above the fold on shorter
+  // viewports, then expand only as content demands. Pure DOM
+  // height-from-scrollHeight; no resize observer needed since the
+  // user's typing is the only trigger.
+  const intentTextareaRef = useRef(null);
+  const autoGrowIntent = useCallback(() => {
+    const el = intentTextareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+  // Keep the height honest if the value changes externally (e.g.
+  // tapping the prompt-card "answer this" button injects text).
+  useEffect(() => { autoGrowIntent(); }, [intent, autoGrowIntent]);
+
   // Past brews of this blend — only meaningful if the blend has an id (saved
   // or previously-logged). Freshly-composed blends won't have prior sessions.
   // Filter to sessions that actually carry a written note from the user
@@ -421,10 +437,12 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           textTransform: "uppercase", color: theme.ash, marginBottom: 6,
         }}>while it steeps</div>
         <textarea
+          ref={intentTextareaRef}
           value={intent || ""}
           onChange={(e) => setIntent && setIntent(e.target.value)}
+          onInput={autoGrowIntent}
           placeholder="A line, a thought, a thing the day's holding…"
-          rows={6}
+          rows={2}
           style={{
             width: "100%", boxSizing: "border-box",
             fontFamily: ff.serif, fontStyle: intent ? "normal" : "italic",
@@ -433,7 +451,8 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             background: theme.cream,
             border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
             padding: "14px 16px", outline: "none",
-            resize: "vertical", minHeight: 160,
+            resize: "none", minHeight: 70,
+            overflow: "hidden",
             boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
           }}
         />
