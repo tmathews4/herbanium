@@ -294,6 +294,16 @@ export const EFFECT_SYNERGIES = [
   { when: ["calm", "soothing"],  bonus: { soothing: 0.3 },         label: "settled" },
   { when: ["energy", "warming"], bonus: { energy: 0.3 },           label: "morning lift" },
   { when: ["grounding", "calm"], bonus: { grounding: 0.3 },        label: "rooted" },
+  // Cross-ingredient theanine-caffeine modulation: when a cup
+  // carries BOTH calm and energy at meaningful strength, real
+  // perception smooths the caffeine's jitter edge — the cup reads
+  // alert rather than wired. Bonus enhances focus and gently
+  // preserves calm; does NOT add to energy (preventing a runaway
+  // 'more theanine = more energy' loop). Catches blends where one
+  // ingredient brings theanine-style calm (matcha, gyokuro, sencha)
+  // and another brings caffeine-driven energy (black tea, mate),
+  // even when the chemistry doesn't come from one source.
+  { when: ["calm", "energy"],    bonus: { focus: 0.5, calm: 0.3 }, label: "alert calm" },
 ];
 
 // Effect pairs that co-exist legitimately rather than canceling.
