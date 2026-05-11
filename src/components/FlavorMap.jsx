@@ -1008,6 +1008,28 @@ const TrackMap = ({
   // slides into them; they just drop out when they're not present
   // at the current point.
   const HIDE_BELOW = 0.05;
+  // Count of leaf flavors/effects in each family contributing at the
+  // current brew. Used to render a small "·N" badge next to family
+  // rows so the user can see at a glance whether a family aggregate
+  // is a single note or a stack. Counted from leaf-level data at the
+  // current sample (not the family-aggregated map), so it works the
+  // same in Simple and Detail modes.
+  const childCountAtCurrent = (() => {
+    if (kind === "palate") return {};
+    const safeIdx = Math.max(0, Math.min(samples.length - 1, currentSampleIdx));
+    const leafSource = kind === "flavor"
+      ? samples[safeIdx]?.flavorMap
+      : samples[safeIdx]?.effectMap;
+    if (!leafSource) return {};
+    const counts = {};
+    for (const [name, strength] of Object.entries(leafSource)) {
+      if (!(strength >= HIDE_BELOW)) continue;
+      const fam = familyOf[name];
+      if (!fam) continue;
+      counts[fam] = (counts[fam] || 0) + 1;
+    }
+    return counts;
+  })();
   // Two-pass filter so parent/child visibility stays consistent:
   //   pass 1: keep any leaf whose own value passes the threshold.
   //   pass 2: keep a parent iff at least one of its children survived
@@ -1168,6 +1190,26 @@ const TrackMap = ({
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {labelFor(name)}
                   </span>
+                  {/* Family-child count badge — small "·N" suffix
+                      next to family-level rows when 2+ leaf notes
+                      are currently active. Visible in both Simple
+                      (where the row IS a family) and Detail (where
+                      the parent header still benefits from the
+                      hint). Hidden when only 1 leaf is active —
+                      "Earthy ·1" would be noise. */}
+                  {(() => {
+                    const famSlug = item.isParent ? item.familySlug
+                      : (useFamilyMode ? name : null);
+                    if (!famSlug) return null;
+                    const n = childCountAtCurrent[famSlug] || 0;
+                    if (n < 2) return null;
+                    return (
+                      <span style={{
+                        fontFamily: ff.mono, fontSize: 8.5, color: theme.ash,
+                        marginLeft: 4, flexShrink: 0, opacity: 0.7,
+                      }}>·{n}</span>
+                    );
+                  })()}
                 </span>
                 {/* Right zone: per-track numeric strength at the user's
                     current slider position, on the engine's 0-5 scale.
