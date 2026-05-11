@@ -2091,7 +2091,7 @@ const INGREDIENTS = {
     overPull: { timeS: 480, reason: "tannin grip overtakes the earth-warmth" },
     // Digestive 4: post-meal traditional but the fennel anchor takes the
     // defining 5; puerh sits at 4 alongside its grounding/warming register.
-    effects: [["digestive", 4], ["grounding", 3], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
+    effects: [["digestive", 4], ["grounding", 4], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
     flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral"],
     pairs: [],
     dose: "1 tsp · 200ml · multi-steep",
@@ -2598,7 +2598,7 @@ const INGREDIENTS = {
     pairs: ["assam", "ceylon", "darjeeling", "licorice-root", "ginger", "chamomile", "lemonbalm", "fennel", "elderflower", "peppermint", "rooibos"],
     dose: "1–2 tsp · 250ml — long steep, moderate heat",
     headsUp: "Mucilage may slow absorption of other oral medications taken at the same time — separate by 1–2 hours to be safe. Otherwise broadly gentle: no daily-dose ceiling, no major drug interactions, safe in pregnancy at culinary amounts.",
-    blurb: "The candy was named after the plant, not the other way around — the original marshmallow confection was made by whipping the root's mucilage with sugar and egg white as a sore-throat remedy, then commercial production replaced the root with gelatin and the herbal connection faded. The chemistry is unusual for an herb: ~25-35% of the dried root by mass is mucilage — long-chain polysaccharides that swell in water and form a physical coat over irritated mucous membranes. The mechanism is mechanical, not pharmacological, which is why marshmallow has been used for sore throat, dry cough, and gut-lining irritation since ancient Egypt without ever needing to be 'isolated' into an active compound.",
+    blurb: "The candy was named after the plant — the original confection was whipped from the root's mucilage with sugar and egg white as a sore-throat remedy, until commercial production swapped the root for gelatin and the herbal link faded. The chemistry is unusual: 25–35% of the dried root by mass is mucilage — long-chain polysaccharides that swell in water and coat irritated mucous membranes mechanically rather than pharmacologically. That's why marshmallow has been used for sore throat, dry cough, and gut-lining irritation since ancient Egypt without ever needing an 'active compound.'",
     facts: [
       "The candy was named after the plant. Original marshmallows were made by whipping the root's mucilage with sugar and egg white as a sore-throat remedy; gelatin replaced the root in the 19th century and the herbal origin faded into a brand name.",
       "Mucilage — long-chain polysaccharides — makes up roughly a quarter to a third of dried marshmallow root by mass. Few other herbs are this concentrated in a single class of compound.",

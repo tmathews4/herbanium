@@ -195,7 +195,7 @@ const BLENDS = [
     ingredients: [
       { id: "puerh", g: 4.0 },
     ],
-    tempC: 100, timeS: 30, ml: 100,
+    tempC: 100, timeS: 90, ml: 100,
     mood: "digestive", flavor: "earthy",
     public: true,
     tradition: "Chinese / Tibetan",
@@ -547,7 +547,7 @@ const BLENDS = [
   {
     id: "tisana-andaluza",
     name: "Tisana Andaluza",
-    subtitle: "Andalusian after-dinner infusion — chamomile spine, lemon-balm middle, a bright spearmint top",
+    subtitle: "Andalusian after-dinner infusion — chamomile spine, lemon balm, bright spearmint top",
     ingredients: [
       { id: "chamomile", g: 1.0 },
       { id: "lemonbalm", g: 1.0 },
@@ -656,7 +656,7 @@ const BLENDS = [
       { id: "cinnamon",     g: 0.3, role: "accent" },
       { id: "black-pepper", g: 0.05, role: "catalyst" },
     ],
-    tempC: 100, timeS: 600, ml: 250,
+    tempC: 95, timeS: 600, ml: 250,
     mood: "warming", flavor: "spiced",
     public: true, experimental: true, house: true,
     twist: true,
@@ -676,7 +676,7 @@ const BLENDS = [
       { id: "rooibos",   g: 0.8 },
       { id: "ginger",    g: 0.3, role: "accent" },
     ],
-    tempC: 100, timeS: 360, ml: 250,
+    tempC: 95, timeS: 360, ml: 250,
     mood: "cooling", flavor: "tart",
     public: true, experimental: true, house: true,
     effects: [["cooling", 4], ["uplifting", 3], ["digestive", 3]],
@@ -829,7 +829,7 @@ const BLENDS = [
       { id: "cinnamon", g: 0.3, role: "accent" },
       { id: "vanilla",  g: 0.2, role: "accent" },
     ],
-    tempC: 100, timeS: 240, ml: 250,
+    tempC: 95, timeS: 240, ml: 250,
     mood: "comfort", flavor: "spiced",
     public: true, experimental: true, house: true,
     twist: true,
@@ -869,7 +869,7 @@ const BLENDS = [
       { id: "lavender",   g: 0.2, role: "accent" },
       { id: "lemon-peel", g: 0.3, role: "accent" },
     ],
-    tempC: 95, timeS: 300, ml: 250,
+    tempC: 90, timeS: 300, ml: 250,
     mood: "focus", flavor: "aromatic",
     public: true, experimental: true, house: true,
     effects: [["focus", 3], ["soothing", 2], ["calm", 2]],
@@ -973,7 +973,7 @@ const MOOD_BLENDS = {
   // resolver uses these when the user picks one of the new moods alone.
   soothing: {
     ings: [{ id: "rooibos", g: 1.8 }, { id: "chamomile", g: 0.6 }],
-    temp: 100, time: 360,
+    temp: 95, time: 360,
     effects: [["soothing", 5], ["calm", 3]],
   },
   warming: {
@@ -998,7 +998,7 @@ const MOOD_BLENDS = {
   },
   grounding: {
     ings: [{ id: "puerh", g: 3.0 }],
-    temp: 100, time: 90,
+    temp: 100, time: 60,
     effects: [["grounding", 4], ["digestive", 3], ["warming", 3]],
   },
   uplifting: {
@@ -1050,7 +1050,7 @@ const PAIR_BLENDS = {
       { id: "lavender",      g: 0.3, role: "accent" },
       { id: "lemonbalm",     g: 0.4, role: "accent" },
     ],
-    temp: 95, time: 360,
+    temp: 90, time: 360,
     effects: [["calm", 4], ["sleepy", 4]],
   },
   "calm+digestive": {

@@ -507,13 +507,13 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Pu-erh ────────────────────────────────────────
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["comfort", 3], ["digestive", 2]],
+      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["comfort", 4], ["digestive", 3]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
-      effects: [["comfort", 4], ["digestive", 3], ["bitterness", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["bitterness", 2]],
       character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
