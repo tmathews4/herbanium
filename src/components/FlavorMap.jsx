@@ -1174,17 +1174,12 @@ const TrackMap = ({
                     {labelFor(name)}
                   </span>
                 </span>
-                {/* Right zone: per-track numeric strength at the user's
-                    current slider position, on the engine's 0-5 scale.
-                    Hugged to the band's left edge by space-between so
-                    the numeric column is visually consistent across
-                    rows even when label widths vary. */}
-                <span style={{
-                  fontFamily: ff.mono, fontSize: 9, color: theme.ash,
-                  marginLeft: 6, flexShrink: 0,
-                }}>
-                  {valueAtCurrent(name).toFixed(1)}
-                </span>
+                {/* Numeric 0-5 readouts removed — the strength gauge
+                    column to the right of this label already carries
+                    the qualitative reading, and a precise '3.4' on
+                    an engine-modeled effect claimed more accuracy
+                    than the chemistry honestly supports. The bar
+                    fill is the signal. */}
               </div>
             );
           })}

@@ -90,13 +90,9 @@ const SolidBar = ({ label, value, color, selected, onClick }) => {
           borderRadius: 3,
         }} />
       </div>
-      <div style={{
-        flex: "0 0 auto",
-        fontFamily: ff.mono, fontSize: 9, color: theme.ash,
-        minWidth: 18, textAlign: "right",
-      }}>
-        {v.toFixed(1)}
-      </div>
+      {/* Numeric 0-5 readout removed — the bar fill above carries
+          the qualitative strength; precise digits implied a chemistry
+          precision the engine doesn't honestly have. */}
     </div>
   );
 };
