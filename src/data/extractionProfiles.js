@@ -93,6 +93,13 @@ export const EXTRACTION_PROFILES = {
     { tempC: 85,  timeS: 180, flavors: ["floral", "sweet", "honeyed", "heady", "vegetal", "astringent"],
       effects: [["calm", 3], ["uplifting", 2], ["bitterness", 2]],
       character: "Pushed past the perfume's range — green-tea base pulls tannin, the heady note fades." },
+    { tempC: 95,  timeS: 240,
+      flavorStrengths: [
+        ["astringent", 4.0], ["vegetal", 3.0], ["bitter", 2.5],
+        ["grassy", 2.0], ["floral", 0.8],
+      ],
+      effects: [["energy", 3], ["focus", 2], ["bitterness", 3]],
+      character: "Perfume boiled off; what's left is over-extracted green tea base — astringent and bitter, the jasmine signature gone." },
   ],
 
   // ─── Herbals ──────────────────────────────────────────────────
@@ -276,6 +283,13 @@ export const EXTRACTION_PROFILES = {
     { tempC: 85,  timeS: 120, flavors: ["grassy", "umami", "marine", "vegetal", "astringent"],
       effects: [["focus", 4], ["energy", 4], ["bitterness", 2]],
       character: "Strong sencha — tannic edge, maximum caffeine pull." },
+    { tempC: 95,  timeS: 150,
+      flavorStrengths: [
+        ["astringent", 4.0], ["vegetal", 3.5], ["bitter", 3.0],
+        ["grassy", 2.5], ["marine", 1.5], ["umami", 1.0],
+      ],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5]],
+      character: "Past the leaf's tolerance — sencha's umami window collapsed, the cup reads spinach-bitter with caffeine grip." },
   ],
 
   gyokuro: [
@@ -439,6 +453,13 @@ export const EXTRACTION_PROFILES = {
       ],
       effects: [["focus", 4], ["energy", 3], ["bitterness", 2]],
       character: "Hotter than the leaf wants. Chestnut sweetness fades; tannins climb." },
+    { tempC: 95,  timeS: 180,
+      flavorStrengths: [
+        ["astringent", 4.0], ["vegetal", 3.0], ["bitter", 2.5],
+        ["chestnut", 2.0], ["nutty", 1.5], ["bean", 1.5],
+      ],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3]],
+      character: "Pan-fired sweetness gone — catechin grip dominates, the chestnut signature lost behind tannin." },
   ],
 
   // ─── True teas: White ─────────────────────────────────────────
@@ -475,6 +496,13 @@ export const EXTRACTION_PROFILES = {
       ],
       effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2]],
       character: "Past the leaf's tolerance. Honey thins; hay turns tannic." },
+    { tempC: 95,  timeS: 270,
+      flavorStrengths: [
+        ["astringent", 4.0], ["hay", 2.5], ["bitter", 2.5],
+        ["wood", 2.0], ["honey", 1.0],
+      ],
+      effects: [["energy", 3.5], ["focus", 2], ["bitterness", 3]],
+      character: "Delicate leaf overrun — catechins outpace the Maillard sweetness, the cup turns tannic and hay-flat." },
   ],
 
   // ─── True teas: Oolong ────────────────────────────────────────
@@ -513,6 +541,13 @@ export const EXTRACTION_PROFILES = {
     { tempC: 90,  timeS: 240, flavors: ["muscatel", "floral", "fruit", "bright", "earthy", "rich", "astringent"],
       effects: [["energy", 4], ["focus", 3], ["bitterness", 2]],
       character: "Pushed — floral holds but tannins sharpen. Still distinctive." },
+    { tempC: 95,  timeS: 300,
+      flavorStrengths: [
+        ["astringent", 4.0], ["earthy", 3.0], ["bitter", 2.5],
+        ["rich", 2.0], ["bright", 1.5], ["muscatel", 1.0],
+      ],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3]],
+      character: "Muscatel volatile gone — what's left is a standard tannic black tea, the Darjeeling signature buried under catechin grip." },
   ],
 
   ceylon: [
@@ -612,6 +647,20 @@ export const EXTRACTION_PROFILES = {
     { tempC: 80, timeS: 30, flavors: ["umami", "vegetal", "creamy", "grassy", "marine", "oceanic", "astringent", "sweet"],
       effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 2]],
       character: "Pushed thick — koicha territory. Dense umami and marine depth; catechins climb behind it." },
+    { tempC: 90, timeS: 30,
+      flavorStrengths: [
+        ["astringent", 3.5], ["vegetal", 3.0], ["bitter", 2.5],
+        ["grassy", 2.0], ["marine", 1.5], ["umami", 1.5], ["sweet", 0.5],
+      ],
+      effects: [["energy", 4], ["focus", 2.5], ["bitterness", 3]],
+      character: "Scorched — water too hot for the powder. Catechins surge ahead of theanine; the cup goes harsh-grassy." },
+    { tempC: 95, timeS: 30,
+      flavorStrengths: [
+        ["astringent", 4.5], ["bitter", 3.5], ["vegetal", 3.0],
+        ["grassy", 2.0], ["marine", 1.0],
+      ],
+      effects: [["energy", 4], ["bitterness", 4]],
+      character: "Matcha destroyed. The chlorophyll burns into harsh-bitter; theanine modulation gone." },
   ],
 
   genmaicha: [
@@ -624,6 +673,13 @@ export const EXTRACTION_PROFILES = {
     { tempC: 85, timeS: 150, flavors: ["toasted", "rice", "nutty", "warm", "grassy", "astringent", "sweet"],
       effects: [["comfort", 3], ["calm", 3], ["digestive", 2], ["bitterness", 2]],
       character: "Past the rice's range. Tea base pulls tannin; the toast dulls." },
+    { tempC: 95, timeS: 180,
+      flavorStrengths: [
+        ["astringent", 3.5], ["vegetal", 2.5], ["bitter", 2.0],
+        ["toasted", 2.0], ["rice", 1.5], ["grassy", 2.0],
+      ],
+      effects: [["comfort", 2], ["energy", 3], ["bitterness", 2.5]],
+      character: "Even the rice can't soften it now — sencha base over-extracted, toast pushed past its register into harsh-bitter." },
   ],
 
   // ─── Caffeinated herbal ─────────────────────────────────────
@@ -637,6 +693,13 @@ export const EXTRACTION_PROFILES = {
     { tempC: 85, timeS: 300, flavors: ["earthy", "grassy", "herbaceous", "bitter", "smoky"],
       effects: [["energy", 4], ["focus", 3], ["bitterness", 2]],
       character: "Pushed long. Saponins surface — tongue-coating bitter." },
+    { tempC: 95, timeS: 360,
+      flavorStrengths: [
+        ["bitter", 4.0], ["astringent", 3.5], ["harsh", 3.0],
+        ["earthy", 2.5], ["herbaceous", 2.0], ["smoky", 1.8],
+      ],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5]],
+      character: "The 'quemado' cup — water too hot for the gourd. Saponins and chlorogenic acids strip the herb of its bright top, leaving harsh-bitter under-tongue." },
   ],
 
   // ─── Sleep & calming herbs (new) ────────────────────────────
