@@ -1000,6 +1000,15 @@ const TrackMap = ({
     const series = filledSeriesFor(name);
     return series[safeIdx] || 0;
   };
+  // Hide rows that would read "0.0" at the user's current slider
+  // position — the bar gauge is empty, the numeric reads 0.0, and
+  // the row is just visual noise that confused readers ("why is
+  // 'uplifting' listed if it's not in the cup?"). Tracks that PEAK
+  // elsewhere along the brew range still appear when the user
+  // slides into them; they just drop out when they're not present
+  // at the current point.
+  const HIDE_BELOW = 0.05;
+  const renderedList = displayList.filter(item => valueAtCurrent(item.name) >= HIDE_BELOW);
   // Tradition-deference: on curated traditional blends, suppress the
   // at-position ⚠ when the user is sitting at or below the curator's
   // recommended brew. The recipe is the recipe — bitterness/tannin in
@@ -1066,7 +1075,7 @@ const TrackMap = ({
           flex: "0 0 auto",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {displayList.map(item => {
+          {renderedList.map(item => {
             const { name, depth, isParent } = item;
             const warn = warningFor(name);
             const here = isWarningHere(warn);
@@ -1159,7 +1168,7 @@ const TrackMap = ({
           width: 4,
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {displayList.map(item => {
+          {renderedList.map(item => {
             const { name } = item;
             const current = valueAtCurrent(name);
             const fill = Math.max(0, Math.min(1, current / 5));
@@ -1187,7 +1196,7 @@ const TrackMap = ({
           flex: 1, position: "relative",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
-          {displayList.map(item => {
+          {renderedList.map(item => {
             const { name } = item;
             const warn = warningFor(name);
             const isSelected = selectedTrack === name;
