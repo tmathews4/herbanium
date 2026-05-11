@@ -1543,6 +1543,25 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     synergyTags.push("tonic stack");
   }
 
+  // Turmeric + black pepper bioavailability boost — piperine
+  // inhibits hepatic glucuronidation of curcumin, multiplying its
+  // systemic absorption (~20x in human trials, up to ~2000% in
+  // some studies). The Ayurvedic golden-milk recipe pairs them
+  // for exactly this reason; the kitchen knew the pharmacology by
+  // a thousand years. Same chemistry, more reaches the body, so
+  // turmeric's warming / digestive / comfort effects register
+  // more strongly when pepper is present. Modest bonus rather
+  // than multiplicative — the cumulative buildup is the bigger
+  // story, but one cup gets a small honest lift too.
+  const hasTurmeric = ingredients.some(({ id, g }) => id === "turmeric" && (g || 0) > 0);
+  const hasPepper = ingredients.some(({ id, g }) => id === "black-pepper" && (g || 0) > 0);
+  if (hasTurmeric && hasPepper) {
+    perceivedEffectMap.warming = (perceivedEffectMap.warming || 0) + 0.3;
+    perceivedEffectMap.comfort = (perceivedEffectMap.comfort || 0) + 0.2;
+    perceivedEffectMap.digestive = (perceivedEffectMap.digestive || 0) + 0.2;
+    synergyTags.push("absorbed deep");
+  }
+
   // Declared `effects` are now labels for search/curation only — the
   // engine output stands on its own so the chemistry can be honest.
 
