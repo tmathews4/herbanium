@@ -1590,10 +1590,16 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   perceivedEffectMap = attenuateFragileEffects(perceivedEffectMap, perceivedFlavorMap);
 
   // Convert maps to sorted tuple arrays for the UI layer.
-  // Drop sub-threshold flavors (< 0.5) — they're noise.
+  // Round first, then filter on the rounded display value: anything
+  // that would render as 0.5 or higher actually appears. Filtering
+  // on the unrounded value caused boundary flicker — chai's pungent
+  // hovers right at the visibility line, and tiny upstream
+  // differences (interpolated extraction at one brew vs another)
+  // produced 0.49 vs 0.51 readings that the user saw as a flavor
+  // 'disappearing' when the slider crossed the threshold.
   const flavors = Object.entries(perceivedFlavorMap)
-    .filter(([, v]) => v >= 0.5)
     .map(([name, v]) => [name, Math.round(v * 10) / 10])
+    .filter(([, v]) => v >= 0.5)
     .sort((a, b) => b[1] - a[1]);
 
   // Effects = mood/feel axis only. Sensory dimensions (bitterness,
