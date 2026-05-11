@@ -554,14 +554,15 @@ export function buildWarnings({
 
   // Caffeine-load warning — high-caffeine cups can read jittery for
   // sensitive bodies even when no axis is over-extracted. Fires when
-  // total caffeine clears 60mg AND the cup also expresses energy or
+  // total caffeine clears 130mg AND the cup also expresses energy or
   // focus strongly (the registers most associated with the adverse
-  // mirror — "wired" instead of "alert"). Healthy adults tolerate
-  // this fine; the warning is a heads-up for caffeine sensitivity,
-  // not a contraindication.
+  // mirror — "wired" instead of "alert"). 130mg is past a normal cup
+  // of coffee or tea, into doubled-up / strong-second-cup territory;
+  // healthy adults tolerate this fine, the warning is a heads-up for
+  // caffeine sensitivity, not a contraindication.
   const energyHigh = (perceivedEffects.energy || 0) >= 4;
   const focusHigh = (perceivedEffects.focus || 0) >= 4;
-  if (caffeineMg >= 60 && (energyHigh || focusHigh)) {
+  if (caffeineMg >= 130 && (energyHigh || focusHigh)) {
     warnings.push({
       kind: "caffeine",
       text: `High caffeine load (~${Math.round(caffeineMg)}mg) — may read wired or jittery for caffeine-sensitive bodies.`,
