@@ -1024,7 +1024,7 @@ export const BlendExtractionExplorer = ({
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
           color: theme.inkSoft, lineHeight: 1.5,
         }}>
-          Adaptogens work cumulatively. One cup is the start of the practice, not the answer.
+          Adaptogens in this mix contribute to the calm and grounding reads — their full effect builds over weeks of daily use, not within one cup.
         </div>
       )}
 
