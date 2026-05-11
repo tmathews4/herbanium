@@ -620,6 +620,10 @@ export const EXTRACTION_PROFILES = {
 
   // ─── Adaptogens & roots ─────────────────────────────────────
   ashwagandha: [
+    { tempC: 60,  timeS: 120,
+      flavorStrengths: [["earthy", 0.6], ["musty", 0.4]],
+      effects: [["grounding", 0.5]],
+      character: "Cold-pour ashwagandha — barely tinted water, the withanolides locked in the root." },
     { tempC: 95,  timeS: 600,  flavors: ["earthy", "musty"],
       effects: [["grounding", 2], ["calm", 2]],
       character: "Light ashwagandha — gentle root warmth, faint musk." },
@@ -632,6 +636,10 @@ export const EXTRACTION_PROFILES = {
   ],
 
   turmeric: [
+    { tempC: 60,  timeS: 120,
+      flavorStrengths: [["earthy", 0.5], ["musky", 0.3]],
+      effects: [["warming", 0.4]],
+      character: "Cold-pour turmeric — pale yellow water, curcumin still locked in the rhizome's fat-soluble fraction." },
     { tempC: 95,  timeS: 600, flavors: ["earthy", "musky"],
       effects: [["warming", 2], ["comfort", 1]],
       character: "Light turmeric — golden color, gentle warmth, mild musk." },
@@ -735,6 +743,10 @@ export const EXTRACTION_PROFILES = {
 
   // ─── Sleep & calming herbs (new) ────────────────────────────
   valerian: [
+    { tempC: 60, timeS: 120,
+      flavorStrengths: [["earthy", 0.5], ["musky", 0.4]],
+      effects: [["calm", 0.6]],
+      character: "Cold-pour valerian — barely any funk, the valerenic acid waiting for heat." },
     { tempC: 85, timeS: 600, flavors: ["earthy", "musky"],
       effects: [["calm", 3], ["sleepy", 2]],
       character: "Light valerian — the funk shows but stays gentle." },
@@ -797,6 +809,10 @@ export const EXTRACTION_PROFILES = {
   ],
 
   "dandelion-root": [
+    { tempC: 60,  timeS: 120,
+      flavorStrengths: [["caramel", 0.5], ["nutty", 0.3]],
+      effects: [["digestive", 0.5]],
+      character: "Cold-pour dandelion root — barely tinted water, the roasted compounds need real heat to release." },
     { tempC: 95,  timeS: 600,  flavors: ["caramel", "nutty"],
       effects: [["digestive", 2], ["comfort", 1]],
       character: "Light dandelion — toasted root warmth, gentle bittersweet." },
@@ -822,6 +838,10 @@ export const EXTRACTION_PROFILES = {
 
   // ─── Mushrooms ──────────────────────────────────────────────
   reishi: [
+    { tempC: 60,  timeS: 600,
+      flavorStrengths: [["woody", 0.4], ["earthy", 0.3]],
+      effects: [["calm", 0.4]],
+      character: "Cold-pour reishi — water with a wisp of wood; triterpenes need a real decoction to surrender." },
     { tempC: 95,  timeS: 1800, flavors: ["earthy", "woody"],
       effects: [["calm", 2], ["sleepy", 1]],
       character: "Short reishi — woody-earthy infusion, the bitter held back." },
@@ -834,6 +854,10 @@ export const EXTRACTION_PROFILES = {
   ],
 
   "lions-mane": [
+    { tempC: 60,  timeS: 120,
+      flavorStrengths: [["sweet", 0.4], ["umami", 0.3]],
+      effects: [["focus", 0.4]],
+      character: "Cold-pour lion's mane — pale broth-water, hericenones still locked in the fruiting body." },
     { tempC: 90,  timeS: 600,  flavors: ["sweet", "umami"],
       effects: [["focus", 2]],
       character: "Light lion's mane — gentle, almost broth-like." },
