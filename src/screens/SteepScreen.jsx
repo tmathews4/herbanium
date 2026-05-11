@@ -741,14 +741,32 @@ const MoodChipRow = ({ label, value, setValue, chips }) => {
     const next = selected.has(key) ? value.filter(k => k !== key) : [...(value || []), key];
     setValue(next);
   };
+  const count = selected.size;
   return (
-    <div style={{ marginBottom: 8, textAlign: "left" }}>
+    <div style={{
+      marginBottom: 8, textAlign: "left",
+      padding: "12px 14px",
+      background: theme.cream,
+      border: `1px solid ${theme.ruleSoft}`,
+      borderRadius: 10,
+      boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+    }}>
       <div style={{
-        fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.16em",
-        textTransform: "uppercase", color: theme.inkSoft, marginBottom: 6,
-        textAlign: "left",
-      }}>{label}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, justifyContent: "flex-start" }}>
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        marginBottom: 8,
+      }}>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>{label}</div>
+        <div style={{
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+          color: theme.ash,
+        }}>
+          {count > 0 ? `${count} selected · tap to remove` : "tap any that fit"}
+        </div>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-start" }}>
         {(chips || DESIRED_MOOD_CHIPS).map(c => {
           const isOn = selected.has(c.key);
           return (
@@ -756,14 +774,25 @@ const MoodChipRow = ({ label, value, setValue, chips }) => {
               key={c.key}
               onClick={() => toggle(c.key)}
               style={{
-                fontFamily: ff.serif, fontSize: 12.5,
-                padding: "5px 11px", borderRadius: 999,
-                background: isOn ? theme.terra : "transparent",
-                color: isOn ? theme.cream : theme.inkSoft,
-                border: `1px solid ${isOn ? theme.terra : theme.rule}`,
+                fontFamily: ff.serif, fontSize: 13.5,
+                padding: "7px 13px", borderRadius: 8,
+                background: isOn ? theme.terra : theme.ivory,
+                color: isOn ? theme.cream : theme.ink,
+                border: `1.5px solid ${isOn ? theme.terra : theme.rule}`,
                 cursor: "pointer", transition: "all 0.15s ease",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                lineHeight: 1,
               }}
-            >{c.label}</button>
+            >
+              <span aria-hidden="true" style={{
+                display: "inline-block", width: 8, height: 8,
+                borderRadius: "50%",
+                background: isOn ? theme.cream : "transparent",
+                border: `1.5px solid ${isOn ? theme.cream : theme.rule}`,
+                transition: "all 0.15s ease",
+              }} />
+              {c.label}
+            </button>
           );
         })}
       </div>
