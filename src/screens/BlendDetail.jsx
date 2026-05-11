@@ -403,6 +403,25 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           </div>
         )}
 
+        {/* Cultural beat — the ritual / lived practice behind the
+            cup. Surfaces for curated traditions (each has its own
+            culturalNote); experimentals stay quiet. Sits above the
+            ingredient list so the user reads the why before the
+            what — the cup's context, then its recipe. */}
+        {b.culturalNote && (
+          <div style={{
+            marginTop: 18, marginBottom: 18,
+            padding: "12px 14px",
+            borderLeft: `2px solid ${theme.ochre}`,
+            background: "rgba(193, 148, 80, 0.06)",
+            borderRadius: "0 6px 6px 0",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.inkSoft, lineHeight: 1.55,
+          }}>
+            {b.culturalNote}
+          </div>
+        )}
+
         {/* Ingredients — collapsible header. Default open. */}
         <div
           role="button"

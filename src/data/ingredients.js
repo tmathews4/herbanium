@@ -42,6 +42,8 @@ const INGREDIENTS = {
   chamomile: {
     name: "Chamomile", latin: "Matricaria chamomilla", category: "flower",
     form: "whole dried flower heads",
+    origin: "Europe and Western Asia",
+    shelfLife: "9–12 months airtight + dark",
     // Envelope stays narrow [95-100]°C / [240-420]s — that's where
     // the centroid-math (computeBrewProfile) expects the canonical
     // brewing window. tempZones/timeZones below extend wider for
@@ -98,6 +100,8 @@ const INGREDIENTS = {
   lavender: {
     name: "Lavender", latin: "Lavandula angustifolia", category: "flower",
     form: "dried buds (unopened)",
+    origin: "Mediterranean (especially Provence)",
+    shelfLife: "12 months airtight + dark",
     // Envelope stays at the canonical lavender brewing window
     // (perfume blooms cleanest 90-95°C / 3-4 min). Zones below
     // extend wider for the live explorer; overPull at 360s where
@@ -148,6 +152,8 @@ const INGREDIENTS = {
   rose: {
     name: "Rose Petal", latin: "Rosa × damascena", category: "flower",
     form: "whole dried petals (culinary-grade)",
+    origin: "Damascus rose: Bulgaria, Turkey, Iran",
+    shelfLife: "9–12 months airtight + dark",
     // Floral perfume — geraniol/citronellol release fast, but past
     // 6 min the cup goes flat-floral and the lift fades.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
@@ -196,6 +202,8 @@ const INGREDIENTS = {
   jasmine: {
     name: "Jasmine", latin: "Jasminum sambac", category: "flower",
     form: "dried whole flowers",
+    origin: "South and Southeast Asia",
+    shelfLife: "6–9 months (volatiles fade fast)",
     // Delicate white floral — needs cooler water than most herbs;
     // boiling scorches the perfume into something heavy and indolic.
     caffeine: 0, tempC: [75, 85], timeS: [120, 180],
@@ -244,6 +252,8 @@ const INGREDIENTS = {
   passionflower: {
     name: "Passionflower", latin: "Passiflora incarnata", category: "herbal",
     form: "dried leaves and flowers",
+    origin: "southeastern North America",
+    shelfLife: "9–12 months airtight + dark",
     // Sleep-leaning herbal — gentle calm at short steeps, deeper
     // sedation at long. Past 12 min the cup goes hay-flat.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
@@ -292,6 +302,8 @@ const INGREDIENTS = {
   lemonbalm: {
     name: "Lemon Balm", latin: "Melissa officinalis", category: "herbal",
     form: "dried leaves",
+    origin: "Southern Europe / Mediterranean",
+    shelfLife: "6–9 months (volatiles fade)",
     // Light citrus-herb register at short steeps, calming-herbal
     // register at longer. Tannins climb past 360s.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
@@ -345,6 +357,8 @@ const INGREDIENTS = {
   peppermint: {
     name: "Peppermint", latin: "Mentha × piperita", category: "herbal",
     form: "dried leaves, whole or rough-cut",
+    origin: "Europe (hybrid; arose in England)",
+    shelfLife: "9–12 months airtight + dark",
     // Cooling anchor (5). Multi-axis: menthol releases fast and
     // tolerates near-boil; over-pull past 8 min turns harsh.
     caffeine: 0, tempC: [95, 100], timeS: [180, 420],
@@ -396,6 +410,8 @@ const INGREDIENTS = {
   spearmint: {
     name: "Spearmint", latin: "Mentha spicata", category: "herbal",
     form: "dried leaves, whole or rough-cut",
+    origin: "Mediterranean basin",
+    shelfLife: "9–12 months airtight + dark",
     // Carvone-dominant — no menthol like peppermint, gentler cool.
     // Maghrebi-tradition cooler temp 85-90°C preserves the delicate
     // sweet-mint top.
@@ -445,6 +461,8 @@ const INGREDIENTS = {
   lemongrass: {
     name: "Lemongrass", latin: "Cymbopogon citratus", category: "herbal",
     form: "dried sliced stalks, or fresh stalks bruised",
+    origin: "tropical South and Southeast Asia",
+    shelfLife: "12 months airtight + dark",
     // Bright citrus-grass — citral releases fast; longer steeps
     // pull a softer aromatic body before turning grassy-flat.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
@@ -493,6 +511,8 @@ const INGREDIENTS = {
   fennel: {
     name: "Fennel Seed", latin: "Foeniculum vulgare", category: "spice",
     form: "whole seeds, lightly crushed",
+    origin: "Mediterranean basin",
+    shelfLife: "12–18 months whole; ground 6 months",
     // Digestive anchor (5). Bruised seeds release the licorice-anise
     // top fast; longer steeps deepen the cooling-digestive register.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
@@ -541,6 +561,8 @@ const INGREDIENTS = {
   hibiscus: {
     name: "Hibiscus", latin: "Hibiscus sabdariffa", category: "flower",
     form: "dried calyces (the fleshy red sepals)",
+    origin: "West Africa; Egypt and Sudan grow most",
+    shelfLife: "12 months airtight + dark",
     // High-traffic herbal — tart-cooling base of karkadé, jamaica,
     // bissap. Anthocyanins extract fast, color comes early; longer
     // steeps deepen tartness without going bitter.
@@ -590,6 +612,8 @@ const INGREDIENTS = {
   rooibos: {
     name: "Rooibos", latin: "Aspalathus linearis", category: "herbal",
     form: "cut, dried needle-like leaves",
+    origin: "Cederberg region, South Africa",
+    shelfLife: "18–24 months airtight",
     // Soothing anchor (5). Famously over-steep-tolerant — tannins
     // stay low, the cup keeps deepening rather than turning bitter.
     // overPull pushed to 900s reflecting that forgiveness.
@@ -642,6 +666,8 @@ const INGREDIENTS = {
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
     form: "dried whole leaves",
+    origin: "Indian subcontinent",
+    shelfLife: "9–12 months airtight + dark",
     // POC ingredient for the multi-zone brewing model. The outer
     // tempC/timeS is the envelope — anywhere inside is a real cup,
     // just a different register. Zones describe what each register
@@ -790,6 +816,8 @@ const INGREDIENTS = {
     name: "Ashwagandha", latin: "Withania somnifera", category: "adaptogen",
     subcategory: "root",
     form: "dried root chunks or powder",
+    origin: "India, parts of Africa, Middle East",
+    shelfLife: "12–18 months airtight + dark",
     aliases: ["asgandh", "asvagandha", "winter cherry"],
     // Adaptogenic root — bitter, slow-acting; the long-decoction
     // preparation pulls withanolides over 10-20 min.
@@ -856,6 +884,8 @@ const INGREDIENTS = {
   ginger: {
     name: "Ginger", latin: "Zingiber officinale", category: "spice",
     form: "fresh root (bruised) or dried sliced root",
+    origin: "tropical Asia (likely south China / India)",
+    shelfLife: "fresh 2–3 weeks fridge; dried 12–18 months",
     // Warming anchor (5). Decoction-friendly root — needs full
     // boil, tolerates long simmer up to ~12 min before the gingerol
     // turns harshly biting.
@@ -908,6 +938,8 @@ const INGREDIENTS = {
     name: "Turmeric", latin: "Curcuma longa", category: "spice",
     subcategory: "rhizome",
     form: "fresh root grated, or dried powder",
+    origin: "Indian subcontinent",
+    shelfLife: "dried whole 18–24 months; ground 6–12",
     aliases: ["haridra", "haldi", "golden spice"],
     // Decoction-style root — curcumin is fat-soluble and slow.
     // Without fat or pepper, water only pulls a fraction; long
@@ -969,6 +1001,8 @@ const INGREDIENTS = {
   cinnamon: {
     name: "Cinnamon", latin: "Cinnamomum verum", category: "spice",
     form: "whole stick, broken into pieces",
+    origin: "Sri Lanka (Ceylon) and southern India",
+    shelfLife: "sticks 2–3 years; ground 6–12 months",
     // Sweet-warm spice — releases fast as ground, slower as stick.
     // Past 12 min the cinnamon turns hot-and-numbing.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
@@ -1017,6 +1051,8 @@ const INGREDIENTS = {
   cardamom: {
     name: "Cardamom", latin: "Elettaria cardamomum", category: "spice",
     form: "green pods, lightly cracked",
+    origin: "Western Ghats, southern India",
+    shelfLife: "pods 12–18 months; ground 6 months",
     // Bright-floral spice — needs full heat for the volatile oils;
     // past 10 min the cup picks up an aggressive camphor-medicinal edge.
     caffeine: 0, tempC: [95, 100], timeS: [300, 480],
@@ -1065,6 +1101,8 @@ const INGREDIENTS = {
   cloves: {
     name: "Cloves", latin: "Syzygium aromaticum", category: "spice",
     form: "whole dried flower buds",
+    origin: "Maluku Islands, Indonesia",
+    shelfLife: "12–18 months whole; ground 6 months",
     // Powerful aromatic — eugenol releases fast and goes medicinal
     // hard past 7 min; less is always more.
     caffeine: 0, tempC: [95, 100], timeS: [300, 420],
@@ -1113,6 +1151,8 @@ const INGREDIENTS = {
   vanilla: {
     name: "Vanilla Bean", latin: "Vanilla planifolia", category: "spice",
     form: "whole bean, split lengthwise",
+    origin: "Mesoamerica (Mexico); now Madagascar most",
+    shelfLife: "2+ years sealed (whole bean)",
     // Slow-extracting bean — vanillin is fat-soluble and patient;
     // tolerates long steeps without going off, but never delivers
     // big flavor at quick brews.
@@ -1162,6 +1202,8 @@ const INGREDIENTS = {
   "black-pepper": {
     name: "Black Pepper", latin: "Piper nigrum", category: "spice",
     form: "whole peppercorns, freshly cracked",
+    origin: "Malabar coast, southwestern India",
+    shelfLife: "2–3 years whole; ground 6–12 months",
     aliases: ["peppercorn", "Maricha", "Kali Mirch", "King of spices"],
     caffeine: 0, tempC: [95, 100], timeS: [300, 900],
     effects: [["warming", 3], ["digestive", 4], ["focus", 1], ["energy", 1], ["uplifting", 1]],
@@ -1207,6 +1249,8 @@ const INGREDIENTS = {
 
   white: {
     name: "White Tea", latin: "Camellia sinensis", category: "true tea", subcategory: "white",
+    origin: "Fujian, China",
+    shelfLife: "12–18 months (improves slightly with age)",
     // Most delicate of the true teas — silver needle's character
     // is held back by hot water; cool brewing preserves the
     // honey-melon top notes.
@@ -1255,6 +1299,8 @@ const INGREDIENTS = {
   },
   sencha: {
     name: "Sencha Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "Japan",
+    shelfLife: "6–9 months (freshness is the cup)",
     // Steamed Japanese green — delicate and tannin-prone. Cooler
     // water and short steeps keep the umami sweet; aggressive heat
     // or long pulls scorch the leaf into harsh grass.
@@ -1303,6 +1349,8 @@ const INGREDIENTS = {
   },
   gyokuro: {
     name: "Gyokuro", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "Japan (Uji especially)",
+    shelfLife: "6–9 months refrigerated",
     // Shaded green tea — extreme low temp / short pour. Anything
     // hot scorches the high theanine; anything long pulls bitter.
     caffeine: 45, tempC: [50, 60], timeS: [90, 120],
@@ -1357,6 +1405,8 @@ const INGREDIENTS = {
   },
   matcha: {
     name: "Matcha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "Japan",
+    shelfLife: "30–60 days opened; 12 months sealed",
     aliases: ["抹茶", "tencha (pre-ground)", "usucha", "koicha"],
     // Focus anchor (5). Whisked, not steeped — the time axis here
     // is "from whisk to sip." Heat past 80°C scorches; sit too long
@@ -1425,6 +1475,8 @@ const INGREDIENTS = {
   },
   genmaicha: {
     name: "Genmaicha", latin: "Camellia sinensis + Oryza sativa", category: "true tea", subcategory: "green",
+    origin: "Japan",
+    shelfLife: "6–9 months airtight",
     aliases: ["玄米茶", "popcorn tea", "people's tea", "brown rice tea"],
     // Sencha + roasted brown rice — gentle popcorn-toast flavor.
     // Tannin-forgiving thanks to the rice; canonical cup short.
@@ -1483,6 +1535,8 @@ const INGREDIENTS = {
   },
   gunpowder: {
     name: "Gunpowder Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "Zhejiang, China",
+    shelfLife: "12 months (rolled keeps fresher)",
     // Pellet-rolled green — opens up gradually, gentler than sencha
     // but still tannin-prone past 4 min. Toasted-mineral register
     // anchors Maghrebi mint preparations. The pellets get their
@@ -1533,6 +1587,8 @@ const INGREDIENTS = {
   },
   hojicha: {
     name: "Hojicha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "Japan (Kyoto especially)",
+    shelfLife: "6–9 months airtight",
     // Roasted green — needs full boil but very short pour. The
     // caramel-toasted character is forgiving but past 90s the
     // toasted register flattens into char.
@@ -1588,6 +1644,8 @@ const INGREDIENTS = {
   },
   dragonwell: {
     name: "Dragonwell", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
+    origin: "West Lake, Hangzhou, China",
+    shelfLife: "6–9 months (freshness is the cup)",
     // Pan-fired Chinese green — chestnut-sweet with a clean
     // vegetal body. Less tannin-prone than sencha; tolerates a
     // touch more time and heat.
@@ -1636,6 +1694,8 @@ const INGREDIENTS = {
   },
   oolong: {
     name: "Oolong", latin: "Camellia sinensis", category: "true tea", subcategory: "oolong",
+    origin: "Fujian, China and Taiwan",
+    shelfLife: "12–24 months (high-oxidation longer)",
     // Partial-oxidation tea — sits between green and black on
     // every axis. Multi-steepable; the canonical gongfu cup uses
     // short pours that develop across re-steeps.
@@ -1684,6 +1744,8 @@ const INGREDIENTS = {
   },
   assam: {
     name: "Assam Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    origin: "Assam, India",
+    shelfLife: "18–24 months airtight",
     // Energy anchor (5). Robust, malt-forward black tea — needs
     // full boil for proper extraction. Tannins climb hard past
     // 5 minutes; the cup turns biting at the over-pull edge.
@@ -1834,6 +1896,8 @@ const INGREDIENTS = {
   },
   darjeeling: {
     name: "Darjeeling", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    origin: "Darjeeling, West Bengal, India",
+    shelfLife: "12–18 months airtight",
     // Uplifting anchor (5). Delicate first-flush register — light,
     // muscatel, floral. Goes tannic fast past 4 minutes; bitter
     // grip is the failure mode.
@@ -1886,6 +1950,8 @@ const INGREDIENTS = {
   },
   ceylon: {
     name: "Ceylon Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    origin: "Sri Lanka (formerly Ceylon)",
+    shelfLife: "18–24 months airtight",
     // Bright black tea — citrus-forward, less malty than Assam.
     // The Earl Grey base and Russian-tea backbone. Tannins climb
     // hard past 4 min.
@@ -1934,6 +2000,8 @@ const INGREDIENTS = {
   },
   lapsang: {
     name: "Lapsang Souchong", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
+    origin: "Wuyi Mountains, Fujian, China",
+    shelfLife: "18–24 months (smoke is forgiving)",
     // Pine-smoked Wuyi black tea — campfire register, deep and
     // grounding. The smoke holds well; tannins climb past 5 min.
     caffeine: 30, tempC: [95, 100], timeS: [180, 240],
@@ -1981,6 +2049,8 @@ const INGREDIENTS = {
   },
   puerh: {
     name: "Shou Pu-erh", latin: "Camellia sinensis", category: "true tea", subcategory: "pu-erh",
+    origin: "Yunnan, China",
+    shelfLife: "indefinite (ages well; shou stabilizes fast)",
     // Fermented Yunnan tea — earthy, grounding, multi-steepable.
     // Quick first pour, then ~1-3 min for the canonical cup.
     caffeine: 35, tempC: [95, 100], timeS: [60, 180],
@@ -2041,6 +2111,8 @@ const INGREDIENTS = {
     name: "Yerba Mate", latin: "Ilex paraguariensis", category: "herbal",
     subcategory: "leaf",
     form: "cut, dried leaves and stems",
+    origin: "Paraguay, southern Brazil, NE Argentina",
+    shelfLife: "12 months airtight",
     // South American gourd-tea — high caffeine, vegetal,
     // multi-refill register. Cool water keeps the bitterness down;
     // hot water turns the cup harshly tannic.
@@ -2113,6 +2185,8 @@ const INGREDIENTS = {
     name: "Valerian", latin: "Valeriana officinalis", category: "herbal",
     subcategory: "root",
     form: "dried root, in chunks or coarse cut",
+    origin: "Europe and Asia",
+    shelfLife: "12–18 months airtight + dark",
     aliases: ["all-heal", "garden heliotrope", "setwall"],
     // Sleepy anchor (5). Long-decoction root — needs the slow
     // simmer to release the valepotriates. The famous "sock smell"
@@ -2183,6 +2257,8 @@ const INGREDIENTS = {
     name: "Echinacea", latin: "Echinacea purpurea", category: "herbal",
     subcategory: "flower",
     form: "dried root (more potent) or aerial parts",
+    origin: "Great Plains of North America",
+    shelfLife: "12 months aerial; 18 months root",
     aliases: ["purple coneflower", "Black Sampson"],
     // Cold-care herb — daisy-family root + flower. The
     // immune-support character builds slowly; quick brews barely
@@ -2247,6 +2323,8 @@ const INGREDIENTS = {
   elderflower: {
     name: "Elderflower", latin: "Sambucus nigra", category: "flower",
     form: "dried whole florets",
+    origin: "Europe and parts of North America",
+    shelfLife: "9–12 months airtight + dark",
     aliases: ["black elder", "Holunder", "Sureau", "Sambuco", "Saúco"],
     // Honey-floral cold-care herb. Light infusion captures the
     // perfume; longer pulls the flavonoid body that supports the
@@ -2312,6 +2390,8 @@ const INGREDIENTS = {
   linden: {
     name: "Linden", latin: "Tilia cordata", category: "flower",
     form: "dried flowers with attached leaf-bract",
+    origin: "Europe and Western Asia",
+    shelfLife: "9–12 months airtight + dark",
     aliases: ["lime flower", "Tilleul", "Tila", "Lipa", "Linde"],
     // Honey-floral tisane, gentler-cousin of chamomile.
     tempZones: [
@@ -2380,6 +2460,8 @@ const INGREDIENTS = {
     name: "Licorice Root", latin: "Glycyrrhiza glabra", category: "herbal",
     subcategory: "root",
     form: "dried root chips",
+    origin: "Western Asia + Mediterranean (G. glabra)",
+    shelfLife: "18–24 months airtight + dark",
     aliases: ["sweet root", "Gan Cao 甘草", "Mulethi", "Yashtimadhu", "liquorice"],
     // Throat-coat root — sweet glycyrrhizin builds slowly. Long
     // simmer is the canonical preparation; quick brews barely
@@ -2460,6 +2542,8 @@ const INGREDIENTS = {
     name: "Marshmallow Root", latin: "Althaea officinalis", category: "herbal",
     subcategory: "root",
     form: "dried root chunks (cold infusion preferred)",
+    origin: "Europe, North Africa, Western Asia",
+    shelfLife: "12–18 months airtight + dark",
     aliases: ["althaea", "white mallow", "guimauve", "Khatmi"],
     // Mucilage-forward demulcent. Unlike most roots, the active
     // compound (long-chain polysaccharides ~25-35% of dried mass)
@@ -2535,6 +2619,8 @@ const INGREDIENTS = {
     name: "Nettle", latin: "Urtica dioica", category: "herbal",
     subcategory: "leaf",
     form: "dried leaves",
+    origin: "Europe, Asia, North Africa",
+    shelfLife: "9–12 months airtight + dark",
     aliases: ["stinging nettle", "common nettle", "Bichu butti"],
     // Mineral-rich tonic herb — long-infusion preparation pulls
     // chlorophyll, minerals, and a green tannic body.
@@ -2604,6 +2690,8 @@ const INGREDIENTS = {
     name: "Dandelion Root", latin: "Taraxacum officinale (radix)", category: "herbal",
     subcategory: "root",
     form: "roasted root chunks (or raw dried)",
+    origin: "Europe and Asia (now nearly global)",
+    shelfLife: "12–18 months airtight + dark",
     aliases: ["roasted dandelion root", "dandelion coffee", "Pissenlit", "lion's tooth", "Pu Gong Ying 蒲公英"],
     relatedIngredient: "dandelion-leaf",
     // Coffee-substitute root — roasted, bittersweet, slow-extracting.
@@ -2673,6 +2761,8 @@ const INGREDIENTS = {
     name: "Dandelion Leaf", latin: "Taraxacum officinale (folium)", category: "herbal",
     subcategory: "leaf",
     form: "dried leaves",
+    origin: "Europe and Asia (now nearly global)",
+    shelfLife: "9–12 months airtight + dark",
     aliases: ["dandelion greens", "Pissenlit", "lion's tooth", "Taraxaci folium"],
     relatedIngredient: "dandelion-root",
     // Spring-tonic green — bitter, mineral-rich, diuretic.
@@ -2748,6 +2838,8 @@ const INGREDIENTS = {
     name: "Sage", latin: "Salvia officinalis", category: "herbal",
     subcategory: "leaf",
     form: "dried whole leaves",
+    origin: "Mediterranean (Salvia officinalis)",
+    shelfLife: "9–12 months airtight + dark",
     aliases: ["common sage", "garden sage", "salvia", "sauge", "Salbei"],
     // Mediterranean savory-aromatic. Tannin and camphor both climb
     // past 7 min; the cup goes harshly medicinal there.
@@ -2799,6 +2891,8 @@ const INGREDIENTS = {
     name: "Bergamot Peel", latin: "Citrus bergamia", category: "herbal",
     subcategory: "peel",
     form: "dried zest strips",
+    origin: "Calabria, southern Italy",
+    shelfLife: "6–9 months (volatile zest oil)",
     aliases: ["bergamot orange", "Earl Grey citrus", "bergamotto"],
     // Calabrian citrus peel — perfumed, floral-citrus. Volatile
     // oils dissipate fast past 5 min; longer pulls the bitter pith.
@@ -2848,6 +2942,8 @@ const INGREDIENTS = {
     name: "Orange Peel", latin: "Citrus sinensis", category: "herbal",
     subcategory: "peel",
     form: "dried zest strips (pith removed)",
+    origin: "origin China; now worldwide",
+    shelfLife: "6–9 months (volatile zest oil)",
     aliases: ["sweet orange peel", "bitter orange peel", "chen pi 陈皮", "zest"],
     // Limonene-forward warming citrus peel. Pith bitter climbs
     // past 8 min once the volatiles dissipate.
@@ -2898,6 +2994,8 @@ const INGREDIENTS = {
     name: "Dried Apple", latin: "Malus domestica", category: "herbal",
     subcategory: "fruit",
     form: "dehydrated rings or chunks",
+    origin: "Central Asia (Malus sieversii origin)",
+    shelfLife: "12 months airtight",
     aliases: ["apple pieces", "apfeltee fruit", "pomme séchée"],
     // Sweet dried fruit — sugars and pectin extract slowly, no
     // bitter ceiling. Long steeps just deepen sweetness.
@@ -2948,6 +3046,8 @@ const INGREDIENTS = {
     name: "Dried Cranberry", latin: "Vaccinium macrocarpon", category: "herbal",
     subcategory: "fruit",
     form: "dehydrated whole berries, unsweetened",
+    origin: "eastern + central North America",
+    shelfLife: "12 months airtight",
     aliases: ["American cranberry", "atoca", "craneberry"],
     // Tart North American berry — quinic + malic + citric acid
     // mix. Past 8 min the cup goes pucker-aggressive without
@@ -2999,6 +3099,8 @@ const INGREDIENTS = {
     name: "Lemon Peel", latin: "Citrus limon", category: "herbal",
     subcategory: "peel",
     form: "dried zest strips (pith removed)",
+    origin: "origin NE India / Burma",
+    shelfLife: "6–9 months (volatile zest oil)",
     aliases: ["lemon zest", "zeste de citron", "scorza di limone"],
     // Sharp citral citrus peel — bright and direct. Past 8 min
     // the pith bitter overtakes the citrus.
@@ -3050,6 +3152,8 @@ const INGREDIENTS = {
     name: "Reishi", latin: "Ganoderma lucidum", category: "herbal",
     subcategory: "fungus",
     form: "dried mushroom slices",
+    origin: "East Asia (China, Japan, Korea)",
+    shelfLife: "12–18 months airtight + dark",
     aliases: ["Lingzhi 灵芝", "Mannentake 万年茸", "mushroom of immortality"],
     // Grounding anchor (5). Long-decoction fungus — the triterpenes
     // are fat-soluble and slow. Anything under 30 minutes barely
@@ -3120,6 +3224,8 @@ const INGREDIENTS = {
     name: "Lion's Mane", latin: "Hericium erinaceus", category: "herbal",
     subcategory: "fungus",
     form: "dried slices or powder",
+    origin: "Northern Hemisphere forests",
+    shelfLife: "12 months airtight",
     aliases: ["Yamabushitake 山伏茸", "Hou Tou Gu 猴頭菇", "monkey head mushroom", "bearded tooth fungus", "pom pom mushroom"],
     // Long-decoction medicinal mushroom — sweeter and lighter than
     // reishi but still wants 10-30 min simmer for full extraction.

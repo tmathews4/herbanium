@@ -173,24 +173,50 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.2 }}>
             {ing.latin}
           </div>
+          {/* Origin — where this ingredient is historically grown.
+              Sits just below the latin name so the "what is this"
+              stack reads: common name, taxonomy, provenance. */}
+          {ing.origin && (
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+              color: theme.ash, marginTop: 3, lineHeight: 1.3,
+              maxWidth: 320,
+            }}>
+              from {ing.origin}
+            </div>
+          )}
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.2em",
             textTransform: "uppercase", color: theme.ash, marginTop: 8,
           }}>
             {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
           </div>
-          {/* Form / preparation — how the ingredient is sold and used.
-              Surfaces for spices, flowers, roots, and other non-obvious
-              ingredients where "do I buy whole or ground?" matters.
-              True teas skip this (loose-leaf is implicit) so the field
-              is conditional on being present in the catalog entry. */}
-          {ing.form && (
+          {/* Kitchen know-how — form (what to buy) + shelf life (when
+              it goes stale). Two short lines grouped visually so the
+              user reading the hero gets the practical block separate
+              from the taxonomic block above. */}
+          {(ing.form || ing.shelfLife) && (
             <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-              color: theme.inkSoft, marginTop: 6, lineHeight: 1.4,
-              maxWidth: 320,
+              marginTop: 6, maxWidth: 320,
+              display: "flex", flexDirection: "column", gap: 2,
             }}>
-              {ing.form}
+              {ing.form && (
+                <div style={{
+                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                  color: theme.inkSoft, lineHeight: 1.4,
+                }}>
+                  {ing.form}
+                </div>
+              )}
+              {ing.shelfLife && (
+                <div style={{
+                  fontFamily: ff.sans, fontSize: 10.5,
+                  color: theme.ash, lineHeight: 1.4,
+                  letterSpacing: "0.04em",
+                }}>
+                  keeps {ing.shelfLife}
+                </div>
+              )}
             </div>
           )}
         </div>

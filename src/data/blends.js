@@ -112,6 +112,7 @@ const BLENDS = [
     public: true,
     tradition: "South Asian",
     effects: [["energy", 4], ["warming", 5], ["digestive", 3]],
+    culturalNote: "The pot stays on the stove between servings — family and guests are offered cups throughout the day, and each pour is an invitation to sit. Spice ratios vary by household; one family's chai is never quite another's.",
   },
   {
     id: "moroccan",
@@ -127,6 +128,7 @@ const BLENDS = [
     tradition: "Maghrebi",
     style: "low-temp",
     effects: [["focus", 3], ["cooling", 3], ["uplifting", 3]],
+    culturalNote: "The three-pour ritual — pouring from height to oxygenate and back into the pot three times — is the host's gesture: the first pour gentle as life, the second strong as love, the third bitter as death. A guest who declines all three glasses is making a statement.",
   },
   {
     id: "darj-neat",
@@ -140,6 +142,7 @@ const BLENDS = [
     public: true,
     tradition: "Indian / Himalayan",
     effects: [["uplifting", 4], ["energy", 3], ["focus", 3]],
+    culturalNote: "Drunk neat in Darjeeling itself — the muscatel character is the cup's reason. Milk is for breakfast Assam down on the plains, not for the first-flush leaves a thousand kilometers north.",
   },
   {
     id: "sencha-properly",
@@ -154,6 +157,7 @@ const BLENDS = [
     tradition: "Japanese",
     style: "low-temp",
     effects: [["focus", 4], ["energy", 3], ["calm", 3]],
+    culturalNote: "Japanese tea drunk in the kitchen during the working day, not in ceremony. The brief steep and complete pour reflect a respect for the leaf as a working partner rather than a ritual object.",
   },
   {
     id: "usucha",
@@ -168,6 +172,7 @@ const BLENDS = [
     tradition: "Japanese / chanoyu",
     style: "low-temp",
     effects: [["focus", 5], ["energy", 4], ["calm", 3]],
+    culturalNote: "The whisked-tea preparation that opens chanoyu, the Way of Tea. The host warms the bowl, sifts the matcha, whisks until foam coats the surface; the guest accepts in three measured sips. Every motion rehearsed, every motion meant.",
   },
   {
     id: "hojicha-evening",
@@ -181,6 +186,7 @@ const BLENDS = [
     public: true,
     tradition: "Japanese",
     effects: [["soothing", 4], ["calm", 3], ["warming", 3]],
+    culturalNote: "Roasted in iron pans in Kyoto since the 1920s — the technique was invented to use up tea stems that wouldn't sell. Now it's the evening cup, low in caffeine, served with the day's last meal.",
   },
   {
     id: "shou-puerh",
@@ -194,6 +200,7 @@ const BLENDS = [
     public: true,
     tradition: "Chinese / Tibetan",
     effects: [["digestive", 4], ["grounding", 3], ["warming", 3]],
+    culturalNote: "Pressed into cakes for centuries of transport along the Tea Horse Road from Yunnan to Tibet. Aged sheng improves with the years; cooked shou is engineered for the dark earthy register from the start. Both keep indefinitely.",
   },
   {
     id: "wuyi-smoke",
@@ -207,6 +214,7 @@ const BLENDS = [
     public: true,
     tradition: "Chinese (Fujian)",
     effects: [["warming", 4], ["grounding", 3], ["energy", 3]],
+    culturalNote: "Smoked over pinewood fires during processing — legend has it the smoke came from soldiers warming the leaves through the night during the Qing dynasty. The pine resin is the cup's signature, distinctive in any blind tasting.",
   },
   {
     id: "cimarron",
@@ -221,6 +229,7 @@ const BLENDS = [
     tradition: "South American gaucho",
     style: "low-temp",
     effects: [["energy", 4], ["focus", 3], ["uplifting", 2]],
+    culturalNote: "Drunk through a metal bombilla from a hollowed gourd, passed in a circle of friends or family. The first pour is for the cebador — bitter, weak, the unsweetened opening of the round. Subsequent pours sweeten or take herbs.",
   },
 
   // ── Apothecary classics (herbal traditionals) ─────────────
@@ -242,6 +251,7 @@ const BLENDS = [
     tradition: "Ayurvedic",
     style: "decoction",
     effects: [["warming", 4], ["soothing", 3], ["digestive", 3]],
+    culturalNote: "Made for centuries by Indian grandmothers for joint pain, weakness, the after-tail of illness. The black pepper isn't seasoning — it raises curcumin's bioavailability by orders of magnitude. The kitchen anticipated the pharmacology.",
   },
   {
     id: "all-heal",
@@ -257,6 +267,7 @@ const BLENDS = [
     public: true,
     tradition: "Western herbal",
     effects: [["sleepy", 5], ["calm", 4], ["soothing", 3]],
+    culturalNote: "Western herbalist sleep blend, calibrated for the body's settling: chamomile and valerian for the descent, lemon balm to soften anxiety, passionflower for the deepest part of the curve.",
   },
   {
     id: "throat-coat",
@@ -274,6 +285,7 @@ const BLENDS = [
     tradition: "Western herbal / TCM",
     style: "decoction",
     effects: [["soothing", 4], ["digestive", 3], ["warming", 2]],
+    culturalNote: "The mucilage-forward blend Western herbalists reach for when the throat is raw. Licorice and marshmallow coat the irritated tissue; the cup is meant to be drunk slowly, let the demulcent do its mechanical work.",
   },
   {
     id: "spring-tonic",
@@ -290,6 +302,7 @@ const BLENDS = [
     tradition: "European folk / Wise Woman",
     style: "decoction",
     effects: [["soothing", 3], ["digestive", 3], ["grounding", 2]],
+    culturalNote: "Drunk in early spring to clear the body of winter's heaviness — the Wise Woman tradition of European folk herbalism. Nettle and dandelion's mineral-rich, faintly bitter cup prepares the system for the lighter foods of summer.",
   },
   {
     id: "mycelium-morning",
@@ -307,6 +320,7 @@ const BLENDS = [
     tradition: "modern adaptogen",
     style: "decoction",
     effects: [["focus", 3], ["grounding", 4], ["calm", 3]],
+    culturalNote: "A modern preparation, grown out of the late-2010s functional-foods movement. Daily use is the tradition; one cup tells you nothing. The patience is the practice.",
   },
   {
     id: "tulsi-doorstep",
@@ -322,6 +336,7 @@ const BLENDS = [
     public: true,
     tradition: "Ayurvedic",
     effects: [["focus", 3], ["calm", 3], ["warming", 2]],
+    culturalNote: "Tulsi is grown at the threshold of Indian homes — asked permission before harvest, treated as a household deity. The cup is what daily care reciprocates.",
   },
   {
     // Validated against a real test brew — 97°C / 4 min came back
@@ -342,6 +357,7 @@ const BLENDS = [
     public: true,
     tradition: "Indian household",
     effects: [["energy", 5], ["focus", 3], ["uplifting", 3], ["warming", 3]],
+    culturalNote: "Indian households brew Assam strong for breakfast; the leaves give a second pour by lunch, often with tulsi from the doorstep plant added for the afternoon cup. The plantation estate and the household threshold both end up in the same kettle.",
   },
   {
     id: "pissenlit-cafe",
@@ -359,6 +375,7 @@ const BLENDS = [
     tradition: "European wartime",
     style: "decoction",
     effects: [["digestive", 3], ["warming", 2], ["grounding", 2]],
+    culturalNote: "French during the wars when coffee was rationed. Dandelion root roasted dark, ground, brewed like coffee. Caramel, bittersweet, no caffeine — the cup that kept the morning ritual alive when the beans didn't come.",
   },
   {
     id: "holunder-care",
@@ -375,6 +392,7 @@ const BLENDS = [
     public: true,
     tradition: "European cold-care",
     effects: [["soothing", 3], ["warming", 2], ["uplifting", 2]],
+    culturalNote: "European cold-care tradition: elderflower for the fever, echinacea for the fight. Drunk at the first sign of illness, with honey if the throat is raw.",
   },
   {
     id: "earl-grey",
@@ -389,6 +407,7 @@ const BLENDS = [
     public: true,
     tradition: "British",
     effects: [["uplifting", 4], ["energy", 3], ["focus", 3], ["calm", 2]],
+    culturalNote: "Bergamot oil over Ceylon, a 19th-century British blend possibly named for Charles Grey, 2nd Earl Grey. The story has many versions; the cup is reliable across all of them.",
   },
   {
     id: "lady-grey",
@@ -405,6 +424,7 @@ const BLENDS = [
     public: true,
     tradition: "British (Twinings, 1992)",
     effects: [["uplifting", 4], ["energy", 3], ["focus", 2], ["digestive", 2]],
+    culturalNote: "Twinings developed it in 1992 for the Norwegian market — lighter, more citrus, less bergamot than the Earl. A modern blend with a deliberately gentler register.",
   },
   {
     id: "russian-lemon",
@@ -419,6 +439,7 @@ const BLENDS = [
     public: true,
     tradition: "Russian",
     effects: [["energy", 4], ["uplifting", 3], ["digestive", 2], ["warming", 2]],
+    culturalNote: "Black tea drunk through a sugar cube held between the teeth, with a slice of lemon. Strong, sweet, sour all at once. The cup carried Russians through long winters and longer trains.",
   },
   {
     id: "canarino",
@@ -432,6 +453,7 @@ const BLENDS = [
     public: true,
     tradition: "Italian household",
     effects: [["digestive", 3], ["uplifting", 3], ["cooling", 2]],
+    culturalNote: "Italian household digestivo — sometimes just a strip of lemon zest in hot water, served after a meal. The minimalism IS the tradition; you're meant to taste the citrus oil bloom.",
   },
   {
     id: "apfeltee",
@@ -448,6 +470,7 @@ const BLENDS = [
     public: true,
     tradition: "Bavarian / Austrian",
     effects: [["comfort", 4], ["warming", 3], ["soothing", 3]],
+    culturalNote: "Bavarian winter cup — dried apples, orange peel, cinnamon, clove. Drunk hot from December through February, often around the Christkindlmarkt stalls.",
   },
 
   // Egyptian household staple; brewed strong and sweet, served hot
@@ -467,6 +490,7 @@ const BLENDS = [
     public: true,
     tradition: "Egyptian / North African",
     effects: [["cooling", 4], ["uplifting", 3], ["soothing", 2]],
+    culturalNote: "Egyptian hibiscus, brewed strong, sweetened generously, served hot for winter weddings and chilled for summer afternoons. The deep ruby color is part of the cup's identity — pour it into a glass so the light comes through.",
   },
 
   // Kashmiri green-tea preparation; saffron and slivered almonds are
@@ -489,6 +513,7 @@ const BLENDS = [
     public: true,
     tradition: "Kashmiri",
     effects: [["warming", 4], ["comfort", 3], ["uplifting", 3], ["calm", 2]],
+    culturalNote: "Kashmiri winter cup — green tea spiced with cardamom and cinnamon, scented with rose, traditionally served from a samovar. The cup carries the Kashmir Valley through its long snowy season.",
   },
 
   // Javanese / Indonesian household warming drink, served hot during
@@ -512,6 +537,7 @@ const BLENDS = [
     tradition: "Javanese / Indonesian",
     style: "decoction",
     effects: [["warming", 5], ["digestive", 3], ["energy", 2], ["soothing", 2]],
+    culturalNote: "Indonesian / Javanese rainy-season warmer — sold from street stalls (warungs) and brewed at home through the wet months. Sweet with palm sugar, hot, drunk slowly while the rain falls.",
   },
 
   // Andalusian household after-dinner infusion; chamomile-led with
@@ -532,6 +558,7 @@ const BLENDS = [
     public: true,
     tradition: "Andalusian / Mediterranean folk",
     effects: [["calm", 4], ["soothing", 3], ["digestive", 2], ["cooling", 2]],
+    culturalNote: "Andalusian after-dinner tisana — chamomile and lemon balm, with spearmint for the bright top. The cup arrives with the dessert plate; a small pot, a few cups, a long conversation.",
   },
 
   // Italian household post-meal infusion; the full carminative
@@ -553,6 +580,7 @@ const BLENDS = [
     public: true,
     tradition: "Italian household",
     effects: [["digestive", 4], ["calm", 3], ["soothing", 2], ["warming", 2]],
+    culturalNote: "The Italian nonna's after-meal cup — fennel, chamomile, lemon peel. Brewed at the end of a heavy meal, sipped while the family lingers at the table. Not optional, not rushed.",
   },
 
   // ── Experimental house customs ─────────────────────────────
@@ -886,6 +914,7 @@ const BLENDS = [
     tradition: "Japanese",
     style: "low-temp",
     effects: [["focus", 5], ["calm", 4], ["energy", 3]],
+    culturalNote: "Shaded-grown Japanese green, the most precious leaf in Japan. The cup is impossibly umami, brewed in tiny volumes at very cool temperatures. Drunk slowly from small thimble cups.",
   },
 ];
 
