@@ -129,13 +129,13 @@ export const EXTRACTION_PROFILES = {
 
   rooibos: [
     { tempC: 95,  timeS: 240, flavors: ["honey", "woody", "warm"],
-      effects: [["comfort", 3], ["digestive", 2]],
+      effects: [["comfort", 3], ["soothing", 2], ["digestive", 2]],
       character: "Light rooibos — warm honeywater, no tannins to speak of." },
     { tempC: 98,  timeS: 360, flavors: ["honey", "woody", "vanilla", "warm"],
-      effects: [["comfort", 4], ["digestive", 3]],
+      effects: [["comfort", 4], ["soothing", 3], ["digestive", 3]],
       character: "The standard cup. Round, sweet, forgiving — can't over-steep." },
     { tempC: 100, timeS: 420, flavors: ["honey", "woody", "vanilla", "earthy", "warm", "rich"],
-      effects: [["comfort", 4], ["digestive", 3]],
+      effects: [["comfort", 4], ["soothing", 3], ["digestive", 3]],
       character: "Fuller body. Rooibos stays sweet even pushed — one of its charms." },
   ],
 

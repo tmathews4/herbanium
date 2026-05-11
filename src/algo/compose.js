@@ -1562,6 +1562,25 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     synergyTags.push("absorbed deep");
   }
 
+  // Licorice as harmonizer — Chinese herbalism's Gan Cao role.
+  // Glycyrrhizin adds sweetness AND smooths perceived bitter /
+  // astringent edges; licorice appears in ~60% of TCM formulas
+  // for exactly this reason. When licorice makes up at least 10%
+  // of cup weight, reduce the cup-level bitter and astringent
+  // readings by 25% and add a 'harmonized' synergy tag. Operates
+  // on the perceived flavor map, so balance bars and warnings
+  // both see the smoothed values. Doesn't affect mood effects —
+  // it's a palate modulation, not a sedative or energizing role.
+  const licoriceWeight = ingredients
+    .filter(({ id }) => id === "licorice-root")
+    .reduce((s, i) => s + (i.g || 0), 0);
+  if (licoriceWeight / Math.max(0.01, totalG) >= 0.10) {
+    if (perceivedFlavorMap.bitter) perceivedFlavorMap.bitter *= 0.75;
+    if (perceivedFlavorMap.bitterness) perceivedFlavorMap.bitterness *= 0.75;
+    if (perceivedFlavorMap.astringent) perceivedFlavorMap.astringent *= 0.75;
+    synergyTags.push("harmonized");
+  }
+
   // Declared `effects` are now labels for search/curation only — the
   // engine output stands on its own so the chemistry can be honest.
 

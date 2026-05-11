@@ -322,12 +322,23 @@ export const EFFECT_SYNERGIES = [
   // pattern. Yunnan-Tibetan decoction register. Cup that anchors
   // AND warms, the cold-weather constitutional brew.
   { when: ["grounding", "warming"], bonus: { grounding: 0.3, warming: 0.2 }, label: "winter root" },
+  // Holding cup — chamomile + rooibos / vanilla pattern. The cup
+  // that quiets the body and warms it at once. Soothing is the
+  // body-relax register; comfort is the felt-warmth-of-spirit.
+  // Together they describe a held-and-tucked-in feel.
+  { when: ["soothing", "comfort"],  bonus: { soothing: 0.3, comfort: 0.2 }, label: "the holding cup" },
 ];
 
 // Effect pairs that co-exist legitimately rather than canceling.
 // When both are present at meaningful strength, surface a paradox tag.
+// 'energy + sleepy' covers cups where the user has stacked a
+// caffeinated tea with a sedative herb (valerian, passionflower,
+// chamomile-heavy) — the cup honestly pushes both directions and
+// the user deserves to know rather than have the engine quietly
+// average it out.
 const ALLOWED_PARADOXES = [
   ["warming", "cooling"],
+  ["energy", "sleepy"],
 ];
 
 /**
