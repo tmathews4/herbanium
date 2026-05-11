@@ -61,13 +61,13 @@ export const EXTRACTION_PROFILES = {
 
   hibiscus: [
     { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright"],
-      effects: [["cooling", 2]],
+      effects: [["cooling", 2], ["uplifting", 2]],
       character: "Light hibiscus — a pink tang, gentle brightness." },
     { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry", "berry", "bright"],
-      effects: [["cooling", 3], ["digestive", 2]],
+      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2]],
       character: "The standard cup. Ruby color, tart and lively." },
     { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent", "bright"],
-      effects: [["cooling", 3], ["digestive", 2], ["bitterness", 2]],
+      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2], ["bitterness", 2]],
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
 
@@ -195,13 +195,13 @@ export const EXTRACTION_PROFILES = {
 
   cardamom: [
     { tempC: 95,  timeS: 240, flavors: ["spiced", "floral"],
-      effects: [["warming", 2], ["comfort", 3], ["digestive", 2], ["energy", 2]],
+      effects: [["warming", 2], ["comfort", 3], ["digestive", 2], ["energy", 2], ["uplifting", 1]],
       character: "Light cardamom — aromatic and floral, the upper register." },
     { tempC: 98,  timeS: 360, flavors: ["spiced", "floral", "citrus", "complex"],
-      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3]],
+      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2]],
       character: "The standard cup. Full cardamom character — complex, lifting." },
     { tempC: 100, timeS: 480, flavors: ["spiced", "floral", "citrus", "complex", "camphor"],
-      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3], ["bitterness", 2]],
+      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["bitterness", 2]],
       character: "Pushed too far. Volatile aromatics escape; camphor takes their place." },
   ],
 
@@ -231,13 +231,13 @@ export const EXTRACTION_PROFILES = {
 
   fennel: [
     { tempC: 95,  timeS: 240, flavors: ["licorice", "sweet"],
-      effects: [["digestive", 3], ["calm", 1]],
+      effects: [["digestive", 3], ["calm", 1], ["warming", 1]],
       character: "Light fennel — sweet anise, clean and gentle." },
     { tempC: 98,  timeS: 360, flavors: ["licorice", "sweet", "aromatic"],
-      effects: [["digestive", 4], ["calm", 2]],
+      effects: [["digestive", 4], ["calm", 2], ["warming", 2]],
       character: "The standard cup. Full fennel character — digestive and soothing." },
     { tempC: 100, timeS: 420, flavors: ["licorice", "sweet", "aromatic", "bitter"],
-      effects: [["digestive", 4], ["calm", 2], ["bitterness", 2]],
+      effects: [["digestive", 4], ["calm", 2], ["warming", 2], ["bitterness", 2]],
       character: "Pushed hard — fennel turns bitter behind the sweetness." },
   ],
 
