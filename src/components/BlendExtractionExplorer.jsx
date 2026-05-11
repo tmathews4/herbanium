@@ -41,6 +41,7 @@ import { restHintForCelsius } from "../helpers/misc";
 // now" — about where a regular black tea / mid-coffee lands. The
 // 250mg ceiling holds for stacked caffeine-bearing leaves.
 const CAFFEINE_MAX_MG = 250;
+const CAFFEINE_GENTLE_MAX_MG = 40;
 const CAFFEINE_CAUTION_MG = 80;
 const CAFFEINE_WARN_MG = 130;
 
@@ -152,14 +153,16 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
       {/* State-aware advisory band. Three flavors share one shape:
-          - gentle (< 60 mg): sage/green — well below the line
-          - at edge (= 120 mg): ochre/yellow — right on the line
-          - over (> 120 mg): terra/red — past the line, alarm
-          Caution band (60-119) gets no advisory — the bar's color
-          already carries the "approaching" read; an extra note
-          there would feel naggy on every normal strong cup. */}
+          - gentle (< 40 mg): sage/green — genuinely light cup
+          - at edge (= 130 mg): ochre/yellow — right on the line
+          - over (> 130 mg): terra/red — past the line, alarm
+          The 40-129 mg range gets NO advisory — that's normal-cup
+          territory (regular black tea, mid sencha, etc.). The bar's
+          color and the numeric readout already carry the signal;
+          a "gentle pour" badge on every breakfast tea felt like a
+          gold-star sticker for drinking tea. */}
       {(() => {
-        const gentle = mg > 0 && mg < CAFFEINE_CAUTION_MG;
+        const gentle = mg > 0 && mg < CAFFEINE_GENTLE_MAX_MG;
         const advisory = past
           ? {
               accent: "#B0542F",
