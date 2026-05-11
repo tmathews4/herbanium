@@ -37,13 +37,13 @@ export const EXTRACTION_PROFILES = {
   // ─── Flowers ──────────────────────────────────────────────────
   chamomile: [
     { tempC: 75,  timeS: 180, flavors: ["floral", "hay"],
-      effects: [["calm", 2], ["sleepy", 1], ["digestive", 1]],
+      effects: [["calm", 2], ["sleepy", 1], ["soothing", 2], ["digestive", 1]],
       character: "A morning chamomile — delicate, barely sedative. Hay water with floral lift." },
     { tempC: 95,  timeS: 300, flavors: ["honey", "apple", "floral", "hay"],
-      effects: [["calm", 4], ["sleepy", 3], ["digestive", 3]],
+      effects: [["calm", 4], ["sleepy", 3], ["soothing", 3], ["digestive", 3]],
       character: "The standard cup. Full honey-floral body, clear calming effect." },
     { tempC: 100, timeS: 420, flavors: ["honey", "apple", "floral", "hay", "earthy", "astringent"],
-      effects: [["calm", 4], ["sleepy", 5], ["digestive", 3], ["bitterness", 2]],
+      effects: [["calm", 4], ["sleepy", 5], ["soothing", 3], ["digestive", 3], ["bitterness", 2]],
       character: "Past the sleepy-time mark. Apigenin maxes out but tannins follow — the cup turns astringent." },
   ],
 
@@ -105,13 +105,13 @@ export const EXTRACTION_PROFILES = {
   // ─── Herbals ──────────────────────────────────────────────────
   lemonbalm: [
     { tempC: 85,  timeS: 180, flavors: ["citrus", "grassy", "bright"],
-      effects: [["calm", 2], ["energy", 2]],
+      effects: [["calm", 2], ["soothing", 1.5], ["energy", 2]],
       character: "Gentle lemon balm — bright and soft, a light wash." },
     { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy", "bright", "fresh"],
-      effects: [["calm", 3], ["focus", 2], ["energy", 3]],
+      effects: [["calm", 3], ["soothing", 2], ["focus", 2], ["energy", 3]],
       character: "The standard cup. Lemon-mint with gentle lift and focus." },
     { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "fresh", "astringent", "bright"],
-      effects: [["calm", 3], ["focus", 2], ["energy", 3], ["bitterness", 2]],
+      effects: [["calm", 3], ["soothing", 2], ["focus", 2], ["energy", 3], ["bitterness", 2]],
       character: "Pushed past the sweet spot — citrus dulls, grass turns hay-bitter." },
   ],
 
@@ -153,13 +153,13 @@ export const EXTRACTION_PROFILES = {
 
   passionflower: [
     { tempC: 95,  timeS: 300, flavors: ["grassy"],
-      effects: [["calm", 3], ["sleepy", 2], ["digestive", 2]],
+      effects: [["calm", 3], ["sleepy", 2], ["soothing", 2], ["digestive", 2]],
       character: "Light passionflower — grassy and quiet, subtle drowse." },
     { tempC: 98,  timeS: 480, flavors: ["grassy", "hay"],
-      effects: [["calm", 4], ["sleepy", 4], ["digestive", 3]],
+      effects: [["calm", 4], ["sleepy", 4], ["soothing", 3], ["digestive", 3]],
       character: "The sleepy cup. Hay and soft sedation, the classic use." },
     { tempC: 100, timeS: 600, flavors: ["grassy", "hay", "earthy"],
-      effects: [["calm", 4], ["sleepy", 5], ["digestive", 3], ["bitterness", 1]],
+      effects: [["calm", 4], ["sleepy", 5], ["soothing", 3], ["digestive", 3], ["bitterness", 1]],
       character: "Maximum extraction — deepest sedative pull, slight bitter edge." },
   ],
 
@@ -614,13 +614,13 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Pu-erh ────────────────────────────────────────
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2], ["calm", 1.5]],
+      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2], ["calm", 1.5], ["warming", 1.5]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 2], ["warming", 2]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 1], ["bitterness", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 1], ["warming", 2], ["bitterness", 2]],
       character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
@@ -762,10 +762,10 @@ export const EXTRACTION_PROFILES = {
       effects: [["calm", 0.6]],
       character: "Cold-pour valerian — barely any funk, the valerenic acid waiting for heat." },
     { tempC: 85, timeS: 600, flavors: ["earthy", "musky"],
-      effects: [["calm", 3], ["sleepy", 2]],
+      effects: [["calm", 3], ["sleepy", 2], ["soothing", 2]],
       character: "Light valerian — the funk shows but stays gentle." },
     { tempC: 90, timeS: 750, flavors: ["earthy", "musky", "pungent", "bitter"],
-      effects: [["calm", 4], ["sleepy", 4]],
+      effects: [["calm", 4], ["sleepy", 4], ["soothing", 3]],
       character: "The standard cup. Full valerenic acid — the deep sedation register." },
     { tempC: 95, timeS: 900, flavors: ["earthy", "musky", "pungent", "bitter", "woody"],
       effects: [["calm", 4], ["sleepy", 5], ["bitterness", 2]],
