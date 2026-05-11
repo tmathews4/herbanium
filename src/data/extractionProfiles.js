@@ -327,6 +327,13 @@ export const EXTRACTION_PROFILES = {
       ],
       effects: [["focus", 3], ["energy", 4], ["comfort", 2], ["bitterness", 2]],
       character: "Strong and tannic. Toast deepens; drinks more assertive." },
+    { tempC: 95,  timeS: 240,
+      flavorStrengths: [
+        ["astringent", 3.4], ["bold", 3.4], ["toasted", 2.8],
+        ["vegetal", 2.4], ["bitter", 2.0], ["mineral", 1.6],
+      ],
+      effects: [["focus", 2.5], ["energy", 4], ["bitterness", 3]],
+      character: "Past peak — astringency leads, vegetal-burnt edge, brisk freshness gone." },
   ],
 
   hojicha: [
@@ -940,11 +947,18 @@ function bracketByIntensity(profiles, tempC, timeS) {
   const minTime = Math.min(...times);
   const maxTime = Math.max(...times);
 
-  // Map (temp, time) to a single 0–1 intensity coordinate.
+  // Map (temp, time) to a single 0–1 intensity coordinate. Temp gets
+  // a heavier weight than time because in real brewing chemistry it
+  // dominates: caffeine doubles per ~10°C rise vs ~30 minutes of
+  // additional steep, and catechin / tannin extraction has a similar
+  // temp-sensitivity profile. A 50/50 mix made a 15°C temp swing
+  // (e.g. Moroccan Mint at 80°C vs 95°C at fixed 180s) feel like
+  // the same cup; 0.7/0.3 lets the temp slider actually shift the
+  // bracket the user lands in.
   function intensityOf(t, s) {
     const tp = maxTemp === minTemp ? 0 : (t - minTemp) / (maxTemp - minTemp);
     const sp = maxTime === minTime ? 0 : (s - minTime) / (maxTime - minTime);
-    return Math.max(0, Math.min(1, (tp + sp) / 2));
+    return Math.max(0, Math.min(1, 0.55 * tp + 0.45 * sp));
   }
 
   const userIntensity   = intensityOf(tempC, timeS);
