@@ -47,14 +47,23 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   // User twists — extra ingredients added on top of the curated recipe.
   // Each is { id, g }; the engine sees the merged ingredient list.
   const [twists, setTwists] = React.useState([]);
+  // Per-id overrides on the curated grams. Only honored when at least
+  // one twist has been added — that's the user signal that they're
+  // remixing the recipe rather than brewing it as designed.
+  const [curatedOverrides, setCuratedOverrides] = React.useState({});
   const [pickerOpen, setPickerOpen] = React.useState(false);
-  const [editingGramsId, setEditingGramsId] = React.useState(null);
   const [saveModalOpen, setSaveModalOpen] = React.useState(false);
   const [twistName, setTwistName] = React.useState("");
   if (!b) return null;
 
-  // Merged ingredient list for engine + brew. Curated rows first.
-  const mergedIngredients = [...(b.ingredients || []), ...twists];
+  const isRemix = twists.length > 0;
+  // Effective curated rows pick up overrides when in remix mode.
+  const effectiveCurated = (b.ingredients || []).map(ing => ({
+    ...ing,
+    g: isRemix && curatedOverrides[ing.id] != null ? curatedOverrides[ing.id] : ing.g,
+  }));
+  // Merged ingredient list for engine + brew.
+  const mergedIngredients = [...effectiveCurated, ...twists];
 
   const addTwist = (id) => {
     const meta = INGREDIENTS[id];
@@ -68,8 +77,16 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
     setTwists(prev => [...prev, { id, g: defaultG }]);
     setPickerOpen(false);
   };
-  const removeTwist = (id) => setTwists(prev => prev.filter(t => t.id !== id));
+  const removeTwist = (id) => setTwists(prev => {
+    const next = prev.filter(t => t.id !== id);
+    // Exiting remix mode — drop curated overrides so the recipe
+    // visibly returns to canonical. Avoids stale stale grams persisting
+    // invisibly after the user thinks they've reset.
+    if (next.length === 0) setCuratedOverrides({});
+    return next;
+  });
   const updateTwistGrams = (id, g) => setTwists(prev => prev.map(t => t.id === id ? { ...t, g } : t));
+  const updateCuratedGrams = (id, g) => setCuratedOverrides(prev => ({ ...prev, [id]: g }));
 
   const handleBrewTap = () => {
     if (twists.length === 0) {
@@ -522,14 +539,19 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                     topFlavors,
                     topEffect ? topEffect[0] : null,
                   ].filter(Boolean);
+                  const effectiveG = isRemix && curatedOverrides[ing.id] != null
+                    ? curatedOverrides[ing.id] : ing.g;
                   return (
-                    <button key={ing.id} onClick={() => onOpenIngredient(ing.id)} style={{
-                      width: "100%", textAlign: "left", background: "transparent",
-                      border: "none", borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                      padding: "10px 0", cursor: "pointer",
-                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                    <div key={ing.id} style={{
+                      borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
+                      padding: "10px 0",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      gap: 12,
                     }}>
-                      <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <button onClick={() => onOpenIngredient(ing.id)} style={{
+                        flex: 1, minWidth: 0, textAlign: "left",
+                        background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                      }}>
                         <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
                           {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                         </div>
@@ -539,21 +561,46 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                         }}>
                           {metaParts.join(" · ")}
                         </div>
-                      </div>
-                      <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
-                        {formatAmount(ing.g, meta.category, weightUnit)}
-                      </div>
-                    </button>
+                      </button>
+                      {isRemix ? (
+                        <GramsInput
+                          value={effectiveG}
+                          onChange={(g) => updateCuratedGrams(ing.id, g)}
+                          unit={weightUnit}
+                        />
+                      ) : (
+                        <div style={{ fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft, flexShrink: 0, marginLeft: 12 }}>
+                          {formatAmount(ing.g, meta.category, weightUnit)}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
 
                 {/* Your twists — user-added ingredients with editable
-                    grams. Dashed divider separates them from the
-                    curated rows above. */}
+                    grams. Name renders in sage to signal these are
+                    your additions, not part of the curated base. Same
+                    meta line as the curated rows so the engineering
+                    info (temp / steep / flavor / effect) stays
+                    visible at a glance. */}
                 {twists.map((t, i) => {
                   const meta = INGREDIENTS[t.id];
                   if (!meta) return null;
-                  const isEditing = editingGramsId === t.id;
+                  const formatSteepRange = ([sMin, sMax]) => {
+                    if (sMax < 60) return `${sMin}–${sMax}s`;
+                    if (sMin < 60) return `${sMin}s–${Math.round(sMax / 60)} min`;
+                    const lo = sMin / 60, hi = sMax / 60;
+                    return `${Number.isInteger(lo) ? lo : lo.toFixed(1)}–${Number.isInteger(hi) ? hi : hi.toFixed(1)} min`;
+                  };
+                  const steepRange = meta.timeS ? formatSteepRange(meta.timeS) : null;
+                  const topFlavors = (meta.flavors || []).slice(0, 2).join(", ");
+                  const topEffect = (meta.effects || []).filter(([tag]) => tag !== "bitterness")[0];
+                  const metaParts = [
+                    formatTempRange(meta.tempC[0], meta.tempC[1], unit),
+                    steepRange,
+                    topFlavors,
+                    topEffect ? topEffect[0] : null,
+                  ].filter(Boolean);
                   return (
                     <div key={t.id} style={{
                       borderTop: i === 0 ? `1px dashed ${theme.ruleSoft}` : `1px solid ${theme.ruleSoft}`,
@@ -565,47 +612,21 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                         flex: 1, minWidth: 0, textAlign: "left",
                         background: "transparent", border: "none", padding: 0, cursor: "pointer",
                       }}>
-                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.sageDeep }}>
                           {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
                         </div>
                         <div style={{
-                          fontFamily: ff.sans, fontSize: 9.5, color: theme.sageDeep,
-                          letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2,
+                          fontFamily: ff.sans, fontSize: 10.5, color: theme.ash,
+                          marginTop: 2, letterSpacing: "0.02em",
                         }}>
-                          your twist
+                          {metaParts.join(" · ")}
                         </div>
                       </button>
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0.1"
-                          autoFocus
-                          value={t.g}
-                          onChange={(e) => updateTwistGrams(t.id, parseFloat(e.target.value) || 0)}
-                          onBlur={() => setEditingGramsId(null)}
-                          onKeyDown={(e) => { if (e.key === "Enter") setEditingGramsId(null); }}
-                          style={{
-                            width: 60, fontFamily: ff.mono, fontSize: 12,
-                            padding: "4px 6px", textAlign: "right",
-                            border: `1px solid ${theme.rule}`, borderRadius: 4,
-                            background: theme.ivory, color: theme.ink,
-                          }}
-                        />
-                      ) : (
-                        <button
-                          onClick={() => setEditingGramsId(t.id)}
-                          style={{
-                            fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft,
-                            background: "transparent",
-                            border: `1px dashed ${theme.ruleSoft}`,
-                            borderRadius: 4, padding: "3px 6px", cursor: "pointer",
-                          }}
-                          title="tap to edit"
-                        >
-                          {formatAmount(t.g, meta.category, weightUnit)}
-                        </button>
-                      )}
+                      <GramsInput
+                        value={t.g}
+                        onChange={(g) => updateTwistGrams(t.id, g)}
+                        unit={weightUnit}
+                      />
                       <button
                         onClick={() => removeTwist(t.id)}
                         title="remove twist"
@@ -1010,6 +1031,40 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
     </div>
   );
 };
+
+/* ──────────────────────────────────────────────────────────────
+   GramsInput — small bordered number input shown in remix mode.
+   Visible form-field affordance so the user can see the quantity
+   is editable without having to click to discover it. Steps in
+   0.1g increments; bare-minimum sanity floor of 0.
+   ────────────────────────────────────────────────────────────── */
+
+const GramsInput = ({ value, onChange, unit }) => (
+  <div style={{
+    display: "flex", alignItems: "center", gap: 4,
+    flexShrink: 0,
+  }}>
+    <input
+      type="number"
+      step="0.1"
+      min="0"
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+      style={{
+        width: 52, fontFamily: ff.mono, fontSize: 12,
+        padding: "4px 6px", textAlign: "right",
+        border: `1px solid ${theme.rule}`,
+        borderRadius: 4,
+        background: theme.ivory, color: theme.ink,
+      }}
+    />
+    <span style={{
+      fontFamily: ff.mono, fontSize: 10, color: theme.ash,
+    }}>
+      {unit === "oz" ? "oz" : "g"}
+    </span>
+  </div>
+);
 
 /* ──────────────────────────────────────────────────────────────
    TwistPicker — overlay that lists every ingredient grouped by
