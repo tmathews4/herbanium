@@ -727,7 +727,7 @@ export const BlendExtractionExplorer = ({
                 type="range"
                 min={tempCRange[0]}
                 max={tempCRange[1]}
-                step={1}
+                step={5}
                 value={tempC}
                 onChange={(e) => setTempC(Number(e.target.value))}
                 style={{
