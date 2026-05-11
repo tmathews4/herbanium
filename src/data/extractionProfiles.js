@@ -492,14 +492,14 @@ export const EXTRACTION_PROFILES = {
     { tempC: 85,  timeS: 240,
       flavorStrengths: [
         ["honey", 3.0], ["hay", 3.0], ["apricot", 1.4], ["melon", 1.2],
-        ["wood", 1.5], ["delicate", 0.7], ["astringent", 2.5],
+        ["woody", 1.5], ["delicate", 0.7], ["astringent", 2.5],
       ],
       effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2]],
       character: "Past the leaf's tolerance. Honey thins; hay turns tannic." },
     { tempC: 95,  timeS: 270,
       flavorStrengths: [
         ["astringent", 4.0], ["hay", 2.5], ["bitter", 2.5],
-        ["wood", 2.0], ["honey", 1.0],
+        ["woody", 2.0], ["honey", 1.0],
       ],
       effects: [["energy", 3.5], ["focus", 2], ["bitterness", 3]],
       character: "Delicate leaf overrun — catechins outpace the Maillard sweetness, the cup turns tannic and hay-flat." },
@@ -572,13 +572,13 @@ export const EXTRACTION_PROFILES = {
     // pushed-with-tannin, full over-pull.
     { tempC: 70,  timeS: 90,
       flavorStrengths: [
-        ["smoked", 1.5], ["pine", 0.8], ["wood", 0.5],
+        ["smoked", 1.5], ["pine", 0.8], ["woody", 0.5],
       ],
       effects: [["warming", 1.5], ["comfort", 1.5]],
       character: "Barely lapsang — water carrying a smoke hint, the phenolics still locked to the leaf." },
     { tempC: 85,  timeS: 150,
       flavorStrengths: [
-        ["smoked", 3.0], ["pine", 1.8], ["campfire", 1.2], ["wood", 1.0],
+        ["smoked", 3.0], ["pine", 1.8], ["campfire", 1.2], ["woody", 1.0],
       ],
       effects: [["energy", 2], ["warming", 3], ["comfort", 2.5], ["digestive", 1]],
       character: "Warming pour — smoke emerging cleanly, no tannin grip yet, the gentler register." },
