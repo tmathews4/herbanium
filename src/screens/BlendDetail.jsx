@@ -147,9 +147,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
           hero band below so it can stay visible at any scroll depth. */}
       <div style={{
         position: "sticky", top: 0, zIndex: 11,
-        background: "rgba(var(--ivory-rgb), 0.78)",
-        backdropFilter: "blur(8px) saturate(1.1)",
-        WebkitBackdropFilter: "blur(8px) saturate(1.1)",
+        background: theme.ivory,
         padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         boxShadow: scrolled ? "0 1px 0 rgba(60, 50, 40, 0.08)" : "0 1px 0 rgba(60, 50, 40, 0)",
