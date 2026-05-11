@@ -30,7 +30,7 @@ import {
    a friend's session — their review in a pull-quote up top.
    ────────────────────────────────────────────────────────────── */
 
-export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavorite, onToggleFavorite, sessions, go }) => {
+export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSaveAndBrew, isFavorite, onToggleFavorite, sessions, go }) => {
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
   const [openMood, setOpenMood] = React.useState(null);
@@ -44,7 +44,52 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
   // rows); anything beyond hides behind "+N more" until expanded.
   const [tagsExpanded, setTagsExpanded] = React.useState(false);
   const [tableAccentsOpen, setTableAccentsOpen] = React.useState(false);
+  // User twists — extra ingredients added on top of the curated recipe.
+  // Each is { id, g }; the engine sees the merged ingredient list.
+  const [twists, setTwists] = React.useState([]);
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [editingGramsId, setEditingGramsId] = React.useState(null);
+  const [saveModalOpen, setSaveModalOpen] = React.useState(false);
+  const [twistName, setTwistName] = React.useState("");
   if (!b) return null;
+
+  // Merged ingredient list for engine + brew. Curated rows first.
+  const mergedIngredients = [...(b.ingredients || []), ...twists];
+
+  const addTwist = (id) => {
+    const meta = INGREDIENTS[id];
+    if (!meta) return;
+    // Default grams: parse the leading number from `meta.dose` (e.g.
+    // "1 tsp · 200ml" → 1) and fall back to 1g. Most herbal doses are
+    // 1 tsp ≈ 1g; spices and high-density ingredients we under-dose
+    // on purpose so the twist starts modest.
+    const doseMatch = (meta.dose || "").match(/^([\d.]+)/);
+    const defaultG = doseMatch ? Math.min(parseFloat(doseMatch[1]), 2) : 1;
+    setTwists(prev => [...prev, { id, g: defaultG }]);
+    setPickerOpen(false);
+  };
+  const removeTwist = (id) => setTwists(prev => prev.filter(t => t.id !== id));
+  const updateTwistGrams = (id, g) => setTwists(prev => prev.map(t => t.id === id ? { ...t, g } : t));
+
+  const handleBrewTap = () => {
+    if (twists.length === 0) {
+      onBrew();
+      return;
+    }
+    // Default name uses the curated blend name as the lineage anchor.
+    setTwistName(`${b.name} — your twist`);
+    setSaveModalOpen(true);
+  };
+
+  const buildModifiedBlend = () => ({
+    ...b,
+    ingredients: mergedIngredients,
+    // Drop the tradition/house flags on a twist — it's no longer the
+    // canonical recipe, it's a user variation.
+    tradition: null,
+    house: null,
+    experimental: true,
+  });
 
   // Filter the user's sessions for this specific blend. These become
   // the "Your log with this blend" section — aggregate stats + recent notes.
@@ -81,13 +126,10 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
       <div style={{
         position: "sticky", top: 0, zIndex: 11,
         background: theme.ivory,
-        padding: "22px 22px 14px",
+        padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <Button variant="ghost" onClick={onClose}>← back</Button>
-        <div style={{ fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: theme.ash }}>
-          The Blend
-        </div>
         {onToggleFavorite ? (
           <button onClick={onToggleFavorite} style={{
             background: "transparent", border: "none", cursor: "pointer",
@@ -504,6 +546,96 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                     </button>
                   );
                 })}
+
+                {/* Your twists — user-added ingredients with editable
+                    grams. Dashed divider separates them from the
+                    curated rows above. */}
+                {twists.map((t, i) => {
+                  const meta = INGREDIENTS[t.id];
+                  if (!meta) return null;
+                  const isEditing = editingGramsId === t.id;
+                  return (
+                    <div key={t.id} style={{
+                      borderTop: i === 0 ? `1px dashed ${theme.ruleSoft}` : `1px solid ${theme.ruleSoft}`,
+                      padding: "10px 0",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      gap: 12,
+                    }}>
+                      <button onClick={() => onOpenIngredient(t.id)} style={{
+                        flex: 1, minWidth: 0, textAlign: "left",
+                        background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                      }}>
+                        <div style={{ fontFamily: ff.serif, fontSize: 15, color: theme.ink }}>
+                          {meta.name} <span style={{ color: theme.rose, fontSize: 11 }}>↗</span>
+                        </div>
+                        <div style={{
+                          fontFamily: ff.sans, fontSize: 9.5, color: theme.sageDeep,
+                          letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2,
+                        }}>
+                          your twist
+                        </div>
+                      </button>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0.1"
+                          autoFocus
+                          value={t.g}
+                          onChange={(e) => updateTwistGrams(t.id, parseFloat(e.target.value) || 0)}
+                          onBlur={() => setEditingGramsId(null)}
+                          onKeyDown={(e) => { if (e.key === "Enter") setEditingGramsId(null); }}
+                          style={{
+                            width: 60, fontFamily: ff.mono, fontSize: 12,
+                            padding: "4px 6px", textAlign: "right",
+                            border: `1px solid ${theme.rule}`, borderRadius: 4,
+                            background: theme.ivory, color: theme.ink,
+                          }}
+                        />
+                      ) : (
+                        <button
+                          onClick={() => setEditingGramsId(t.id)}
+                          style={{
+                            fontFamily: ff.mono, fontSize: 11, color: theme.inkSoft,
+                            background: "transparent",
+                            border: `1px dashed ${theme.ruleSoft}`,
+                            borderRadius: 4, padding: "3px 6px", cursor: "pointer",
+                          }}
+                          title="tap to edit"
+                        >
+                          {formatAmount(t.g, meta.category, weightUnit)}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => removeTwist(t.id)}
+                        title="remove twist"
+                        style={{
+                          background: "transparent", border: "none",
+                          color: theme.ash, fontSize: 16, lineHeight: 1,
+                          cursor: "pointer", padding: "2px 4px",
+                        }}
+                      >×</button>
+                    </div>
+                  );
+                })}
+
+                {/* Add a twist — text-link affordance kept low-key so
+                    the curated framing stays primary. */}
+                <button
+                  onClick={() => setPickerOpen(true)}
+                  style={{
+                    width: "100%", textAlign: "center",
+                    background: "transparent",
+                    border: "none",
+                    borderTop: `1px dashed ${theme.ruleSoft}`,
+                    padding: "10px 0 4px",
+                    fontFamily: ff.sans, fontSize: 10.5,
+                    letterSpacing: "0.18em", textTransform: "uppercase",
+                    color: theme.sageDeep, cursor: "pointer",
+                  }}
+                >
+                  + Add your own twist
+                </button>
               </div>
 
               {/* At-the-table accents — connected sub-card (shares the
@@ -684,13 +816,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         {brewingOpen && (
           <>
             <BlendExtractionExplorer
-              ingredients={b.ingredients}
+              ingredients={mergedIngredients}
               defaultTempC={b.tempC}
               defaultTimeS={b.timeS}
               declaredEffects={b.effects}
               curated
-              isTraditional={!!b.tradition}
-              isHouse={!!b.house}
+              isTraditional={!!b.tradition && twists.length === 0}
+              isHouse={!!b.house && twists.length === 0}
             />
             {b.ml && (
               <div style={{
@@ -710,11 +842,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             standard Button defaults. */}
         <Button
           variant="primary" fullWidth
-          onClick={onBrew}
+          onClick={handleBrewTap}
           icon={<Kettle size={20} c={theme.cream} />}
           style={{ marginTop: 18, fontSize: 17, padding: "15px 16px", gap: 10 }}
         >
-          Brew this cup →
+          {twists.length > 0 ? "Brew your twist →" : "Brew this cup →"}
         </Button>
 
         {/* Your log with this blend — aggregates + recent sessions */}
@@ -842,6 +974,197 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
         )}
 
       </div>
+
+      {/* Ingredient picker overlay — shown when the user taps
+          "+ Add your own twist". Groups available ingredients by
+          category and excludes anything already in the recipe. */}
+      {pickerOpen && (
+        <TwistPicker
+          onClose={() => setPickerOpen(false)}
+          onPick={addTwist}
+          excludeIds={new Set([
+            ...((b.ingredients || []).map(i => i.id)),
+            ...twists.map(t => t.id),
+          ])}
+        />
+      )}
+
+      {/* Save modal — fires when the user taps Brew with at least one
+          twist. They can save the modified blend as a personal copy
+          before brewing, or brew an ephemeral copy without saving. */}
+      {saveModalOpen && (
+        <SaveTwistModal
+          name={twistName}
+          setName={setTwistName}
+          onCancel={() => setSaveModalOpen(false)}
+          onSaveAndBrew={() => {
+            setSaveModalOpen(false);
+            onSaveAndBrew(buildModifiedBlend(), twistName);
+          }}
+          onBrewWithoutSaving={() => {
+            setSaveModalOpen(false);
+            onBrew(buildModifiedBlend());
+          }}
+        />
+      )}
     </div>
   );
 };
+
+/* ──────────────────────────────────────────────────────────────
+   TwistPicker — overlay that lists every ingredient grouped by
+   category. Tap to add the ingredient at a default dose to the
+   user's twist list. Existing recipe + already-added twists are
+   excluded so the same ingredient can't double-up.
+   ────────────────────────────────────────────────────────────── */
+
+const TwistPicker = ({ onClose, onPick, excludeIds }) => {
+  const available = Object.values(INGREDIENTS).filter(meta => !excludeIds.has(meta.id));
+  const byCategory = available.reduce((acc, meta) => {
+    const cat = meta.category || "other";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(meta);
+    return acc;
+  }, {});
+  const categoryOrder = ["true-tea", "herbal", "flower", "spice", "adaptogen", "root", "fruit", "other"];
+  const sortedCats = Object.keys(byCategory).sort((a, b) => {
+    const ai = categoryOrder.indexOf(a);
+    const bi = categoryOrder.indexOf(b);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 50,
+        background: "rgba(30, 25, 20, 0.45)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 520,
+          maxHeight: "78vh", overflowY: "auto",
+          background: theme.ivory,
+          borderRadius: `${radius.lg}px ${radius.lg}px 0 0`,
+          boxShadow: shadow.card,
+          padding: "18px 18px 24px",
+        }}
+      >
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          marginBottom: 14,
+        }}>
+          <div style={{
+            fontFamily: ff.serif, fontSize: 18, color: theme.ink,
+          }}>
+            Add your own twist
+          </div>
+          <button onClick={onClose} style={{
+            background: "transparent", border: "none", color: theme.ash,
+            fontSize: 20, lineHeight: 1, cursor: "pointer", padding: 4,
+          }}>×</button>
+        </div>
+        {sortedCats.map(cat => (
+          <div key={cat} style={{ marginBottom: 14 }}>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: theme.ash,
+              marginBottom: 6,
+            }}>
+              {cat.replace("-", " ")}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {byCategory[cat].map(meta => (
+                <button
+                  key={meta.id}
+                  onClick={() => onPick(meta.id)}
+                  style={{
+                    fontFamily: ff.serif, fontSize: 13, color: theme.ink,
+                    background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+                    borderRadius: radius.sm, padding: "6px 10px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {meta.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────────
+   SaveTwistModal — confirms whether the user wants to keep their
+   twist as a personal blend before brewing. Save & brew runs
+   saveComposedBlend then starts the steep on the new id; brew-
+   without-saving steeps an ephemeral copy and discards on close.
+   ────────────────────────────────────────────────────────────── */
+
+const SaveTwistModal = ({ name, setName, onCancel, onSaveAndBrew, onBrewWithoutSaving }) => (
+  <div
+    onClick={onCancel}
+    style={{
+      position: "fixed", inset: 0, zIndex: 55,
+      background: "rgba(30, 25, 20, 0.5)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 20,
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: "100%", maxWidth: 380,
+        background: theme.ivory,
+        borderRadius: radius.lg,
+        boxShadow: shadow.card,
+        padding: "22px 22px 18px",
+      }}
+    >
+      <div style={{
+        fontFamily: ff.serif, fontSize: 18, color: theme.ink,
+        marginBottom: 6,
+      }}>
+        Save this twist?
+      </div>
+      <div style={{
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+        color: theme.ash, lineHeight: 1.5, marginBottom: 14,
+      }}>
+        Keep it on your shelf so you can brew it again, or skip and steep this cup once.
+      </div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name your twist"
+        style={{
+          width: "100%", boxSizing: "border-box",
+          fontFamily: ff.serif, fontSize: 14, color: theme.ink,
+          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: radius.sm, padding: "10px 12px",
+          marginBottom: 14,
+        }}
+      />
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <Button variant="primary" fullWidth onClick={onSaveAndBrew}>
+          Save & brew
+        </Button>
+        <Button variant="secondary" fullWidth onClick={onBrewWithoutSaving}>
+          Brew without saving
+        </Button>
+        <button onClick={onCancel} style={{
+          background: "transparent", border: "none",
+          fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+          padding: "6px 0", cursor: "pointer",
+        }}>cancel</button>
+      </div>
+    </div>
+  </div>
+);

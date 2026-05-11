@@ -161,7 +161,7 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: theme.ivory,
-        padding: "22px 22px 14px",
+        padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <button onClick={onClose} style={{

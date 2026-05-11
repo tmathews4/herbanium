@@ -1913,10 +1913,16 @@ export default function App() {
             setIngredientId(ingId);
             setOverlay("ingredient");
           }}
-          onBrew={() => {
-            const b = getBlend(blendOverlayId);
+          onBrew={(modified) => {
+            const b = modified || getBlend(blendOverlayId);
             if (!b) return;
             startBrew(b, "", [b.mood]);
+          }}
+          onSaveAndBrew={(modified, name) => {
+            const newId = saveComposedBlend(modified, name);
+            const saved = LOCAL_BLENDS[newId] || { ...modified, id: newId };
+            setOverlay(null);
+            startBrew(saved, "", [saved.mood]);
           }}
         />
       )}

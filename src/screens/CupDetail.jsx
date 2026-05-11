@@ -140,7 +140,7 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: theme.ivory,
-        padding: "22px 22px 14px",
+        padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <button onClick={onClose} style={{
@@ -148,12 +148,6 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
           fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.12em",
           textTransform: "uppercase", cursor: "pointer",
         }}>← back</button>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: theme.ash,
-        }}>
-          A cup
-        </div>
         <div style={{ width: 40 }} />
       </div>
       <div style={{ padding: "0 22px 32px" }}>

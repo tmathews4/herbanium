@@ -136,11 +136,6 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
   const isLimerick = entry.kind === "limerick";
   const isPoem     = entry.kind === "poem";
   const isVerse    = isHaiku || isLimerick || isPoem;
-  const label =
-    isHaiku    ? "A verse"
-    : isLimerick ? "A limerick"
-    : isPoem    ? "A poem"
-    : "An entry";
   const stamp = entry.ts ? new Date(entry.ts) : null;
   const ago   = formatAgo(stamp);
   const editedAgo = entry.editedAt ? formatAgo(new Date(entry.editedAt)) : null;
@@ -193,7 +188,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: theme.ivory,
-        padding: "22px 22px 14px",
+        padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <button onClick={editing ? handleCancelEdit : onClose} style={{
@@ -205,7 +200,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
           fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.18em",
           textTransform: "uppercase", color: theme.ash,
         }}>
-          {editing ? "Editing" : label}
+          {editing ? "Editing" : ""}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {!editing && onEdit && (
