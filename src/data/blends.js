@@ -175,6 +175,21 @@ const BLENDS = [
     culturalNote: "The whisked-tea preparation that opens chanoyu, the Way of Tea. The host warms the bowl, sifts the matcha, whisks until foam coats the surface; the guest accepts in three measured sips. Every motion rehearsed, every motion meant.",
   },
   {
+    id: "koicha",
+    name: "Koicha",
+    subtitle: "thick matcha — twice the leaf, cooler water, kneaded to a paste",
+    ingredients: [
+      { id: "matcha", g: 4.0 },
+    ],
+    tempC: 70, timeS: 30, ml: 40,
+    mood: "calm", flavor: "umami",
+    public: true,
+    tradition: "Japanese / chanoyu",
+    style: "low-temp",
+    effects: [["calm", 5], ["focus", 4], ["sleepy", 2]],
+    culturalNote: "The thick ceremonial whisk that opens the formal chanoyu kaiseki, used for centuries before usucha. The host kneads the matcha to a glossy paste rather than foaming it — the bowl is shared, passed and turned, three and a half sips per guest. The L-theanine load at this dose grounds rather than alerts.",
+  },
+  {
     id: "hojicha-evening",
     name: "Hojicha at Dusk",
     subtitle: "Kyoto roast — caramel-toasted green, almost no caffeine",
@@ -189,6 +204,21 @@ const BLENDS = [
     culturalNote: "Roasted in iron pans in Kyoto since the 1920s — the technique was invented to use up tea stems that wouldn't sell. Now it's the evening cup, low in caffeine, served with the day's last meal.",
   },
   {
+    id: "genmaicha-simply",
+    name: "Genmaicha, simply",
+    subtitle: "Sencha and toasted brown rice — the people's tea, warm and forgiving",
+    ingredients: [
+      { id: "genmaicha", g: 3.0 },
+    ],
+    tempC: 80, timeS: 150, ml: 250,
+    mood: "comfort", flavor: "toasted",
+    public: true,
+    tradition: "Japanese",
+    style: "low-temp",
+    effects: [["comfort", 4], ["calm", 3], ["focus", 3]],
+    culturalNote: "Japanese households stretched scarce green leaf with toasted brown rice, the rice softening the tannin and adding a popcorn-toast warmth. The frugality became style — now served in restaurants between courses or with the day's small meals. Forgiving of slight over-steep thanks to the rice; half the caffeine of plain sencha.",
+  },
+  {
     id: "shou-puerh",
     name: "Shou Pu-erh",
     subtitle: "Yunnan road tea — rinse first, then short pours",
@@ -201,6 +231,20 @@ const BLENDS = [
     tradition: "Chinese / Tibetan",
     effects: [["digestive", 4], ["grounding", 3], ["warming", 3]],
     culturalNote: "Pressed into cakes for centuries of transport along the Tea Horse Road from Yunnan to Tibet. Aged sheng improves with the years; cooked shou is engineered for the dark earthy register from the start. Both keep indefinitely.",
+  },
+  {
+    id: "tieguanyin",
+    name: "Tieguanyin",
+    subtitle: "Iron Goddess of Mercy — partial-oxidation oolong, short pours, orchid in the cup",
+    ingredients: [
+      { id: "oolong", g: 3.0 },
+    ],
+    tempC: 90, timeS: 120, ml: 100,
+    mood: "focus", flavor: "floral",
+    public: true,
+    tradition: "Chinese / Fujian",
+    effects: [["focus", 4], ["energy", 3], ["uplifting", 3], ["calm", 2]],
+    culturalNote: "Anxi county in Fujian, where the partial-oxidation style was named after a temple goddess who appeared to a farmer in a dream. The gongfu register is short pours from a small pot — three or four infusions of the same leaves, each one developing differently than the last. The orchid note comes from the bruise-and-rest oxidation pattern.",
   },
   {
     id: "wuyi-smoke",
@@ -1336,15 +1380,31 @@ const BLEND_DIRECTIONS = {
     "Whisk briskly with a chasen in zigzag M-strokes until a fine foam covers the surface.",
     "Drink in three measured sips.",
   ],
+  "koicha": [
+    "Sift 4g (two heaped chashaku) of matcha through a fine strainer into a warmed bowl.",
+    "Add 40ml of 70°C water — half what you'd use for usucha.",
+    "Knead the powder into a glossy paste with slow, deliberate strokes (no foam).",
+    "The bowl is shared; each guest takes three and a half sips and wipes the rim with a kaishi.",
+  ],
   "hojicha-evening": [
     "Heat water to 90°C.",
     "Steep 30 seconds — short, the leaves are already roasted.",
     "Forgiving of slight over-steep; bitterness is naturally low.",
   ],
+  "genmaicha-simply": [
+    "Heat water to 80°C.",
+    "Steep 2.5 minutes — the rice mellows the green leaf's grip.",
+    "The rice forgives a longer steep; over-pulled genmaicha just gets toastier, not bitter.",
+  ],
   "shou-puerh": [
     "Rinse: pour boiling water over the leaf and discard immediately to wake it.",
     "Steep 90 seconds for the first proper infusion.",
     "Re-steep 5 or more times, adding ~30 seconds to each round.",
+  ],
+  "tieguanyin": [
+    "Warm a small gaiwan or yixing pot; rinse 3g of leaf with boiling water and discard immediately.",
+    "Heat fresh water to 90°C and steep the first proper pour 2 minutes.",
+    "Re-steep 4–6 times in 90°C water, adding ~30 seconds each round — the leaves keep opening.",
   ],
   "wuyi-smoke": [
     "Heat water to a full boil.",
