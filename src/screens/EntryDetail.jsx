@@ -192,7 +192,9 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
           Hairline shadow fades in once content has scrolled. */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "rgba(var(--ivory-rgb), 0.92)",
+        background: "rgba(var(--ivory-rgb), 0.78)",
+        backdropFilter: "blur(8px) saturate(1.1)",
+        WebkitBackdropFilter: "blur(8px) saturate(1.1)",
         padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         boxShadow: scrolled ? "0 1px 0 rgba(60, 50, 40, 0.08)" : "0 1px 0 rgba(60, 50, 40, 0)",
