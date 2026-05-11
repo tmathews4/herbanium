@@ -92,8 +92,15 @@ const FLAVOR_LOUDNESS = {
   minty: 2.0, mint: 2.0, cool: 1.8, cooling: 1.8,
   astringent: 1.6, pungent: 1.6, tannic: 1.5,
   tar: 1.5,
-  // Mid — a touch louder than mass-ratio
-  spiced: 1.2, peppery: 1.4, roasted: 1.1, earthy: 1.1,
+  // Mid — a touch louder than mass-ratio. Spiced moved 1.2 → 1.5
+  // because the prior multiplier under-counted how perceptually
+  // loud spices are at small doses. Masala chai with 0.3g cardamom
+  // + 0.3g cinnamon + 0.1g cloves should read spice-led, not
+  // earthy-led-with-spice-trim; the loudness now matches what mint
+  // and smoke already had (~2x) at a slightly more conservative
+  // 1.5x, since not every 'spiced' contribution is as perceptually
+  // dominant as menthol or guaiacol.
+  spiced: 1.5, peppery: 1.4, roasted: 1.1, earthy: 1.1,
   // Tart / acidic-bright register. Anthocyanins, citric/malic acid,
   // and tartaric character read more loudly on the palate than
   // their grams ratio suggests, and they're stable in water (acids

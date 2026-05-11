@@ -462,21 +462,16 @@ export const VocabInfoCard = ({ term, summary, body, ladder, tone = "sage", onCl
             textTransform: "uppercase", color: accent, opacity: 0.85,
             marginBottom: 2,
           }}>what it feels like</div>
+          {/* Numeric 1/3/5 quantifier column dropped — the descriptions
+              describe a felt spectrum (gentle → clear → deep) without
+              claiming a precise engine level. Matches the strip's
+              numbers-removed treatment: bars and qualitative text do
+              the work, no false-precision digits. */}
           {ladder.map(([level, text]) => (
             <div key={level} style={{
-              display: "flex", gap: 8, alignItems: "flex-start",
               fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
               lineHeight: 1.45,
-            }}>
-              <span style={{
-                flexShrink: 0,
-                fontFamily: ff.mono, fontSize: 11,
-                color: accent, fontWeight: 600,
-                width: 14, textAlign: "right",
-                lineHeight: 1.45,
-              }}>{level}</span>
-              <span style={{ flex: 1, minWidth: 0 }}>{text}</span>
-            </div>
+            }}>{text}</div>
           ))}
         </div>
       )}
