@@ -18,6 +18,23 @@ export const getBlend = (id) => LOCAL_BLENDS[id] || BLENDS.find(b => b.id === id
 
 export const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 
+// How long off a rolling boil water needs to rest to reach the
+// target. Returns null at full boil (no rest needed). The mapping
+// is the same scale used in BlendDetail's brewing directions so a
+// user sees the same vocabulary in both surfaces.
+export function restHintForCelsius(celsius) {
+  if (celsius >= 100) return null;
+  if (celsius >= 95) return "about 20 seconds off the boil";
+  if (celsius >= 90) return "about 1 minute off the boil";
+  if (celsius >= 85) return "about 2 minutes off the boil";
+  if (celsius >= 80) return "3–4 minutes off the boil";
+  if (celsius >= 75) return "4–5 minutes off the boil";
+  if (celsius >= 70) return "5–6 minutes off the boil, or boiling into an open cup and back";
+  if (celsius >= 65) return "equal parts boiling and room-temperature water";
+  if (celsius >= 60) return "two parts room-temperature, one part boiling";
+  return "boil, rest 5–8 minutes, then add a splash of cold water";
+}
+
 // Parse the timestamp baked into a session id ("sess-<ms>"). Returns
 // a Date or null when the id is missing or malformed.
 export function sessionDate(session) {

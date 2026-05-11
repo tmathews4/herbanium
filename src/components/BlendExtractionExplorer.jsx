@@ -32,6 +32,7 @@ import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } fr
 import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
+import { restHintForCelsius } from "../helpers/misc";
 
 // Caffeine load thresholds (mg). Tuned so the bar's "too much"
 // tick lines up with where the perception.js high-caffeine warning
@@ -709,8 +710,22 @@ export const BlendExtractionExplorer = ({
                 }}>
                   Water
                 </label>
-                <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-                  {displayTemp}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                  <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+                    {displayTemp}
+                  </div>
+                  {(() => {
+                    const hint = restHintForCelsius(tempC);
+                    if (!hint) return null;
+                    return (
+                      <div style={{
+                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                        color: theme.ash, marginTop: 1, textAlign: "right",
+                      }}>
+                        {hint}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
               <input
