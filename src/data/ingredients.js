@@ -1249,7 +1249,7 @@ const INGREDIENTS = {
 
   white: {
     name: "White Tea", latin: "Camellia sinensis", category: "true tea", subcategory: "white",
-    form: "silvery whole buds with downy fuzz; sometimes whole young leaves",
+    form: "silvery downy buds",
     origin: "Fujian, China",
     shelfLife: "12–18 months (improves slightly with age)",
     // Most delicate of the true teas — silver needle's character
@@ -1300,7 +1300,7 @@ const INGREDIENTS = {
   },
   sencha: {
     name: "Sencha Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "needle-shaped rolled leaves, deep emerald green",
+    form: "rolled green needles",
     origin: "Japan",
     shelfLife: "6–9 months (freshness is the cup)",
     // Steamed Japanese green — delicate and tannin-prone. Cooler
@@ -1351,7 +1351,7 @@ const INGREDIENTS = {
   },
   gyokuro: {
     name: "Gyokuro", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "tightly rolled dark-emerald needles, shade-grown sencha",
+    form: "tight dark-emerald needles",
     origin: "Japan (Uji especially)",
     shelfLife: "6–9 months refrigerated",
     // Shaded green tea — extreme low temp / short pour. Anything
@@ -1408,7 +1408,7 @@ const INGREDIENTS = {
   },
   matcha: {
     name: "Matcha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "bright-green stone-ground powder",
+    form: "stone-ground green powder",
     origin: "Japan",
     shelfLife: "30–60 days opened; 12 months sealed",
     aliases: ["抹茶", "tencha (pre-ground)", "usucha", "koicha"],
@@ -1479,7 +1479,7 @@ const INGREDIENTS = {
   },
   genmaicha: {
     name: "Genmaicha", latin: "Camellia sinensis + Oryza sativa", category: "true tea", subcategory: "green",
-    form: "sencha needles mixed with toasted (sometimes popped) brown rice",
+    form: "green needles with toasted rice",
     origin: "Japan",
     shelfLife: "6–9 months airtight",
     aliases: ["玄米茶", "popcorn tea", "people's tea", "brown rice tea"],
@@ -1540,7 +1540,7 @@ const INGREDIENTS = {
   },
   gunpowder: {
     name: "Gunpowder Green", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "small dense pellets like gunshot — the rolled shape gave the tea its name",
+    form: "tightly rolled pellets",
     origin: "Zhejiang, China",
     shelfLife: "12 months (rolled keeps fresher)",
     // Pellet-rolled green — opens up gradually, gentler than sencha
@@ -1593,7 +1593,7 @@ const INGREDIENTS = {
   },
   hojicha: {
     name: "Hojicha", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "reddish-brown roasted leaves and stems, lightly twiggy",
+    form: "roasted reddish-brown leaves",
     origin: "Japan (Kyoto especially)",
     shelfLife: "6–9 months airtight",
     // Roasted green — needs full boil but very short pour. The
@@ -1651,7 +1651,7 @@ const INGREDIENTS = {
   },
   dragonwell: {
     name: "Dragonwell", latin: "Camellia sinensis", category: "true tea", subcategory: "green",
-    form: "flat sword-shaped jade leaves, pressed flat against the wok during firing",
+    form: "flat jade sword-leaves",
     origin: "West Lake, Hangzhou, China",
     shelfLife: "6–9 months (freshness is the cup)",
     // Pan-fired Chinese green — chestnut-sweet with a clean
@@ -1702,7 +1702,7 @@ const INGREDIENTS = {
   },
   oolong: {
     name: "Oolong", latin: "Camellia sinensis", category: "true tea", subcategory: "oolong",
-    form: "tightly rolled balls or long twisted leaves, varies by style",
+    form: "rolled balls or twisted leaves",
     origin: "Fujian, China and Taiwan",
     shelfLife: "12–24 months (high-oxidation longer)",
     // Partial-oxidation tea — sits between green and black on
@@ -1753,7 +1753,7 @@ const INGREDIENTS = {
   },
   assam: {
     name: "Assam Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
-    form: "broken-leaf orthodox flakes or small dense CTC pellets",
+    form: "broken flakes or CTC pellets",
     origin: "Assam, India",
     shelfLife: "18–24 months airtight",
     // Energy anchor (5). Robust, malt-forward black tea — needs
@@ -1906,7 +1906,7 @@ const INGREDIENTS = {
   },
   darjeeling: {
     name: "Darjeeling", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
-    form: "whole orthodox leaves with silver tips; lighter-toned (especially first flush)",
+    form: "whole leaves with silver tips",
     origin: "Darjeeling, West Bengal, India",
     shelfLife: "12–18 months airtight",
     // Uplifting anchor (5). Delicate first-flush register — light,
@@ -1961,7 +1961,7 @@ const INGREDIENTS = {
   },
   ceylon: {
     name: "Ceylon Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
-    form: "uniform broken-leaf orthodox, dark and cleanly cut",
+    form: "uniform broken-leaf flakes",
     origin: "Sri Lanka (formerly Ceylon)",
     shelfLife: "18–24 months airtight",
     // Bright black tea — citrus-forward, less malty than Assam.
@@ -2012,7 +2012,7 @@ const INGREDIENTS = {
   },
   lapsang: {
     name: "Lapsang Souchong", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
-    form: "long dark leaves with a smoky pine scent before brewing",
+    form: "long dark smoky leaves",
     origin: "Wuyi Mountains, Fujian, China",
     shelfLife: "18–24 months (smoke is forgiving)",
     // Pine-smoked Wuyi black tea — campfire register, deep and
@@ -2062,7 +2062,7 @@ const INGREDIENTS = {
   },
   puerh: {
     name: "Shou Pu-erh", latin: "Camellia sinensis", category: "true tea", subcategory: "pu-erh",
-    form: "compressed cake or brick broken into chunks, or loose fermented leaves",
+    form: "compressed cake or loose leaves",
     origin: "Yunnan, China",
     shelfLife: "indefinite (ages well; shou stabilizes fast)",
     // Fermented Yunnan tea — earthy, grounding, multi-steepable.
