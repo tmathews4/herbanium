@@ -1009,6 +1009,12 @@ const TrackMap = ({
   // at the current point.
   const HIDE_BELOW = 0.05;
   const renderedList = displayList.filter(item => valueAtCurrent(item.name) >= HIDE_BELOW);
+  // Empty-section suppression — if no rows survive the per-position
+  // filter (e.g. Balance has no astringent / bitter / menthol at a
+  // cold-pour brew), hide the whole card rather than rendering a
+  // title with an empty body. Title-only sections add visual noise
+  // and a "where did the bars go?" moment.
+  if (renderedList.length === 0) return null;
   // Tradition-deference: on curated traditional blends, suppress the
   // at-position ⚠ when the user is sitting at or below the curator's
   // recommended brew. The recipe is the recipe — bitterness/tannin in
