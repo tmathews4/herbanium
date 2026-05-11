@@ -1028,6 +1028,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         <SaveTwistModal
           name={twistName}
           setName={setTwistName}
+          baseName={b.name}
+          twists={twists}
+          curatedOverrides={curatedOverrides}
+          baseIngredients={b.ingredients || []}
+          weightUnit={weightUnit}
           onCancel={() => setSaveModalOpen(false)}
           onSaveAndBrew={() => {
             setSaveModalOpen(false);
@@ -1180,7 +1185,32 @@ const TwistPicker = ({ onClose, onPick, excludeIds }) => {
    without-saving steeps an ephemeral copy and discards on close.
    ────────────────────────────────────────────────────────────── */
 
-const SaveTwistModal = ({ name, setName, onCancel, onSaveAndBrew, onBrewWithoutSaving }) => (
+const SaveTwistModal = ({ name, setName, baseName, twists = [], curatedOverrides = {}, baseIngredients = [], weightUnit, onCancel, onSaveAndBrew, onBrewWithoutSaving }) => {
+  // Build a one-glance recap so the user sees exactly what they're
+  // saving without having to mentally reconstruct it. Curated rows
+  // whose grams were tweaked render as "1.4g Chamomile (was 1g)";
+  // user additions render as "+ 0.5g Rose Petal".
+  const fmt = (g) => weightUnit === "oz"
+    ? `${(g * 0.0353).toFixed(2)}oz`
+    : `${g}g`;
+  const overrideRows = baseIngredients
+    .filter(ing => curatedOverrides[ing.id] != null && curatedOverrides[ing.id] !== ing.g)
+    .map(ing => {
+      const meta = INGREDIENTS[ing.id];
+      if (!meta) return null;
+      return `${fmt(curatedOverrides[ing.id])} ${meta.name} (was ${fmt(ing.g)})`;
+    })
+    .filter(Boolean);
+  const twistRows = twists
+    .map(t => {
+      const meta = INGREDIENTS[t.id];
+      if (!meta) return null;
+      return `+ ${fmt(t.g)} ${meta.name}`;
+    })
+    .filter(Boolean);
+  const recapRows = [...overrideRows, ...twistRows];
+
+  return (
   <div
     onClick={onCancel}
     style={{
@@ -1212,6 +1242,27 @@ const SaveTwistModal = ({ name, setName, onCancel, onSaveAndBrew, onBrewWithoutS
       }}>
         Keep it on your shelf so you can brew it again, or skip and steep this cup once.
       </div>
+      {recapRows.length > 0 && (
+        <div style={{
+          background: theme.cream,
+          border: `1px solid ${theme.ruleSoft}`,
+          borderRadius: radius.sm,
+          padding: "10px 12px",
+          marginBottom: 14,
+          fontFamily: ff.serif, fontSize: 12.5, color: theme.inkSoft,
+          lineHeight: 1.55,
+        }}>
+          <div style={{
+            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+          }}>
+            {baseName}
+          </div>
+          {recapRows.map((row, i) => (
+            <div key={i} style={{ fontStyle: "italic" }}>{row}</div>
+          ))}
+        </div>
+      )}
       <input
         type="text"
         value={name}
@@ -1241,4 +1292,5 @@ const SaveTwistModal = ({ name, setName, onCancel, onSaveAndBrew, onBrewWithoutS
       </div>
     </div>
   </div>
-);
+  );
+};
