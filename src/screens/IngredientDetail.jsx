@@ -179,6 +179,20 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           }}>
             {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
           </div>
+          {/* Form / preparation — how the ingredient is sold and used.
+              Surfaces for spices, flowers, roots, and other non-obvious
+              ingredients where "do I buy whole or ground?" matters.
+              True teas skip this (loose-leaf is implicit) so the field
+              is conditional on being present in the catalog entry. */}
+          {ing.form && (
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+              color: theme.inkSoft, marginTop: 6, lineHeight: 1.4,
+              maxWidth: 320,
+            }}>
+              {ing.form}
+            </div>
+          )}
         </div>
       </div>
 

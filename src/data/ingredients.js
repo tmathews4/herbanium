@@ -41,6 +41,7 @@ const INGREDIENTS = {
 
   chamomile: {
     name: "Chamomile", latin: "Matricaria chamomilla", category: "flower",
+    form: "whole dried flower heads",
     // Envelope stays narrow [95-100]°C / [240-420]s — that's where
     // the centroid-math (computeBrewProfile) expects the canonical
     // brewing window. tempZones/timeZones below extend wider for
@@ -96,6 +97,7 @@ const INGREDIENTS = {
   },
   lavender: {
     name: "Lavender", latin: "Lavandula angustifolia", category: "flower",
+    form: "dried buds (unopened)",
     // Envelope stays at the canonical lavender brewing window
     // (perfume blooms cleanest 90-95°C / 3-4 min). Zones below
     // extend wider for the live explorer; overPull at 360s where
@@ -145,6 +147,7 @@ const INGREDIENTS = {
   },
   rose: {
     name: "Rose Petal", latin: "Rosa × damascena", category: "flower",
+    form: "whole dried petals (culinary-grade)",
     // Floral perfume — geraniol/citronellol release fast, but past
     // 6 min the cup goes flat-floral and the lift fades.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
@@ -192,6 +195,7 @@ const INGREDIENTS = {
   },
   jasmine: {
     name: "Jasmine", latin: "Jasminum sambac", category: "flower",
+    form: "dried whole flowers",
     // Delicate white floral — needs cooler water than most herbs;
     // boiling scorches the perfume into something heavy and indolic.
     caffeine: 0, tempC: [75, 85], timeS: [120, 180],
@@ -239,6 +243,7 @@ const INGREDIENTS = {
   },
   passionflower: {
     name: "Passionflower", latin: "Passiflora incarnata", category: "herbal",
+    form: "dried leaves and flowers",
     // Sleep-leaning herbal — gentle calm at short steeps, deeper
     // sedation at long. Past 12 min the cup goes hay-flat.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
@@ -286,6 +291,7 @@ const INGREDIENTS = {
   },
   lemonbalm: {
     name: "Lemon Balm", latin: "Melissa officinalis", category: "herbal",
+    form: "dried leaves",
     // Light citrus-herb register at short steeps, calming-herbal
     // register at longer. Tannins climb past 360s.
     caffeine: 0, tempC: [90, 95], timeS: [180, 300],
@@ -338,6 +344,7 @@ const INGREDIENTS = {
 
   peppermint: {
     name: "Peppermint", latin: "Mentha × piperita", category: "herbal",
+    form: "dried leaves, whole or rough-cut",
     // Cooling anchor (5). Multi-axis: menthol releases fast and
     // tolerates near-boil; over-pull past 8 min turns harsh.
     caffeine: 0, tempC: [95, 100], timeS: [180, 420],
@@ -388,6 +395,7 @@ const INGREDIENTS = {
   },
   spearmint: {
     name: "Spearmint", latin: "Mentha spicata", category: "herbal",
+    form: "dried leaves, whole or rough-cut",
     // Carvone-dominant — no menthol like peppermint, gentler cool.
     // Maghrebi-tradition cooler temp 85-90°C preserves the delicate
     // sweet-mint top.
@@ -436,6 +444,7 @@ const INGREDIENTS = {
   },
   lemongrass: {
     name: "Lemongrass", latin: "Cymbopogon citratus", category: "herbal",
+    form: "dried sliced stalks, or fresh stalks bruised",
     // Bright citrus-grass — citral releases fast; longer steeps
     // pull a softer aromatic body before turning grassy-flat.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
@@ -483,6 +492,7 @@ const INGREDIENTS = {
   },
   fennel: {
     name: "Fennel Seed", latin: "Foeniculum vulgare", category: "spice",
+    form: "whole seeds, lightly crushed",
     // Digestive anchor (5). Bruised seeds release the licorice-anise
     // top fast; longer steeps deepen the cooling-digestive register.
     caffeine: 0, tempC: [95, 100], timeS: [240, 420],
@@ -530,6 +540,7 @@ const INGREDIENTS = {
   },
   hibiscus: {
     name: "Hibiscus", latin: "Hibiscus sabdariffa", category: "flower",
+    form: "dried calyces (the fleshy red sepals)",
     // High-traffic herbal — tart-cooling base of karkadé, jamaica,
     // bissap. Anthocyanins extract fast, color comes early; longer
     // steeps deepen tartness without going bitter.
@@ -578,6 +589,7 @@ const INGREDIENTS = {
   },
   rooibos: {
     name: "Rooibos", latin: "Aspalathus linearis", category: "herbal",
+    form: "cut, dried needle-like leaves",
     // Soothing anchor (5). Famously over-steep-tolerant — tannins
     // stay low, the cup keeps deepening rather than turning bitter.
     // overPull pushed to 900s reflecting that forgiveness.
@@ -629,6 +641,7 @@ const INGREDIENTS = {
 
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
+    form: "dried whole leaves",
     // POC ingredient for the multi-zone brewing model. The outer
     // tempC/timeS is the envelope — anywhere inside is a real cup,
     // just a different register. Zones describe what each register
@@ -776,6 +789,7 @@ const INGREDIENTS = {
   ashwagandha: {
     name: "Ashwagandha", latin: "Withania somnifera", category: "adaptogen",
     subcategory: "root",
+    form: "dried root chunks or powder",
     aliases: ["asgandh", "asvagandha", "winter cherry"],
     // Adaptogenic root — bitter, slow-acting; the long-decoction
     // preparation pulls withanolides over 10-20 min.
@@ -841,6 +855,7 @@ const INGREDIENTS = {
 
   ginger: {
     name: "Ginger", latin: "Zingiber officinale", category: "spice",
+    form: "fresh root (bruised) or dried sliced root",
     // Warming anchor (5). Decoction-friendly root — needs full
     // boil, tolerates long simmer up to ~12 min before the gingerol
     // turns harshly biting.
@@ -892,6 +907,7 @@ const INGREDIENTS = {
   turmeric: {
     name: "Turmeric", latin: "Curcuma longa", category: "spice",
     subcategory: "rhizome",
+    form: "fresh root grated, or dried powder",
     aliases: ["haridra", "haldi", "golden spice"],
     // Decoction-style root — curcumin is fat-soluble and slow.
     // Without fat or pepper, water only pulls a fraction; long
@@ -952,6 +968,7 @@ const INGREDIENTS = {
   },
   cinnamon: {
     name: "Cinnamon", latin: "Cinnamomum verum", category: "spice",
+    form: "whole stick, broken into pieces",
     // Sweet-warm spice — releases fast as ground, slower as stick.
     // Past 12 min the cinnamon turns hot-and-numbing.
     caffeine: 0, tempC: [95, 100], timeS: [300, 600],
@@ -999,6 +1016,7 @@ const INGREDIENTS = {
   },
   cardamom: {
     name: "Cardamom", latin: "Elettaria cardamomum", category: "spice",
+    form: "green pods, lightly cracked",
     // Bright-floral spice — needs full heat for the volatile oils;
     // past 10 min the cup picks up an aggressive camphor-medicinal edge.
     caffeine: 0, tempC: [95, 100], timeS: [300, 480],
@@ -1046,6 +1064,7 @@ const INGREDIENTS = {
   },
   cloves: {
     name: "Cloves", latin: "Syzygium aromaticum", category: "spice",
+    form: "whole dried flower buds",
     // Powerful aromatic — eugenol releases fast and goes medicinal
     // hard past 7 min; less is always more.
     caffeine: 0, tempC: [95, 100], timeS: [300, 420],
@@ -1093,6 +1112,7 @@ const INGREDIENTS = {
   },
   vanilla: {
     name: "Vanilla Bean", latin: "Vanilla planifolia", category: "spice",
+    form: "whole bean, split lengthwise",
     // Slow-extracting bean — vanillin is fat-soluble and patient;
     // tolerates long steeps without going off, but never delivers
     // big flavor at quick brews.
@@ -1141,6 +1161,7 @@ const INGREDIENTS = {
   },
   "black-pepper": {
     name: "Black Pepper", latin: "Piper nigrum", category: "spice",
+    form: "whole peppercorns, freshly cracked",
     aliases: ["peppercorn", "Maricha", "Kali Mirch", "King of spices"],
     caffeine: 0, tempC: [95, 100], timeS: [300, 900],
     effects: [["warming", 3], ["digestive", 4], ["focus", 1], ["energy", 1], ["uplifting", 1]],
@@ -2019,6 +2040,7 @@ const INGREDIENTS = {
   "yerba-mate": {
     name: "Yerba Mate", latin: "Ilex paraguariensis", category: "herbal",
     subcategory: "leaf",
+    form: "cut, dried leaves and stems",
     // South American gourd-tea — high caffeine, vegetal,
     // multi-refill register. Cool water keeps the bitterness down;
     // hot water turns the cup harshly tannic.
@@ -2090,6 +2112,7 @@ const INGREDIENTS = {
   valerian: {
     name: "Valerian", latin: "Valeriana officinalis", category: "herbal",
     subcategory: "root",
+    form: "dried root, in chunks or coarse cut",
     aliases: ["all-heal", "garden heliotrope", "setwall"],
     // Sleepy anchor (5). Long-decoction root — needs the slow
     // simmer to release the valepotriates. The famous "sock smell"
@@ -2159,6 +2182,7 @@ const INGREDIENTS = {
   echinacea: {
     name: "Echinacea", latin: "Echinacea purpurea", category: "herbal",
     subcategory: "flower",
+    form: "dried root (more potent) or aerial parts",
     aliases: ["purple coneflower", "Black Sampson"],
     // Cold-care herb — daisy-family root + flower. The
     // immune-support character builds slowly; quick brews barely
@@ -2222,6 +2246,7 @@ const INGREDIENTS = {
   },
   elderflower: {
     name: "Elderflower", latin: "Sambucus nigra", category: "flower",
+    form: "dried whole florets",
     aliases: ["black elder", "Holunder", "Sureau", "Sambuco", "Saúco"],
     // Honey-floral cold-care herb. Light infusion captures the
     // perfume; longer pulls the flavonoid body that supports the
@@ -2286,6 +2311,7 @@ const INGREDIENTS = {
   },
   linden: {
     name: "Linden", latin: "Tilia cordata", category: "flower",
+    form: "dried flowers with attached leaf-bract",
     aliases: ["lime flower", "Tilleul", "Tila", "Lipa", "Linde"],
     // Honey-floral tisane, gentler-cousin of chamomile.
     tempZones: [
@@ -2353,6 +2379,7 @@ const INGREDIENTS = {
   "licorice-root": {
     name: "Licorice Root", latin: "Glycyrrhiza glabra", category: "herbal",
     subcategory: "root",
+    form: "dried root chips",
     aliases: ["sweet root", "Gan Cao 甘草", "Mulethi", "Yashtimadhu", "liquorice"],
     // Throat-coat root — sweet glycyrrhizin builds slowly. Long
     // simmer is the canonical preparation; quick brews barely
@@ -2432,6 +2459,7 @@ const INGREDIENTS = {
   "marshmallow-root": {
     name: "Marshmallow Root", latin: "Althaea officinalis", category: "herbal",
     subcategory: "root",
+    form: "dried root chunks (cold infusion preferred)",
     aliases: ["althaea", "white mallow", "guimauve", "Khatmi"],
     // Mucilage-forward demulcent. Unlike most roots, the active
     // compound (long-chain polysaccharides ~25-35% of dried mass)
@@ -2506,6 +2534,7 @@ const INGREDIENTS = {
   nettle: {
     name: "Nettle", latin: "Urtica dioica", category: "herbal",
     subcategory: "leaf",
+    form: "dried leaves",
     aliases: ["stinging nettle", "common nettle", "Bichu butti"],
     // Mineral-rich tonic herb — long-infusion preparation pulls
     // chlorophyll, minerals, and a green tannic body.
@@ -2574,6 +2603,7 @@ const INGREDIENTS = {
   "dandelion-root": {
     name: "Dandelion Root", latin: "Taraxacum officinale (radix)", category: "herbal",
     subcategory: "root",
+    form: "roasted root chunks (or raw dried)",
     aliases: ["roasted dandelion root", "dandelion coffee", "Pissenlit", "lion's tooth", "Pu Gong Ying 蒲公英"],
     relatedIngredient: "dandelion-leaf",
     // Coffee-substitute root — roasted, bittersweet, slow-extracting.
@@ -2642,6 +2672,7 @@ const INGREDIENTS = {
   "dandelion-leaf": {
     name: "Dandelion Leaf", latin: "Taraxacum officinale (folium)", category: "herbal",
     subcategory: "leaf",
+    form: "dried leaves",
     aliases: ["dandelion greens", "Pissenlit", "lion's tooth", "Taraxaci folium"],
     relatedIngredient: "dandelion-root",
     // Spring-tonic green — bitter, mineral-rich, diuretic.
@@ -2716,6 +2747,7 @@ const INGREDIENTS = {
   sage: {
     name: "Sage", latin: "Salvia officinalis", category: "herbal",
     subcategory: "leaf",
+    form: "dried whole leaves",
     aliases: ["common sage", "garden sage", "salvia", "sauge", "Salbei"],
     // Mediterranean savory-aromatic. Tannin and camphor both climb
     // past 7 min; the cup goes harshly medicinal there.
@@ -2766,6 +2798,7 @@ const INGREDIENTS = {
   bergamot: {
     name: "Bergamot Peel", latin: "Citrus bergamia", category: "herbal",
     subcategory: "peel",
+    form: "dried zest strips",
     aliases: ["bergamot orange", "Earl Grey citrus", "bergamotto"],
     // Calabrian citrus peel — perfumed, floral-citrus. Volatile
     // oils dissipate fast past 5 min; longer pulls the bitter pith.
@@ -2814,6 +2847,7 @@ const INGREDIENTS = {
   "orange-peel": {
     name: "Orange Peel", latin: "Citrus sinensis", category: "herbal",
     subcategory: "peel",
+    form: "dried zest strips (pith removed)",
     aliases: ["sweet orange peel", "bitter orange peel", "chen pi 陈皮", "zest"],
     // Limonene-forward warming citrus peel. Pith bitter climbs
     // past 8 min once the volatiles dissipate.
@@ -2863,6 +2897,7 @@ const INGREDIENTS = {
   "dried-apple": {
     name: "Dried Apple", latin: "Malus domestica", category: "herbal",
     subcategory: "fruit",
+    form: "dehydrated rings or chunks",
     aliases: ["apple pieces", "apfeltee fruit", "pomme séchée"],
     // Sweet dried fruit — sugars and pectin extract slowly, no
     // bitter ceiling. Long steeps just deepen sweetness.
@@ -2912,6 +2947,7 @@ const INGREDIENTS = {
   cranberry: {
     name: "Dried Cranberry", latin: "Vaccinium macrocarpon", category: "herbal",
     subcategory: "fruit",
+    form: "dehydrated whole berries, unsweetened",
     aliases: ["American cranberry", "atoca", "craneberry"],
     // Tart North American berry — quinic + malic + citric acid
     // mix. Past 8 min the cup goes pucker-aggressive without
@@ -2962,6 +2998,7 @@ const INGREDIENTS = {
   "lemon-peel": {
     name: "Lemon Peel", latin: "Citrus limon", category: "herbal",
     subcategory: "peel",
+    form: "dried zest strips (pith removed)",
     aliases: ["lemon zest", "zeste de citron", "scorza di limone"],
     // Sharp citral citrus peel — bright and direct. Past 8 min
     // the pith bitter overtakes the citrus.
@@ -3012,6 +3049,7 @@ const INGREDIENTS = {
   reishi: {
     name: "Reishi", latin: "Ganoderma lucidum", category: "herbal",
     subcategory: "fungus",
+    form: "dried mushroom slices",
     aliases: ["Lingzhi 灵芝", "Mannentake 万年茸", "mushroom of immortality"],
     // Grounding anchor (5). Long-decoction fungus — the triterpenes
     // are fat-soluble and slow. Anything under 30 minutes barely
@@ -3081,6 +3119,7 @@ const INGREDIENTS = {
   "lions-mane": {
     name: "Lion's Mane", latin: "Hericium erinaceus", category: "herbal",
     subcategory: "fungus",
+    form: "dried slices or powder",
     aliases: ["Yamabushitake 山伏茸", "Hou Tou Gu 猴頭菇", "monkey head mushroom", "bearded tooth fungus", "pom pom mushroom"],
     // Long-decoction medicinal mushroom — sweeter and lighter than
     // reishi but still wants 10-30 min simmer for full extraction.
