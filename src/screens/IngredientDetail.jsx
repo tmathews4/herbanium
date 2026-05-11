@@ -147,22 +147,29 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
   // peek at a pairing's effects/flavors without leaving this ingredient.
   const [previewPairId, setPreviewPairId] = useState(null);
   const previewIng = previewPairId ? INGREDIENTS[previewPairId] : null;
+  const [scrolled, setScrolled] = useState(false);
 
   return (
-    <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
-      background: theme.ivory, overflowY: "auto",
-      boxSizing: "border-box",
-    }}>
+    <div
+      onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
+      style={{
+        position: "absolute", inset: 0, zIndex: 30,
+        background: theme.ivory, overflowY: "auto",
+        boxSizing: "border-box",
+      }}
+    >
       {/* Sticky header row — back button + eyebrow stay pinned at
           the top of the scroll viewport so they're always reachable
           regardless of scroll depth. Opaque ivory bg so content
-          scrolling underneath doesn't bleed through. */}
+          scrolling underneath doesn't bleed through; hairline shadow
+          fades in on scroll to read the header as a separate layer. */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: theme.ivory,
         padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
+        boxShadow: scrolled ? "0 1px 0 rgba(60, 50, 40, 0.08)" : "0 1px 0 rgba(60, 50, 40, 0)",
+        transition: "box-shadow 0.18s ease",
       }}>
         <button onClick={onClose} style={{
           background: "transparent", border: "none", color: theme.ash,

@@ -178,18 +178,25 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
 
   const start = (entry.currentMoods || []).join(", ");
   const end   = (entry.landedMoods  || []).join(", ");
+  const [scrolled, setScrolled] = useState(false);
 
   return (
-    <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
-      background: theme.ivory, overflowY: "auto",
-    }}>
-      {/* Sticky header — back + eyebrow + edit/delete pinned. */}
+    <div
+      onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
+      style={{
+        position: "absolute", inset: 0, zIndex: 30,
+        background: theme.ivory, overflowY: "auto",
+      }}
+    >
+      {/* Sticky header — back + eyebrow + edit/delete pinned.
+          Hairline shadow fades in once content has scrolled. */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: theme.ivory,
         padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
+        boxShadow: scrolled ? "0 1px 0 rgba(60, 50, 40, 0.08)" : "0 1px 0 rgba(60, 50, 40, 0)",
+        transition: "box-shadow 0.18s ease",
       }}>
         <button onClick={editing ? handleCancelEdit : onClose} style={{
           background: "transparent", border: "none", color: theme.ash,

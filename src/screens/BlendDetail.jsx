@@ -128,11 +128,20 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   });
   const topIntent = Object.entries(intentTally).sort((a, b) => b[1] - a[1])[0]?.[0];
 
+  // Scroll-aware hairline under the sticky header — fades in once
+  // the page has been scrolled at all so the header reads as a
+  // separate layer once content sits behind it. Stays opaque so the
+  // paper aesthetic isn't broken by a glassy backdrop blur.
+  const [scrolled, setScrolled] = React.useState(false);
+
   return (
-    <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
-      background: theme.ivory, overflowY: "auto",
-    }}>
+    <div
+      onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
+      style={{
+        position: "absolute", inset: 0, zIndex: 30,
+        background: theme.ivory, overflowY: "auto",
+      }}
+    >
       {/* Sticky header — back + eyebrow + favorite-star stay pinned
           to the top of the scroll viewport. Pulled out of the cream
           hero band below so it can stay visible at any scroll depth. */}
@@ -141,6 +150,8 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         background: theme.ivory,
         padding: "10px 22px 8px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
+        boxShadow: scrolled ? "0 1px 0 rgba(60, 50, 40, 0.08)" : "0 1px 0 rgba(60, 50, 40, 0)",
+        transition: "box-shadow 0.18s ease",
       }}>
         <Button variant="ghost" onClick={onClose}>← back</Button>
         {onToggleFavorite ? (
