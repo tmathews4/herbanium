@@ -281,31 +281,6 @@ export function attenuateFragileEffects(effectsMap, flavorsMap) {
   return out;
 }
 
-/**
- * Apply a blend's declared effects as a soft floor on the perception-
- * derived effects map. For each declared `[tag, n]`, ensure the
- * perceived value is at least 80% of n — so a tag the curator
- * promised on the recipe can't silently disappear because the
- * ingredient's extraction profile didn't list it. Doesn't lower a
- * perceived value if it's already above the floor.
- *
- * The 80% ceiling lets the perception layer still attenuate at
- * extreme brew points (post-overpull, post-masking) — the floor is
- * "this tag should be present", not "this tag is locked at this
- * strength."
- */
-export function applyEffectFloor(effectsMap, declaredEffects) {
-  if (!declaredEffects || declaredEffects.length === 0) return effectsMap;
-  const out = { ...effectsMap };
-  for (const [tag, declaredStrength] of declaredEffects) {
-    if (typeof declaredStrength !== "number") continue;
-    const floor = declaredStrength * 0.8;
-    if ((out[tag] || 0) < floor) {
-      out[tag] = floor;
-    }
-  }
-  return out;
-}
 
 // Effect synergies — non-linear bonuses when both effects co-present
 // at meaningful strength. Trigger threshold: each component ≥ 1.5.

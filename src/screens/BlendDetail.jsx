@@ -851,7 +851,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               ingredients={mergedIngredients}
               defaultTempC={b.tempC}
               defaultTimeS={b.timeS}
-              declaredEffects={b.effects}
               curated
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}

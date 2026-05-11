@@ -1,10 +1,9 @@
 /* ──────────────────────────────────────────────────────────────
    tests/perception-extras.test.mjs
 
-   Covers the three perception-layer additions:
+   Covers the two perception-layer additions:
      1. loudnessOf — perceptual loudness multipliers
      2. attenuateFragileEffects — parabolic decay past overpull
-     3. applyEffectFloor — blend.effects as a soft floor
 
    Plus an integration check via resolveBlendAtBrew on real catalog
    blends, verifying the audit-flagged regressions actually moved
@@ -14,7 +13,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  loudnessOf, attenuateFragileEffects, applyEffectFloor, FRAGILE_EFFECTS,
+  loudnessOf, attenuateFragileEffects, FRAGILE_EFFECTS,
 } from "../src/algo/perception.js";
 import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import {
@@ -105,38 +104,7 @@ test("attenuate: returns new object, doesn't mutate", () => {
   assert(JSON.stringify(effects) === before, "input was mutated");
 });
 
-// ── 3. applyEffectFloor ──────────────────────────────────────────
-test("floor: declared tag missing from perceived gets raised", () => {
-  const perceived = { focus: 3 };
-  const declared = [["calm", 3], ["focus", 3]];
-  const out = applyEffectFloor(perceived, declared);
-  assert(approx(out.calm, 2.4), `calm ${out.calm} ≠ 2.4 (80% of 3)`);
-});
-test("floor: doesn't lower a perceived value above the floor", () => {
-  const perceived = { calm: 4 };
-  const declared = [["calm", 3]];
-  const out = applyEffectFloor(perceived, declared);
-  assert(out.calm === 4, `calm shouldn't move down: got ${out.calm}`);
-});
-test("floor: empty declared list is a no-op", () => {
-  const perceived = { focus: 3, calm: 2 };
-  const out = applyEffectFloor(perceived, []);
-  assert(out.focus === 3 && out.calm === 2, `unexpected change: ${JSON.stringify(out)}`);
-});
-test("floor: null declared list is a no-op", () => {
-  const perceived = { focus: 3 };
-  const out = applyEffectFloor(perceived, null);
-  assert(out.focus === 3 && Object.keys(out).length === 1);
-});
-test("floor: returns new object, doesn't mutate", () => {
-  const perceived = { focus: 3 };
-  const declared = [["calm", 3]];
-  const before = JSON.stringify(perceived);
-  applyEffectFloor(perceived, declared);
-  assert(JSON.stringify(perceived) === before, "input was mutated");
-});
-
-// ── 4. Integration via resolveBlendAtBrew ────────────────────────
+// ── 3. Integration via resolveBlendAtBrew ────────────────────────
 
 test("integration: sencha at 100°C/240s blunts focus vs 78°C/90s peak", () => {
   const sencha = findBlend("sencha-properly");
@@ -149,13 +117,12 @@ test("integration: sencha at 100°C/240s blunts focus vs 78°C/90s peak", () => 
     `cliff focus ${cliffFocus} should be < peak ${peakFocus} (parabolic decay broken)`);
 });
 
-test("integration: pu-erh shows grounding (declared on blend.effects)", () => {
+test("integration: pu-erh shows grounding from its extraction profile", () => {
   const puerh = findBlend("shou-puerh");
   assert(puerh, "shou-puerh missing");
   const out = resolveBlendAtBrew(
     puerh.ingredients, 100, 30,
     puerh.tempC, puerh.timeS, true, !!puerh.tradition,
-    puerh.effects
   );
   const grounding = out.effects.find(([t]) => t === "grounding");
   assert(grounding && grounding[1] >= 2,
@@ -173,7 +140,6 @@ test("integration: moroccan mint loudness lifts minty above its pre-loudness bas
   const out = resolveBlendAtBrew(
     m.ingredients, 90, 180,
     m.tempC, m.timeS, true, !!m.tradition,
-    m.effects
   );
   const minty = (out.flavors.find(([t]) => t === "minty") || [, 0])[1];
   assert(minty >= 1.5,

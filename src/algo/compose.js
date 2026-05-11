@@ -1173,7 +1173,7 @@ function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
   return out;
 }
 
-export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, declaredEffects = null) {
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false) {
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],

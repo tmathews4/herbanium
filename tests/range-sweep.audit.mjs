@@ -36,7 +36,7 @@ for (const b of traditions) {
   ];
 
   for (const [label, t, s] of points) {
-    const r = resolveBlendAtBrew(ings, t, s, baseT, baseS, true, true, b.effects);
+    const r = resolveBlendAtBrew(ings, t, s, baseT, baseS, true, true);
     const moods = fmt(r.effects, 4);
     const flavors = fmt(r.flavors, 4);
     const balance = fmt(r.balance, 3);
