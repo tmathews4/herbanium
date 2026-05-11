@@ -563,15 +563,46 @@ export const EXTRACTION_PROFILES = {
   ],
 
   lapsang: [
-    { tempC: 95,  timeS: 120, flavors: ["smoked", "pine", "campfire"],
-      effects: [["energy", 2], ["warming", 3], ["comfort", 3], ["digestive", 1]],
-      character: "Light lapsang — pine smoke on the surface, gentler than expected." },
-    { tempC: 98,  timeS: 200, flavors: ["smoked", "pine", "campfire", "leather", "tar", "woody"],
+    // Pine-smoke phenolics (guaiacol, syringol, 4-methylguaiacol) sit
+    // on the leaf surface from the pinewood drying step and need both
+    // heat and time to migrate into the water. A cold pour barely
+    // touches them; the canonical Lapsang cup wants real boil to pull
+    // the full campfire character. Five knots so the slider produces
+    // a real journey: barely-smoky cold pour, warming, canonical,
+    // pushed-with-tannin, full over-pull.
+    { tempC: 70,  timeS: 90,
+      flavorStrengths: [
+        ["smoked", 1.5], ["pine", 0.8], ["wood", 0.5],
+      ],
+      effects: [["warming", 1.5], ["comfort", 1.5]],
+      character: "Barely lapsang — water carrying a smoke hint, the phenolics still locked to the leaf." },
+    { tempC: 85,  timeS: 150,
+      flavorStrengths: [
+        ["smoked", 3.0], ["pine", 1.8], ["campfire", 1.2], ["wood", 1.0],
+      ],
+      effects: [["energy", 2], ["warming", 3], ["comfort", 2.5], ["digestive", 1]],
+      character: "Warming pour — smoke emerging cleanly, no tannin grip yet, the gentler register." },
+    { tempC: 95,  timeS: 200,
+      flavorStrengths: [
+        ["smoked", 4.0], ["pine", 2.5], ["campfire", 2.0], ["leather", 1.2],
+        ["tar", 0.8], ["woody", 0.6],
+      ],
       effects: [["energy", 3], ["warming", 4], ["comfort", 4], ["digestive", 2]],
-      character: "The standard cup. Full campfire — pine smoke, leather, tar — singular, divisive, warming." },
-    { tempC: 100, timeS: 240, flavors: ["smoked", "pine", "campfire", "leather", "tar", "woody", "astringent"],
+      character: "The canonical cup. Full campfire — pine smoke, leather, soft tar — singular and warming." },
+    { tempC: 100, timeS: 240,
+      flavorStrengths: [
+        ["smoked", 4.5], ["pine", 3.0], ["campfire", 2.5], ["leather", 2.0],
+        ["tar", 1.8], ["astringent", 2.5], ["woody", 0.5],
+      ],
       effects: [["energy", 3], ["warming", 4], ["comfort", 4], ["digestive", 2], ["bitterness", 2]],
-      character: "Pushed long. Smoke holds but the body tightens with tannin." },
+      character: "Pushed — smoke holds strong but black-tea catechins surface underneath, tannin grip emerging." },
+    { tempC: 100, timeS: 360,
+      flavorStrengths: [
+        ["smoked", 4.5], ["astringent", 4.0], ["tar", 2.8], ["bitter", 2.5],
+        ["pine", 2.5], ["leather", 2.0],
+      ],
+      effects: [["energy", 3], ["warming", 4], ["bitterness", 3.5]],
+      character: "Over-pulled — smoke saturated, tannin and tar dominate the back palate, comfort recedes behind the grip." },
   ],
 
   // ─── True teas: Pu-erh ────────────────────────────────────────
