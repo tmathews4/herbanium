@@ -1006,6 +1006,28 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
+      {/* Adaptogen caveat — fires when adaptogen-flagged ingredients
+          (tulsi, ashwagandha, reishi, lion's mane, licorice) make up
+          a meaningful share of the cup. These compounds build effect
+          over weeks of daily use, not within a single cup — the
+          per-cup grounding/calm readouts are honest about the
+          chemistry that's extracted, but they overstate what one cup
+          can shift. Surfaced only when ≥20% adaptogen by weight so
+          the caveat tracks with cups that are actually adaptogen-led. */}
+      {brew?.adaptogenShare >= 0.2 && (
+        <div style={{
+          marginTop: 14,
+          padding: "8px 12px",
+          borderLeft: `2px solid ${theme.sageDeep}`,
+          background: "rgba(98, 124, 92, 0.06)",
+          borderRadius: "0 6px 6px 0",
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
+          color: theme.inkSoft, lineHeight: 1.5,
+        }}>
+          Adaptogens work cumulatively. One cup is the start of the practice, not the answer.
+        </div>
+      )}
+
       {/* Honesty footer — the predictions are now precise enough
           (caffeine in mg, calm to a tenth) that users could over-
           trust them. This small italic line travels with the

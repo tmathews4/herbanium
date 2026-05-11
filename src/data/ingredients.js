@@ -665,6 +665,7 @@ const INGREDIENTS = {
 
   tulsi: {
     name: "Tulsi", latin: "Ocimum tenuiflorum", category: "adaptogen",
+    adaptogen: true,
     form: "dried whole leaves",
     origin: "Indian subcontinent",
     shelfLife: "9–12 months airtight + dark",
@@ -815,6 +816,7 @@ const INGREDIENTS = {
   ashwagandha: {
     name: "Ashwagandha", latin: "Withania somnifera", category: "adaptogen",
     subcategory: "root",
+    adaptogen: true,
     form: "dried root chunks or powder",
     origin: "India, parts of Africa, Middle East",
     shelfLife: "12–18 months airtight + dark",
@@ -2481,6 +2483,7 @@ const INGREDIENTS = {
   "licorice-root": {
     name: "Licorice Root", latin: "Glycyrrhiza glabra", category: "herbal",
     subcategory: "root",
+    adaptogen: true,
     form: "dried root chips",
     origin: "Western Asia + Mediterranean (G. glabra)",
     shelfLife: "18–24 months airtight + dark",
@@ -3173,6 +3176,7 @@ const INGREDIENTS = {
   reishi: {
     name: "Reishi", latin: "Ganoderma lucidum", category: "herbal",
     subcategory: "fungus",
+    adaptogen: true,
     form: "dried mushroom slices",
     origin: "East Asia (China, Japan, Korea)",
     shelfLife: "12–18 months airtight + dark",
@@ -3245,6 +3249,7 @@ const INGREDIENTS = {
   "lions-mane": {
     name: "Lion's Mane", latin: "Hericium erinaceus", category: "herbal",
     subcategory: "fungus",
+    adaptogen: true,
     form: "dried slices or powder",
     origin: "Northern Hemisphere forests",
     shelfLife: "12 months airtight",

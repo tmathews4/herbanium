@@ -1522,6 +1522,27 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   let { effects: perceivedEffectMap, synergyTags, paradoxTags } =
     applyEffectSynergies(rawEffects);
 
+  // Adaptogen-stack synergy — when 2+ ingredients flagged as
+  // adaptogens are co-present at meaningful weight, tradition
+  // (Ayurvedic and TCM) treats the cup as a 'tonic stack' rather
+  // than a sum of individual effects. The chemistry rationale:
+  // different adaptogens target different stress axes (cortisol,
+  // GABA, HPA), so combining them broadens coverage without
+  // over-amplifying any one register. Detected on the ingredient
+  // list (not the effect map) so we don't over-fire on cups with
+  // overlapping grounding/calm chemistry from non-adaptogens (e.g.
+  // pu-erh + chamomile).
+  const adaptogenIngs = ingredients.filter(({ id, g }) => {
+    const meta = INGREDIENTS[id];
+    return meta?.adaptogen === true && (g || 0) > 0;
+  });
+  if (adaptogenIngs.length >= 2) {
+    perceivedEffectMap.calm = (perceivedEffectMap.calm || 0) + 0.3;
+    perceivedEffectMap.grounding = (perceivedEffectMap.grounding || 0) + 0.2;
+    perceivedEffectMap.comfort = (perceivedEffectMap.comfort || 0) + 0.2;
+    synergyTags.push("tonic stack");
+  }
+
   // Declared `effects` are now labels for search/curation only — the
   // engine output stands on its own so the chemistry can be honest.
 
@@ -1735,6 +1756,11 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     // used internally by buildWarnings for the high-caffeine-load
     // alert; same number, now visualized.
     caffeineMg: totalCaffeineMg,
+    // Share of cup weight from adaptogen-flagged ingredients (tulsi,
+    // ashwagandha, reishi, lion's mane, licorice). Used by the UI to
+    // surface the daily-use caveat — adaptogens build cumulatively
+    // over weeks rather than acting on the cup alone.
+    adaptogenShare: adaptogenIngs.reduce((s, i) => s + (i.g || 0), 0) / Math.max(0.01, totalG),
   };
 }
 
