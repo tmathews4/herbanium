@@ -1102,6 +1102,43 @@ const TrackMap = ({
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
+        {/* Absolute-strength gauges — moved to the leftmost column
+            now that the numeric 0-5 readouts are gone. Reads as
+            a small vertical bar to the left of each row label,
+            filled bottom-up to the row's current value on a shared
+            0-5 scale. Gives the user a cross-row comparison the
+            per-track gradient alpha can't (gradient is normalized
+            to each track's peak, so a flat-quiet track and a
+            flat-loud track read with similar alpha). */}
+        <div style={{
+          flex: "0 0 auto",
+          width: 4,
+          display: "flex", flexDirection: "column", gap: TRACK_GAP,
+        }}>
+          {renderedList.map(item => {
+            const { name } = item;
+            const current = valueAtCurrent(name);
+            const fill = Math.max(0, Math.min(1, current / 5));
+            return (
+              <div key={name} style={{
+                height: heightForItem(item),
+                position: "relative",
+                background: theme.ruleSoft,
+                borderRadius: 1,
+                overflow: "hidden",
+              }}>
+                <div style={{
+                  position: "absolute",
+                  left: 0, right: 0, bottom: 0,
+                  height: `${fill * 100}%`,
+                  background: colorForName(name),
+                  opacity: 0.7,
+                }} />
+              </div>
+            );
+          })}
+        </div>
+
         <div style={{
           flex: "0 0 auto",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
@@ -1180,44 +1217,6 @@ const TrackMap = ({
                     an engine-modeled effect claimed more accuracy
                     than the chemistry honestly supports. The bar
                     fill is the signal. */}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Absolute-strength gauges on a shared 0-5 scale. Filled
-            bottom-up to each row's CURRENT slider value. Per-track
-            normalization scales each band's alpha to its own peak
-            (good for reading SHAPE within a track) but flattens
-            cross-band loudness; the gauge restores that comparison.
-            Tied to the current slider position (not envelope peak)
-            so palate axes that fire only at the slider's extreme
-            corner read empty when the user's brew is in clean
-            territory. */}
-        <div style={{
-          flex: "0 0 auto",
-          width: 4,
-          display: "flex", flexDirection: "column", gap: TRACK_GAP,
-        }}>
-          {renderedList.map(item => {
-            const { name } = item;
-            const current = valueAtCurrent(name);
-            const fill = Math.max(0, Math.min(1, current / 5));
-            return (
-              <div key={name} style={{
-                height: heightForItem(item),
-                position: "relative",
-                background: theme.ruleSoft,
-                borderRadius: 1,
-                overflow: "hidden",
-              }}>
-                <div style={{
-                  position: "absolute",
-                  left: 0, right: 0, bottom: 0,
-                  height: `${fill * 100}%`,
-                  background: colorForName(name),
-                  opacity: 0.7,
-                }} />
               </div>
             );
           })}
