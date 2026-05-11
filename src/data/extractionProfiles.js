@@ -201,14 +201,20 @@ export const EXTRACTION_PROFILES = {
   ],
 
   cardamom: [
+    // Cardamom's 1,8-cineole (eucalyptol) gives a surface-cooling
+    // sensation while the spice register reads warming in the gut —
+    // the paradox the engine's warming+cooling rule recognizes.
+    // Both registers ride in the same cup; the perception is a real
+    // 'cool surface, warm body' split. Eucalyptol is volatile, so
+    // cooling fades at the pushed knot where the aromatics escape.
     { tempC: 95,  timeS: 240, flavors: ["spiced", "floral"],
-      effects: [["warming", 2], ["comfort", 3], ["digestive", 2], ["energy", 2], ["uplifting", 1]],
+      effects: [["warming", 2], ["cooling", 1.5], ["comfort", 3], ["digestive", 2], ["energy", 2], ["uplifting", 1]],
       character: "Light cardamom — aromatic and floral, the upper register." },
     { tempC: 98,  timeS: 360, flavors: ["spiced", "floral", "citrus"],
-      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2]],
+      effects: [["warming", 3], ["cooling", 2], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2]],
       character: "The standard cup. Full cardamom character — complex, lifting." },
     { tempC: 100, timeS: 480, flavors: ["spiced", "floral", "citrus", "camphor"],
-      effects: [["warming", 3], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["bitterness", 2]],
+      effects: [["warming", 3], ["cooling", 1], ["comfort", 4], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["bitterness", 2]],
       character: "Pushed too far. Volatile aromatics escape; camphor takes their place." },
   ],
 

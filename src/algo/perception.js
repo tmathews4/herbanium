@@ -304,6 +304,24 @@ export const EFFECT_SYNERGIES = [
   // and another brings caffeine-driven energy (black tea, mate),
   // even when the chemistry doesn't come from one source.
   { when: ["calm", "energy"],    bonus: { focus: 0.5, calm: 0.3 }, label: "alert calm" },
+  // Maghrebi refresh — gunpowder + spearmint pattern. The entire
+  // Moroccan tea ritual is built on cooling + focus. Cross-cultural
+  // versions exist (yerba mate + mint, Vietnamese green + lemongrass).
+  { when: ["cooling", "focus"],  bonus: { focus: 0.4, cooling: 0.2 }, label: "Maghrebi refresh" },
+  // After-meal lift — citrus + fennel / lemon + ginger pattern.
+  // Italian canarino, Mexican agua de jamaica with lime, French
+  // tisane after a heavy meal. The cup ends both bright and
+  // settling.
+  { when: ["uplifting", "digestive"], bonus: { uplifting: 0.3, digestive: 0.2 }, label: "after-meal lift" },
+  // Deep settle — chamomile + valerian / passionflower pattern.
+  // Complements 'deepens sedation' (calm+sleepy = mind quiet);
+  // soothing+sleepy is the body-relax register, the unwind cup
+  // rather than the get-tired cup.
+  { when: ["soothing", "sleepy"], bonus: { sleepy: 0.3, soothing: 0.2 }, label: "deep settle" },
+  // Winter root — pu-erh + ginger / cinnamon + adaptogen-root
+  // pattern. Yunnan-Tibetan decoction register. Cup that anchors
+  // AND warms, the cold-weather constitutional brew.
+  { when: ["grounding", "warming"], bonus: { grounding: 0.3, warming: 0.2 }, label: "winter root" },
 ];
 
 // Effect pairs that co-exist legitimately rather than canceling.
