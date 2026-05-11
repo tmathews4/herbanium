@@ -567,74 +567,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
           );
         })()}
 
-        {/* Brewing — collapsible header + interactive explorer.
-            Default open; collapsing hides the slider explorer and
-            volume tag so the user can read just the recipe and
-            preparations. The Brew CTA stays outside the collapse
-            so the action is always one tap away. */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setBrewingOpen(o => !o)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setBrewingOpen(o => !o);
-            }
-          }}
-          style={{
-            margin: "22px 0 10px",
-            display: "flex", alignItems: "baseline", gap: 8,
-            cursor: "pointer", userSelect: "none",
-          }}
-        >
-          <span style={{
-            fontFamily: ff.sans, fontSize: 9, color: theme.ash,
-            transition: "transform 0.15s ease",
-            transform: brewingOpen ? "rotate(90deg)" : "rotate(0deg)",
-            display: "inline-block",
-          }}>▶</span>
-          <SectionLabel n="ii">Brewing</SectionLabel>
-        </div>
-        {brewingOpen && (
-          <>
-            <BlendExtractionExplorer
-              ingredients={b.ingredients}
-              defaultTempC={b.tempC}
-              defaultTimeS={b.timeS}
-              declaredEffects={b.effects}
-              curated
-              isTraditional={!!b.tradition}
-              isHouse={!!b.house}
-            />
-            {b.ml && (
-              <div style={{
-                marginTop: 8,
-                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
-                textTransform: "uppercase", color: theme.ash, textAlign: "right",
-              }}>
-                Volume · {b.ml} ml
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Brew CTA — primary terra button, full width. Style overrides
-            push the size up one tier (17px serif, 15px vertical pad) so
-            the page's headline action reads slightly bigger than the
-            standard Button defaults. */}
-        <Button
-          variant="primary" fullWidth
-          onClick={onBrew}
-          icon={<Kettle size={20} c={theme.cream} />}
-          style={{ marginTop: 18, fontSize: 17, padding: "15px 16px", gap: 10 }}
-        >
-          Brew this cup →
-        </Button>
-
-        {/* Recommended Preparations — tradition-specific steps when curated,
-            generic template otherwise. Sits after the predicted-mood/balance
-            bars so the brewing science reads first, the ritual second. */}
+        {/* Recommended Preparations — tradition-specific steps when
+            curated, generic template otherwise. Sits directly below
+            the ingredient list (under "The recipe") so the user
+            reads the how-to-make-this before the interactive
+            brewing-science explorer — which order matches how
+            people actually use the page: scan ingredients, scan
+            steps, then dig into the chemistry if curious. */}
         {(() => {
           const tradSteps = BLEND_DIRECTIONS[b.id];
           const tempLabel = formatTempRange(b.tempC, b.tempC, unit);
@@ -686,7 +625,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
                     transform: directionsOpen ? "rotate(90deg)" : "rotate(0deg)",
                     display: "inline-block",
                   }}>▶</span>
-                  <SectionLabel n="iii">Recommended Preparations</SectionLabel>
+                  <SectionLabel n="ii">Recommended Preparations</SectionLabel>
                 </span>
                 <span style={{
                   fontFamily: ff.serif, fontStyle: "italic", fontSize: 12, color: theme.ash,
@@ -712,6 +651,71 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, isFavo
             </div>
           );
         })()}
+
+        {/* Brewing — collapsible header + interactive explorer.
+            Default open; collapsing hides the slider explorer and
+            volume tag so the user can read just the recipe and
+            preparations. The Brew CTA stays outside the collapse
+            so the action is always one tap away. */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setBrewingOpen(o => !o)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setBrewingOpen(o => !o);
+            }
+          }}
+          style={{
+            margin: "22px 0 10px",
+            display: "flex", alignItems: "baseline", gap: 8,
+            cursor: "pointer", userSelect: "none",
+          }}
+        >
+          <span style={{
+            fontFamily: ff.sans, fontSize: 9, color: theme.ash,
+            transition: "transform 0.15s ease",
+            transform: brewingOpen ? "rotate(90deg)" : "rotate(0deg)",
+            display: "inline-block",
+          }}>▶</span>
+          <SectionLabel n="iii">Brewing</SectionLabel>
+        </div>
+        {brewingOpen && (
+          <>
+            <BlendExtractionExplorer
+              ingredients={b.ingredients}
+              defaultTempC={b.tempC}
+              defaultTimeS={b.timeS}
+              declaredEffects={b.effects}
+              curated
+              isTraditional={!!b.tradition}
+              isHouse={!!b.house}
+            />
+            {b.ml && (
+              <div style={{
+                marginTop: 8,
+                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
+                textTransform: "uppercase", color: theme.ash, textAlign: "right",
+              }}>
+                Volume · {b.ml} ml
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Brew CTA — primary terra button, full width. Style overrides
+            push the size up one tier (17px serif, 15px vertical pad) so
+            the page's headline action reads slightly bigger than the
+            standard Button defaults. */}
+        <Button
+          variant="primary" fullWidth
+          onClick={onBrew}
+          icon={<Kettle size={20} c={theme.cream} />}
+          style={{ marginTop: 18, fontSize: 17, padding: "15px 16px", gap: 10 }}
+        >
+          Brew this cup →
+        </Button>
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>
