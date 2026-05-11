@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────
-   components/BestiaryView.jsx — the Elemental Bestiary.
+   components/ElementalsView.jsx — the Elemental Elementals.
 
    A user-curated record of every elemental observed during their
    time with the kettle. Lives inside the Shelf as a sub-tab,
@@ -7,10 +7,10 @@
    button cycles the queue: first ever click reveals the user's
    unique creation elemental via the OmenCard; subsequent clicks
    pop the ElementalArrivalCard for the next earned-but-unobserved
-   one. Each one only sketches into the bestiary after its arrival
+   one. Each one only sketches into the elementals after its arrival
    card fades through.
 
-   This component owns the bestiary data layer: it evaluates the
+   This component owns the elementals data layer: it evaluates the
    attribute context, names + decorates each elemental, runs the
    summon flow, and renders the AttributeShelf detail. The host
    screen only has to wire the persisted props through.
@@ -104,7 +104,7 @@ const RARITY_TONE = {
   mythic:    { color: theme.plum,     label: "mythic",    bg: "rgba(120,72,140,0.12)" },
 };
 
-export const BestiaryView = ({
+export const ElementalsView = ({
   profile,
   sessions = [],
   savedBlendIds,
@@ -123,7 +123,7 @@ export const BestiaryView = ({
   rolledElementalAt,
   rolledElementalAction,
   // Auto-open hint passed by App when the user taps "Log it" on the
-  // end-of-brew glimpse card. The bestiary lands with this elemental's
+  // end-of-brew glimpse card. The elementals lands with this elemental's
   // arrival card already open, so the user doesn't have to tap a
   // second summon button to reach the moment they came here for.
   // Skipped if the user hasn't seen the omen yet (i.e. their unique
@@ -137,8 +137,8 @@ export const BestiaryView = ({
   // snapshot until the user unlocks it.
   lockedCrystal,
   setLockedCrystal,
-  bestiaryHintShown,
-  dismissBestiaryHint,
+  elementalsHintShown,
+  dismissElementalsHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
 
@@ -276,7 +276,7 @@ export const BestiaryView = ({
   }
   if (creatureDesc) uniquePieces.push(creatureDesc);
   // Closing reminder that this elemental belongs to the user alone —
-  // the rest of the bestiary is a kind ("A Mist Heron"), this one is
+  // the rest of the elementals is a kind ("A Mist Heron"), this one is
   // a singular ("The Twilight Pearl Hare").
   uniquePieces.push("An elemental no one but you has yet documented.");
   const creationCard = creationTitleName ? {
@@ -365,7 +365,7 @@ export const BestiaryView = ({
         color: theme.ash, lineHeight: 1.55, textAlign: "center",
       }}>
         Elementals are turned off in your preferences. Enable them in
-        Profile to start a bestiary.
+        Profile to start a elementals.
       </div>
     );
   }
@@ -386,7 +386,7 @@ export const BestiaryView = ({
           that already biases wild-elemental rolls (see
           maybeRollWild in data/wildElementals.js). Color and
           name shift with the user's last 30 days of cups and
-          journal entries; sits above the bestiary header so the
+          journal entries; sits above the elementals header so the
           crystal reads as the lodestone the elementals gather
           around. */}
       <MoodCrystal
@@ -608,7 +608,7 @@ export const BestiaryView = ({
 /* ──────────────────────────────────────────────────────────────
    AttributeShelf — earned-only name cards, border colored by
    rarity. Tap any card to expand its description. Used inside
-   the bestiary to render the unique + featured + reserve rows.
+   the elementals to render the unique + featured + reserve rows.
    ────────────────────────────────────────────────────────────── */
 
 const AttributeShelf = ({
@@ -829,7 +829,7 @@ const AttributeShelf = ({
                       }}
                     >
                       {openIsFeatured
-                        ? "remove from bestiary front-page"
+                        ? "remove from elementals front-page"
                         : armReverseSwap ? "choose a tile to swap with"
                         : "pin to front-page"}
                     </button>

@@ -1,6 +1,6 @@
 /* ──────────────────────────────────────────────────────────────
    data/moodCrystal.js — recent mood/flavor aggregation for the
-   bestiary's lead crystal.
+   elementals's lead crystal.
 
    The crystal is the visual surface for the bias that already
    exists in maybeRollWild — top effect-families + flavor-families
@@ -76,7 +76,7 @@ const CRYSTAL_FLAVOR_COLORS = {
 };
 
 // Adjective per family. Drawn from the same gemstone/atmosphere
-// vocabulary the bestiary already uses (see elementalAdjectives.js)
+// vocabulary the elementals already uses (see elementalAdjectives.js)
 // so the crystal name reads as a peer to the elementals on the
 // shelf below, not a separate language.
 const EFFECT_ADJECTIVES = {

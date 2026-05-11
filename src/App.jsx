@@ -193,8 +193,8 @@ const PhoneFrame = ({ children }) => {
    ElementalGlimpseCard — modal that appears at the end of a brew
    when the just-logged cup has unlocked a new elemental. Soft
    centered card on a faint backdrop, glowing teacup glyph + a short
-   prompt: "log it" navigates to the bestiary; "later" dismisses
-   without losing the find (the bestiary's pendingArrivals list
+   prompt: "log it" navigates to the elementals; "later" dismisses
+   without losing the find (the elementals's pendingArrivals list
    still has the elemental queued for the next visit).
    The teacup glow is a CSS keyframe pulse so the eye lands on it
    without the card itself feeling busy.
@@ -204,8 +204,8 @@ const PhoneFrame = ({ children }) => {
    ElementalGlimpseBanner — a top-of-screen ribbon that fades in
    when a freshly-rolled elemental is waiting to be noted, and
    stays visible across tab changes until the user taps it (which
-   navigates to the bestiary and auto-opens the arrival card) or
-   dismisses it (which leaves the elemental queued in the bestiary's
+   navigates to the elementals and auto-opens the arrival card) or
+   dismisses it (which leaves the elemental queued in the elementals's
    summon list — same end state as Log button there). The banner
    replaces the older modal-card glimpse: less interrupting, easier
    to ignore, and persists across navigation so a user who's mid-
@@ -271,7 +271,7 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
         }}>
           <svg width="22" height="26" viewBox="0 0 22 26" aria-hidden>
             {/* Crystal silhouette — six-faceted bipyramid scaled down
-                from the bestiary's lodestone shape so the banner
+                from the elementals's lodestone shape so the banner
                 reads as "your lodestone is pulsing" at icon size. */}
             <polygon
               points="11,2 18,8 17,18 11,24 5,18 4,8"
@@ -506,23 +506,23 @@ export default function App() {
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate
-  // to the bestiary to log the find. We track two pieces of state:
+  // to the elementals to log the find. We track two pieces of state:
   //   - glimpsePendingBefore: the set of earned-elemental ids captured
   //     just before the new session was added, so the post-update
   //     useEffect can compute the diff
   //   - glimpseElemental: when set, the glimpse overlay renders. Holds
   //     the first newly-earned elemental (others queue naturally on
-  //     the bestiary's pendingArrivals path)
+  //     the elementals's pendingArrivals path)
   const [glimpsePendingBefore, setGlimpsePendingBefore] = useState(null);
   const [glimpseElemental, setGlimpseElemental] = useState(null);
   // When the user taps "Log it" on the glimpse card, we auto-open
-  // that elemental's arrival card on the bestiary so the moment of
+  // that elemental's arrival card on the elementals so the moment of
   // "the brew called something in" lands on the actual creature
-  // rather than dropping the user on the bestiary index expecting
-  // them to find it. Cleared by the bestiary itself once the flag
+  // rather than dropping the user on the elementals index expecting
+  // them to find it. Cleared by the elementals itself once the flag
   // has been consumed (see onAutoOpenConsumed below). Skipped when
   // the user hasn't seen the omen — the creation-title intro needs
-  // to play first; the bestiary's own effect handles that gating.
+  // to play first; the elementals's own effect handles that gating.
   const [autoOpenArrivalId, setAutoOpenArrivalId] = useState(null);
   // Steep-screen minimize state. When true, the steep overlay is
   // hidden via display:none (still mounted so the timer keeps
@@ -659,7 +659,7 @@ export default function App() {
 
   // Apply a seed mode in full — covers every persisted flow state
   // we've added since the seeds were first authored. Hint flags,
-  // bestiary state, planner, journal entries, tab visits, etc.
+  // elementals state, planner, journal entries, tab visits, etc.
   // all reset alongside the original sessions/blends/pantry so the
   // dev seed faithfully represents the user's place in the app.
   const applySeedMode = (mode) => {
@@ -700,7 +700,7 @@ export default function App() {
     setJournalHintShown(!!hints.journalHintShown);
     setProfileHintShown(!!hints.profileHintShown);
     setPantryHintShown(!!hints.pantryHintShown);
-    setBestiaryHintShown(!!hints.bestiaryHintShown);
+    setElementalsHintShown(!!hints.elementalsHintShown);
     setIngredientHintShown(!!hints.ingredientHintShown);
     if (mode.profile) {
       setProfile(prev => {
@@ -777,10 +777,10 @@ export default function App() {
   const [shelfHintShown, setShelfHintShown] = usePersistedState("shelfHintShown", false);
   const [journalHintShown, setJournalHintShown] = usePersistedState("journalHintShown", false);
   const [profileHintShown, setProfileHintShown] = usePersistedState("profileHintShown", false);
-  // First-visit hint for Shelf > Bestiary. Lives on its own flag
-  // because the bestiary is an opt-in side surface — users only
+  // First-visit hint for Shelf > Elementals. Lives on its own flag
+  // because the elementals is an opt-in side surface — users only
   // see this hint after they tap into the tab.
-  const [bestiaryHintShown, setBestiaryHintShown] = usePersistedState("bestiaryHintShown", false);
+  const [elementalsHintShown, setElementalsHintShown] = usePersistedState("elementalsHintShown", false);
   // First-visit hint for the IngredientDetail screen — explains
   // its three tabs (Overview / Brewing / Pairings).
   const [ingredientHintShown, setIngredientHintShown] = usePersistedState("ingredientHintShown", false);
@@ -806,14 +806,14 @@ export default function App() {
   // and journal entries (1/15 per event, throttled to one per week).
   // Stored as full objects (id, displayName, creature, rarity, desc,
   // ts) so they're self-contained and don't depend on the attribute
-  // evaluator. Read-and-merged into the bestiary alongside earned attrs.
+  // evaluator. Read-and-merged into the elementals alongside earned attrs.
   const [wildElementals, setWildElementals] = usePersistedState("wildElementals", []);
   const [lastWildAt, setLastWildAt] = usePersistedState("lastWildAt", 0);
   // Roll-based earned elementals — replaces the legacy deterministic
   // predicate model. Each action site (tab visit, brew, journal, etc.)
   // calls tryRollOnAction(...), which has a small chance to add an id
   // to this set. Once added, the elemental is permanently in the
-  // user's bestiary. lastElementalRollAt enforces a cooldown between
+  // user's elementals. lastElementalRollAt enforces a cooldown between
   // attempts so rapid-fire actions don't mass-spawn elementals.
   // legacyMigrated runs the one-time predicate-eval pass on first
   // load with this version so users carrying earned elementals from
@@ -823,7 +823,7 @@ export default function App() {
   const [legacyMigrated, setLegacyMigrated] = usePersistedState("elementalLegacyMigrated", false);
   // Per-id timestamp of when each elemental was first noted. Powers
   // the arrivals-list at the bottom of the crystalarium so the
-  // bestiary reads as a journal of visitors with dates rather than
+  // elementals reads as a journal of visitors with dates rather than
   // a trophy grid. Stored as plain object {id: ts} since
   // usePersistedState's serializer handles Map → object faithfully
   // but plain objects round-trip through localStorage with less
@@ -840,7 +840,7 @@ export default function App() {
   // roller folds the streak into a multiplier (1× → 3× across 12-24
   // dry actions) so users don't sit in silence for weeks at a time.
   const [elementalDryStreak, setElementalDryStreak] = usePersistedState("elementalDryStreak", 0);
-  // Locked-crystal snapshot. When non-null, the bestiary's lead
+  // Locked-crystal snapshot. When non-null, the elementals's lead
   // crystal renders this frozen configuration instead of computing
   // fresh from recent sessions/journalEntries — lets the user pin
   // a mood/flavor profile they like so the crystal stops drifting
@@ -973,10 +973,10 @@ export default function App() {
   // Apothecary → Herbanium reference itself.
   React.useEffect(() => {
     if (shelfMode === "pantry") setShelfMode("recipes");
-    // The Bestiary sub-tab is now called "Visitors" — same view,
+    // The Elementals sub-tab is now called "Visitors" — same view,
     // same content, friendlier label. Migrate any persisted
-    // "bestiary" mode forward.
-    if (shelfMode === "bestiary") setShelfMode("visitors");
+    // "elementals" mode forward.
+    if (shelfMode === "elementals") setShelfMode("visitors");
   }, [shelfMode]);
 
   // Tab navigation history. Every tab change pushes the previous
@@ -1155,10 +1155,10 @@ export default function App() {
 
   // One-time legacy migration. The previous model evaluated `earned`
   // predicates on every render to decide which attribute-based
-  // elementals were in the bestiary. The new chance-based model
+  // elementals were in the elementals. The new chance-based model
   // stores explicit ids in `rolledElementalIds`. On first load with
   // the new code, evaluate the old predicates ONCE and seed the new
-  // set so anyone carrying a legitimately-earned bestiary doesn't
+  // set so anyone carrying a legitimately-earned elementals doesn't
   // see it disappear. Persisted flag prevents the migration from
   // re-running and avoids feeding pre-existing-but-not-yet-rolled
   // elementals (e.g. seed-preset users) into the new state.
@@ -1195,7 +1195,7 @@ export default function App() {
   // Try a chance-based elemental roll on a user action. Called by
   // every action site (tab visit, brew, journal, pantry, favorite,
   // compose). If the roll lands, the new id is appended to
-  // rolledElementalIds and the bestiary's existing arrival flow
+  // rolledElementalIds and the elementals's existing arrival flow
   // surfaces it as a "you glimpsed an elemental" moment. Internal
   // cooldown is enforced inside rollOnAction.
   // Milestone elementals — guaranteed drops at meaningful thresholds.
@@ -1317,12 +1317,12 @@ export default function App() {
   // Honors the elementalsDisabled preference (no rolls for users who
   // turned the mythic layer off) and the once-per-week throttle. On
   // a hit, the new spirit is appended to wildElementals and lastWildAt
-  // is bumped. The bestiary surfaces it via the existing arrival flow
+  // is bumped. The elementals surfaces it via the existing arrival flow
   // (id won't be in seenElementalIds, so it queues up naturally).
   const tryRollWildElemental = () => {
     if (elementalsDisabled) return;
     // Crystal name is included in the wild's `desc` so the arrival
-    // card closes the loop on the bestiary's lead crystal — the
+    // card closes the loop on the elementals's lead crystal — the
     // same signal that biased this roll. Computed inline rather
     // than read from a memo so the name reflects the activity
     // state the roller saw, not a stale render.
@@ -1756,10 +1756,10 @@ export default function App() {
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} bestiaryHintShown={bestiaryHintShown} dismissBestiaryHint={() => setBestiaryHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} composeHintShown={composeHintShown} dismissComposeHint={() => setComposeHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
-          // bestiary will treat the tap-through as a real first
+          // elementals will treat the tap-through as a real first
           // arrival. Falls back to "any unseen" then "any" so the
           // button stays useful even on a fully-collected dev
           // profile — but in those fallback paths we also clear the
@@ -1772,7 +1772,7 @@ export default function App() {
             || ATTRIBUTES.find(a => !seen.has(a.id))
             || ATTRIBUTES[0];
           if (!next) return;
-          // Add to rolledElementalIds so the bestiary actually has the
+          // Add to rolledElementalIds so the elementals actually has the
           // arrival in earnedAttrs.
           setRolledElementalIds(prev => {
             const n = new Set(prev || []);
@@ -1783,7 +1783,7 @@ export default function App() {
           // Critical for the dev path on seed-loaded profiles where
           // some ids are pre-marked seen: clear the chosen id from
           // seenElementalIds so pendingArrivals includes it. Without
-          // this, the autoOpenArrivalId effect on bestiary can't
+          // this, the autoOpenArrivalId effect on elementals can't
           // find the target in pendingArrivals and silently no-ops.
           setSeenElementalIds(prev => {
             const n = new Set(prev || []);
@@ -2012,9 +2012,9 @@ export default function App() {
       </Suspense>
       {/* End-of-brew elemental glimpse banner — fires when a roll
           lands a new elemental and persists across tab changes
-          until the user taps it (navigating to the bestiary with
+          until the user taps it (navigating to the elementals with
           the arrival card auto-opened) or dismisses it (the
-          elemental stays in the bestiary's pendingArrivals so the
+          elemental stays in the elementals's pendingArrivals so the
           Log/summon button there picks it up later). Less
           interrupting than the previous modal card; the user can
           keep doing whatever they were doing. */}

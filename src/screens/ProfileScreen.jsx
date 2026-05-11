@@ -347,7 +347,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
           </div>
         </div>
 
-        {/* Remove Bestiary — hides the Bestiary sub-tab + the
+        {/* Remove Elementals — hides the Elementals sub-tab + the
             Profile stat for users who'd rather not engage with the
             elementals layer. State persists as elementalsDisabled. */}
         <div style={{
@@ -355,7 +355,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Remove Bestiary</span>
+          <span>Remove Elementals</span>
           <span
             onClick={() => setElementalsDisabled && setElementalsDisabled(!elementalsDisabled)}
             style={{
@@ -550,10 +550,10 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
           {/* Glimpse-banner force-trigger. Drops the user straight
               into the post-roll banner state without waiting for an
               actual roll to land — useful when iterating on banner
-              copy, animation, or the navigate-to-bestiary handoff.
+              copy, animation, or the navigate-to-elementals handoff.
               The id passed to the banner is whichever unrolled
               attribute the catalog has next; if everything's already
-              rolled the banner still fires (the bestiary's
+              rolled the banner still fires (the elementals's
               autoOpenArrivalId effect will then no-op gracefully
               since the elemental isn't in pendingArrivals). */}
           {devForceGlimpse && (
@@ -567,7 +567,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
                 marginBottom: 10, lineHeight: 1.45,
               }}>
                 Force the elemental-glimpse banner to appear so you can
-                check copy, animation, and the bestiary handoff without
+                check copy, animation, and the elementals handoff without
                 waiting for an actual roll to land.
               </div>
               <button

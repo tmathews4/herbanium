@@ -2,7 +2,7 @@
    components/HintCard.jsx — generic first-visit tutorial card.
 
    Used at the top of main surfaces (Compose, Profile, the Journal
-   sub-tab, the Bestiary) the first time the user lands there.
+   sub-tab, the Elementals) the first time the user lands there.
    Dismissible to a persisted flag so it never reappears.
 
    Layout: title + body on top, full-width OK button on its own

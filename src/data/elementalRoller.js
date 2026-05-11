@@ -7,9 +7,9 @@
    app (tab visits, brews, journal entries, pantry edits, recipe
    favorites, composed blends) has a small chance to roll an
    elemental from a pool tagged with that action. First-time users
-   get a boost so the early bestiary feels rewarding; once a few
+   get a boost so the early elementals feels rewarding; once a few
    elementals are landed, the rate settles to a base level so the
-   bestiary stays a slow-accruing collection rather than a flood.
+   elementals stays a slow-accruing collection rather than a flood.
 
    The original predicates are still useful for one purpose: a
    one-time MIGRATION pass on first run with this new system, so
@@ -59,12 +59,12 @@ const RARITY_WEIGHT = {
 // session feels like elemental-grinding. With ~1-2 actions per
 // minute of active use, this lands ~1 elemental every ~20 minutes
 // of engagement on a fresh account, dropping to ~1 every 1-2 hours
-// once the bestiary has filled in.
+// once the elementals has filled in.
 const BASE_CHANCE = 0.045;  // 4.5%
 
 // First-time boost. Users with 0 elementals earned roll at 4× base
 // chance so the very first action they take has a reasonable shot
-// at landing something. Tapers down as the bestiary fills so the
+// at landing something. Tapers down as the elementals fills so the
 // rate settles into the long-tail collecting rhythm.
 function chanceMultiplier(earnedCount) {
   if (earnedCount === 0) return 4.0;
@@ -189,7 +189,7 @@ function pickByRarity(pool, rng = Math.random) {
  *
  * @param {string} action       — one of ELEMENTAL_ACTIONS
  * @param {array}  allAttrs     — full attribute catalog (ATTRIBUTES from attributes.js)
- * @param {Set}    earnedIds    — ids already in the user's bestiary
+ * @param {Set}    earnedIds    — ids already in the user's elementals
  * @param {number} lastRollAt   — ms timestamp of the previous roll, or 0
  * @param {number} now          — ms timestamp of this attempt (default Date.now())
  * @param {fn}     rng          — random source (default Math.random) — stub for tests

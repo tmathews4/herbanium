@@ -402,7 +402,7 @@ export function pickRandomCreature(attr, profileSeed) {
 // which fixes the creature and randomizes the adjective). This
 // gives some elementals a thematic adjective signature with a
 // per-user creature surprise — half-controlled, half-not — so
-// each user's bestiary reads with mixed schemas.
+// each user's elementals reads with mixed schemas.
 export const ADJECTIVE_OVERRIDES = {
   // Time-of-day & seasonal triggers feel naturally adjective-led.
   "dawn-steeper":     "Daybreak",

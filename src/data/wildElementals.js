@@ -191,7 +191,7 @@ function extractFlavorTrends(sessions, getBlend) {
 /**
  * Try to roll a wild elemental for the given event.
  *   null   — rate-limited (last roll within 7 days) or 1/15 missed
- *   object — a wild elemental, ready to merge into the bestiary
+ *   object — a wild elemental, ready to merge into the elementals
  *
  * The caller is responsible for persisting the returned object and
  * updating `lastWildAt` to the current time.
@@ -227,10 +227,10 @@ export function maybeRollWild({
   const adjective = weightedPick(tier.adjPool, biasedAdj, rng);
   const creature  = weightedPick(tier.crePool, biasedCre, rng);
 
-  // Trail closes the loop on the bestiary's lead crystal when one
+  // Trail closes the loop on the elementals's lead crystal when one
   // is named — same signal that biased this roll. Falls back to
   // the older mood/flavor trend phrasing when there's no crystal
-  // (early users, or anyone with the bestiary disabled).
+  // (early users, or anyone with the elementals disabled).
   let trail;
   if (crystalName) {
     // Strip the leading article so the line scans naturally:
@@ -250,7 +250,7 @@ export function maybeRollWild({
   const desc = `A wild elemental that wandered into the steam between cups. ${trail}`;
   const ts = now;
   // Wild elementals are a kind, not a singular — same indefinite-article
-  // treatment as the rest of the bestiary. "An" before vowel-led adjectives.
+  // treatment as the rest of the elementals. "An" before vowel-led adjectives.
   const article = /^[aeiou]/i.test(adjective) ? "An" : "A";
   const display = `${article} ${adjective} ${creature}`;
   return {

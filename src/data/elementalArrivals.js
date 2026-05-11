@@ -8,7 +8,7 @@
    observation of *behavior* — how the creature moves, holds itself,
    feeds, watches. We avoid the territorial-claim template ("claims
    a corner of the wood") in favor of specific habits and postures
-   so the bestiary reads as a record of beings, not slots.
+   so the elementals reads as a record of beings, not slots.
 
    Patterns to favor:
      • Movement verbs: hovers, perches, circles, treads, slips,

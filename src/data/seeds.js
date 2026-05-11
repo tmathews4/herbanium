@@ -236,7 +236,7 @@ export const SEED_MODES = {
     // Tab-visit counts feed the first-visit / regular-visit
     // elemental triggers. Power user has logged plenty of laps.
     tabVisits: { home: 64, apothecary: 38, shelf: 27, profile: 9 },
-    // Bestiary state — power user has welcomed (logged) a handful
+    // Elementals state — power user has welcomed (logged) a handful
     // of specimens and pinned three to the front page.
     seenElementalIds: ["first-brew", "ten-cups", "first-favorite", "first-apothecary", "first-shelf", "first-profile", "four-corners", "the-buzzed", "smokesworn", "the-druid"],
     featuredElementals: ["the-druid", "smokesworn", "the-buzzed"],
@@ -252,7 +252,7 @@ export const SEED_MODES = {
       journalHintShown:  true,
       profileHintShown:  true,
       pantryHintShown:   true,
-      bestiaryHintShown: true,
+      elementalsHintShown: true,
       ingredientHintShown: true,
     },
     // User-composed blends — make Composer + Self-Repeater fire and
@@ -430,7 +430,7 @@ export const SEED_MODES = {
       journalHintShown:  true,
       profileHintShown:  false,
       pantryHintShown:   false,
-      bestiaryHintShown: false,
+      elementalsHintShown: false,
       ingredientHintShown: false,
     },
   },
@@ -464,7 +464,7 @@ export const SEED_MODES = {
       journalHintShown:  false,
       profileHintShown:  false,
       pantryHintShown:   false,
-      bestiaryHintShown: false,
+      elementalsHintShown: false,
       ingredientHintShown: false,
     },
   },

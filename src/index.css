@@ -211,7 +211,7 @@ textarea::placeholder {
 
 /* Elemental sigil arrival pulse — runs once when the arrival card
    first paints. Brief scale + glow drop-shadow so the signet
-   reads as "drawn into the bestiary" at the moment of logging.
+   reads as "drawn into the elementals" at the moment of logging.
    currentColor lets it inherit the sigil's stroke color (terra on
    the arrival card), so the glow halo is the same hue as the
    strokes. */

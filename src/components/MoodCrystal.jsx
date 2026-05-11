@@ -1,7 +1,7 @@
 /* ──────────────────────────────────────────────────────────────
-   components/MoodCrystal.jsx — the bestiary's lead crystal.
+   components/MoodCrystal.jsx — the elementals's lead crystal.
 
-   Sits above the Elemental Bestiary as a small SVG diamond whose
+   Sits above the Elemental Elementals as a small SVG diamond whose
    color is computed from the user's last 30 days of moods and
    flavors. Same data the wild-elemental roller already uses for
    bias — this is the visible face of that signal.
@@ -508,7 +508,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       </span>
     </button>
     {/* Crystal-shift banner — surfaces the moment a user lands on
-        the bestiary AFTER the crystal has changed identity (different
+        the elementals AFTER the crystal has changed identity (different
         name + different primary color than last seen). The 2.4s
         animation flare above is the visual cue; this is the textual
         cue that names what shifted. Fades out a beat after the flare

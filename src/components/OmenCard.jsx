@@ -16,7 +16,7 @@ import { describeCreationTitle } from "../data/creationTitle";
 // Quick enough to feel responsive on the user's tap, slow enough
 // that the omen still reads as arriving rather than blinking in.
 // Mirrors ElementalArrivalCard's pacing so both cards feel like
-// the same surface across the bestiary.
+// the same surface across the elementals.
 const FADE_IN_MS  = 500;
 const FADE_OUT_MS = 320;
 

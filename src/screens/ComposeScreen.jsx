@@ -32,7 +32,7 @@ import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { HintCard } from "../components/HintCard";
-import { BestiaryView } from "../components/BestiaryView";
+import { ElementalsView } from "../components/ElementalsView";
 import { Sprig, Pencil } from "../components/icons";
 
 // Stable signature for an ingredient list — same ids with same grams,
@@ -64,7 +64,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -105,7 +105,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // "pantry" (Cabinet) was retired; pantry management is now a
     // toggle inside the Apothecary → Herbanium reference. Stale
     // persisted state lands back on the section's default.
-    // Bestiary was previously a sub-toggle inside Journal; promoted to
+    // Elementals was previously a sub-toggle inside Journal; promoted to
     // a top-level Notebook sub-tab so it surfaces in the dock and gets
     // the discoverability the feature deserves.
     const shelfModes      = new Set(["recipes", "journal", "visitors"]);
@@ -124,9 +124,9 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // Mode universe per section (state lives in App so the bottom
   // TabBar can render the sub-tabs as part of the same dock):
   //   apothecary: reverse (Blend) | compendium (Herbanium)
-  //   shelf:      recipes | journal (bestiary nested under journal)
+  //   shelf:      recipes | journal (elementals nested under journal)
   // Secondary toggle inside the Journal sub-tab — flips between the
-  // brew/entry timeline and the elemental Bestiary that used to sit
+  // brew/entry timeline and the elemental Elementals that used to sit
   // as its own primary tab.
   // Recipes-tab "More filters" disclosure state. Default collapsed so the
   // filter strip lands quiet (collection row + cabinet toggle). Expands
@@ -155,10 +155,10 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     if (composeView.section && composeView.section !== section) return;
     if (composeView.mode) setMode(composeView.mode);
     if (composeView.journalFilter) setJournalFilter(composeView.journalFilter);
-    // Legacy deep-link compat — old links carried journalSubTab "bestiary"
-    // when Bestiary was nested inside Journal. Bestiary is now its own
+    // Legacy deep-link compat — old links carried journalSubTab "elementals"
+    // when Elementals was nested inside Journal. Elementals is now its own
     // top-level Notebook sub-mode, so route the deep-link there instead.
-    if (composeView.journalSubTab === "bestiary") setMode("bestiary");
+    if (composeView.journalSubTab === "elementals") setMode("elementals");
   }, [composeView?.at]);
 
   return (
@@ -174,7 +174,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           Visitors); the apothecary stays focused on the active
           making tools (Blend / Herbanium reference). */}
       {mode === "visitors" && (
-        <BestiaryView
+        <ElementalsView
           profile={profile}
           sessions={sessions}
           savedBlendIds={savedBlendIds}
@@ -196,8 +196,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           onAutoOpenConsumed={onAutoOpenConsumed}
           lockedCrystal={lockedCrystal}
           setLockedCrystal={setLockedCrystal}
-          bestiaryHintShown={bestiaryHintShown}
-          dismissBestiaryHint={dismissBestiaryHint}
+          elementalsHintShown={elementalsHintShown}
+          dismissElementalsHint={dismissElementalsHint}
         />
       )}
 

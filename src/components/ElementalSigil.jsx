@@ -19,7 +19,7 @@
    That gives 22 runes × ~15 chord combos × ~30 dot placements ×
    4 center marks ≈ tens of thousands of unique sigils — no two
    earned elementals will share the same exact mark in any
-   reasonable bestiary.
+   reasonable elementals.
 
    Stroke color comes from the caller (use rarity tone) so the
    sigil ties into the existing common/uncommon/rare/legendary
@@ -199,7 +199,7 @@ const RUNE_KEYS = Object.keys(RUNES);
 // stroke from the feel of its name word — Ember reads as fire,
 // Frost as cyan, Onyx as deep, Sage as moss-green. Picks from the
 // vibrant gem palette already used by the mood-crystal renderer
-// so the bestiary's sigils sit in the same color family as the
+// so the elementals's sigils sit in the same color family as the
 // crystal at the top of the screen.
 //
 // Unknown adjectives fall back to whatever color the caller
