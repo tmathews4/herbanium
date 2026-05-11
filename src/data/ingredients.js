@@ -1888,7 +1888,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "cinnamon", "cardamom", "cloves", "vanilla", "black-pepper", "marshmallow-root"],
     dose: "1 tsp · 200ml",
     headsUp: "High caffeine — not for late afternoons.",
-    blurb: "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight. The local variety, Camellia sinensis assamica, is bigger-leafed and stronger than its Chinese cousin — more caffeine, more malt. The cup demands milk and gets it; British breakfast culture was built on this leaf and on the labor that picked it.",
+    blurb: "The Singpho and Khamti peoples of Upper Assam had been brewing the native Camellia sinensis assamica long before Maniram Dewan pointed Robert Bruce toward it in 1823, and the Singpho chief Beesa Gaum gave the British their first plants and brewing knowledge. The colonial industry that followed was built on that indigenous variety and on the indentured labor of the workers who picked it. Bigger-leafed and stronger than its Chinese cousin — more caffeine, more malt — the cup demands milk and gets it.",
     facts: [
       "When the British found tea growing wild in Assam in 1823, the colonial industry was born overnight.",
       "Camellia sinensis assamica is bigger-leafed and stronger than the Chinese cousin — more caffeine, more malt, the cup that demands milk and gets it.",

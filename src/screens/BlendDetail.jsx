@@ -1019,14 +1019,22 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
    ────────────────────────────────────────────────────────────── */
 
 const TwistPicker = ({ onClose, onPick, excludeIds }) => {
-  const available = Object.values(INGREDIENTS).filter(meta => !excludeIds.has(meta.id));
+  // INGREDIENTS is keyed by id but the objects themselves don't carry
+  // an `id` field — pick it up from the entry key.
+  const available = Object.entries(INGREDIENTS)
+    .filter(([id]) => !excludeIds.has(id))
+    .map(([id, meta]) => ({ ...meta, id }));
   const byCategory = available.reduce((acc, meta) => {
     const cat = meta.category || "other";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(meta);
     return acc;
   }, {});
-  const categoryOrder = ["true-tea", "herbal", "flower", "spice", "adaptogen", "root", "fruit", "other"];
+  const categoryOrder = [
+    "true tea", "black", "green", "oolong", "white", "pu-erh",
+    "herbal", "leaf", "flower", "spice", "peel", "fruit",
+    "root", "rhizome", "adaptogen", "fungus", "other",
+  ];
   const sortedCats = Object.keys(byCategory).sort((a, b) => {
     const ai = categoryOrder.indexOf(a);
     const bi = categoryOrder.indexOf(b);
