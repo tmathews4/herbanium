@@ -1073,7 +1073,7 @@ export function resolveCandidates(moods, flavorArg, primaryAxis = "feel") {
 import { resolveExtractionProfile } from "../data/extractionProfiles.js";
 import {
   applyMasking, applyEffectSynergies, buildWarnings,
-  attenuateFragileEffects, applyEffectFloor,
+  attenuateFragileEffects,
   combineFlavors,
   STACK_EXPONENT, STACKING_MIN_STRENGTH,
 } from "./perception.js";
@@ -1503,10 +1503,8 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   let { effects: perceivedEffectMap, synergyTags, paradoxTags } =
     applyEffectSynergies(rawEffects);
 
-  // Declared blend.effects soft-floor (80% of declared) so a curator's
-  // promise about a tag can't silently disappear when the ingredient
-  // extraction profile doesn't list it (e.g. pu-erh's grounding).
-  perceivedEffectMap = applyEffectFloor(perceivedEffectMap, declaredEffects);
+  // Declared `effects` are now labels for search/curation only — the
+  // engine output stands on its own so the chemistry can be honest.
 
   // Fragile-effect attenuation — overpulled cups blunt focus / calm /
   // soothing / uplifting alongside the bitterness they add. The

@@ -178,7 +178,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "the bouquet flattens, tannin overtakes the lift.", moodImpact: "the lift is gone, tannin remains" },
     ],
     overPull: { timeS: 420, reason: "the floral lift collapses into tannin" },
-    effects: [["calm", 4], ["soothing", 4], ["sleepy", 2]],
+    effects: [["calm", 4], ["soothing", 4], ["uplifting", 3], ["sleepy", 2]],
     flavors: ["floral", "sweet", "fruity"],
     pairs: ["chamomile", "lavender", "hibiscus", "cardamom", "tulsi", "vanilla", "white", "oolong", "linden", "elderflower"],
     dose: "1 tsp · 200ml",
