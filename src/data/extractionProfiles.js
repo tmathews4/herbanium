@@ -275,10 +275,10 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Green ─────────────────────────────────────────
   sencha: [
     { tempC: 70,  timeS: 60,  flavors: ["grassy", "sweet", "fresh"],
-      effects: [["focus", 2], ["energy", 2]],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2]],
       character: "Gentle sencha — sweet grass, fresh top, low astringency, morning-soft." },
     { tempC: 78,  timeS: 90,  flavors: ["grassy", "umami", "marine", "vegetal", "sweet", "fresh"],
-      effects: [["focus", 4], ["energy", 3]],
+      effects: [["focus", 4], ["calm", 1], ["energy", 3]],
       character: "The canonical cup. Fresh-cut grass and marine umami, balanced and focused." },
     { tempC: 85,  timeS: 120, flavors: ["grassy", "umami", "marine", "vegetal", "astringent"],
       effects: [["focus", 4], ["energy", 4], ["bitterness", 2]],
@@ -301,20 +301,20 @@ export const EXTRACTION_PROFILES = {
     // past-peak knots aren't a stylistic choice — they're what
     // actually happens to the leaf when brewed wrong.
     { tempC: 50,  timeS: 60,  flavors: ["umami", "sweet"],
-      effects: [["focus", 3], ["energy", 2]],
+      effects: [["focus", 3], ["calm", 3], ["energy", 2]],
       character: "Ultra-gentle gyokuro — pure sweet umami, a delicate brew." },
     { tempC: 55,  timeS: 100, flavors: ["umami", "marine", "sweet", "buttery"],
-      effects: [["focus", 5], ["energy", 3]],
+      effects: [["focus", 5], ["calm", 4], ["energy", 3]],
       character: "The classic cup. Dense umami, deep focus, meditative." },
     { tempC: 60,  timeS: 120, flavors: ["umami", "marine", "sweet", "buttery", "seaweed"],
-      effects: [["focus", 5], ["energy", 3], ["bitterness", 1]],
+      effects: [["focus", 5], ["calm", 3], ["energy", 3], ["bitterness", 1]],
       character: "Fuller body. Seaweed notes deepen; slight brisk edge." },
     { tempC: 70,  timeS: 120,
       flavorStrengths: [
         ["umami", 3.0], ["marine", 3.0], ["vegetal", 2.0], ["seaweed", 2.0],
         ["sweet", 1.5], ["buttery", 1.0], ["brisk", 1.5],
       ],
-      effects: [["focus", 4], ["energy", 3], ["bitterness", 1.5]],
+      effects: [["focus", 4], ["calm", 1], ["energy", 3], ["bitterness", 1.5]],
       character: "Past the shaded-leaf optimum — theanine sweetness fading, vegetal-marine climbing into the foreground." },
     { tempC: 80,  timeS: 120,
       flavorStrengths: [
