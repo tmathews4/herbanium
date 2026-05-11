@@ -1713,40 +1713,45 @@ export default function App() {
           today; reserved-space layout means future controls (page
           title, profile menu, search, etc.) can drop in without
           shifting the rest of the app.
-          Bar always renders so content height stays stable across
-          tab switches; just the back button visibility toggles. */}
-      <div style={{
-        flex: "0 0 auto",
-        height: 40,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 14px",
-        borderBottom: `1px solid ${theme.ruleSoft}`,
-        background: theme.ivory,
-        zIndex: 10,
-      }}>
-        <div style={{ flex: "0 0 auto", minWidth: 70 }}>
-          {canGoBack && !overlay && (
-            <button
-              type="button"
-              onClick={goBack}
-              style={{
-                background: "transparent", border: "none",
-                padding: "6px 4px", cursor: "pointer",
-                fontFamily: "Instrument Sans, system-ui, sans-serif",
-                fontSize: 12, letterSpacing: "0.12em",
-                textTransform: "uppercase", color: theme.ash,
-                outline: "none",
-              }}
-            >← back</button>
-          )}
+          Native-only: on native the bar sits just below the system
+          status icons and provides the back-button row. On web the
+          browser already supplies back navigation, so we drop the
+          strip entirely to give the home page its full vertical
+          real estate. */}
+      {isNativeApp() && (
+        <div style={{
+          flex: "0 0 auto",
+          height: 40,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 14px",
+          borderBottom: `1px solid ${theme.ruleSoft}`,
+          background: theme.ivory,
+          zIndex: 10,
+        }}>
+          <div style={{ flex: "0 0 auto", minWidth: 70 }}>
+            {canGoBack && !overlay && (
+              <button
+                type="button"
+                onClick={goBack}
+                style={{
+                  background: "transparent", border: "none",
+                  padding: "6px 4px", cursor: "pointer",
+                  fontFamily: "Instrument Sans, system-ui, sans-serif",
+                  fontSize: 12, letterSpacing: "0.12em",
+                  textTransform: "uppercase", color: theme.ash,
+                  outline: "none",
+                }}
+              >← back</button>
+            )}
+          </div>
+          {/* Reserved center slot for a future page title. */}
+          <div style={{ flex: 1 }} />
+          {/* Reserved right slot for future controls (search, profile
+              menu, etc). Empty for now but kept symmetric so the back
+              button anchors to the left edge cleanly. */}
+          <div style={{ flex: "0 0 auto", minWidth: 70, textAlign: "right" }} />
         </div>
-        {/* Reserved center slot for a future page title. */}
-        <div style={{ flex: 1 }} />
-        {/* Reserved right slot for future controls (search, profile
-            menu, etc). Empty for now but kept symmetric so the back
-            button anchors to the left edge cleanly. */}
-        <div style={{ flex: "0 0 auto", minWidth: 70, textAlign: "right" }} />
-      </div>
+      )}
       <div ref={scrollRef} style={{
         flex: "1 1 auto", minHeight: 0,
         overflowY: "auto",
