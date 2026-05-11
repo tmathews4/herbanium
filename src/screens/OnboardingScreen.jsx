@@ -191,6 +191,8 @@ export const OnboardingScreen = ({ onComplete }) => {
         color: theme.ash, lineHeight: 1.5, flexShrink: 0,
         maxWidth: 520, width: "100%", alignSelf: "center", boxSizing: "border-box",
       }}>
+        Your journal stays on your device — no account, never sent anywhere.
+        <br />
         A brewing companion, not medical advice — check with a clinician for anything that matters.
       </div>
     </div>
