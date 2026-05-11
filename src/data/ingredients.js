@@ -1753,7 +1753,7 @@ const INGREDIENTS = {
   },
   assam: {
     name: "Assam Black", latin: "Camellia sinensis", category: "true tea", subcategory: "black",
-    form: "broken flakes or CTC pellets",
+    form: "broken flakes or small dense pellets",
     origin: "Assam, India",
     shelfLife: "18–24 months airtight",
     // Energy anchor (5). Robust, malt-forward black tea — needs
