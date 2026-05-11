@@ -615,31 +615,31 @@ const TrackMap = ({
     const list = [];
     for (const [fam, leaves] of groups.entries()) {
       const famLabel = familyDisplayLabel(fam);
-      // Single-child collapse: if the only leaf would render with the
-      // same label as the parent (either matches the slug — calm/calm —
-      // or matches the family display label — body/digestive,
-      // warm/comfort — through the label maps above), skip the parent
-      // header and render just the leaf at depth 0.
-      const onlyChildIsFamily = leaves.length === 1 &&
-        (leaves[0] === fam || leaves[0] === famLabel);
-      if (!onlyChildIsFamily) {
-        list.push({
-          name: FAMILY_KEY_PREFIX + fam,
-          depth: 0,
-          isParent: true,
-          familySlug: fam,
-        });
-      }
+      // Always render the family parent row at depth 0. This keeps the
+      // structure stable as the user slides through brew points: a
+      // family that currently has just its self-named leaf (e.g.
+      // 'spiced' alone) shows one parent row, and as new leaves cross
+      // their visibility threshold (pungent joining at long steeps),
+      // they appear as children below without the parent row rebuilding
+      // or repositioning. The previous single-child-collapse logic
+      // produced a jarring structural transition where the leaf row
+      // got replaced by parent+child as new leaves emerged.
+      list.push({
+        name: FAMILY_KEY_PREFIX + fam,
+        depth: 0,
+        isParent: true,
+        familySlug: fam,
+      });
       for (const leaf of leaves) {
-        // When the parent header IS rendered, suppress any leaf whose
-        // display label exactly matches the parent's display label —
-        // it would draw a redundant child bar right under the same
-        // label (e.g. "Comfort" parent with a "comfort" child, or
-        // "Digestive" parent with a "digestive" child).
-        if (!onlyChildIsFamily && (leaf === fam || leaf === famLabel)) continue;
+        // Suppress any leaf whose label matches the family — its
+        // contribution is already in the parent aggregate. Keeps the
+        // single-leaf case visually identical to the prior collapse
+        // behavior (one row labeled by the family) while preserving
+        // the parent header for stability across slider movement.
+        if (leaf === fam || leaf === famLabel) continue;
         list.push({
           name: leaf,
-          depth: onlyChildIsFamily ? 0 : 1,
+          depth: 1,
           isParent: false,
           parent: fam,
         });
