@@ -1031,7 +1031,17 @@ const TrackMap = ({
     }
   }
   const renderedList = displayList.filter(item => {
-    if (item.isParent) return familiesWithVisibleChild.has(item.familySlug);
+    if (item.isParent) {
+      // Render parent if any child is visible OR the parent's own
+      // aggregate value is above threshold. The aggregate-fallback
+      // catches families whose only leaf matches the family name
+      // and gets skipped as a child (e.g. chai's 'spiced' family
+      // with just the 'spiced' leaf below pungent's threshold) —
+      // without it, the row would vanish entirely even though the
+      // family has real presence in the cup.
+      return familiesWithVisibleChild.has(item.familySlug)
+        || valueAtCurrent(item.name) >= HIDE_BELOW;
+    }
     return visibleChildNames.has(item.name);
   });
   // Empty-section suppression — if no rows survive the per-position
