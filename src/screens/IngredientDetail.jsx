@@ -101,6 +101,36 @@ const SolidBar = ({ label, value, color, selected, onClick }) => {
   );
 };
 
+// Two-column row used in the Overview tab's spec stack — small
+// uppercase label on the left, italic-serif value on the right,
+// the pair separated so the user can scan rapidly. Used for
+// Origin / Form / Shelf life. Kept here rather than in a shared
+// component file because IngredientDetail is currently the only
+// surface that uses this exact shape.
+const SpecRow = ({ label, value }) => (
+  <div style={{
+    display: "flex", alignItems: "baseline",
+    gap: 12,
+    minWidth: 0,
+  }}>
+    <div style={{
+      flex: "0 0 84px",
+      fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.14em",
+      textTransform: "uppercase", color: theme.ash,
+      lineHeight: 1.5,
+    }}>
+      {label}
+    </div>
+    <div style={{
+      flex: "1 1 auto", minWidth: 0,
+      fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5,
+      color: theme.ink, lineHeight: 1.45,
+    }}>
+      {value}
+    </div>
+  </div>
+);
+
 /* ──────────────────────────────────────────────────────────────
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
@@ -173,52 +203,17 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
           <div style={{ fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.ash, marginTop: 4, lineHeight: 1.2 }}>
             {ing.latin}
           </div>
-          {/* Origin — where this ingredient is historically grown.
-              Sits just below the latin name so the "what is this"
-              stack reads: common name, taxonomy, provenance. */}
-          {ing.origin && (
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.ash, marginTop: 3, lineHeight: 1.3,
-              maxWidth: 320,
-            }}>
-              from {ing.origin}
-            </div>
-          )}
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.2em",
             textTransform: "uppercase", color: theme.ash, marginTop: 8,
           }}>
             {ing.category}{ing.subcategory && ` · ${ing.subcategory}`}
           </div>
-          {/* Kitchen know-how — form (what to buy) + shelf life (when
-              it goes stale). Two short lines grouped visually so the
-              user reading the hero gets the practical block separate
-              from the taxonomic block above. */}
-          {(ing.form || ing.shelfLife) && (
-            <div style={{
-              marginTop: 6, maxWidth: 320,
-              display: "flex", flexDirection: "column", gap: 2,
-            }}>
-              {ing.form && (
-                <div style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                  color: theme.inkSoft, lineHeight: 1.4,
-                }}>
-                  {ing.form}
-                </div>
-              )}
-              {ing.shelfLife && (
-                <div style={{
-                  fontFamily: ff.sans, fontSize: 10.5,
-                  color: theme.ash, lineHeight: 1.4,
-                  letterSpacing: "0.04em",
-                }}>
-                  keeps {ing.shelfLife}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Origin / form / shelf life used to stack here in the hero
+              but the column was getting visually heavy. Those fields
+              now live in a labeled spec list at the top of the Overview
+              tab where the user can scan them more easily without
+              competing with the identity stack above. */}
         </div>
       </div>
 
@@ -270,6 +265,36 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
         )}
         {tab === "overview" && (
           <>
+            {/* Spec list — origin, form, shelf life rendered as a
+                labeled definition stack above the blurb. Pulled out
+                of the hero so the identity column up there stays
+                compact; the practical facts the user reaches for
+                ("what do I buy / where's it from / how long does
+                it keep") live here as a scannable block. Each row
+                renders conditionally on field presence, so true
+                teas (no form) and any future entries without one
+                of the fields don't show empty rows. */}
+            {(ing.origin || ing.form || ing.shelfLife) && (
+              <div style={{
+                marginBottom: 22,
+                padding: "12px 14px",
+                background: theme.cream,
+                border: `1px solid ${theme.ruleSoft}`,
+                borderRadius: 10,
+                display: "flex", flexDirection: "column", gap: 10,
+              }}>
+                {ing.origin && (
+                  <SpecRow label="Origin" value={ing.origin} />
+                )}
+                {ing.form && (
+                  <SpecRow label="Form" value={ing.form} />
+                )}
+                {ing.shelfLife && (
+                  <SpecRow label="Shelf life" value={ing.shelfLife} />
+                )}
+              </div>
+            )}
+
             <p style={{
               fontFamily: ff.serif, fontSize: 15, color: theme.inkSoft,
               lineHeight: 1.65, margin: 0,
