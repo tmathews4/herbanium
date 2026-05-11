@@ -19,7 +19,7 @@ import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import {
   padTempRange, padTimeRange,
   TEMP_HARD_MIN, TEMP_HARD_MAX, TIME_HARD_MIN, TIME_HARD_MAX,
-  TEMP_PAD_BELOW, TIME_PAD_RATIO,
+  TEMP_PAD_BELOW, TEMP_MIN_SLIDER_RANGE, TIME_PAD_RATIO,
 } from "../src/algo/brewBounds.js";
 import { BLENDS } from "../src/data/blends.js";
 
@@ -218,12 +218,21 @@ test("computeBrewProfile: synthetic-built blend always uses intersection when po
 //                 the input lo); upper always returns TEMP_HARD_MAX.
 //   padTimeRange: lower always returns TIME_HARD_MIN; upper is +30%
 //                 of the input hi (TIME_PAD_RATIO).
-test("padTempRange: pads lower side by TEMP_PAD_BELOW; upper = boiling", () => {
-  const out = padTempRange([85, 95]);
-  assert(out[0] === 85 - TEMP_PAD_BELOW,
-    `expected lower = 85-${TEMP_PAD_BELOW} = ${85 - TEMP_PAD_BELOW}, got ${out[0]}`);
+test("padTempRange: when natural pad already wider than min slider span, keep natural lower", () => {
+  // Input low = 60 → natural lower = 60 - TEMP_PAD_BELOW = 50.
+  // min slider span enforces lower <= 100 - 45 = 55. 50 < 55, so keep 50.
+  const out = padTempRange([60, 80]);
+  assert(out[0] === 60 - TEMP_PAD_BELOW,
+    `expected lower = 60-${TEMP_PAD_BELOW} = ${60 - TEMP_PAD_BELOW}, got ${out[0]}`);
   assert(out[1] === TEMP_HARD_MAX,
     `expected upper = TEMP_HARD_MAX (${TEMP_HARD_MAX}), got ${out[1]}`);
+});
+test("padTempRange: when natural pad narrower than min slider span, widen down", () => {
+  // Input low = 85 → natural lower = 75. min slider span needs lower
+  // <= TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE. Widen down to that.
+  const out = padTempRange([85, 95]);
+  assert(out[0] === TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE,
+    `expected lower widened to ${TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE}, got ${out[0]}`);
 });
 test("padTempRange: clamps low side to TEMP_HARD_MIN", () => {
   const out = padTempRange([TEMP_HARD_MIN + 2, 75]);

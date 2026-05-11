@@ -44,6 +44,13 @@ export const TIME_HARD_MAX = 3600; // s — 60 min covers long decoctions
 export const TEMP_PAD_BELOW = 10;  // °C below the coldest ingredient's
                                    // tempC min — "right below where the
                                    // bottom couple bands drop off"
+// Minimum span the temp slider should cover, regardless of the
+// ingredients' natural range. The slider snaps at 5°C, so a 45°C
+// span gives 9 increments / 10 positions — enough to feel scaled,
+// not so wide it dilutes the recipe's own band. Boil-heavy recipes
+// (chai, decoctions) extend further below their real range; cold-
+// brewing recipes (gyokuro) keep their natural wider span.
+export const TEMP_MIN_SLIDER_RANGE = 45;
 export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
 // Slider step granularity for the time slider. The upper bound is
 // rounded UP to a multiple of this so the slider thumb can land on
@@ -57,8 +64,10 @@ export const TIME_STEP_S = 15;
  * blend versions, applied to the single ingredient's range.
  */
 export function padTempRange([lo, _hi]) {
+  const naturalLo = Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW);
+  const widenedLo = Math.min(naturalLo, TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE);
   return [
-    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW),
+    Math.max(TEMP_HARD_MIN, widenedLo),
     TEMP_HARD_MAX,
   ];
 }
@@ -80,7 +89,11 @@ export function padTimeRange([_lo, hi]) {
  */
 export function unionAndPadTempRange(ingredients, INGREDIENTS) {
   if (!ingredients?.length) {
-    return [Math.max(TEMP_HARD_MIN, 90 - TEMP_PAD_BELOW), TEMP_HARD_MAX];
+    const lo = Math.min(
+      Math.max(TEMP_HARD_MIN, 90 - TEMP_PAD_BELOW),
+      TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE,
+    );
+    return [lo, TEMP_HARD_MAX];
   }
   let lo = Infinity;
   for (const { id } of ingredients) {
@@ -89,8 +102,10 @@ export function unionAndPadTempRange(ingredients, INGREDIENTS) {
     if (range[0] < lo) lo = range[0];
   }
   if (!Number.isFinite(lo)) lo = 90;
+  const naturalLo = Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW);
+  const widenedLo = Math.min(naturalLo, TEMP_HARD_MAX - TEMP_MIN_SLIDER_RANGE);
   return [
-    Math.max(TEMP_HARD_MIN, lo - TEMP_PAD_BELOW),
+    Math.max(TEMP_HARD_MIN, widenedLo),
     TEMP_HARD_MAX,
   ];
 }
