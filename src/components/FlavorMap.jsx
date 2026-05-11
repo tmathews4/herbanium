@@ -586,6 +586,12 @@ const TrackMap = ({
   };
   const FAMILY_LABEL_FLAVOR = {
     fruit: "fruity", body: "creamy",
+    // 'off' is the internal family for bitter/astringent/harsh/
+    // medicinal-style diagnostic notes — bare 'off' reads as
+    // cryptic to a user looking at the brewing strip. 'off-notes'
+    // is the tea-tasting term and gives the diagnostic register
+    // a name a reader can recognize.
+    off: "off-notes",
   };
   const familyDisplayLabel = (fam) => {
     if (kind === "mood")   return FAMILY_LABEL_MOOD[fam]   || fam;
