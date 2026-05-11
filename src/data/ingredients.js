@@ -1415,6 +1415,14 @@ const INGREDIENTS = {
     // Focus anchor (5). Whisked, not steeped — the time axis here
     // is "from whisk to sip." Heat past 80°C scorches; sit too long
     // and the ground tea oxidizes and goes flat.
+    // whisked: true tells the engine to clamp the time-axis lookup
+    // to this ingredient's natural range. Matcha's powder is in
+    // suspension; long contact time doesn't extract more, just
+    // lets it sit. Without the clamp, the slider's wider time
+    // range (when matcha is blended with steeped ingredients) drove
+    // the bracket math into the over-pull knot and read 'destroyed'
+    // at brew points where real matcha would just be flat.
+    whisked: true,
     caffeine: 60, tempC: [70, 80], timeS: [15, 30],
     tempZones: [
       { id: "under", tempC: [40, 65],  character: "ceremony temp lost; theanine forward, no bite.", moodImpact: "calm forward; focus quieter" },

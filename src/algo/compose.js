@@ -1257,7 +1257,17 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const weight = g / totalG;
     const ingRole = role || "lead";
 
-    const profile = resolveExtractionProfile(id, tempC, timeS) || {
+    // Whisked ingredients (matcha) don't follow steep-time chemistry —
+    // the powder is in suspension, so longer 'contact time' just lets
+    // the bowl sit and oxidize. Clamp the time-axis lookup to the
+    // ingredient's natural range so brewing matcha as part of a blend
+    // with longer-time ingredients doesn't push the bracket into
+    // 'destroyed' territory at brew points where real matcha would
+    // just be flat.
+    const effTimeS = meta?.whisked && meta.timeS
+      ? Math.min(timeS, meta.timeS[1])
+      : timeS;
+    const profile = resolveExtractionProfile(id, tempC, effTimeS) || {
       flavors: normalizeFlavors(meta.flavors || []),
       effects: meta.effects || [],
       character: "",

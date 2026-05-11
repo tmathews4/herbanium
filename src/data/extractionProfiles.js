@@ -677,6 +677,14 @@ export const EXTRACTION_PROFILES = {
 
   // ─── True teas (new) ────────────────────────────────────────
   matcha: [
+    // Matcha is whisked, not steeped — the powder goes into
+    // suspension, so 'time' on the slider means 'whisk-to-sip
+    // window,' not 'water-on-leaf duration.' All knots stay
+    // within matcha's natural 15-30s range; the engine never
+    // sees a longer time because matcha.timeS clamps the slider
+    // to that window. High-temp 90/95°C knots model real over-
+    // extraction (scorched / destroyed when the water is too hot
+    // for the chlorophyll-rich shaded leaf).
     { tempC: 70, timeS: 15, flavors: ["umami", "sweet", "creamy"],
       effects: [["focus", 3], ["calm", 2]],
       character: "Light usucha — frothy and gentle, the morning bowl." },
