@@ -1008,7 +1008,32 @@ const TrackMap = ({
   // slides into them; they just drop out when they're not present
   // at the current point.
   const HIDE_BELOW = 0.05;
-  const renderedList = displayList.filter(item => valueAtCurrent(item.name) >= HIDE_BELOW);
+  // Two-pass filter so parent/child visibility stays consistent:
+  //   pass 1: keep any leaf whose own value passes the threshold.
+  //   pass 2: keep a parent iff at least one of its children survived
+  //           pass 1 — even if the parent's aggregated valueAtCurrent
+  //           would round below the threshold due to interpolation or
+  //           the sub-linear family stack. This prevents the "orphan
+  //           child rendering as a top-level row" jitter the user
+  //           sees when sliding through a brew point where the
+  //           family aggregate sits right at the threshold edge.
+  const visibleChildNames = new Set();
+  for (const item of displayList) {
+    if (item.isParent) continue;
+    if (valueAtCurrent(item.name) >= HIDE_BELOW) {
+      visibleChildNames.add(item.name);
+    }
+  }
+  const familiesWithVisibleChild = new Set();
+  for (const item of displayList) {
+    if (!item.isParent && visibleChildNames.has(item.name)) {
+      familiesWithVisibleChild.add(item.parent);
+    }
+  }
+  const renderedList = displayList.filter(item => {
+    if (item.isParent) return familiesWithVisibleChild.has(item.familySlug);
+    return visibleChildNames.has(item.name);
+  });
   // Empty-section suppression — if no rows survive the per-position
   // filter (e.g. Balance has no astringent / bitter / menthol at a
   // cold-pour brew), hide the whole card rather than rendering a
