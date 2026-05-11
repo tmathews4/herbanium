@@ -142,7 +142,7 @@ const BLENDS = [
     public: true,
     tradition: "Indian / Himalayan",
     effects: [["uplifting", 4], ["energy", 3], ["focus", 3]],
-    culturalNote: "Drunk neat in Darjeeling itself — the muscatel character is the cup's reason. Milk is for breakfast Assam down on the plains, not for the first-flush leaves a thousand kilometers north.",
+    culturalNote: "Drunk neat in Darjeeling itself — the muscatel character is the cup's reason. Milk is for breakfast Assam down on the plains, not for the first-flush leaves a thousand kilometers north on the Lepcha-Limbu-Gorkha estates that produce them.",
   },
   {
     id: "sencha-properly",

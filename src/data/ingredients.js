@@ -283,7 +283,7 @@ const INGREDIENTS = {
     pairs: ["chamomile", "lemonbalm", "lavender", "linden", "valerian"],
     dose: "1 tsp · 200ml",
     headsUp: "Strong calming herb — talk to your doctor before combining with sedative medications or alcohol, and skip driving after. Not for use during pregnancy.",
-    blurb: "16th-century Spanish naturalists read elaborate symbolism into its anatomy — the radial corona, the three styles, the five anthers — and the dramatic name stuck. The cup is quieter than the imagery: chrysin and apigenin in the leaves bind GABA receptors, and trials report reductions in mild anxiety. The folk drowsiness is real and replicated in studies.",
+    blurb: "Indigenous peoples across the Americas — Cherokee and other Southeastern nations among them — used passionflower for sleep and nervous unrest long before sixteenth-century Spanish naturalists read Christ's passion into the radial corona, three styles, and five anthers, and renamed it. Chrysin and apigenin in the leaves bind GABA receptors, and trials report reductions in mild anxiety. The folk drowsiness is real and replicated in studies.",
     facts: [
       "Passionflower is indigenous to the southeastern United States — used by Cherokee, Houma, and Seminole peoples long before European contact.",
       "Passionflower — the name was given by 16th-century Spanish naturalists who read elaborate symbolism into the flower's anatomy: the radial corona, the three styles, the five anthers, all numerically loaded.",
@@ -918,7 +918,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rooibos", "peppermint", "cinnamon", "cardamom", "cloves", "lemongrass", "turmeric", "black-pepper", "tulsi", "lemonbalm", "echinacea", "yerba-mate", "elderflower", "licorice-root"],
     dose: "2 coins · 250ml",
     headsUp: null,
-    blurb: "The Silk Road carried it before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against seasickness; medieval English bakers turned it into gingerbread. Drying converts gingerol to shogaol — sharper, more warming — which is why dried and fresh taste like cousins, not twins. Folk uses against nausea and circulation hold up cleanly under modern trials.",
+    blurb: "Native to monsoon-forest South Asia, ginger had moved along the Silk Road before nutmeg or pepper — Roman cooks knew it, Chinese sailors chewed it against seasickness, medieval English bakers turned it into gingerbread. Drying converts gingerol to shogaol — sharper, more warming — which is why dried and fresh taste like cousins, not twins. Folk uses against nausea and circulation hold up cleanly under modern trials.",
     facts: [
       "The Silk Road carried ginger before nutmeg, before pepper. Roman cooks knew it; Chinese sailors chewed it against the swell.",
       "Drying turns gingerol into shogaol — sharper, more warming — which is why dried ginger and fresh taste like cousins, not twins.",
@@ -1032,7 +1032,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rooibos", "ginger", "cardamom", "cloves", "vanilla", "turmeric", "black-pepper", "ashwagandha", "lions-mane", "dandelion-root", "reishi", "licorice-root", "elderflower"],
     dose: "½ stick or ½ tsp · 250ml",
     headsUp: "Cassia (most common) has higher coumarin — heavy daily use is cautioned. Ceylon (C. verum) is safer for frequent use.",
-    blurb: "Worth more than gold to the Romans, who never saw the tree it came from — Pliny invented birds nesting in cliffs to explain the supply chain. Today's choice is Ceylon (verum) or cassia, the latter cheaper but heavier in coumarin (a liver irritant in large daily doses). Both warm the cup; for daily use, the gentler Ceylon is the apothecary's pick.",
+    blurb: "Cinnamomum verum is native to Sri Lanka, where Sinhalese harvesters have stripped and dried the inner bark for at least three thousand years — long before it reached Roman markets at a price that outstripped gold, with Pliny inventing birds nesting in cliffs to explain a supply chain he didn't understand. Today's choice is Ceylon (verum) or cassia, the latter cheaper but heavier in coumarin (a liver irritant in large daily doses). Both warm the cup; for daily use, the gentler Ceylon is the apothecary's pick.",
     facts: [
       "Cinnamon — worth more than gold to the Romans, who never saw the tree. Pliny invented birds that nested in cliffs to explain the supply chain.",
       "Two main commercial cinnamons exist: Ceylon (verum) and cassia. Cassia is cheaper but heavier in coumarin, which can stress the liver at high daily doses.",
@@ -1082,7 +1082,7 @@ const INGREDIENTS = {
     pairs: ["assam", "rose", "ginger", "cinnamon", "cloves", "vanilla", "tulsi", "ashwagandha", "turmeric", "black-pepper", "dandelion-root"],
     dose: "3–4 crushed pods · 250ml",
     headsUp: null,
-    blurb: "Bedouin coffee passes through cardamom-stuffed spouts; ancient Roman perfumers folded the pods into unguents and wedding unctions. Inside the green husk: 1,8-cineole — the eucalyptol that lets a cup feel warming and cooling at once. A paradox the chemistry resolves cleanly: cooling at the surface, warming in the gut.",
+    blurb: "Native to the Western Ghats of South India, where the rainforest understory still produces most of the world's pods — picked up by Bedouin coffee culture (the spouted dallah pours through cardamom) and folded by ancient Roman perfumers into unguents and wedding unctions. Inside the green husk: 1,8-cineole — the eucalyptol that lets a cup feel warming and cooling at once. A paradox the chemistry resolves cleanly: cooling at the surface, warming in the gut.",
     facts: [
       "Bedouin coffee passes through cardamom-stuffed spouts; ancient Roman perfumers folded the pods into unguents.",
       "Cardamom — inside the green husk: 1,8-cineole, the eucalyptol that lets a cup feel warming and cooling at once.",
@@ -1132,7 +1132,7 @@ const INGREDIENTS = {
     pairs: ["assam", "cinnamon", "cardamom", "ginger", "rooibos", "black-pepper"],
     dose: "2–3 cloves · 250ml",
     headsUp: "Very strong — can numb the tongue. One or two cloves, not a handful.",
-    blurb: "Han dynasty officials chewed cloves before addressing the emperor — the breath it scrubbed clean was managed by eugenol, a topical anesthetic still used in dental clinics today. The Dutch and Portuguese fought wars in the Maluku islands for the bud. The folk use against toothache is the same molecule modern dentistry reaches for.",
+    blurb: "Native only to the Maluku Islands of eastern Indonesia, where Ternateans and Tidorese cultivated and harvested the flower buds for centuries before they reached Chinese and South Asian markets — Han dynasty officials chewed them before addressing the emperor, and the Dutch and Portuguese later fought wars to control the islands. The breath-scrubbing chemistry is eugenol, a topical anesthetic still used in dental clinics. The folk use against toothache is the same molecule modern dentistry reaches for.",
     facts: [
       "Han dynasty officials chewed cloves before addressing the emperor — eugenol is a topical anesthetic, and the breath it scrubbed clean is the same molecule a dentist still uses.",
       "The Dutch and Portuguese fought wars in the Maluku islands for control of the clove tree — Indonesia's spice islands shaped European empire-building.",
@@ -1183,7 +1183,7 @@ const INGREDIENTS = {
     pairs: ["rooibos", "assam", "cinnamon", "cardamom", "rose", "lions-mane", "dandelion-root"],
     dose: "½ bean split · 250ml",
     headsUp: null,
-    blurb: "The vanilla orchid has exactly one wild pollinator, a Mexican bee that lives nowhere else. The world drinks vanilla anyway because in 1841, a twelve-year-old enslaved boy named Edmond Albius worked out hand pollination on Réunion island. Vanillin, the principal aromatic, is now also synthesized — but the orchid pods carry hundreds of supporting molecules the lab can't replicate.",
+    blurb: "The Totonac people of the Mexican Gulf coast cultivated the orchid and developed the sun-cure that transforms green pods into the aromatic spice — long before Spanish colonizers carried vanilla back across the Atlantic. Outside Mexico, pollination fails: the orchid has exactly one wild pollinator, a Mexican bee endemic to its range. The world drinks vanilla anyway because in 1841, a twelve-year-old enslaved boy named Edmond Albius worked out hand pollination on Réunion island. Vanillin is now also synthesized, but the cured pod carries hundreds of supporting molecules the lab can't replicate.",
     facts: [
       "The orchid that bears vanilla pods has exactly one wild pollinator — a Mexican bee that lives nowhere else.",
       "In 1841, a twelve-year-old boy named Edmond Albius worked out how to pollinate the flower by hand — every vanilla bean from Madagascar onward owes its existence to his technique.",
@@ -1212,7 +1212,7 @@ const INGREDIENTS = {
     pairs: ["turmeric", "cinnamon", "cardamom", "ginger", "cloves", "assam"],
     dose: "1–3 cracked peppercorns · 250ml (5–10 in chai)",
     headsUp: "A pinch in tea is gentle. Concentrated piperine supplements can affect how the body metabolizes some medications — talk to your doctor if you take prescriptions, especially before surgery.",
-    blurb: "Roman empresses paid taxes in peppercorns; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
+    blurb: "The Malabar Coast of South India is pepper's native ground — Kerala has shipped peppercorns west for two and a half thousand years. Roman empresses paid taxes in them; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
     facts: [
       "Roman empresses paid in peppercorns; Vasco da Gama crossed an ocean for them.",
       "The bite is piperine — the same molecule that quietly slows the liver's enzymes, which is why turmeric travels in pepper's company.",
@@ -1939,7 +1939,7 @@ const INGREDIENTS = {
     pairs: ["rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "Chinese cuttings planted in Himalayan foothills in the 1840s produced something neither parent had: the muscatel grape note nobody can replicate elsewhere. The aroma comes from the tea jassid, a small insect whose bite triggers the leaf's defensive chemistry — exactly the same mechanism that makes Taiwan's bai hao oolong famous. Beauty as injury, healed.",
+    blurb: "Chinese cuttings were planted by the British East India Company in the 1840s across the Himalayan foothills of Lepcha country, near present-day Sikkim, and the estates that followed have been worked for generations by Lepcha, Limbu, and Gorkha families — the labor and microclimate behind the cup. The muscatel grape note nobody can replicate elsewhere comes from the tea jassid, a small insect whose bite triggers the leaf's defensive chemistry — the same mechanism behind Taiwan's bai hao oolong. Beauty as injury, healed.",
     facts: [
       "Darjeeling — chinese cuttings planted in Himalayan foothills produced something neither parent had — the muscatel grape note nobody can replicate elsewhere.",
       "Darjeeling's aroma comes from a small insect called the tea jassid, whose bite triggers the leaf's defensive chemistry. Beauty as injury, healed.",
@@ -1994,7 +1994,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "lemongrass", "cinnamon", "cardamom", "rose"],
     dose: "1 tsp · 200ml",
     headsUp: null,
-    blurb: "A coffee blight in the 1860s burned through Ceylon's plantations; the planters switched crops, and an island became famous for tea instead. The bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb. Estate names like Uva and Dimbula are altitude bands, not flavor profiles, but the chemistry shows up in the cup.",
+    blurb: "When a coffee blight burned through Ceylon's British-run plantations in the 1860s, the colonial planters switched crops and an island built an industry on tea instead — staffed largely by Tamil workers brought as indentured labor from South India, whose descendants still pick the leaves on Sri Lankan estates today. The bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb. Uva and Dimbula are altitude bands, not flavor profiles, but the chemistry shows up in the cup.",
     facts: [
       "A coffee blight in the 1860s burned through Ceylon's plantations; the planters switched crops, and an island became famous for tea instead.",
       "Ceylon — the bright citrus character is altitude — the cooler the leaves grow, the higher the aromatic notes climb.",
@@ -2738,7 +2738,7 @@ const INGREDIENTS = {
     pairs: ["cinnamon", "cardamom", "vanilla", "dandelion-leaf"],
     dose: "1–2 tsp roasted · 250ml",
     headsUp: "Skip if you have active gallbladder, ulcer, or gastritis issues. Daisy-family cross-allergy is possible.",
-    blurb: "Roasted and ground as ersatz coffee through both World Wars when the bean was rationed — bittersweet, caramel, almost convincing. The bitter is sesquiterpene lactones, which provoke bile and digestive juices the way the body intends a meal-starter to. The sweetness is inulin, a prebiotic the gut bacteria treat as a long meal of their own.",
+    blurb: "Used across Eurasian folk medicine for centuries — Chinese herbalism calls it pu gong ying and prescribes it for inflammation and digestion. In Europe, it was roasted and ground as ersatz coffee through both World Wars when the bean was rationed — bittersweet, caramel, almost convincing. The bitter is sesquiterpene lactones, which provoke bile and digestive juices the way the body intends a meal-starter to. The sweetness is inulin, a prebiotic the gut bacteria treat as a long meal of their own.",
     facts: [
       "Dandelion root — roasted as coffee through both World Wars when the real bean was rationed — bittersweet, caramel, almost convincing.",
       "Dandelion root's bitter is sesquiterpene lactones, which provoke the bile and digestive juices.",
@@ -3145,7 +3145,7 @@ const INGREDIENTS = {
     pairs: ["ginger", "lemongrass", "chamomile", "hibiscus", "peppermint", "ceylon", "assam"],
     dose: "1 tsp · 200ml",
     headsUp: "Concentrated lemon oil on skin can briefly raise sun sensitivity; the cup is fine. If you drink citrus teas often, rinse with water afterward — the acidity can soften tooth enamel over time.",
-    blurb: "The sharpest, most direct citrus peel in the catalog — clean lift without bergamot's florality or orange's warmth. Used widely across European tea traditions: Russian chai s limonom, Italian canarino (lemon peel infused alone or with bay leaf as an after-dinner digestive). Pairs naturally with ginger — citral and gingerol together are a digestive classic.",
+    blurb: "The sharpest, most direct citrus peel in the catalog — clean lift without bergamot's florality or orange's warmth. Lemon itself originated in Northeast India and Burma before spreading west; the European tea traditions came later — Russian chai s limonom, Italian canarino (lemon peel infused alone or with bay leaf as an after-dinner digestive). Pairs naturally with ginger — citral and gingerol together are a digestive classic.",
     facts: [
       "Italian canarino — boiled water poured over lemon peel and sometimes a bay leaf — is a traditional after-dinner digestive named for its yellow color, like a canary. It's served in households more often than in cafés.",
       "Russian tea with lemon — chai s limonom — became standard in the 19th century when both samovars and citrus imports reached the Russian middle class. The combination cuts through the tannic Russian Caravan blend that defined the tea hour.",
