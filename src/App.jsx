@@ -855,6 +855,11 @@ export default function App() {
   // Hidden curated experimentals — tracked here so deleting Tom Foolery
   // (which lives in the BLENDS source-of-truth array) sticks across reloads.
   const [hiddenBlendIds, setHiddenBlendIds] = usePersistedState("hiddenBlendIds", new Set());
+  // In-progress twists on curated blends, keyed by blendId. Persisted so
+  // navigating to an ingredient detail and back, or reloading the app,
+  // doesn't quietly drop work. Cleared on brew (saved or ephemeral).
+  const [twistsByBlendId, setTwistsByBlendId] = usePersistedState("twistsByBlendId", {});
+  const [curatedOverridesByBlendId, setCuratedOverridesByBlendId] = usePersistedState("curatedOverridesByBlendId", {});
 
   // Hydrate LOCAL_BLENDS from the persisted generated-blends list
   // synchronously during render. Doing this in useEffect would leave
@@ -1637,6 +1642,21 @@ export default function App() {
     return id;
   };
 
+  // Drop in-progress twists for a blend — fired when the user
+  // commits (saves or brews) so the next visit starts clean.
+  const clearTwistState = (blendId) => {
+    setTwistsByBlendId(prev => {
+      if (!prev[blendId]) return prev;
+      const { [blendId]: _drop, ...rest } = prev;
+      return rest;
+    });
+    setCuratedOverridesByBlendId(prev => {
+      if (!prev[blendId]) return prev;
+      const { [blendId]: _drop, ...rest } = prev;
+      return rest;
+    });
+  };
+
   // Single favorite toggle — save and favorite are now one concept.
   // Updates both savedBlendIds and favoriteBlendIds in lockstep so legacy
   // call sites that read savedBlendIds (Profile stat, etc.) keep working
@@ -1916,14 +1936,30 @@ export default function App() {
           onBrew={(modified) => {
             const b = modified || getBlend(blendOverlayId);
             if (!b) return;
+            // Twist consumed for one cup — clear so the next visit
+            // starts from the canonical recipe.
+            if (modified) clearTwistState(blendOverlayId);
             startBrew(b, "", [b.mood]);
           }}
           onSaveAndBrew={(modified, name) => {
             const newId = saveComposedBlend(modified, name);
             const saved = LOCAL_BLENDS[newId] || { ...modified, id: newId };
+            clearTwistState(blendOverlayId);
             setOverlay(null);
             startBrew(saved, "", [saved.mood]);
           }}
+          twists={twistsByBlendId[blendOverlayId] || []}
+          setTwists={(updater) => setTwistsByBlendId(prev => {
+            const current = prev[blendOverlayId] || [];
+            const next = typeof updater === "function" ? updater(current) : updater;
+            return { ...prev, [blendOverlayId]: next };
+          })}
+          curatedOverrides={curatedOverridesByBlendId[blendOverlayId] || {}}
+          setCuratedOverrides={(updater) => setCuratedOverridesByBlendId(prev => {
+            const current = prev[blendOverlayId] || {};
+            const next = typeof updater === "function" ? updater(current) : updater;
+            return { ...prev, [blendOverlayId]: next };
+          })}
         />
       )}
       {overlay === "cup" && cupOverlayId && (

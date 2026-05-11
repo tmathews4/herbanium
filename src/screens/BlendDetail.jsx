@@ -30,7 +30,7 @@ import {
    a friend's session — their review in a pull-quote up top.
    ────────────────────────────────────────────────────────────── */
 
-export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSaveAndBrew, isFavorite, onToggleFavorite, sessions, go }) => {
+export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSaveAndBrew, isFavorite, onToggleFavorite, sessions, go, twists = [], setTwists = () => {}, curatedOverrides = {}, setCuratedOverrides = () => {} }) => {
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
   const [openMood, setOpenMood] = React.useState(null);
@@ -44,13 +44,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   // rows); anything beyond hides behind "+N more" until expanded.
   const [tagsExpanded, setTagsExpanded] = React.useState(false);
   const [tableAccentsOpen, setTableAccentsOpen] = React.useState(false);
-  // User twists — extra ingredients added on top of the curated recipe.
-  // Each is { id, g }; the engine sees the merged ingredient list.
-  const [twists, setTwists] = React.useState([]);
-  // Per-id overrides on the curated grams. Only honored when at least
-  // one twist has been added — that's the user signal that they're
-  // remixing the recipe rather than brewing it as designed.
-  const [curatedOverrides, setCuratedOverrides] = React.useState({});
+  // Twists + curated grams overrides live on App (keyed by blendId)
+  // so they survive overlay transitions (ingredient detail and back)
+  // and reloads. App clears them on brew or save.
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [saveModalOpen, setSaveModalOpen] = React.useState(false);
   const [twistName, setTwistName] = React.useState("");
