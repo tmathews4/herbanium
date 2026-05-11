@@ -45,12 +45,16 @@ export const TEMP_PAD_BELOW = 10;  // °C below the coldest ingredient's
                                    // tempC min — "right below where the
                                    // bottom couple bands drop off"
 // Minimum span the temp slider should cover, regardless of the
-// ingredients' natural range. The slider snaps at 5°C, so a 45°C
-// span gives 9 increments / 10 positions — enough to feel scaled,
-// not so wide it dilutes the recipe's own band. Boil-heavy recipes
-// (chai, decoctions) extend further below their real range; cold-
-// brewing recipes (gyokuro) keep their natural wider span.
-export const TEMP_MIN_SLIDER_RANGE = 45;
+// ingredients' natural range. The slider snaps at 5°C, so a 30°C
+// span gives 6 increments / 7 positions — enough room to slide
+// 'cooler than recipe' without dragging into temperatures the
+// leaf would never see. Wider ranges (10 positions / 45°C span)
+// invited exploration of brew points that read either 'barely
+// extracted' or 'destroyed,' neither particularly useful as a
+// learning surface. Cold-brewing recipes (gyokuro at 45°C natural,
+// tulsi at 50°C) keep their wider natural span — the floor only
+// kicks in when natural span is too narrow.
+export const TEMP_MIN_SLIDER_RANGE = 30;
 export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
 // Slider step granularity for the time slider. The upper bound is
 // rounded UP to a multiple of this so the slider thumb can land on
