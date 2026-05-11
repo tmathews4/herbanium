@@ -746,7 +746,31 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                 `${Math.round(Number(c) * 9 / 5 + 32)}°F`)
             );
           };
-          const steps = localizeSteps(tradSteps || fallbackSteps);
+          // Append a rest-time hint after any sub-boil temperature so a
+          // user without a thermometer or temperature-control kettle
+          // knows how to actually reach the target. Skipped when the
+          // step already supplies a rest qualifier ("let a boiled
+          // kettle rest", "off boil", "equal parts", etc.).
+          const augmentSubBoilSteps = (raw) => raw.map(step => {
+            const match = step.match(/(\d+)\s*°([CF])/);
+            if (!match) return step;
+            const value = parseInt(match[1], 10);
+            const celsius = match[2] === "C" ? value : Math.round((value - 32) * 5 / 9);
+            if (celsius >= 100) return step;
+            if (/(rest|off boil|let .* (cool|sit|rest)|equal parts|just below)/i.test(step)) return step;
+            const hint =
+              celsius >= 95 ? "about 20 seconds off the boil" :
+              celsius >= 90 ? "about 1 minute off the boil" :
+              celsius >= 85 ? "about 2 minutes off the boil" :
+              celsius >= 80 ? "3–4 minutes off the boil" :
+              celsius >= 75 ? "4–5 minutes off the boil" :
+              celsius >= 70 ? "5–6 minutes off the boil, or pour boiling into an open cup and back" :
+              celsius >= 65 ? "equal parts boiling water and room-temperature water" :
+              celsius >= 60 ? "two parts room-temperature water to one part boiling" :
+              "boil, rest 5–8 minutes, then add a splash of cold water";
+            return step.replace(/(\d+\s*°[CF])/, `$1 (${hint})`);
+          });
+          const steps = augmentSubBoilSteps(localizeSteps(tradSteps || fallbackSteps));
           const sourceLabel = tradSteps
             ? (b.tradition ? `${b.tradition} preparation` : "house preparation")
             : "simple steep";
