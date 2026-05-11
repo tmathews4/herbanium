@@ -382,14 +382,6 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
         padding: 14, borderRadius: 10,
         border: `1px solid ${theme.rule}`, background: theme.cream,
       }}>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13, color: theme.inkSoft,
-          marginBottom: 12, lineHeight: 1.5,
-        }}>
-          Your journal lives on this device. No account, no cloud sync.
-          Clearing your browser data will clear your journal.
-        </div>
-
         {/* Export / Import — desktop only. Native WebView wraps
             on iOS and Android have inconsistent file-picker shims
             and the workflow really suits a desktop save anyway. */}
