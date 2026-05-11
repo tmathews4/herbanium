@@ -1119,9 +1119,14 @@ const TrackMap = ({
                 title={hasDescription ? "tap for definition" : undefined}
                 style={{
                   height: heightForItem(item),
-                  fontFamily: ff.sans, fontSize: isParent ? 10 : 9.5,
+                  fontFamily: ff.sans, fontSize: depth === 0 ? 10 : 9.5,
                   color: here ? theme.terra : (isSelected ? theme.ink : (depth > 0 ? theme.ash : theme.inkSoft)),
-                  fontWeight: isParent ? 500 : (here || isSelected ? 500 : 400),
+                  // Primary-level rows (depth 0) always bold whether
+                  // they're explicit family parents with children
+                  // underneath OR collapsed-single-child rows acting
+                  // as family rows. Children stay 400 unless warning
+                  // or selected highlight bumps them.
+                  fontWeight: depth === 0 ? 500 : (here || isSelected ? 500 : 400),
                   // Two-zone layout: indent zone on the left grows with
                   // depth (empty for parents, arrow + space for children
                   // so leaves visually nest under their parent row);
