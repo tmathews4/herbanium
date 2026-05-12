@@ -442,39 +442,16 @@ export const VocabInfoCard = ({ term, summary, body, ladder, tone = "sage", onCl
         textTransform: "uppercase", color: accent, marginBottom: 4,
       }}>{term}</div>
       <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5,
-        color: theme.ink, lineHeight: 1.45, marginRight: 18,
-      }}>{summary}</div>
-      {body && (
-        <div style={{
-          fontFamily: ff.serif, fontSize: 12.5, color: theme.inkSoft,
-          lineHeight: 1.5, marginTop: 6,
-        }}>{body}</div>
-      )}
-      {Array.isArray(ladder) && ladder.length > 0 && (
-        <div style={{
-          marginTop: 10, paddingTop: 8,
-          borderTop: `1px solid ${bd}`,
-          display: "flex", flexDirection: "column", gap: 4,
-        }}>
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: accent, opacity: 0.85,
-            marginBottom: 2,
-          }}>what it feels like</div>
-          {/* Numeric 1/3/5 quantifier column dropped — the descriptions
-              describe a felt spectrum (gentle → clear → deep) without
-              claiming a precise engine level. Matches the strip's
-              numbers-removed treatment: bars and qualitative text do
-              the work, no false-precision digits. */}
-          {ladder.map(([level, text]) => (
-            <div key={level} style={{
-              fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
-              lineHeight: 1.45,
-            }}>{text}</div>
-          ))}
-        </div>
-      )}
+        fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
+        lineHeight: 1.5, marginRight: 18,
+      }}>
+        {summary}{body ? " " + body : ""}
+      </div>
+      {/* Summary and body are joined into one flowing description.
+          The strength-level ladder ('what it feels like at 1/3/5')
+          was removed — its quantitative spectrum implied a precision
+          the engine doesn't honestly support, and the strip's visual
+          gauge already carries the strength signal. */}
     </div>
   );
 };

@@ -1309,44 +1309,14 @@ const TrackMap = ({
             {labelFor(selectedTrack)}
           </div>
           <div style={{
-            fontFamily: ff.serif, fontSize: 13, color: theme.ink,
-            lineHeight: 1.45, marginBottom: 4,
+            fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
+            lineHeight: 1.5,
           }}>
             {descriptionFor(selectedTrack).summary}
+            {descriptionFor(selectedTrack).body
+              ? " " + descriptionFor(selectedTrack).body
+              : ""}
           </div>
-          {descriptionFor(selectedTrack).body && (
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-              color: theme.ash, lineHeight: 1.5,
-            }}>
-              {descriptionFor(selectedTrack).body}
-            </div>
-          )}
-          {/* 1/3/5 ladder — surfaces what the axis feels like at each
-              strength so a user reading "focus 4" knows what they
-              should expect from the cup at that level. Mirrors the
-              ladder rendered inside VocabInfoCard on detail pages,
-              kept compact here since this is the in-strip popup. */}
-          {Array.isArray(descriptionFor(selectedTrack).ladder)
-           && descriptionFor(selectedTrack).ladder.length > 0 && (
-            <div style={{
-              marginTop: 8, paddingTop: 6,
-              borderTop: `1px solid rgba(176,84,47,0.18)`,
-              display: "flex", flexDirection: "column", gap: 3,
-            }}>
-              <div style={{
-                fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-                textTransform: "uppercase", color: theme.terra, opacity: 0.85,
-                marginBottom: 1,
-              }}>what it feels like</div>
-              {descriptionFor(selectedTrack).ladder.map(([level, text]) => (
-                <div key={level} style={{
-                  fontFamily: ff.serif, fontSize: 11.5, color: theme.inkSoft,
-                  lineHeight: 1.4,
-                }}>{text}</div>
-              ))}
-            </div>
-          )}
           {/* Contributors — for the flavor strip in family mode, list
               the specific notes the cup carries that rolled into this
               family. Only shows when there's more than one (a single
