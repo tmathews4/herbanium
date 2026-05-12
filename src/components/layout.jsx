@@ -418,7 +418,7 @@ export const Chip = ({ active, onClick, children, tone = "default", caution = fa
 // that surface what the axis feels like at that strength. Renders
 // as a small numbered ladder under the body so the user can read
 // e.g. "focus = 3" against "Clear attention; reading or writing flows."
-export const VocabInfoCard = ({ term, summary, body, ladder, examples, tone = "sage", onClose }) => {
+export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) => {
   const accent = tone === "terra" ? theme.terra : theme.sageDeep;
   const bg = tone === "terra" ? "rgba(176, 84, 47, 0.05)" : "rgba(98, 124, 92, 0.06)";
   const bd = tone === "terra" ? "rgba(176, 84, 47, 0.20)" : "rgba(98, 124, 92, 0.22)";
@@ -447,25 +447,6 @@ export const VocabInfoCard = ({ term, summary, body, ladder, examples, tone = "s
       }}>
         {summary}{body ? " " + body : ""}
       </div>
-      {/* Examples — concrete ingredients the user can map to the
-          abstract vocabulary term. Derived from INGREDIENTS data
-          at the call site, so the list stays current as the catalog
-          recalibrates. */}
-      {Array.isArray(examples) && examples.length > 0 && (
-        <div style={{
-          marginTop: 8, paddingTop: 8,
-          borderTop: `1px solid ${bd}`,
-          fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
-          lineHeight: 1.5,
-        }}>
-          <span style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: accent, opacity: 0.85,
-            marginRight: 6,
-          }}>found in</span>
-          {examples.map(e => e.name).join(", ")}
-        </div>
-      )}
     </div>
   );
 };

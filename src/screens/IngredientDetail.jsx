@@ -19,7 +19,6 @@ import {
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
-import { ingredientsForVocab } from "../helpers/misc";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
@@ -329,7 +328,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 term={openEffect}
                 summary={EFFECT_DESCRIPTIONS[openEffect].summary}
                 body={EFFECT_DESCRIPTIONS[openEffect].body}
-                examples={ingredientsForVocab(openEffect, "effect")}
                 tone="sage"
                 onClose={() => setOpenEffect(null)}
               />
@@ -362,7 +360,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 term={openFlavor}
                 summary={FLAVOR_DESCRIPTIONS[openFlavor].summary}
                 body={FLAVOR_DESCRIPTIONS[openFlavor].body}
-                examples={ingredientsForVocab(openFlavor, "flavor")}
                 tone="terra"
                 onClose={() => setOpenFlavor(null)}
               />

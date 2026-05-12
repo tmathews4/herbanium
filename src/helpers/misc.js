@@ -4,7 +4,6 @@
 
 import { BLENDS } from "../data/blends";
 import { INGREDIENTS } from "../data/ingredients";
-import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import {
   ff, theme,
 } from "../theme";
@@ -18,56 +17,6 @@ export const LOCAL_BLENDS = {};
 export const getBlend = (id) => LOCAL_BLENDS[id] || BLENDS.find(b => b.id === id);
 
 export const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
-
-// Representative ingredients for a vocab term (effect or flavor).
-// Used to surface "found in: chamomile, lemon balm, tulsi…" alongside
-// the abstract description, so users can map a vocabulary term to
-// ingredients they already know. Self-maintaining as ingredients
-// are added or recalibrated.
-//
-// Looks at BOTH the ingredient's top-level effects/flavors array
-// AND its extraction profile knots. Many ingredients produce
-// effects (e.g. comfort, grounding) at brew time via their profile
-// without declaring them in the top-level summary array — checking
-// only the top-level would miss them (comfort is produced by
-// ginger/cinnamon/cardamom via profiles but only listed as
-// 'soothing/warming' at the top level). Top-level strength wins
-// when both sources agree; profile-only matches use the strongest
-// knot strength as the ranking weight.
-export function ingredientsForVocab(tag, kind) {
-  if (!tag) return [];
-  const out = [];
-  for (const [id, meta] of Object.entries(INGREDIENTS)) {
-    let weight = 0;
-    if (kind === "effect") {
-      const top = (meta.effects || []).find(([n]) => n === tag);
-      if (top) weight = top[1];
-      const profile = EXTRACTION_PROFILES[id];
-      if (profile) {
-        for (const knot of profile) {
-          const e = (knot.effects || []).find(([n]) => n === tag);
-          if (e && e[1] > weight) weight = e[1];
-        }
-      }
-      if (weight >= 3) out.push({ id, name: meta.name, weight });
-    } else if (kind === "flavor") {
-      let present = (meta.flavors || []).includes(tag);
-      if (!present) {
-        const profile = EXTRACTION_PROFILES[id];
-        if (profile) {
-          present = profile.some(knot =>
-            (knot.flavors || []).includes(tag)
-            || (knot.flavorStrengths || []).some(([n]) => n === tag)
-          );
-        }
-      }
-      if (present) out.push({ id, name: meta.name, weight: 0 });
-    }
-  }
-  return out
-    .sort((a, b) => (b.weight || 0) - (a.weight || 0))
-    .slice(0, 5);
-}
 
 // How long off a rolling boil water needs to rest to reach the
 // target. Returns null at full boil (no rest needed). The mapping
