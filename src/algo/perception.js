@@ -90,7 +90,7 @@ const FLAVOR_LOUDNESS = {
   bitter: 1.8, bitterness: 1.8,
   smoky: 2.0, smoked: 2.0,
   minty: 2.0, mint: 2.0, cool: 1.8, cooling: 1.8,
-  astringent: 1.6, pungent: 1.6, tannic: 1.5,
+  astringent: 1.6, pungent: 2.0, tannic: 1.5,
   tar: 1.5,
   // Mid — a touch louder than mass-ratio. Spiced moved 1.2 → 1.5
   // because the prior multiplier under-counted how perceptually
