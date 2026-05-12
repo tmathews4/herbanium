@@ -15,7 +15,7 @@ import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/bl
 import {
   EFFECT_DESCRIPTIONS,
 } from "../data/vocabularyDescriptions";
-import { getBlend, sessionAgo, restHintForCelsius } from "../helpers/misc";
+import { getBlend, sessionAgo, restHintForCelsius, ingredientsForVocab } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
 } from "../theme";
@@ -451,7 +451,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               term={openTag.label}
               summary={openTag.summary}
               body={openTag.body}
-              ladder={openTag.ladder}
               tone={openTag.tone}
               onClose={() => setOpenTag(null)}
             />
@@ -462,7 +461,8 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
             <VocabInfoCard
               term={openMood}
               summary={EFFECT_DESCRIPTIONS[openMood].summary}
-              ladder={EFFECT_DESCRIPTIONS[openMood].ladder}
+              body={EFFECT_DESCRIPTIONS[openMood].body}
+              examples={ingredientsForVocab(openMood, "effect")}
               tone="sage"
               onClose={() => setOpenMood(null)}
             />

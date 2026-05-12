@@ -29,6 +29,7 @@
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
+import { ingredientsForVocab } from "../helpers/misc";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
 
@@ -1317,6 +1318,34 @@ const TrackMap = ({
               ? " " + descriptionFor(selectedTrack).body
               : ""}
           </div>
+          {/* 'Found in' examples — concrete ingredients that carry
+              this flavor or effect, derived from INGREDIENTS data so
+              the list stays current. Skips palate axes since those
+              are diagnostic taste-structure dimensions (bitterness,
+              astringency, menthol) rather than ingredient registers. */}
+          {(() => {
+            const lookupKind = kind === "flavor" ? "flavor"
+              : kind === "mood" ? "effect"
+              : null;
+            if (!lookupKind) return null;
+            const examples = ingredientsForVocab(selectedTrack, lookupKind);
+            if (!examples.length) return null;
+            return (
+              <div style={{
+                marginTop: 6, paddingTop: 6,
+                borderTop: `1px solid rgba(176,84,47,0.18)`,
+                fontFamily: ff.serif, fontSize: 11.5, color: theme.inkSoft,
+                lineHeight: 1.5,
+              }}>
+                <span style={{
+                  fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: theme.terra, opacity: 0.85,
+                  marginRight: 6,
+                }}>found in</span>
+                {examples.map(e => e.name).join(", ")}
+              </div>
+            );
+          })()}
           {/* Contributors — for the flavor strip in family mode, list
               the specific notes the cup carries that rolled into this
               family. Only shows when there's more than one (a single

@@ -18,6 +18,32 @@ export const getBlend = (id) => LOCAL_BLENDS[id] || BLENDS.find(b => b.id === id
 
 export const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 
+// Representative ingredients for a vocab term (effect or flavor).
+// Used to surface "found in: chamomile, lemon balm, tulsi…" alongside
+// the abstract description, so users can map a vocabulary term to
+// ingredients they already know. Derives from INGREDIENTS data so
+// the example list stays self-maintaining as ingredients are added
+// or recalibrated. For effects, ranks by strength on the ingredient
+// (top 5). For flavors, lists any ingredient that includes the
+// flavor in its top-level flavors array.
+export function ingredientsForVocab(tag, kind) {
+  if (!tag) return [];
+  const out = [];
+  for (const [id, meta] of Object.entries(INGREDIENTS)) {
+    if (kind === "effect") {
+      const e = (meta.effects || []).find(([n]) => n === tag);
+      if (e && e[1] >= 3) out.push({ id, name: meta.name, weight: e[1] });
+    } else if (kind === "flavor") {
+      if ((meta.flavors || []).includes(tag)) {
+        out.push({ id, name: meta.name, weight: 0 });
+      }
+    }
+  }
+  return out
+    .sort((a, b) => (b.weight || 0) - (a.weight || 0))
+    .slice(0, 5);
+}
+
 // How long off a rolling boil water needs to rest to reach the
 // target. Returns null at full boil (no rest needed). The mapping
 // is the same scale used in BlendDetail's brewing directions so a
