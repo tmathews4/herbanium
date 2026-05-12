@@ -15,14 +15,54 @@ import { FirstCupHintCard } from "./components/FirstCupHintCard";
 // the user actually opens it.
 import { HomeScreen } from "./screens/HomeScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
-const ComposeScreen = lazy(() => import("./screens/ComposeScreen").then(m => ({ default: m.ComposeScreen })));
-const ComposeTutorialOverlay = lazy(() => import("./screens/ComposeScreen").then(m => ({ default: m.ComposeTutorialOverlay })));
-const SteepScreen = lazy(() => import("./screens/SteepScreen").then(m => ({ default: m.SteepScreen })));
-const IngredientDetail = lazy(() => import("./screens/IngredientDetail").then(m => ({ default: m.IngredientDetail })));
-const BlendDetail = lazy(() => import("./screens/BlendDetail").then(m => ({ default: m.BlendDetail })));
-const CupDetail = lazy(() => import("./screens/CupDetail").then(m => ({ default: m.CupDetail })));
-const EntryDetail = lazy(() => import("./screens/EntryDetail").then(m => ({ default: m.EntryDetail })));
-const ProfileScreen = lazy(() => import("./screens/ProfileScreen").then(m => ({ default: m.ProfileScreen })));
+// Single import() per screen module — referenced by both the lazy()
+// boundary below and the idle-time preloader. Calling import() twice
+// just hits the module cache the second time, so the preloader can
+// fire freely without duplicating work or breaking React.lazy.
+const loadCompose       = () => import("./screens/ComposeScreen");
+const loadSteep         = () => import("./screens/SteepScreen");
+const loadIngredient    = () => import("./screens/IngredientDetail");
+const loadBlendDetail   = () => import("./screens/BlendDetail");
+const loadCupDetail     = () => import("./screens/CupDetail");
+const loadEntryDetail   = () => import("./screens/EntryDetail");
+const loadProfile       = () => import("./screens/ProfileScreen");
+
+const ComposeScreen          = lazy(() => loadCompose().then(m => ({ default: m.ComposeScreen })));
+const ComposeTutorialOverlay = lazy(() => loadCompose().then(m => ({ default: m.ComposeTutorialOverlay })));
+const SteepScreen            = lazy(() => loadSteep().then(m => ({ default: m.SteepScreen })));
+const IngredientDetail       = lazy(() => loadIngredient().then(m => ({ default: m.IngredientDetail })));
+const BlendDetail            = lazy(() => loadBlendDetail().then(m => ({ default: m.BlendDetail })));
+const CupDetail              = lazy(() => loadCupDetail().then(m => ({ default: m.CupDetail })));
+const EntryDetail            = lazy(() => loadEntryDetail().then(m => ({ default: m.EntryDetail })));
+const ProfileScreen          = lazy(() => loadProfile().then(m => ({ default: m.ProfileScreen })));
+
+// Idle-time route preloader — fires the import() calls for the most-
+// likely-next routes after the initial screen has settled, so the
+// first navigation to any of them resolves from cache instantly.
+// Ordering reflects the natural flow off Home: people open a curated
+// blend, then go to Compose, then drill into ingredients. Profile
+// and history screens trail the priority list.
+//
+// Skipped on `Save-Data` connections so Lite-mode users aren't
+// surprised with background network. Each import is fire-and-forget;
+// a failure just leaves that screen to load on first nav as before.
+const PRELOAD_QUEUE = [
+  loadBlendDetail,
+  loadCompose,
+  loadIngredient,
+  loadSteep,
+  loadCupDetail,
+  loadEntryDetail,
+  loadProfile,
+];
+function preloadRoutes() {
+  if (typeof navigator !== "undefined" && navigator.connection?.saveData) return;
+  // Stagger so the network doesn't get hammered all at once on a slow
+  // connection. setTimeout(0) yields to the browser between each.
+  PRELOAD_QUEUE.forEach((load, i) => {
+    setTimeout(() => { load().catch(() => {}); }, i * 80);
+  });
+}
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
 import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
@@ -469,6 +509,25 @@ export default function App() {
   // bar to match the ivory background. No-op on web.
   useEffect(() => {
     configureStatusBar();
+  }, []);
+
+  // Preload lazy route chunks during idle time after the first paint.
+  // Without this, the first navigation to any non-Home screen pays a
+  // chunk-fetch round trip mid-tap; with it, the chunks are warm in
+  // the browser cache by the time the user actually clicks. Uses
+  // requestIdleCallback when available; falls back to a 2s setTimeout
+  // on browsers without it (Safari) so we still preload reliably.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ric = window.requestIdleCallback;
+    const cic = window.cancelIdleCallback;
+    let handle;
+    if (typeof ric === "function") {
+      handle = ric(preloadRoutes, { timeout: 4000 });
+      return () => { if (typeof cic === "function") cic(handle); };
+    }
+    handle = setTimeout(preloadRoutes, 2000);
+    return () => clearTimeout(handle);
   }, []);
 
   // Dev modes pin the palette to light so we can spot-check the cream
