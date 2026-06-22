@@ -822,15 +822,76 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 </div>
               ) : (
                 <>
+                  {catVisible.map((b, i) => {
+                  // House experimentals (Tom Foolery + the curated research
+                  // blends) are permanent Catalogue staples — undeletable.
+                  const isHouseStaple = b.house === true || b.id === "exp-tom-foolery";
+                  const author = b.tradition
+                    || (isHouseStaple ? "Herbanium house"
+                       : b.synthetic ? "algorithmic experiment"
+                       : b.id?.startsWith("local-") ? "your composition"
+                       : b.experimental ? "Herbanium experiment"
+                       : null);
+                  // Any catalogue blend except permanent house staples
+                  // can be removed; curated traditions get hidden via
+                  // hiddenBlendIds and can be restored from the panel
+                  // below the list.
+                  const canDelete = !isHouseStaple && deleteBlend;
+                  return (
+                    <div key={b.id} style={{ position: "relative" }}>
+                      <BlendListRow
+                        b={b}
+                        author={author}
+                        first={i === 0}
+                        go={go}
+                        startBrew={startBrew}
+                        openBlend={openBlend}
+                      />
+                      {canDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Delete "${b.name}" from your Catalogue?`)) {
+                              deleteBlend(b.id);
+                            }
+                          }}
+                          title="Delete from catalogue"
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; }}
+                          style={{
+                            position: "absolute", top: 12, right: 10,
+                            width: 22, height: 22,
+                            background: "transparent",
+                            border: `1px solid ${theme.ruleSoft}`,
+                            borderRadius: "50%",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            padding: 0, cursor: "pointer",
+                            opacity: 0.45,
+                            transition: "opacity 0.18s ease",
+                          }}
+                        >
+                          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+                            <path d="M1.5 1.5 L7.5 7.5 M7.5 1.5 L1.5 7.5"
+                              stroke={theme.ash} strokeWidth="1.4" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                  })}
                   {/* "Try these" — recommendations carousel that
                       surfaces in the favorites tab while the user's
-                      favorites list is sparse (≤3 pinned). Scoring
-                      lives in helpers/recommend.js and is driven by
-                      onboarding draws/flavors initially, evolving
-                      to incorporate last-30-days mood patterns and
-                      high-rated cups as the user logs more. Hides
-                      once they've built out their favorites or
-                      whenever the scorer returns nothing matching. */}
+                      favorites list is sparse (≤3 pinned). Sits
+                      below the user's own favorites so their pinned
+                      list stays the priority view; the carousel is
+                      a secondary "if you're looking for more" rail.
+                      Scoring lives in helpers/recommend.js and is
+                      driven by onboarding draws/flavors initially,
+                      evolving to incorporate last-30-days mood
+                      patterns and high-rated cups as the user logs
+                      more. Hides once they've built out their
+                      favorites or whenever the scorer returns
+                      nothing matching. */}
                   {cf.collection === "favorites" && catVisible.length <= 3 && (() => {
                     const recs = recommendBlends({
                       blends: [...traditional, ...experimental],
@@ -842,7 +903,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                     });
                     if (recs.length === 0) return null;
                     return (
-                      <div style={{ marginTop: 14, marginBottom: 14 }}>
+                      <div style={{ marginTop: 18, marginBottom: 14 }}>
                         <div style={{
                           display: "flex", alignItems: "baseline",
                           justifyContent: "space-between", gap: 8,
@@ -919,63 +980,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                       </div>
                     );
                   })()}
-                  {catVisible.map((b, i) => {
-                  // House experimentals (Tom Foolery + the curated research
-                  // blends) are permanent Catalogue staples — undeletable.
-                  const isHouseStaple = b.house === true || b.id === "exp-tom-foolery";
-                  const author = b.tradition
-                    || (isHouseStaple ? "Herbanium house"
-                       : b.synthetic ? "algorithmic experiment"
-                       : b.id?.startsWith("local-") ? "your composition"
-                       : b.experimental ? "Herbanium experiment"
-                       : null);
-                  // Any catalogue blend except permanent house staples
-                  // can be removed; curated traditions get hidden via
-                  // hiddenBlendIds and can be restored from the panel
-                  // below the list.
-                  const canDelete = !isHouseStaple && deleteBlend;
-                  return (
-                    <div key={b.id} style={{ position: "relative" }}>
-                      <BlendListRow
-                        b={b}
-                        author={author}
-                        first={i === 0}
-                        go={go}
-                        startBrew={startBrew}
-                        openBlend={openBlend}
-                      />
-                      {canDelete && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm(`Delete "${b.name}" from your Catalogue?`)) {
-                              deleteBlend(b.id);
-                            }
-                          }}
-                          title="Delete from catalogue"
-                          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; }}
-                          style={{
-                            position: "absolute", top: 12, right: 10,
-                            width: 22, height: 22,
-                            background: "transparent",
-                            border: `1px solid ${theme.ruleSoft}`,
-                            borderRadius: "50%",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            padding: 0, cursor: "pointer",
-                            opacity: 0.45,
-                            transition: "opacity 0.18s ease",
-                          }}
-                        >
-                          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
-                            <path d="M1.5 1.5 L7.5 7.5 M7.5 1.5 L1.5 7.5"
-                              stroke={theme.ash} strokeWidth="1.4" strokeLinecap="round" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  );
-                  })}
                 </>
               )}
 

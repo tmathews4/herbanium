@@ -1772,12 +1772,14 @@ export default function App() {
           today; reserved-space layout means future controls (page
           title, profile menu, search, etc.) can drop in without
           shifting the rest of the app.
-          Native-only: on native the bar sits just below the system
-          status icons and provides the back-button row. On web the
-          browser already supplies back navigation, so we drop the
-          strip entirely to give the home page its full vertical
-          real estate. */}
-      {isNativeApp() && (
+          On native the bar is always present (it doubles as the
+          clearance strip below the system status icons). On web we
+          mount it only when there's somewhere to go back to — Home
+          keeps its full vertical real estate, and a small layout
+          shift on tab navigation is the price for a visible back
+          affordance on inner views for users who don't reach for
+          browser back / the edge-swipe gesture. */}
+      {(isNativeApp() || (canGoBack && !overlay)) && (
         <div style={{
           flex: "0 0 auto",
           height: 40,
