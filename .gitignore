@@ -47,3 +47,7 @@ ios/App/build/
 ios/DerivedData/
 ios/App/App.xcworkspace/xcuserdata/
 ios/App/App.xcodeproj/xcuserdata/
+
+# Playwright artifacts
+playwright-report/
+test-results/
