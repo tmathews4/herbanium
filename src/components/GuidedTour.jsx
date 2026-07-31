@@ -90,10 +90,20 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       }
     : null;
 
-  // Place the callout above the target when the target sits low on
-  // screen (the tab bar), else below it.
+  // Place the callout on whichever side of the target has more room,
+  // and cap its height to that space. The overlay is fixed and blocks
+  // page scroll, so a callout anchored past the viewport edge would be
+  // unreachable — that's what a tall target (e.g. the blend graph with
+  // several ingredients' bars) hit. Flip-to-more-room + a maxHeight
+  // (with internal scroll as a last resort) keeps it fully on-screen
+  // regardless of how tall the highlighted element is.
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-  const targetLow = rect ? rect.top > vh * 0.5 : true;
+  const GAP = 14;      // breathing room between target and callout
+  const MARGIN = 16;   // keep the callout off the very screen edge
+  const spaceAbove = rect ? rect.top : vh;
+  const spaceBelow = rect ? vh - rect.bottom : vh;
+  const placeBelow = spaceBelow >= spaceAbove;
+  const calloutMax = Math.max(140, (placeBelow ? spaceBelow : spaceAbove) - GAP - MARGIN);
 
   return (
     <div style={{
@@ -161,9 +171,11 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       <div style={{
         position: "fixed",
         left: 16, right: 16, maxWidth: 420, margin: "0 auto",
-        ...(targetLow
-          ? { bottom: rect ? vh - rect.top + 14 : 24 }
-          : { top: rect ? rect.bottom + 14 : 24 }),
+        ...(placeBelow
+          ? { top: rect.bottom + GAP }
+          : { bottom: vh - rect.top + GAP }),
+        maxHeight: calloutMax,
+        overflowY: "auto",
         background: theme.cream,
         border: `1px solid ${theme.ruleSoft}`,
         borderRadius: radius.md,
