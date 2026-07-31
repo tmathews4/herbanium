@@ -98,12 +98,28 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // (with internal scroll as a last resort) keeps it fully on-screen
   // regardless of how tall the highlighted element is.
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-  const GAP = 14;      // breathing room between target and callout
-  const MARGIN = 16;   // keep the callout off the very screen edge
+  const GAP = 14;           // breathing room between target and callout
+  const MARGIN = 16;        // keep the callout off the very screen edge
+  const MIN_CALLOUT = 180;  // below this, no room to sit beside the target
   const spaceAbove = rect ? rect.top : vh;
   const spaceBelow = rect ? vh - rect.bottom : vh;
-  const placeBelow = spaceBelow >= spaceAbove;
-  const calloutMax = Math.max(140, (placeBelow ? spaceBelow : spaceAbove) - GAP - MARGIN);
+  const roomier = Math.max(spaceAbove, spaceBelow);
+  // Default: sit on whichever side of the target has more room, sized to
+  // fit it. But if the target is so tall that NEITHER side can hold a
+  // readable callout (e.g. the blend graph nearly fills the screen), pin
+  // the callout to the bottom safe-area and let it overlay the target —
+  // overlaying a huge highlight is acceptable; an off-screen, unreachable
+  // callout (fixed overlay blocks page scroll) is not.
+  const calloutPos = !rect
+    ? {}
+    : roomier >= MIN_CALLOUT
+      ? {
+          ...(spaceBelow >= spaceAbove
+            ? { top: rect.bottom + GAP }
+            : { bottom: vh - rect.top + GAP }),
+          maxHeight: roomier - GAP - MARGIN,
+        }
+      : { bottom: MARGIN, maxHeight: Math.min(vh - 2 * MARGIN, Math.round(vh * 0.55)) };
 
   return (
     <div style={{
@@ -168,13 +184,10 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           a frame later; hiding it until measurement makes it appear
           in place (the mount fade covers the one-frame delay). */}
       {rect && (
-      <div style={{
+      <div data-testid="tour-callout" style={{
         position: "fixed",
         left: 16, right: 16, maxWidth: 420, margin: "0 auto",
-        ...(placeBelow
-          ? { top: rect.bottom + GAP }
-          : { bottom: vh - rect.top + GAP }),
-        maxHeight: calloutMax,
+        ...calloutPos,
         overflowY: "auto",
         background: theme.cream,
         border: `1px solid ${theme.ruleSoft}`,
@@ -183,7 +196,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         padding: "14px 16px",
         fontFamily: ff.sans,
       }}>
-        <div style={{
+        <div data-testid="tour-progress" style={{
           fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
           textTransform: "uppercase", color: theme.ash, marginBottom: 6,
         }}>
