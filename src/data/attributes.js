@@ -22,8 +22,8 @@
    out without us hand-drawing 80+ unique SVGs.
    ────────────────────────────────────────────────────────────── */
 
-import { INGREDIENTS } from "./ingredients";
-import { getBlend } from "../helpers/misc";
+import { INGREDIENTS } from "./ingredients.js";
+import { getBlend } from "../helpers/misc.js";
 
 const RECENT_WINDOW = 20;
 
@@ -95,7 +95,7 @@ function buildWindow(sessions) {
   return ctx;
 }
 
-export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, pantryIds, profile, journalEntries, tabVisits }) {
+export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendIds, generatedBlends, profile, journalEntries, tabVisits }) {
   const yourSessions = (sessions || []).filter(s => s.who === "you");
   const recentSessions = yourSessions.slice(0, RECENT_WINDOW);
 
@@ -162,7 +162,6 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
     composedCount,
     favoriteBlendIds: favoriteBlendIds || new Set(),
     savedBlendIds:   savedBlendIds   || new Set(),
-    pantryIds:       pantryIds       || new Set(),
     journal,
     // Lifetime tab-visit counts — fuels the four-corners and
     // first-tab-visit elemental triggers. tabVisits comes in as a
@@ -336,7 +335,7 @@ export const ATTRIBUTES = [
     glyph: "flower", tint: "ochre", frame: "circle", accent: "star",
     desc: "River-nymph with water-dark hair, garlanded in wild blossom. Drawn by every blossom the catalog holds passing through your cup.",
     earned: ctx => ctx.flowerIngsAll.length > 0
-      && ctx.flowerIngsAll.every(id => ctx.lifetime.byIngredient.has(id) || ctx.pantryIds.has(id)) },
+      && ctx.flowerIngsAll.every(id => ctx.lifetime.byIngredient.has(id)) },
   { id: "all-leaves", name: "The Kirin", rarity: "legendary", window: "lifetime",
     glyph: "leaf", tint: "sageDeep", frame: "hex", accent: "rays",
     desc: "Scaled chimera with a flame mane and gentle hooves. Drawn by every true tea steeped in your kettle.",
@@ -441,9 +440,9 @@ export const ATTRIBUTES = [
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
     desc: "Sharp-eyed raptor never long on the same branch. Drawn by a cup that keeps the hands moving.",
     earned: ctx => moodFamily(ctx.recent, ["focus","energy"]) >= 5 },
-  { id: "hearth-keeper", name: "The Pantry-Spirit", rarity: "common", window: "recent",
+  { id: "hearth-keeper", name: "The Hearth-Spirit", rarity: "common", window: "recent",
     glyph: "warming", tint: "terra", frame: "square", accent: "none",
-    desc: "Round-bellied burrower asleep in the warm pantry of the den. Drawn by a kettle kept lit for the home's comfort.",
+    desc: "Round-bellied burrower asleep by the warm hearth of the den. Drawn by a kettle kept lit for the home's comfort.",
     earned: ctx => moodFamily(ctx.recent, ["warming","comfort"]) >= 5 },
   { id: "sun-chaser", name: "The Sun-Spirit", rarity: "uncommon", window: "recent",
     glyph: "uplifting", tint: "ochre", frame: "circle", accent: "rays",
@@ -1160,8 +1159,8 @@ export const ATTRIBUTES = [
     } },
   { id: "kitsune", name: "The Kitsune", rarity: "rare", window: "lifetime",
     glyph: "sprig", tint: "terra", frame: "circle", accent: "dot",
-    desc: "Nine-tailed fox of Japanese myth, guardian of the inari rice-stores and a thousand small kept gifts. Drawn by a curated pantry held ready for the kettle.",
-    earned: ctx => ctx.pantryIds.size >= 15 },
+    desc: "Nine-tailed fox of Japanese myth, guardian of the inari rice-stores and a thousand small kept gifts. Drawn by a deep library of blends kept close to the heart.",
+    earned: ctx => (ctx.favoriteBlendIds?.size || 0) >= 15 },
   { id: "xuanwu", name: "The Black-Tortoise Spirit", rarity: "legendary", window: "lifetime",
     glyph: "compass", tint: "ash", frame: "hex", accent: "none",
     desc: "Black Tortoise of Chinese myth, intertwined with serpent, guardian of the north and of completed cycles. Drawn by a kettle that has answered most of the moods the leaf can name.",
@@ -1301,11 +1300,6 @@ export const ATTRIBUTES = [
     random: true,
     desc: "An elemental drawn from no roster — only what the kettle's edge offered. Drawn by the first note you tied to a cup.",
     earned: ctx => ctx.lifetime?.sessions?.some?.(s => (s.note || "").trim().length > 0) || false },
-  { id: "wild-pantry", name: "Wild-Pantry", rarity: "uncommon", window: "lifetime",
-    glyph: "sprig", tint: "sageDeep", frame: "hex", accent: "star",
-    random: true,
-    desc: "An elemental pulled from the wild pool, shape settled at the first reach into the cupboard. Drawn by your first ingredient marked on hand.",
-    earned: ctx => (ctx.pantryIds?.size || 0) >= 1 },
   { id: "wild-composed", name: "Wild-Composed", rarity: "rare", window: "lifetime",
     glyph: "focus", tint: "plum", frame: "diamond", accent: "star",
     random: true,

@@ -18,7 +18,6 @@ import {
   ff, theme,
 } from "../theme";
 import { mmss } from "../helpers/misc";
-import { PantryHintCard } from "../components/PantryHintCard";
 import {
   formatTempShort, useUnit,
 } from "../units/units";
@@ -49,10 +48,9 @@ const categoryColor = (cat, theme) => {
   }
 };
 
-export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, dismissPantryHint, defaultPantryOnly = false, hideHeader = false, hidePantryToggle = false }) => {
+export const LibraryScreen = ({ go, hideHeader = false }) => {
   const [shelfSearch, setShelfSearch] = useState("");
   const [shelfCategory, setShelfCategory] = useState("all");
-  const [pantryOnly, setPantryOnly] = useState(defaultPantryOnly);
   const [caffeineFilter, setCaffeineFilter] = useState("any"); // any | free | has
   const [effectFilter, setEffectFilter] = useState("any");
   const [teaSubcategory, setTeaSubcategory] = useState("all");
@@ -70,17 +68,9 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
     setFlavorFamilies(prev => prev.includes(fam)
       ? prev.filter(x => x !== fam)
       : [...prev, fam]);
-  // Remove-from-cabinet confirmation. When pantryOnly is on the toggle
-  // reads as "remove" rather than "add" (the X icon replaces the check),
-  // and pulling something out of the cabinet by accident means walking
-  // back to the full herbanium to find it again. The "are you sure?"
-  // gate keeps a stray tap from costing the user that trip.
-  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
-
   // All ingredients, filtered then sorted alphabetically by display name.
   const shelfItems = Object.entries(INGREDIENTS)
     .filter(([id, ing]) => {
-      if (pantryOnly && !pantryIds.has(id)) return false;
       // "fruit" is a virtual category — collects everything fruit-
       // adjacent regardless of where it lives in the data: cranberry
       // and dried-apple (herbal/fruit), the citrus peels (herbal/peel),
@@ -140,7 +130,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
         {/* Search input — placeholder reflects whether the user is
             browsing the full herbanium or filtering down to their own
             cabinet via the toggle below. */}
-        <div style={{
+        <div data-tour="herb-search" style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 12px", borderRadius: 10,
             background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
@@ -151,7 +141,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             <input
               value={shelfSearch}
               onChange={(e) => setShelfSearch(e.target.value)}
-              placeholder={pantryOnly ? "search your cabinet…" : "search the herbanium…"}
+              placeholder="search the herbanium…"
               style={{
                 flex: 1, background: "transparent", border: "none",
                 fontFamily: ff.serif, fontStyle: shelfSearch ? "normal" : "italic",
@@ -167,7 +157,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
           </div>
 
           {/* Category filter pills — spread to edges */}
-          <div style={{ marginBottom: 8 }}>
+          <div data-tour="herb-filters" style={{ marginBottom: 8 }}>
             <ChipRows
               items={[
                 ["all",       "all"],
@@ -382,84 +372,32 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             paddingTop: 10,
             borderTop: `1px solid ${theme.ruleSoft}`,
           }}>
-            {hidePantryToggle ? <span /> : (
-              <label style={{
-                display: "flex", alignItems: "center", gap: 8,
-                fontFamily: ff.sans, fontSize: 11.5, color: theme.inkSoft, cursor: "pointer",
-              }}>
-                <span style={{
-                  width: 28, height: 16, borderRadius: 999,
-                  background: pantryOnly ? theme.sageDeep : theme.rule,
-                  position: "relative", transition: "background .2s",
-                  flexShrink: 0,
-                }} onClick={() => setPantryOnly(!pantryOnly)}>
-                  <span style={{
-                    position: "absolute", top: 2, left: pantryOnly ? 14 : 2,
-                    width: 12, height: 12, borderRadius: "50%", background: theme.cream,
-                    transition: "left .2s",
-                  }} />
-                </span>
-                <span onClick={() => setPantryOnly(!pantryOnly)}>only what's in my cabinet</span>
-              </label>
-            )}
+            <span />
             <span style={{
               fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
               textTransform: "uppercase", color: theme.ash,
             }}>
-              {pantryOnly
-                ? `${shelfItems.length} in cabinet`
-                : (<>{shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span></>)
-              }
+              {shelfItems.length} <span style={{ opacity: 0.55 }}>of {Object.keys(INGREDIENTS).length}</span>
             </span>
           </div>
 
           {/* The catalog grid */}
           {shelfItems.length === 0 ? (
-            pantryOnly && pantryIds.size === 0 ? (
-              <div style={{
-                marginTop: 8, padding: "24px 18px", borderRadius: 12,
-                border: `1px dashed ${theme.ruleSoft}`,
-                background: theme.cream,
-                fontFamily: ff.serif, fontSize: 13.5, color: theme.inkSoft,
-                lineHeight: 1.55, textAlign: "center",
-              }}>
-                <div style={{
-                  fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-                  textTransform: "uppercase", color: theme.ash, marginBottom: 8,
-                }}>your cabinet is empty</div>
-                <div style={{ fontStyle: "italic", color: theme.ash, marginBottom: 14 }}>
-                  Mark what you keep at home so the apothecarium knows what
-                  you can actually brew right now.
-                </div>
-                <button
-                  onClick={() => go("apothecary", { mode: "compendium" })}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    padding: "8px 18px", borderRadius: 999,
-                    border: `1px solid ${theme.sageDeep}`, background: theme.sageDeep,
-                    color: theme.cream, cursor: "pointer",
-                  }}
-                >open the herbanium</button>
-              </div>
-            ) : (
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-                color: theme.ash, padding: "18px 0", textAlign: "center",
-              }}>
-                no ingredients match your filters.
-              </div>
-            )
+            <div style={{
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+              color: theme.ash, padding: "18px 0", textAlign: "center",
+            }}>
+              no ingredients match your filters.
+            </div>
           ) : (
             <div style={{
               display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
             }}>
-              {shelfItems.map(([id, ing]) => {
-                const inPantry = pantryIds.has(id);
+              {shelfItems.map(([id, ing], idx) => {
                 const hasCaffeine = (ing.caffeine || 0) > 0;
                 const accent = categoryColor(ing.category, theme);
                 return (
-                  <button key={id} onClick={() => go("ingredient", id)}
+                  <button key={id} data-tour={idx === 0 ? "herb-ingredient" : undefined} onClick={() => go("ingredient", id)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.boxShadow = "0 4px 10px rgba(30,24,18,0.09), 0 1px 2px rgba(30,24,18,0.05)";
                     e.currentTarget.style.borderColor = theme.rule;
@@ -487,105 +425,13 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
                       position: "absolute", left: 0, top: 0, bottom: 0,
                       width: 3, background: accent, opacity: 0.85,
                     }} />
-                    {/* Pantry toggle — three visual states:
-                        • Not in pantry (any surface): ghost circle + plus.
-                        • In pantry, browsing the Herbanium: sage-filled
-                          check (the affirmative "yes, in cabinet" badge).
-                        • In pantry, on the Cabinet surface: terra-outline
-                          X (the action here is "remove"; reads as a
-                          delete affordance, not a status badge).
-                        Cabinet remove is gated behind a confirm prompt
-                        because adding back costs a trip to the Herbanium. */}
-                    {togglePantry && (
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (pantryOnly && inPantry) {
-                            setConfirmRemoveId(id);
-                          } else {
-                            togglePantry(id);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (pantryOnly && inPantry) {
-                              setConfirmRemoveId(id);
-                            } else {
-                              togglePantry(id);
-                            }
-                          }
-                        }}
-                        title={
-                          pantryOnly && inPantry
-                            ? "remove from cabinet"
-                            : inPantry
-                              ? "in cabinet — tap to remove"
-                              : "tap to add to cabinet"
-                        }
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.08)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-                        style={{
-                          position: "absolute", top: 8, right: 8,
-                          width: 24, height: 24, borderRadius: "50%",
-                          background: pantryOnly && inPantry
-                            ? "transparent"
-                            : inPantry
-                              ? theme.sage
-                              : "transparent",
-                          border: `1px solid ${
-                            pantryOnly && inPantry
-                              ? theme.terra
-                              : inPantry
-                                ? theme.sage
-                                : theme.ruleSoft
-                          }`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          cursor: "pointer",
-                          transition: "background 0.18s ease, border-color 0.18s ease, transform 0.12s ease",
-                        }}
-                      >
-                        {pantryOnly && inPantry ? (
-                          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
-                            <path
-                              d="M2.5 2.5 L9.5 9.5 M9.5 2.5 L2.5 9.5"
-                              stroke={theme.terra}
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        ) : inPantry ? (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
-                            <path
-                              d="M2.5 6.2 L5 8.5 L9.5 3.7"
-                              stroke={theme.cream}
-                              strokeWidth="1.7"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        ) : (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
-                            <path
-                              d="M6 2.5 L6 9.5 M2.5 6 L9.5 6"
-                              stroke={theme.ash}
-                              strokeWidth="1.4"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    )}
                     {/* Header row — just the type icon (and optional
                         CAF pill). Subcategory moved out so the row
                         breathes; it lands bottom-right under the
                         latin name as a quieter footer label. */}
                     <div style={{
                       display: "flex", alignItems: "center", gap: 7,
-                      paddingRight: togglePantry ? 28 : 0, marginBottom: 4,
+                      marginBottom: 4,
                     }}>
                       {ing.category === "flower"    && <Flower size={20} c={accent} />}
                       {ing.category === "herbal"    && <Sprig  size={20} c={accent} />}
@@ -633,103 +479,8 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
               })}
             </div>
           )}
-          {/* Pantry-bottom CTA — when the user's filtered down to their
-              cabinet, drop a clear button at the end of the list that
-              flips the filter off so the full herbanium appears with
-              the plus button on each card to add new ingredients. */}
-          {pantryOnly && (
-            <button
-              onClick={() => setPantryOnly(false)}
-              style={{
-                marginTop: 16, width: "100%",
-                padding: "12px 14px",
-                fontFamily: ff.serif, fontSize: 14,
-                color: theme.terra,
-                background: "transparent",
-                border: `1px dashed ${theme.terra}`,
-                borderRadius: 10, cursor: "pointer",
-              }}
-            >Browse the herbanium to add</button>
-          )}
       </>
 
-      {/* Cabinet remove confirmation — only fires from the Cabinet
-          surface, where adding back means walking to the Herbanium.
-          Modal is centered, dim-overlay backed; Cancel is the
-          default-weighted action (outline) and Remove is terra-filled
-          to read as the destructive choice without screaming. */}
-      {confirmRemoveId && (() => {
-        const ing = INGREDIENTS[confirmRemoveId];
-        const ingName = ing?.name || "this ingredient";
-        const close = () => setConfirmRemoveId(null);
-        const confirm = () => {
-          if (togglePantry) togglePantry(confirmRemoveId);
-          setConfirmRemoveId(null);
-        };
-        return (
-          <div
-            onClick={close}
-            style={{
-              position: "fixed", inset: 0, zIndex: 220,
-              background: "rgba(30,24,18,0.45)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              padding: "0 24px",
-            }}
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxWidth: 380, width: "100%",
-                background: theme.cream,
-                border: `1px solid ${theme.ruleSoft}`,
-                borderRadius: 14, padding: "20px 22px 18px",
-                boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
-              }}
-            >
-              <div style={{
-                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-                textTransform: "uppercase", color: theme.terra, marginBottom: 8,
-              }}>remove from cabinet</div>
-              <div style={{
-                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-                lineHeight: 1.45, marginBottom: 6,
-              }}>
-                Remove <em style={{ color: theme.terra, fontStyle: "normal" }}>{ingName}</em> from your cabinet?
-              </div>
-              <div style={{
-                fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                color: theme.ash, lineHeight: 1.5, marginBottom: 16,
-              }}>
-                You can add it back from the Herbanium reference any time.
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <button
-                  onClick={close}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    padding: "8px 16px", borderRadius: 999,
-                    background: "transparent",
-                    border: `1px solid ${theme.ruleSoft}`,
-                    color: theme.inkSoft, cursor: "pointer",
-                  }}
-                >cancel</button>
-                <button
-                  onClick={confirm}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    padding: "8px 16px", borderRadius: 999,
-                    background: theme.terra, border: `1px solid ${theme.terra}`,
-                    color: theme.cream, cursor: "pointer",
-                    boxShadow: "0 2px 6px -1px rgba(176,84,47,0.32)",
-                  }}
-                >remove</button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 };

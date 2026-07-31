@@ -63,7 +63,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, composeHintShown, dismissComposeHint, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, bestiaryHintShown, dismissBestiaryHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -164,7 +164,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} />
       )}
 
       {/* Visitors — the notebook's third sub-tab. The lodestone
@@ -177,7 +177,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           profile={profile}
           sessions={sessions}
           savedBlendIds={savedBlendIds}
-          pantryIds={pantryIds}
           journalEntries={journalEntries}
           tabVisits={tabVisits}
           elementalsDisabled={elementalsDisabled}
@@ -277,7 +276,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           <div style={{ marginTop: 4 }}>
             {/* Timeline filter chips — All / Cups / Entries — narrow
                 what the user sees in the journal scroll below. */}
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 12 }}>
+            <div data-tour="reflections-log" style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 12 }}>
               {[
                 ["all",     "All"],
                 ["cups",    "Cups"],
@@ -330,7 +329,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 ? `Writing — ${activeChoice[1].toLowerCase()}`
                 : "Write something";
               return (
-                <div style={{ marginBottom: 12, position: "relative" }}>
+                <div data-tour="reflections-write" style={{ marginBottom: 12, position: "relative" }}>
                   <button
                     onClick={() => setWriteMenuOpen(o => !o)}
                     aria-haspopup="listbox"
@@ -541,8 +540,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               : [...list, item];
             setCatalogueFilter({ ...cf, [key]: next });
           };
-          const togglePantryOnly = () =>
-            setCatalogueFilter({ ...cf, pantryOnly: !cf.pantryOnly });
 
           // Step 1 — collection bucket.
           let pool;
@@ -613,27 +610,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             if (moodSet.size === 0) return true;
             return moodSet.has(b.mood);
           };
-          // Pantry-only filter: every ingredient in the blend must be
-          // in the user's pantry. Empty pantry + toggle on = empty list,
-          // explained by the empty-state copy below.
-          const blendInPantry = (b) => {
-            if (!cf.pantryOnly) return true;
-            if (!pantryIds) return false;
-            const ings = b.ingredients || [];
-            return ings.every(it => it && it.id && pantryIds.has(it.id));
-          };
           const catVisible = pool.filter(b =>
-            blendMatchesMoods(b) && blendMatchesFlavors(b) && blendInPantry(b)
+            blendMatchesMoods(b) && blendMatchesFlavors(b)
           );
-          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0 || cf.pantryOnly)) {
+          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0)) {
             const subBits = [
               moodSet.size > 0 ? `mood (${[...moodSet].join(", ")})` : null,
               flavorSet.size > 0 ? `flavor (${[...flavorSet].join(", ")})` : null,
-              cf.pantryOnly ? "in your cabinet" : null,
             ].filter(Boolean).join(" + ");
-            catEmpty = cf.pantryOnly && pantryIds && pantryIds.size === 0
-              ? "Add ingredients to your cabinet to use this filter."
-              : `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
+            catEmpty = `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
           }
 
           // One-line meta header: count + the active sub-filters that
@@ -652,7 +637,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               const c = FLAVOR_FAMILY_CHIPS.find(x => x.family === f);
               return c ? c.label.toLowerCase() : f;
             }).join(" / ")] : []),
-            ...(cf.pantryOnly ? ["in cabinet"] : []),
           ];
           const subFilterCount = (cf.moods || []).length + (cf.flavors || []).length;
 
@@ -660,45 +644,28 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             <div style={{ marginTop: 4 }}>
               {/* Collection row — always visible. Single-select bucket
                   for what kind of recipes to browse. */}
-              <FilterRow
-                label="collection"
-                items={[
-                  ["favorites",   "Favorites"],
-                  ["all",         "All"],
-                  ["traditional", "Traditional"],
-                  ["twists",      "Twists"],
-                  ["house recipes", "House"],
-                ]}
-                value={cf.collection}
-                setValue={setCollection}
-              />
+              <div data-tour="recipes-filter">
+                <FilterRow
+                  label="collection"
+                  items={[
+                    ["favorites",   "Favorites"],
+                    ["all",         "All"],
+                    ["traditional", "Traditional"],
+                    ["twists",      "Twists"],
+                    ["house recipes", "House"],
+                  ]}
+                  value={cf.collection}
+                  setValue={setCollection}
+                />
+              </div>
 
-              {/* Cabinet toggle + "More filters" disclosure live on one
-                  row so the two secondary controls share visual weight
-                  and the filter strip's at-rest height stays compact. */}
+              {/* "More filters" disclosure row — opens the mood + flavor
+                  rows below. Sits alone now that the cabinet toggle is
+                  gone; right-aligned so it reads as a quiet secondary. */}
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
+                display: "flex", alignItems: "center", justifyContent: "flex-end",
                 gap: 12, marginTop: 4, marginBottom: 10,
               }}>
-                <label style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
-                }}>
-                  <span style={{
-                    width: 30, height: 18, borderRadius: 999,
-                    background: cf.pantryOnly ? theme.sageDeep : theme.rule,
-                    position: "relative", transition: "background .2s",
-                    flexShrink: 0,
-                  }} onClick={togglePantryOnly}>
-                    <span style={{
-                      position: "absolute", top: 2, left: cf.pantryOnly ? 14 : 2,
-                      width: 14, height: 14, borderRadius: "50%", background: theme.cream,
-                      transition: "left .2s",
-                    }} />
-                  </span>
-                  in cabinet
-                </label>
-
                 {/* Disclosure — opens the mood + flavor rows below.
                     Shows a small count badge when sub-filters are
                     active so the user can spot "narrowed" at a glance
@@ -836,7 +803,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                   // below the list.
                   const canDelete = !isHouseStaple && deleteBlend;
                   return (
-                    <div key={b.id} style={{ position: "relative" }}>
+                    <div key={b.id} data-tour={i === 0 ? "recipes-row" : undefined} style={{ position: "relative" }}>
                       <BlendListRow
                         b={b}
                         author={author}
@@ -900,11 +867,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
       {mode === "compendium" && (
         <LibraryScreen
           go={go}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
           hideHeader
-          pantryHintShown={pantryHintShown}
-          dismissPantryHint={dismissPantryHint}
         />
       )}
 
@@ -1016,7 +979,17 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep }) => {
+  // When the guided Blend tour starts on an empty pot, drop in one
+  // example ingredient so the quantity stepper and the steep/temp
+  // sliders actually render for the walkthrough. Left in place after —
+  // the user can tweak it or remove it with ×.
+  React.useEffect(() => {
+    if (blendTourActive && reverseIngs.length === 0) {
+      setReverseIngs(["chamomile"]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blendTourActive]);
   const [rcSaveName, setRcSaveName] = useState("");
   const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
   const [rcSaveStatus, setRcSaveStatus] = useState(null);
@@ -1236,6 +1209,33 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     setBrewTimeS(profile.timeS);
   }, [profile.tempC, profile.timeS]);
 
+  // Guided-tour demo — while the graph/slider steps are showing, gently
+  // oscillate the steep-time slider so the prediction bars visibly move
+  // on their own. The tour overlay blocks real input, so this is the
+  // only motion; it stops when the step advances or the tour ends.
+  // Honors prefers-reduced-motion.
+  const tourDemoActive = blendTourStep === "blend-graph" || blendTourStep === "blend-sliders";
+  useEffect(() => {
+    if (!tourDemoActive) return undefined;
+    const times = reverseIngs.map(id => INGREDIENTS[id]?.timeS).filter(Boolean);
+    if (times.length === 0) return undefined;
+    if (typeof window !== "undefined" && window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    let lo = Math.min(...times.map(t => t[0]));
+    let hi = Math.max(...times.map(t => t[1]));
+    const span = hi - lo;
+    lo += span * 0.12; hi -= span * 0.12; // inset so the thumb never clamps at the edge
+    if (hi <= lo) return undefined;
+    let phase = 0;
+    const id = setInterval(() => {
+      phase += 0.09;
+      const frac = (Math.sin(phase) + 1) / 2;
+      setBrewTimeS(Math.round(lo + frac * (hi - lo)));
+    }, 60);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourDemoActive, reverseIngs]);
+
   // Custom user-built blend — no curator, no baseline. Every warning
   // fires immediately so the user exploring an arbitrary combination
   // sees the consequence of each slider position the moment it lands.
@@ -1266,7 +1266,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         background: theme.cream,
       }}>
         {/* Search input */}
-        <div style={{
+        <div data-tour="blend-search" style={{
           display: "flex", alignItems: "center", gap: 8,
           padding: "8px 10px", borderRadius: 8,
           background: theme.ivory, border: `1px solid ${theme.ruleSoft}`,
@@ -1591,7 +1591,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             <div>caffeine + balance scale from total</div>
           </div>
         )}
-        {reverseIngs.map(id => {
+        {reverseIngs.map((id, idx) => {
           const primary = isPrimary(id);
           const parts = partsFor(id);
           return (
@@ -1639,7 +1639,9 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   number renders in terra when the row is the lead
                   so the eye reads "this is what's driving the cup"
                   without needing the PRIMARY label. */}
-              <div style={{
+              <div
+                data-tour={idx === 0 ? "blend-quantity" : undefined}
+                style={{
                 flexShrink: 0,
                 display: "inline-flex", alignItems: "center", gap: 4,
                 marginRight: 4,
@@ -1852,7 +1854,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           textAlign: "center",
         }}>{rcSaveStatus.text}</div>
       )}
-      <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+      <div data-tour="blend-brew" style={{ display: "flex", gap: 10, marginTop: 14 }}>
         <Button
           variant="secondary"
           disabled={!saveComposedBlend || reverseIngs.length === 0}

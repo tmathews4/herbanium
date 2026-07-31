@@ -105,10 +105,3 @@ export function pickSeedBlends({ timeOfDay, draw }) {
   // plus the always-include count.
   return Array.from(pool).slice(0, 5 + ALWAYS_INCLUDE.length);
 }
-
-/**
- * Default starting pantry for new users — empty. The user curates
- * their own from day one; a one-time hint card on Home points them
- * to the toggle in Library and on each Ingredient detail page.
- */
-export const ONBOARDING_PANTRY = [];

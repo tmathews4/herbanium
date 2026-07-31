@@ -17,7 +17,6 @@ import {
 import {
   Button, SectionLabel, VocabInfoCard,
 } from "../components/layout";
-import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
 import {
   EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS,
@@ -105,7 +104,7 @@ const SolidBar = ({ label, value, color, selected, onClick }) => {
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
+export const IngredientDetail = ({ id, onClose, onOpenIngredient }) => {
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   const [tab, setTab] = useState("overview");
   // Click-to-expand description cards. null = closed; clicking the same
@@ -218,16 +217,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
       </div>
 
       <div>
-        {!ingredientHintShown && dismissIngredientHint && (
-          <HintCard
-            title="Hint"
-            body={<>
-              Hit the <strong style={{ color: theme.terra }}>Brewing</strong> tab
-              to experiment with steep and temp for this ingredient on its own.
-            </>}
-            onDismiss={dismissIngredientHint}
-          />
-        )}
         {tab === "overview" && (
           <>
             <p style={{
@@ -336,20 +325,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
               </div>
             )}
 
-            <div style={{ marginTop: 22 }}>
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={() => togglePantry && togglePantry(id)}
-                style={(pantryIds && pantryIds.has(id)) ? {
-                  background: "rgba(74,87,58,0.06)",
-                  borderColor: theme.sageDeep,
-                  color: theme.sageDeep,
-                } : {}}
-              >
-                {pantryIds && pantryIds.has(id) ? "✓ in pantry" : "+ pantry"}
-              </Button>
-            </div>
           </>
         )}
 

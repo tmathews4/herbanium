@@ -380,7 +380,7 @@ export const BlendExtractionExplorer = ({
           BOTH the flavor and mood strips at once — registers vs
           specific notes/leaf effects. Palate doesn't have a
           comparable hierarchy and reads the same in either mode. */}
-      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div data-tour="blend-graph" style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{
           display: "flex", justifyContent: "flex-end", alignItems: "center",
         }}>
@@ -692,7 +692,7 @@ export const BlendExtractionExplorer = ({
         };
 
         return (
-          <>
+          <div data-tour="blend-sliders">
             {/* Temp + time sliders. Sit BELOW the maps now that the
                 maps are fixed-height (per-track normalization keeps
                 each band's intensity stable; only the vertical
@@ -829,7 +829,7 @@ export const BlendExtractionExplorer = ({
               })()}
 
             </div>
-          </>
+          </div>
         );
       })()}
 

@@ -357,22 +357,26 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         {[
           {
             label: "Experiment",
+            tour: "home-experiment",
             onClick: () => go("apothecary", { mode: "reverse" }),
             icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
           },
           {
             label: "Brew",
+            tour: "home-brew",
             onClick: () => go("shelf", { mode: "recipes" }),
             icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
           },
           {
             label: "Write",
+            tour: "home-write",
             onClick: () => go("shelf", { mode: "journal" }),
             icon: (sz) => <Pencil size={sz} c={theme.sageDeep} />,
           },
         ].map((cta, i) => (
           <button
             key={i}
+            data-tour={cta.tour}
             onClick={cta.onClick}
             className="home-cta"
           >
@@ -394,6 +398,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           beneath the three primary CTAs as a quieter doorway into the
           apothecary's compendium of every leaf, flower, root, and bark. */}
       <button
+        data-tour="home-herbanium"
         onClick={() => go("apothecary", { mode: "compendium" })}
         className="home-cta home-cta-thin"
         style={{
@@ -443,34 +448,39 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
       )}
 
       {/* Your recent cups — header stays even before any brew so a
-          new user sees this is the window where their cups will land. */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-        <SectionLabel n="i">Recent brews</SectionLabel>
-        {yourSessions.length > 0 && (
-          <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
-            background: "transparent", border: "none",
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-            cursor: "pointer",
-          }}>see all →</button>
+          new user sees this is the window where their cups will land.
+          The guided tour anchors to the header row (not the whole list)
+          so the highlight stays compact and consistent regardless of
+          how many cups are logged. */}
+      <div>
+        <div data-tour="home-recent" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+          <SectionLabel n="i">Recent brews</SectionLabel>
+          {yourSessions.length > 0 && (
+            <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
+              background: "transparent", border: "none",
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+              cursor: "pointer",
+            }}>see all →</button>
+          )}
+        </div>
+        {yourSessions.length > 0 ? (
+          <div>
+            {yourSessions.slice(0, 5).map((s, i) => (
+              <CompactSessionRow key={s.id} s={s} openCup={openCup} first={i === 0} />
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            padding: "14px 16px", borderRadius: 10,
+            border: `1px dashed ${theme.ruleSoft}`,
+            background: "transparent",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
+            color: theme.ash, lineHeight: 1.5, textAlign: "center",
+          }}>
+            Your last few cups will land here once you've brewed something.
+          </div>
         )}
       </div>
-      {yourSessions.length > 0 ? (
-        <div>
-          {yourSessions.slice(0, 5).map((s, i) => (
-            <CompactSessionRow key={s.id} s={s} openCup={openCup} first={i === 0} />
-          ))}
-        </div>
-      ) : (
-        <div style={{
-          padding: "14px 16px", borderRadius: 10,
-          border: `1px dashed ${theme.ruleSoft}`,
-          background: "transparent",
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-          color: theme.ash, lineHeight: 1.5, textAlign: "center",
-        }}>
-          Your last few cups will land here once you've brewed something.
-        </div>
-      )}
 
     </div>
   );

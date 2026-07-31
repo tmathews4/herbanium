@@ -78,7 +78,6 @@ function contextPhraseForAction(action, ts, sessions, journalEntries, getBlend) 
   if (action === "visit:shelf")      return "while turning notebook pages";
   if (action === "visit:home")       return "while crossing the threshold home";
   if (action === "visit:profile")    return "while looking inward";
-  if (action === "pantry")           return "while sorting the pantry";
   if (action === "favorite")         return "while marking a recipe to keep";
   if (action === "compose")          return "while building a blend at the bench";
   if (action === "any")              return "passing on its own course";
@@ -108,7 +107,6 @@ export const BestiaryView = ({
   profile,
   sessions = [],
   savedBlendIds,
-  pantryIds,
   journalEntries = [],
   tabVisits,
   elementalsDisabled = false,
@@ -389,6 +387,7 @@ export const BestiaryView = ({
           journal entries; sits above the bestiary header so the
           crystal reads as the lodestone the elementals gather
           around. */}
+      <div data-tour="fieldnotes-lodestone">
       <MoodCrystal
         sessions={sessions}
         journalEntries={journalEntries}
@@ -412,6 +411,7 @@ export const BestiaryView = ({
         }
         onSummon={onSummonClick}
       />
+      </div>
 
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "flex-end",

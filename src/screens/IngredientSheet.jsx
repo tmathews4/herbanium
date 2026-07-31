@@ -21,7 +21,7 @@ import { formatTempRange, useUnit } from "../units/units";
    brew without navigating away from the timer.
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientSheet = ({ id, onClose, inPantry, onTogglePantry }) => {
+export const IngredientSheet = ({ id, onClose }) => {
   const { unit } = useUnit();
   const ing = INGREDIENTS[id];
   if (!ing) return null;
@@ -154,21 +154,6 @@ export const IngredientSheet = ({ id, onClose, inPantry, onTogglePantry }) => {
           </div>
         )}
 
-        {/* Pantry toggle */}
-        {onTogglePantry && (
-          <button onClick={onTogglePantry} style={{
-            width: "100%",
-            fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.04em",
-            padding: "11px", borderRadius: 10,
-            background: inPantry ? "transparent" : theme.cream,
-            border: `1px solid ${inPantry ? theme.sageDeep : theme.rule}`,
-            color: inPantry ? theme.sageDeep : theme.inkSoft,
-            cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          }}>
-            {inPantry ? "✓ in your pantry" : "+ add to pantry"}
-          </button>
-        )}
       </div>
 
       <style>{`

@@ -195,13 +195,6 @@ export const SEED_MODES = {
     favoriteBlendIds: [
       "dusk", "morning", "study", "wuyi-smoke", "moroccan", "local-tomscalm",
     ],
-    pantryIds: [
-      "chamomile", "lavender", "lemonbalm", "peppermint", "rooibos",
-      "sencha", "assam", "ginger", "hibiscus", "rose",
-      "cinnamon", "cardamom", "vanilla", "spearmint", "jasmine",
-      "passionflower", "valerian", "tulsi", "fennel", "lapsang",
-      "puerh", "matcha", "hojicha", "darjeeling",
-    ],
     // Free-form journal entries with the mood-arc shape introduced
     // when the journal became a tea-meets-mood log. hoursAgo maps
     // to fresh ts at apply time the same way sessions do.
@@ -244,7 +237,6 @@ export const SEED_MODES = {
       shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  true,
-      pantryHintShown:   true,
       bestiaryHintShown: true,
       ingredientHintShown: true,
     },
@@ -404,7 +396,6 @@ export const SEED_MODES = {
     ],
     savedBlendIds: ["all-heal", "hojicha-evening"],
     favoriteBlendIds: ["all-heal"],
-    pantryIds: ["chamomile", "lemonbalm", "lavender", "peppermint", "rooibos", "ginger", "rose"],
     journalEntries: [
       { hoursAgo: 6, kind: "entry",
         text: "First quiet evening of the week. Tried the all-heal blend and watched the light go.",
@@ -422,7 +413,6 @@ export const SEED_MODES = {
       shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  false,
-      pantryHintShown:   false,
       bestiaryHintShown: false,
       ingredientHintShown: false,
     },
@@ -456,7 +446,6 @@ export const SEED_MODES = {
       shelfHintShown:    false,
       journalHintShown:  false,
       profileHintShown:  false,
-      pantryHintShown:   false,
       bestiaryHintShown: false,
       ingredientHintShown: false,
     },
