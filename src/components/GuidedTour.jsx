@@ -188,6 +188,11 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         position: "fixed",
         left: 16, right: 16, maxWidth: 420, margin: "0 auto",
         ...calloutPos,
+        // border-box so maxHeight bounds the WHOLE box (padding + border
+        // included). With the default content-box, padding+border spill
+        // past maxHeight (~30px) and the callout can poke off-screen —
+        // that's what tipped Firefox's tall-graph step over the bottom edge.
+        boxSizing: "border-box",
         overflowY: "auto",
         background: theme.cream,
         border: `1px solid ${theme.ruleSoft}`,

@@ -30,21 +30,22 @@ jobs:
         run: npm test
 
   e2e:
-    name: e2e (${{ matrix.project }})
+    name: e2e (${{ matrix.engine }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # project = the Playwright project name (from playwright.config.ts)
-        # browser = the engine to install for that project. Splitting them
-        # lets each job install ONLY the engine it needs.
+        # One job per engine; each runs ALL its device projects. A device
+        # preset implies its engine (Pixel/Galaxy -> chromium, iPhone/iPad
+        # -> webkit), so grouping this way installs each engine once and
+        # runs its whole device set together.
         include:
-          - project: mobile-chromium
-            browser: chromium
-          - project: mobile-webkit
-            browser: webkit
-          - project: firefox
-            browser: firefox
+          - engine: chromium
+            projects: "pixel-9 pixel-fold-cover pixel-fold-open galaxy-s9 desktop-chrome"
+          - engine: webkit
+            projects: "iphone-15 iphone-se ipad-pro"
+          - engine: firefox
+            projects: "firefox-phone firefox-desktop"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -52,22 +53,25 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Installs the browser binary AND its OS libraries. --with-deps is
-      # the CI form of the `install-deps` you ran by hand locally — the
-      # runner has passwordless sudo, so it just works.
-      - name: Install ${{ matrix.browser }} + system deps
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-      # Playwright builds + serves the app itself (webServer in the
-      # config), then runs just this project's browser.
-      - name: Run E2E (${{ matrix.project }})
-        run: npm run test:e2e -- --project=${{ matrix.project }}
-      # Keep the HTML report + traces per browser so a red run is
-      # debuggable: download → `npx playwright show-report <folder>`.
-      # Artifact names must be unique across matrix legs.
+      # Installs the engine binary AND its OS libraries. --with-deps is the
+      # CI form of the `install-deps` you ran by hand locally — the runner
+      # has passwordless sudo, so it just works.
+      - name: Install ${{ matrix.engine }} + system deps
+        run: npx playwright install --with-deps ${{ matrix.engine }}
+      # Playwright builds + serves the app itself (webServer in the config),
+      # then runs every device project for this engine.
+      - name: Run E2E (${{ matrix.engine }})
+        run: |
+          flags=""
+          for p in ${{ matrix.projects }}; do flags="$flags --project=$p"; done
+          npm run test:e2e -- $flags
+      # Keep the HTML report + traces per engine so a red run is debuggable:
+      # download → `npx playwright show-report <folder>`. Artifact names
+      # must be unique across matrix legs.
       - name: Upload report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.project }}
+          name: playwright-report-${{ matrix.engine }}
           path: playwright-report/
           retention-days: 14

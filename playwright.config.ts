@@ -40,32 +40,42 @@ export default defineConfig({
     // Every page.goto("/") resolves against this.
     baseURL: "http://localhost:5173",
 
-    // Debuggability defaults, set up now so we never backfill them:
-    //  - trace "on": record a full trace (DOM snapshots + network +
-    //    console per step) for EVERY test, pass or fail. Open with
-    //    `npx playwright show-trace` (or from the HTML report) and
-    //    time-travel through the run. For a large mature suite you'd
-    //    switch this to "on-first-retry"/"retain-on-failure" to save
-    //    space; while the suite is small, always-on is the best
-    //    learning/debugging tool.
-    trace: "on",
-    //  - screenshot only when a test fails (cheap, and enough for
-    //    "what did the screen look like when it broke").
+    // Debuggability defaults:
+    //  - trace "retain-on-failure": record a full trace (DOM snapshots +
+    //    network + console per step) but keep it only for tests that
+    //    FAIL — open with `npx playwright show-trace` or from the HTML
+    //    report and time-travel the failure. Always-on traces don't
+    //    scale across a wide device matrix (a zip per test per device),
+    //    so we keep them where they matter and use `--trace on` ad hoc
+    //    when actively debugging a passing test.
+    trace: "retain-on-failure",
+    //  - screenshot only when a test fails.
     screenshot: "only-on-failure",
   },
 
-  // Browser matrix. Chromium + WebKit run in true mobile-emulation
-  // (touch + mobile viewport) since the app is phone-first. Firefox
-  // does NOT support Playwright's mobile emulation (isMobile), so it
-  // runs desktop-engine at a narrow phone-width viewport instead — the
-  // app's responsive layout still renders its phone UI there.
+  // Device matrix — broad on purpose (infrastructure early, so device-
+  // specific breakage surfaces before detailed tests pile up). Grouped by
+  // engine, since a device preset implies its engine (Pixel/Galaxy ->
+  // chromium, iPhone/iPad -> webkit). Chromium + WebKit presets run in
+  // true mobile emulation (mobile viewport, DPR, touch, UA). Firefox has
+  // no mobile emulation in Playwright, so it runs Gecko at fixed phone-
+  // and desktop-width viewports to still catch engine-specific rendering.
+  // Foldable (Galaxy Z Fold 7 Cover = folded/narrow, main = unfolded/wide)
+  // and the tablet/desktop widths exercise the app's foldable wide-mode.
   projects: [
-    { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
-    { name: "mobile-webkit", use: { ...devices["iPhone 13"] } },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"], viewport: { width: 412, height: 915 } },
-    },
+    // — Chromium engine (Android + desktop Chrome) —
+    { name: "pixel-9", use: { ...devices["Pixel 9"] } },
+    { name: "pixel-fold-cover", use: { ...devices["Galaxy Z Fold 7 Cover"] } },
+    { name: "pixel-fold-open", use: { ...devices["Galaxy Z Fold 7"] } },
+    { name: "galaxy-s9", use: { ...devices["Galaxy S9+"] } },
+    { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } },
+    // — WebKit engine (iOS + iPadOS + desktop Safari) —
+    { name: "iphone-15", use: { ...devices["iPhone 15"] } },
+    { name: "iphone-se", use: { ...devices["iPhone SE (3rd gen)"] } },
+    { name: "ipad-pro", use: { ...devices["iPad Pro 11"] } },
+    // — Firefox engine (no mobile emulation; fixed viewports) —
+    { name: "firefox-phone", use: { ...devices["Desktop Firefox"], viewport: { width: 412, height: 915 } } },
+    { name: "firefox-desktop", use: { ...devices["Desktop Firefox"] } },
   ],
 
   // Playwright manages the server itself: builds the app, serves the
