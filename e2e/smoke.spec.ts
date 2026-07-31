@@ -1,4 +1,4 @@
-// e2e/smoke.spec.js — boot-level sanity checks.
+// e2e/smoke.spec.ts — boot-level sanity checks.
 //
 // A "smoke test" answers one question: does the app even start?
 // It runs in a real browser against the real Vite build, so it
@@ -8,7 +8,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("app boot", () => {
   test("fresh visitor lands on onboarding", async ({ page }) => {
-    // baseURL comes from playwright.config.js, so "/" is enough.
+    // baseURL comes from playwright.config.ts, so "/" is enough.
     await page.goto("/");
 
     // getByText auto-waits: it polls until the element appears or the
@@ -35,7 +35,7 @@ test.describe("app boot", () => {
   test("no console errors on boot", async ({ page }) => {
     // Collect page console errors during load. A page can look fine
     // while logging red — this catches the "works but bleeding" state.
-    const errors = [];
+    const errors: string[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg.text());
     });

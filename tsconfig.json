@@ -1,0 +1,21 @@
+{
+  // Scoped to the Playwright test harness only. The app itself is
+  // JS/JSX (Vite handles it) — this config exists so the E2E specs and
+  // playwright.config.ts get real type-checking (`npm run typecheck`)
+  // and editor intellisense, without type-checking the app sources.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["e2e", "playwright.config.ts"]
+}

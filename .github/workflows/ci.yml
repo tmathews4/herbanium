@@ -1,59 +1,73 @@
-# CI — runs the unit suite and the Playwright E2E smoke suite on every
-# push to main and every pull request. Mirrors what you'd run locally
-# (`npm test` + `npm run test:e2e`), so a green check here means the
-# same thing it does on your machine.
+# CI — three independent, parallel pipelines on every push to main and
+# every pull request:
+#   • checks : TypeScript typecheck + the node unit/data suite
+#   • e2e    : a matrix of one job per browser engine, each running the
+#              Playwright suite against the production build
+# Jobs run concurrently (no `needs:`) so feedback is fast, and the e2e
+# matrix uses fail-fast:false so one browser failing doesn't cancel the
+# others.
 name: CI
 
-# When to run. Pushes to main catch regressions after a merge; PRs catch
-# them before. (Once you work on branches, the PR trigger is the useful one.)
 on:
   push:
     branches: [main]
   pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest          # GitHub-hosted Linux runner (Ubuntu 24.04)
-
+  checks:
+    name: typecheck + unit
+    runs-on: ubuntu-latest
     steps:
-      # 1. Pull the repo's code into the runner.
       - uses: actions/checkout@v5
-
-      # 2. Install Node. `cache: npm` restores ~/.npm between runs so
-      #    installs are fast; keyed off package-lock.json.
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      # 3. Install dependencies from the lockfile exactly (reproducible,
-      #    faster than `npm install`, and fails if lock is out of sync).
-      - name: Install dependencies
-        run: npm ci
-
-      # 4. Unit / data-integrity suite (the node tests/*.mjs chain).
-      #    Runs first so a cheap failure short-circuits the slower E2E.
-      - name: Unit tests
+      - run: npm ci
+      - name: Typecheck (E2E harness)
+        run: npm run typecheck
+      - name: Unit / data-integrity suite
         run: npm test
 
-      # 5. Install the Playwright browser AND its system libraries. This
-      #    is the CI-friendly form of the `install-deps` you ran by hand:
-      #    the runner has passwordless sudo, so --with-deps just works.
-      - name: Install Playwright browser + deps
-        run: npx playwright install --with-deps chromium
-
-      # 6. E2E suite. Playwright boots the vite dev server itself
-      #    (webServer in the config), runs the specs, tears it down.
-      - name: E2E tests
-        run: npm run test:e2e
-
-      # 7. On failure, keep the HTML report + traces as a downloadable
-      #    artifact so you can debug a red CI run locally
-      #    (download → `npx playwright show-report <folder>`).
-      - name: Upload Playwright report
+  e2e:
+    name: e2e (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # project = the Playwright project name (from playwright.config.ts)
+        # browser = the engine to install for that project. Splitting them
+        # lets each job install ONLY the engine it needs.
+        include:
+          - project: mobile-chromium
+            browser: chromium
+          - project: mobile-webkit
+            browser: webkit
+          - project: firefox
+            browser: firefox
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Installs the browser binary AND its OS libraries. --with-deps is
+      # the CI form of the `install-deps` you ran by hand locally — the
+      # runner has passwordless sudo, so it just works.
+      - name: Install ${{ matrix.browser }} + system deps
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      # Playwright builds + serves the app itself (webServer in the
+      # config), then runs just this project's browser.
+      - name: Run E2E (${{ matrix.project }})
+        run: npm run test:e2e -- --project=${{ matrix.project }}
+      # Keep the HTML report + traces per browser so a red run is
+      # debuggable: download → `npx playwright show-report <folder>`.
+      # Artifact names must be unique across matrix legs.
+      - name: Upload report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: playwright-report/
           retention-days: 14
