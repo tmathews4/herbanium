@@ -103,10 +103,10 @@ const SCREEN_TOURS = {
   blend: [
     { target: "blend-search", title: "Add ingredients", pad: 6,
       body: "Search or filter the apothecarium, then tap an ingredient to drop it in your pot." },
-    { target: "blend-quantity", title: "Set the amounts", pad: 8,
-      body: "We've dropped in an example. Use − / + to set how much of each ingredient goes in — its “parts.” The one with the most parts leads the cup." },
+    { target: "blend-quantity", title: "Set the parts", pad: 8,
+      body: "We've dropped in an example blend. Use − / + to set each ingredient's “parts” — its share of the cup. The most parts leads; the others accent it. (Brewing just one ingredient? The Herbanium's the place for that.)" },
     { target: "blend-graph", title: "The prediction", pad: 6,
-      body: "These bars read the blend's flavor and effects — watch them shift as the brew changes." },
+      body: "These bars read the whole blend's flavor and effects at once — watch them shift as you change the parts or the brew." },
     { target: "blend-sliders", title: "Dial in the brew", pad: 6,
       body: "That movement is these sliders — drag temperature and steep time to change how the blend extracts." },
     { target: "blend-brew", title: "Brew or save", pad: 6,

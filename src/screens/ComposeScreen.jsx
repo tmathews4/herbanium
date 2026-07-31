@@ -1025,13 +1025,16 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
 };
 
 export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep }) => {
-  // When the guided Blend tour starts on an empty pot, drop in one
-  // example ingredient so the quantity stepper and the steep/temp
-  // sliders actually render for the walkthrough. Left in place after —
-  // the user can tweak it or remove it with ×.
+  // When the guided Blend tour starts on an empty pot, drop in a small
+  // example *blend* — three ingredients at different parts (3 / 2 / 1) —
+  // so the walkthrough shows what blending actually is: balancing a few
+  // ingredients, with the parts and the steep together shaping how it all
+  // extracts. (A single ingredient on its own is what the Herbanium is
+  // for.) Left in place after; the user can retune or remove any with ×.
   React.useEffect(() => {
     if (blendTourActive && reverseIngs.length === 0) {
-      setReverseIngs(["chamomile"]);
+      setReverseIngs(["chamomile", "peppermint", "rooibos"]);
+      setPartsById({ chamomile: 3, peppermint: 2, rooibos: 1 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blendTourActive]);
