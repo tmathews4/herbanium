@@ -28,6 +28,10 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // generic box.
   const [targetRadius, setTargetRadius] = useState("10px");
   const step = steps[i];
+  // Honor prefers-reduced-motion: skip the mount fade (also keeps E2E
+  // runs — which set reducedMotion — fast and deterministic).
+  const reduceMotion = typeof window !== "undefined" && window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Announce the active step (tab switch, etc.) before we measure, so
   // the target is mounted/on-screen when getBoundingClientRect runs.
@@ -131,7 +135,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // bursting onto the screen.
       position: "fixed", inset: 0, zIndex: 1000,
       pointerEvents: "auto",
-      animation: "tourFadeIn 0.55s ease-out",
+      animation: reduceMotion ? undefined : "tourFadeIn 0.55s ease-out",
     }}>
       {/* The target's own border, lit white and slowly breathing — a
           soft border-glow that traces the element's exact edge/shape. */}

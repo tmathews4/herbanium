@@ -53,9 +53,18 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Installs the engine binary AND its OS libraries. --with-deps is the
-      # CI form of the `install-deps` you ran by hand locally — the runner
-      # has passwordless sudo, so it just works.
+      # Cache the downloaded browser binaries (keyed on the lockfile, so it
+      # busts when the Playwright version changes). On a hit, the install
+      # below finds the browser present and skips the (slow) download —
+      # only the apt system-deps step still runs.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ matrix.engine }}-${{ hashFiles('package-lock.json') }}
+      # Installs the engine binary (skipped if cached) AND its OS libraries.
+      # --with-deps is the CI form of the `install-deps` you ran by hand
+      # locally — the runner has passwordless sudo, so it just works.
       - name: Install ${{ matrix.engine }} + system deps
         run: npx playwright install --with-deps ${{ matrix.engine }}
       # Playwright builds + serves the app itself (webServer in the config),

@@ -19,6 +19,10 @@ const ALL_SCREENS = ["home", "blend", "herbanium", "recipes", "reflections", "fi
 // wipe storage on load. addInitScript serializes its function into the
 // browser, so the values are passed as an argument (no outer closure).
 async function armTour(page: Page, target: string) {
+  // Emulate prefers-reduced-motion so the app skips the tour fade-in and
+  // the steep-slider demo loop — faster walks, and no animation-timing
+  // flake (we're testing layout, not racing animations).
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(
     ([seenList, tgt]) => {
       localStorage.setItem("herbanium.schemaVersion", "6");
