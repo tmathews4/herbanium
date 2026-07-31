@@ -9,7 +9,7 @@
 
    On finish: calls onComplete with profile data. App sets up the
    user's initial state (profile, seeded favorites + algorithmic
-   experimentals tailored to draws + flavors, default pantry) and
+   experimentals tailored to draws + flavors) and
    navigates to Home.
    ────────────────────────────────────────────────────────────── */
 

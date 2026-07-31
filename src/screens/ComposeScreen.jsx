@@ -31,7 +31,6 @@ import {
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
-import { HintCard } from "../components/HintCard";
 import { ElementalsView } from "../components/ElementalsView";
 import { Sprig, Pencil } from "../components/icons";
 
@@ -64,7 +63,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, pantryIds, togglePantry, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, pantryHintShown, dismissPantryHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -91,8 +90,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, mode]);
   // Section-aware mode clamp. Each section has a fixed set of valid
-  // sub-modes (apothecary: reverse / forward / compendium; shelf:
-  // recipes / journal / pantry). If the mode somehow drifts into an
+  // sub-modes (apothecary: reverse / compendium; shelf:
+  // recipes / journal / visitors). If the mode somehow drifts into an
   // out-of-section value — usually because a deep-link from the
   // other section was applied before the section guard caught it —
   // snap back to the section's default. Belt-and-suspenders for the
@@ -102,9 +101,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     // covers that flow. Any deep-link or stale persisted state with
     // "forward" gets snapped back to "reverse" by the section guard.
     const apothecaryModes = new Set(["reverse", "compendium"]);
-    // "pantry" (Cabinet) was retired; pantry management is now a
-    // toggle inside the Apothecary → Herbanium reference. Stale
-    // persisted state lands back on the section's default.
+    // "pantry" (Cabinet) was retired along with the pantry feature;
+    // stale persisted state lands back on the section's default.
     // Elementals was previously a sub-toggle inside Journal; promoted to
     // a top-level Notebook sub-tab so it surfaces in the dock and gets
     // the discoverability the feature deserves.
@@ -129,7 +127,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   // brew/entry timeline and the elemental Elementals that used to sit
   // as its own primary tab.
   // Recipes-tab "More filters" disclosure state. Default collapsed so the
-  // filter strip lands quiet (collection row + cabinet toggle). Expands
+  // filter strip lands quiet (collection row). Expands
   // to reveal mood + flavor rows when the user wants to narrow further.
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [reverseIngs, setReverseIngs] = useState([]);
@@ -140,7 +138,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
   React.useEffect(() => {
     if (!composePreselect) return;
     setMode("recipes");
-    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [], pantryOnly: false });
+    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
@@ -178,7 +176,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
           profile={profile}
           sessions={sessions}
           savedBlendIds={savedBlendIds}
-          pantryIds={pantryIds}
           journalEntries={journalEntries}
           tabVisits={tabVisits}
           elementalsDisabled={elementalsDisabled}
@@ -532,8 +529,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         // is supported for backwards-compat with any cached older state.
         if (true) {
           const cf = typeof catalogueFilter === "string"
-            ? { collection: catalogueFilter, moods: [], flavors: [], pantryOnly: false }
-            : { collection: "favorites", moods: [], flavors: [], pantryOnly: false, ...(catalogueFilter || {}) };
+            ? { collection: catalogueFilter, moods: [], flavors: [] }
+            : { collection: "favorites", moods: [], flavors: [], ...(catalogueFilter || {}) };
           const setCollection = (c) => setCatalogueFilter({ ...cf, collection: c });
           const toggleInList = (key, item) => {
             const list = cf[key] || [];
@@ -542,8 +539,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               : [...list, item];
             setCatalogueFilter({ ...cf, [key]: next });
           };
-          const togglePantryOnly = () =>
-            setCatalogueFilter({ ...cf, pantryOnly: !cf.pantryOnly });
 
           // Step 1 — collection bucket.
           let pool;
@@ -614,33 +609,21 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
             if (moodSet.size === 0) return true;
             return moodSet.has(b.mood);
           };
-          // Pantry-only filter: every ingredient in the blend must be
-          // in the user's pantry. Empty pantry + toggle on = empty list,
-          // explained by the empty-state copy below.
-          const blendInPantry = (b) => {
-            if (!cf.pantryOnly) return true;
-            if (!pantryIds) return false;
-            const ings = b.ingredients || [];
-            return ings.every(it => it && it.id && pantryIds.has(it.id));
-          };
           const catVisible = pool.filter(b =>
-            blendMatchesMoods(b) && blendMatchesFlavors(b) && blendInPantry(b)
+            blendMatchesMoods(b) && blendMatchesFlavors(b)
           );
-          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0 || cf.pantryOnly)) {
+          if (catVisible.length === 0 && (moodSet.size > 0 || flavorSet.size > 0)) {
             const subBits = [
               moodSet.size > 0 ? `mood (${[...moodSet].join(", ")})` : null,
               flavorSet.size > 0 ? `flavor (${[...flavorSet].join(", ")})` : null,
-              cf.pantryOnly ? "in your cabinet" : null,
             ].filter(Boolean).join(" + ");
-            catEmpty = cf.pantryOnly && pantryIds && pantryIds.size === 0
-              ? "Add ingredients to your cabinet to use this filter."
-              : `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
+            catEmpty = `No ${cf.collection} blends match ${subBits}. Tap a chip to clear.`;
           }
 
           // One-line meta header: count + the active sub-filters that
           // narrowed it. Replaces the two-line description band so the
           // filter strip stays compact when the user knows what they
-          // picked. Reads "12 traditional · calm · floral · in cabinet".
+          // picked. Reads "12 traditional · calm · floral".
           const collectionLabels = {
             favorites: "favorites", all: "all recipes",
             traditional: "traditional", twists: "twists",
@@ -653,7 +636,6 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               const c = FLAVOR_FAMILY_CHIPS.find(x => x.family === f);
               return c ? c.label.toLowerCase() : f;
             }).join(" / ")] : []),
-            ...(cf.pantryOnly ? ["in cabinet"] : []),
           ];
           const subFilterCount = (cf.moods || []).length + (cf.flavors || []).length;
 
@@ -676,32 +658,12 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                 />
               </div>
 
-              {/* Cabinet toggle + "More filters" disclosure live on one
-                  row so the two secondary controls share visual weight
-                  and the filter strip's at-rest height stays compact. */}
+              {/* "More filters" disclosure — right-aligned so the
+                  filter strip's at-rest height stays compact. */}
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
+                display: "flex", alignItems: "center", justifyContent: "flex-end",
                 gap: 12, marginTop: 4, marginBottom: 10,
               }}>
-                <label style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft, cursor: "pointer",
-                }}>
-                  <span style={{
-                    width: 30, height: 18, borderRadius: 999,
-                    background: cf.pantryOnly ? theme.sageDeep : theme.rule,
-                    position: "relative", transition: "background .2s",
-                    flexShrink: 0,
-                  }} onClick={togglePantryOnly}>
-                    <span style={{
-                      position: "absolute", top: 2, left: cf.pantryOnly ? 14 : 2,
-                      width: 14, height: 14, borderRadius: "50%", background: theme.cream,
-                      transition: "left .2s",
-                    }} />
-                  </span>
-                  in cabinet
-                </label>
-
                 {/* Disclosure — opens the mood + flavor rows below.
                     Shows a small count badge when sub-filters are
                     active so the user can spot "narrowed" at a glance
@@ -736,8 +698,8 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
               </div>
 
               {/* Mood + flavor rows live behind the disclosure. Hidden
-                  by default so the filter strip lands at three controls
-                  (chips + cabinet + more); expanded for power users. */}
+                  by default so the filter strip lands at two controls
+                  (chips + more); expanded for power users. */}
               {filtersExpanded && (
                 <div style={{ marginBottom: 4 }}>
                   <FilterRow
@@ -995,75 +957,15 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
         return null;
       })()}
 
-      {/* Compendium — full ingredient reference. The "only what's in
-          my pantry" filter is hidden here; that filter is reserved for
-          the Shelf · Pantry surface. Compendium always shows every
-          ingredient at full presence. */}
-      {/* Apothecary · Herbanium — full ingredient reference and the
-          home for pantry management. The "only what's in my cabinet"
-          toggle lives here so the same surface flips between "browse
-          the catalog" and "review what I have." */}
+      {/* Apothecary · Herbanium — the full ingredient reference.
+          Every ingredient shows at full presence. */}
       {mode === "compendium" && (
         <LibraryScreen
           go={go}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
           hideHeader
-          pantryHintShown={pantryHintShown}
-          dismissPantryHint={dismissPantryHint}
         />
       )}
 
-    </div>
-  );
-};
-
-// Floating Apothecary / Shelf tutorial card — rendered at the App
-// level just above the TabBar so it overlays the screen content
-// instead of pushing it. Shares the same z layer as the menu
-// buttons so the user reads "this card sits with the dock," and
-// the description's words land right above the sub-tabs they
-// describe. Pulled out of the ComposeScreen tree so the in-screen
-// scroll doesn't carry it.
-export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
-  if (hintShown || !dismissHint) return null;
-  if (section !== "apothecary" && section !== "shelf") return null;
-
-  const isApothecary = section === "apothecary";
-  const Icon  = isApothecary ? Sprig : Pencil;
-  const title = isApothecary ? "Apothecarium" : "Journal";
-  const items = isApothecary
-    ? [
-        ["Blend", "Build a recipe from scratch. Pick ingredients, see how they read together, save your formula."],
-        ["Herbanium", "The full reference — every leaf, flower, root, and bark the apothecarium tracks. Tap one to read its profile."],
-      ]
-    : [
-        ["Recipes", "Curated picks you've held onto plus your own creations, all in one place to brew again."],
-        ["Reflections", "What you wrote while the kettle was hot — cup logs, lines jotted between sips, and the mood arcs around them."],
-        ["Field Notes", "Elementals drawn to your cups. Your apothecary's familiars, observed through the lodestone."],
-      ];
-
-  return (
-    <div style={{
-      // Float above the TabBar dock without taking flex space.
-      // 100% width inside the centered phone-frame column so the
-      // card aligns with the same gutter as the rest of the app.
-      flexShrink: 0,
-      padding: "0 14px 8px",
-      pointerEvents: "auto",
-    }}>
-      <HintCard
-        icon={<Icon size={18} c={isApothecary ? theme.sageDeep : theme.terra} />}
-        title={title}
-        body={<>
-          {items.map(([k, body], i) => (
-            <div key={k} style={{ marginBottom: i === items.length - 1 ? 0 : 6 }}>
-              <strong style={{ color: theme.terra }}>{k}</strong> — {body}
-            </div>
-          ))}
-        </>}
-        onDismiss={dismissHint}
-      />
     </div>
   );
 };
@@ -1072,7 +974,7 @@ export const ComposeTutorialOverlay = ({ section, hintShown, dismissHint }) => {
 // row of equal-width chip buttons that span the full container.
 // Each chip is flex:1 so the row extends edge-to-edge regardless
 // of label length, and active vs inactive uses the same ink-fill
-// pattern as the catalog/cabinet filter chips for consistency
+// pattern as the catalog filter chips for consistency
 // across the app.
 const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null }) => {
   // Single-select rows pass `value` as a string; multi-select rows pass
@@ -1185,7 +1087,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     : Math.max(...reverseIngs.map(partsFor));
   const isPrimary = (id) => maxParts > 1 && partsFor(id) === maxParts;
   // Mood + flavor sub-filters — multi-select. Same vocabulary as
-  // Recipes (mood) and Cabinet/Herbanium (flavor) so filter language
+  // Recipes (mood) and Herbanium (flavor) so filter language
   // stays consistent. Both empty = no constraint; either narrows the
   // ingredient pool via the matching field on each ingredient.
   const [pickerMoods, setPickerMoods] = useState([]);

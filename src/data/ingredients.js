@@ -3288,7 +3288,7 @@ const INGREDIENTS = {
     facts: [
       "Japan's yamabushi mountain wanderers saw the white cascading tufts and named the mushroom for themselves — yamabushitake, the mountain-walker's mushroom.",
       "Inside lion's mane: hericenones, which prompt the brain to make more nerve growth factor.",
-      "Lion's mane has both culinary and medicinal pedigrees — sautéed it tastes like seafood; brewed it's the most palatable mushroom in the cabinet.",
+      "Lion's mane has both culinary and medicinal pedigrees — sautéed it tastes like seafood; brewed it's the most palatable mushroom in the catalog.",
       "Lion's mane — clinical trials in mild cognitive impairment show modest but measurable improvement at 8-16 weeks — a slow effect, not an immediate one.",
       "Lion's mane mushroom genuinely tastes like crab or lobster when cooked — the texture and umami profile is closer to seafood than to other mushrooms.",
       "Lion's mane — hericenones (in the fruiting body) and erinacines (in the mycelium) are different compounds with similar effects — both stimulate NGF production. Supplements vary in which they emphasize.",

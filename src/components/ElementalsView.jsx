@@ -3,7 +3,7 @@
 
    A user-curated record of every elemental observed during their
    time with the kettle. Lives inside the Shelf as a sub-tab,
-   alongside Journal / Recipe Book / Pantry. Tapping the Summon
+   alongside Journal / Recipe Book. Tapping the Summon
    button cycles the queue: first ever click reveals the user's
    unique creation elemental via the OmenCard; subsequent clicks
    pop the ElementalArrivalCard for the next earned-but-unobserved
@@ -78,7 +78,6 @@ function contextPhraseForAction(action, ts, sessions, journalEntries, getBlend) 
   if (action === "visit:shelf")      return "while turning notebook pages";
   if (action === "visit:home")       return "while crossing the threshold home";
   if (action === "visit:profile")    return "while looking inward";
-  if (action === "pantry")           return "while sorting the pantry";
   if (action === "favorite")         return "while marking a recipe to keep";
   if (action === "compose")          return "while building a blend at the bench";
   if (action === "any")              return "passing on its own course";
@@ -108,7 +107,6 @@ export const ElementalsView = ({
   profile,
   sessions = [],
   savedBlendIds,
-  pantryIds,
   journalEntries = [],
   tabVisits,
   elementalsDisabled = false,

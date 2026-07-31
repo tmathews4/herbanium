@@ -30,10 +30,3 @@ const ALWAYS_INCLUDE = ["exp-tom-foolery"];
 export function pickSeedBlends({ timeOfDay, draw } = {}) {
   return [...ALWAYS_INCLUDE];
 }
-
-/**
- * Default starting pantry for new users — empty. The user curates
- * their own from day one; a one-time hint card on Home points them
- * to the toggle in Library and on each Ingredient detail page.
- */
-export const ONBOARDING_PANTRY = [];

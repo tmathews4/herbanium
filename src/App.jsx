@@ -64,7 +64,7 @@ function preloadRoutes() {
 }
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
-import { pickSeedBlends, ONBOARDING_PANTRY } from "./helpers/onboarding";
+import { pickSeedBlends } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
@@ -824,10 +824,6 @@ export default function App() {
     "favoriteBlendIds",
     isDev ? new Set(SEED_MODES.power.favoriteBlendIds || []) : new Set()
   );
-  const [pantryIds, setPantryIds] = usePersistedState(
-    "pantryIds",
-    isDev ? new Set(SEED_MODES.power.pantryIds) : new Set()
-  );
 
   // Seed mode: dev-only toggle. Hidden from normal users. Only functional
   // when ?dev is set. Flipping it resets state to that seed's snapshot.
@@ -852,12 +848,12 @@ export default function App() {
   // Apply a seed mode in full — covers every persisted flow state
   // we've added since the seeds were first authored. Hint flags,
   // elementals state, planner, journal entries, tab visits, etc.
-  // all reset alongside the original sessions/blends/pantry so the
+  // all reset alongside the original sessions/blends so the
   // dev seed faithfully represents the user's place in the app.
   const applySeedMode = (mode) => {
     if (!mode) return;
     setSessions(materializeSeedSessions(mode.sessions));
-    // Freshly-onboarded seeds derive saved/favorites/pantry from the same
+    // Freshly-onboarded seeds derive saved/favorites from the same
     // helpers handleOnboardingComplete uses, so the dev "new" mode stays
     // a faithful mirror of what a real user sees right after sign-up
     // rather than drifting as the onboarding logic evolves.
@@ -868,12 +864,10 @@ export default function App() {
       });
       setSavedBlendIds(new Set(seedBlendIds));
       setFavoriteBlendIds(new Set(seedBlendIds));
-      setPantryIds(new Set(ONBOARDING_PANTRY));
       setFavoritesMigrated(true);
     } else {
       setSavedBlendIds(new Set(mode.savedBlendIds || []));
       setFavoriteBlendIds(new Set(mode.favoriteBlendIds || []));
-      setPantryIds(new Set(mode.pantryIds || []));
       setFavoritesMigrated(!!mode.favoritesMigrated);
     }
     setGeneratedBlends(mode.generatedBlends || []);
@@ -888,7 +882,6 @@ export default function App() {
     const hints = mode.hints || {};
     setJournalHintShown(!!hints.journalHintShown);
     setProfileHintShown(!!hints.profileHintShown);
-    setPantryHintShown(!!hints.pantryHintShown);
     setElementalsHintShown(!!hints.elementalsHintShown);
     setIngredientHintShown(!!hints.ingredientHintShown);
     if (mode.profile) {
@@ -949,9 +942,6 @@ export default function App() {
     setFavoritesMigrated(true);
   }, [profile, favoritesMigrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pantry hint visibility — one-time card pointing at the pantry toggle.
-  // Pantry starts empty for new users; this nudges them toward filling it.
-  const [pantryHintShown, setPantryHintShown] = usePersistedState("pantryHintShown", false);
   // (The old first-visit tutorial cards — FirstCupHintCard on Home and
   // the Apothecary/Shelf ComposeTutorialOverlay strips — are retired
   // in favor of the per-screen guided tours above. Their persisted
@@ -1109,11 +1099,7 @@ export default function App() {
     // populated from the start and adding the first real favorite
     // doesn't visually wipe the preloaded ones out from under the user.
     setFavoriteBlendIds(new Set(seedBlendIds));
-    setPantryIds(new Set(ONBOARDING_PANTRY));
     setOmenShown(false); // unique elemental popup plays on first Profile visit
-    setPantryHintShown(false); // ensure pantry hint shows for new users
-    setFirstCupHintShown(false); // first-cup tutorial card on Home
-    setComposeHintShown(false); // first-visit Compose tutorial
     setJournalHintShown(false); // first-visit Journal tutorial
     setProfileHintShown(false); // first-visit Profile tutorial
     setSeenElementalIds(new Set()); // arrival popups start fresh
@@ -1150,9 +1136,8 @@ export default function App() {
   }, [apothecaryMode]);
   const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");
   // Migrate users who had Cabinet (mode "pantry") persisted from
-  // before it was retired. Cabinet was just LibraryScreen with
-  // forcePantryOnly; that capability is now a toggle inside the
-  // Apothecary → Herbanium reference itself.
+  // before it was retired. The pantry feature has since been removed
+  // entirely, so any stale persisted mode just lands on Recipes.
   React.useEffect(() => {
     if (shelfMode === "pantry") setShelfMode("recipes");
     // The Elementals sub-tab is now called "Visitors" — same view,
@@ -1252,7 +1237,7 @@ export default function App() {
   // across rows AND together (collection ∩ moods ∩ flavors); within mood
   // and flavor rows the chips OR together.
   const [catalogueFilter, setCatalogueFilter] = useState({
-    collection: "favorites", moods: [], flavors: [], pantryOnly: false,
+    collection: "favorites", moods: [], flavors: [],
   });
   const setApothecaryModeAction = (k) => setApothecaryMode(k);
   const setShelfModeAction = (k) => {
@@ -1262,7 +1247,7 @@ export default function App() {
     // want a wider browse. Deep-links can still override downstream
     // via composePreselect.
     if (k === "recipes" && shelfMode !== "recipes") {
-      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [], pantryOnly: false });
+      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
     }
     setShelfMode(k);
   };
@@ -1358,14 +1343,6 @@ export default function App() {
     setOverlay("steep");
   };
 
-  const togglePantry = (ingId) => {
-    const next = new Set(pantryIds);
-    if (next.has(ingId)) next.delete(ingId);
-    else next.add(ingId);
-    setPantryIds(next);
-    tryRollOnAction("pantry");
-  };
-
   // One-time legacy migration. The previous model evaluated `earned`
   // predicates on every render to decide which attribute-based
   // elementals were in the elementals. The new chance-based model
@@ -1382,7 +1359,7 @@ export default function App() {
       return;
     }
     const ctx = buildAttributeContext({
-      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
+      sessions, savedBlendIds, profile, journalEntries, tabVisits,
     });
     const seeded = legacyEarnedIds(ATTRIBUTES, ctx);
     if (seeded.size > 0) {
@@ -1403,10 +1380,10 @@ export default function App() {
       });
     }
     setLegacyMigrated(true);
-  }, [legacyMigrated, sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits, elementalsDisabled, setLegacyMigrated, setRolledElementalIds]);
+  }, [legacyMigrated, sessions, savedBlendIds, profile, journalEntries, tabVisits, elementalsDisabled, setLegacyMigrated, setRolledElementalIds]);
 
   // Try a chance-based elemental roll on a user action. Called by
-  // every action site (tab visit, brew, journal, pantry, favorite,
+  // every action site (tab visit, brew, journal, favorite,
   // compose). If the roll lands, the new id is appended to
   // rolledElementalIds and the elementals's existing arrival flow
   // surfaces it as a "you glimpsed an elemental" moment. Internal
@@ -1430,7 +1407,7 @@ export default function App() {
     if (elementalsDisabled) return;
     const earned = rolledElementalIds || new Set();
     const ctx = buildAttributeContext({
-      sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits,
+      sessions, savedBlendIds, profile, journalEntries, tabVisits,
     });
     const justEarned = [];
     for (const id of MILESTONE_IDS) {
@@ -1975,9 +1952,9 @@ export default function App() {
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} pantryIds={pantryIds} togglePantry={togglePantry} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} pantryHintShown={pantryHintShown} dismissPantryHint={() => setPantryHintShown(true)} />}
-        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} pantryIds={pantryIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
+        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first
           // arrival. Falls back to "any unseen" then "any" so the
@@ -2078,8 +2055,6 @@ export default function App() {
           currentMoods={session.currentMoods || []}
           setCurrentMoods={(v) => setSession(s => s ? { ...s, currentMoods: v } : s)}
           sessions={sessions}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
           minimized={steepMinimized}
           onMinimize={() => setSteepMinimized(true)}
           onRemainingChange={setSteepRemaining}
@@ -2128,8 +2103,6 @@ export default function App() {
         <IngredientDetail
           id={ingredientId}
           onClose={popOverlayHistory}
-          pantryIds={pantryIds}
-          togglePantry={togglePantry}
           onOpenIngredient={(newId) => {
             pushOverlayHistory("ingredient", { ingredientId: newId });
             setIngredientId(newId);

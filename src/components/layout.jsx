@@ -525,7 +525,7 @@ export const StatCard = ({ label, value }) => (
 
 // Stat — bare label+value, no card chrome. Used on Profile summary.
 // When `onClick` is supplied the stat becomes a button that links to
-// the relevant surface (recent brews, catalogue, pantry, etc.).
+// the relevant surface (recent brews, catalogue, etc.).
 //
 // Layout is forced via inline-flex column so clickable (button) and
 // static (div) variants align identically as flex items in the row —

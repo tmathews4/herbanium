@@ -6,7 +6,7 @@
    a realistic point in a user's journey with the app:
 
    - power: established journal with several weeks of cups,
-     saved blends, and a well-stocked pantry. The "what does
+     saved blends. The "what does
      the app look like for someone who's really using it" view.
 
    - mid: a couple weeks in, a handful of cups logged, one saved
@@ -202,13 +202,6 @@ export const SEED_MODES = {
     favoriteBlendIds: [
       "dusk", "morning", "study", "wuyi-smoke", "moroccan", "local-tomscalm",
     ],
-    pantryIds: [
-      "chamomile", "lavender", "lemonbalm", "peppermint", "rooibos",
-      "sencha", "assam", "ginger", "hibiscus", "rose",
-      "cinnamon", "cardamom", "vanilla", "spearmint", "jasmine",
-      "passionflower", "valerian", "tulsi", "fennel", "lapsang",
-      "puerh", "matcha", "hojicha", "darjeeling",
-    ],
     // Free-form journal entries with the mood-arc shape introduced
     // when the journal became a tea-meets-mood log. hoursAgo maps
     // to fresh ts at apply time the same way sessions do.
@@ -251,7 +244,6 @@ export const SEED_MODES = {
       shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  true,
-      pantryHintShown:   true,
       elementalsHintShown: true,
       ingredientHintShown: true,
     },
@@ -411,7 +403,6 @@ export const SEED_MODES = {
     ],
     savedBlendIds: ["all-heal", "hojicha-evening"],
     favoriteBlendIds: ["all-heal"],
-    pantryIds: ["chamomile", "lemonbalm", "lavender", "peppermint", "rooibos", "ginger", "rose"],
     journalEntries: [
       { hoursAgo: 6, kind: "entry",
         text: "First quiet evening of the week. Tried the all-heal blend and watched the light go.",
@@ -429,7 +420,6 @@ export const SEED_MODES = {
       shelfHintShown:    true,
       journalHintShown:  true,
       profileHintShown:  false,
-      pantryHintShown:   false,
       elementalsHintShown: false,
       ingredientHintShown: false,
     },
@@ -439,8 +429,8 @@ export const SEED_MODES = {
     label: "new user",
     description: "just onboarded — favorites seeded, nothing logged yet",
     // freshlyOnboarded tells applySeedMode to materialize savedBlendIds,
-    // favoriteBlendIds, and pantryIds via the same helpers handleOnboardingComplete
-    // uses (pickSeedBlends + ONBOARDING_PANTRY), so this mode stays a faithful
+    // favoriteBlendIds via the same helpers handleOnboardingComplete
+    // uses (pickSeedBlends), so this mode stays a faithful
     // mirror of what a real user sees the moment they finish onboarding.
     freshlyOnboarded: true,
     profile: {
@@ -463,7 +453,6 @@ export const SEED_MODES = {
       shelfHintShown:    false,
       journalHintShown:  false,
       profileHintShown:  false,
-      pantryHintShown:   false,
       elementalsHintShown: false,
       ingredientHintShown: false,
     },

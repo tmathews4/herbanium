@@ -29,7 +29,7 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, pantryIds, togglePantry, minimized = false, onMinimize, onRemainingChange }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -726,8 +726,6 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
         <IngredientSheet
           id={activeIngredient}
           onClose={() => setActiveIngredient(null)}
-          inPantry={pantryIds?.has(activeIngredient)}
-          onTogglePantry={() => togglePantry && togglePantry(activeIngredient)}
         />
       )}
     </div>

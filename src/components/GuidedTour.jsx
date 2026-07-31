@@ -100,9 +100,12 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // Full-viewport click-catcher — blocks interaction with the app
       // underneath so the tour is driven by the callout buttons. The
       // container itself is transparent; the dim comes from the hole's
-      // box-shadow below.
+      // box-shadow below. The whole overlay (dim + glow + callout)
+      // eases in on mount so the tour arrives gently rather than
+      // bursting onto the screen.
       position: "fixed", inset: 0, zIndex: 1000,
       pointerEvents: "auto",
+      animation: "tourFadeIn 0.55s ease-out",
     }}>
       {/* The target's own border, lit white and slowly breathing — a
           soft border-glow that traces the element's exact edge/shape. */}
@@ -110,6 +113,10 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         @keyframes tourPulse {
           0%, 100% { border-color: rgba(255,255,255,0.38); box-shadow: 0 0 5px 0px rgba(255,255,255,0.20); }
           50%      { border-color: rgba(255,255,255,0.97); box-shadow: 0 0 15px 4px rgba(255,255,255,0.72); }
+        }
+        @keyframes tourFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
       `}</style>
       {hole ? (
@@ -145,7 +152,12 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         <div style={{ position: "fixed", inset: 0, background: "rgba(20,16,10,0.66)" }} />
       )}
 
-      {/* Callout */}
+      {/* Callout — only rendered once the target has been measured.
+          Before `rect` lands the placement math would fall back to a
+          bottom-anchored guess and visibly jump to the real position
+          a frame later; hiding it until measurement makes it appear
+          in place (the mount fade covers the one-frame delay). */}
+      {rect && (
       <div style={{
         position: "fixed",
         left: 16, right: 16, maxWidth: 420, margin: "0 auto",
@@ -199,6 +211,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

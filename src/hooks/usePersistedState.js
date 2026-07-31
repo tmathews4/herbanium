@@ -3,7 +3,7 @@
 
    Drop-in replacement for useState that transparently persists the
    value to localStorage and reads it back on mount. Used for state
-   that should survive browser reloads: sessions, pantry, preferences,
+   that should survive browser reloads: sessions, preferences,
    profile info.
 
    Usage:
@@ -60,7 +60,7 @@ function ensureSchema() {
 // Run once per module load
 ensureSchema();
 
-// Serialization helpers — handle Set (used for savedBlendIds, pantryIds)
+// Serialization helpers — handle Set (used for savedBlendIds)
 function serialize(value) {
   if (value instanceof Set) return { __type: "Set", items: [...value] };
   return value;

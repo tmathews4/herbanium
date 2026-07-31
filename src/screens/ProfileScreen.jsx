@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -128,7 +128,6 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
   const yourSessions = sessions.filter(s => s.who === "you");
   const cupCount = yourSessions.length;
   const blendCount = savedBlendIds.size;
-  const shelfCount = pantryIds.size;
 
   // Compute a simple prediction-match rate: did the target mood land?
   // Here we fake it by checking actual ≈ intent — good enough for the
@@ -146,7 +145,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, pantryIds, profile, journalEntries, tabVisits });
+  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, profile, journalEntries, tabVisits });
   const attrEvaluation = evaluateAttributes(attrCtx);
   // Elementals stat — count what the user has actually summoned/
   // observed (seenElementalIds), not what the engine has *earned*
@@ -263,7 +262,6 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
         <div style={{ marginTop: 6, display: "flex", gap: 16, justifyContent: "center" }}>
           <Stat label="Cups"      value={cupCount}    onClick={() => go("shelf", { mode: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
-          <Stat label="Cabinet"   value={shelfCount}  onClick={() => go("apothecary", { mode: "compendium" })} />
           {!elementalsDisabled && (
             <Stat label="Elementals"  value={elementalsCount} onClick={() => go("shelf", { mode: "visitors" })} />
           )}

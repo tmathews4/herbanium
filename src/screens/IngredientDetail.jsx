@@ -15,7 +15,7 @@ import {
   Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
-  Button, SectionLabel, VocabInfoCard,
+  SectionLabel, VocabInfoCard,
 } from "../components/layout";
 import { HintCard } from "../components/HintCard";
 import { INGREDIENTS } from "../data/ingredients";
@@ -131,7 +131,7 @@ const SpecRow = ({ label, value }) => (
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
+export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   const [tab, setTab] = useState("overview");
   // Click-to-expand description cards. null = closed; clicking the same
@@ -401,21 +401,6 @@ export const IngredientDetail = ({ id, onClose, pantryIds, togglePantry, onOpenI
                 </div>
               </div>
             )}
-
-            <div style={{ marginTop: 22 }}>
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={() => togglePantry && togglePantry(id)}
-                style={(pantryIds && pantryIds.has(id)) ? {
-                  background: "rgba(74,87,58,0.06)",
-                  borderColor: theme.sageDeep,
-                  color: theme.sageDeep,
-                } : {}}
-              >
-                {pantryIds && pantryIds.has(id) ? "✓ in pantry" : "+ pantry"}
-              </Button>
-            </div>
           </>
         )}
 

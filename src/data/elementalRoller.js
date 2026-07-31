@@ -4,7 +4,7 @@
    Replaces the old deterministic predicate model where each
    elemental had an `earned: ctx => bool` and fired the moment its
    condition was met. New model: every action the user takes in the
-   app (tab visits, brews, journal entries, pantry edits, recipe
+   app (tab visits, brews, journal entries, recipe
    favorites, composed blends) has a small chance to roll an
    elemental from a pool tagged with that action. First-time users
    get a boost so the early elementals feels rewarding; once a few
@@ -33,13 +33,12 @@
 //   visit:home        — opening home (or arriving on it)
 //   brew              — completing a brew log
 //   journal           — saving a journal entry
-//   pantry            — toggling an ingredient on/off the pantry
 //   favorite          — saving a blend to favorites
 //   compose           — saving a user-composed blend
 //   any               — generic pool, eligible on any action
 export const ELEMENTAL_ACTIONS = [
   "visit:home", "visit:apothecary", "visit:shelf", "visit:profile",
-  "brew", "journal", "pantry", "favorite", "compose",
+  "brew", "journal", "favorite", "compose",
 ];
 
 // Per-rarity weights for pool sampling. Lower-rarity elementals are
@@ -123,10 +122,10 @@ const TRIGGER_OVERRIDES = {
   "compose-master":     ["compose"],
   "lavandiere-life":    ["compose"],            // experiments
 
-  // ─── Pantry pool ──────────────────────────────────────────
-  "hearth-keeper":      ["pantry", "brew"],     // keeper of the cupboard
-  "the-mineralist":     ["pantry"],
-  "petal-drinker":      ["pantry"],
+  // ─── Brew-flavor pool (formerly pantry-triggered) ─────────
+  "hearth-keeper":      ["brew"],               // kettle kept lit for comfort
+  "the-mineralist":     ["brew"],               // cups of root and rock
+  "petal-drinker":      ["brew"],               // petals leading the kettle
 
   // ─── Favorites / library pool ─────────────────────────────
   "all-leaves":         ["favorite"],           // collected the catalog
@@ -146,7 +145,6 @@ const TRIGGER_OVERRIDES = {
   // ─── Wild / cross-pool (any-action) ───────────────────────
   "wild-rated":         ["brew"],
   "wild-noted":         ["brew", "journal"],
-  "wild-pantry":        ["pantry"],
   "wild-composed":      ["compose"],
   "wild-tradition":     ["favorite"],
 };

@@ -253,7 +253,7 @@ export const WAIT_FACTS = {
   "lions-mane": [
     { type: "tradition", text: "Japan's yamabushi mountain wanderers named lion's mane after themselves — yamabushitake, the mountain-walker's mushroom — for its white cascading tufts." },
     { type: "fact",      text: "Hericenones and erinacines inside prompt the brain to produce more nerve growth factor. The folk reputation for sharpening the mind has held up better in the lab than most mushroom claims." },
-    { type: "fact",      text: "Lion's mane is the most palatable mushroom in the cabinet — tradition compares it to crab or lobster — with the longest tail of effect when taken daily." },
+    { type: "fact",      text: "Lion's mane is the most palatable mushroom in the catalog — tradition compares it to crab or lobster — with the longest tail of effect when taken daily." },
   ],
 };
 

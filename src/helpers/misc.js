@@ -2,11 +2,11 @@
    helpers/misc.js — small shared utilities (mmss time format, getBlend lookup, iconBtn style)
    ────────────────────────────────────────────────────────────── */
 
-import { BLENDS } from "../data/blends";
-import { INGREDIENTS } from "../data/ingredients";
+import { BLENDS } from "../data/blends.js";
+import { INGREDIENTS } from "../data/ingredients.js";
 import {
   ff, theme,
-} from "../theme";
+} from "../theme.js";
 
 // LOCAL_BLENDS: mock-only in-memory store for blends that didn't exist
 // at boot — e.g. a user's newly-posted blend. Real app would persist these
