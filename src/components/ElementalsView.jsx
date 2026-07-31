@@ -389,6 +389,7 @@ export const ElementalsView = ({
           journal entries; sits above the elementals header so the
           crystal reads as the lodestone the elementals gather
           around. */}
+      <div data-tour="fieldnotes-lodestone">
       <MoodCrystal
         sessions={sessions}
         journalEntries={journalEntries}
@@ -412,6 +413,7 @@ export const ElementalsView = ({
         }
         onSummon={onSummonClick}
       />
+      </div>
 
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "flex-end",

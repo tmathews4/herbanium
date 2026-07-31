@@ -140,7 +140,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
         {/* Search input — placeholder reflects whether the user is
             browsing the full herbanium or filtering down to their own
             cabinet via the toggle below. */}
-        <div style={{
+        <div data-tour="herb-search" style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 12px", borderRadius: 10,
             background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
@@ -167,7 +167,7 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
           </div>
 
           {/* Category filter pills — spread to edges */}
-          <div style={{ marginBottom: 8 }}>
+          <div data-tour="herb-filters" style={{ marginBottom: 8 }}>
             <ChipRows
               items={[
                 ["all",       "all"],
@@ -454,12 +454,12 @@ export const LibraryScreen = ({ go, pantryIds, togglePantry, pantryHintShown, di
             <div style={{
               display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
             }}>
-              {shelfItems.map(([id, ing]) => {
+              {shelfItems.map(([id, ing], idx) => {
                 const inPantry = pantryIds.has(id);
                 const hasCaffeine = (ing.caffeine || 0) > 0;
                 const accent = categoryColor(ing.category, theme);
                 return (
-                  <button key={id} onClick={() => go("ingredient", id)}
+                  <button key={id} data-tour={idx === 0 ? "herb-ingredient" : undefined} onClick={() => go("ingredient", id)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.boxShadow = "0 4px 10px rgba(30,24,18,0.09), 0 1px 2px rgba(30,24,18,0.05)";
                     e.currentTarget.style.borderColor = theme.rule;

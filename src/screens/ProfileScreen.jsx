@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -469,6 +469,19 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, pantryIds,
           </div>
         ) : (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+            {startTour && (
+              <button
+                onClick={startTour}
+                style={{
+                  fontFamily: ff.sans, fontSize: 12, color: theme.ink,
+                  padding: "8px 14px", borderRadius: 999,
+                  background: "transparent", border: `1px solid ${theme.ink}`,
+                  cursor: "pointer",
+                }}
+              >
+                replay tour
+              </button>
+            )}
             <button
               onClick={() => setConfirmingReset(true)}
               style={{

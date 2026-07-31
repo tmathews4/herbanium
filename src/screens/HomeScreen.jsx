@@ -359,22 +359,26 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             label: "Experiment",
             onClick: () => go("apothecary", { mode: "reverse" }),
             icon: (sz) => <Flask size={sz} c={theme.sageDeep} />,
+            tour: "home-experiment",
           },
           {
             label: "Brew",
             onClick: () => go("shelf", { mode: "recipes" }),
             icon: (sz) => <Leaf size={sz} c={theme.sageDeep} />,
+            tour: "home-brew",
           },
           {
             label: "Write",
             onClick: () => go("shelf", { mode: "journal" }),
             icon: (sz) => <Pencil size={sz} c={theme.sageDeep} />,
+            tour: "home-write",
           },
         ].map((cta, i) => (
           <button
             key={i}
             onClick={cta.onClick}
             className="home-cta"
+            data-tour={cta.tour}
           >
             {cta.icon(26)}
             <div style={{
@@ -396,6 +400,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
       <button
         onClick={() => go("apothecary", { mode: "compendium" })}
         className="home-cta home-cta-thin"
+        data-tour="home-herbanium"
         style={{
           marginTop: -16,
           marginBottom: 24,
@@ -444,7 +449,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
 
       {/* Your recent cups — header stays even before any brew so a
           new user sees this is the window where their cups will land. */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+      <div data-tour="home-recent" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
         <SectionLabel n="i">Recent brews</SectionLabel>
         {yourSessions.length > 0 && (
           <button onClick={() => go("shelf", { mode: "journal", journalFilter: "cups" })} style={{
