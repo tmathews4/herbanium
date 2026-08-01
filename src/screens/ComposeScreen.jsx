@@ -63,7 +63,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -163,7 +163,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} blendTourFamilyMode={blendTourFamilyMode} />
       )}
 
       {/* Visitors — the notebook's third sub-tab. The lodestone
@@ -1024,17 +1024,19 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep, blendTourFamilyMode }) => {
   // When the guided Blend tour starts on an empty pot, drop in a small
-  // example *blend* — three ingredients at different parts (3 / 2 / 1) —
-  // so the walkthrough shows what blending actually is: balancing a few
-  // ingredients, with the parts and the steep together shaping how it all
-  // extracts. (A single ingredient on its own is what the Herbanium is
-  // for.) Left in place after; the user can retune or remove any with ×.
+  // example *blend* — two ingredients at different parts (2 / 1) — so the
+  // walkthrough shows what blending actually is: balancing ingredients,
+  // with the parts and the steep together shaping how it all extracts.
+  // Two and not three on purpose: the prediction bars and the brew
+  // sliders both have to fit on screen beside the tour callout, so the
+  // user can watch the flavor/mood bars move as the sliders change.
+  // Left in place after; the user can retune or remove either with ×.
   React.useEffect(() => {
     if (blendTourActive && reverseIngs.length === 0) {
-      setReverseIngs(["chamomile", "peppermint", "rooibos"]);
-      setPartsById({ chamomile: 3, peppermint: 2, rooibos: 1 });
+      setReverseIngs(["chamomile", "peppermint"]);
+      setPartsById({ chamomile: 2, peppermint: 1 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blendTourActive]);
@@ -1837,6 +1839,8 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             setTimeS={setBrewTimeS}
             compact
             experimental
+            tourStep={blendTourStep}
+            familyModeOverride={blendTourFamilyMode}
           />
         </div>
       )}

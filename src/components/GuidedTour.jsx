@@ -19,10 +19,17 @@
 
 import React, { useLayoutEffect, useState } from "react";
 import { theme, ff, radius, shadow } from "../theme";
+import { unionSpan, unionRect, groupScrollDelta, calloutPlacement } from "../helpers/tourLayout";
 
 export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   const [i, setI] = useState(0);
   const [rect, setRect] = useState(null);
+  // Union of the step's `keepClear` targets, if it has any — other
+  // elements the user must be able to see WHILE reading this step. The
+  // Blend tour's prediction/slider steps use it: the whole lesson is
+  // that dragging the sliders moves the bars, which the user can only
+  // learn if both are on screen and the callout is off both of them.
+  const [clearRect, setClearRect] = useState(null);
   // The target's own border-radius, so the pulse traces the element's
   // real shape (rounded button corners, square windows) rather than a
   // generic box.
@@ -48,19 +55,81 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     if (!step) return undefined;
     let raf = 0;
     let scrolled = false;
+    // The step's keep-clear elements, or [] — they may legitimately not
+    // exist (a step reused on a screen that doesn't render them), in
+    // which case the step just behaves like an ordinary one.
+    const clearEls = () => (step.keepClear || [])
+      .map(id => document.querySelector(`[data-tour="${id}"]`))
+      .filter(Boolean);
+    const unionOf = (els) => unionSpan(els.map(el => el.getBoundingClientRect()));
+    // A step can light up more than one element: `spotlight` lists extra
+    // data-tour ids to fold into the highlight. The Simple/Detailed step
+    // uses it to light the toggle AND the bars, so the user watches the
+    // thing the toggle changes rather than just the control itself.
+    const spotEls = (el) => [el, ...(step.spotlight || [])
+      .map(id => document.querySelector(`[data-tour="${id}"]`))
+      .filter(Boolean)];
+    // Nearest scrollable ancestor — the app scrolls an inner pane, not
+    // the document, so scrollIntoView's container is what we have to
+    // nudge for the fine positioning below.
+    const scrollParent = (el) => {
+      for (let n = el.parentElement; n; n = n.parentElement) {
+        const oy = window.getComputedStyle(n).overflowY;
+        if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight) return n;
+      }
+      return document.scrollingElement || document.documentElement;
+    };
+    // Position the step's subject. Plain steps center the target; steps
+    // with keepClear then get nudged so the whole group sits flush to
+    // the bottom margin — see groupScrollDelta for why.
+    const position = (el) => {
+      el.scrollIntoView({ block: "center", inline: "nearest" });
+      const extra = clearEls();
+      if (extra.length === 0) return;
+      // Converge rather than nudge once. scrollIntoView may act on a
+      // different container than the one we adjust, so a single delta
+      // can land short and leave the group high — which then pushes the
+      // target under the callout. Re-measure and correct, bailing when
+      // it's settled or the container has hit the end of its range.
+      const pane = scrollParent(el);
+      // The region the group can actually occupy is the pane's visible
+      // box, not the window — the app scrolls between a header and the
+      // tab dock, so on a small phone the pane is ~165px shorter.
+      const region = pane.getBoundingClientRect
+        ? pane.getBoundingClientRect()
+        : { top: 0, bottom: window.innerHeight };
+      for (let pass = 0; pass < 3; pass++) {
+        const delta = groupScrollDelta(unionOf([...spotEls(el), ...extra]), region);
+        if (!delta) break;
+        const before = pane.scrollTop;
+        pane.scrollTop += delta;
+        if (pane.scrollTop === before) break;
+      }
+    };
     const apply = (el) => {
-      setRect(el.getBoundingClientRect());
-      setTargetRadius(window.getComputedStyle(el).borderRadius || "0px");
+      const els = spotEls(el);
+      setRect(unionRect(els.map(n => n.getBoundingClientRect())));
+      // Radius comes from the primary target — with several elements
+      // lit at once there's no single shape to trace, and the largest
+      // one's corners read best around the group.
+      setTargetRadius(window.getComputedStyle(els.length > 1 ? els.at(-1) : el).borderRadius || "0px");
+      setClearRect(unionOf(clearEls()));
     };
     const measure = () => {
       const el = document.querySelector(`[data-tour="${step.target}"]`);
       if (el) {
         if (!scrolled) {
           scrolled = true;
-          // Bring the target into view (instant so measurement below is
-          // accurate), then measure on the next frame once it's settled.
-          el.scrollIntoView({ block: "center", inline: "nearest" });
-          raf = requestAnimationFrame(() => apply(el));
+          // Position, let the frame settle, then position AGAIN before
+          // measuring. The second pass matters: a step can change the
+          // layout it just scrolled to (the Blend steps put the strips
+          // back into Simple, which shortens them by ~200px), and the
+          // first scroll is computed against the old heights.
+          position(el);
+          raf = requestAnimationFrame(() => {
+            position(el);
+            raf = requestAnimationFrame(() => apply(el));
+          });
         } else {
           apply(el);
         }
@@ -94,36 +163,21 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       }
     : null;
 
-  // Place the callout on whichever side of the target has more room,
-  // and cap its height to that space. The overlay is fixed and blocks
-  // page scroll, so a callout anchored past the viewport edge would be
-  // unreachable — that's what a tall target (e.g. the blend graph with
-  // several ingredients' bars) hit. Flip-to-more-room + a maxHeight
-  // (with internal scroll as a last resort) keeps it fully on-screen
-  // regardless of how tall the highlighted element is.
+  // Where the callout goes — pure geometry, in helpers/tourLayout.js so
+  // it can be tested across the whole device matrix without a browser.
+  // The short version: sit on whichever side of the anchor has more
+  // room; when neither side fits, overlay the target rather than the
+  // step's keep-clear element.
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-  const GAP = 14;           // breathing room between target and callout
-  const MARGIN = 16;        // keep the callout off the very screen edge
-  const MIN_CALLOUT = 180;  // below this, no room to sit beside the target
-  const spaceAbove = rect ? rect.top : vh;
-  const spaceBelow = rect ? vh - rect.bottom : vh;
-  const roomier = Math.max(spaceAbove, spaceBelow);
-  // Default: sit on whichever side of the target has more room, sized to
-  // fit it. But if the target is so tall that NEITHER side can hold a
-  // readable callout (e.g. the blend graph nearly fills the screen), pin
-  // the callout to the bottom safe-area and let it overlay the target —
-  // overlaying a huge highlight is acceptable; an off-screen, unreachable
-  // callout (fixed overlay blocks page scroll) is not.
-  const calloutPos = !rect
-    ? {}
-    : roomier >= MIN_CALLOUT
-      ? {
-          ...(spaceBelow >= spaceAbove
-            ? { top: rect.bottom + GAP }
-            : { bottom: vh - rect.top + GAP }),
-          maxHeight: roomier - GAP - MARGIN,
-        }
-      : { bottom: MARGIN, maxHeight: Math.min(vh - 2 * MARGIN, Math.round(vh * 0.55)) };
+  const calloutPos = calloutPlacement({ rect, clearRect, vh });
+  // Compact steps trade callout size for screen. A step that says "watch
+  // these two things at once" is competing with its own subject for
+  // space, and on a small phone the ordinary callout wins that fight —
+  // so those steps shrink the box instead of covering the lesson.
+  const tight = !!step.compact;
+  const sizing = tight
+    ? { pad: "10px 12px", title: 15, body: 11.5, gapTitle: 4, gapBody: 9, btnPad: "6px 14px" }
+    : { pad: "14px 16px", title: 18, body: 13,   gapTitle: 6, gapBody: 14, btnPad: "8px 18px" };
 
   return (
     <div style={{
@@ -154,7 +208,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           {/* Dim layer + cutout — a transparent box whose huge spread
               shadow darkens everything except the target. Matches the
               target's border-radius so the cutout hugs its shape. */}
-          <div style={{
+          <div data-testid="tour-spotlight" style={{
             position: "fixed",
             left: hole.left, top: hole.top,
             width: hole.width, height: hole.height,
@@ -202,7 +256,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         border: `1px solid ${theme.ruleSoft}`,
         borderRadius: radius.md,
         boxShadow: shadow.card,
-        padding: "14px 16px",
+        padding: sizing.pad,
         fontFamily: ff.sans,
       }}>
         <div data-testid="tour-progress" style={{
@@ -213,13 +267,13 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         </div>
         {step.title && (
           <div style={{
-            fontFamily: ff.serif, fontSize: 18, color: theme.ink,
-            lineHeight: 1.2, marginBottom: 6,
+            fontFamily: ff.serif, fontSize: sizing.title, color: theme.ink,
+            lineHeight: 1.2, marginBottom: sizing.gapTitle,
           }}>{step.title}</div>
         )}
         <div style={{
-          fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
-          lineHeight: 1.5, marginBottom: 14,
+          fontFamily: ff.sans, fontSize: sizing.body, color: theme.inkSoft,
+          lineHeight: 1.45, marginBottom: sizing.gapBody,
         }}>{step.body}</div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -233,7 +287,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
                 background: "transparent", cursor: "pointer",
                 border: `1px solid ${theme.rule}`, borderRadius: 999,
                 fontFamily: ff.sans, fontSize: 12, color: theme.inkSoft,
-                padding: "8px 16px",
+                padding: sizing.btnPad,
               }}>Back</button>
             )}
             <button onClick={() => (last ? finish() : setI(i + 1))} style={{

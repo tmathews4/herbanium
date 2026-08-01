@@ -5,12 +5,15 @@
 
 import React from "react";
 import {
-  Flask, Kettle, Leaf, Ornament, Pencil,
+  Flask, Kettle, Leaf, Pencil,
 } from "../components/icons";
 import {
-  Button, FitText, SectionLabel,
+  Button, SectionLabel,
 } from "../components/layout";
 import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
+import { OrnamentRule } from "../components/OrnamentRule";
+import { PoemLines } from "../components/PoemLines";
+import { TeaGreeting } from "../components/TeaGreeting";
 import { WAIT_POEMS } from "../data/waitContent";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import {
@@ -23,6 +26,17 @@ import {
 /* ──────────────────────────────────────────────────────────────
    Screen: HOME
    ────────────────────────────────────────────────────────────── */
+
+/* First view of the session gets the arrival animation — the greeting
+   fading up and both flourishes drawing themselves. Once per SESSION,
+   not once per mount: Home remounts every time you tab back to it, and
+   a welcome that re-performs on every visit becomes a toll.
+
+   Decided here, at the common parent, rather than inside each piece.
+   The poem card's flourish and the greeting's are a matched pair, so
+   they have to agree about whether this is an arrival — if each owned
+   its own flag, whichever mounted first would consume it. */
+let homeArrived = false;
 
 // Contextual line based on the hour. Returns { label, todTags }
 // where todTags carry the time-of-day keywords used to pick a
@@ -81,6 +95,11 @@ const pickHomePoem = (date) => {
 };
 
 export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, addJournalEntry, journalEntries = [] }) => {
+  const [arriving] = React.useState(() => {
+    if (homeArrived) return false;
+    homeArrived = true;
+    return true;
+  });
   // Pick a poem ONCE per mount so the line is stable within a visit
   // but fresh on each return to Home. Rotation comes from coming back
   // to Home through the day rather than from re-rendering in place.
@@ -140,25 +159,27 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           band that gets stale. */}
       {isEmpty && (
         <>
+          {/* Flourish sits ABOVE the card, not inside it, so the pair
+              of marks brackets the whole opening block — flourish,
+              poem, greeting, flourish — instead of one being the
+              card's decoration and the other the section's. The card
+              then reads as nested inside the masthead rather than as
+              a separate object that happens to sit above it. */}
+          <OrnamentRule drawing={arriving} style={{ marginBottom: 12 }} />
           <div style={{
             marginBottom: 14,
-            padding: "16px 22px 18px",
+            padding: "18px 22px",
             borderRadius: radius.md,
             background: theme.cream,
             border: `1px solid ${theme.ruleSoft}`,
             boxShadow: shadow.card,
             textAlign: "center",
           }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
-              <Ornament w={80} c={theme.ochre} />
-            </div>
-            <div style={{
-              fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-              color: theme.inkSoft, lineHeight: 1.55,
-              whiteSpace: "pre-line",
-            }}>
-              {"Stray birds of summer come to my window to sing and fly away.\nAnd yellow leaves of autumn, which have no songs,\nflutter and fall there with a sigh."}
-            </div>
+            <PoemLines
+              size={13}
+              arriving={arriving}
+              text={"Stray birds of summer come to my window to sing and fly away.\nAnd yellow leaves of autumn, which have no songs,\nflutter and fall there with a sigh."}
+            />
             <div style={{
               fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
               color: theme.ash, marginTop: 8,
@@ -167,21 +188,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <FitText style={{
-                fontFamily: ff.serif, fontSize: 28, fontWeight: 400,
-                color: theme.ink, lineHeight: 1.05,
-                fontStyle: "italic",
-                letterSpacing: "-0.005em",
-              }}>
-                <>What's the tea, <em style={{
-                  color: theme.terra, fontStyle: "normal",
-                  fontWeight: 500,
-                }}>{name}</em>?</>
-              </FitText>
-            </div>
-          </div>
+          <TeaGreeting name={name} kicker={getTimeOfDay(new Date().getHours()).label} arriving={arriving} />
         </>
       )}
 
@@ -196,18 +203,18 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         const poem = homePoem;
         return (
           <>
+            {/* See the empty-state note: the flourish brackets the
+                block from outside the card. */}
+            <OrnamentRule drawing={arriving} style={{ marginBottom: 12 }} />
             <div style={{
               marginBottom: 14,
-              padding: "14px 22px 16px",
+              padding: "16px 22px",
               borderRadius: radius.md,
               background: theme.cream,
               border: `1px solid ${theme.ruleSoft}`,
               boxShadow: shadow.card,
               textAlign: "center",
             }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
-                <Ornament w={80} c={theme.ochre} />
-              </div>
               <div style={{
                 fontFamily: ff.serif, fontSize: 17, color: theme.ink,
                 lineHeight: 1.25, marginBottom: poem ? 8 : 3,
@@ -216,13 +223,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               </div>
               {poem ? (
                 <>
-                  <div style={{
-                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                    color: theme.inkSoft, lineHeight: 1.5,
-                    whiteSpace: "pre-line",
-                  }}>
-                    {poem.text}
-                  </div>
+                  <PoemLines text={poem.text} arriving={arriving} />
                   {poem.attribution && (
                     <div style={{
                       fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
@@ -266,31 +267,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
                 small pull-quote — gives the line weight without
                 making it shout. Ornament flourishes flank the
                 eyebrow to tie back to the poem card above. */}
-            <div style={{
-              marginBottom: 18, marginTop: 8,
-              textAlign: "center",
-            }}>
-              <div style={{
-                width: 36, height: 1, margin: "0 auto 10px",
-                background: theme.rule,
-              }} />
-
-              <FitText style={{
-                fontFamily: ff.serif, fontSize: 28, fontWeight: 400,
-                color: theme.ink, lineHeight: 1.05,
-                fontStyle: "italic",
-                letterSpacing: "-0.005em",
-              }}>
-                <>What's the tea, <em style={{
-                  color: theme.terra, fontStyle: "normal",
-                  fontWeight: 500,
-                }}>{name}</em>?</>
-              </FitText>
-              <div style={{
-                width: 36, height: 1, margin: "10px auto 0",
-                background: theme.rule,
-              }} />
-            </div>
+            <TeaGreeting name={name} arriving={arriving} />
           </>
         );
       })()}

@@ -252,6 +252,14 @@ export const BlendExtractionExplorer = ({
                             // Required for the tradition-over-literature
                             // notice to fire; experimentals and synths
                             // shouldn't claim that lineage.
+  tourStep = null,          // active guided-tour step id, when the Blend
+                            // tour is running. Only used to put the strips
+                            // in Simple mode for the steps that need the
+                            // short layout — see the effect below.
+  familyModeOverride = null,// tour demo only: forces what the strips SHOW
+                            // without touching the user's saved preference,
+                            // so the Simple/Detailed step can flip between
+                            // the two and leave the choice as it found it.
 }) => {
   const { unit, weightUnit } = useUnit();
 
@@ -265,6 +273,22 @@ export const BlendExtractionExplorer = ({
   // rollup. Persisted so users who prefer Simple keep that across
   // sessions after flipping.
   const [familyMode, setFamilyMode] = usePersistedState("explorerFamilyMode", false);
+
+  // Guided tour: the tour's toggle step explains Simple vs Detailed and
+  // leaves the strips on Simple. That isn't only pedagogy — family rows
+  // alone are short enough that the flavor/mood bars and the temp/steep
+  // sliders fit on one phone screen together, which is exactly what the
+  // two steps after this one teach (watch the bars move as you drag).
+  // Detailed's leaf rows push the sliders off the bottom. Flipping the
+  // persisted preference is intended: the user is left where the tour
+  // put them, and the toggle they were just shown flips it back.
+  React.useEffect(() => {
+    if (tourStep === "blend-mode" && !familyMode) setFamilyMode(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStep]);
+  // What the strips render. The override is transient demo state; the
+  // persisted preference is what survives the tour.
+  const shownFamilyMode = familyModeOverride ?? familyMode;
 
   // Range-band selection. Each axis ("tempC" / "timeS") gets its
   // own slot — tapping a band toggles a description panel below
@@ -370,7 +394,9 @@ export const BlendExtractionExplorer = ({
       border: `1px solid ${theme.ruleSoft}`,
     }}>
 
-      {/* Flavor + mood + palate across the temperature envelope.
+      {/* Flavor + mood across the temperature envelope. (Palate/balance
+          used to live here too; it moved below the sliders — see the
+          note there.)
           Sits ABOVE the temp/steep sliders now: the maps are fixed-
           height (per-track normalization keeps each band's intensity
           constant as the slider moves — only the vertical indicator
@@ -387,7 +413,7 @@ export const BlendExtractionExplorer = ({
         <div style={{
           display: "flex", justifyContent: "flex-end", alignItems: "center",
         }}>
-          <span style={{
+          <span data-tour="blend-mode" style={{
             display: "inline-flex",
             border: `1px solid ${theme.ruleSoft}`,
             borderRadius: 999,
@@ -397,13 +423,13 @@ export const BlendExtractionExplorer = ({
               { id: "simple",   label: "Simple"   },
               { id: "detailed", label: "Detailed" },
             ].map(opt => {
-              const active = (opt.id === "simple") === familyMode;
+              const active = (opt.id === "simple") === shownFamilyMode;
               return (
                 <button
                   key={opt.id}
                   onClick={() => {
                     const want = opt.id === "simple";
-                    if (want === familyMode) return;
+                    if (want === shownFamilyMode) return;
                     setFamilyMode(want);
                   }}
                   style={{
@@ -428,7 +454,7 @@ export const BlendExtractionExplorer = ({
           timeS={timeS}
           tempCRange={tempCRange}
           showAxis={false}
-          familyMode={familyMode}
+          familyMode={shownFamilyMode}
         />
         <MoodMap
           ingredients={ingredients}
@@ -436,17 +462,7 @@ export const BlendExtractionExplorer = ({
           timeS={timeS}
           tempCRange={tempCRange}
           showAxis={false}
-          familyMode={familyMode}
-        />
-        <PalateMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-          curated={curated}
-          isTraditional={isTraditional}
-          defaultTempC={defaultTempC}
-          defaultTimeS={defaultTimeS}
+          familyMode={shownFamilyMode}
         />
       </div>
 
@@ -850,10 +866,35 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
+      {/* Balance — sits BELOW the sliders, not with the flavor/mood
+          strips above them. Flavor and mood are the prediction the
+          user is aiming at; balance is the caveat about it, and it
+          belongs with the other consequence signals (caffeine, the
+          warnings) rather than in the panorama. Reading order is
+          prediction → controls → consequences.
+
+          The move is also what lets the tour teach its central point:
+          with balance in the middle, the flavor/mood bars and the
+          temp/steep sliders couldn't fit on one phone screen together,
+          so the user never saw the bars respond to the sliders. See
+          the "bars and sliders visible together" test in
+          e2e/tours.spec.ts, which pins that. */}
+      <div style={{ marginBottom: 12 }}>
+        <PalateMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          curated={curated}
+          isTraditional={isTraditional}
+          defaultTempC={defaultTempC}
+          defaultTimeS={defaultTimeS}
+        />
+      </div>
 
       {/* Caffeine load — pulled out of the panorama group and parked
           here in the consequence cluster, just below the sliders. The
-          three temp-axis strips (flavor / mood / balance) above share
+          two temp-axis strips above the sliders (flavor / mood) share
           an envelope and read as one panorama; caffeine is a scalar
           gauge whose value barely shifts with temp/time. Living with
           the warnings keeps related "is this cup pushing too hard?"

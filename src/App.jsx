@@ -75,72 +75,14 @@ import { isNativeApp } from "./helpers/platform";
 // Hooks
 import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedState";
 import { useAppBackNav } from "./hooks/useAppBackNav";
+// Guided-tour content (steps + the Simple/Detailed demo schedule)
+import { SCREEN_TOURS } from "./data/tours";
 
 /* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
 
-/* ──────────────────────────────────────────────────────────────
-   Guided tours — per-screen coach-mark walkthroughs. Each fires the
-   first time you enter a screen. Each step targets a data-tour="<id>"
-   anchor somewhere in the UI; GuidedTour spotlights it and the
-   callout explains it. Keyed by screen (see currentTourScreen).
-   ────────────────────────────────────────────────────────────── */
-const SCREEN_TOURS = {
-  home: [
-    { target: "home-experiment", title: "Experiment",
-      body: "Start a blend from scratch — pick ingredients and design a recipe in the apothecary." },
-    { target: "home-brew", title: "Brew",
-      body: "Jump to your saved recipes and steep one you've kept." },
-    { target: "home-write", title: "Write",
-      body: "Open your journal to jot a thought or note how a cup left you." },
-    { target: "home-herbanium", title: "Herbanium",
-      body: "The compendium — a glossary of every tea and herb the app knows." },
-    { target: "home-recent", title: "Recent brews", pad: 10,
-      body: "Your recently brewed cups gather here. Tap one to revisit its notes." },
-  ],
-  blend: [
-    { target: "blend-search", title: "Add ingredients", pad: 6,
-      body: "Search or filter the apothecarium, then tap an ingredient to drop it in your pot." },
-    { target: "blend-quantity", title: "Set the parts", pad: 8,
-      body: "We've dropped in an example blend. Use − / + to set each ingredient's “parts” — its share of the cup. The most parts leads; the others accent it. (Brewing just one ingredient? The Herbanium's the place for that.)" },
-    { target: "blend-graph", title: "The prediction", pad: 6,
-      body: "These bars read the whole blend's flavor and effects at once — watch them shift as you change the parts or the brew." },
-    { target: "blend-sliders", title: "Dial in the brew", pad: 6,
-      body: "That movement is these sliders — drag temperature and steep time to change how the blend extracts." },
-    { target: "blend-brew", title: "Brew or save", pad: 6,
-      body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
-    { target: "subtabs", title: "Two sides", pad: 4,
-      body: "The Apothecarium has two sides — Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
-  ],
-  herbanium: [
-    { target: "herb-search", title: "The compendium", pad: 6,
-      body: "A glossary of every tea and herb the app knows. Search by name to find one fast." },
-    { target: "herb-filters", title: "Narrow it down", pad: 6,
-      body: "Filter by category — teas, herbals, flowers, fruits, spices — to browse a family at a time." },
-    { target: "herb-ingredient", title: "Read its profile", pad: 6,
-      body: "Tap any ingredient to open its full profile — flavor, effects, how to brew it, and what it pairs with." },
-  ],
-  recipes: [
-    { target: "recipes-filter", title: "Your recipes", pad: 6,
-      body: "Your saved and curated blends live here. Filter by collection, mood, or flavor to find one." },
-    { target: "recipes-row", title: "Brew again", pad: 6,
-      body: "Tap any recipe to open it — then brew it, or tweak it into something new." },
-    { target: "subtabs", title: "Three parts", pad: 4,
-      body: "Your notebook has three parts — Recipes (here), Reflections (your tea log), and Field Notes (the spirits you draw in). Switch between them here." },
-  ],
-  reflections: [
-    { target: "reflections-log", title: "Your tea log", pad: 6,
-      body: "Every cup you brew and every note you write gathers here as a timeline. Filter by cups or entries." },
-    { target: "reflections-write", title: "Write it down", pad: 6,
-      body: "Jot a reflection or a little verse about a cup — free-form, haiku, limerick, or a short poem." },
-  ],
-  fieldnotes: [
-    { target: "fieldnotes-lodestone", title: "The lodestone", pad: 8,
-      body: "Spirits are drawn in by how you brew and write. Tap the lodestone to summon the ones waiting — they sketch into your field notes below." },
-  ],
-};
 
 /* ──────────────────────────────────────────────────────────────
    Tour offer — the gentle "want a tour?" card. Fades in slowly a
@@ -688,6 +630,11 @@ export default function App() {
   // react to specific steps — e.g. the Blend composer auto-animates
   // the steep slider while the graph/slider steps are showing.
   const [activeTourStep, setActiveTourStep] = useState(null);
+  // What the blend tour wants the extraction strips to show, if the
+  // active step says. Steps carry `familyMode` and the value simply
+  // follows the step — no timers, so a step can't advance out from
+  // under a reader. null hands control back to the user's own choice.
+  const [blendTourFamilyMode, setBlendTourFamilyMode] = useState(null);
   // Persisted lifetime tab-visit counts. Each time the active tab
   // changes the entry increments by one, fueling the "first time
   // visiting tab X" / "visited X N times" elemental triggers. Stored
@@ -1952,7 +1899,7 @@ export default function App() {
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
@@ -2033,7 +1980,10 @@ export default function App() {
       {activeTour && SCREEN_TOURS[activeTour] && (
         <GuidedTour
           steps={SCREEN_TOURS[activeTour]}
-          onStep={(s) => setActiveTourStep(s && s.target)}
+          onStep={(s) => {
+            setActiveTourStep(s && s.target);
+            setBlendTourFamilyMode(s && s.familyMode != null ? s.familyMode : null);
+          }}
           onClose={closeActiveTour}
         />
       )}
