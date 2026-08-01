@@ -176,7 +176,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // so those steps shrink the box instead of covering the lesson.
   const tight = !!step.compact;
   const sizing = tight
-    ? { pad: "10px 12px", title: 15, body: 11.5, gapTitle: 4, gapBody: 9, btnPad: "6px 14px" }
+    ? { pad: "8px 12px", title: 14, body: 11, gapTitle: 3, gapBody: 7, btnPad: "5px 13px" }
     : { pad: "14px 16px", title: 18, body: 13,   gapTitle: 6, gapBody: 14, btnPad: "8px 18px" };
 
   return (

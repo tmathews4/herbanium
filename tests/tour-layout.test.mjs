@@ -95,17 +95,11 @@ test("groupScrollDelta parks the group flush to the pane's bottom margin", () =>
 test("groupScrollDelta measures against the PANE, not the window", () => {
   // The bug this guards: measuring against window.innerHeight parks the
   // group ~57px too low on a phone, tucking the bars under the header.
-  // This group (538) is taller than the phone pane (493), so it centres
-  // — and either way it must be positioned relative to the pane.
   const group = { top: 47, bottom: 585 };
   const delta = groupScrollDelta(group, PHONE_PANE);
-  const top = 47 - delta, bottom = 585 - delta;
-  const paneMid = (PHONE_PANE.top + PHONE_PANE.bottom) / 2;
-  assert(Math.abs((top + bottom) / 2 - paneMid) <= 1,
-    `group should centre on the pane (mid ${paneMid}), got ${(top + bottom) / 2}`);
-  // Sanity: the same group measured against the window would sit lower.
   const wrong = groupScrollDelta(group, { top: 0, bottom: 658 });
-  assert(585 - wrong > bottom, "window-relative placement should sit lower than pane-relative");
+  assert(585 - wrong > 585 - delta,
+    "window-relative placement should sit lower than pane-relative");
 });
 
 test("groupScrollDelta pulls a group back up when it hangs below the pane", () => {
@@ -114,20 +108,39 @@ test("groupScrollDelta pulls a group back up when it hangs below the pane", () =
   assert(900 - delta === 700 - MARGIN, "bottom should end on the margin");
 });
 
-test("an oversized group centres, splitting the overflow evenly", () => {
-  // Taller than the pane: the overflow has to go somewhere, and half at
-  // each end beats clipping one element in two.
+test("an oversized group loses most of its overflow off the TOP", () => {
+  // The keep-clear element sits at the bottom of the group, so overflow
+  // has to be biased away from it. An even split clipped 43px off the
+  // temp/steep sliders on Firefox — the one thing the step guarantees.
   const group = { top: 0, bottom: 900 };   // 900 tall in a 700 region
   const delta = groupScrollDelta(group, FULL);
   const top = 0 - delta, bottom = 900 - delta;
-  assert(Math.abs((FULL.top - top) - (bottom - FULL.bottom)) <= 1,
-    `overflow should be even, got ${FULL.top - top} above and ${bottom - FULL.bottom} below`);
+  const lostAbove = FULL.top - top;
+  const lostBelow = bottom - FULL.bottom;
+  assert(lostAbove > 0 && lostBelow >= 0, `expected loss at both ends, got ${lostAbove}/${lostBelow}`);
+  assert(lostAbove > lostBelow * 2,
+    `most of the overflow should come off the top, got ${lostAbove} above vs ${lostBelow} below`);
+});
+
+test("the bottom of an oversized group stays nearly whole", () => {
+  // Concretely: a 232px keep-clear block at the bottom of the group
+  // must survive with the vast majority of itself on screen.
+  const SLIDERS = 232;
+  for (const [regionH, groupH] of [[487, 565], [493, 538], [502, 538]]) {
+    const region = { top: 92, bottom: 92 + regionH };
+    const group = { top: 0, bottom: groupH };
+    const delta = groupScrollDelta(group, region);
+    const bottom = groupH - delta;
+    const visible = SLIDERS - Math.max(0, bottom - region.bottom);
+    assert(visible / SLIDERS >= 0.9,
+      `pane ${regionH} / group ${groupH}: sliders only ${Math.round(visible / SLIDERS * 100)}% visible`);
+  }
 });
 
 test("a group that only just fits still parks flush", () => {
-  const group = { top: 0, bottom: 690 };   // 690 in a 700 pane — fits
+  const group = { top: 0, bottom: 660 };   // 660 in a 700 pane — fits inside margins
   const delta = groupScrollDelta(group, FULL);
-  assert(690 - delta === FULL.bottom - MARGIN, `should park flush, got ${690 - delta}`);
+  assert(660 - delta === FULL.bottom - MARGIN, `should park flush, got ${660 - delta}`);
 });
 
 test("groupScrollDelta ignores sub-pixel noise and missing inputs", () => {

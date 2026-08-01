@@ -65,13 +65,21 @@ export function groupScrollDelta(group, region) {
   const regionH = region.bottom - region.top;
   const groupH  = group.bottom - group.top;
   // Fits: park it flush to the bottom margin, gathering the slack into
-  // one band above. Doesn't fit: centre it, so the overflow is split
-  // evenly instead of clipping one element in half — on a 320px phone
-  // the group is ~45px taller than the pane, and losing 23px off each
-  // end beats losing the top half of the bars.
-  const desiredBottom = groupH <= regionH
+  // one band above.
+  //
+  // Doesn't fit: split the overflow, but NOT evenly — 80% comes off the
+  // top. An even split reads better in the abstract and broke the one
+  // guarantee that matters: the keep-clear element sits at the BOTTOM
+  // of the group, so half the overflow landed on it. Firefox, with
+  // 487px of pane against a 565px group, clipped 43px off the temp/
+  // steep sliders that way. Biasing the loss upward keeps the sliders
+  // near-whole and takes it out of the top of the bars, which are tall
+  // enough to spare it.
+  const OVERFLOW_TOP_SHARE = 0.8;
+  const overflow = groupH - (regionH - 2 * MARGIN);
+  const desiredBottom = overflow <= 0
     ? region.bottom - MARGIN
-    : region.top + regionH / 2 + groupH / 2;
+    : region.bottom - MARGIN + overflow * (1 - OVERFLOW_TOP_SHARE);
   const delta = group.bottom - desiredBottom;
   return Math.abs(delta) > 1 ? delta : 0;
 }

@@ -56,10 +56,10 @@ export const SCREEN_TOURS = {
     // short for the same reason.
     { target: "blend-graph", title: "The prediction", pad: 6, keepClear: ["blend-sliders"],
       familyMode: true, compact: true,
-      body: "These bars read the whole blend at once — flavor and effects together." },
+      body: "These bars read the whole blend at once — flavor and effects." },
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
       familyMode: true, compact: true,
-      body: "Drag temperature or steep time and watch the bars above move with them." },
+      body: "Drag temperature or steep time — watch the bars above move." },
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,
