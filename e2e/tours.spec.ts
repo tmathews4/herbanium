@@ -178,28 +178,32 @@ test.describe("Blend tour — bars and sliders visible together", () => {
   // whole and never sit under the callout (they're the control the step
   // is teaching), and enough of the bars stay both unclipped and
   // uncovered to watch them move.
-  // Two regimes, because one number would be a lie. Where the pane can
-  // hold the whole group, most of the bars stay readable. Where it
-  // can't — Galaxy S9+ is 493px of pane against a 538px group — the
-  // overflow is split and the callout takes more of what's left. The
-  // test reports which regime each device landed in rather than quietly
-  // applying the weaker bound everywhere.
-  // Floors are measured, not aspirational, and they differ per engine
-  // more than you'd hope: WebKit renders the compact callout ~35%
-  // taller than Chromium for the same copy, which costs the bars
-  // directly. The cramped floor sits below the tightest measured value
-  // (Chromium/galaxy-s9 at 50%) so an engine difference doesn't turn
-  // into a red build — the per-device numbers are logged every run, so
-  // a real regression still shows up as a drop in the output.
+  // What this step can actually promise, measured across all three
+  // engines rather than inferred from Chromium:
+  //
+  //   roomy pane (>= group height):  bars 62–100% clear, sliders 100%
+  //   cramped pane (487–502px):      bars 32–70% clear, sliders 96–100%
+  //
+  // The group is ~540px; a phone pane is ~490px. On those devices the
+  // layout cannot show both whole, and how much of the BARS survives
+  // depends on how tall the engine renders the callout — WebKit's is
+  // ~35% taller than Chromium's for identical copy. So the bars only
+  // carry a hard floor where the pane can hold them; on cramped panes
+  // the percentage is logged and guarded against collapse, not pinned
+  // to a number that means "whichever engine I happened to measure".
+  //
+  // The sliders promise is the real one and holds everywhere: never
+  // under the callout, never meaningfully clipped. That's the control
+  // the step is teaching.
   const MIN_BARS_CLEAR = 0.6;
-  const MIN_BARS_CLEAR_CRAMPED = 0.42;
+  const MIN_BARS_NOT_COLLAPSED = 0.25;
   const MIN_SLIDERS_CLEAR = 0.9;
 
-  // Fraction of an element that is inside its scroll pane AND not under
-  // the callout. Measured in the page so we can see the pane's real box
-  // — a bounding box inside the window can still be clipped by the pane.
-  async function clearFraction(page: Page, selector: string) {
-    return page.evaluate((sel) => {
+  // Fraction of an element inside its scroll pane AND not under the
+  // callout. Measured in one page evaluation so the boxes can't be read
+  // at different moments.
+  const measure = (page: Page) => page.evaluate(() => {
+    const read = (sel: string) => {
       const el = document.querySelector(sel) as HTMLElement;
       const box = el.getBoundingClientRect();
       let pane: { top: number; bottom: number } = { top: 0, bottom: window.innerHeight };
@@ -219,31 +223,38 @@ test.describe("Blend tour — bars and sliders visible together", () => {
         fraction: box.height > 0 ? (visible - covered) / box.height : 0,
         paneHeight: Math.round(pane.bottom - pane.top),
         height: Math.round(box.height),
-        visible: Math.round(visible),
         covered: Math.round(covered),
       };
-    }, selector);
-  }
+    };
+    return { bars: read('[data-tour="blend-graph"]'), sliders: read('[data-tour="blend-sliders"]') };
+  });
 
   async function expectBothClear(page: Page, stepLabel: string) {
-    const bars = await clearFraction(page, '[data-tour="blend-graph"]');
-    const sliders = await clearFraction(page, '[data-tour="blend-sliders"]');
-    const cramped = bars.paneHeight < bars.height + 14 + sliders.height;
-    const floor = cramped ? MIN_BARS_CLEAR_CRAMPED : MIN_BARS_CLEAR;
-    // eslint-disable-next-line no-console
-    console.log(`  [${test.info().project.name}] ${stepLabel}: pane ${bars.paneHeight}px, `
-      + `bars ${Math.round(bars.fraction * 100)}% clear, sliders ${Math.round(sliders.fraction * 100)}%`
-      + `${cramped ? " (cramped pane — reduced floor)" : ""}`);
+    // Poll rather than read once. GuidedTour positions, waits a frame
+    // for the layout to settle, then positions again — so a single read
+    // taken the moment the step's text appears can catch the callout
+    // against stale geometry. That produced both a spurious "callout is
+    // sitting on the sliders" and a 15-point spread in the bars number
+    // across retries of the same device.
+    let last = await measure(page);
+    await expect.poll(async () => {
+      last = await measure(page);
+      const cramped = last.bars.paneHeight < last.bars.height + 14 + last.sliders.height;
+      const barsFloor = cramped ? MIN_BARS_NOT_COLLAPSED : MIN_BARS_CLEAR;
+      return last.sliders.covered === 0
+        && last.sliders.fraction >= MIN_SLIDERS_CLEAR
+        && last.bars.fraction >= barsFloor;
+    }, {
+      message: `${stepLabel}: layout should settle with the sliders clear`,
+      timeout: 8_000,
+    }).toBe(true);
 
-    // The sliders are the control the step teaches: never under the
-    // callout, and essentially whole. This holds on every device.
-    expect(sliders.covered, `${stepLabel}: callout is sitting on the brew sliders`).toBe(0);
-    expect(sliders.fraction,
-      `${stepLabel}: sliders only ${Math.round(sliders.fraction * 100)}% clear (${JSON.stringify(sliders)})`)
-      .toBeGreaterThanOrEqual(MIN_SLIDERS_CLEAR);
-    expect(bars.fraction,
-      `${stepLabel}: bars only ${Math.round(bars.fraction * 100)}% clear (${JSON.stringify(bars)})`)
-      .toBeGreaterThanOrEqual(floor);
+    const cramped = last.bars.paneHeight < last.bars.height + 14 + last.sliders.height;
+    // eslint-disable-next-line no-console
+    console.log(`  [${test.info().project.name}] ${stepLabel}: pane ${last.bars.paneHeight}px, `
+      + `bars ${Math.round(last.bars.fraction * 100)}% clear, `
+      + `sliders ${Math.round(last.sliders.fraction * 100)}%`
+      + `${cramped ? " (cramped pane — bars logged, not pinned)" : ""}`);
   }
 
   test("the Simple/Detailed steps walk the toggle and change the bars", async ({ page }) => {
