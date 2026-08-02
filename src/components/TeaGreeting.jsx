@@ -34,7 +34,7 @@ import { ff, theme } from "../theme";
 // at SLOGAN_AT and takes 1.6s. Exported so anything that needs to wait
 // for the arrival — the guided tour, notably — waits on one number
 // rather than a duplicated guess that drifts when the timings move.
-export const GREETING_ARRIVAL_MS = 3500;
+export const GREETING_ARRIVAL_MS = 4400;
 
 export const TeaGreeting = ({ name, kicker = null, arriving = false }) => {
   // The slogan is the finale, so it goes LAST — after the poem has
@@ -44,7 +44,7 @@ export const TeaGreeting = ({ name, kicker = null, arriving = false }) => {
   // Timings sit well above the textbook numbers, on purpose. NN/g puts
   // the useful range at 200–500ms and calls 1s the limit of a user's
   // flow of thought; Material's longest duration token is 1000ms. This
-  // sequence runs ~3.5s end to end. The justification is narrow but
+  // sequence runs ~4.3s end to end. The justification is narrow but
   // real: it fires once per session, on a leisure app, over content
   // nobody is trying to get past — none of which would excuse these
   // numbers on an interaction the user repeats.
@@ -58,8 +58,8 @@ export const TeaGreeting = ({ name, kicker = null, arriving = false }) => {
   // both flourishes start drawing on the kicker's beat (see
   // ORN_DRAW_DELAY in OrnamentRule, which must match KICKER_AT). The
   // poem has already settled by then; the masthead assembles as one.
-  const KICKER_AT = 1.5;
-  const SLOGAN_AT = 1.7;   // KICKER_AT + 0.2
+  const KICKER_AT = 2.5;
+  const SLOGAN_AT = 2.7;   // KICKER_AT + 0.2
   const fadeIn = (delay) => (arriving
     ? { animation: `greetIn 1.1s cubic-bezier(0.33, 0, 0.2, 1) ${delay}s both` }
     : undefined);

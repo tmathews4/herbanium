@@ -167,7 +167,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             color: theme.inkSoft, letterSpacing: "0.01em",
             lineHeight: 1.2, marginBottom: 12,
             ...(arriving
-              ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 1.7s both" }
+              ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 2.7s both" }
               : null),
           }}>
             {getTimeOfDay(new Date().getHours()).label}.
@@ -217,8 +217,10 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             <style>{POEM_KEYFRAMES}</style>
             <div style={{
               textAlign: "center",
-              // Arrives on the slogan's beat (1.7s, matching SLOGAN_AT
-              // in TeaGreeting), not with the poem. The hour and the
+              // Arrives on the slogan's beat (2.7s, matching SLOGAN_AT
+              // in TeaGreeting) — which is after the poem has finished
+              // signing itself. The card completes, THEN the two
+              // page-level lines close around it. The hour and the
               // slogan are the two page-level lines; fading them in
               // together makes them a pair bracketing the card rather
               // than a label the card happens to sit under.
@@ -234,7 +236,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               color: theme.inkSoft, letterSpacing: "0.01em",
               lineHeight: 1.2, marginBottom: 12,
               ...(arriving
-                ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 1.7s both" }
+                ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 2.7s both" }
                 : null),
             }}>
               {tod.label}.

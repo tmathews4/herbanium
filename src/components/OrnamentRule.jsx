@@ -28,9 +28,9 @@ import { theme } from "../theme";
 // NN/g's guidance on animated text is to keep motion off primary
 // content and put it on supporting elements; this is the supporting
 // element, so it carries the unhurried feeling and the poem doesn't.
-export const ORN_DRAW_DELAY = 1.5;
+export const ORN_DRAW_DELAY = 2.5;
 export const ORN_DRAW_DUR   = 1.6;
-export const ORN_DOT_DELAY  = 3.0;
+export const ORN_DOT_DELAY  = 4.0;
 
 export const OrnamentRule = ({ w = 80, c = theme.ochre, drawing = false, style }) => (
   <div
