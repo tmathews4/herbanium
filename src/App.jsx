@@ -475,6 +475,8 @@ const BrewTimerBanner = ({ blendName, remaining, onTap }) => {
       <div
         onClick={onTap}
         role="button"
+        aria-label="return to your steeping brew"
+        data-testid="brew-banner"
         style={{
           pointerEvents: "auto",
           width: "100%", maxWidth: 460,
