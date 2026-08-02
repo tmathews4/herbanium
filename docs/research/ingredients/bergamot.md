@@ -198,3 +198,48 @@
 | Facts | 3 | Earl Grey + Calabrian origin both well-attested |
 
 **Overall status:** Verified — confident enough to ship.
+
+---
+
+## Addendum — `focus` removed (2026-08-02)
+
+An audit found `focus` 2–3 shipped at every brew point with no §5 row
+behind it. The literature on bergamot is genuinely good, and it is
+about something else.
+
+> *A Neural Circuit for Bergamot Essential Oil-Induced Anxiolytic
+> Effects.* Advanced Science (2025) —
+> https://advanced.onlinelibrary.wiley.com/doi/10.1002/advs.202406766
+>
+> *Bergamot Essential Oil Inhalation Improves Positive Feelings in the
+> Waiting Room of a Mental Health Treatment Center* — pilot study.
+
+Limonene (~36%), linalyl acetate (~31%) and linalool (~11%) carry
+anxiolytic and mood-elevating activity through GABAergic and
+serotonergic routes. That is exactly what §5 already rates: `uplifting`
+3, "linalyl acetate + citrus volatiles consistently produce mood-lift
+in aromatherapy trials", and `calm` 2 via the linalool overlap with
+lavender.
+
+**No study measures bergamot improving attention in healthy people.**
+The nearest results are cognitive improvement in mild cognitive
+impairment — a clinical population, not an attention effect — and
+qualitative self-report from a PTSD study. What bergamot is unusual
+for is being calming *without* sedating, and an absence of drowsiness
+is not focus. That distinction matters here more than most places,
+because bergamot's whole catalogue identity is Earl Grey, where the
+focus a drinker feels is the black tea's caffeine and L-theanine.
+
+Removed. `uplifting` 3 and `calm` 2 carry bergamot's sourced picture,
+and the app's own vocabulary already names bergamot under uplifting.
+
+### `cooling` — transcribed, having never been shipped
+
+Writing the line above surfaced a second gap in the opposite
+direction: §5 rates `cooling` 1 ("citrus register, mild") and §7
+attributes it to limonene alongside uplifting, but no brew point ever
+carried it. Now transcribed at 1 across all three, flat — §5 gives a
+single rating rather than a curve, and inventing one would be the same
+mistake in miniature.
+
+<!-- sourced-effects: uplifting, calm, cooling -->

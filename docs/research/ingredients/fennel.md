@@ -535,3 +535,38 @@
    chamomile (gentle evening), licorice (anise-licorice
    harmony — but licorice not in catalog), anise/star anise
    (closely related — none in catalog yet).
+
+---
+
+## Addendum — the warm register kept, sourced as tradition (2026-08-02)
+
+An audit flagged fennel's warm claim as unsourced. §5 mentions it only
+as "Slight; not primary" with no strength. The traditional
+classification is more definite than that, and it is documented in two
+independent systems.
+
+> **Ayurveda.** Fennel is *rasa* sweet and slightly pungent, ***virya*
+> (potency) warming — ushna*** — and *vipaka* (post-digestive effect)
+> sweet. The *ushna virya* of *shatapushpa* is what is credited with
+> clearing obstruction in the channels —
+> https://ask-ayurveda.com/wiki/article/2782-fennel-seeds
+> https://www.easyayurveda.com/fennel-seed-health-benefits-dose-how-to-use-ayurveda-details/
+>
+> **TCM.** Fennel soothes liver Qi, ***warms the kidney***, expels
+> cold and alleviates pain.
+
+**This also explains something the app was already showing.** Fennel
+ships `warming` and `cooling` together, which the opposition audit
+flags as an unusual pair to hold in one cup. Ayurveda describes
+exactly that shape: the thermal action is slightly warming, but the
+sweet post-digestive action leaves a residual cooling. So the two are
+not a contradiction in fennel; they are sequential in the traditional
+account and simultaneous in a cup. Both stay.
+
+**No trial measures fennel's felt temperature.** Recorded as
+tradition, on the same footing as the catalogue's other
+`sources: traditional` entries, and not presented as clinical. Note it
+sits at 1–2 — well below ginger's TRPV1-agonist warming, which is a
+measurable thermogenic effect rather than a traditional attribution.
+
+<!-- sourced-effects: warming -->

@@ -498,3 +498,31 @@
    commercial orchid is a fun fact that could be surfaced in
    user-facing copy — distinguishes it sensorially from the
    "other spices" category.
+
+---
+
+## Addendum — `digestive` kept, sourced as tradition (2026-08-02)
+
+An audit flagged `digestive` as unsourced. §5 rates `soothing` 3,
+`calm` 2, `uplifting` 2, `warming` 1 and `sleepy` 1 — no digestive
+row. The traditional record does carry one.
+
+> Vanilla has traditionally been used as an aphrodisiac, **carminative**,
+> antipyretic and stimulant, and in the treatment of fever, spasm,
+> dysmenorrhea and hysteria. — Natural Products Database monograph,
+> https://www.drugs.com/npp/vanilla.html
+
+Carminative is the relevant word: the same register as fennel's
+anethole and the catalogue's other after-meal ingredients, arrived at
+by tradition rather than by trial.
+
+**The limit is the same one §5 already sets for vanilla's primary
+effect.** That row says outright that vanilla's `soothing` is "not a
+pharmacological effect in the way ginger's warming is — this is
+aromatic/psychological, but still real and reliable." The digestive
+claim sits in the same category: documented, cross-cultural,
+mechanistically unproven. **No controlled trial tests vanilla for
+digestion**, and it should not be presented as though one did. It
+belongs at the 2–3 it ships rather than anywhere near fennel's 4.
+
+<!-- sourced-effects: digestive -->

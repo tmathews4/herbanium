@@ -915,10 +915,10 @@ export const EXTRACTION_PROFILES = {
       effects: [["focus", 2]],
       character: "Light lion's mane — gentle, almost broth-like." },
     { tempC: 95,  timeS: 1200, flavors: ["sweet", "umami", "earthy", "nutty"],
-      effects: [["focus", 3], ["comfort", 2], ["calm", 1], ["grounding", 1]],
+      effects: [["focus", 3], ["calm", 1], ["grounding", 1]],
       character: "The standard cup. The most palatable mushroom — umami and quietly nourishing." },
     { tempC: 100, timeS: 1800, flavors: ["sweet", "umami", "earthy", "nutty", "muddy"],
-      effects: [["focus", 3], ["comfort", 2], ["bitterness", 2], ["grounding", 3], ["calm", 2], ["soothing", 2]],
+      effects: [["focus", 3], ["bitterness", 2], ["grounding", 3], ["calm", 2], ["soothing", 2]],
       character: "Long-extracted. Earthy depth surfaces; the cup tips muddy." },
   ],
 
@@ -938,13 +938,13 @@ export const EXTRACTION_PROFILES = {
   // ─── Citrus peels ─────────────────────────────────────────────
   bergamot: [
     { tempC: 88,  timeS: 180, flavors: ["citrus", "bergamot", "floral"],
-      effects: [["uplifting", 2], ["focus", 2], ["calm", 1]],
+      effects: [["uplifting", 2], ["calm", 1], ["cooling", 1]],
       character: "Light bergamot — perfumed citrus top, only just lifting." },
     { tempC: 95,  timeS: 300, flavors: ["citrus", "bergamot", "floral", "bright", "aromatic"],
-      effects: [["uplifting", 3], ["focus", 3], ["calm", 2]],
+      effects: [["uplifting", 3], ["calm", 2], ["cooling", 1]],
       character: "The Earl Grey signature — fragrant citrus and floral oil." },
     { tempC: 100, timeS: 420, flavors: ["citrus", "bergamot", "bright", "aromatic", "pith", "bitter"],
-      effects: [["uplifting", 3], ["focus", 3], ["bitterness", 2], ["calm", 2]],
+      effects: [["uplifting", 3], ["bitterness", 2], ["calm", 2], ["cooling", 1]],
       character: "Past optimal — the perfume thins, pith bitterness surfaces." },
   ],
   "orange-peel": [
@@ -987,10 +987,10 @@ export const EXTRACTION_PROFILES = {
       effects: [["uplifting", 2], ["cooling", 2]],
       character: "Light cranberry — bright tart top, gentle berry." },
     { tempC: 96,  timeS: 360, flavors: ["tart", "fruity", "berry", "bright", "cranberry"],
-      effects: [["uplifting", 3], ["cooling", 3], ["energy", 2]],
+      effects: [["uplifting", 3], ["cooling", 3]],
       character: "The standard cup. Full cranberry — ruby color, tart-sweet bite." },
     { tempC: 100, timeS: 480, flavors: ["tart", "fruity", "berry", "cranberry", "astringent"],
-      effects: [["uplifting", 3], ["cooling", 3], ["energy", 2], ["bitterness", 2]],
+      effects: [["uplifting", 3], ["cooling", 3], ["bitterness", 2]],
       character: "Pushed long — tart pushes into sour, astringency climbs." },
   ],
 };

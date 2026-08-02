@@ -174,3 +174,25 @@
 | Facts | 2 | History + mechanism well-sourced for the major claims |
 
 **Overall status:** Draft — solid baseline. Mechanism research is active; expect updates as more clinical trials publish.
+
+---
+
+## Addendum — `comfort` removed (2026-08-02)
+
+An audit found `comfort` 2 shipped at the 95°C and 100°C brew points.
+§5 rates lion's mane at three things — `focus` 3, `grounding` 2,
+`calm` 2 — and comfort is not among them.
+
+The research base here is narrow and specific: hericenones and
+erinacines stimulate nerve growth factor synthesis, which is what §5's
+`focus` 3 rests on, with its own honest caveat that the effect is
+"subtle, builds over weeks; not an acute alertness hit." Nothing in
+that literature touches a warm or consoling register, and nothing in
+the cup's character suggests one either — §2 describes lion's mane as
+delicate and seafood-adjacent, which is close to the opposite of the
+wrapped-blanket reading `comfort` encodes.
+
+Removed. `grounding` carries the mushroom's body and quietness, which
+is the register it actually has.
+
+<!-- sourced-effects: focus, grounding, calm -->

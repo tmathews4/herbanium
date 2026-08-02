@@ -12,11 +12,12 @@
       and presenting it with the authority of the sourced ones — a
       user cannot tell the two apart.
 
-      Enforced as a RATCHET, not a clean bill of health: 5 known
-      unsourced pairs across 5 ingredients today (from 30), listed by
-      name below so they can be worked off deliberately while any NEW
-      one fails immediately. A bare count would let one be fixed and
-      another introduced with the suite still green.
+      Enforced as a RATCHET. KNOWN_UNSOURCED is now EMPTY — every one
+      of the 30 pairs the first audit found has been researched and
+      either sourced, corrected to the right register, or removed. The
+      map stays because the discipline is the point: an entry may be
+      added, but only deliberately and with a reason, and it comes back
+      out by writing the research rather than by deleting the line.
 
       A doc must also be REACHABLE to be checked. Two files resolving
       to one ingredient silently exempted lemon balm from this guard
@@ -79,13 +80,7 @@ const ALIAS = { settle: "digestive", warming: "comfort" };
 // Unsourced effects that exist today, listed so they can be worked off
 // one at a time. Removing a line here after fixing the data is the
 // point; ADDING one should be a deliberate act with a reason.
-const KNOWN_UNSOURCED = {
-  bergamot: ["focus"],
-  cranberry: ["energy"],
-  fennel: ["comfort"],
-  "lions-mane": ["comfort"],
-  vanilla: ["digestive"],
-};
+const KNOWN_UNSOURCED = {};
 
 const docIdFor = {};
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {

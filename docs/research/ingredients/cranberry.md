@@ -221,3 +221,29 @@
 | Facts | 3 | All cross-referenced |
 
 **Overall status:** Verified — confident enough to ship.
+
+---
+
+## Addendum — `energy` removed (2026-08-02)
+
+An audit found `energy` 2 shipped at two brew points. §5 rates
+cranberry at two things only — `uplifting` 1 and `cooling` 1 — and
+describes both as sensory readings of tart fruit: "the 'wake up the
+palate' effect, mild" and "tart fruit reads as cooling on the tongue,
+mild".
+
+Cranberry is caffeine-free and has no stimulant constituent. Its
+research base is urinary-tract prophylaxis via proanthocyanidins,
+which has nothing to say about arousal. There is no mechanism, no
+trial and no tradition claiming cranberry lifts energy.
+
+This is the same shape as hibiscus's `uplifting`, removed in the same
+pass: a bright, tart, palate-waking sensation being transcribed a
+second time as a pharmacological-looking mood claim. The sensation is
+real; `uplifting` is where it belongs, and §5 already rates it there.
+
+Removed. Note §5 rates both survivors at **1** while the profile ships
+them at 3 — that gap is a separate matter, tracked by the strength
+guard rather than this one.
+
+<!-- sourced-effects: uplifting, cooling -->
