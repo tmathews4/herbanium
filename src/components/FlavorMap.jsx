@@ -28,7 +28,9 @@
 
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
-import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../data/families";
+import {
+  EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
+} from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
@@ -71,12 +73,6 @@ const FLAVOR_FAMILY_ORDER = [
 ];
 
 // Same idea for moods.
-const MOOD_FAMILY_ORDER = [
-  // Related registers sit next to their old parents so the strip still
-  // reads top-to-bottom as quiet -> alert -> warm -> cool -> body.
-  "calm", "soothing", "grounding", "focus", "energy", "uplifting",
-  "warm", "cool", "body", "sleep",
-];
 
 // Family → color mapping. Keeps the strip readable as a palette
 // of related notes rather than a confetti of unrelated hues.
@@ -111,20 +107,8 @@ const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] |
 // orthogonal to mind-quieting calm; lumping them confused green-tea
 // brews where the cup reads cool but not particularly settling.
 // Re-exported so existing component imports keep working.
-export { FAMILY_BY_FLAVOR, FAMILY_BY_EFFECT };
+export { FAMILY_BY_FLAVOR, FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS };
 
-export const EFFECT_FAMILY_COLORS = {
-  calm:   "var(--effect-calm)",
-  soothing: "var(--effect-soothing)",
-  grounding: "var(--effect-grounding)",
-  uplifting: "var(--effect-uplifting)",
-  focus:  "var(--effect-focus)",
-  energy: "var(--effect-energy)",
-  warm:   "var(--effect-warm)",
-  cool:   "var(--effect-cool)",
-  body:   "var(--effect-body)",
-  sleep:  "var(--effect-sleep)",
-};
 const colorForEffect = (effect) =>
   EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "var(--ash)";
 

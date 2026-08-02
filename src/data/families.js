@@ -85,3 +85,23 @@ export const FAMILY_BY_EFFECT = {
   // sleep register — drowsiness, downward drift
   sleepy: "sleep",
 };
+
+export const MOOD_FAMILY_ORDER = [
+  // Related registers sit next to their old parents so the strip still
+  // reads top-to-bottom as quiet -> alert -> warm -> cool -> body.
+  "calm", "soothing", "grounding", "focus", "energy", "uplifting",
+  "warm", "cool", "body", "sleep",
+];
+
+export const EFFECT_FAMILY_COLORS = {
+  calm:   "var(--effect-calm)",
+  soothing: "var(--effect-soothing)",
+  grounding: "var(--effect-grounding)",
+  uplifting: "var(--effect-uplifting)",
+  focus:  "var(--effect-focus)",
+  energy: "var(--effect-energy)",
+  warm:   "var(--effect-warm)",
+  cool:   "var(--effect-cool)",
+  body:   "var(--effect-body)",
+  sleep:  "var(--effect-sleep)",
+};
