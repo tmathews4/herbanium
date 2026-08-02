@@ -315,7 +315,14 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expect(callout).toContainText("The prediction");
     await expect(toggle, "and stop once the tour moves past them")
       .not.toHaveCSS("animation-name", "tourTogglePulse");
-    expect((await graph.boundingBox())!.height).toBeCloseTo(simpleH, 0);
+    // Tolerance in pixels, not toBeCloseTo. WebKit re-lays this SVG out
+    // with sub-pixel differences between renders of identical content —
+    // CI saw 309.375 against 310.375 — and toBeCloseTo(x, 0) demands
+    // agreement within half a pixel. The claim is "back to the short
+    // Simple layout", not "identical to the float".
+    const settledH = (await graph.boundingBox())!.height;
+    expect(Math.abs(settledH - simpleH),
+      `should settle back to Simple's height (${settledH} vs ${simpleH})`).toBeLessThan(4);
   });
 
   test("both the prediction bars and the brew sliders stay clear", async ({ page }) => {
