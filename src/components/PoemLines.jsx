@@ -35,6 +35,13 @@ const LINE_START = 0.25;
 const LINE_STAGGER = 0.26;
 const LINE_DUR = 1.2;
 
+export const POEM_KEYFRAMES = `
+  @keyframes poemLineIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+`;
+
 export const PoemLines = ({ text, size = 12.5, arriving = false, attribution = null }) => {
   const lines = String(text || "").split("\n");
   // The attribution waits for the whole verse to FINISH — signing the

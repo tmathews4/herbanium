@@ -12,7 +12,7 @@ import {
 } from "../components/layout";
 import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { OrnamentRule } from "../components/OrnamentRule";
-import { PoemLines } from "../components/PoemLines";
+import { PoemLines, POEM_KEYFRAMES } from "../components/PoemLines";
 import { TeaGreeting } from "../components/TeaGreeting";
 import { nextFollowUp } from "../data/followUp";
 import { WAIT_POEMS } from "../data/waitContent";
@@ -204,9 +204,18 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               boxShadow: shadow.card,
               textAlign: "center",
             }}>
+              <style>{POEM_KEYFRAMES}</style>
+              {/* Fades in ahead of the verse rather than being present
+                  from the first frame — it was the last thing in the
+                  card just sitting there while everything around it
+                  arrived, which made the whole card look like it was
+                  animating around a fixed label. */}
               <div style={{
                 fontFamily: ff.serif, fontSize: 17, color: theme.ink,
                 lineHeight: 1.25, marginBottom: poem ? 8 : 3,
+                ...(arriving
+                  ? { animation: "poemLineIn 1.1s cubic-bezier(0.33, 0, 0.2, 1) 0.1s both" }
+                  : null),
               }}>
                 {tod.label}.
               </div>
