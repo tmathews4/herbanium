@@ -75,7 +75,6 @@ const KNOWN_UNSOURCED = {
   gunpowder: ["calm"],
   hibiscus: ["uplifting"],
   jasmine: ["uplifting"],
-  lemonbalm: ["energy", "focus"],
   lemongrass: ["energy"],
   "licorice-root": ["grounding", "uplifting"],
   "lions-mane": ["comfort"],
@@ -86,7 +85,13 @@ const KNOWN_UNSOURCED = {
   rose: ["energy"],
   sencha: ["cooling"],
   spearmint: ["energy"],
-  tulsi: ["energy", "focus"],
+  // tulsi's focus IS sourced — see the addendum in its research doc
+  // (attention and working-memory gains, PMC9524226 + a 2017 review of
+  // 24 studies). It stays listed only because this parser reads the
+  // docs' `| effects |` tables and a prose addendum isn't one. Worth
+  // fixing by moving the claim into the table when tulsi is next
+  // touched, rather than leaving a sourced effect on an exemption list.
+  tulsi: ["focus"],
   vanilla: ["digestive"],
 };
 

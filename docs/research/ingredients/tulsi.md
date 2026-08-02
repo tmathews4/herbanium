@@ -532,3 +532,28 @@
    build over weeks, consistent with the lifestyle-practice
    framing. Users should know this rather than expecting
    acute effects.
+
+---
+
+## Addendum — `focus` sourced, `energy` removed (2026-08-02)
+
+An audit found both shipped without support in this document.
+
+**`focus` — supported, now sourced.** Holy basil's cognitive effects
+are documented in controlled trials:
+
+> Randomised, double-blind, placebo-controlled trial of an *Ocimum
+> tenuiflorum* extract on stress, mood and sleep (n=100, 8 weeks) —
+> https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9524226/
+>
+> 2017 systematic review of 24 human studies reporting significant
+> improvements in stress markers, mood and cognitive function.
+
+Reported improvements are in **attention and working memory**, which is
+the `focus` register.
+
+**`energy` — removed.** The same evidence is about attention and stress
+buffering, not stimulation, and tulsi is caffeine-free. Nothing found
+supports an energy claim; carrying one put an unsourced stimulant
+effect beside a sourced cognitive one where a user couldn't tell them
+apart.

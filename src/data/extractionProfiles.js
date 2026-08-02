@@ -103,15 +103,20 @@ export const EXTRACTION_PROFILES = {
   ],
 
   // ─── Herbals ──────────────────────────────────────────────────
+  // energy and focus removed 2026-08-02 after checking the literature:
+  // Kennedy et al. found self-rated ALERTNESS significantly REDUCED at
+  // the highest dose, and lemon balm is characterised as a mild
+  // sedative rather than a stimulant. The app was claiming the
+  // opposite of the evidence. See docs/research/ingredients/lemonbalm.md.
   lemonbalm: [
     { tempC: 85,  timeS: 180, flavors: ["citrus", "grassy", "bright"],
-      effects: [["calm", 2], ["soothing", 1.5], ["energy", 2], ["uplifting", 2], ["cooling", 2]],
+      effects: [["calm", 2], ["soothing", 1.5], ["uplifting", 2], ["cooling", 2]],
       character: "Gentle lemon balm — bright and soft, a light wash." },
     { tempC: 92,  timeS: 270, flavors: ["citrus", "mint", "grassy", "bright", "fresh"],
-      effects: [["calm", 3], ["soothing", 2], ["focus", 2], ["energy", 3], ["sleepy", 3], ["cooling", 2], ["uplifting", 2]],
+      effects: [["calm", 3], ["soothing", 2], ["sleepy", 3], ["cooling", 2], ["uplifting", 2]],
       character: "The standard cup. Lemon-mint with gentle lift and focus." },
     { tempC: 95,  timeS: 300, flavors: ["citrus", "mint", "grassy", "fresh", "astringent", "bright"],
-      effects: [["calm", 3], ["soothing", 2], ["focus", 2], ["energy", 3], ["bitterness", 2], ["sleepy", 4]],
+      effects: [["calm", 3], ["soothing", 2], ["bitterness", 2], ["sleepy", 4]],
       character: "Pushed past the sweet spot — citrus dulls, grass turns hay-bitter." },
   ],
 
@@ -271,6 +276,10 @@ export const EXTRACTION_PROFILES = {
   // five points below cover the full span so the FlavorMap and
   // MoodMap show real gradients across the cool register, not
   // flat extrapolation off the hot end.
+  // energy removed 2026-08-02 — unsourced. Tulsi's cognitive evidence
+  // is about attention and working memory, not stimulation, and it is
+  // caffeine-free; `focus` carries that claim and is now sourced. See
+  // docs/research/ingredients/tulsi.md.
   tulsi: [
     { tempC: 60,  timeS: 240, flavors: ["aromatic", "fresh", "sweet"],
       effects: [["calm", 2], ["soothing", 2]],
@@ -279,13 +288,13 @@ export const EXTRACTION_PROFILES = {
       effects: [["calm", 3], ["focus", 2], ["soothing", 2]],
       character: "Warm steep — aromatic balance, the spice quietly arriving." },
     { tempC: 92,  timeS: 300, flavors: ["spiced", "sweet", "aromatic"],
-      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["digestive", 2], ["soothing", 3], ["grounding", 3], ["uplifting", 2], ["warming", 2]],
+      effects: [["focus", 2], ["calm", 2], ["digestive", 2], ["soothing", 3], ["grounding", 3], ["uplifting", 2], ["warming", 2]],
       character: "Light tulsi — gently aromatic, balanced lift." },
     { tempC: 98,  timeS: 360, flavors: ["spiced", "clove", "peppery", "sweet", "warm"],
-      effects: [["focus", 3], ["calm", 3], ["energy", 3], ["digestive", 3], ["soothing", 3], ["grounding", 4], ["warming", 2]],
+      effects: [["focus", 3], ["calm", 3], ["digestive", 3], ["soothing", 3], ["grounding", 4], ["warming", 2]],
       character: "The standard cup. Full holy basil — the adaptogen balance." },
     { tempC: 100, timeS: 420, flavors: ["spiced", "clove", "peppery", "sweet", "earthy", "astringent"],
-      effects: [["focus", 3], ["calm", 3], ["energy", 3], ["digestive", 3], ["bitterness", 2], ["soothing", 3], ["grounding", 4], ["warming", 2]],
+      effects: [["focus", 3], ["calm", 3], ["digestive", 3], ["bitterness", 2], ["soothing", 3], ["grounding", 4], ["warming", 2]],
       character: "Past the standard. Earthy depth surfaces; bitter follows." },
   ],
 
