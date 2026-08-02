@@ -401,3 +401,31 @@
    all have support. Herbanium copy should probably use "the name
    comes from multiple possible sources, including..." rather than
    committing to one theory.
+
+---
+
+## Addendum — `calm` kept (sourced) (2026-08-02)
+
+An audit flagged `calm` as shipped without a prescribing brew-point
+row. It was researched all along: §5 rates it **1 — "L-theanine
+contribution present but not primary"**. The claim lives in the
+effects-rating table rather than a §6 row, which is the only reason
+the parity guard couldn't see it.
+
+> Csupor D et al. 2016. *Theanine and Caffeine Content of Infusions
+> Prepared from Commercial Tea Samples.* Green tea mean L-theanine
+> 6.56 mg/g — the highest of the five categories assayed —
+> https://www.researchgate.net/publication/293799309_Theanine_and_Caffeine_Content_of_Infusions_Prepared_from_Commercial_Tea_Samples
+>
+> *Effects of L-Theanine on the Release of α-Brain Waves in Human
+> Volunteers* —
+> https://www.jstage.jst.go.jp/article/nogeikagaku1924/72/2/72_2_153/_article
+
+**§5's "not primary" is the whole point of the rating.** Gunpowder is
+a rolled, relatively assertive green with higher caffeine (~35mg) than
+a typical green tea, so the theanine signature is present but sits
+behind `focus` and `energy` rather than leading. Shipping `calm` at 2
+where the research says 1 is a separate matter from whether the claim
+is sourced — the strength guard tracks that.
+
+<!-- sourced-effects: calm -->

@@ -497,7 +497,7 @@ export const EXTRACTION_PROFILES = {
         ["astringent", 4.0], ["vegetal", 3.0], ["bitter", 2.5],
         ["chestnut", 2.0], ["nutty", 1.5], ["bean", 1.5],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 4], ["warming", 4], ["cooling", 1]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 4], ["cooling", 1]],
       character: "Pan-fired sweetness gone — catechin grip dominates, the chestnut signature lost behind tannin." },
   ],
 

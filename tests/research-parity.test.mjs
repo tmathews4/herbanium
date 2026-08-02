@@ -1,8 +1,9 @@
 /* ──────────────────────────────────────────────────────────────
    tests/research-parity.test.mjs
 
-   Two guards, both turning audits that were run by hand today into
-   things the build enforces.
+   Audits that were run by hand once, turned into things the build
+   enforces. Four families of guard now, each added the day something
+   got past the previous ones.
 
    1. NOTHING UNSOURCED. Every effect an ingredient's extraction
       profile claims must appear in that ingredient's research doc.
@@ -11,11 +12,23 @@
       and presenting it with the authority of the sourced ones — a
       user cannot tell the two apart.
 
-      Enforced as a RATCHET, not a clean bill of health. There are
-      30 known unsourced pairs today, listed by name below so
-      they can be worked off deliberately while any NEW one fails
-      immediately. A bare count would let one be fixed and another
-      introduced with the suite still green.
+      Enforced as a RATCHET, not a clean bill of health: 15 known
+      unsourced pairs across 13 ingredients today (from 30), listed by
+      name below so they can be worked off deliberately while any NEW
+      one fails immediately. A bare count would let one be fixed and
+      another introduced with the suite still green.
+
+      A doc must also be REACHABLE to be checked. Two files resolving
+      to one ingredient silently exempted lemon balm from this guard
+      for four cycles, so that's checked too.
+
+   1b. RIGHT EFFECT, WRONG MAGNITUDE. Presence is not enough — a claim
+      can sit at 6x its researched strength with every name matching.
+      Ratcheted the same way.
+
+   1c. CUPS WHOSE TENSION ISN'T NAMED. Where one ingredient's research
+      puts two opposed effects at the SAME brew point, the opposition
+      isn't real and the app should have language for it.
 
    2. THE FAMILY TREE IS WHOLE. Every effect and flavour token maps to
       a family, and every family a token maps to has a colour and a
@@ -70,11 +83,8 @@ const KNOWN_UNSOURCED = {
   bergamot: ["focus"],
   chamomile: ["soothing"],
   cranberry: ["energy"],
-  dragonwell: ["comfort"],
   "dried-apple": ["calm", "uplifting"],
   fennel: ["comfort"],
-  genmaicha: ["digestive"],
-  gunpowder: ["calm"],
   hibiscus: ["uplifting"],
   jasmine: ["uplifting"],
   "licorice-root": ["grounding", "uplifting"],
@@ -82,7 +92,6 @@ const KNOWN_UNSOURCED = {
   nettle: ["sleepy"],
   passionflower: ["soothing"],
   reishi: ["sleepy"],
-  sencha: ["cooling"],
   vanilla: ["digestive"],
 };
 

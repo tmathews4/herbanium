@@ -455,3 +455,31 @@
    flat-pressed spears (not rolled), light olive-green color
    (not dark green), characteristic sweet-bean aroma. Herbanium
    users buying premium Longjing should be aware.
+
+---
+
+## Addendum — the warm register removed (2026-08-02)
+
+An audit found the 95°C brew point shipping `warming` 4 — the single
+largest effect value in the whole profile — against a document that
+rules the register out twice over in §5:
+
+> | warming | | Opposite direction |
+> | soothing | | Not the register — Dragonwell is bright, not warm |
+
+The same 95°C row also carries `cooling` 1, so one cup was asserting
+both directions of the thermal axis at once, with the contradicting
+value four times the size of the one its own research supports.
+
+It is also the wrong cup for it. 95°C is far above the 75–85°C band
+§6 describes for Longjing; that row exists to show what over-extraction
+costs — §6's own character note calls it the point where the
+chestnut-sweet character is buried under catechin grip. A tea does not
+acquire a warm register by being brewed badly. What it acquires is
+bitterness, which the row already carries at 3.
+
+Removed. `cooling` 1 stays: it is the sourced thermal claim for an
+unoxidised green (§5, "TCM Yin"), and it correctly *falls* from 2 to 1
+as extraction climbs, which is the direction the tradition describes.
+
+<!-- sourced-effects: cooling -->

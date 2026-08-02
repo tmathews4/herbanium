@@ -168,3 +168,37 @@
 | Facts | 1-2 | History well-attested; rice chemistry less rigorously sourced for this exact application |
 
 **Overall status:** Draft — solid baseline, primary-source citations on the rice-chemistry side would strengthen.
+
+---
+
+## Addendum — `digestive` kept, sourced as tradition + mechanism (2026-08-02)
+
+An audit flagged `digestive` as unsourced. Kept, but the reason it
+holds is not the reason the other digestive herbs in this catalogue
+hold, and the difference is worth stating rather than blurring.
+
+**Tradition.** Genmaicha dates to the Edo period, when tea merchants
+extended their leaf with roasted brown rice. It became "the people's
+tea," and is documented as a tea taken *before, during and after*
+meals rather than as a dedicated after-meal remedy.
+
+> Global Japanese Tea Association — https://gjtea.org/genmaicha/
+> Genmaicha history — https://nioteas.com/blogs/genmaicha/genmaicha-history
+
+**Mechanism, and it is a subtractive one.** The gastric complaints tea
+provokes come from tannins, which bind proteins and irritate the
+gastric mucosa, and from caffeine, which stimulates acid secretion and
+relaxes the lower oesophageal sphincter. Diluting the leaf with
+roasted rice roughly halves both — a cup of genmaicha carries about
+10–15mg caffeine against ~30mg for a plain Japanese green, with
+correspondingly lower astringency.
+
+**So the honest claim is that genmaicha does not irritate, not that it
+actively settles.** Peppermint's menthol acts on gut smooth muscle,
+fennel's anethole is a carminative, ginger's gingerol works through
+5-HT3 inhibition and motility — those are active. Genmaicha earns its
+`digestive` by being the tea you can drink with food without the usual
+cost, which is why it sits at 2 rather than with the 4s. No trial
+tests it as a digestive aid, and it should not be presented as one.
+
+<!-- sourced-effects: digestive -->

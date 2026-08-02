@@ -182,3 +182,39 @@ Sencha is the most temperature-sensitive tea in the catalog. Time at 75°C is fa
 | Facts | 2 | History + chemistry well-sourced |
 
 **Overall status:** Draft — adequate baseline, deeper sources welcome on cultivar-level chemistry.
+
+---
+
+## Addendum — `cooling` kept, sourced as tradition (2026-08-02)
+
+An audit found `cooling` 2 shipped at the 70°C brew point with nothing
+in this document behind it. Kept, because the claim is well documented
+— but as **tradition, not as a clinical finding**, on the same footing
+as the catalogue's other `sources: traditional` entries.
+
+> In TCM the thermal nature of tea tracks oxidation: minimally
+> oxidised white and green teas are cooling (Yin), while black tea,
+> dark oolong and shou pu-erh are warming (Yang). Less processing
+> keeps the leaf closer to its raw state and therefore cooler; heat
+> and oxidation convert that cooling property toward neutral or warm.
+> https://pathofcha.com/blogs/all-about-tea/hot-gong-fu-cha-in-the-summer-cooling-chinese-teas
+> https://acupuncturetoday.com/article/28505-camellia-sinensis-cha-use-in-traditional-chinese-medicine
+
+Sencha is unoxidised, and its Japanese steam-fixing is the *least*
+heat-transforming fixation method in use — steaming halts oxidation
+within hours of harvest and preserves the chlorophyll and theanine
+that §2 describes, where Chinese pan-firing imparts a toastier,
+warmer character. So sencha sits at the cooling end even among greens.
+
+**No controlled trial tests sencha for felt temperature**, and this
+should not be presented as though one did. Two other docs in this
+catalogue already carry the identical attestation in their §5 tables —
+dragonwell ("TCM Yin; unoxidized green tea") and gunpowder ("TCM Yin;
+unoxidized green tea character") — so recording it here brings sencha
+in line with its own category rather than adding a new kind of claim.
+
+Shipping it at the 70°C point only is consistent: that is the cup the
+§6a table describes as the delicate, marine, theanine-forward one,
+before catechin extraction takes the cup somewhere else.
+
+<!-- sourced-effects: cooling -->
