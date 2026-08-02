@@ -178,9 +178,19 @@ export async function cancelSteepNotification(id) {
  * an id the caller stashes so it can be cancelled if the user
  * fills the follow-up first.
  */
+// Web fallback timers, keyed by the handle we hand back. The web has
+// no way to schedule a notification for later without a service worker
+// and a push subscription, neither of which this app has (and a push
+// server would mean the backend the whole design avoids). So the web
+// gets a best-effort timer that only fires while the tab is alive.
+// That's a genuinely weaker promise than the native path, and the
+// in-app card remains the reliable mechanism on both.
+const webCheckInTimers = new Map();
+let webCheckInSeq = 0;
+
 export async function scheduleCheckInNotification({ blendName, secondsFromNow }) {
-  if (!isNativeApp()) return null;
   if (!secondsFromNow || secondsFromNow <= 0) return null;
+  if (!isNativeApp()) return scheduleWebCheckIn({ blendName, secondsFromNow });
   try {
     const { LocalNotifications } = await ensureNotifications();
     if (!LocalNotifications) return null;
@@ -211,9 +221,51 @@ export async function scheduleCheckInNotification({ blendName, secondsFromNow })
 /**
  * Cancel a check-in notification (mirror of cancelSteepNotification).
  */
+/**
+ * Best-effort web check-in. Fires only if the tab is still open when
+ * the time comes — a browser can't wake a closed page without push.
+ * Permission is requested here rather than up front so a user who
+ * never brews is never asked.
+ */
+async function scheduleWebCheckIn({ blendName, secondsFromNow }) {
+  try {
+    if (typeof window === "undefined" || !("Notification" in window)) return null;
+    if (Notification.permission === "denied") return null;
+    if (Notification.permission !== "granted") {
+      const req = await Notification.requestPermission();
+      if (req !== "granted") return null;
+    }
+    const handle = `web-${++webCheckInSeq}`;
+    const timer = setTimeout(() => {
+      webCheckInTimers.delete(handle);
+      try {
+        new Notification("How did it land?", {
+          body: blendName
+            ? `Your ${blendName} has had time to settle — log how it landed when you get a moment.`
+            : "Your cup has had time to settle — log how it landed when you get a moment.",
+          icon: "/favicon.svg",
+          tag: "herbanium-check-in",
+        });
+      } catch {
+        // Some browsers only allow notifications from a service worker
+        // context. Nothing to fall back to; the in-app card still runs.
+      }
+    }, secondsFromNow * 1000);
+    webCheckInTimers.set(handle, timer);
+    return handle;
+  } catch {
+    return null;
+  }
+}
+
 export async function cancelCheckInNotification(id) {
-  if (!isNativeApp()) return;
   if (id == null) return;
+  if (typeof id === "string" && id.startsWith("web-")) {
+    const timer = webCheckInTimers.get(id);
+    if (timer) { clearTimeout(timer); webCheckInTimers.delete(id); }
+    return;
+  }
+  if (!isNativeApp()) return;
   try {
     const { LocalNotifications } = await ensureNotifications();
     if (!LocalNotifications) return;

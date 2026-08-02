@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
-import { theme, ff } from "./theme";
+import { theme, ff, radius } from "./theme";
 import { UnitContext } from "./units/units";
 import {
   SEED_MODES, materializeSeedSessions,
@@ -69,6 +69,7 @@ import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
 import { applyCharge, isCharged, spendCharge, CHARGE_FULL } from "./data/lodestone";
+import { scheduleFollowUp, snoozeFollowUp, FOLLOWUP_CHOICES } from "./data/followUp";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
 import { configureStatusBar, hapticTap, scheduleCheckInNotification, cancelCheckInNotification } from "./helpers/native";
@@ -458,6 +459,89 @@ const mmssShort = (s) => {
   return `${m}:${r.toString().padStart(2, "0")}`;
 };
 
+/* ──────────────────────────────────────────────────────────────
+   Check-in notice — shown once, right after a brew is logged.
+
+   A notice, not a question. At brew time the tea is ready but not
+   drunk, so asking "how did it land?" has no answer yet; the only
+   honest response would be "later", and a prompt whose right answer is
+   fixed teaches people to dismiss it — including later, when it does
+   matter. This just says the ask is coming, which is the gap that
+   actually existed, and offers a timing choice for anyone who wants
+   one. Doing nothing is a complete interaction.
+   ────────────────────────────────────────────────────────────── */
+const CheckInNotice = ({ blendName, choice, onChoose, onClose }) => (
+  <div style={{
+    position: "fixed",
+    left: 12, right: 12,
+    bottom: "calc(96px + env(safe-area-inset-bottom))",
+    zIndex: 68,
+    display: "flex", justifyContent: "center",
+    pointerEvents: "none",
+  }}>
+    <div data-testid="check-in-notice" style={{
+      pointerEvents: "auto",
+      width: "100%", maxWidth: 460,
+      background: theme.cream,
+      border: `1px solid ${theme.ruleSoft}`,
+      borderRadius: radius.md,
+      boxShadow: "0 8px 26px rgba(30,24,18,0.16)",
+      padding: "12px 14px",
+      animation: "checkInNoticeIn 0.5s ease-out",
+    }}>
+      <div style={{
+        display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10,
+      }}>
+        <div style={{
+          fontFamily: ff.serif, fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
+        }}>
+          We'll ask how {blendName ? <em style={{ fontStyle: "italic" }}>{blendName}</em> : "this cup"} landed in a little while.
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="dismiss"
+          style={{
+            flexShrink: 0, background: "transparent", border: "none",
+            color: theme.ash, fontSize: 17, lineHeight: 1, padding: "0 2px", cursor: "pointer",
+          }}
+        >×</button>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+        <span style={{
+          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+          textTransform: "uppercase", color: theme.ash,
+        }}>ask me</span>
+        {FOLLOWUP_CHOICES.map(c => (
+          <button
+            key={c.id}
+            onClick={() => onChoose(c.id)}
+            style={{
+              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
+              padding: "4px 10px", borderRadius: 999,
+              border: `1px solid ${choice === c.id ? theme.terra : theme.rule}`,
+              background: choice === c.id ? "rgba(176,84,47,0.10)" : "transparent",
+              color: choice === c.id ? theme.terra : theme.inkSoft,
+              cursor: "pointer",
+            }}
+          >{c.label}</button>
+        ))}
+      </div>
+      <style>{`
+        @keyframes checkInNoticeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes checkInNoticeIn {
+            from { opacity: 0; transform: none; }
+            to   { opacity: 1; transform: none; }
+          }
+        }
+      `}</style>
+    </div>
+  </div>
+);
+
 const BrewTimerBanner = ({ blendName, remaining, onTap }) => {
   const ready = remaining <= 0;
   return (
@@ -685,6 +769,14 @@ export default function App() {
   // can show a live countdown without lifting the entire timer
   // engine out of SteepScreen.
   const [steepMinimized, setSteepMinimized] = useState(false);
+  // After a brew, a one-line notice that a check-in is coming. It is
+  // deliberately NOT the review itself: at brew time the tea is ready
+  // but not drunk, so "how did it land?" has no answer yet and the only
+  // honest response is to defer — a prompt whose right answer is fixed
+  // trains people to dismiss it, including later when it does matter.
+  // The notice closes the discoverability gap instead, and carries the
+  // timing choice for anyone who wants one.
+  const [checkInNotice, setCheckInNotice] = useState(null);
   const [steepRemaining, setSteepRemaining] = useState(0);
   const [ingredientId, setIngredientId] = useState("chamomile");
   // Overlay history stack — back-button returns to the previous
@@ -695,10 +787,17 @@ export default function App() {
   const pushOverlayHistory = (kind, payload = {}) => {
     setOverlayHistory(prev => [...prev, { kind, ...payload }]);
   };
+  // Closing the last overlay returns to a running steep if there is
+  // one, rather than to nothing. A minimized brew keeps `session` set
+  // but isn't on this stack, so without the fallback, opening a recipe
+  // over a minimized brew and closing it again orphaned the steep: the
+  // timer was still alive in state with nothing on screen pointing at
+  // it, and the user's tea quietly stopped being tracked.
+  const restingOverlay = () => (session ? "steep" : null);
   const popOverlayHistory = () => {
     setOverlayHistory(prev => {
       if (prev.length === 0) {
-        setOverlay(null);
+        setOverlay(restingOverlay());
         return prev;
       }
       const next = prev.slice(0, -1);
@@ -710,7 +809,7 @@ export default function App() {
         if (top.kind === "entry" && top.entryId) setEntryOverlayId(top.entryId);
         setOverlay(top.kind);
       } else {
-        setOverlay(null);
+        setOverlay(restingOverlay());
       }
       return next;
     });
@@ -1525,6 +1624,7 @@ export default function App() {
     blend, intent, targetMoods, currentMoods,
     flavorsTasted, flavorsExtra, flavorsTarget,
     taste, note, save, rename,
+    followUpChoice = "default",
   }) => {
     // A blend composed via forward-compose won't have an id; stash it under
     // a synthetic id so the session can reference it via getBlend().
@@ -1555,6 +1655,11 @@ export default function App() {
       landed: {},
       extra: [],
       moodsPending: true,
+      // When to ask how it landed. Stamped at brew time from the
+      // user's pick (or the default) rather than computed later, so
+      // the schedule can't shift under them if the rules change.
+      followUpAt: scheduleFollowUp(Date.now(), followUpChoice),
+      followUpSnoozes: 0,
       // Snapshot of the moods the user originally aimed for, so the
       // follow-up card knows which checkboxes to render.
       targetMoods: targetMoods || [],
@@ -1589,7 +1694,7 @@ export default function App() {
     // ping if they fill the follow-up before it fires.
     scheduleCheckInNotification({
       blendName: blend?.name,
-      secondsFromNow: 10 * 60,
+      secondsFromNow: Math.max(60, Math.round((newSession.followUpAt - Date.now()) / 1000)),
     }).then(notifId => {
       if (notifId == null) return;
       setSessions(prev => prev.map(s =>
@@ -1664,6 +1769,45 @@ export default function App() {
   // Skip a mood follow-up — user dismissed without filling. Clears
   // moodsPending so the card doesn't reappear, but leaves `actual`
   // as the "brewed" placeholder. The session still counts in the log.
+  // Push a check-in back a step. Unlike dismissing, the cup stays
+  // pending — this is the "not yet" that's a real answer, since by the
+  // time the card appears the user may or may not have finished the
+  // cup. Reschedules the reminder to match.
+  const snoozeSessionMoods = (sessionId) => {
+    const target = sessions.find(s => s.id === sessionId);
+    if (!target) return;
+    const next = snoozeFollowUp(target);
+    if (!next) return;
+    if (target.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
+    setSessions(prev => prev.map(s => (s.id === sessionId ? { ...s, ...next } : s)));
+    scheduleCheckInNotification({
+      blendName: getBlend(target.blendId)?.name,
+      secondsFromNow: Math.max(60, Math.round((next.followUpAt - Date.now()) / 1000)),
+    }).then(notifId => {
+      if (notifId == null) return;
+      setSessions(prev => prev.map(s => (s.id === sessionId ? { ...s, checkInNotifId: notifId } : s)));
+    });
+    hapticTap();
+  };
+
+  // Re-time the just-logged cup's check-in from the notice.
+  const chooseFollowUpTiming = (choiceId) => {
+    const target = (sessions || []).find(s => s.who === "you" && s.moodsPending);
+    setCheckInNotice(n => (n ? { ...n, choice: choiceId } : n));
+    if (!target) return;
+    const followUpAt = scheduleFollowUp(target.brewedAt || Date.now(), choiceId);
+    if (target.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
+    setSessions(prev => prev.map(s => (s.id === target.id ? { ...s, followUpAt } : s)));
+    scheduleCheckInNotification({
+      blendName: getBlend(target.blendId)?.name,
+      secondsFromNow: Math.max(60, Math.round((followUpAt - Date.now()) / 1000)),
+    }).then(notifId => {
+      if (notifId == null) return;
+      setSessions(prev => prev.map(s => (s.id === target.id ? { ...s, checkInNotifId: notifId } : s)));
+    });
+    hapticTap();
+  };
+
   const dismissSessionMoods = (sessionId) => {
     const target = sessions.find(s => s.id === sessionId);
     if (target?.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
@@ -1947,7 +2091,7 @@ export default function App() {
         position: "relative",
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
-        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
+        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} lodestoneCharge={lodestoneCharge} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
@@ -2079,6 +2223,7 @@ export default function App() {
             setSteepMinimized(false);
             setOverlay(null);
             clearOverlayHistory();
+            setCheckInNotice({ blendName: session.blend?.name || null, choice: "default" });
             setSession(null);
             setTab("home");
           }}
@@ -2091,6 +2236,20 @@ export default function App() {
           restores the steep overlay on tap. Persists across tab
           changes since it lives at App level, outside any tab
           wrapper. */}
+      {checkInNotice && (
+        <CheckInNotice
+          blendName={checkInNotice.blendName}
+          choice={checkInNotice.choice}
+          onChoose={chooseFollowUpTiming}
+          onClose={() => setCheckInNotice(null)}
+        />
+      )}
+      {/* Only while the steep is the active overlay. Showing it over
+          other overlays too was tried and reverted: the banner is
+          fixed to the top of the viewport and swallowed the detail
+          screens' back button, which is a worse bug than the gap it
+          closed. The brew surviving that detour is handled by
+          restingOverlay in popOverlayHistory instead. */}
       {overlay === "steep" && steepMinimized && session && (
         <BrewTimerBanner
           blendName={session.blend?.name || "your brew"}

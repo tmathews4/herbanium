@@ -29,7 +29,7 @@ import { PARENT_MOODS, CURRENT_FEEL_EXTRAS } from "../data/canon";
 import { getBlend } from "../helpers/misc";
 import { ff, theme } from "../theme";
 
-export const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
+export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => {
   const blend = getBlend(session.blendId);
   const targets = session.targetMoods || [];
   const predictedFlavors = React.useMemo(() => {
@@ -107,6 +107,23 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss }) => {
         }}>
           How did it land?
         </div>
+        {/* Snooze — the honest deferral. Dismissing drops the cup for
+            good; this keeps it pending and asks again later, which is
+            the right answer when the cup simply isn't finished yet.
+            Hidden once the snooze allowance is spent rather than left
+            as a button that does nothing. */}
+        {onSnooze && (
+          <button
+            onClick={onSnooze}
+            style={{
+              flexShrink: 0, background: "transparent",
+              border: `1px solid ${theme.rule}`, borderRadius: 999,
+              color: theme.inkSoft, fontFamily: ff.sans, fontSize: 10.5,
+              letterSpacing: "0.04em", padding: "4px 10px", marginRight: 6,
+              cursor: "pointer",
+            }}
+          >not yet</button>
+        )}
         {onDismiss && (
           <button
             onClick={onDismiss}

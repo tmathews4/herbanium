@@ -14,6 +14,7 @@ import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { OrnamentRule } from "../components/OrnamentRule";
 import { PoemLines } from "../components/PoemLines";
 import { TeaGreeting } from "../components/TeaGreeting";
+import { nextFollowUp } from "../data/followUp";
 import { WAIT_POEMS } from "../data/waitContent";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import {
@@ -94,7 +95,7 @@ const pickHomePoem = (date) => {
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
-export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, addJournalEntry, journalEntries = [] }) => {
+export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods, addJournalEntry, journalEntries = [] }) => {
   const [arriving] = React.useState(() => {
     if (homeArrived) return false;
     homeArrived = true;
@@ -126,18 +127,11 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   // gets surfaced as an inline card here. One per render: the most
   // recent pending cup, since piling them up reads as nagging.
   //
-  // Min-elapsed gate (10 min): asking the moment the user finishes
-  // the cup defeats the point — caffeine hasn't kicked in, calm
-  // hasn't settled. Holding the card back for ten minutes gives the
-  // body time to actually feel the cup before we ask about it.
-  const FOLLOWUP_MIN_MS    = 10 * 60 * 1000;
-  const FOLLOWUP_WINDOW_MS = 24 * 60 * 60 * 1000;
-  const pendingMoodSession = (sessions || []).find(s => {
-    if (s.who !== "you") return false;
-    if (!s.moodsPending) return false;
-    const elapsed = Date.now() - (s.brewedAt || 0);
-    return elapsed >= FOLLOWUP_MIN_MS && elapsed < FOLLOWUP_WINDOW_MS;
-  });
+  // The timing rules live in data/followUp.js — when to ask, how long
+  // the ask stays worth making, and what a snooze does. Keeping them
+  // out of the view means they're unit-tested rather than eyeballed.
+  const pendingMoodSession = nextFollowUp(sessions);
+
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
   // are only surfaced behind the Shelf > Journal sub-tab where they
@@ -408,6 +402,9 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
           session={pendingMoodSession}
           onSubmit={(payload) => patchSessionMoods?.(pendingMoodSession.id, payload)}
           onDismiss={() => dismissSessionMoods?.(pendingMoodSession.id)}
+          onSnooze={snoozeSessionMoods && (pendingMoodSession.followUpSnoozes || 0) < 3
+            ? () => snoozeSessionMoods(pendingMoodSession.id)
+            : undefined}
         />
       )}
 
