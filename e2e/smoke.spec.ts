@@ -64,13 +64,13 @@ for (const withBrew of [false, true]) {
       // Flagged rather than papered over; if that gets fixed, tighten
       // this back to the banner alone.
       if (!withBrew) return;
-      // KNOWN BUG, not yet fixed: opening another overlay (a recipe or
-      // ingredient detail) over a minimized brew and closing it again
-      // loses the steep entirely — no banner, no steep screen. The
-      // session is orphaned. popOverlayHistory now falls back to a
-      // running steep, which is the right direction but doesn't fully
-      // close it. The test that opens a detail opts out below; every
-      // other screen must keep the brew.
+      // PARTIALLY FIXED. The popstate handler used to clear the session
+      // unconditionally, so backing out of ANY overlay binned a
+      // steeping cup — that's fixed. But closing a recipe detail over a
+      // minimized brew STILL loses it, by some other path not yet
+      // found, so that one test opts out. Every other screen is held to
+      // the promise. Don't delete this opt-out to make the suite green;
+      // delete it when the bug is actually gone.
       if (test.info().title.includes("a recipe opens its detail")) return;
       const alive = page.getByTestId("brew-banner")
         .or(page.getByRole("button", { name: /minimize/i }));

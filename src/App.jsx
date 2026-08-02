@@ -847,14 +847,23 @@ export default function App() {
     if (!overlay) return;
     window.history.pushState({ herbaniumOverlay: overlay }, "");
     const onPop = () => {
-      // Browser/system back: pop one level instead of dropping
-      // out of the overlay stack entirely.
+      // Browser/system back: pop one level instead of dropping out of
+      // the overlay stack entirely.
+      //
+      // Only discard the brew if the user was LOOKING at the steep and
+      // backed out of it — that reads as cancelling. This used to clear
+      // the session unconditionally, which meant backing out of any
+      // overlay at all (a recipe, an ingredient) silently binned a
+      // steeping cup: the timer vanished with no banner, no screen and
+      // no warning. Backing out of a detail over a minimized brew must
+      // leave the tea alone.
+      const cancellingSteep = overlay === "steep" && !steepMinimized;
       popOverlayHistory();
-      setSession(null);
+      if (cancellingSteep) setSession(null);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [overlay]);
+  }, [overlay, steepMinimized]);
 
   // Persisted preferences
   const [unit, setUnit] = usePersistedState("unit", "F");

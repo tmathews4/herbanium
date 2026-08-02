@@ -37,8 +37,9 @@ const LINE_DUR = 1.2;
 
 export const PoemLines = ({ text, size = 12.5, arriving = false, attribution = null }) => {
   const lines = String(text || "").split("\n");
-  // The attribution waits for the whole verse, then fades slowly and
-  // on its own. It was the one part of the card simply present from
+  // The attribution waits for the whole verse to FINISH — signing the
+  // poem before its last line has landed reads as the signature
+  // arriving on its own. It was the one part of the card simply present from
   // the first frame, which read as the poem animating around a fixed
   // label. Signing the poem after it has been read is also just the
   // right order.
@@ -84,7 +85,7 @@ export const PoemLines = ({ text, size = 12.5, arriving = false, attribution = n
           ...(arriving
             ? {
                 animation: "poemLineIn 1.5s cubic-bezier(0.33, 0, 0.2, 1) "
-                  + `${afterLastLine - 0.35}s both`,
+                  + `${afterLastLine}s both`,
               }
             : null),
         }}>
