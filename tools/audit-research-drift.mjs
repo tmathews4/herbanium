@@ -37,6 +37,24 @@ const only = process.argv.includes("--ing")
   ? process.argv[process.argv.indexOf("--ing") + 1]
   : null;
 
+// Canonical-word aliases. The docs and the app sometimes use different
+// words for one claim, and the app's word wins where it's the one the
+// user meets:
+//   settle  -> digestive  (docs' own glosses all say digestive)
+//   warming -> comfort    (comfort is what onboarding offers as the
+//                          warm register; carrying both made 21
+//                          ingredients assert it twice)
+//
+// Applied to BOTH sides — it's a canonicalisation, not a one-way
+// mapping, and tests/research-parity.test.mjs already learned this the
+// hard way. Aliasing only the docs made every ingredient that ships
+// "warming" report as `extra: warming` AND `missing: comfort` at the
+// same time: one claim counted as both a gap and a surplus, on ~15
+// ingredients. That's not noise around the signal, it IS most of the
+// output, and it sends you off transcribing work that's already done.
+const ALIAS = { settle: "digestive", warming: "comfort" };
+const canon = n => ALIAS[n] || n;
+
 /** Effect names prescribed anywhere in an ingredient's research doc. */
 function researchEffects(file) {
   const src = readFileSync(file, "utf8");
@@ -44,20 +62,21 @@ function researchEffects(file) {
   // Table rows: | effects | [["name", n], ...] |
   for (const row of src.matchAll(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/g)) {
     for (const hit of row[1].matchAll(/\[\s*"([^"]+)"\s*,\s*[\d.]+\s*\]/g)) {
-      // The docs' "settle" is the app's "digestive" — same claim, and
-      // every gloss in the docs says so. Without the alias this audit
-      // reports four ingredients as un-transcribed that are in fact
-      // done, which is worse than useless: it makes a finished job
-      // look unfinished and hides the ones that genuinely aren't.
-      // Canonical-word aliases. The docs and the app sometimes use
-      // different words for one claim, and the app's word wins where
-      // it's the one the user meets:
-      //   settle  -> digestive  (docs' own glosses all say digestive)
-      //   warming -> comfort    (comfort is what onboarding offers as
-      //                          the warm register; carrying both made
-      //                          21 ingredients assert it twice)
-      const ALIAS = { settle: "digestive", warming: "comfort" };
-      names.add(ALIAS[hit[1]] || hit[1]);
+      names.add(canon(hit[1]));
+    }
+  }
+  // Addenda. A brew-point table is the normal place to prescribe an
+  // effect, but a finding often applies across every brew point rather
+  // than to one — darjeeling's L-theanine calm, say, which its §5
+  // effects-rating table has carried all along. Those carry the same
+  // machine-readable line the parity guard reads, so the two tools
+  // agree on what "sourced" means. Without it this audit reports
+  // freshly-researched ingredients as drift the moment they're done.
+  //
+  //   <!-- sourced-effects: focus, calm -->
+  for (const row of src.matchAll(/<!--\s*sourced-effects:\s*([^>]+?)\s*-->/g)) {
+    for (const n of row[1].split(",").map(x => x.trim()).filter(Boolean)) {
+      names.add(canon(n));
     }
   }
   return names;
@@ -71,7 +90,7 @@ function shippedEffects(id) {
     const sample = p[key];
     if (!sample || typeof sample !== "object") continue;
     for (const e of sample.effects || []) {
-      names.add(Array.isArray(e) ? e[0] : e.name);
+      names.add(canon(Array.isArray(e) ? e[0] : e.name));
     }
   }
   return names;

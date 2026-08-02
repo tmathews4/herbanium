@@ -437,3 +437,45 @@
    anti-aging, etc.) than Herbanium should reflect. Stuck to the
    well-supported digestive/cholesterol claims; other claims
    flagged as `folk` or omitted.
+
+---
+
+## Addendum — `calm` removed (2026-08-02)
+
+An audit found `calm` shipped at all three brew points (1.5 / 2 / 1)
+with nothing in this document behind it. §5 does better than stay
+silent — it rules the claim out by name:
+
+> **calm | | Not applicable in the L-theanine sense**
+
+and gives the mechanism one row above, under `focus`: pu-erh "lacks the
+L-theanine + caffeine synergy that defines green tea focus — L-theanine
+is essentially zero in pu-erh (Csupor 2016) because fermentation
+degrades it."
+
+The measurement holds up.
+
+> Csupor D et al. 2016. *Theanine and Caffeine Content of Infusions
+> Prepared from Commercial Tea Samples.* Of 37 commercial white, green,
+> oolong, black and pu-erh samples assayed by HPLC, **no theanine was
+> detected in the pu-erh samples** — practically zero, unique among
+> true teas —
+> https://www.researchgate.net/publication/293799309_Theanine_and_Caffeine_Content_of_Infusions_Prepared_from_Commercial_Tea_Samples
+>
+> Solid-state fermentation by tea-derived *Aspergillus* measurably
+> degrades pu-erh's alkaloid and amino-acid pool —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC5987490/
+
+This is the sharpest version of the pattern the catalogue keeps
+producing: pu-erh is the one true tea where the compound responsible
+for tea-calm has been fermented out of the leaf, and it was the tea
+shipping `calm` at every brew point. `calm` was not declared on the
+ingredient card either — it lived only in the extraction profile, so
+the card and the brew view disagreed.
+
+Removed. The sourced picture is `grounding`, `digestive`, `soothing`
+and the warm register; §5 rates the mellow, aged character as
+`soothing` 2, which is the real felt claim and is not the same claim as
+theanine calm.
+
+<!-- sourced-effects: digestive, grounding, soothing -->

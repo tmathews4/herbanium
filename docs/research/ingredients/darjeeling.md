@@ -362,3 +362,64 @@
 5. **Darjeeling labor ethics** — parallel concern to Assam. Nepali-
    origin worker welfare, 2017-2018 strike, ongoing wage disputes.
    Flagged for future `sourcing_note` field consideration.
+
+---
+
+## Addendum — `calm` kept (sourced), `cooling` removed (2026-08-02)
+
+An audit flagged both as shipped without a prescribing extraction-table
+row. They needed opposite answers, and the same axis explains both.
+
+### `calm` — kept
+
+Already researched: §5 rates `calm` 2, "mild, through the L-theanine
+angle", and §7's `ref-csupor-2016` is the measurement behind it. It was
+only ever invisible to the parity guard because it lives in the
+effects-rating table rather than in a §6 brew-point row.
+
+> Csupor D et al. 2016. *Theanine and Caffeine Content of Infusions
+> Prepared from Commercial Tea Samples.* 37 commercial samples by HPLC;
+> black tea mean L-theanine 5.13 mg/g (white 6.26, green 6.56, oolong
+> 6.09) —
+> https://www.researchgate.net/publication/293799309_Theanine_and_Caffeine_Content_of_Infusions_Prepared_from_Commercial_Tea_Samples
+>
+> *Varietal Differences in the Total and Enantiomeric Composition of
+> Theanine in Tea*, J. Agric. Food Chem. —
+> https://pubs.acs.org/doi/abs/10.1021/jf960432m
+>
+> *Effects of L-Theanine on the Release of α-Brain Waves in Human
+> Volunteers* —
+> https://www.jstage.jst.go.jp/article/nogeikagaku1924/72/2/72_2_153/_article
+
+Black tea retains most of the leaf's theanine — less than green, but
+nowhere near zero — and Chinese-variety bushes carry more of it than
+assamica, which is the Darjeeling case specifically. The felt claim is
+alpha-wave "wakeful relaxation," not sedation; `sleepy` stays absent.
+
+**Shipping it at the gentle point only is correct, not an oversight.**
+`calm` 1 sits at 85°C/180s and nowhere hotter. Theanine is the
+water-soluble amino acid that comes out early; push the cup and
+catechin and caffeine extraction climbs past it. Sencha's §6c records
+the same mechanism in its own words — "theanine masked by catechin
+extraction." The gentle Darjeeling is the theanine cup; the 95°C one
+is not.
+
+### `cooling` — removed
+
+§5 of this document already answers it: **"cooling | | Not applicable —
+oxidized tea."** The app shipped `cooling` 1 anyway, and shipped it at
+95°C — the *most* extracted, hardest-pushed brew point, in the same
+`effects` row as `warming` 4. One cup asserting both directions of the
+thermal axis at once.
+
+> TCM thermal nature tracks oxidation: the most warming teas are the
+> most oxidized — black, dark oolong, shou pu-erh — while minimally
+> oxidized white and green teas are the cooling ones.
+> https://pathofcha.com/blogs/all-about-tea/traditional-chinese-medicine-heating-chinese-teas
+
+Darjeeling is a fully oxidized black tea. `warming` already carries the
+sourced thermal picture, and it climbs with extraction exactly as the
+tradition describes. `cooling` was never declared on the ingredient
+card either — it existed only in this one profile row. Removed.
+
+<!-- sourced-effects: calm -->

@@ -585,7 +585,7 @@ export const EXTRACTION_PROFILES = {
         ["astringent", 4.0], ["earthy", 3.0], ["bitter", 2.5],
         ["rich", 2.0], ["bright", 1.5], ["muscatel", 1.0],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 3], ["cooling", 1], ["warming", 4]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 3], ["warming", 4]],
       character: "Muscatel volatile gone — what's left is a standard tannic black tea, the Darjeeling signature buried under catechin grip." },
   ],
 
@@ -647,13 +647,13 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Pu-erh ────────────────────────────────────────
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2], ["calm", 1.5], ["warming", 1.5], ["soothing", 2]],
+      effects: [["comfort", 3], ["digestive", 2], ["grounding", 2], ["warming", 1.5], ["soothing", 2]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 2], ["warming", 2], ["soothing", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["warming", 2], ["soothing", 2]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
-      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["calm", 1], ["warming", 2], ["bitterness", 2], ["energy", 2]],
+      effects: [["comfort", 4], ["digestive", 3], ["grounding", 3], ["warming", 2], ["bitterness", 2], ["energy", 2]],
       character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
