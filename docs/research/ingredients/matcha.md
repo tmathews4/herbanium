@@ -572,3 +572,45 @@
 10. **Decaffeinated matcha exists but is rare.** Mostly used
     for late-evening or pregnancy-conscious consumption.
     Future catalog consideration if user demand surfaces.
+
+---
+
+## Addendum — `uplifting` transcribed, `soothing` cannot be (2026-08-02)
+
+An audit found two effects this document prescribes that no brew point
+ever carried. Only one of them is transcribable, and the reason is
+structural rather than an oversight.
+
+**§6 here is not a temperature gradient.** It is three preparations —
+usucha, koicha, matcha latte — and the section says so outright: "the
+standard GENTLE/STANDARD/STRONG extraction model doesn't fit matcha
+cleanly because there's no extraction in the standard sense." The
+shipped profile, like every other profile in the app, is a
+temperature/time curve. The two axes are not the same axis.
+
+### `uplifting` 2 — transcribed
+
+Prescribed at **all three** preparations, and rated 2 in §5 on general
+grounds ("the bright vegetal aromatic profile and sustained energy
+combine to produce mood-positive effect"). General across preparations
+means it survives the translation, so it now ships at 2 across the
+70–80°C samples.
+
+Not added at 90°C or 95°C. Those points are above anything §6
+describes — matcha is whisked at 70–80°C and the hotter rows model a
+scalded cup — and the profile already drops `calm` and most of `focus`
+there. Adding a mood-positive claim to the two rows that exist to show
+the drink going wrong would contradict the profile's own logic.
+
+### `soothing` — not transcribable
+
+Prescribed for koicha (1) and the latte (2), and absent from usucha.
+Those differ by **concentration and by the presence of milk**, not by
+temperature — koicha is 4–5g kneaded into 30–50ml, the latte is
+matcha plus steamed milk. The profile has no axis for either. Placing
+`soothing` at some temperature would be inventing a structure the
+research doesn't support, purely to make an audit line go away.
+
+Recorded instead as a known structural limit.
+
+<!-- preparation-only: soothing -->

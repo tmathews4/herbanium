@@ -83,6 +83,39 @@ function researchEffects(file) {
   return names;
 }
 
+/**
+ * Effects a doc prescribes ONLY inside a preparation the shipped
+ * profile has no way to represent.
+ *
+ * Most docs model a temperature/time gradient, which is what a profile
+ * is. A few model PREPARATIONS instead — matcha's §6 is usucha, koicha
+ * and latte, and says outright that "the standard GENTLE/STANDARD/
+ * STRONG extraction model doesn't fit matcha because there's no
+ * extraction in the standard sense." Yerba-mate's is gourd, tea bag
+ * and tereré.
+ *
+ * Where such an effect is general across the preparations it can still
+ * be transcribed — mate is uplifting however you make it. Where it
+ * belongs to one preparation the temperature axis cannot express, it
+ * cannot: yerba-mate's `cooling` is prescribed only for tereré, served
+ * at 5-10C, and the profile's coldest sample is 70C. Transcribing it
+ * would assert that HOT mate is cooling, which the doc denies in §5
+ * ("not primary; slight in tereré").
+ *
+ * Marked in the doc so this reads as a known structural limit rather
+ * than as un-transcribed work the audit nags about forever:
+ *
+ *   <!-- preparation-only: cooling -->
+ */
+function preparationOnly(file) {
+  const names = new Set();
+  for (const row of readFileSync(file, "utf8")
+    .matchAll(/<!--\s*preparation-only:\s*([^>]+?)\s*-->/g)) {
+    for (const n of row[1].split(",").map(x => x.trim()).filter(Boolean)) names.add(canon(n));
+  }
+  return names;
+}
+
 /** Effect names the shipped extraction profile actually produces. */
 function shippedEffects(id) {
   const p = EXTRACTION_PROFILES[id];
@@ -111,9 +144,10 @@ for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
   const research = researchEffects(resolve(DOCS, file));
   if (research.size === 0) { rows.push({ slug, id, noTable: true }); continue; }
   const shipped = shippedEffects(id);
-  const missing = [...research].filter(n => !shipped.has(n)).sort();
+  const prepOnly = preparationOnly(resolve(DOCS, file));
+  const missing = [...research].filter(n => !shipped.has(n) && !prepOnly.has(n)).sort();
   const extra = [...shipped].filter(n => !research.has(n) && n !== "bitterness").sort();
-  rows.push({ slug, id, missing, extra, research: research.size });
+  rows.push({ slug, id, missing, extra, research: research.size, prepOnly: [...prepOnly] });
 }
 
 const drifted = rows.filter(r => r.missing?.length);
@@ -151,6 +185,13 @@ if (strengthDiffs.length) {
     + `transcription rounding and perception tuning, mostly fine)`);
   if (unpairable) console.log(`\n  ${unpairable} doc brew points could not be paired to a `
     + `shipped sample\n  (no exact tempC+timeS and no unique tempC) — NOT compared.`);
+}
+
+const prepAll = rows.filter(r => r.prepOnly?.length);
+if (prepAll.length) {
+  console.log(`\nPRESCRIBED ONLY IN A PREPARATION THE PROFILE CAN'T MODEL `
+    + `(${prepAll.length}) — not drift, a structural limit:\n`);
+  for (const r of prepAll) console.log(`  ${r.id.padEnd(20)} ${r.prepOnly.join(", ")}`);
 }
 
 if (noTable.length) {

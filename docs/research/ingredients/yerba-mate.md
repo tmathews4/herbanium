@@ -580,3 +580,39 @@
     Mate Maté, Yerba Mate Bros, etc.). User-facing copy
     should engage this gateway honestly — these are mate, but
     typically with added caffeine, sugar, or other ingredients.
+
+---
+
+## Addendum — `uplifting` transcribed, `cooling` cannot be (2026-08-02)
+
+Same shape as matcha, and the same cause: **§6 here models three
+preparations, not a temperature gradient** — the traditional gourd
+(*mate*/*chimarrão*), the Western tea bag, and *tereré*.
+
+### `uplifting` — transcribed
+
+Prescribed at all three preparations and rated 2 in §5 as "the bright
+social register; mate is associated culturally with conversation,
+friendship, daytime energy." General across preparations, so it
+translates. Shipped at 2, dropping to 1 at the lightest cup — §6b, the
+tea-bag preparation, is the one the doc rates at 1, and the 70°C
+sample is its closest analogue.
+
+### `cooling` — not transcribable
+
+Prescribed **only** for tereré, and §5 is explicit that this is not a
+general property: *"cooling | | Not primary; slight in tereré (cold
+preparation)."*
+
+Tereré is served at **5–10°C**. The coldest sample in the shipped
+profile is 70°C. There is no cup in this profile that tereré
+corresponds to, and putting `cooling` on a 70°C sample would assert
+that hot mate is cooling — which is the opposite of what §5 says.
+
+The honest answer is that the app cannot currently express a cold
+preparation of a hot-brewed ingredient. That's a real limitation of
+the profile shape, worth knowing about, and better recorded than
+papered over. If cold-brew preparations ever get their own axis,
+tereré is the first thing to model.
+
+<!-- preparation-only: cooling -->

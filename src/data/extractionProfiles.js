@@ -731,13 +731,13 @@ export const EXTRACTION_PROFILES = {
     // extraction (scorched / destroyed when the water is too hot
     // for the chlorophyll-rich shaded leaf).
     { tempC: 70, timeS: 15, flavors: ["umami", "sweet", "creamy"],
-      effects: [["focus", 3], ["calm", 2]],
+      effects: [["focus", 3], ["calm", 2], ["uplifting", 2]],
       character: "Light usucha — frothy and gentle, the morning bowl." },
     { tempC: 75, timeS: 20, flavors: ["umami", "vegetal", "grassy", "creamy", "sweet"],
-      effects: [["focus", 4], ["energy", 3], ["calm", 3]],
+      effects: [["focus", 4], ["energy", 3], ["calm", 3], ["uplifting", 2]],
       character: "The standard whisk. Full umami body, creamy and grass-sweet, balanced focus." },
     { tempC: 80, timeS: 30, flavors: ["umami", "vegetal", "creamy", "grassy", "marine", "oceanic", "astringent", "sweet"],
-      effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 2]],
+      effects: [["focus", 5], ["energy", 4], ["calm", 3], ["bitterness", 2], ["uplifting", 2]],
       character: "Pushed thick — koicha territory. Dense umami and marine depth; catechins climb behind it." },
     { tempC: 90, timeS: 30,
       flavorStrengths: [
@@ -777,20 +777,20 @@ export const EXTRACTION_PROFILES = {
   // ─── Caffeinated herbal ─────────────────────────────────────
   "yerba-mate": [
     { tempC: 70, timeS: 60,  flavors: ["earthy", "grassy"],
-      effects: [["energy", 3], ["focus", 2]],
+      effects: [["energy", 3], ["focus", 2], ["uplifting", 1]],
       character: "First fill — bright and herbal, the gentle wake." },
     { tempC: 78, timeS: 180, flavors: ["earthy", "grassy", "herbaceous", "bitter"],
-      effects: [["energy", 4], ["focus", 3], ["digestive", 2]],
+      effects: [["energy", 4], ["focus", 3], ["digestive", 2], ["uplifting", 2]],
       character: "The classic gourd cup. Full mate — the durative caffeine pull." },
     { tempC: 85, timeS: 300, flavors: ["earthy", "grassy", "herbaceous", "bitter", "smoky"],
-      effects: [["energy", 4], ["focus", 3], ["bitterness", 2]],
+      effects: [["energy", 4], ["focus", 3], ["bitterness", 2], ["uplifting", 2]],
       character: "Pushed long. Saponins surface — tongue-coating bitter." },
     { tempC: 95, timeS: 360,
       flavorStrengths: [
         ["bitter", 4.0], ["astringent", 3.5], ["harsh", 3.0],
         ["earthy", 2.5], ["herbaceous", 2.0], ["smoky", 1.8],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5], ["uplifting", 2]],
       character: "The 'quemado' cup — water too hot for the gourd. Saponins and chlorogenic acids strip the herb of its bright top, leaving harsh-bitter under-tongue." },
   ],
 
