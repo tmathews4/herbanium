@@ -28,6 +28,7 @@
 
 import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
+import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
 import { cToF, useUnit } from "../units/units";
