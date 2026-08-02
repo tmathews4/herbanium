@@ -232,7 +232,7 @@ export const EXTRACTION_PROFILES = {
 
   vanilla: [
     { tempC: 95,  timeS: 240, flavors: ["sweet", "creamy"],
-      effects: [["comfort", 3], ["digestive", 2], ["soothing", 4], ["warming", 1], ["calm", 1]],
+      effects: [["comfort", 3], ["digestive", 2], ["soothing", 4], ["warming", 1], ["calm", 1], ["sleepy", 2]],
       character: "Light vanilla — soft sweetness, a gentle comfort." },
     { tempC: 98,  timeS: 360, flavors: ["sweet", "creamy", "floral", "warm"],
       effects: [["comfort", 4], ["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1]],
@@ -352,7 +352,7 @@ export const EXTRACTION_PROFILES = {
         ["toasted", 2.0], ["vegetal", 1.4], ["brisk", 1.0],
         ["bold", 0.8], ["mineral", 0.6],
       ],
-      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["uplifting", 3]],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["uplifting", 3], ["cooling", 2]],
       character: "Cool first pour — gunpowder unfurling, toasted-mineral lead with a quiet brisk edge." },
     { tempC: 80,  timeS: 120,
       flavorStrengths: [
@@ -464,7 +464,7 @@ export const EXTRACTION_PROFILES = {
         ["astringent", 4.0], ["vegetal", 3.0], ["bitter", 2.5],
         ["chestnut", 2.0], ["nutty", 1.5], ["bean", 1.5],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 4], ["warming", 4]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 4], ["warming", 4], ["cooling", 1]],
       character: "Pan-fired sweetness gone — catechin grip dominates, the chestnut signature lost behind tannin." },
   ],
 
@@ -513,8 +513,8 @@ export const EXTRACTION_PROFILES = {
 
   // ─── True teas: Oolong ────────────────────────────────────────
   oolong: [
-    { tempC: 85,  timeS: 90,  flavors: ["floral", "fruit", "orchid"],
-      effects: [["focus", 2], ["calm", 2], ["energy", 2]],
+    { tempC: 85,  timeS: 90,  flavors: ["floral", "fruit", "orchid", "sweet", "delicate"],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["uplifting", 3]],
       character: "Light oolong — floral top with orchid edge, gentle lift, early extraction." },
     { tempC: 90,  timeS: 135, flavors: ["floral", "honey", "fruit", "orchid", "peach", "creamy", "toasted"],
       effects: [["focus", 3], ["calm", 2], ["energy", 3], ["comfort", 2], ["uplifting", 3], ["warming", 2]],
@@ -552,7 +552,7 @@ export const EXTRACTION_PROFILES = {
         ["astringent", 4.0], ["earthy", 3.0], ["bitter", 2.5],
         ["rich", 2.0], ["bright", 1.5], ["muscatel", 1.0],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 3], ["cooling", 1]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3], ["uplifting", 3], ["cooling", 1], ["warming", 4]],
       character: "Muscatel volatile gone — what's left is a standard tannic black tea, the Darjeeling signature buried under catechin grip." },
   ],
 
@@ -820,8 +820,8 @@ export const EXTRACTION_PROFILES = {
     { tempC: 95,  timeS: 300, flavors: ["earthy", "grassy"],
       effects: [["comfort", 2], ["soothing", 2], ["grounding", 1], ["digestive", 1]],
       character: "Light nettle — green and mineral, a quiet spring tonic." },
-    { tempC: 98,  timeS: 600, flavors: ["earthy", "grassy", "mineral", "vegetal"],
-      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1]],
+    { tempC: 98,  timeS: 600, flavors: ["earthy", "grassy", "mineral", "vegetal", "spinach-like"],
+      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["grounding", 2], ["uplifting", 1]],
       character: "The standard cup. Full mineral pull, the daily green." },
     { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "mineral", "vegetal", "sweet", "astringent"],
       effects: [["comfort", 3], ["digestive", 2], ["bitterness", 2], ["soothing", 3], ["grounding", 2], ["uplifting", 1], ["calm", 1], ["warming", 1]],

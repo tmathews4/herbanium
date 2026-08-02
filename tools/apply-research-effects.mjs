@@ -27,7 +27,7 @@ import { readFileSync, writeFileSync, readdirSync } from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
-import { FAMILY_BY_EFFECT } from "../src/data/families.js";
+import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../src/data/families.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -43,6 +43,8 @@ function docBrewPoints(file) {
     const temp = block.match(/\|\s*tempC\s*\|\s*([\d.]+)\s*\|/);
     const time = block.match(/\|\s*timeS\s*\|\s*([\d.]+)\s*\|/);
     const eff = block.match(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/);
+    // Flavours are a bare bracketed list in the docs: [earthy, mild].
+    const flv = block.match(/\|\s*flavors\s*\|\s*\[([^\]]*)\]\s*\|/);
     if (!temp || !time || !eff) continue;
     const effects = [...eff[1].matchAll(/\[\s*"([^"]+)"\s*,\s*([\d.]+)\s*\]/g)]
       .map(m => [m[1], Number(m[2])])
@@ -55,12 +57,23 @@ function docBrewPoints(file) {
         unmapped.set(n, (unmapped.get(n) || 0) + 1);
         return false;
       });
-    points.push({ tempC: Number(temp[1]), timeS: Number(time[1]), effects });
+    const flavors = (flv ? flv[1].split(",") : [])
+      .map(x => x.trim().replace(/^["']|["']$/g, ""))
+      .filter(Boolean)
+      // Same rule as effects: a flavour with no family can't be drawn,
+      // and inventing one is an editorial call.
+      .filter(n => {
+        if (FAMILY_BY_FLAVOR[n]) return true;
+        unmappedFlavors.set(n, (unmappedFlavors.get(n) || 0) + 1);
+        return false;
+      });
+    points.push({ tempC: Number(temp[1]), timeS: Number(time[1]), effects, flavors });
   }
   return points;
 }
 
 const unmapped = new Map();
+const unmappedFlavors = new Map();
 const docFor = {};
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
   const slug = file.replace(/\.md$/, "");
@@ -135,6 +148,23 @@ for (const [id, points] of Object.entries(docFor)) {
     }
     src = src.slice(0, idx) + merged + src.slice(idx + existing.length);
     changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, add });
+
+    // Flavours, same rules. Samples using flavorStrengths (the
+    // cold-pour points) are skipped — they carry per-flavour weights
+    // and appending a bare name would silently change their shape.
+    if (Array.isArray(sample.flavors) && best.flavors?.length) {
+      const haveF = new Set(sample.flavors);
+      const addF = best.flavors.filter(n => !haveF.has(n));
+      if (addF.length) {
+        const exF = "[" + sample.flavors.map(f => `"${f}"`).join(", ") + "]";
+        const mgF = "[" + [...sample.flavors, ...addF].map(f => `"${f}"`).join(", ") + "]";
+        const iF = src.indexOf(exF);
+        if (iF !== -1) {
+          src = src.slice(0, iF) + mgF + src.slice(iF + exF.length);
+          changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, addF });
+        }
+      }
+    }
   }
 }
 
@@ -143,7 +173,8 @@ const skipped = changes.filter(c => c.skipped);
 
 for (const c of applied) {
   console.log(`  ${c.id.padEnd(18)} ${String(c.tempC).padStart(3)}C/${String(c.timeS).padStart(4)}s  `
-    + `+ ${c.add.map(([n, v]) => `${n} ${v}`).join(", ")}`);
+    + (c.add ? `+ ${c.add.map(([n, v]) => `${n} ${v}`).join(", ")}`
+             : `+ flavours ${c.addF.join(", ")}`));
 }
 if (skipped.length) {
   console.log(`\nSKIPPED (${skipped.length}) — couldn't anchor on the existing array:`);
@@ -156,7 +187,12 @@ if (unmapped.size) {
   for (const [n, count] of unmapped) console.log(`  ${n} (in ${count} brew points)`);
 }
 
-console.log(`\n${applied.reduce((n, c) => n + c.add.length, 0)} effect values added `
+if (unmappedFlavors.size) {
+  console.log(`\nUNMAPPED FLAVOURS (${unmappedFlavors.size}) — skipped:`);
+  for (const [n, c] of unmappedFlavors) console.log(`  ${n} (in ${c} brew points)`);
+}
+
+console.log(`\n${applied.reduce((n, c) => n + (c.add?.length || c.addF?.length || 0), 0)} values added `
   + `across ${new Set(applied.map(c => c.id)).size} ingredients, `
   + `${applied.length} brew points.`);
 if (WRITE) {
