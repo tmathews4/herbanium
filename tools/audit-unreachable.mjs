@@ -26,6 +26,7 @@
 
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import { resolveBlendAtBrew } from "../src/algo/compose.js";
+import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../src/data/families.js";
 
 // Matches SECONDARY_THRESHOLD in components/FlavorMap: below this a
 // track earns no row, so the user never sees it.
@@ -71,12 +72,30 @@ function sweep(id) {
     ...(meta.flavors || []).map(f => ({ kind: "flavor", name: f, declared: null })),
   ];
 
+  const famOf = (d) =>
+    (d.kind === "effect" ? FAMILY_BY_EFFECT : FAMILY_BY_FLAVOR)[d.name] || null;
+
+  // Which families DID surface, and under which name. This is the
+  // split that decides the fix: a suppressed property whose family is
+  // already on screen under a sibling name isn't lost information, it's
+  // the same idea declared twice — masking doing its job on redundant
+  // data. A suppressed property whose whole family vanished is real
+  // information the user never sees.
+  const surfacedFamily = new Map();
+  for (const d of declared) {
+    const got = peak.get(`${d.kind}:${d.name}`) || 0;
+    const fam = famOf(d);
+    if (got >= VISIBLE && fam) surfacedFamily.set(`${d.kind}:${fam}`, d.name);
+  }
+
   const unreachable = [];
   const borderline = [];
   for (const d of declared) {
     const got = peak.get(`${d.kind}:${d.name}`) || 0;
-    if (got < VISIBLE) unreachable.push({ ...d, got });
-    else if (got < BORDERLINE) borderline.push({ ...d, got });
+    const fam = famOf(d);
+    const sibling = fam ? surfacedFamily.get(`${d.kind}:${fam}`) : null;
+    if (got < VISIBLE) unreachable.push({ ...d, got, fam, sibling });
+    else if (got < BORDERLINE) borderline.push({ ...d, got, fam, sibling });
   }
   return { id, name: meta.name, declared: declared.length, unreachable, borderline };
 }
@@ -103,6 +122,25 @@ if (SHOW_ALL) {
       + r.borderline.map(u => `${u.name} peaks ${u.got.toFixed(2)}`).join(", "));
   }
 }
+
+const allGaps = withGaps.flatMap(r => r.unreachable.map(u => ({ ...u, ing: r.name })));
+const redundant = allGaps.filter(u => u.sibling);
+const lost = allGaps.filter(u => !u.sibling);
+
+console.log(`\n── REDUNDANT (${redundant.length}) — family already on screen under a sibling name`);
+console.log("   Masking is working; the DATA says the same thing twice.\n");
+for (const u of redundant.slice(0, 14)) {
+  console.log(`  ${u.ing.padEnd(18)} ${u.name.padEnd(12)} suppressed, but "${u.sibling}" carries ${u.fam}`);
+}
+if (redundant.length > 14) console.log(`  ... and ${redundant.length - 14} more`);
+
+console.log(`\n── LOST (${lost.length}) — the whole family vanished`);
+console.log("   Real information the user can never see. This is the masking bug.\n");
+for (const u of lost.slice(0, 20)) {
+  console.log(`  ${u.ing.padEnd(18)} ${u.name.padEnd(12)}`
+    + `${u.declared != null ? `declared ${u.declared}` : ""}  (family: ${u.fam || "unmapped"})`);
+}
+if (lost.length > 20) console.log(`  ... and ${lost.length - 20} more`);
 
 const totalDeclared = rows.reduce((n, r) => n + r.declared, 0);
 const totalGap = rows.reduce((n, r) => n + r.unreachable.length, 0);
