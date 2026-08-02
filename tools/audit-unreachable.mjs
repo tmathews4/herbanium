@@ -129,10 +129,24 @@ const lost = allGaps.filter(u => !u.sibling);
 
 console.log(`\n── REDUNDANT (${redundant.length}) — family already on screen under a sibling name`);
 console.log("   Masking is working; the DATA says the same thing twice.\n");
-for (const u of redundant.slice(0, 14)) {
-  console.log(`  ${u.ing.padEnd(18)} ${u.name.padEnd(12)} suppressed, but "${u.sibling}" carries ${u.fam}`);
+// Grouped by the WORD PAIR, not the ingredient. Each pair is one
+// editorial decision — "is soothing a different register from calm, or
+// the same idea twice?" — and answering it once settles every
+// ingredient that uses it. Listing 42 rows invites 42 judgements of
+// the same question.
+const byPair = new Map();
+for (const u of redundant) {
+  const key = `${u.kind}|${u.name}|${u.sibling}`;
+  if (!byPair.has(key)) byPair.set(key, { ...u, ings: [] });
+  byPair.get(key).ings.push(u.ing);
 }
-if (redundant.length > 14) console.log(`  ... and ${redundant.length - 14} more`);
+const pairs = [...byPair.values()].sort((a, b) => b.ings.length - a.ings.length);
+console.log(`   ${pairs.length} distinct word pairs across ${redundant.length} cases.\n`);
+for (const p of pairs) {
+  console.log(`  ${(p.name + " -> " + p.sibling).padEnd(34)} [${p.kind}/${p.fam}] `
+    + `x${String(p.ings.length).padStart(2)}  ${p.ings.slice(0, 4).join(", ")}`
+    + (p.ings.length > 4 ? ", ..." : ""));
+}
 
 console.log(`\n── LOST (${lost.length}) — the whole family vanished`);
 console.log("   Real information the user can never see. This is the masking bug.\n");
