@@ -413,11 +413,39 @@ export const BlendExtractionExplorer = ({
         <div style={{
           display: "flex", justifyContent: "flex-end", alignItems: "center",
         }}>
+          {/* During the tour's Simple/Detailed steps the toggle takes a
+              terra outline and a slow pulse of its own. The spotlight
+              already lights the whole strip block — which is right,
+              since what the toggle DOES is the lesson — but that leaves
+              the control itself just one more thing inside a large
+              bright area. The second, smaller signal says which part to
+              actually look at. Terra rather than the spotlight's white
+              so the two read as different jobs: the halo is "look
+              here", this is "this is the control". */}
+          {tourStep === "blend-mode" && (
+            <style>{`
+              @keyframes tourTogglePulse {
+                0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.55); }
+                50%      { box-shadow: 0 0 0 6px rgba(176,84,47,0.02); }
+              }
+              @media (prefers-reduced-motion: reduce) {
+                @keyframes tourTogglePulse {
+                  0%, 100% { box-shadow: 0 0 0 3px rgba(176,84,47,0.32); }
+                }
+              }
+            `}</style>
+          )}
           <span data-tour="blend-mode" style={{
             display: "inline-flex",
-            border: `1px solid ${theme.ruleSoft}`,
+            border: tourStep === "blend-mode"
+              ? `1.5px solid ${theme.terra}`
+              : `1px solid ${theme.ruleSoft}`,
             borderRadius: 999,
             overflow: "hidden",
+            animation: tourStep === "blend-mode"
+              ? "tourTogglePulse 1.9s ease-in-out infinite"
+              : undefined,
+            transition: "border-color 0.3s ease",
           }}>
             {[
               { id: "simple",   label: "Simple"   },

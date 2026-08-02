@@ -291,8 +291,19 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       message: "spotlight should settle over the whole bars block",
     }).toEqual({ coversTop: true, coversBottom: true });
 
+    // The toggle itself pulses in terra while these steps are up. The
+    // spotlight lights the whole strip block, which is right — what the
+    // toggle DOES is the lesson — but that leaves the control as one
+    // more thing inside a large bright area, so it gets a second,
+    // smaller signal of its own.
+    const toggle = page.locator('[data-tour="blend-mode"]');
+    await expect(toggle).toHaveCSS("animation-name", "tourTogglePulse");
+    await expect(toggle).toHaveCSS("border-color", /rgb\(176, ?84, ?47\)/);
+
     await callout.getByRole("button", { name: "Next", exact: true }).click();
     await expect(callout).toContainText("Detailed opens every family");
+    await expect(toggle, "the pulse should hold across both toggle steps")
+      .toHaveCSS("animation-name", "tourTogglePulse");
     await expect(callout).toContainText("We'll leave it on Simple");
     const detailedH = (await graph.boundingBox())!.height;
     expect(detailedH, `Detailed should grow the graph (simple=${simpleH}, detailed=${detailedH})`)
@@ -302,6 +313,8 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // the prediction/slider steps depend on.
     await callout.getByRole("button", { name: "Next", exact: true }).click();
     await expect(callout).toContainText("The prediction");
+    await expect(toggle, "and stop once the tour moves past them")
+      .not.toHaveCSS("animation-name", "tourTogglePulse");
     expect((await graph.boundingBox())!.height).toBeCloseTo(simpleH, 0);
   });
 
