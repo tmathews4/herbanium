@@ -630,14 +630,20 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [["earthy", 0.6], ["musty", 0.4]],
       effects: [["grounding", 0.5]],
       character: "Cold-pour ashwagandha — barely tinted water, the withanolides locked in the root." },
+    // Transcribed from docs/research/ingredients/ashwagandha.md 6a-6c.
+    // The shipped values had drifted from the researched ones: soothing
+    // was absent from all three points and warming from the standard
+    // cup, so the ingredient page promised a stress-buffering, warming
+    // root and the brew view showed neither. Grounding at the gentle
+    // point and the standard cup's temperature were also off.
     { tempC: 95,  timeS: 600,  flavors: ["earthy", "musty"],
-      effects: [["grounding", 2], ["calm", 2]],
+      effects: [["grounding", 3], ["calm", 2], ["soothing", 2]],
       character: "Light ashwagandha — gentle root warmth, faint musk." },
-    { tempC: 98,  timeS: 900,  flavors: ["earthy", "musty", "bitter", "woody"],
-      effects: [["grounding", 3], ["calm", 3], ["sleepy", 2]],
+    { tempC: 100, timeS: 900,  flavors: ["earthy", "musty", "bitter", "woody"],
+      effects: [["grounding", 4], ["calm", 3], ["sleepy", 3], ["soothing", 3], ["warming", 2]],
       character: "The standard kshir-style cup. Full root depth, the classic adaptogenic digestive." },
     { tempC: 100, timeS: 1200, flavors: ["earthy", "musty", "bitter", "woody"],
-      effects: [["grounding", 4], ["calm", 3], ["sleepy", 3], ["bitterness", 2]],
+      effects: [["grounding", 4], ["calm", 3], ["sleepy", 4], ["soothing", 3], ["bitterness", 2]],
       character: "Long decoction. Maximum withanolide pull — deep grounding, distinctly bitter." },
   ],
 
