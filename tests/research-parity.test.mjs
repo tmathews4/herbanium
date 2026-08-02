@@ -44,6 +44,7 @@ import {
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
+import { undescribedOppositions } from "../tools/lib/opposition.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -209,6 +210,48 @@ test("every declared ingredient effect has a family", () => {
     }
   }
   assert(orphans.size === 0, `declared effects with no family:\n    ${[...orphans].join("\n    ")}`);
+});
+
+// ── 1c. Cups whose tension the app never names ───────────────────
+
+// A single ingredient prescribing two opposed effects at the SAME brew
+// point is evidence the opposition isn't real — one cup demonstrably
+// holds both. (Different brew points prove nothing; the cup changes
+// register as it extracts.) Where the engine already has language, that
+// is the system working: energy + calm fires the "alert calm" synergy
+// across seven true teas, which is the L-theanine signature.
+//
+// These are the ones with NO synergy and NO paradox tag, so the app
+// stays silent about a tension its own research documents. NOT lost
+// data — nothing cancels effects; the paradox list only drives an
+// informational tag. Ratcheted so a new one has to be a decision.
+//
+// Clearing an entry means writing the synergy or paradox with a source
+// behind it, the same rule as any other claim here. Do not just delete
+// the line.
+const KNOWN_UNDESCRIBED = new Set([
+  "energy|soothing::dandelion-root",
+  "energy|soothing::ginger",
+  "energy|soothing::matcha",
+  "grounding|uplifting::cardamom",
+  "grounding|uplifting::dandelion-leaf",
+  "grounding|uplifting::nettle",
+  "grounding|uplifting::tulsi",
+]);
+
+test("no new cup holds an opposed pair the app can't describe", () => {
+  const fresh = undescribedOppositions(EXTRACTION_PROFILES)
+    .map(o => `${o.key}::${o.id}`)
+    .filter(k => !KNOWN_UNDESCRIBED.has(k));
+  assert(fresh.length === 0,
+    `opposed pairs in one cup with no synergy or paradox:\n    ${fresh.join("\n    ")}`);
+});
+
+test("the known-undescribed list has no stale entries", () => {
+  const live = new Set(undescribedOppositions(EXTRACTION_PROFILES).map(o => `${o.key}::${o.id}`));
+  const stale = [...KNOWN_UNDESCRIBED].filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `no longer undescribed — remove from KNOWN_UNDESCRIBED:\n    ${stale.join("\n    ")}`);
 });
 
 // ── 1b. Right effect, wrong magnitude ────────────────────────────

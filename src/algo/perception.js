@@ -343,7 +343,9 @@ export const EFFECT_SYNERGIES = [
 // chamomile-heavy) — the cup honestly pushes both directions and
 // the user deserves to know rather than have the engine quietly
 // average it out.
-const ALLOWED_PARADOXES = [
+// Exported so tools/lib/opposition.mjs can derive what the engine has
+// language for, rather than keeping a hand-copied list that goes stale.
+export const ALLOWED_PARADOXES = [
   ["warming", "cooling"],
   ["energy", "sleepy"],
 ];
