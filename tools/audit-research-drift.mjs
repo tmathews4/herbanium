@@ -29,6 +29,7 @@ import { readFileSync, existsSync, readdirSync } from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
+import { strengthDrift, SEVERE } from "./lib/strength-drift.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -132,6 +133,24 @@ if (extras.length) {
   console.log(`\nSHIPPED BUT NOT PRESCRIBED (${extras.length}) — may be fine, `
     + `but worth an eye:\n`);
   for (const r of extras) console.log(`  ${r.id.padEnd(20)} extra: ${r.extra.join(", ")}`);
+}
+
+const { diffs: strengthDiffs, unpairable } = strengthDrift(EXTRACTION_PROFILES);
+if (strengthDiffs.length) {
+  const severe = strengthDiffs.filter(d => d.delta >= SEVERE);
+  console.log(`\nSTRENGTH DRIFT — right effect, wrong magnitude `
+    + `(${strengthDiffs.length} across paired brew points):\n`);
+  console.log(`  ${severe.length} differ by ${SEVERE}+ points — these are the ones worth `
+    + `an argument:\n`);
+  for (const d of severe) {
+    console.log(`  ${d.id.padEnd(18)} ${String(d.tempC).padStart(3)}C  `
+      + `${d.name.padEnd(11)} doc ${String(d.doc).padStart(4)} -> app ${d.app}`);
+  }
+  const minor = strengthDiffs.length - severe.length;
+  if (minor) console.log(`\n  (+${minor} differing by under ${SEVERE} — `
+    + `transcription rounding and perception tuning, mostly fine)`);
+  if (unpairable) console.log(`\n  ${unpairable} doc brew points could not be paired to a `
+    + `shipped sample\n  (no exact tempC+timeS and no unique tempC) — NOT compared.`);
 }
 
 if (noTable.length) {

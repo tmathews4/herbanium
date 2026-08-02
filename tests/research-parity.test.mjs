@@ -43,6 +43,7 @@ import {
   MOOD_FAMILY_LABEL,
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
+import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -208,6 +209,46 @@ test("every declared ingredient effect has a family", () => {
     }
   }
   assert(orphans.size === 0, `declared effects with no family:\n    ${[...orphans].join("\n    ")}`);
+});
+
+// ── 1b. Right effect, wrong magnitude ────────────────────────────
+
+// Strength drift that exists today, keyed `id@tempC:effect`. Same
+// ratchet discipline as KNOWN_UNSOURCED: work these off and delete the
+// line; a NEW one fails immediately. Until this guard existed nothing
+// compared magnitudes at all, so a claim could sit at 6x its researched
+// strength with the whole suite green.
+const KNOWN_STRENGTH_DRIFT = new Set([
+  "assam@95:energy",             // doc 5 -> app 3
+  "cardamom@95:uplifting",       // doc 3 -> app 1
+  "cranberry@100:uplifting",     // doc 1 -> app 3
+  "cranberry@100:cooling",       // doc 1 -> app 3
+  "dried-apple@100:comfort",     // doc 1 -> app 3
+  "elderflower@90:calm",         // doc 1 -> app 3
+  "gyokuro@50:focus",            // doc 5 -> app 3
+  "lemon-peel@95:cooling",       // doc 1 -> app 3
+  "lemon-peel@100:cooling",      // doc 1 -> app 3
+  "licorice-root@100:warming",   // doc 1 -> app 3
+  "lions-mane@95:focus",         // doc 1 -> app 3
+  "puerh@95:digestive",          // doc 4 -> app 2
+  "puerh@100:warming",           // doc 4 -> app 2
+  "rooibos@100:soothing",        // doc 5 -> app 3
+  "vanilla@95:calm",             // doc 3 -> app 1
+]);
+
+test("no new claim drifts 2+ points from its researched strength", () => {
+  const fresh = severeDrift(EXTRACTION_PROFILES)
+    .filter(d => !KNOWN_STRENGTH_DRIFT.has(driftKey(d)))
+    .map(d => `${driftKey(d)}  doc ${d.doc} -> app ${d.app}`);
+  assert(fresh.length === 0,
+    `strengths that no longer match the research:\n    ${fresh.join("\n    ")}`);
+});
+
+test("the known-strength-drift list has no stale entries", () => {
+  const live = new Set(severeDrift(EXTRACTION_PROFILES).map(driftKey));
+  const stale = [...KNOWN_STRENGTH_DRIFT].filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `these no longer drift — remove them from KNOWN_STRENGTH_DRIFT:\n    ${stale.join("\n    ")}`);
 });
 
 test("no family's display label is the name of one of its own leaves", () => {
