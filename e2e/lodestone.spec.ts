@@ -112,6 +112,9 @@ const gradientColors = (page: Page) => page.evaluate(() => {
 
 test.describe("lodestone colour follows the mood profile", () => {
   // Straight from CRYSTAL_EFFECT_COLORS in data/moodCrystal.js.
+  // Seeded with "calm" alone, not calm + soothing: those are separate
+  // families now (see data/families.js), so the old pair was a coin
+  // toss between two colours that happened to land on calm.
   const CALM = "#4DEB7E";   // neon spring-green
   const SLEEP = "#C77FFF";  // neon amethyst
   const ENERGY = "#FFC318"; // saturated amber-yellow
@@ -122,7 +125,7 @@ test.describe("lodestone colour follows the mood profile", () => {
   // happen. "drowsy" and "alert" aren't in the map; "sleepy" and
   // "energy" are.
   test("a calm profile renders a calm-coloured crystal", async ({ page }) => {
-    await openFieldNotes(page, 0, ["calm", "soothing"]);
+    await openFieldNotes(page, 0, ["calm"]);
     expect(await gradientColors(page), "calm should drive the crystal green").toContain(CALM);
   });
 
@@ -140,14 +143,28 @@ test.describe("lodestone colour follows the mood profile", () => {
     expect(colors).not.toContain(CALM);
   });
 
-  test("the charge wash doesn't change the crystal's own colours", async ({ page }) => {
-    // The fill washes toward the card surface; it must not tint the
-    // body gradient, or a charged stone would read as a different
-    // mood than the user actually has.
-    await openFieldNotes(page, 0, ["calm", "soothing"]);
-    const empty = await gradientColors(page);
-    await openFieldNotes(page, 100, ["calm", "soothing"]);
-    const full = await gradientColors(page);
-    expect(full, "charge must not alter the crystal's palette").toEqual(empty);
+  test("the charge wash is a separate layer, not a tint on the palette", async ({ page }) => {
+    // Checked inside ONE page load. Comparing two loads was unstable:
+    // the crystal is computed from session recency, so two visits
+    // produce slightly different crystals and the test was really
+    // asserting determinism it never had.
+    //
+    // The invariant that matters is structural — the charge fill paints
+    // with the card surface colour in its own clipped group, and never
+    // touches the body gradient. A charged stone has to stay the user's
+    // own mood colour, or the meter would be lying about their moods.
+    await openFieldNotes(page, 50, ["calm"]);
+    const layers = await page.evaluate(() => {
+      const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
+      const wash = stone.querySelector("svg g[clip-path] rect") as SVGRectElement;
+      const stops = Array.from(stone.querySelectorAll("svg defs stop"))
+        .map(s => (s.getAttribute("stop-color") || "").toLowerCase());
+      return { washFill: wash?.getAttribute("fill") || null, stops };
+    });
+    expect(layers.washFill, "the wash should paint with the card surface")
+      .toContain("--cream");
+    expect(layers.stops.some(c => c.includes("--cream")),
+      "and must not appear among the crystal's own gradient stops").toBe(false);
   });
+
 });

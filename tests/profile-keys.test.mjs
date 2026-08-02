@@ -28,30 +28,15 @@ import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
+import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../src/data/families.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// FAMILY_BY_FLAVOR and FAMILY_BY_EFFECT live in a .jsx file that
-// node can't import directly. Parse them out of the source text
-// with a regex — the mappings are simple flat objects with no
-// computed values, so a string match is enough.
-function loadFamilyMap(label) {
-  const src = readFileSync(resolve(__dirname, "../src/components/FlavorMap.jsx"), "utf8");
-  const re = new RegExp(`export const ${label} = \\{([\\s\\S]*?)\\};`);
-  const m = src.match(re);
-  if (!m) throw new Error(`couldn't find ${label} in FlavorMap.jsx`);
-  const out = {};
-  for (const line of m[1].split("\n")) {
-    for (const entry of line.matchAll(/(?:"([^"]+)"|([a-z][a-z0-9-]*)):\s*"([^"]+)"/g)) {
-      const key = entry[1] || entry[2];
-      out[key] = entry[3];
-    }
-  }
-  return out;
-}
+// FAMILY_BY_FLAVOR and FAMILY_BY_EFFECT moved to data/families.js —
+// a plain module precisely so node can import them. The regex parse
+// this used to do against FlavorMap.jsx broke silently when they
+// moved, so import them for real instead.
 
-const FAMILY_BY_FLAVOR = loadFamilyMap("FAMILY_BY_FLAVOR");
-const FAMILY_BY_EFFECT = loadFamilyMap("FAMILY_BY_EFFECT");
 
 // Bitterness is intentional — diagnostic effect, surfaces on the
 // palate strip not the mood strip. Other effects must be mapped.

@@ -63,11 +63,19 @@ export const FAMILY_BY_FLAVOR = {
 
 export const FAMILY_BY_EFFECT = {
   // calm register — settling, mind-quieting
-  calm: "calm", soothing: "calm", grounding: "calm",
+  // soothing and grounding used to file under calm. They aren't the
+  // same register: calm is mental settling (L-theanine, anxiolytic),
+  // soothing is bodily comfort (demulcent — throat, gut), grounding is
+  // adaptogenic steadying. Filed together they masked each other, so a
+  // herb declaring all three showed one and the audit read the other
+  // two as redundant data. They're distinct claims, not repetition.
+  calm: "calm", soothing: "soothing", grounding: "grounding",
   // focus register — clarity, alertness
   focus: "focus",
   // energy register — lift, brightening
-  energy: "energy", uplifting: "energy",
+  // Likewise: energy is a caffeine lift, uplifting is mood brightening
+  // without stimulation. Bergamot is uplifting and has no caffeine.
+  energy: "energy", uplifting: "uplifting",
   // warm register — comfort, warmth-of-spirit
   warming: "warm", comfort: "warm",
   // cool register — felt-temperature cooling, opposite warm

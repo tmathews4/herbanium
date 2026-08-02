@@ -72,7 +72,10 @@ const FLAVOR_FAMILY_ORDER = [
 
 // Same idea for moods.
 const MOOD_FAMILY_ORDER = [
-  "calm", "focus", "energy", "warm", "cool", "body", "sleep",
+  // Related registers sit next to their old parents so the strip still
+  // reads top-to-bottom as quiet -> alert -> warm -> cool -> body.
+  "calm", "soothing", "grounding", "focus", "energy", "uplifting",
+  "warm", "cool", "body", "sleep",
 ];
 
 // Family → color mapping. Keeps the strip readable as a palette
@@ -112,6 +115,9 @@ export { FAMILY_BY_FLAVOR, FAMILY_BY_EFFECT };
 
 export const EFFECT_FAMILY_COLORS = {
   calm:   "var(--effect-calm)",
+  soothing: "var(--effect-soothing)",
+  grounding: "var(--effect-grounding)",
+  uplifting: "var(--effect-uplifting)",
   focus:  "var(--effect-focus)",
   energy: "var(--effect-energy)",
   warm:   "var(--effect-warm)",

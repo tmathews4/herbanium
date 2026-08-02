@@ -52,6 +52,9 @@ const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 // stops, and stronger glow halos so each color almost emits.
 const CRYSTAL_EFFECT_COLORS = {
   calm:   "#4DEB7E", // neon spring-green
+  soothing:  "#7CF0B4", // pale jade
+  grounding: "#2FA96B", // deep viridian
+  uplifting: "#FFE566", // bright citrine
   focus:  "#3EBAFF", // electric sapphire
   energy: "#FFC318", // saturated amber-yellow
   warm:   "#FF7A4C", // hot coral
@@ -81,6 +84,9 @@ const CRYSTAL_FLAVOR_COLORS = {
 // shelf below, not a separate language.
 const EFFECT_ADJECTIVES = {
   calm:   "Sage",
+  soothing:  "Jade",
+  grounding: "Verdant",
+  uplifting: "Sunstone",
   focus:  "Sky",
   energy: "Citrine",
   warm:   "Ember",
