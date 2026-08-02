@@ -376,3 +376,41 @@ anchoring to any one.
    and Arabic cultural anchors are all genuinely primary — no single
    framing is "the" framing. If the app can get this right for
    jasmine, the pattern will scale to other ingredients.
+
+---
+
+## Addendum — `uplifting` kept (2026-08-02)
+
+An audit flagged `uplifting` as unsourced. §5 has no row for it, but
+the evidence is direct, human, and names the register explicitly.
+
+> Hongratanaworakit T. *Stimulating Effect of Aromatherapy Massage
+> with Jasmine Oil.* Natural Product Communications 5(1), 2010 —
+> https://journals.sagepub.com/doi/10.1177/1934578x1000500136
+
+40 healthy volunteers, jasmine oil against placebo. Breathing rate,
+blood oxygen saturation and both systolic and diastolic blood pressure
+rose significantly — autonomic arousal. Subjects rated themselves
+**more alert (p = 0.046) and more vigorous (p = 0.037)**, and less
+relaxed, than controls. The authors' own conclusion is that the result
+supports jasmine's use "for the relief of depression and uplifting
+mood in humans."
+
+This is the same research line §5 already cites for `energy` 2
+(Hongratanaworakit 2008), so it isn't a new claim so much as the
+mood-side half of one already accepted — and it is why jasmine is the
+one floral in this catalogue that carries an arousal register at all.
+
+**The limit: these are inhalation and massage studies, not tea.** The
+route is aromatic rather than gastric. That happens to suit jasmine
+better than most — jasmine tea is scented by repeated exposure to
+living blossoms, the aromatics ARE the product, and a drinker inhales
+them over the cup. But it should not be read as a trial on the
+beverage.
+
+The biphasic shape §5 describes holds: `calm` 3 through the
+cortisol-reduction and alpha-wave findings, `uplifting` through
+autonomic arousal. Both are real and they are not the same axis, which
+is why jasmine reads as lifted rather than sedated.
+
+<!-- sourced-effects: uplifting -->

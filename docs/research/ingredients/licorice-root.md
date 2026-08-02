@@ -719,3 +719,40 @@
     - **In TCM formulas universally** as a 5-15% component
     These suggest licorice's role as flavor and effect modifier
     rather than primary ingredient.
+
+---
+
+## Addendum — `uplifting` kept, `grounding` removed (2026-08-02)
+
+### `grounding` — removed
+
+§5 rates six effects for licorice and `grounding` is not among them:
+`soothing` 4 as the primary, `digestive` 2, `warming` 1, `calm` 1,
+`uplifting` 1. The app shipped `grounding` 2 at the 98°C point anyway.
+
+Being a root is not the same as being grounding. This catalogue's
+grounding register is reishi's triterpenes, ashwagandha's
+withanolides, aged pu-erh — deep, earthy, low-pitched. Licorice's
+defining quality is the opposite pole of the flavour map: glycyrrhizin
+is 30–50× the sweetness of sucrose, and §5 rates `sweet` at 5 as the
+ingredient's defining felt quality. A cup that reads overwhelmingly
+sweet is not what "settled, centering, earthy" describes.
+
+### `uplifting` — kept, and weak on purpose
+
+§5 already rates it 1, glossed "some users report mood-positive
+effect." That is anecdote rather than evidence, and the rating's own
+value says so — 1 is the floor of the scale.
+
+There is a plausible mechanism rather than a proven one: glycyrrhizin
+inhibits 11β-hydroxysteroid dehydrogenase type 2, extending cortisol's
+active life, which §5 already invokes for the anti-inflammatory and
+`calm` 1 claims. A mild mood effect is consistent with that, and it is
+the same mechanism behind licorice's well-documented blood-pressure
+and potassium cautions — so it is not an inert ingredient.
+
+**No trial tests licorice for mood.** Kept at 1, where it ships, as a
+subjective-report claim on the same footing as the catalogue's other
+traditional entries — and explicitly not as a clinical finding.
+
+<!-- sourced-effects: uplifting -->

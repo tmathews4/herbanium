@@ -208,3 +208,39 @@
 | Facts | 3 | All cross-referenced |
 
 **Overall status:** Verified — confident enough to ship.
+
+---
+
+## Addendum — `calm` kept, `uplifting` removed (2026-08-02)
+
+An audit flagged both. They needed different answers, and the split
+falls exactly where the evidence does.
+
+### `uplifting` — removed
+
+§5 rates this ingredient at two things, `soothing` 1 and `comfort` 1,
+and says of the first that it is "not pharmacological" — a sensory and
+cultural reading, honestly labelled. Nothing supports a mood-lifting
+effect, and what evidence exists for apple runs toward settling rather
+than lifting (below). It was shipping at 3, higher than any rating
+this document actually makes.
+
+### `calm` — kept, aroma-sourced, modest
+
+> *Alleviation of physiological stress response by apple aroma.*
+> Australian Journal of Psychology (2024) —
+> https://www.tandfonline.com/doi/full/10.1080/00049530.2024.2401022
+
+Apple aroma measurably blunted the physiological stress response to a
+short-term cognitive stressor, and earlier work on green-apple odour
+reported reduced anxiety. The direction is consistent and it is human
+work.
+
+**Two limits, both real.** The studies use fresh or green apple
+*odour*, not a dried-fruit infusion — the route is aromatic, and the
+material is not identical. And the literature here is thin next to
+lavender or citrus. So `calm` stays at the modest 2 it ships, sits
+below `comfort`, and is recorded as an aroma finding rather than a
+pharmacological one — the same footing §5 already uses for `soothing`.
+
+<!-- sourced-effects: calm -->

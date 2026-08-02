@@ -61,13 +61,13 @@ export const EXTRACTION_PROFILES = {
 
   hibiscus: [
     { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright", "cranberry"],
-      effects: [["cooling", 2], ["uplifting", 2], ["energy", 2], ["digestive", 2]],
+      effects: [["cooling", 2], ["energy", 2], ["digestive", 2]],
       character: "Light hibiscus — a pink tang, gentle brightness." },
     { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry", "berry", "bright"],
-      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2], ["energy", 2]],
+      effects: [["cooling", 3], ["digestive", 2], ["energy", 2]],
       character: "The standard cup. Ruby color, tart and lively." },
     { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent", "bright", "mineral"],
-      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 3], ["bitterness", 2], ["energy", 2]],
+      effects: [["cooling", 3], ["digestive", 3], ["bitterness", 2], ["energy", 2]],
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
 
@@ -713,7 +713,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["comfort", 2], ["soothing", 3], ["digestive", 1]],
       character: "Light licorice — sweet root water, anise on the lift." },
     { tempC: 98,  timeS: 600, flavors: ["sweet", "anise", "woody", "earthy"],
-      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["grounding", 2], ["uplifting", 1], ["calm", 1], ["warming", 1]],
+      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["uplifting", 1], ["calm", 1], ["warming", 1]],
       character: "The standard cup. Full glycyrrhizin sweetness — the harmonizer's work." },
     { tempC: 100, timeS: 900, flavors: ["sweet", "anise", "woody", "earthy", "bitter"],
       effects: [["warming", 3], ["comfort", 4], ["digestive", 2], ["bitterness", 1], ["soothing", 4]],
@@ -973,13 +973,13 @@ export const EXTRACTION_PROFILES = {
   // ─── Dried fruit ──────────────────────────────────────────────
   "dried-apple": [
     { tempC: 92,  timeS: 360, flavors: ["sweet", "fruity", "apple"],
-      effects: [["comfort", 2], ["uplifting", 2], ["soothing", 1]],
+      effects: [["comfort", 2], ["soothing", 1]],
       character: "Light apple — soft sweetness, faint orchard fruit." },
     { tempC: 96,  timeS: 480, flavors: ["sweet", "fruity", "apple", "honeyed", "hay"],
-      effects: [["comfort", 3], ["uplifting", 3], ["calm", 2], ["soothing", 1]],
+      effects: [["comfort", 3], ["calm", 2], ["soothing", 1]],
       character: "The standard cup. Full dried-apple — honey-sweet, compote depth." },
     { tempC: 100, timeS: 600, flavors: ["sweet", "fruity", "apple", "honeyed", "hay", "tart"],
-      effects: [["comfort", 3], ["uplifting", 3], ["calm", 2], ["soothing", 1]],
+      effects: [["comfort", 3], ["calm", 2], ["soothing", 1]],
       character: "Long-steeped. Fruit deepens, a faint tart edge surfaces." },
   ],
   cranberry: [

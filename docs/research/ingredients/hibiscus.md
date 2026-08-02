@@ -447,3 +447,37 @@ that is genuinely global in use.
    asides about Mexico and Senegal would be framing error. Worth
    doing explicitly for every ingredient that has non-Western
    traditional use.
+
+---
+
+## Addendum — `uplifting` removed (2026-08-02)
+
+An audit found `uplifting` 2–3 shipped at every brew point with
+nothing in this document behind it. The pharmacological evidence runs
+the other way.
+
+> Fakeye TO et al. *Anxiolytic and sedative effects of extracts of
+> Hibiscus sabdariffa Linn (family Malvaceae).* African Journal of
+> Medicine and Medical Sciences —
+> https://pubmed.ncbi.nlm.nih.gov/18756855/
+
+Hibiscus extracts show **anxiolytic and sedative** activity, more
+pronounced on repeated dosing. Whatever hibiscus does to mood, the
+measured direction is downward-settling, not lifting. (That evidence
+is animal-model; there is little human work on hibiscus and mood. It
+is cited here to show the absence of support for the opposite claim,
+not to add a sedative one.)
+
+**What `uplifting` was actually encoding is already carried twice.**
+§5 rates `energy` 2 and says plainly what it is: "not a stimulant —
+the bright, vitamin-C-like tartness giving a refreshment-forward
+impression." And `cooling` 3 is the well-attested one, central to
+hibiscus's global use — karkadé in Egypt, agua de jamaica in Mexico,
+bissap in Senegal, iced in every case. The bright-and-refreshing
+character has two homes already; a third was the same claim asserted a
+third time, which is the redundancy this catalogue keeps having to
+unpick.
+
+Removed. `cooling` and `energy` carry hibiscus honestly.
+
+<!-- sourced-effects: cooling, energy, digestive -->
