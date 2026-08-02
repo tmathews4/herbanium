@@ -160,6 +160,18 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               then reads as nested inside the masthead rather than as
               a separate object that happens to sit above it. */}
           <OrnamentRule drawing={arriving} style={{ marginBottom: 12 }} />
+          <style>{POEM_KEYFRAMES}</style>
+          <div style={{
+            textAlign: "center",
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 19,
+            color: theme.inkSoft, letterSpacing: "0.01em",
+            lineHeight: 1.2, marginBottom: 12,
+            ...(arriving
+              ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 1.7s both" }
+              : null),
+          }}>
+            {getTimeOfDay(new Date().getHours()).label}.
+          </div>
           <div style={{
             marginBottom: 14,
             padding: "18px 22px",
@@ -177,7 +189,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             />
           </div>
 
-          <TeaGreeting name={name} kicker={getTimeOfDay(new Date().getHours()).label} arriving={arriving} />
+          <TeaGreeting name={name} arriving={arriving} />
         </>
       )}
 
@@ -195,6 +207,38 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
             {/* See the empty-state note: the flourish brackets the
                 block from outside the card. */}
             <OrnamentRule drawing={arriving} style={{ marginBottom: 12 }} />
+
+            {/* Time of day sits ABOVE the card, not inside it. As the
+                card's title it competed with the poem for the same
+                frame and duplicated the greeting's kicker two lines
+                down; out here it heads the whole opening block —
+                flourish, hour, poem, greeting — and the card gets to
+                be nothing but the verse. */}
+            <style>{POEM_KEYFRAMES}</style>
+            <div style={{
+              textAlign: "center",
+              // Arrives on the slogan's beat (1.7s, matching SLOGAN_AT
+              // in TeaGreeting), not with the poem. The hour and the
+              // slogan are the two page-level lines; fading them in
+              // together makes them a pair bracketing the card rather
+              // than a label the card happens to sit under.
+              //
+              // Italic and soft, not roman and black. Two full-strength
+              // serif lines stacked (the hour, then the slogan) read as
+              // the same voice saying two things — which is what makes
+              // them look like raw text. Italic + inkSoft turns this one
+              // into a dateline: context above the title rather than a
+              // second title. It also rhymes with the verse directly
+              // below it, which is set the same way.
+              fontFamily: ff.serif, fontStyle: "italic", fontSize: 19,
+              color: theme.inkSoft, letterSpacing: "0.01em",
+              lineHeight: 1.2, marginBottom: 12,
+              ...(arriving
+                ? { animation: "poemLineIn 1.6s cubic-bezier(0.33, 0, 0.2, 1) 1.7s both" }
+                : null),
+            }}>
+              {tod.label}.
+            </div>
             <div style={{
               marginBottom: 14,
               padding: "16px 22px",
@@ -204,21 +248,6 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               boxShadow: shadow.card,
               textAlign: "center",
             }}>
-              <style>{POEM_KEYFRAMES}</style>
-              {/* Fades in ahead of the verse rather than being present
-                  from the first frame — it was the last thing in the
-                  card just sitting there while everything around it
-                  arrived, which made the whole card look like it was
-                  animating around a fixed label. */}
-              <div style={{
-                fontFamily: ff.serif, fontSize: 17, color: theme.ink,
-                lineHeight: 1.25, marginBottom: poem ? 8 : 3,
-                ...(arriving
-                  ? { animation: "poemLineIn 1.1s cubic-bezier(0.33, 0, 0.2, 1) 0.1s both" }
-                  : null),
-              }}>
-                {tod.label}.
-              </div>
               {poem ? (
                 <>
                   <PoemLines text={poem.text} arriving={arriving} attribution={poem.attribution} />

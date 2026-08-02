@@ -189,7 +189,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // bursting onto the screen.
       position: "fixed", inset: 0, zIndex: 1000,
       pointerEvents: "auto",
-      animation: reduceMotion ? undefined : "tourFadeIn 0.55s ease-out",
+      animation: reduceMotion ? undefined : "tourFadeIn 1.4s cubic-bezier(0.33, 0, 0.2, 1)",
     }}>
       {/* The target's own border, lit white and slowly breathing — a
           soft border-glow that traces the element's exact edge/shape. */}
@@ -198,6 +198,10 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           0%, 100% { border-color: rgba(255,255,255,0.38); box-shadow: 0 0 5px 0px rgba(255,255,255,0.20); }
           50%      { border-color: rgba(255,255,255,0.97); box-shadow: 0 0 15px 4px rgba(255,255,255,0.72); }
         }
+        /* Slow on purpose. The tour arrives on top of a screen the
+           user is already reading, so it should settle over it rather
+           than snap on — and it now waits for Home's own arrival to
+           finish before it starts (see arrivalDone in App). */
         @keyframes tourFadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }

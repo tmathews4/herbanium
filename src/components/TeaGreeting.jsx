@@ -30,6 +30,12 @@ import { ff, theme } from "../theme";
 /* `arriving` comes from HomeScreen, which decides once per app session
    whether this is a first view — so the greeting and the poem card's
    flourish above it agree, and both animate or neither does. */
+// How long Home's opening sequence runs, end to end: the slogan starts
+// at SLOGAN_AT and takes 1.6s. Exported so anything that needs to wait
+// for the arrival — the guided tour, notably — waits on one number
+// rather than a duplicated guess that drifts when the timings move.
+export const GREETING_ARRIVAL_MS = 3500;
+
 export const TeaGreeting = ({ name, kicker = null, arriving = false }) => {
   // The slogan is the finale, so it goes LAST — after the poem has
   // finished arriving and both flourishes have drawn. Its kicker leads

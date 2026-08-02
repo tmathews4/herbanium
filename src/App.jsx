@@ -79,6 +79,7 @@ import { usePersistedState, resetAllPersistedState } from "./hooks/usePersistedS
 import { useAppBackNav } from "./hooks/useAppBackNav";
 // Guided-tour content (steps + the Simple/Detailed demo schedule)
 import { SCREEN_TOURS } from "./data/tours";
+import { GREETING_ARRIVAL_MS } from "./components/TeaGreeting";
 
 /* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
@@ -104,7 +105,7 @@ const TourOfferCard = ({ onYes, onNo }) => (
     padding: "16px 18px",
     boxShadow: "0 10px 30px -12px rgba(30,24,18,0.35)",
     opacity: 0,
-    animation: "tourOfferIn 0.7s ease-out 0.9s forwards",
+    animation: "tourOfferIn 1.3s cubic-bezier(0.33, 0, 0.2, 1) 0.2s forwards",
   }}>
     <div style={{ fontFamily: ff.serif, fontSize: 17, color: theme.ink, marginBottom: 4 }}>
       A quick tour?
@@ -1227,8 +1228,20 @@ export default function App() {
   // Fire a screen's tour the first time it's entered — but never on top
   // of an open overlay (steep/detail modal) or before onboarding has a
   // profile, and never while another tour is already running.
+  // Home's opening sequence gets to finish before a tour interrupts
+  // it. Spotlighting a screen while the poem is still arriving means
+  // the user watches neither: the tour dims the thing it's pointing at
+  // mid-animation, and the arrival plays out under an overlay. Only
+  // applies to the first tour of a session — tours entered later, by
+  // walking to a new screen, have nothing to wait for.
+  const [arrivalDone, setArrivalDone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setArrivalDone(true), GREETING_ARRIVAL_MS);
+    return () => clearTimeout(t);
+  }, []);
   useEffect(() => {
     if (!profile) return;
+    if (!arrivalDone) return;
     if (toursEnabled !== true) return; // opt-in first (offer card below)
     if (!currentTourScreen) return;
     if (overlay) return;
@@ -1237,7 +1250,7 @@ export default function App() {
     if (!SCREEN_TOURS[currentTourScreen]) return;
     setActiveTour(currentTourScreen);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTourScreen, profile, overlay, toursSeen, toursEnabled]);
+  }, [currentTourScreen, profile, overlay, toursSeen, toursEnabled, arrivalDone]);
   const closeActiveTour = () => {
     setToursSeen(prev => ({ ...(prev || {}), [activeTour]: true }));
     setActiveTour(null);
@@ -2177,7 +2190,7 @@ export default function App() {
 
       {/* Tour opt-in — offered once, a beat after the user first
           lands with a fresh profile. Until answered, no tour fires. */}
-      {profile && toursEnabled == null && !overlay && (
+      {profile && toursEnabled == null && !overlay && arrivalDone && (
         <TourOfferCard
           onYes={() => setToursEnabled(true)}
           onNo={() => setToursEnabled(false)}
