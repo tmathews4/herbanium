@@ -40,7 +40,9 @@ import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
+  MOOD_FAMILY_LABEL,
 } from "../src/data/families.js";
+import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -206,6 +208,45 @@ test("every declared ingredient effect has a family", () => {
     }
   }
   assert(orphans.size === 0, `declared effects with no family:\n    ${[...orphans].join("\n    ")}`);
+});
+
+test("no family's display label is the name of one of its own leaves", () => {
+  // Detail mode draws a parent row per family with its leaves indented
+  // underneath, and suppresses any leaf whose label equals the family's
+  // label — its value is already in the parent aggregate. That's right
+  // for a family whose single leaf is self-named (cool/cooling,
+  // sleep/sleepy). It goes wrong the moment a family has TWO leaves and
+  // is labelled after one of them: the named leaf is swallowed, and the
+  // parent shows max-of-children under that leaf's name.
+  //
+  // `warm` shipped exactly that. Labelled "comfort" while holding both
+  // `comfort` and `warming`, orange-peel drew one row reading
+  // "comfort 3" — which was warming's 3 — and comfort's own 1 was
+  // rendered nowhere. Invisible to every other guard here, because the
+  // family tree itself was perfectly well-formed.
+  const leavesOf = {};
+  for (const [leaf, fam] of Object.entries(FAMILY_BY_EFFECT)) {
+    (leavesOf[fam] = leavesOf[fam] || []).push(leaf);
+  }
+  const collisions = [];
+  for (const [fam, label] of Object.entries(MOOD_FAMILY_LABEL)) {
+    const leaves = leavesOf[fam] || [];
+    if (leaves.length > 1 && leaves.includes(label)) {
+      collisions.push(`${fam} labelled "${label}" but holds ${leaves.join(", ")}`);
+    }
+  }
+  assert(collisions.length === 0,
+    `family label swallows one of its own leaves:\n    ${collisions.join("\n    ")}`);
+});
+
+test("every family label resolves to a vocabulary description", () => {
+  // The parent row is tappable; a label with no entry opens an empty
+  // panel. `warm` pointed at "warming" while reading "comfort", so the
+  // blurb described thermogenic spice on a row that said comfort.
+  const missing = Object.values(MOOD_FAMILY_LABEL)
+    .filter(l => !EFFECT_DESCRIPTIONS[l]);
+  assert(missing.length === 0,
+    `family labels with no description entry: ${missing.join(", ")}`);
 });
 
 test("every effect family has a colour", () => {

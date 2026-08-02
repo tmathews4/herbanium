@@ -42,7 +42,11 @@ export const PARENT_MOODS = [
   { key: "focus",     family: "focus",  label: "Focus",     note: "clarity, attention" },
   { key: "energy",    family: "energy", label: "Energy",    note: "lift, brightening" },
   { key: "uplifting", family: "uplifting", label: "Uplifting", note: "brightening, without the buzz" },
-  { key: "comfort",   family: "warm",   label: "Comfort",   note: "warmth-of-spirit" },
+  // key stays "comfort" — it's what journal entries persist in
+  // targetMoods, and there is no migration path (bumping CURRENT_SCHEMA
+  // wipes rather than migrates). Only the label moves, to match the
+  // strip's family row now that `warm` holds two distinct leaves.
+  { key: "comfort",   family: "warm",   label: "Warmth",    note: "heat and warmth-of-spirit" },
   { key: "cooling",   family: "cool",   label: "Cooling",   note: "felt-temperature cooling" },
   { key: "digestive", family: "body",   label: "Digestive", note: "after-meal ease" },
   { key: "sleepy",    family: "sleep",  label: "Sleepy",    note: "drift toward rest" },

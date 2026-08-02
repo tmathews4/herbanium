@@ -30,6 +30,7 @@ import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import {
   EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
+  MOOD_FAMILY_LABEL, FLAVOR_FAMILY_LABEL,
 } from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
@@ -511,17 +512,17 @@ const TrackMap = ({
   const FAMILY_KEY_PREFIX = "__fam:";
   const isParentKey = (n) => typeof n === "string" && n.startsWith(FAMILY_KEY_PREFIX);
   const familyOfKey = (n) => isParentKey(n) ? n.slice(FAMILY_KEY_PREFIX.length) : null;
-  // Family-label maps moved up here so the displayList memo (below)
-  // can compare a leaf's display label against its parent's display
-  // label. Without this, a leaf whose canonical label matches the
-  // family display label (warm→comfort with a "comfort" leaf, body→
-  // digestive with a "digestive" leaf) renders as a duplicate row.
-  const FAMILY_LABEL_MOOD = {
-    warm: "comfort", cool: "cooling", body: "digestive", sleep: "sleepy",
-  };
-  const FAMILY_LABEL_FLAVOR = {
-    fruit: "fruity", body: "creamy",
-  };
+  // Family-label maps live in data/families.js so a test can assert the
+  // one rule that isn't obvious from reading them: a family's display
+  // label must not be the name of one of its own leaves. See the guard
+  // in tests/research-parity.test.mjs for what goes wrong when it is.
+  //
+  // They're referenced here (rather than imported at the leaf) so the
+  // displayList memo below can compare a leaf's display label against
+  // its parent's — without that comparison, a leaf whose canonical
+  // label matches the family display label renders as a duplicate row.
+  const FAMILY_LABEL_MOOD = MOOD_FAMILY_LABEL;
+  const FAMILY_LABEL_FLAVOR = FLAVOR_FAMILY_LABEL;
   const familyDisplayLabel = (fam) => {
     if (kind === "mood")   return FAMILY_LABEL_MOOD[fam]   || fam;
     if (kind === "flavor") return FAMILY_LABEL_FLAVOR[fam] || fam;
@@ -594,7 +595,11 @@ const TrackMap = ({
     off:   "bitter",
   };
   const MOOD_FAMILY_DESC_ALIAS = {
-    warm:  "warming",
+    // warm points at its own family-level entry, not at either leaf.
+    // It used to alias to "warming" while the row was labelled
+    // "comfort", so tapping a row that said comfort opened the
+    // thermogenic-spice blurb.
+    warm:  "warmth",
     cool:  "cooling",
     body:  "digestive",
     sleep: "sleepy",

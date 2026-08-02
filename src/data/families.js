@@ -93,6 +93,29 @@ export const MOOD_FAMILY_ORDER = [
   "warm", "cool", "body", "sleep",
 ];
 
+// How a family is labelled when the strip draws it as a row — both the
+// Simple-mode band and the Detail-mode parent above its indented leaves.
+// The map exists because the family KEYS are internal shorthand: without
+// it the strip would read "warm" / "body" / "fruit" while the chip rows
+// read "Warmth" / "Digestive" / "Fruity", same family in two words.
+//
+// THE RULE: a family's label must never be the name of one of its own
+// leaves. Detail mode suppresses any leaf whose label equals its
+// family's label — correct when the family has a single self-named leaf
+// (cool/cooling, sleep/sleepy), but when the family has two leaves it
+// swallows one of them and shows the family AGGREGATE under that leaf's
+// name. `warm` was labelled "comfort" while holding both `comfort` and
+// `warming`, so orange-peel drew a row reading "comfort 3" that was
+// really warming's 3, and comfort's own 1 appeared nowhere. Hence
+// "warmth": a parent that names the register without naming a child.
+export const MOOD_FAMILY_LABEL = {
+  warm: "warmth", cool: "cooling", body: "digestive", sleep: "sleepy",
+};
+
+export const FLAVOR_FAMILY_LABEL = {
+  fruit: "fruity", body: "creamy",
+};
+
 export const EFFECT_FAMILY_COLORS = {
   calm:   "var(--effect-calm)",
   soothing: "var(--effect-soothing)",

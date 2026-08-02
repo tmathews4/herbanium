@@ -35,6 +35,10 @@ export const EFFECT_DESCRIPTIONS = {
     summary: "Lightening, brightening, mood-lifting.",
     body: "Jasmine, bergamot, light oolongs, and citrus-forward herbs. Linalool (lavender, bergamot) and limonene (citrus peels) are the volatile aromatics that read on the nose before the tongue; Darjeeling's muscatel character lifts the same way through its terpene-rich first flush.",
   },
+  warmth: {
+    summary: "The warm register — physical heat and warmth-of-spirit together.",
+    body: "The family above two different claims. `warming` is thermogenic: gingerol and piperine act on the TRPV1 heat receptors, so the cup raises real body heat. `comfort` is the wrapped-blanket feeling, which arrives without any temperature change at all. Most warming spices carry both, and a cup can carry either alone — rooibos comforts without heating, a black tea can heat without comforting.",
+  },
   warming: {
     summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
     body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
