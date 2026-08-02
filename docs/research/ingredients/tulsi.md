@@ -557,3 +557,5 @@ buffering, not stimulation, and tulsi is caffeine-free. Nothing found
 supports an energy claim; carrying one put an unsourced stimulant
 effect beside a sourced cognitive one where a user couldn't tell them
 apart.
+
+<!-- sourced-effects: focus -->

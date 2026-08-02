@@ -75,7 +75,6 @@ const KNOWN_UNSOURCED = {
   gunpowder: ["calm"],
   hibiscus: ["uplifting"],
   jasmine: ["uplifting"],
-  lemongrass: ["energy"],
   "licorice-root": ["grounding", "uplifting"],
   "lions-mane": ["comfort"],
   nettle: ["sleepy"],
@@ -84,14 +83,6 @@ const KNOWN_UNSOURCED = {
   reishi: ["sleepy"],
   rose: ["energy"],
   sencha: ["cooling"],
-  spearmint: ["energy"],
-  // tulsi's focus IS sourced — see the addendum in its research doc
-  // (attention and working-memory gains, PMC9524226 + a 2017 review of
-  // 24 studies). It stays listed only because this parser reads the
-  // docs' `| effects |` tables and a prose addendum isn't one. Worth
-  // fixing by moving the claim into the table when tulsi is next
-  // touched, rather than leaving a sourced effect on an exemption list.
-  tulsi: ["focus"],
   vanilla: ["digestive"],
 };
 
@@ -108,6 +99,20 @@ function prescribed(id) {
   for (const row of src.matchAll(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/g)) {
     for (const hit of row[1].matchAll(/\[\s*"([^"]+)"\s*,\s*[\d.]+\s*\]/g)) {
       names.add(ALIAS[hit[1]] || hit[1]);
+    }
+  }
+  // Addenda. A brew-point table is the normal place to prescribe an
+  // effect, but a later finding often applies across every brew point
+  // rather than to one — spearmint's attention evidence, say. Those
+  // carry a machine-readable line so writing the research properly
+  // CLEARS the guard. Without it, documenting a source correctly still
+  // failed the build, which teaches people to edit the exemption list
+  // instead of the docs.
+  //
+  //   <!-- sourced-effects: focus, calm -->
+  for (const row of src.matchAll(/<!--\s*sourced-effects:\s*([^>]+?)\s*-->/g)) {
+    for (const n of row[1].split(",").map(x => x.trim()).filter(Boolean)) {
+      names.add(ALIAS[n] || n);
     }
   }
   return names;

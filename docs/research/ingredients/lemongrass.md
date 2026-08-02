@@ -441,3 +441,25 @@
 7. **The bee-attraction note.** Beekeepers use lemongrass oil
    to attract bees (it mimics a Nasonov gland pheromone).
    Charming fact that could surface in user-facing copy.
+
+---
+
+## Addendum — `energy` removed (2026-08-02)
+
+An audit found `energy` (2–3) shipped at every brew point with nothing
+in this document behind it. A literature check found no support for a
+stimulant or energising effect; the pharmacology runs the other way.
+
+> Carlini et al., *Pharmacology of lemongrass (Cymbopogon citratus
+> Stapf) III: assessment of eventual toxic, hypnotic and anxiolytic
+> effects on humans* — https://pubmed.ncbi.nlm.nih.gov/2429120/
+>
+> Animal work reports sedative, anxiolytic and anticonvulsant effects.
+> The human trial found lemongrass atoxic but with **no** hypnotic or
+> anxiolytic effect: sleep induction, sleep quality, dream recall and
+> reawakening were all unchanged versus placebo.
+
+So the honest picture is neither stimulant nor sedative in humans.
+`energy` removed and nothing added in its place — the remaining
+cooling, digestive, uplifting and calm claims stand on their own
+entries above.

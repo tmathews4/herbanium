@@ -488,3 +488,30 @@
    lemon balm, spearmint volatiles degrade. Quality fresh
    spearmint tea is meaningfully superior to dried; worth
    surfacing for users with garden access.
+
+---
+
+## Addendum — `energy` corrected to `focus` (2026-08-02)
+
+An audit found `energy` (1–2) shipped with nothing in this document
+behind it. The literature does support a real cognitive effect, but it
+is explicitly **stimulant-free** — so the claim was in the wrong
+register rather than simply absent.
+
+> *The attention-enhancing effects of spearmint extract supplementation
+> in healthy men and women: a randomized, double-blind,
+> placebo-controlled, parallel trial.*
+> https://www.sciencedirect.com/science/article/pii/S0271531718308431
+>
+> 142 healthy adults aged 18–50, 900 mg/day spearmint extract over 90
+> days: improvements in **attention and working memory**. A separate
+> trial found rosmarinic-acid-rich spearmint extract improved working
+> memory and spatial reasoning in adults with age-associated memory
+> impairment.
+
+The active fraction is rosmarinic acid, and spearmint is caffeine-free;
+sources describe it as a stimulant-free alternative to coffee for
+focus. Recorded as `focus` at the same strengths — the evidence
+supports the effect, only the register was wrong.
+
+<!-- sourced-effects: focus -->

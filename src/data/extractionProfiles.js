@@ -144,15 +144,19 @@ export const EXTRACTION_PROFILES = {
       character: "Fuller body. Rooibos stays sweet even pushed — one of its charms." },
   ],
 
+  // energy -> focus, 2026-08-02. The research supports a real
+  // cognitive effect but explicitly a STIMULANT-FREE one: attention
+  // and working memory, not a lift. Same values, correct register.
+  // See docs/research/ingredients/spearmint.md.
   spearmint: [
     { tempC: 88,  timeS: 240, flavors: ["minty", "sweet"],
-      effects: [["cooling", 2], ["digestive", 2], ["energy", 1], ["uplifting", 2], ["calm", 2]],
+      effects: [["cooling", 2], ["digestive", 2], ["focus", 1], ["uplifting", 2], ["calm", 2]],
       character: "Gentle spearmint — rounder and sweeter than peppermint." },
     { tempC: 95,  timeS: 360, flavors: ["minty", "sweet", "grassy", "cool"],
-      effects: [["cooling", 3], ["digestive", 3], ["energy", 2], ["calm", 2]],
+      effects: [["cooling", 3], ["digestive", 3], ["focus", 2], ["calm", 2]],
       character: "The standard cup. Sweet mint, mellow cooling effect." },
     { tempC: 100, timeS: 420, flavors: ["minty", "sweet", "grassy", "cool", "herbal", "harsh"],
-      effects: [["cooling", 3], ["digestive", 3], ["energy", 2], ["bitterness", 2], ["calm", 2]],
+      effects: [["cooling", 3], ["digestive", 3], ["focus", 2], ["bitterness", 2], ["calm", 2]],
       character: "Pushed too far. Carvone goes lawn-clipping, herbal turns hay-bitter." },
   ],
 
@@ -168,15 +172,19 @@ export const EXTRACTION_PROFILES = {
       character: "Maximum extraction — deepest sedative pull, slight bitter edge." },
   ],
 
+  // energy removed 2026-08-02 — no evidence found. The literature on
+  // lemongrass is sedative/anxiolytic, and the one human trial found
+  // no hypnotic effect either. Nothing supports a lift.
+  // See docs/research/ingredients/lemongrass.md.
   lemongrass: [
     { tempC: 95,  timeS: 240, flavors: ["citrus", "bright"],
-      effects: [["energy", 2], ["cooling", 2], ["digestive", 2], ["uplifting", 3], ["calm", 2]],
+      effects: [["cooling", 2], ["digestive", 2], ["uplifting", 3], ["calm", 2]],
       character: "Light lemongrass — clean citrus wash, refreshing." },
     { tempC: 98,  timeS: 360, flavors: ["citrus", "grassy", "bright"],
-      effects: [["energy", 3], ["cooling", 3], ["digestive", 2], ["uplifting", 3], ["calm", 2]],
+      effects: [["cooling", 3], ["digestive", 2], ["uplifting", 3], ["calm", 2]],
       character: "The standard cup. Bright, herbal, uplifting." },
     { tempC: 100, timeS: 420, flavors: ["citrus", "grassy", "bright", "woody", "acrid"],
-      effects: [["energy", 3], ["cooling", 3], ["digestive", 2], ["bitterness", 2], ["uplifting", 3]],
+      effects: [["cooling", 3], ["digestive", 2], ["bitterness", 2], ["uplifting", 3]],
       character: "Past the bright window — citral pushes acrid; the lift dulls." },
   ],
 
