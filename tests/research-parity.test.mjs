@@ -152,6 +152,32 @@ test("no ingredient ships an effect its research doesn't prescribe", () => {
     `unsourced effects — add the research first, then transcribe:\n    ${offenders.join("\n    ")}`);
 });
 
+test("no two research docs claim the same ingredient", () => {
+  // Doc -> id resolution tries the slug and the slug without dashes, so
+  // lemon-balm.md and lemonbalm.md BOTH resolved to `lemonbalm` and the
+  // later filename won. The winner was a 1KB addendum with no extraction
+  // table, so prescribed() came back empty and the unsourced-effects
+  // guard above skipped lemon balm entirely — an ingredient silently
+  // exempt from the project's central rule from cycle 1 until it was
+  // spotted by hand. The drift audit had been printing "NO EXTRACTION
+  // TABLE IN DOC: lemonbalm" the whole time, which reads as a note
+  // rather than a hole.
+  //
+  // An addendum belongs at the bottom of the ingredient's doc, not in a
+  // new file beside it.
+  const claims = {};
+  for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
+    const slug = file.replace(/\.md$/, "");
+    const id = [slug, slug.replace(/-/g, "")].find(c => EXTRACTION_PROFILES[c]);
+    if (!id) continue;
+    (claims[id] = claims[id] || []).push(file);
+  }
+  const dupes = Object.entries(claims).filter(([, files]) => files.length > 1)
+    .map(([id, files]) => `${id} <- ${files.join(", ")}`);
+  assert(dupes.length === 0,
+    `two docs resolve to one ingredient; the later one silently wins:\n    ${dupes.join("\n    ")}`);
+});
+
 test("the known-unsourced list has no stale entries", () => {
   // A cleaned-up ingredient should drop off the list, not linger as a
   // permanent exemption that quietly re-permits the same mistake.
