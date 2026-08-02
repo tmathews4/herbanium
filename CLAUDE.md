@@ -12,6 +12,33 @@ Project instructions, loaded every session. These are rules, not suggestions.
 
 Aim for smoke-level coverage of the core path over exhaustive edge cases. A test that walks the real flow and asserts one meaningful thing beats five that assert implementation details.
 
+## Never invent an effect or a mood
+
+Every effect, mood and flavour an ingredient claims must be backed by an
+entry in its `docs/research/ingredients/<name>.md`, with a source. If a
+property should exist and the research doesn't cover it, **the research
+gets written first** — then the extraction profile is transcribed from
+it. Not the other way round.
+
+This isn't bureaucracy. The app's entire claim is that it teaches real
+extraction chemistry; an unsourced effect is the app making something
+up while presenting it with the same authority as the sourced ones, and
+a user can't tell the difference. An audit found 21 ingredients
+asserting `comfort` with no research behind it, which is how that goes
+wrong quietly.
+
+Two tools measure this — run both after touching ingredient data:
+
+```
+node tools/audit-research-drift.mjs    # shipped vs prescribed, both directions
+node tools/audit-unreachable.mjs       # declared but never visible in a cup
+```
+
+Where the docs and the app use different words for one claim, alias in
+the audit rather than duplicating the data — `settle` -> `digestive`,
+`warming` -> `comfort`. Carrying both made 21 ingredients assert the
+same register twice.
+
 ## Before merging
 
 Run **both** suites locally and report the actual pass/fail counts:

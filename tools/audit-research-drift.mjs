@@ -49,7 +49,15 @@ function researchEffects(file) {
       // reports four ingredients as un-transcribed that are in fact
       // done, which is worse than useless: it makes a finished job
       // look unfinished and hides the ones that genuinely aren't.
-      names.add(hit[1] === "settle" ? "digestive" : hit[1]);
+      // Canonical-word aliases. The docs and the app sometimes use
+      // different words for one claim, and the app's word wins where
+      // it's the one the user meets:
+      //   settle  -> digestive  (docs' own glosses all say digestive)
+      //   warming -> comfort    (comfort is what onboarding offers as
+      //                          the warm register; carrying both made
+      //                          21 ingredients assert it twice)
+      const ALIAS = { settle: "digestive", warming: "comfort" };
+      names.add(ALIAS[hit[1]] || hit[1]);
     }
   }
   return names;
