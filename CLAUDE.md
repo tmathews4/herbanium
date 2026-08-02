@@ -34,6 +34,28 @@ node tools/audit-research-drift.mjs    # shipped vs prescribed, both directions
 node tools/audit-unreachable.mjs       # declared but never visible in a cup
 ```
 
+### How a claim gets sourced
+
+Three outcomes, all seen in practice — the right one depends on what
+the literature says, not on which is least work:
+
+- **Contradicted → remove.** Lemon balm shipped `energy` and `focus`;
+  a controlled trial found alertness significantly *reduced*. The app
+  was asserting the opposite of its own evidence base. Worse than an
+  unsourced claim, because it's confidently wrong.
+- **Right effect, wrong register → correct it.** Spearmint's `energy`
+  became `focus`: the attention evidence is real and explicitly
+  stimulant-free. Same strengths, correct name.
+- **Tradition-sourced → keep, and say so.** Cardamom's `energy` has no
+  trial behind it but is well documented as traditional use. Recorded
+  as tradition, on the same footing as other `sources: traditional`
+  entries — never dressed up as clinical.
+
+A finding that applies across every brew point belongs in an addendum
+carrying `<!-- sourced-effects: name, name -->`, which the parity guard
+reads. Writing the research properly is what clears the guard; editing
+the exemption list is not.
+
 Where the docs and the app use different words for one claim, alias in
 the audit rather than duplicating the data — `settle` -> `digestive`,
 `warming` -> `comfort`. Carrying both made 21 ingredients assert the

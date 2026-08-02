@@ -451,3 +451,25 @@
    Worth considering whether `aromatic` deserves its own top-
    level flavor category when the catalog has more of these
    entries (vanilla also fits; cinnamon to a lesser degree).
+
+## Addendum — `energy` kept, sourced as tradition (2026-08-02)
+
+An audit flagged `energy` as unsourced. Unlike rose or lemongrass —
+where the evidence actively contradicted the claim — cardamom's rests
+on documented traditional use rather than on a trial, and that is worth
+recording precisely rather than deleting.
+
+> Cardamom seeds have long been used as a stimulant and tonic, valued
+> in Ayurvedic practice for lifting the spirits and restoring vitality.
+> Reviewed in *Health-Promoting Effects of Cardamom (Elettaria
+> cardamomum)* and *The effect of Elettaria cardamomum on the metabolic
+> syndrome: narrative review* —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC8917848/
+
+**No controlled human trial tests cardamom for alertness, fatigue or
+energy.** The modern evidence base is metabolic and cardiovascular. So
+this is a tradition-sourced claim, on the same footing as the other
+`sources: traditional` entries in this catalogue — not a clinical one,
+and it shouldn't be presented as though it were.
+
+<!-- sourced-effects: energy -->

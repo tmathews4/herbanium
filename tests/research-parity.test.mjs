@@ -64,7 +64,6 @@ const ALIAS = { settle: "digestive", warming: "comfort" };
 // point; ADDING one should be a deliberate act with a reason.
 const KNOWN_UNSOURCED = {
   bergamot: ["focus"],
-  cardamom: ["energy"],
   chamomile: ["soothing"],
   cranberry: ["energy"],
   darjeeling: ["calm", "cooling"],
@@ -81,7 +80,6 @@ const KNOWN_UNSOURCED = {
   passionflower: ["soothing"],
   puerh: ["calm"],
   reishi: ["sleepy"],
-  rose: ["energy"],
   sencha: ["cooling"],
   vanilla: ["digestive"],
 };

@@ -354,3 +354,26 @@ rather than anchoring to one is the integrity move.
    through the app's existing effects ratings with "does this match
    what the literature says" would probably surface several similar
    artifacts.
+
+---
+
+## Addendum — `energy` removed (2026-08-02)
+
+An audit found `energy` (3) shipped at two brew points with nothing in
+this document behind it. The literature points squarely the other way.
+
+> *The effects of Rosa damascena aromatherapy on mood and sleep: a
+> systematic review and meta-analysis* —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC12623198/
+>
+> *Rosa damascena as holy ancient herb with novel applications* —
+> https://www.sciencedirect.com/science/article/pii/S2225411015000954
+
+Quercetin and kaempferol bind GABAergic and central benzodiazepine
+receptors, giving anxiolytic and hypnotic activity; geraniol and
+phenylethyl alcohol act on the CNS to reduce stress. Rose is described
+throughout as anxiolytic, hypnotic and sedative — never stimulant.
+
+Removed. `calm` and `sleepy` already carry the sourced picture.
+
+<!-- sourced-effects: calm, sleepy -->

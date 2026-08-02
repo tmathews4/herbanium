@@ -71,15 +71,20 @@ export const EXTRACTION_PROFILES = {
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
 
+  // energy removed 2026-08-02 — the evidence is squarely the other
+  // way. Damask rose's flavonoids bind GABA-A and central
+  // benzodiazepine receptors; a meta-analysis of aromatherapy trials
+  // reports anxiolytic and sleep-quality effects. calm and sleepy
+  // already carry that. See docs/research/ingredients/rose.md.
   rose: [
     { tempC: 85,  timeS: 180, flavors: ["floral"],
       effects: [["calm", 2], ["comfort", 2]],
       character: "Light rose — delicate, powdery, barely there." },
     { tempC: 92,  timeS: 270, flavors: ["floral", "sweet", "fruity"],
-      effects: [["calm", 3], ["energy", 3], ["sleepy", 2], ["comfort", 3]],
+      effects: [["calm", 3], ["sleepy", 2], ["comfort", 3]],
       character: "The standard cup. Full rose perfume with a honeyed lift." },
     { tempC: 95,  timeS: 300, flavors: ["floral", "sweet", "fruity", "earthy", "astringent"],
-      effects: [["calm", 3], ["energy", 3], ["bitterness", 2], ["sleepy", 3], ["comfort", 3]],
+      effects: [["calm", 3], ["bitterness", 2], ["sleepy", 3], ["comfort", 3]],
       character: "Over-steeped — rose picks up muskiness and a tannic edge. Pull back." },
   ],
 
