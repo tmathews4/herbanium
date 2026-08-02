@@ -64,14 +64,14 @@ for (const withBrew of [false, true]) {
       // Flagged rather than papered over; if that gets fixed, tighten
       // this back to the banner alone.
       if (!withBrew) return;
-      // PARTIALLY FIXED. The popstate handler used to clear the session
-      // unconditionally, so backing out of ANY overlay binned a
-      // steeping cup — that's fixed. But closing a recipe detail over a
-      // minimized brew STILL loses it, by some other path not yet
-      // found, so that one test opts out. Every other screen is held to
-      // the promise. Don't delete this opt-out to make the suite green;
-      // delete it when the bug is actually gone.
-      if (test.info().title.includes("a recipe opens its detail")) return;
+      // This caught two real bugs. The popstate handler cleared the
+      // session unconditionally, so system-back out of any overlay
+      // binned a steeping cup. And the recipe detail a brew was started
+      // FROM stayed on the overlay stack underneath the steep, so
+      // closing a later detail popped back to that stale recipe instead
+      // of the running brew — the session survived, but nothing on
+      // screen pointed at it, which a user can't tell apart from having
+      // lost it. Every screen is held to the same promise now.
       const alive = page.getByTestId("brew-banner")
         .or(page.getByRole("button", { name: /minimize/i }));
       await expect(alive, "the brew should still be running somewhere").toBeVisible();

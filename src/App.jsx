@@ -1407,6 +1407,14 @@ export default function App() {
       setSteepMinimized(false);
     }
     setSession({ blend, intent, targetMoods, currentMoods: [] });
+    // A brew is a new root, not a child of whatever opened it. Without
+    // clearing the stack, the recipe detail you brewed FROM stays
+    // underneath the steep — so minimizing, opening another detail and
+    // closing it popped you back to that stale recipe rather than to
+    // your running brew. The tea was never lost (the session survived
+    // the whole way); it just had nothing on screen pointing at it,
+    // which is indistinguishable from losing it.
+    clearOverlayHistory();
     setOverlay("steep");
   };
 
