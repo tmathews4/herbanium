@@ -60,14 +60,14 @@ export const EXTRACTION_PROFILES = {
   ],
 
   hibiscus: [
-    { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright"],
-      effects: [["cooling", 2], ["uplifting", 2], ["energy", 2]],
+    { tempC: 90,  timeS: 240, flavors: ["tart", "fruity", "bright", "cranberry"],
+      effects: [["cooling", 2], ["uplifting", 2], ["energy", 2], ["digestive", 2]],
       character: "Light hibiscus — a pink tang, gentle brightness." },
     { tempC: 98,  timeS: 360, flavors: ["tart", "fruity", "cranberry", "berry", "bright"],
       effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2], ["energy", 2]],
       character: "The standard cup. Ruby color, tart and lively." },
-    { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent", "bright"],
-      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 2], ["bitterness", 2], ["energy", 2]],
+    { tempC: 100, timeS: 420, flavors: ["tart", "fruity", "cranberry", "berry", "astringent", "bright", "mineral"],
+      effects: [["cooling", 3], ["uplifting", 3], ["digestive", 3], ["bitterness", 2], ["energy", 2]],
       character: "Full extraction — tart pushes into sour, tannins evident." },
   ],
 

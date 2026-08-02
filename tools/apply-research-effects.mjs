@@ -52,6 +52,12 @@ function docBrewPoints(file) {
       // inventing a family is an editorial call — "settle" could sit
       // under calm or under digestive depending on whether you read
       // chamomile or peppermint. Reported below rather than guessed.
+      // "settle" is the docs' informal word for the same thing they
+      // otherwise call digestive — every gloss says so outright
+      // ("traditional digestive use; mild carminative"). Kept as one
+      // token because on screen it would sit beside calm and soothing,
+      // where "settle" gives a reader no way to tell it's the gut one.
+      .map(([n, v]) => (n === "settle" ? ["digestive", v, "aliased"] : [n, v]))
       .filter(([n]) => {
         if (FAMILY_BY_EFFECT[n]) return true;
         unmapped.set(n, (unmapped.get(n) || 0) + 1);
@@ -130,24 +136,40 @@ for (const [id, points] of Object.entries(docFor)) {
   }
 
   for (const { sample, point: best } of order.filter(r => r.point)) {
-    const have = new Set((sample.effects || []).map(e => (Array.isArray(e) ? e[0] : e.name)));
-    const add = best.effects.filter(([n]) => !have.has(n));
-    if (!add.length) continue;
+    const haveVal = new Map((sample.effects || []).map(e => [e[0], e[1]]));
+    const add = best.effects.filter(([n]) => !haveVal.has(n)).map(([n, v]) => [n, v]);
+    // Aliasing settle onto digestive can collide with a digestive the
+    // sample already has — peppermint declares settle 4 as its primary
+    // effect and carries digestive too. Take the stronger reading
+    // rather than dropping one or summing them into something the
+    // research never claimed.
+    // ONLY where aliasing settle onto digestive collides with a
+    // digestive the sample already has. Raising every value the doc
+    // reads higher would be correcting calibration drift, which is a
+    // judgement about the model rather than a transcription — left
+    // alone deliberately, here as everywhere else.
+    const raise = best.effects.filter(
+      ([n, v, alias]) => alias === "aliased" && haveVal.has(n) && v > haveVal.get(n),
+    ).map(([n, v]) => [n, v]);
+    if (!add.length && !raise.length) continue;
 
     // Rewrite this sample's effects array in the source text. Anchored
     // on the exact existing array so a mis-match is a skip, not a
     // corruption.
+    const raisedTo = new Map(raise);
     const existing = "[" + (sample.effects || [])
       .map(e => `["${e[0]}", ${e[1]}]`).join(", ") + "]";
-    const merged = "[" + [...(sample.effects || []), ...add]
-      .map(e => `["${e[0]}", ${e[1]}]`).join(", ") + "]";
+    const merged = "[" + [
+      ...(sample.effects || []).map(e => [e[0], raisedTo.has(e[0]) ? raisedTo.get(e[0]) : e[1]]),
+      ...add,
+    ].map(e => `["${e[0]}", ${e[1]}]`).join(", ") + "]";
     const idx = src.indexOf(existing);
     if (idx === -1) {
       changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, add, skipped: "no text match" });
       continue;
     }
     src = src.slice(0, idx) + merged + src.slice(idx + existing.length);
-    changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, add });
+    changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, add, raise });
 
     // Flavours, same rules. Samples using flavorStrengths (the
     // cold-pour points) are skipped — they carry per-flavour weights
@@ -173,7 +195,8 @@ const skipped = changes.filter(c => c.skipped);
 
 for (const c of applied) {
   console.log(`  ${c.id.padEnd(18)} ${String(c.tempC).padStart(3)}C/${String(c.timeS).padStart(4)}s  `
-    + (c.add ? `+ ${c.add.map(([n, v]) => `${n} ${v}`).join(", ")}`
+    + (c.add ? `+ ${[...c.add.map(([n, v]) => `${n} ${v}`),
+                     ...(c.raise || []).map(([n, v]) => `${n} ->${v}`)].join(", ")}`
              : `+ flavours ${c.addF.join(", ")}`));
 }
 if (skipped.length) {
@@ -192,7 +215,7 @@ if (unmappedFlavors.size) {
   for (const [n, c] of unmappedFlavors) console.log(`  ${n} (in ${c} brew points)`);
 }
 
-console.log(`\n${applied.reduce((n, c) => n + (c.add?.length || c.addF?.length || 0), 0)} values added `
+console.log(`\n${applied.reduce((n, c) => n + ((c.add?.length || 0) + (c.raise?.length || 0) + (c.addF?.length || 0)), 0)} values added `
   + `across ${new Set(applied.map(c => c.id)).size} ingredients, `
   + `${applied.length} brew points.`);
 if (WRITE) {

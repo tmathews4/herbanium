@@ -32,8 +32,16 @@
 // row and the graph below it scan the same direction.
 export const PARENT_MOODS = [
   { key: "calm",      family: "calm",   label: "Calm",      note: "settling, mind-quieting" },
+  // soothing, grounding and uplifting became their own families when
+  // the effect map was split; before that they were folded into calm
+  // and energy. Onboarding offers one option per family, so without
+  // these three a user couldn't ask for a register the catalogue now
+  // tracks — and the recommender had no signal for them.
+  { key: "soothing",  family: "soothing",  label: "Soothing",  note: "bodily ease, gentle support" },
+  { key: "grounding", family: "grounding", label: "Grounded",  note: "steadying, settled in yourself" },
   { key: "focus",     family: "focus",  label: "Focus",     note: "clarity, attention" },
   { key: "energy",    family: "energy", label: "Energy",    note: "lift, brightening" },
+  { key: "uplifting", family: "uplifting", label: "Uplifting", note: "brightening, without the buzz" },
   { key: "comfort",   family: "warm",   label: "Comfort",   note: "warmth-of-spirit" },
   { key: "cooling",   family: "cool",   label: "Cooling",   note: "felt-temperature cooling" },
   { key: "digestive", family: "body",   label: "Digestive", note: "after-meal ease" },
