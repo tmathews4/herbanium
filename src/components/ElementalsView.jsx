@@ -104,6 +104,9 @@ const RARITY_TONE = {
 };
 
 export const ElementalsView = ({
+  lodestoneCharge = 0,
+  onChargedSummon = null,
+  tourStep = null,
   profile,
   sessions = [],
   savedBlendIds,
@@ -199,8 +202,13 @@ export const ElementalsView = ({
 
   // Summon flow.
   const [summonTarget, setSummonTarget] = useState(null);
-  const summonExhausted = !elementalsDisabled && omenShown && pendingArrivals.length === 0;
-  const summonReady     = !elementalsDisabled && (!omenShown || pendingArrivals.length > 0);
+  // A full stone is its own reason to be ready, independent of whether
+  // anything is already queued — that's the point of charging it.
+  const chargeReady = !elementalsDisabled && lodestoneCharge >= 100;
+  const summonExhausted = !elementalsDisabled && omenShown
+    && pendingArrivals.length === 0 && !chargeReady;
+  const summonReady     = !elementalsDisabled
+    && (!omenShown || pendingArrivals.length > 0 || chargeReady);
   const onSummonClick = () => {
     if (!summonReady || summonTarget) return;
     if (!omenShown) {
@@ -208,7 +216,15 @@ export const ElementalsView = ({
       return;
     }
     const next = pendingArrivals[0];
-    if (next) setSummonTarget({ kind: "arrival", elemental: next });
+    if (next) {
+      setSummonTarget({ kind: "arrival", elemental: next });
+      return;
+    }
+    // Nothing queued, but the stone is full: spend it. App rolls a wild
+    // elemental and empties the charge; the new arrival then flows
+    // through the normal pending path on the next render, so there's
+    // one code path for showing a visitor however it was earned.
+    if (chargeReady && onChargedSummon) onChargedSummon();
   };
 
   // Auto-open the requested arrival when arriving from a glimpse-card
@@ -389,6 +405,12 @@ export const ElementalsView = ({
           around. */}
       <div data-tour="fieldnotes-lodestone">
       <MoodCrystal
+        tourStep={tourStep}
+        // lodestoneCharge is persisted 0–100 (it's a human-facing
+        // percentage); the renderer wants a 0–1 fraction. Converting
+        // here rather than storing a fraction keeps the dev controls
+        // and any future "72% charged" copy reading naturally.
+        charge={Math.max(0, Math.min(100, Number(lodestoneCharge) || 0)) / 100}
         sessions={sessions}
         journalEntries={journalEntries}
         getBlend={getBlend}

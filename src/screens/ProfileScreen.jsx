@@ -20,7 +20,7 @@ import { isNativeApp } from "../helpers/platform";
 import { FeedbackModal } from "./FeedbackModal";
 import { HintCard } from "../components/HintCard";
 import {
-  ff, theme,
+  ff, radius, theme,
 } from "../theme";
 import { useUnit } from "../units/units";
 
@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode
@@ -558,6 +558,37 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
               {SEED_MODES[seedMode].description}
             </div>
           </div>
+
+          {/* Lodestone charge — set the fill level by hand. No seed
+              produces a resting lodestone (power/mid/new all arrive
+              pulsing with 26, 27 and 1 pending respectively), so
+              without this there's no way to look at the empty state,
+              a part-filled stone, or the moment it tops out. */}
+          {setLodestoneCharge && (
+            <div style={{
+              border: `1px solid ${theme.rule}`, borderRadius: radius.md,
+              padding: "14px 16px", marginBottom: 12,
+            }}>
+              <div style={{
+                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: theme.ash, marginBottom: 10,
+              }}>
+                lodestone charge — {Math.round(lodestoneCharge)}%
+              </div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {[["empty", 0], ["a third", 33], ["two thirds", 66], ["full", 100]].map(([label, v]) => (
+                  <button key={label} onClick={() => setLodestoneCharge(v)} style={{
+                    fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.03em",
+                    padding: "6px 12px", borderRadius: 999,
+                    border: `1px solid ${lodestoneCharge === v ? theme.ink : theme.rule}`,
+                    background: lodestoneCharge === v ? theme.ink : "transparent",
+                    color: lodestoneCharge === v ? theme.cream : theme.inkSoft,
+                    cursor: "pointer", flex: 1, minWidth: 70,
+                  }}>{label}</button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Glimpse-banner force-trigger. Drops the user straight
               into the post-roll banner state without waiting for an

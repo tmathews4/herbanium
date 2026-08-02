@@ -111,7 +111,7 @@ const patternConfig = (pattern, c1, c2) => {
   }
 };
 
-const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }) => {
+const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, charge = 0 }) => {
   const gradId = `crystal-grad-${idSuffix}`;
   const glowId = `crystal-glow-${idSuffix}`;
   const clipId = `crystal-clip-${idSuffix}`;
@@ -127,6 +127,15 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }
 
   // Crystal silhouette polygon — six-faceted bipyramid.
   const silhouette = "36,6 60,28 56,58 36,80 16,58 12,28";
+  // Charge level, drawn as the stone filling from the base up. The
+  // silhouette spans y 6..80, so the fill is a full-height rect pushed
+  // down by the unfilled remainder and clipped to the shape — a plain
+  // translate, which animates reliably everywhere, rather than an
+  // animated `y`/`height` (patchier SVG-as-CSS support).
+  const CHARGE_TOP = 6, CHARGE_BOTTOM = 80;
+  const chargeH = CHARGE_BOTTOM - CHARGE_TOP;
+  const level = Math.max(0, Math.min(1, charge));
+  const chargeId = `crystal-charge-${idSuffix}`;
 
   return (
     <svg width={72} height={84} viewBox="0 0 72 84" aria-hidden>
@@ -170,6 +179,51 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }
         stroke="rgba(30,24,18,0.12)"
         strokeWidth="0.6"
       />
+      {/* Charge level — the stone fills from the base as it charges.
+          Drawn as a wash over the UNCHARGED part rather than a tint
+          over the charged part. Tinting the filled portion with the
+          crystal's own colour just floods it and erases the secondary
+          hue: at two-thirds the whole stone read as "greener", not as
+          "two-thirds full", and a same-colour surface line was
+          invisible. Washing toward the card surface instead leaves the
+          charged portion as the true crystal, which is the half the
+          user should be looking at, and puts a legible boundary
+          between pale and vivid.
+
+          The wash colour is theme.cream — a CSS variable — so it
+          lightens on paper and darkens in the forest-noir dark theme
+          instead of always washing white.
+
+          Geometry: a full-height rect translated UP as charge rises,
+          clipped to the silhouette. Transform animates reliably
+          everywhere; animated `y`/`height` on SVG does not. */}
+      {level < 1 && (
+        <g clipPath={`url(#${clipId})`}>
+          <rect
+            x="0" y={CHARGE_TOP} width="72" height={chargeH}
+            fill={theme.cream} fillOpacity="0.5"
+            style={{
+              transform: `translateY(${-level * chargeH}px)`,
+              transition: "transform 0.9s cubic-bezier(0.33, 0, 0.2, 1)",
+            }}
+          />
+          {/* Waterline. Sits at the bottom edge of the wash, in the
+              crystal's own primary at full strength — against the
+              washed-out region above it, this is the bit that makes
+              the level readable at a glance. */}
+          {level > 0 && (
+            <rect
+              x="0" y={CHARGE_BOTTOM - 1} width="72" height="1.2"
+              fill={c1} fillOpacity="0.95"
+              style={{
+                transform: `translateY(${-level * chargeH}px)`,
+                transition: "transform 0.9s cubic-bezier(0.33, 0, 0.2, 1)",
+              }}
+            />
+          )}
+        </g>
+      )}
+
       {/* Inner emit overlay — adds a luminous core glow on top of
           the gradient body. */}
       <polygon
@@ -227,7 +281,7 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor }
   );
 };
 
-export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal, summonReady = false, summonPendingCount = 0, onSummon }) => {
+export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal, summonReady = false, summonPendingCount = 0, onSummon, charge = 0, tourStep = null }) => {
   // Live crystal — always computed from current activity, even when
   // locked, so we can stash a fresh snapshot into lockedCrystal when
   // the user taps "lock at this state."
@@ -322,6 +376,12 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
   // showing what's powering the crystal: top families per axis
   // plus the user's onboarding intent for context.
   const [expanded, setExpanded] = React.useState(false);
+  // The tour's lock step has to point at a control that only exists
+  // inside the expanded panel, and the tour overlay swallows taps — so
+  // the step opens the panel itself rather than asking the user to.
+  // Reverts to whatever they had when the step passes.
+  const tourWantsPanel = tourStep === "lodestone-lock";
+  const isExpanded = expanded || tourWantsPanel;
 
   // Pulse multiplier — shifting >> activity pulse > resting. Shift
   // is a stronger flare so the crystal-identity-change reads as a
@@ -346,7 +406,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
     <button
       type="button"
       onClick={() => setExpanded(v => !v)}
-      aria-expanded={expanded}
+      aria-expanded={isExpanded}
       style={{
         all: "unset", cursor: "pointer", width: "100%", boxSizing: "border-box",
         display: "flex", alignItems: "center", gap: 14,
@@ -405,7 +465,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
             animation: "lodestoneAuraBreath 3.6s ease-in-out infinite",
           }}
         />
-        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} />
+        <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} charge={charge} />
         {/* Pending-arrivals badge — small terra dot with count,
             anchored at the top-right of the crystal halo. Visibility
             is decoupled from summonReady so the badge persists
@@ -480,26 +540,27 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
           panel below is the visible answer to the invitation. */}
       <span
         aria-hidden
+        data-tour="lodestone-details"
         style={{
           position: "absolute",
           right: 10, bottom: 10,
           display: "inline-flex", alignItems: "center", gap: 3,
           padding: "2px 7px",
           borderRadius: 999,
-          background: expanded ? "rgba(176,84,47,0.10)" : `${crystal.gradient[0]}14`,
-          border: `1px solid ${expanded ? theme.terra : crystal.gradient[0]}55`,
+          background: isExpanded ? "rgba(176,84,47,0.10)" : `${crystal.gradient[0]}14`,
+          border: `1px solid ${isExpanded ? theme.terra : crystal.gradient[0]}55`,
           fontFamily: ff.sans, fontSize: 8, letterSpacing: "0.14em",
           textTransform: "uppercase", color: theme.terra,
           fontWeight: 600, lineHeight: 1,
-          animation: expanded ? "none" : "crystalExpandPulse 2.4s ease-in-out infinite",
+          animation: isExpanded ? "none" : "crystalExpandPulse 2.4s ease-in-out infinite",
           transition: "background 0.18s ease, border-color 0.18s ease",
         }}
       >
-        <span>{expanded ? "less" : "details"}</span>
+        <span>{isExpanded ? "less" : "details"}</span>
         <svg width="9" height="9" viewBox="0 0 9 9" fill="none"
              style={{
                transition: "transform 0.22s ease",
-               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+               transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
              }}>
           <path d="M1.5 3 L4.5 6 L7.5 3" stroke={theme.terra}
                 strokeWidth="1.5" strokeLinecap="round"
@@ -565,7 +626,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
         50%      { opacity: 1.00; }
       }
     `}</style>
-    {expanded && (
+    {isExpanded && (
       <CrystalDetail
         crystal={crystal}
         profile={profile}
@@ -671,7 +732,7 @@ const CrystalDetail = ({ crystal, profile, isLocked, liveCrystal, onToggleLock }
           ? liveCrystal
           : null;
         return (
-        <div style={{
+        <div data-tour="lodestone-lock" style={{
           marginTop: 10, paddingTop: 10,
           borderTop: `1px dashed ${theme.ruleSoft}`,
           display: "flex", flexDirection: "column", gap: 8,

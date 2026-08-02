@@ -9,6 +9,7 @@
 // guided tour) as locators — they're stable, semantic hooks that only
 // change when we intend them to, exactly like a data-testid.
 import { test, expect, type Page } from "@playwright/test";
+import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 // A ready-to-use account seeded straight into localStorage so the app
 // skips onboarding and lands in the tabbed UI. Two gotchas encoded here:
@@ -16,8 +17,8 @@ import { test, expect, type Page } from "@playwright/test";
 //    app wipes every herbanium.* key on load and we'd bounce to onboarding.
 //  - toursEnabled:false stops the "quick tour?" offer card and the
 //    spotlight overlay from covering the tab bar and eating our clicks.
-const seedAccount = () => {
-  localStorage.setItem("herbanium.schemaVersion", "6");
+const seedAccount = (schema: string) => {
+  localStorage.setItem("herbanium.schemaVersion", schema);
   localStorage.setItem("herbanium.toursEnabled", "false");
   localStorage.setItem(
     "herbanium.profile",
@@ -44,7 +45,7 @@ const openSubTab = (page: Page, name: string) =>
 
 test.describe("tab + sub-tab render regression", () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(seedAccount);
+    await page.addInitScript(seedAccount, CURRENT_SCHEMA);
     await page.goto("/");
   });
 

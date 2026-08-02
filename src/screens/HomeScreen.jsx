@@ -179,13 +179,8 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               size={13}
               arriving={arriving}
               text={"Stray birds of summer come to my window to sing and fly away.\nAnd yellow leaves of autumn, which have no songs,\nflutter and fall there with a sigh."}
+              attribution="— Rabindranath Tagore (Stray Birds, 1916)"
             />
-            <div style={{
-              fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
-              color: theme.ash, marginTop: 8,
-            }}>
-              — Rabindranath Tagore (Stray Birds, 1916)
-            </div>
           </div>
 
           <TeaGreeting name={name} kicker={getTimeOfDay(new Date().getHours()).label} arriving={arriving} />
@@ -223,15 +218,7 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
               </div>
               {poem ? (
                 <>
-                  <PoemLines text={poem.text} arriving={arriving} />
-                  {poem.attribution && (
-                    <div style={{
-                      fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
-                      color: theme.ash, marginTop: 6,
-                    }}>
-                      {poem.attribution}
-                    </div>
-                  )}
+                  <PoemLines text={poem.text} arriving={arriving} attribution={poem.attribution} />
                   {addJournalEntry && (() => {
                     const saved = poemSaved || poemAlreadyInJournal;
                     return (

@@ -1,0 +1,153 @@
+// e2e/lodestone.spec.ts — the lodestone's charge fill.
+//
+// The stone IS the meter: it fills from the base as charge rises. The
+// fill is drawn as a wash over the UNCHARGED portion, translated up as
+// charge grows, so the charged part stays the true crystal. None of
+// that is visible to a screenshot diff in any stable way (the crystal's
+// colour and pattern are computed from session data and change between
+// loads), so the geometry is asserted directly.
+import { test, expect, type Page } from "@playwright/test";
+import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+
+// Seed a mood profile straight into sessions. computeMoodCrystal reads
+// currentMoods/targetMoods/actual off recent sessions, so a handful of
+// same-mood cups is enough to pin the crystal's primary family — and
+// therefore its colour — deterministically.
+function sessionsFor(moods: string[], count = 6) {
+  const now = Date.now();
+  return Array.from({ length: count }, (_, i) => ({
+    id: `sess-${i}`,
+    who: "you",
+    blendId: "chamomile-dream",
+    brewedAt: now - (i + 1) * 3600_000,
+    ts: now - (i + 1) * 3600_000,
+    actual: moods.join(", "),
+    currentMoods: moods,
+    targetMoods: moods,
+    landed: {},
+    extra: [],
+    taste: 4,
+  }));
+}
+
+async function openFieldNotes(page: Page, charge: number, moods: string[] | null = null) {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(([c, schema]) => {
+    localStorage.setItem("herbanium.schemaVersion", schema as string);
+    localStorage.setItem("herbanium.toursEnabled", "false");
+    localStorage.setItem("herbanium.toursSeen", JSON.stringify({
+      home: true, blend: true, herbanium: true, recipes: true, reflections: true, fieldnotes: true,
+    }));
+    localStorage.setItem("herbanium.lodestoneCharge", JSON.stringify(c));
+    // A plain seeded profile, NOT ?dev. The dev seed re-applies its own
+    // sessions on every load, which silently overwrites the mood
+    // profile these tests set — every crystal came out identical until
+    // that turned up.
+    localStorage.setItem("herbanium.profile", JSON.stringify({ name: "Test Brewer", onboarded: true }));
+  }, [charge, CURRENT_SCHEMA] as const);
+  if (moods) {
+    await page.addInitScript((s) => {
+      localStorage.setItem("herbanium.sessions", s as string);
+    }, JSON.stringify(sessionsFor(moods)));
+  }
+  await page.goto("/");
+  await page.getByRole("button", { name: "Journal", exact: true }).click();
+  await page.locator('[data-tour="subtabs"]')
+    .getByRole("button", { name: "Field Notes", exact: true }).click();
+  await expect(page.locator('[data-tour="fieldnotes-lodestone"]')).toBeVisible();
+}
+
+// How far the wash has been lifted off the stone, in SVG units. 0 means
+// the whole crystal is washed (empty); 74 would be fully lifted.
+const washLift = (page: Page) => page.evaluate(() => {
+  const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
+  const rect = stone.querySelector("svg g[clip-path] rect") as SVGRectElement | null;
+  if (!rect) return null;
+  const m = /translateY\((-?[\d.]+)px\)/.exec(rect.style.transform || "");
+  return m ? Math.abs(parseFloat(m[1])) : 0;
+});
+
+test.describe("lodestone charge fill", () => {
+  test("an empty lodestone is washed over its whole height", async ({ page }) => {
+    await openFieldNotes(page, 0);
+    expect(await washLift(page), "nothing should be lifted at zero charge").toBe(0);
+  });
+
+  test("charge lifts the wash proportionally", async ({ page }) => {
+    await openFieldNotes(page, 50);
+    const lift = await washLift(page);
+    expect(lift, "half charge should lift the wash about halfway").not.toBeNull();
+    expect(lift!).toBeGreaterThan(30);
+    expect(lift!).toBeLessThan(45);
+  });
+
+  test("a full lodestone has no wash at all — it's the true crystal", async ({ page }) => {
+    await openFieldNotes(page, 100);
+    // The wash element isn't rendered at full charge, rather than being
+    // rendered and pushed out of view: a full stone should be exactly
+    // what the crystal looks like with no charge layer involved.
+    expect(await washLift(page), "no wash element should exist at full charge").toBeNull();
+  });
+});
+
+/* ──────────────────────────────────────────────────────────────
+   The crystal's colour is computed from the user's recent moods and
+   flavours — it's the visible face of the same signal that biases the
+   elemental roller. Worth pinning: it's easy to break by touching the
+   family maps, and nothing else in the suite would notice.
+
+   These assert on the SVG gradient stops rather than on pixels, so
+   they don't care about the pattern the crystal happens to draw
+   (Threaded / Veined / Dotted all vary per profile).
+   ────────────────────────────────────────────────────────────── */
+
+// Every colour the crystal's body gradient is built from.
+const gradientColors = (page: Page) => page.evaluate(() => {
+  const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
+  const stops = stone.querySelectorAll('svg defs linearGradient stop, svg defs radialGradient stop');
+  return Array.from(stops)
+    .map(s => (s.getAttribute("stop-color") || "").toUpperCase())
+    .filter(c => c.startsWith("#"));
+});
+
+test.describe("lodestone colour follows the mood profile", () => {
+  // Straight from CRYSTAL_EFFECT_COLORS in data/moodCrystal.js.
+  const CALM = "#4DEB7E";   // neon spring-green
+  const SLEEP = "#C77FFF";  // neon amethyst
+  const ENERGY = "#FFC318"; // saturated amber-yellow
+
+  // Mood words must exist in FAMILY_BY_EFFECT (components/FlavorMap) —
+  // an unmapped word contributes nothing and the crystal falls back to
+  // its neutral palette, which is a silently passing test waiting to
+  // happen. "drowsy" and "alert" aren't in the map; "sleepy" and
+  // "energy" are.
+  test("a calm profile renders a calm-coloured crystal", async ({ page }) => {
+    await openFieldNotes(page, 0, ["calm", "soothing"]);
+    expect(await gradientColors(page), "calm should drive the crystal green").toContain(CALM);
+  });
+
+  test("a sleep profile renders a different colour than a calm one", async ({ page }) => {
+    await openFieldNotes(page, 0, ["sleepy"]);
+    const colors = await gradientColors(page);
+    expect(colors, "sleep should drive the crystal amethyst").toContain(SLEEP);
+    expect(colors, "and must not still be reading as calm").not.toContain(CALM);
+  });
+
+  test("an energy profile is distinct again", async ({ page }) => {
+    await openFieldNotes(page, 0, ["energy", "uplifting"]);
+    const colors = await gradientColors(page);
+    expect(colors).toContain(ENERGY);
+    expect(colors).not.toContain(CALM);
+  });
+
+  test("the charge wash doesn't change the crystal's own colours", async ({ page }) => {
+    // The fill washes toward the card surface; it must not tint the
+    // body gradient, or a charged stone would read as a different
+    // mood than the user actually has.
+    await openFieldNotes(page, 0, ["calm", "soothing"]);
+    const empty = await gradientColors(page);
+    await openFieldNotes(page, 100, ["calm", "soothing"]);
+    const full = await gradientColors(page);
+    expect(full, "charge must not alter the crystal's palette").toEqual(empty);
+  });
+});

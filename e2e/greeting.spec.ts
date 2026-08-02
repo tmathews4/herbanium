@@ -8,15 +8,16 @@
 //      remounts on every tab return, and a welcome that re-performs
 //      each visit becomes a toll.
 import { test, expect, type Page } from "@playwright/test";
+import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 async function openHome(page: Page) {
-  await page.addInitScript(() => {
-    localStorage.setItem("herbanium.schemaVersion", "6");
+  await page.addInitScript((schema) => {
+    localStorage.setItem("herbanium.schemaVersion", schema);
     localStorage.setItem("herbanium.toursEnabled", "false");
     localStorage.setItem("herbanium.toursSeen", JSON.stringify({
       home: true, blend: true, herbanium: true, recipes: true, reflections: true, fieldnotes: true,
     }));
-  });
+  }, CURRENT_SCHEMA);
   await page.goto("/?dev");
 }
 

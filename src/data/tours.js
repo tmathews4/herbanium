@@ -89,6 +89,13 @@ export const SCREEN_TOURS = {
   ],
   fieldnotes: [
     { target: "fieldnotes-lodestone", title: "The lodestone", pad: 8,
-      body: "Spirits are drawn in by how you brew and write. Tap the lodestone to summon the ones waiting — they sketch into your field notes below." },
+      body: "Spirits are drawn in by how you brew and write. The stone fills as you go, and a full stone always draws one in — tap it to summon what's waiting." },
+    { target: "lodestone-details", title: "Look closer", pad: 8,
+      body: "The stone's colour is your own — mixed from the moods and flavours of your recent cups. Open this to see what it's made of." },
+    // Targets a control that only exists inside the expanded panel;
+    // MoodCrystal opens the panel for this step (the overlay swallows
+    // taps, so the user can't do it themselves mid-tour).
+    { target: "lodestone-lock", title: "Keep this one", pad: 8,
+      body: "Fond of the colour you've got? Lock it here and the stone holds that composition instead of drifting with your next few cups. Unlock any time to let it track again." },
   ],
 };

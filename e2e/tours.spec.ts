@@ -11,6 +11,7 @@
 // targets exist — recipes rows, recent brews, etc.) plus a seeded
 // toursSeen map so each test fires exactly ONE tour in isolation.
 import { test, expect, type Page, type Locator } from "@playwright/test";
+import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 const ALL_SCREENS = ["home", "blend", "herbanium", "recipes", "reflections", "fieldnotes"];
 
@@ -24,14 +25,14 @@ async function armTour(page: Page, target: string) {
   // flake (we're testing layout, not racing animations).
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(
-    ([seenList, tgt]) => {
-      localStorage.setItem("herbanium.schemaVersion", "6");
+    ([seenList, tgt, schema]) => {
+      localStorage.setItem("herbanium.schemaVersion", schema as string);
       localStorage.setItem("herbanium.toursEnabled", "true");
       const seen: Record<string, boolean> = {};
       for (const s of seenList as string[]) if (s !== tgt) seen[s] = true;
       localStorage.setItem("herbanium.toursSeen", JSON.stringify(seen));
     },
-    [ALL_SCREENS, target] as const,
+    [ALL_SCREENS, target, CURRENT_SCHEMA] as const,
   );
   await page.goto("/?dev");
 }

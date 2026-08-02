@@ -30,10 +30,12 @@
    ────────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from "react";
+import { CURRENT_SCHEMA } from "../data/schemaVersion";
 
 const KEY_PREFIX = "herbanium.";
 const SCHEMA_KEY = KEY_PREFIX + "schemaVersion";
-const CURRENT_SCHEMA = "6";
+// CURRENT_SCHEMA is imported (see data/schemaVersion.js) so the E2E
+// suite can seed localStorage with the same value the app expects.
 
 // Check schema once on module load. If mismatched, wipe all herbanium.* keys.
 // Portfolio phase: acceptable to clear. Post-launch: implement real migration.

@@ -68,6 +68,7 @@ import { pickSeedBlends } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
+import { applyCharge, isCharged, spendCharge, CHARGE_FULL } from "./data/lodestone";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
 import { configureStatusBar, hapticTap, scheduleCheckInNotification, cancelCheckInNotification } from "./helpers/native";
@@ -640,6 +641,15 @@ export default function App() {
   // visiting tab X" / "visited X N times" elemental triggers. Stored
   // as a plain object keyed by tab id ("home" | "apothecary" | "shelf"
   // | "profile") so it serializes cleanly without Set/Map gymnastics.
+  // Lodestone charge, 0–100. The stone itself is the meter (it fills
+  // from the base as this rises), so there's no separate progress bar.
+  // Earning rules aren't wired yet — for now it's set by hand from the
+  // Dev section, which is what lets the empty / part / full states be
+  // looked at at all: no seed produces a resting lodestone.
+  const [lodestoneCharge, setLodestoneCharge] = usePersistedState("lodestoneCharge", 0);
+  // Per-day tally of which charge sources have paid out, so a visible
+  // meter can't be ground out in an evening. See data/lodestone.js.
+  const [lodestoneLedger, setLodestoneLedger] = usePersistedState("lodestoneLedger", null);
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
   const [overlay, setOverlay] = useState(null); // null | "steep" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
@@ -1384,6 +1394,7 @@ export default function App() {
       justEarned.forEach(id => { if (next[id] == null) next[id] = "milestone"; });
       return next;
     });
+    earnCharge("milestone");
   };
 
   const tryRollOnAction = (action) => {
@@ -1456,7 +1467,31 @@ export default function App() {
   // a hit, the new spirit is appended to wildElementals and lastWildAt
   // is bumped. The elementals surfaces it via the existing arrival flow
   // (id won't be in seenElementalIds, so it queues up naturally).
-  const tryRollWildElemental = () => {
+  // Charge the lodestone for a qualifying action. Silently does nothing
+  // when the day's cap for that action is spent or the stone is already
+  // full — both are normal, not errors.
+  const earnCharge = (action) => {
+    if (elementalsDisabled) return;
+    const next = applyCharge({ charge: lodestoneCharge, ledger: lodestoneLedger, action });
+    setLodestoneLedger(next.ledger);
+    if (next.gained > 0) setLodestoneCharge(next.charge);
+  };
+
+  // Spend a full stone for a guaranteed summon. This is what replaced
+  // the wild elemental's 1-in-15 chance roll: same reward, but earned
+  // visibly instead of arriving at random. Returns true if it paid out,
+  // so the caller can leave the pending-arrivals path alone when it
+  // didn't.
+  const summonFromCharge = () => {
+    if (elementalsDisabled) return false;
+    if (!isCharged(lodestoneCharge)) return false;
+    const wild = rollWildElemental({ guaranteed: true });
+    if (!wild) return false;
+    setLodestoneCharge(spendCharge(lodestoneCharge) ?? 0);
+    return true;
+  };
+
+  const rollWildElemental = ({ guaranteed = false } = {}) => {
     if (elementalsDisabled) return;
     // Crystal name is included in the wild's `desc` so the arrival
     // card closes the loop on the elementals's lead crystal — the
@@ -1467,15 +1502,21 @@ export default function App() {
       sessions, journalEntries, getBlend, profile,
     });
     const wild = maybeRollWild({
-      lastWildAt,
+      // A charged summon bypasses both gates the random roll used: the
+      // 7-day limiter and the 1-in-15 chance. The user paid for this
+      // one by brewing, reviewing and writing — refusing it because a
+      // die came up wrong is exactly what the meter exists to end.
+      lastWildAt: guaranteed ? 0 : lastWildAt,
+      rng: guaranteed ? () => 0 : undefined,
       sessions,
       journalEntries,
       getBlend,
       crystalName: crystal.isNeutral ? null : crystal.name,
     });
-    if (!wild) return;
+    if (!wild) return null;
     setWildElementals(prev => [...(prev || []), wild]);
     setLastWildAt(wild.ts);
+    return wild;
   };
 
   const addSession = ({
@@ -1555,7 +1596,10 @@ export default function App() {
     });
 
     hapticTap();
-    tryRollWildElemental();
+    // The wild roll used to fire here on a 1-in-15 chance. It's now
+    // earned through the lodestone instead — the brew charges the
+    // stone, and a full stone is summoned deliberately.
+    earnCharge("brew");
     tryRollOnAction("brew");
     tryMilestones();
   };
@@ -1609,6 +1653,9 @@ export default function App() {
         moodsPending: false,
       };
     }));
+    // The review is the heaviest charge source: it's the part that
+    // feeds the perception model, so it's what the meter rewards most.
+    earnCharge("review");
     hapticTap();
   };
 
@@ -1670,7 +1717,7 @@ export default function App() {
       flavors:      Array.isArray(flavors) ? flavors : [],
     };
     setJournalEntries(prev => [entry, ...(prev || [])]);
-    tryRollWildElemental();
+    earnCharge("reflection");
     tryRollOnAction("journal");
     tryMilestones();
   };
@@ -1899,9 +1946,9 @@ export default function App() {
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} />}
-        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} lodestoneCharge={lodestoneCharge} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
+        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first
           // arrival. Falls back to "any unseen" then "any" so the

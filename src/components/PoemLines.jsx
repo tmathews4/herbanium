@@ -26,12 +26,23 @@ import { ff, theme } from "../theme";
 // immediately. NN/g's study of animated text found users read animated
 // body copy as an artificial loading delay, so whatever slowness the
 // opening has should live in the flourish, not here. The 140ms stagger
-// is at the top of the 50–200ms range rather than past it.
-const LINE_START = 0.2;
-const LINE_STAGGER = 0.14;
+// stagger is past the usual 50–200ms range, deliberately: the lines
+// should land at reading pace so a scan-reader can follow the poem as
+// it arrives rather than watching a block appear. That's a different
+// job from the "don't make me wait for body copy" case the range is
+// written for — nothing here is gating a task.
+const LINE_START = 0.25;
+const LINE_STAGGER = 0.26;
+const LINE_DUR = 1.2;
 
-export const PoemLines = ({ text, size = 12.5, arriving = false }) => {
+export const PoemLines = ({ text, size = 12.5, arriving = false, attribution = null }) => {
   const lines = String(text || "").split("\n");
+  // The attribution waits for the whole verse, then fades slowly and
+  // on its own. It was the one part of the card simply present from
+  // the first frame, which read as the poem animating around a fixed
+  // label. Signing the poem after it has been read is also just the
+  // right order.
+  const afterLastLine = LINE_START + Math.max(0, lines.length - 1) * LINE_STAGGER + LINE_DUR;
   return (
     <div style={{ position: "relative" }}>
       <style>{`
@@ -56,7 +67,7 @@ export const PoemLines = ({ text, size = 12.5, arriving = false }) => {
             minHeight: line.trim() === "" ? "0.8em" : undefined,
             ...(arriving
               ? {
-                  animation: "poemLineIn 1s cubic-bezier(0.33, 0, 0.2, 1) "
+                  animation: `poemLineIn ${LINE_DUR}s cubic-bezier(0.33, 0, 0.2, 1) `
                     + `${LINE_START + i * LINE_STAGGER}s both`,
                 }
               : null),
@@ -65,6 +76,21 @@ export const PoemLines = ({ text, size = 12.5, arriving = false }) => {
           {line}
         </div>
       ))}
+
+      {attribution && (
+        <div style={{
+          fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+          color: theme.ash, marginTop: 8,
+          ...(arriving
+            ? {
+                animation: "poemLineIn 1.5s cubic-bezier(0.33, 0, 0.2, 1) "
+                  + `${afterLastLine - 0.35}s both`,
+              }
+            : null),
+        }}>
+          {attribution}
+        </div>
+      )}
     </div>
   );
 };
