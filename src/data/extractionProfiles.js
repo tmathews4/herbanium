@@ -230,15 +230,26 @@ export const EXTRACTION_PROFILES = {
       character: "Eugenol overdose. The cup goes medicinal-numbing." },
   ],
 
+  // Vanilla's doc (sections 6a-6c) prescribes uplifting at 1 then 2,
+  // and it was the one straggler the transcription tool couldn't pair:
+  // the doc brews at 85-95C over 10-20 min while the shipped samples
+  // run 95-100C over 4-7 min, which is outside the tool's matching
+  // distance. Carried into the third sample too — extraction
+  // accumulates, and the doc simply stops listing it rather than
+  // claiming it disappears.
+  //
+  // That temperature/time divergence is itself worth a look: the
+  // shipped curve is hotter and far shorter than the research. Left
+  // alone here, since changing brew windows is a calibration decision.
   vanilla: [
     { tempC: 95,  timeS: 240, flavors: ["sweet", "creamy"],
-      effects: [["comfort", 3], ["digestive", 2], ["soothing", 4], ["warming", 1], ["calm", 1], ["sleepy", 2]],
+      effects: [["comfort", 3], ["digestive", 2], ["soothing", 4], ["warming", 1], ["calm", 1], ["sleepy", 2], ["uplifting", 1]],
       character: "Light vanilla — soft sweetness, a gentle comfort." },
     { tempC: 98,  timeS: 360, flavors: ["sweet", "creamy", "floral", "warm"],
-      effects: [["comfort", 4], ["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1]],
+      effects: [["comfort", 4], ["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
       character: "The standard cup. Full vanilla bloom, warm and rounded." },
     { tempC: 100, timeS: 420, flavors: ["sweet", "creamy", "floral", "warm", "woody"],
-      effects: [["comfort", 4], ["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1]],
+      effects: [["comfort", 4], ["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
       character: "Fuller extraction. Vanilla's woodier side emerges, still sweet." },
   ],
 

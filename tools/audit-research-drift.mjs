@@ -44,7 +44,12 @@ function researchEffects(file) {
   // Table rows: | effects | [["name", n], ...] |
   for (const row of src.matchAll(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/g)) {
     for (const hit of row[1].matchAll(/\[\s*"([^"]+)"\s*,\s*[\d.]+\s*\]/g)) {
-      names.add(hit[1]);
+      // The docs' "settle" is the app's "digestive" — same claim, and
+      // every gloss in the docs says so. Without the alias this audit
+      // reports four ingredients as un-transcribed that are in fact
+      // done, which is worse than useless: it makes a finished job
+      // look unfinished and hides the ones that genuinely aren't.
+      names.add(hit[1] === "settle" ? "digestive" : hit[1]);
     }
   }
   return names;
