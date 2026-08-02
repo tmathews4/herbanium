@@ -630,3 +630,29 @@
     inform a future `preparationPattern: "long-infusion"` if
     multiple ingredients need it (oat straw, raspberry leaf
     in Tier 3 would also use it).
+
+---
+
+## Addendum — `sleepy` removed (2026-08-02)
+
+An audit found `sleepy` 2 shipped at the 98°C brew point. This
+document declines to rate it — §5 lists **`sleepy` | | Not primary** —
+and one row above says the opposite in plain words:
+
+> | grounding | 2 | The earthy, mineral, food-adjacent character
+> grounds **without sedation** |
+
+Nettle is a nutritive tonic, not a nervine. Its researched register is
+mineral-rich daily nourishment: `soothing` 3 as the primary effect,
+`grounding` 2, `digestive` 2, with `calm` at 1 and explicitly marked
+"mild; not nettle's primary register". Nothing in the pharmacology
+points at sedation — the flavonoid and mineral content that carries
+the tonic claim has no sedative mechanism attached, which is why §5
+left the strength blank rather than filling in a low number.
+
+Shipping `sleepy` also put nettle in the same register as valerian and
+passionflower on a brew view where the user can't tell a sourced claim
+from an unsourced one. Removed. `calm` 1 already carries the quiet end
+of nettle honestly.
+
+<!-- sourced-effects: soothing, grounding, digestive, calm, uplifting -->

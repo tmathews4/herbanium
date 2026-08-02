@@ -854,7 +854,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["comfort", 2], ["soothing", 2], ["grounding", 1], ["digestive", 1]],
       character: "Light nettle — green and mineral, a quiet spring tonic." },
     { tempC: 98,  timeS: 600, flavors: ["earthy", "grassy", "mineral", "vegetal", "spinach-like"],
-      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["grounding", 2], ["uplifting", 1]],
+      effects: [["comfort", 3], ["digestive", 2], ["soothing", 3], ["calm", 3], ["warming", 1], ["grounding", 2], ["uplifting", 1]],
       character: "The standard cup. Full mineral pull, the daily green." },
     { tempC: 100, timeS: 900, flavors: ["earthy", "grassy", "mineral", "vegetal", "sweet", "astringent"],
       effects: [["comfort", 3], ["digestive", 2], ["bitterness", 2], ["soothing", 3], ["grounding", 2], ["uplifting", 1], ["calm", 1], ["warming", 1]],

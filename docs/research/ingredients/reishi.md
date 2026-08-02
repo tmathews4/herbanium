@@ -177,3 +177,50 @@
 | Facts | 2 | History and chemistry well-documented |
 
 **Overall status:** Draft — solid baseline. The mushroom has the largest research literature of any in the catalog; deep-source pass would yield significantly more nuance.
+
+---
+
+## Addendum — `sleepy` kept (2026-08-02)
+
+An audit flagged `sleepy` as shipped without a prescribing row. §5
+rates no `sleepy` line, but it does describe `calm` 3 as "background
+calming, **traditional sleep support**" — the claim was there, filed
+under a neighbouring name. It holds up on both tradition and
+mechanism.
+
+**Tradition.** Reishi is classically a *shen* tonic — *shen* meaning
+spirit — used to calm the spirit and induce sleep. The *an shen*
+(calm-spirit) framing is the herb's oldest documented indication, and
+it is the reason the mushroom carries a sleep association at all.
+
+**Mechanism and animal evidence.**
+
+> *Ganoderma lucidum promotes sleep through a gut microbiota-dependent
+> and serotonin-involved pathway in mice.* Scientific Reports (2021).
+> 28 days of the acidic alcohol-extract fraction shortened sleep
+> latency and prolonged sleep duration; the effect raised
+> 5-hydroxytryptamine in the hypothalamic serotonergic synapse pathway
+> and depended on the gut microbiota —
+> https://www.nature.com/articles/s41598-021-92913-6
+>
+> *Ganoderma lucidum spore extract improves sleep disturbances in a rat
+> model of sporadic Alzheimer's disease* —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC11076761/
+
+Ganoderic acids — the triterpene fraction, 130–140 distinct acids in
+ethanol extract — cross the blood-brain barrier and modulate GABAergic
+transmission, which is the proposed route.
+
+**The limit, stated plainly: the sleep evidence is animal.** There is
+no human RCT showing reishi shortens sleep latency. Human reports are
+observational. So this sits above cardamom's purely traditional
+`energy` and below chamomile's trial-backed `calm` — mechanism plus
+animal models plus long tradition, and it should not be described as
+clinically proven.
+
+That the claim climbs with extraction is consistent: triterpenes are
+the slow, hot fraction, which is why §6's long decoction is where
+`sleepy` reaches its full value and the 60°C cold pour shows almost
+nothing.
+
+<!-- sourced-effects: sleepy -->

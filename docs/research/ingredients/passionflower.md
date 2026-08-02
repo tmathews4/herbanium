@@ -387,3 +387,37 @@ of the plant's medicinal use.
    that's a meaningful signal of institutional acceptance that
    helps calibrate confidence. Worth noting where this applies for
    other ingredients.
+
+---
+
+## Addendum — `soothing` kept (2026-08-02)
+
+An audit flagged `soothing` as unsourced. §5 rates `calm` 3, `sleepy`
+3, `settle` 2 and `comfort` 2 — all correct, all mind-side or
+digestive. `soothing` is the app's *bodily* register, and the question
+was whether passionflower earns one.
+
+It does, on a separate line of evidence from the anxiolytic one:
+
+> *Passiflora incarnata attenuation of neuropathic allodynia and
+> vulvodynia apropos GABA-ergic and opioidergic antinociceptive and
+> behavioural mechanisms* —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC4765057/
+>
+> *Passiflora incarnata L. extracts elicit GABA currents* —
+> https://pubmed.ncbi.nlm.nih.gov/20382514/
+
+The harmala alkaloids (harman, harmol, harmaline) carry muscle-relaxant
+activity, and the flavonoid fraction is antispasmodic and
+anti-inflammatory alongside its sedative action. Antinociceptive
+effects run through GABAergic and opioidergic mechanisms.
+
+**The limit: the human trials are about anxiety, not the body.** The
+strongest clinical result is the 2001 double-blind RCT finding
+Passiflora comparable to oxazepam in generalised anxiety without the
+performance impairment — a mind-side result. The somatic evidence is
+animal and in-vitro. So `soothing` stays at the modest 2–3 it ships
+rather than rising toward `calm`'s level, and it is not presented as
+trial-backed bodily relief.
+
+<!-- sourced-effects: soothing -->

@@ -455,3 +455,36 @@ dismisses it. Similarly, `attested` content uses "Traditionally..." or
 - **What's outright missing:** Primary sources for the monograph-level claims (German Commission E, WHO), the historical facts beyond Peter Rabbit, safety notes beyond ragweed.
 
 **Generalizable lesson for other ingredients:** The apigenin research showed that when a popular claim is widely repeated with a single well-known source (Viola 1995), it often has a more complicated story hiding in the follow-up literature. The extraction-kinetics research added a second lesson: peer-reviewed primary data exists for far more herbals than wellness-blog sources let on — Harbourne 2008 is *the* chamomile brewing paper and almost no popular source cites it. For each ingredient, spend 20 minutes looking for a "beverage optimization" or "extraction kinetics" paper in the peer-reviewed literature before trusting popular brewing advice. Worth repeating the "find the follow-up papers" step for any mechanism claim during research — especially lavender (linalool / GABA), passionflower (GABA-related), and lemon balm (GABA transaminase). A primary source being real doesn't mean the simple story it tells is still current consensus.
+
+---
+
+## Addendum — `soothing` kept (2026-08-02)
+
+An audit flagged `soothing` as unsourced. §5 rates `calm`, `sleepy`,
+`settle` and `comfort` but no `soothing` — an omission rather than a
+judgement, because in this app `soothing` is the *bodily* register
+("the body's cup, not the mind's"), and chamomile's somatic evidence
+is separate from its anxiolytic evidence and at least as good.
+
+> *Evidence Supports Tradition: the in Vitro Effects of Roman
+> Chamomile on Smooth Muscles.* Frontiers in Pharmacology (2018) —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC5897738/
+
+α-bisabolol and the volatile fraction relax smooth muscle through the
+digestive tract; apigenin, apigenin-7-O-glucoside and its acetylated
+derivatives carry the spasmolytic and antiphlogistic activity;
+K⁺-channel modulation accounts for the antispasmodic and antisecretory
+effect. α-bisabolol additionally protects the gastric mucosa and is
+anti-ulcerogenic. A 2015 randomised clinical study found significant
+symptom reduction in IBS patients after four weeks.
+
+**This is a different claim from `calm`, and worth keeping separate.**
+`calm` is apigenin at the GABA-A benzodiazepine site — anxiolytic in
+9 of 10 RCTs per the Saadatmand 2024 review §5 already cites. That is
+the mind. Smooth-muscle relaxation and mucosal protection are the
+body, and they're why chamomile has a topical and gastrointestinal
+tradition alongside the bedtime one. `settle` 3 covers the narrowly
+digestive part; `soothing` is the broader bodily ease that the
+anti-inflammatory action supports.
+
+<!-- sourced-effects: soothing -->

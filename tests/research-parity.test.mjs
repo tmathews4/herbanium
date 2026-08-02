@@ -12,8 +12,8 @@
       and presenting it with the authority of the sourced ones — a
       user cannot tell the two apart.
 
-      Enforced as a RATCHET, not a clean bill of health: 15 known
-      unsourced pairs across 13 ingredients today (from 30), listed by
+      Enforced as a RATCHET, not a clean bill of health: 11 known
+      unsourced pairs across 9 ingredients today (from 30), listed by
       name below so they can be worked off deliberately while any NEW
       one fails immediately. A bare count would let one be fixed and
       another introduced with the suite still green.
@@ -81,7 +81,6 @@ const ALIAS = { settle: "digestive", warming: "comfort" };
 // point; ADDING one should be a deliberate act with a reason.
 const KNOWN_UNSOURCED = {
   bergamot: ["focus"],
-  chamomile: ["soothing"],
   cranberry: ["energy"],
   "dried-apple": ["calm", "uplifting"],
   fennel: ["comfort"],
@@ -89,9 +88,6 @@ const KNOWN_UNSOURCED = {
   jasmine: ["uplifting"],
   "licorice-root": ["grounding", "uplifting"],
   "lions-mane": ["comfort"],
-  nettle: ["sleepy"],
-  passionflower: ["soothing"],
-  reishi: ["sleepy"],
   vanilla: ["digestive"],
 };
 
