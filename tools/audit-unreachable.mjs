@@ -27,6 +27,25 @@
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import { resolveBlendAtBrew } from "../src/algo/compose.js";
 import { FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR } from "../src/data/families.js";
+import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
+
+// Everything an ingredient's extraction samples ever mention. A
+// declared property missing from here can't be suppressed by masking —
+// it was never in the input. That's a data gap, and it needs a
+// completely different fix from a perception-layer one.
+function declaredInProfile(id) {
+  const p = EXTRACTION_PROFILES[id];
+  const seen = new Set();
+  for (const key of Object.keys(p || {})) {
+    const sample = p[key];
+    if (!sample || typeof sample !== "object") continue;
+    for (const f of sample.flavors || []) seen.add(`flavor:${f}`);
+    for (const e of sample.effects || []) {
+      seen.add(`effect:${Array.isArray(e) ? e[0] : e.name}`);
+    }
+  }
+  return seen;
+}
 
 // Matches SECONDARY_THRESHOLD in components/FlavorMap: below this a
 // track earns no row, so the user never sees it.
@@ -81,6 +100,7 @@ function sweep(id) {
   // the same idea declared twice — masking doing its job on redundant
   // data. A suppressed property whose whole family vanished is real
   // information the user never sees.
+  const inProfileSet = declaredInProfile(id);
   const surfacedFamily = new Map();
   for (const d of declared) {
     const got = peak.get(`${d.kind}:${d.name}`) || 0;
@@ -94,7 +114,8 @@ function sweep(id) {
     const got = peak.get(`${d.kind}:${d.name}`) || 0;
     const fam = famOf(d);
     const sibling = fam ? surfacedFamily.get(`${d.kind}:${fam}`) : null;
-    if (got < VISIBLE) unreachable.push({ ...d, got, fam, sibling });
+    const inProfile = inProfileSet.has(`${d.kind}:${d.name}`);
+    if (got < VISIBLE) unreachable.push({ ...d, got, fam, sibling, inProfile });
     else if (got < BORDERLINE) borderline.push({ ...d, got, fam, sibling });
   }
   return { id, name: meta.name, declared: declared.length, unreachable, borderline };
@@ -148,13 +169,27 @@ for (const p of pairs) {
     + (p.ings.length > 4 ? ", ..." : ""));
 }
 
-console.log(`\n── LOST (${lost.length}) — the whole family vanished`);
-console.log("   Real information the user can never see. This is the masking bug.\n");
-for (const u of lost.slice(0, 20)) {
+const missingData = lost.filter(u => !u.inProfile);
+const suppressed = lost.filter(u => u.inProfile);
+
+console.log(`\n── LOST / NEVER IN THE DATA (${missingData.length})`);
+console.log("   The ingredient page declares it; the extraction profile never");
+console.log("   mentions it at any temp or time. No perception change can reach");
+console.log("   these — the input doesn't contain them.\n");
+for (const u of missingData.slice(0, 12)) {
+  console.log(`  ${u.ing.padEnd(18)} ${u.name.padEnd(12)}`
+    + `${u.declared != null ? `declared ${u.declared}` : ""}`);
+}
+if (missingData.length > 12) console.log(`  ... and ${missingData.length - 12} more`);
+
+console.log(`\n── LOST / SUPPRESSED (${suppressed.length})`);
+console.log("   In the extraction data, but never survives to the screen.");
+console.log("   THIS is the perception-layer set.\n");
+for (const u of suppressed.slice(0, 12)) {
   console.log(`  ${u.ing.padEnd(18)} ${u.name.padEnd(12)}`
     + `${u.declared != null ? `declared ${u.declared}` : ""}  (family: ${u.fam || "unmapped"})`);
 }
-if (lost.length > 20) console.log(`  ... and ${lost.length - 20} more`);
+if (suppressed.length > 12) console.log(`  ... and ${suppressed.length - 12} more`);
 
 const totalDeclared = rows.reduce((n, r) => n + r.declared, 0);
 const totalGap = rows.reduce((n, r) => n + r.unreachable.length, 0);
