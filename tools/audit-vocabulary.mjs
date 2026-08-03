@@ -108,6 +108,32 @@ export function containment(threshold = 0.85) {
   return out.sort((x, y) => y.frac - x.frac);
 }
 
+/* ── 4. Gaps the docs flagged themselves ──────────────────────────
+   Several research docs record, in prose, that they had to press an
+   existing word into service because the vocabulary has no term for
+   what the herb actually does. Echinacea's soothing row says outright
+   it is the "best vocabulary mapping for immune support"; turmeric's
+   says the same for anti-inflammatory. Those are the authors telling
+   us the word is a proxy — and nothing read it, because it's prose in
+   a table cell rather than data.
+
+   This is why `soothing` looks synonymous with `comfort`: it has been
+   absorbing whatever the vocabulary can't say. A word doing five jobs
+   overlaps everything.                                             */
+const GAP_PHRASES = /(closest (existing )?(vocabulary )?(effect|mapping)|best vocabulary mapping|vocabulary gap|no (better|existing) (word|term|effect))/i;
+
+export function flaggedGaps() {
+  const out = [];
+  for (const f of readdirSync(DOCS).filter(x => x.endsWith(".md"))) {
+    for (const line of readFileSync(resolve(DOCS, f), "utf8").split("\n")) {
+      if (GAP_PHRASES.test(line)) {
+        out.push({ doc: f.replace(/\.md$/, ""), line: line.replace(/^[>|\s]+/, "").trim().slice(0, 110) });
+      }
+    }
+  }
+  return out;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   console.log("\nCENSUS — ingredients shipping a word vs docs prescribing it\n");
   console.log("  token        ships  docs   ratio");
@@ -132,6 +158,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const c = COUNTERPART[t];
     console.log(`  ${t.padEnd(11)} ${c || "** no counterpart in herbal action vocabulary **"}`);
   }
+  const gaps = flaggedGaps();
+  if (gaps.length) {
+    console.log("\n\nGAPS THE DOCS FLAGGED THEMSELVES — a word pressed into service\n");
+    for (const g of gaps) console.log(`  ${g.doc.padEnd(15)} ${g.line}`);
+  }
+
   console.log("\n  Tea's own sensory lexicons (Lee 2007 green tea, CTSEM, QDA) cover");
   console.log("  flavour, aroma and mouthfeel only — none of them name effects, so");
   console.log("  materia medica and TCM are the reference frames available.\n");
