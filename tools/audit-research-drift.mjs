@@ -111,6 +111,31 @@ function researchEffects(file) {
  *
  *   <!-- preparation-only: cooling -->
  */
+/**
+ * Effects an EARLIER part of the doc prescribes that a later addendum
+ * has re-registered under a different word.
+ *
+ * The §6 brew tables are a transcription made at a point in time. When
+ * research later shows the register was misnamed — the seven
+ * ingredients whose "soothing" gloss actually described comfort — the
+ * addendum records the correction, but the original tables still say
+ * the old word, and this audit reported it as prescribed-but-shipped.
+ *
+ * Rewriting the old tables would erase the record of what was
+ * originally concluded, which is the opposite of how these docs work:
+ * they append. So the addendum carries a marker instead.
+ *
+ *   <!-- superseded-effects: soothing -->
+ */
+function supersededEffects(file) {
+  const names = new Set();
+  for (const row of readFileSync(file, "utf8")
+    .matchAll(/<!--\s*superseded-effects:\s*([^>]+?)\s*-->/g)) {
+    for (const n of row[1].split(",").map(x => x.trim()).filter(Boolean)) names.add(canon(n));
+  }
+  return names;
+}
+
 function preparationOnly(file) {
   const names = new Set();
   for (const row of readFileSync(file, "utf8")
@@ -149,7 +174,9 @@ for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
   if (research.size === 0) { rows.push({ slug, id, noTable: true }); continue; }
   const shipped = shippedEffects(id);
   const prepOnly = preparationOnly(resolve(DOCS, file));
-  const missing = [...research].filter(n => !shipped.has(n) && !prepOnly.has(n)).sort();
+  const superseded = supersededEffects(resolve(DOCS, file));
+  const missing = [...research]
+    .filter(n => !shipped.has(n) && !prepOnly.has(n) && !superseded.has(n)).sort();
   const extra = [...shipped].filter(n => !research.has(n) && n !== "bitterness").sort();
   rows.push({ slug, id, missing, extra, research: research.size, prepOnly: [...prepOnly] });
 }

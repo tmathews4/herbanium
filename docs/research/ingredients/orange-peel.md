@@ -222,3 +222,31 @@
 | Facts | 3 | All cross-referenced |
 
 **Overall status:** Verified — confident enough to ship.
+
+---
+
+## Addendum — `warming` removed (2026-08-03)
+
+An audit found `warming` 2–3 shipped at every brew point — the second
+largest value in the profile — with no §6 row prescribing it. §5
+prescribes `comfort` 1 instead, and its gloss is precise about why:
+
+> | comfort | 1 | The **"warming"** register that makes it the
+> chai/mulled-wine staple |
+
+The quotation marks are doing real work. The doc is describing the
+register orange peel *belongs to* in a blend, not claiming the peel
+generates heat. Since `warming` and `comfort` were separated, that
+distinction has a home: `warming` is thermogenic — gingerol and
+piperine acting on TRPV1, measurable body heat — and citrus peel has
+no such constituent. Its aromatics are limonene and linalool, which
+carry the `uplifting` claim §5 already rates at 2.
+
+What orange peel actually contributes to a mulled wine or a chai is
+the *association* — sweet, spiced, seasonal. That is `comfort`, at the
+modest 1 the research gives it, and the profile already carries it.
+
+Removed. `uplifting` 2 and `digestive` 2 are the sourced picture,
+with `comfort` 1 alongside.
+
+<!-- sourced-effects: uplifting, digestive, comfort -->

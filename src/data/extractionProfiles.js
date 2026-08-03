@@ -949,13 +949,13 @@ export const EXTRACTION_PROFILES = {
   ],
   "orange-peel": [
     { tempC: 92,  timeS: 240, flavors: ["citrus", "orange", "sweet"],
-      effects: [["uplifting", 2], ["warming", 2], ["digestive", 1]],
+      effects: [["uplifting", 2], ["digestive", 1]],
       character: "Light orange peel — bright citrus top, faint sweetness." },
     { tempC: 96,  timeS: 360, flavors: ["citrus", "orange", "sweet", "aromatic", "warm"],
-      effects: [["uplifting", 3], ["warming", 3], ["digestive", 2], ["comfort", 1]],
+      effects: [["uplifting", 2], ["digestive", 2], ["comfort", 1]],
       character: "The standard cup. Full orange character — sun-warm and rounded." },
     { tempC: 100, timeS: 480, flavors: ["citrus", "orange", "aromatic", "warm", "pith", "bitter"],
-      effects: [["uplifting", 3], ["warming", 3], ["bitterness", 2], ["digestive", 2], ["comfort", 1]],
+      effects: [["uplifting", 2], ["bitterness", 2], ["digestive", 2], ["comfort", 1]],
       character: "Long extraction — the sweet edge thins, pith carries bitter." },
   ],
   "lemon-peel": [

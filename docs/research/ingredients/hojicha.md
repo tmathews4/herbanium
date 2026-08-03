@@ -440,3 +440,5 @@ Transcribed as `comfort` at the same strength. Nothing about the
 evidence changes; the word does.
 
 <!-- sourced-effects: comfort -->
+
+<!-- superseded-effects: soothing -->

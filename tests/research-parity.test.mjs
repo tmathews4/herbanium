@@ -105,12 +105,13 @@ const ALIAS = { settle: "digestive" };
 // distinct from "physically warm". Each comes off the list by either
 // finding a genuine comfort claim in the literature or removing it.
 const KNOWN_UNSOURCED = {
-  // orange-peel ships a `warming` its doc doesn't prescribe. The 20
-  // comfort entries that sat here were resolved by removal — see the
-  // note above the ALIAS.
-  "orange-peel": ["warming"],
-};
-const docIdFor = {};
+  // EMPTY again. Every unsourced effect pair the audits have found has
+  // been researched and then sourced, corrected, or removed — the 30
+  // from the original audit, and the 21 that surfaced when the
+  // warming -> comfort alias was retired. The map stays because the
+  // discipline is: an entry may be added, but deliberately and with a
+  // reason, and it leaves by writing research rather than by deletion.
+};const docIdFor = {};
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
   const slug = file.replace(/\.md$/, "");
   const id = [slug, slug.replace(/-/g, "")].find(c => EXTRACTION_PROFILES[c]);

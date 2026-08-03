@@ -493,3 +493,5 @@ Transcribed as `comfort` at the same strength. The evidence is
 unchanged; the word is corrected.
 
 <!-- sourced-effects: comfort -->
+
+<!-- superseded-effects: soothing -->
