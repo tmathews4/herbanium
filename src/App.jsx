@@ -1239,6 +1239,23 @@ export default function App() {
     const t = setTimeout(() => setArrivalDone(true), GREETING_ARRIVAL_MS);
     return () => clearTimeout(t);
   }, []);
+  // Tours dismissed during THIS session. The auto-start effect below
+  // guards on `toursSeen`, which is React state — closing a tour sets
+  // it and clears activeTour in the same handler, so the effect should
+  // re-run once with both new values and stop.
+  //
+  // It doesn't always. A Firefox CI run caught the Field Notes tour
+  // still on screen ten seconds after Done, and the trace shows the
+  // click landing cleanly ("performing click action / click action
+  // done") with the callout afterwards holding no step content — a
+  // tour torn down and re-established, not a click that missed.
+  //
+  // A ref settles it without needing to win that race: it updates
+  // synchronously, so however the state timing falls out, a tour the
+  // user has closed cannot come back. That's the invariant worth
+  // holding anyway — a tour reopening itself after you dismiss it is a
+  // real bug for a user, not only for a test.
+  const closedToursRef = useRef(new Set());
   useEffect(() => {
     if (!profile) return;
     if (!arrivalDone) return;
@@ -1246,12 +1263,20 @@ export default function App() {
     if (!currentTourScreen) return;
     if (overlay) return;
     if (activeTour) return;
+    if (closedToursRef.current.has(currentTourScreen)) return;
     if (toursSeen && toursSeen[currentTourScreen]) return;
     if (!SCREEN_TOURS[currentTourScreen]) return;
     setActiveTour(currentTourScreen);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTourScreen, profile, overlay, toursSeen, toursEnabled, arrivalDone]);
   const closeActiveTour = () => {
+    // Both keys: the tour being closed, and the screen the guard reads.
+    // They're the same today — currentTourScreen derives from tab and
+    // mode, and neither changes mid-tour — but the guard and the write
+    // looking at different keys is the kind of asymmetry that only
+    // stays harmless by luck.
+    if (activeTour) closedToursRef.current.add(activeTour);
+    if (currentTourScreen) closedToursRef.current.add(currentTourScreen);
     setToursSeen(prev => ({ ...(prev || {}), [activeTour]: true }));
     setActiveTour(null);
     setActiveTourStep(null);
