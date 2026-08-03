@@ -59,6 +59,7 @@ import {
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
+import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -259,6 +260,27 @@ test("every declared ingredient effect has a family", () => {
     }
   }
   assert(orphans.size === 0, `declared effects with no family:\n    ${[...orphans].join("\n    ")}`);
+});
+
+// ── 1d. Vocabulary the app invented ──────────────────────────────
+
+test("no effect word is asserted far more often than the research uses it", () => {
+  // Every other guard here works ingredient-by-ingredient, which is
+  // why `comfort` survived so long: no single ingredient looked
+  // egregious, but the WORD shipped on 27 ingredients while only 7
+  // research docs ever prescribed it — a ratio of 3.9 while every
+  // other token sat near 1. It was app-invented vocabulary layered on
+  // top of `warming` and `soothing`, and it took a hand audit to see.
+  //
+  // This is the word-level view. A token drifting above the threshold
+  // means the app is asserting a claim the research doesn't make, at
+  // a scale no per-ingredient check will flag.
+  const offenders = census
+    .filter(c => c.ships >= 3 && c.ratio > INVENTION_RATIO)
+    .map(c => `${c.token}: ships on ${c.ships}, only ${c.docs} docs prescribe it `
+      + `(${c.ratio.toFixed(1)}x)`);
+  assert(offenders.length === 0,
+    `effect words the app asserts beyond its research:\n    ${offenders.join("\n    ")}`);
 });
 
 // ── 1c. Cups whose tension the app never names ───────────────────

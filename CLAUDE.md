@@ -30,9 +30,23 @@ wrong quietly.
 Two tools measure this — run both after touching ingredient data:
 
 ```
-node tools/audit-research-drift.mjs    # shipped vs prescribed, both directions
+node tools/audit-research-drift.mjs    # shipped vs prescribed, both directions,
+                                       # and magnitude, not just presence
 node tools/audit-unreachable.mjs       # declared but never visible in a cup
+node tools/audit-vocabulary.mjs        # is a WORD invented? census vs the docs
+node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at once
 ```
+
+The last two work word-by-word rather than ingredient-by-ingredient,
+which is the gap `comfort` lived in: no single ingredient looked wrong,
+but the word shipped on 27 ingredients while 7 docs prescribed it.
+
+Effect vocabulary is judged against **materia medica and TCM**, not
+against tea writing. Tea's own sensory lexicons — Lee 2007 for green
+tea, the Chinese CTSEM method, QDA — cover flavour, aroma and mouthfeel
+and never name effects. So `soothing` is answerable to *demulcent*,
+`digestive` to *carminative*, `sleepy` to *sedative*; a word with no
+counterpart there is doing lay work and only our own docs constrain it.
 
 ### How a claim gets sourced
 
