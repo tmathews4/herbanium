@@ -716,7 +716,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["digestive", 2], ["soothing", 3], ["uplifting", 1], ["calm", 1], ["warming", 1]],
       character: "The standard cup. Full glycyrrhizin sweetness — the harmonizer's work." },
     { tempC: 100, timeS: 900, flavors: ["sweet", "anise", "woody", "earthy", "bitter"],
-      effects: [["warming", 3], ["digestive", 2], ["bitterness", 1], ["soothing", 4]],
+      effects: [["warming", 1], ["digestive", 2], ["bitterness", 1], ["soothing", 4]],
       character: "Long extraction. Sweetness deepens — respect the dose ceiling." },
   ],
 
@@ -960,13 +960,13 @@ export const EXTRACTION_PROFILES = {
   ],
   "lemon-peel": [
     { tempC: 88,  timeS: 180, flavors: ["citrus", "lemon", "bright"],
-      effects: [["uplifting", 2], ["cooling", 2], ["digestive", 1]],
+      effects: [["uplifting", 2], ["cooling", 1], ["digestive", 1]],
       character: "Light lemon peel — sharp clean top, only the brightness." },
     { tempC: 95,  timeS: 300, flavors: ["citrus", "lemon", "bright", "fresh", "aromatic"],
-      effects: [["uplifting", 3], ["cooling", 3], ["digestive", 2]],
+      effects: [["uplifting", 2], ["cooling", 1], ["digestive", 2]],
       character: "The standard cup. Full lemon — citrus oil, clean and lively." },
     { tempC: 100, timeS: 420, flavors: ["citrus", "lemon", "bright", "aromatic", "pith", "bitter"],
-      effects: [["uplifting", 3], ["cooling", 3], ["bitterness", 2], ["digestive", 2]],
+      effects: [["uplifting", 2], ["cooling", 1], ["bitterness", 2], ["digestive", 2]],
       character: "Past optimal — the lemon edge sharpens, pith goes bitter." },
   ],
 
@@ -984,13 +984,13 @@ export const EXTRACTION_PROFILES = {
   ],
   cranberry: [
     { tempC: 92,  timeS: 240, flavors: ["tart", "fruity", "berry"],
-      effects: [["uplifting", 2], ["cooling", 2]],
+      effects: [["uplifting", 1], ["cooling", 1]],
       character: "Light cranberry — bright tart top, gentle berry." },
     { tempC: 96,  timeS: 360, flavors: ["tart", "fruity", "berry", "bright", "cranberry"],
-      effects: [["uplifting", 3], ["cooling", 3]],
+      effects: [["uplifting", 1], ["cooling", 1]],
       character: "The standard cup. Full cranberry — ruby color, tart-sweet bite." },
     { tempC: 100, timeS: 480, flavors: ["tart", "fruity", "berry", "cranberry", "astringent"],
-      effects: [["uplifting", 3], ["cooling", 3], ["bitterness", 2]],
+      effects: [["uplifting", 1], ["cooling", 1], ["bitterness", 2]],
       character: "Pushed long — tart pushes into sour, astringency climbs." },
   ],
 };

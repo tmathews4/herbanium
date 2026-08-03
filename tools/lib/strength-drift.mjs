@@ -59,12 +59,32 @@ export function researchBrewPoints(file) {
   return out;
 }
 
-/** Pair a doc brew point to one shipped sample, or null if ambiguous. */
+/**
+ * Pair a doc brew point to one shipped sample, or null if ambiguous.
+ *
+ * TEMPERATURE ALONE IS NOT A CUP. The first version of this fell back
+ * to "the only sample at that temperature" and compared it regardless
+ * of steep time, which paired pu-erh's 30-second gongfu first pour
+ * against the doc's 4-minute western steep and called the difference
+ * drift. 8 of the 13 severe drifts it reported were that — different
+ * cups, not wrong numbers. Acting on them would have corrupted the
+ * data: setting a 30-second rinse to digestive 4 because a 4-minute
+ * decoction earns it.
+ *
+ * So the fallback now requires the times to be within TIME_TOLERANCE.
+ * Anything further apart is genuinely unpairable and gets counted as
+ * such rather than compared.
+ */
+export const TIME_TOLERANCE = 0.25;   // ±25% of the doc's steep time
+
 export function pairSample(samples, pt) {
   const exact = samples.find(s => s.tempC === pt.tempC && s.timeS === pt.timeS);
   if (exact) return exact;
   const byTemp = samples.filter(s => s.tempC === pt.tempC);
-  return byTemp.length === 1 ? byTemp[0] : null;
+  if (byTemp.length !== 1) return null;
+  const s = byTemp[0];
+  if (!pt.timeS || !s.timeS) return null;      // can't judge; don't guess
+  return Math.abs(s.timeS / pt.timeS - 1) <= TIME_TOLERANCE ? s : null;
 }
 
 /**

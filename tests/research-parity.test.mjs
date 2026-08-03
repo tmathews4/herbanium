@@ -333,21 +333,19 @@ test("the known-undescribed list has no stale entries", () => {
 // compared magnitudes at all, so a claim could sit at 6x its researched
 // strength with the whole suite green.
 const KNOWN_STRENGTH_DRIFT = new Set([
-  "assam@95:energy",             // doc 5 -> app 3
-  "cardamom@95:uplifting",       // doc 3 -> app 1
-  "cranberry@100:uplifting",     // doc 1 -> app 3
-  "cranberry@100:cooling",       // doc 1 -> app 3
-  "dried-apple@100:comfort",     // doc 1 -> app 3
-  "gyokuro@50:focus",            // doc 5 -> app 3
-  "lemon-peel@95:cooling",       // doc 1 -> app 3
-  "lemon-peel@100:cooling",      // doc 1 -> app 3
-  "licorice-root@100:warming",   // doc 1 -> app 3
-  "lions-mane@95:focus",         // doc 1 -> app 3
-  "puerh@95:digestive",          // doc 4 -> app 2
-  "puerh@100:warming",           // doc 4 -> app 2
-  "vanilla@95:calm",             // doc 3 -> app 1
+  // EMPTY. Of the 13 that sat here, five were real and were transcribed
+  // to their researched values — cranberry's uplifting and cooling,
+  // lemon-peel's cooling, licorice-root's warming, all cases of the app
+  // ramping a mild flat claim up to 3.
+  //
+  // The other eight were never drift at all. The pairing fell back to
+  // "the only sample at that temperature" and compared it whatever the
+  // steep time, so pu-erh's 30-second gongfu first pour was measured
+  // against the doc's 4-minute western steep (x0.13) and vanilla's
+  // 240s against 1200s (x0.20). Acting on those would have corrupted
+  // the data. pairSample now requires the times to match within 25%
+  // and counts the rest as unpairable, which is what they are.
 ]);
-
 test("no new claim drifts 2+ points from its researched strength", () => {
   const fresh = severeDrift(EXTRACTION_PROFILES)
     .filter(d => !KNOWN_STRENGTH_DRIFT.has(driftKey(d)))
