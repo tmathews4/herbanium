@@ -39,27 +39,13 @@
 import { readFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
-import { FAMILY_BY_EFFECT } from "../src/data/families.js";
+import { FAMILY_BY_EFFECT, MOOD_COUNTERPARTS } from "../src/data/families.js";
 import { DOCS } from "./lib/strength-drift.mjs";
 
-// Where each of our words sits in established practice. A token with
-// no counterpart isn't automatically wrong — but it is carrying no
-// external definition, so only our own docs constrain it.
-const COUNTERPART = {
-  calm:      "nervine / relaxant — herbs acting on the nervous system without sedation",
-  sleepy:    "sedative / hypnotic — materia medica category, distinct from nervine",
-  soothing:  "demulcent (internal) / emollient (topical) — mucilage coats and protects "
-             + "irritated mucous membranes; described in the literature as cooling, "
-             + "soothing, healing, relaxing",
-  digestive: "carminative — relieves gas and gastrointestinal spasm",
-  warming:   "thermogenic; TCM warm-natured, Ayurvedic ushna virya",
-  cooling:   "refrigerant; TCM cool-natured / Yin",
-  energy:    "stimulant",
-  focus:     "nootropic / cerebral stimulant",
-  uplifting: "thymoleptic — mood-elevating",
-  grounding: "no direct materia medica action; adaptogen-adjacent, largely TCM/lay",
-  comfort:   null,   // no counterpart in herbal action vocabulary at all
-};
+// Counterparts come from the canonical tree in data/families.js —
+// they live beside the definitions they qualify rather than in a copy
+// here that would drift. See MOOD_VOCABULARY.
+const COUNTERPART = MOOD_COUNTERPARTS;
 
 const tokens = [...new Set(Object.keys(FAMILY_BY_EFFECT))];
 

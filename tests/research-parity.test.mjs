@@ -54,7 +54,7 @@ import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
-  MOOD_FAMILY_LABEL,
+  MOOD_FAMILY_LABEL, MOOD_VOCABULARY,
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
@@ -391,6 +391,52 @@ test("no family's display label is the name of one of its own leaves", () => {
   }
   assert(collisions.length === 0,
     `family label swallows one of its own leaves:\n    ${collisions.join("\n    ")}`);
+});
+
+test("every mood word carries its own definition", () => {
+  // The tree in data/families.js is the single source: a leaf can't be
+  // added without a definition, because they're written in the same
+  // object literal. This asserts the derivation actually reaches the
+  // map the UI reads, so the click-to-describe panel can never open
+  // empty on a word the app is willing to display.
+  const undefinedWords = Object.keys(FAMILY_BY_EFFECT)
+    .filter(t => !EFFECT_DESCRIPTIONS[t]?.summary);
+  assert(undefinedWords.length === 0,
+    `mood words with no definition: ${undefinedWords.join(", ")}`);
+});
+
+test("no two mood words share a definition", () => {
+  // `soothing` and `comfort` had the same one for a long time — the
+  // family map called soothing "bodily comfort (demulcent — throat,
+  // gut)" while its user-facing summary read "general comfort,
+  // warmth-of-spirit", which is comfort's meaning under soothing's
+  // name. Two files, one holding the structure and one the meaning,
+  // and nothing comparing them. They're co-located now; this checks
+  // they stay distinct.
+  const seen = new Map(), clashes = [];
+  for (const token of Object.keys(FAMILY_BY_EFFECT)) {
+    const s = EFFECT_DESCRIPTIONS[token]?.summary;
+    if (!s) continue;
+    if (seen.has(s)) clashes.push(`${seen.get(s)} and ${token}: "${s}"`);
+    else seen.set(s, token);
+  }
+  assert(clashes.length === 0,
+    `mood words sharing one definition:\n    ${clashes.join("\n    ")}`);
+});
+
+test("a multi-leaf family defines itself, not just its children", () => {
+  // A family with two leaves is drawn as a parent row of its own and
+  // is tappable, so it needs a definition that isn't either child's.
+  // `warm` is the only one today; the check is for the next one.
+  const missing = [];
+  for (const fam of MOOD_VOCABULARY) {
+    if (fam.leaves.length < 2) continue;
+    if (!fam.summary) { missing.push(`${fam.family} (no family-level summary)`); continue; }
+    for (const leaf of fam.leaves) {
+      if (leaf.summary === fam.summary) missing.push(`${fam.family} reuses ${leaf.token}'s definition`);
+    }
+  }
+  assert(missing.length === 0, `family definitions:\n    ${missing.join("\n    ")}`);
 });
 
 test("every family label resolves to a vocabulary description", () => {

@@ -18,57 +18,22 @@
    missing here is just non-clickable in the UI; safe to extend.
    ────────────────────────────────────────────────────────────── */
 
-export const EFFECT_DESCRIPTIONS = {
-  calm: {
-    summary: "A slow exhale. Quieting the chatter without dulling presence.",
-    body: "Chamomile's apigenin and lemon balm's rosmarinic acid carry this most directly through GABAergic relaxation; linden, lavender, tulsi, and passionflower live in the same register. Not sedation — the mind quiets but stays present.",
-  },
-  soothing: {
-    summary: "General comfort, warmth-of-spirit. Sweetness without sugar.",
-    body: "The wrapped-blanket register — rooibos, vanilla, hojicha, licorice root. Licorice's glycyrrhizin and vanilla's vanillin lift any blend toward this feel. Different from calm: this is the body's cup, not the mind's.",
-  },
-  digestive: {
-    summary: "Settles the stomach. The post-meal cup across cultures.",
-    body: "Peppermint's menthol is the most studied for easing the gut; fennel's anethole, ginger's gingerol, and dandelion root's bitter compounds all pull in the same direction. Pu-erh rounds the after-meal cup through its fermented character.",
-  },
-  uplifting: {
-    summary: "Lightening, brightening, mood-lifting.",
-    body: "Jasmine, bergamot, light oolongs, and citrus-forward herbs. Linalool (lavender, bergamot) and limonene (citrus peels) are the volatile aromatics that read on the nose before the tongue; Darjeeling's muscatel character lifts the same way through its terpene-rich first flush.",
-  },
-  warmth: {
-    summary: "The warm register — physical heat and warmth-of-spirit together.",
-    body: "The family above two different claims. `warming` is thermogenic: gingerol and piperine act on the TRPV1 heat receptors, so the cup raises real body heat. `comfort` is the wrapped-blanket feeling, which arrives without any temperature change at all. Most warming spices carry both, and a cup can carry either alone — rooibos comforts without heating, a black tea can heat without comforting.",
-  },
-  warming: {
-    summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
-    body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
-  },
-  focus: {
-    summary: "Meditative clarity. Alert without jitter.",
-    body: "L-theanine paired with caffeine — the shaded-green signature. Gyokuro and matcha hold the top of this register, with sencha, dragonwell, and oolong following the same chemistry at lower amplitude. Lion's mane works on a longer arc through nerve-growth-factor support.",
-  },
-  energy: {
-    summary: "Stimulating, awakening — the wake-up cup.",
-    body: "Caffeine, smoothed by L-theanine in true teas so the lift reads cleaner than coffee. Assam carries the most caffeine of the catalog; matcha lands close behind through its shaded-tea chemistry, and yerba mate adds theobromine alongside caffeine for a sustained-arc rather than peak-and-crash.",
-  },
-  sleepy: {
-    summary: "Sedating, drowsiness-adjacent.",
-    body: "Heavier than calm — a downward drift. Valerian's valerenic acid is the strongest sedative in the kitchen, with reishi's triterpenes close behind. Passionflower, chamomile (apigenin), and ashwagandha pull in the same direction more gently.",
-  },
-  cooling: {
-    summary: "Refreshes and clarifies. The settling-down register opposite warming.",
-    body: "Green tea and white tea sit here through their lighter chemistry and lower oxidation; hibiscus through its anthocyanin tartness; mints through menthol. Distinct from menthol's mouthfeel cool, though the two can co-occur.",
-  },
-  grounding: {
-    summary: "Settling, centering, earthy.",
-    body: "Reishi's triterpenes carry this most strongly, with ashwagandha's withanolides and ripe pu-erh's aged-fermentation chemistry close behind. Lapsang's pine smoke and dandelion root pull here too — the deeper, low-pitched register.",
-  },
+import { MOOD_DESCRIPTIONS } from "./families.js";
 
-  // ── User-facing mood aliases (mapped to effects above) ──
-  comfort: {
-    summary: "A wrapped-blanket feeling — soothing without sedating.",
-    body: "Maps to the soothing effect. Rooibos and hojicha are the prototypes; vanilla's vanillin and licorice's glycyrrhizin round any blend toward this register.",
-  },
+/* The mood half of this file now lives in data/families.js, beside the
+   parent/child tree it describes. It moved because the two disagreed:
+   the family map called `soothing` "bodily comfort (demulcent — throat,
+   gut)" while the definition here read "general comfort, warmth-of-
+   spirit" — comfort's definition under soothing's name. Nothing could
+   catch it while one file held the structure and another held the
+   meaning.
+
+   What remains below is the palate vocabulary (bitterness, sweetness,
+   astringency, tartness, menthol) and a few legacy aliases, which have
+   no family tree to sit beside. Mood entries are spread in from the
+   canonical source and win over anything local. */
+const PALATE_AND_LEGACY = {
+
 
   // ── Brewing-intent aliases (used by IngredientDetail Brewing tab) ──
   // These describe brew PRESETS, not vocabulary registers.
@@ -112,6 +77,8 @@ export const EFFECT_DESCRIPTIONS = {
     body: "Peppermint's menthol is sharp and direct; spearmint's carvone is gentler and sweeter. Distinct from the cooling mood (felt-temperature register); menthol is the physical mouthfeel.",
   },
 };
+
+export const EFFECT_DESCRIPTIONS = { ...PALATE_AND_LEGACY, ...MOOD_DESCRIPTIONS };
 
 export const FLAVOR_DESCRIPTIONS = {
   // ── Floral family ──
