@@ -47,14 +47,19 @@ test.describe("post-brew check-in notice", () => {
       "no rating controls belong in a notice").toHaveCount(0);
   });
 
-  test("the timing choice is offered and can be changed", async ({ page }) => {
+  test("choosing a timing acknowledges the tap, then dismisses itself", async ({ page }) => {
     await brewACup(page);
     const hour = notice(page).getByRole("button", { name: /in an hour/i });
     await expect(hour).toBeVisible();
     await hour.click();
     // Selection is reflected back, so the tap doesn't feel like a no-op.
     await expect(hour).toHaveCSS("border-color", /rgb\(/);
-    await expect(notice(page)).toBeVisible();
+    // ...and then the notice leaves. Choosing IS the interaction; it
+    // used to mark the choice and sit there, which reads as the tap
+    // not having taken and sends the user hunting for the x to confirm
+    // something already decided.
+    await expect(notice(page), "the notice should dismiss itself once answered")
+      .toBeHidden({ timeout: 4000 });
   });
 
   test("the notice can be dismissed and stays gone", async ({ page }) => {

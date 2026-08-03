@@ -1824,6 +1824,19 @@ export default function App() {
   const chooseFollowUpTiming = (choiceId) => {
     const target = (sessions || []).find(s => s.who === "you" && s.moodsPending);
     setCheckInNotice(n => (n ? { ...n, choice: choiceId } : n));
+    // Choosing IS the interaction, so the notice should leave once it's
+    // been answered. It used to mark the selection and then sit there,
+    // which reads as though the tap didn't take — leaving the user to
+    // hunt for the × to confirm something they'd already decided.
+    //
+    // Held briefly rather than closed instantly so the selected chip is
+    // visibly acknowledged first; dismissing on the same frame as the
+    // tap loses the confirmation entirely. Only closes if the choice is
+    // still the one just made, so a newer notice (or a changed mind)
+    // isn't torn down by a stale timer.
+    window.setTimeout(() => {
+      setCheckInNotice(n => (n && n.choice === choiceId ? null : n));
+    }, 1100);
     if (!target) return;
     const followUpAt = scheduleFollowUp(target.brewedAt || Date.now(), choiceId);
     if (target.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
