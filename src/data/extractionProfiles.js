@@ -139,13 +139,13 @@ export const EXTRACTION_PROFILES = {
 
   rooibos: [
     { tempC: 95,  timeS: 240, flavors: ["honey", "woody", "warm"],
-      effects: [["soothing", 2], ["digestive", 2]],
+      effects: [["comfort", 2], ["digestive", 2]],
       character: "Light rooibos — warm honeywater, no tannins to speak of." },
     { tempC: 98,  timeS: 360, flavors: ["honey", "woody", "vanilla", "warm"],
-      effects: [["soothing", 3], ["digestive", 3], ["grounding", 3], ["warming", 2]],
+      effects: [["comfort", 3], ["digestive", 3], ["grounding", 3], ["warming", 2]],
       character: "The standard cup. Round, sweet, forgiving — can't over-steep." },
     { tempC: 100, timeS: 420, flavors: ["honey", "woody", "vanilla", "earthy", "warm", "rich"],
-      effects: [["soothing", 3], ["digestive", 3], ["grounding", 2]],
+      effects: [["comfort", 3], ["digestive", 3], ["grounding", 2]],
       character: "Fuller body. Rooibos stays sweet even pushed — one of its charms." },
   ],
 
@@ -211,7 +211,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["warming", 3], ["digestive", 2], ["uplifting", 2]],
       character: "Light cinnamon — sweet warmth, a gentle touch." },
     { tempC: 98,  timeS: 480, flavors: ["spiced", "sweet", "woody", "warm"],
-      effects: [["warming", 4], ["digestive", 3], ["uplifting", 2], ["soothing", 2]],
+      effects: [["warming", 4], ["digestive", 3], ["uplifting", 2], ["comfort", 2]],
       character: "The standard cup. Full cinnamon bark, round and warming." },
     { tempC: 100, timeS: 600, flavors: ["spiced", "sweet", "woody", "warm", "earthy", "astringent"],
       effects: [["warming", 4], ["digestive", 3], ["bitterness", 2], ["grounding", 2]],
@@ -226,10 +226,10 @@ export const EXTRACTION_PROFILES = {
     // 'cool surface, warm body' split. Eucalyptol is volatile, so
     // cooling fades at the pushed knot where the aromatics escape.
     { tempC: 95,  timeS: 240, flavors: ["spiced", "floral"],
-      effects: [["warming", 2], ["cooling", 1.5], ["digestive", 2], ["energy", 2], ["uplifting", 1], ["soothing", 2]],
+      effects: [["warming", 2], ["cooling", 1.5], ["digestive", 2], ["energy", 2], ["uplifting", 1], ["comfort", 2]],
       character: "Light cardamom — aromatic and floral, the upper register." },
     { tempC: 98,  timeS: 360, flavors: ["spiced", "floral", "citrus"],
-      effects: [["warming", 3], ["cooling", 2], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["soothing", 2]],
+      effects: [["warming", 3], ["cooling", 2], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["comfort", 2]],
       character: "The standard cup. Full cardamom character — complex, lifting." },
     { tempC: 100, timeS: 480, flavors: ["spiced", "floral", "citrus", "camphor"],
       effects: [["warming", 3], ["cooling", 1], ["digestive", 3], ["energy", 3], ["uplifting", 2], ["bitterness", 2], ["grounding", 1]],
@@ -261,13 +261,13 @@ export const EXTRACTION_PROFILES = {
   // alone here, since changing brew windows is a calibration decision.
   vanilla: [
     { tempC: 95,  timeS: 240, flavors: ["sweet", "creamy"],
-      effects: [["digestive", 2], ["soothing", 4], ["warming", 1], ["calm", 1], ["sleepy", 2], ["uplifting", 1]],
+      effects: [["digestive", 2], ["comfort", 4], ["warming", 1], ["calm", 1], ["sleepy", 2], ["uplifting", 1]],
       character: "Light vanilla — soft sweetness, a gentle comfort." },
     { tempC: 98,  timeS: 360, flavors: ["sweet", "creamy", "floral", "warm"],
-      effects: [["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
+      effects: [["digestive", 3], ["comfort", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
       character: "The standard cup. Full vanilla bloom, warm and rounded." },
     { tempC: 100, timeS: 420, flavors: ["sweet", "creamy", "floral", "warm", "woody"],
-      effects: [["digestive", 3], ["soothing", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
+      effects: [["digestive", 3], ["comfort", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
       character: "Fuller extraction. Vanilla's woodier side emerges, still sweet." },
   ],
 
@@ -430,7 +430,7 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [
         ["roasted", 2.6], ["warm", 1.6], ["woody", 0.8],
       ],
-      effects: [["calm", 2], ["digestive", 2], ["soothing", 4], ["warming", 3], ["grounding", 2]],
+      effects: [["calm", 2], ["digestive", 2], ["comfort", 4], ["warming", 3], ["grounding", 2]],
       character: "Quick hojicha — roasted warmth, minimal caffeine." },
     { tempC: 95,  timeS: 45,
       flavorStrengths: [
@@ -438,7 +438,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.4], ["toasted", 1.2], ["sweet", 0.9],
         ["woody", 0.8],
       ],
-      effects: [["calm", 2.5], ["digestive", 2.6], ["soothing", 4], ["warming", 3], ["grounding", 2]],
+      effects: [["calm", 2.5], ["digestive", 2.6], ["comfort", 4], ["warming", 3], ["grounding", 2]],
       character: "Approaching the standard cup — caramel-toast leading, body filling in." },
     { tempC: 98,  timeS: 60,
       flavorStrengths: [
@@ -446,7 +446,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.6], ["toasted", 1.4], ["sweet", 1.0],
         ["woody", 0.9],
       ],
-      effects: [["calm", 3], ["digestive", 3], ["soothing", 4], ["warming", 4], ["grounding", 3]],
+      effects: [["calm", 3], ["digestive", 3], ["comfort", 4], ["warming", 4], ["grounding", 3]],
       character: "The standard cup. Full hojicha — caramel-toasted, warm and sweet, the evening-safe green tea." },
     { tempC: 105, timeS: 120,
       flavorStrengths: [
@@ -454,7 +454,7 @@ export const EXTRACTION_PROFILES = {
         ["nutty", 1.7], ["toasted", 1.5], ["sweet", 1.0],
         ["woody", 1.0],
       ],
-      effects: [["calm", 3], ["digestive", 3], ["soothing", 4], ["warming", 4], ["grounding", 3]],
+      effects: [["calm", 3], ["digestive", 3], ["comfort", 4], ["warming", 4], ["grounding", 3]],
       character: "Pushed brew — character barely moves, the roast already did the work in the kiln." },
   ],
 
@@ -647,10 +647,10 @@ export const EXTRACTION_PROFILES = {
   // ─── True teas: Pu-erh ────────────────────────────────────────
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["digestive", 2], ["grounding", 2], ["warming", 1.5], ["soothing", 2]],
+      effects: [["digestive", 2], ["grounding", 2], ["warming", 1.5], ["comfort", 2]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["soothing", 2]],
+      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["comfort", 2]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
       effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["bitterness", 2], ["energy", 2]],
@@ -973,13 +973,13 @@ export const EXTRACTION_PROFILES = {
   // ─── Dried fruit ──────────────────────────────────────────────
   "dried-apple": [
     { tempC: 92,  timeS: 360, flavors: ["sweet", "fruity", "apple"],
-      effects: [["comfort", 2], ["soothing", 1]],
+      effects: [["comfort", 2]],
       character: "Light apple — soft sweetness, faint orchard fruit." },
     { tempC: 96,  timeS: 480, flavors: ["sweet", "fruity", "apple", "honeyed", "hay"],
-      effects: [["comfort", 3], ["calm", 2], ["soothing", 1]],
+      effects: [["comfort", 3], ["calm", 2]],
       character: "The standard cup. Full dried-apple — honey-sweet, compote depth." },
     { tempC: 100, timeS: 600, flavors: ["sweet", "fruity", "apple", "honeyed", "hay", "tart"],
-      effects: [["comfort", 3], ["calm", 2], ["soothing", 1]],
+      effects: [["comfort", 3], ["calm", 2]],
       character: "Long-steeped. Fruit deepens, a faint tart edge surfaces." },
   ],
   cranberry: [

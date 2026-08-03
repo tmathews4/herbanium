@@ -524,3 +524,23 @@
    strongly prefers Ceylon (canela) over cassia. This makes
    "Mexican-style cinnamon" effectively a Ceylon synonym — a
    cultural detail that may matter for sourcing recommendations.
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 files this ingredient's affective claim under `soothing`, but the
+gloss describes warm relaxation rather than any action on tissue:
+
+> | soothing | 2 | The warming-sweet combination soothes; especially when combined with milk (chai, golden milk) |
+
+`soothing` is the **demulcent** register here — mucilage or tannin
+acting on irritated surfaces, as in licorice's throat coat, linden's
+mucilage, sage's gargle tradition. This one credits the warming-sweet
+combination and milk, not cinnamon acting on anything. It is the
+feeling of a chai, which is comfort.
+
+Transcribed as `comfort` at the same strength. The evidence is
+unchanged; the word is corrected.
+
+<!-- sourced-effects: comfort -->

@@ -63,8 +63,17 @@ for (const [id, samples] of Object.entries(EXTRACTION_PROFILES)) {
 const docUse = Object.fromEntries(tokens.map(t => [t, 0]));
 for (const f of readdirSync(DOCS).filter(x => x.endsWith(".md"))) {
   const src = readFileSync(resolve(DOCS, f), "utf8");
+  // Brew-point tables AND sourced-effects addenda, because both are
+  // ways a doc prescribes an effect — that convention is what the
+  // parity guard reads, and a census using a narrower definition would
+  // put the two tools back into disagreement about what "the research
+  // prescribes this" means. Which is the bug this file exists to catch.
   const eff = [...src.matchAll(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/g)].map(m => m[1]).join(" ");
-  for (const t of tokens) if (new RegExp(`"${t}"`).test(eff)) docUse[t]++;
+  const addenda = [...src.matchAll(/<!--\s*sourced-effects:\s*([^>]+?)\s*-->/g)]
+    .flatMap(m => m[1].split(",").map(x => x.trim()));
+  for (const t of tokens) {
+    if (new RegExp(`"${t}"`).test(eff) || addenda.includes(t)) docUse[t]++;
+  }
 }
 
 export const census = tokens.map(t => ({

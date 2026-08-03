@@ -479,3 +479,23 @@ and the warm register; §5 rates the mellow, aged character as
 theanine calm.
 
 <!-- sourced-effects: digestive, grounding, soothing -->
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 files this ingredient's affective claim under `soothing`, but the
+gloss describes warm relaxation rather than any action on tissue:
+
+> | soothing | 2 | The round, mellow, mature character soothes — especially aged versions |
+
+`soothing` is the **demulcent** register here — mucilage or tannin
+acting on irritated surfaces, as in licorice's throat coat, linden's
+mucilage, sage's gargle tradition. Roundness and maturity are
+character notes. Pu-erh has no demulcent constituent; what ages into
+it is a mellower cup, which is a comfort claim.
+
+Transcribed as `comfort` at the same strength. The evidence is
+unchanged; the word is corrected.
+
+<!-- sourced-effects: comfort -->

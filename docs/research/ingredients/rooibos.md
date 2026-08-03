@@ -324,3 +324,26 @@
    RCTs have specifically studied heavy daily use in pregnancy. Most
    obstetric "safe" designations are by caffeine-absence inference
    rather than direct study.
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 rates this ingredient's primary affective claim under `soothing`,
+but its own gloss describes something else:
+
+> | soothing | 4 | The defining mood — warm, sweet, round. Century of global positioning as "comfort in a cup" |
+
+`soothing` in this catalogue is the **demulcent** register — the
+materia medica action where mucilage or tannin acts on irritated
+tissue. Licorice's throat coat, linden's mucilage, sage's gargle
+tradition. It is a claim about the body's surfaces.
+
+The gloss quotes the phrase directly: "comfort in a cup". Rooibos has
+low tannin and a full sweet body, and that is the whole basis — a
+cup that feels good to meet, not one that acts on the throat.
+
+Transcribed as `comfort` at the same strength. Nothing about the
+evidence changes; the word does.
+
+<!-- sourced-effects: comfort -->

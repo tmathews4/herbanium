@@ -244,3 +244,23 @@ below `comfort`, and is recorded as an aroma finding rather than a
 pharmacological one — the same footing §5 already uses for `soothing`.
 
 <!-- sourced-effects: calm -->
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 files this ingredient's affective claim under `soothing`, but the
+gloss describes warm relaxation rather than any action on tissue:
+
+> | soothing | 1 | Sweet, full-bodied cup reads as soothing; not pharmacological |
+
+`soothing` is the **demulcent** register here — mucilage or tannin
+acting on irritated surfaces, as in licorice's throat coat, linden's
+mucilage, sage's gargle tradition. The row rules the mechanism out in
+its own words — "not pharmacological". Dried apple already carries
+`comfort`, so this was the same claim counted twice.
+
+Transcribed as `comfort` at the same strength. The evidence is
+unchanged; the word is corrected.
+
+<!-- sourced-effects: comfort -->

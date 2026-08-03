@@ -416,3 +416,27 @@
    body; hojicha's from roasted-nutty warmth. Both feel
    canonical at this strength. Future non-tea comfort teas
    (chicory root?) would need to fit into this calibration.
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 rates this ingredient's primary affective claim under `soothing`,
+but its own gloss describes something else:
+
+> | soothing | 4 | **Primary effect.** The defining comfort-tea register — warm, mellow, nostalgic for many Japanese drinkers |
+
+`soothing` in this catalogue is the **demulcent** register — the
+materia medica action where mucilage or tannin acts on irritated
+tissue. Licorice's throat coat, linden's mucilage, sage's gargle
+tradition. It is a claim about the body's surfaces.
+
+What §5 actually describes here is warm relaxation — it uses the word
+"comfort" outright, and names nostalgia rather than any tissue-level
+action. Roasting is what makes hojicha this; there is no mucilage and
+no demulcent mechanism to point at.
+
+Transcribed as `comfort` at the same strength. Nothing about the
+evidence changes; the word does.
+
+<!-- sourced-effects: comfort -->

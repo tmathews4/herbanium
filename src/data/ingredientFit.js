@@ -85,29 +85,31 @@ export const EFFECT_ANCHORS = Object.freeze({
   // single answer for digestive — peppermint and ginger are also strong
   // but their primary registers are cooling and warming respectively.
   digestive: { id: "fennel",     strength: 5 },
-  // Rooibos's full-body, caffeine-free, low-tannin smoothness reads as
-  // the most defining "soothing" expression in the catalog. Hojicha
-  // and licorice are runners-up but lean into roasted-comfort and
-  // throat-coat respectively.
-  soothing:  { id: "rooibos",    strength: 5 },
-  // Comfort tops out at 3, and the previous note here was already
-  // circling why: "no ingredient in the catalog hits a signature-5
-  // pure comfort register". It anchored hojicha at 4 anyway.
+  // Licorice root, and the old note here explains why without meaning
+  // to: it ruled licorice out for leaning into "throat-coat". Throat
+  // coat IS soothing — the demulcent action, mucilage on irritated
+  // tissue, which is what the word means in materia medica. Rooibos
+  // was anchoring it on "full-body, low-tannin smoothness", which is
+  // a comfort claim, and rooibos has since moved to comfort along
+  // with the six other ingredients whose docs described warm
+  // relaxation under soothing's name.
   //
-  // Once every unsourced `comfort` came out, the reason became plain.
-  // Across all 51 research docs the highest comfort any of them
-  // prescribes is 3 — rose and genmaicha. Hojicha's 4 was never
-  // researched; its doc rates soothing and warming, not comfort.
+  // Anchored at 4 rather than 5 because that is what §5 rates it —
+  // "primary effect, strong throat-soothing tradition, demulcent
+  // quality from polysaccharides".
+  soothing:  { id: "licorice-root", strength: 4 },
+  // Comfort anchors at 4 now, on hojicha. It sat at 3 on genmaicha
+  // because comfort's best exemplars were filed under `soothing` —
+  // hojicha's own §5 calls it "the defining comfort-tea register" at
+  // strength 4 while rating it as soothing. Once that register moved
+  // to the word its research already used, the archetype and the
+  // ceiling came with it.
   //
-  // Genmaicha is the honest archetype: §5 rates comfort 3, "toasty,
-  // grain-warm character; emotionally welcoming". Anchoring at the
-  // real ceiling rather than a convention-satisfying 5 is the same
-  // instinct the old note had, applied to a number the research
-  // actually supports.
-  //
-  // That comfort cannot muster a 4 anywhere is itself evidence about
-  // the register — see the comfort-vs-soothing question in CLAUDE.md.
-  comfort:   { id: "genmaicha",  strength: 3 },
+  // The note that used to sit here observed that "no ingredient in
+  // the catalog hits a signature-5 pure comfort register" and
+  // anchored at 4 anyway. It was half-right: the ingredient existed,
+  // under another name.
+  comfort:   { id: "hojicha",    strength: 4 },
 });
 
 // Flavor anchors — for each declared flavor axis, the ingredient

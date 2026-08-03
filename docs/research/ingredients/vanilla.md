@@ -526,3 +526,27 @@ digestion**, and it should not be presented as though one did. It
 belongs at the 2–3 it ships rather than anywhere near fennel's 4.
 
 <!-- sourced-effects: digestive -->
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 rates this ingredient's primary affective claim under `soothing`,
+but its own gloss describes something else:
+
+> | soothing | 3 | **Primary effect.** Vanilla is culturally the "comfort flavor" across most of the world where it has cultural presence. Not a pharmacological effect in the way ginger's warming is — this is aromatic/psychological, but still real and reliable |
+
+`soothing` in this catalogue is the **demulcent** register — the
+materia medica action where mucilage or tannin acts on irritated
+tissue. Licorice's throat coat, linden's mucilage, sage's gargle
+tradition. It is a claim about the body's surfaces.
+
+The row says "comfort flavor" and then says outright that the effect is
+aromatic and psychological rather than pharmacological. That is the
+definition of the comfort register and the opposite of a demulcent
+claim.
+
+Transcribed as `comfort` at the same strength. Nothing about the
+evidence changes; the word does.
+
+<!-- sourced-effects: comfort -->

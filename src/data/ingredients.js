@@ -639,7 +639,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "very strong but smooth — rooibos rarely turns harsh.", moodImpact: "soothing heavy; the cup is grounding" },
     ],
     overPull: { timeS: 900, reason: "the cup is muddy and tannic past the rooibos sweet spot" },
-    effects: [["soothing", 5], ["digestive", 3], ["grounding", 2]],
+    effects: [["comfort", 4], ["digestive", 3], ["grounding", 2]],
     flavors: ["honey", "woody", "vanilla"],
     pairs: ["cinnamon", "ginger", "vanilla", "cloves", "rose", "lemongrass", "ashwagandha", "nettle", "lemonbalm"],
     dose: "1 tsp · 200ml",
@@ -1029,7 +1029,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "hot and numbing — the spice has turned aggressive.", moodImpact: "warming overdone; comfort lost" },
     ],
     overPull: { timeS: 720, reason: "cinnamon turns hot and numbing past sweet" },
-    effects: [["warming", 4], ["digestive", 4], ["uplifting", 3], ["soothing", 3], ["grounding", 1]],
+    effects: [["warming", 4], ["digestive", 4], ["uplifting", 3], ["comfort", 3], ["grounding", 1]],
     flavors: ["spiced", "sweet", "woody", "warm"],
     pairs: ["assam", "rooibos", "ginger", "cardamom", "cloves", "vanilla", "turmeric", "black-pepper", "ashwagandha", "lions-mane", "dandelion-root", "reishi", "licorice-root", "elderflower"],
     dose: "½ stick or ½ tsp · 250ml",
@@ -1079,7 +1079,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "camphor-medicinal — the brightness gone aggressive.", moodImpact: "uplifting lost to harsh edge" },
     ],
     overPull: { timeS: 720, reason: "cardamom turns camphor-medicinal" },
-    effects: [["digestive", 4], ["warming", 3], ["uplifting", 4], ["cooling", 3], ["soothing", 3]],
+    effects: [["digestive", 4], ["warming", 3], ["uplifting", 4], ["cooling", 3], ["comfort", 3]],
     flavors: ["spiced", "floral", "citrus", "complex"],
     pairs: ["assam", "rose", "ginger", "cinnamon", "cloves", "vanilla", "tulsi", "ashwagandha", "turmeric", "black-pepper", "dandelion-root"],
     dose: "3–4 crushed pods · 250ml",
@@ -1180,7 +1180,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "very heavy but smooth — vanilla rarely turns.", moodImpact: "comfort holds; cup is rich" },
     ],
     overPull: { timeS: 900, reason: "the cup is past dessert into thick syrup" },
-    effects: [["soothing", 4], ["calm", 3], ["uplifting", 3], ["warming", 1], ["sleepy", 1]],
+    effects: [["comfort", 4], ["calm", 3], ["uplifting", 3], ["warming", 1], ["sleepy", 1]],
     flavors: ["sweet", "creamy", "floral", "warm"],
     pairs: ["rooibos", "assam", "cinnamon", "cardamom", "rose", "lions-mane", "dandelion-root"],
     dose: "½ bean split · 250ml",
@@ -1638,7 +1638,7 @@ const INGREDIENTS = {
     // catalog hits a signature-5 "pure comfort" (the roasted-and-cozy
     // register lives at 4 here, with vanilla a runner-up); the anchor
     // sits at 4 deliberately so the rubric stays honest.
-    effects: [["soothing", 4], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
+    effects: [["comfort", 4], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
     flavors: ["roasted", "warm", "caramel", "nutty", "toasted", "woody", "sweet"],
     pairs: ["rooibos", "ginger", "vanilla"],
     dose: "1 tbsp · 250ml",
@@ -2101,7 +2101,7 @@ const INGREDIENTS = {
     overPull: { timeS: 480, reason: "tannin grip overtakes the earth-warmth" },
     // Digestive 4: post-meal traditional but the fennel anchor takes the
     // defining 5; puerh sits at 4 alongside its grounding/warming register.
-    effects: [["digestive", 4], ["grounding", 4], ["warming", 3], ["energy", 2], ["focus", 2], ["soothing", 3]],
+    effects: [["digestive", 4], ["grounding", 4], ["warming", 3], ["energy", 2], ["focus", 2], ["comfort", 3]],
     flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral"],
     pairs: [],
     dose: "1 tsp · 200ml · multi-steep",
@@ -3047,7 +3047,7 @@ const INGREDIENTS = {
     overPull: { timeS: 900, reason: "the cup is past dessert into syrup-thick" },
     // body at 6-7 min; no bitter ceiling to worry about.
     caffeine: 0, tempC: [90, 100], timeS: [240, 420],
-    effects: [["soothing", 1], ["comfort", 1]],
+    effects: [["comfort", 1]],
     flavors: ["apple", "sweet", "fruity", "honey"],
     pairs: ["chamomile", "cinnamon", "hibiscus", "rose", "vanilla", "rooibos", "fennel"],
     dose: "1 heaping tsp · 200ml",

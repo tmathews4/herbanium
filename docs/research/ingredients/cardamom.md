@@ -473,3 +473,23 @@ this is a tradition-sourced claim, on the same footing as the other
 and it shouldn't be presented as though it were.
 
 <!-- sourced-effects: energy -->
+
+---
+
+## Addendum — the register is `comfort`, not `soothing` (2026-08-03)
+
+§5 files this ingredient's affective claim under `soothing`, but the
+gloss describes warm relaxation rather than any action on tissue:
+
+> | soothing | 2 | Gentle comforting quality; works well in milk-based preparations |
+
+`soothing` is the **demulcent** register here — mucilage or tannin
+acting on irritated surfaces, as in licorice's throat coat, linden's
+mucilage, sage's gargle tradition. The row says "comforting" and points at
+milk preparations — a culinary and affective observation, with no
+mucosal mechanism behind it.
+
+Transcribed as `comfort` at the same strength. The evidence is
+unchanged; the word is corrected.
+
+<!-- sourced-effects: comfort -->

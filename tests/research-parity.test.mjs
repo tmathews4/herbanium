@@ -345,7 +345,6 @@ const KNOWN_STRENGTH_DRIFT = new Set([
   "lions-mane@95:focus",         // doc 1 -> app 3
   "puerh@95:digestive",          // doc 4 -> app 2
   "puerh@100:warming",           // doc 4 -> app 2
-  "rooibos@100:soothing",        // doc 5 -> app 3
   "vanilla@95:calm",             // doc 3 -> app 1
 ]);
 
