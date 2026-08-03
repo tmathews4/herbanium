@@ -223,8 +223,12 @@ test("ashwagandha: long decoction raises grounding (vs short)", () => {
 // ─── SPICES ─────────────────────────────────────────────────────
 
 // Ginger: gingerol → shogaol with heat/time. Warming sharpens.
-test("ginger: longer simmer raises warming/comfort", () => {
-  assert(getEffect(strong("ginger"), "comfort") > getEffect(light("ginger"), "comfort"),
+// `warming` is the register now, not `comfort` — the two were split
+// once the research made clear they are different claims (gingerol is
+// TRPV1-agonist body heat; comfort is warm relaxation). Ginger's doc
+// rates warming 5 as its primary effect, so that is what should climb.
+test("ginger: longer simmer raises warming", () => {
+  assert(getEffect(strong("ginger"), "warming") > getEffect(light("ginger"), "warming"),
     `expected warming register climb`);
 });
 
@@ -747,8 +751,13 @@ test("nettle (Susun Weed, Healing Wise): long infusion is the medicine, short is
 });
 
 test("dandelion root vs leaf (Rosemary Gladstar, Family Herbal): root decocts, leaf infuses", () => {
-  const lightSettle  = getEffect(light("dandelion-root"),  "settle") + getEffect(light("dandelion-root"),  "comfort");
-  const strongSettle = getEffect(strong("dandelion-root"), "settle") + getEffect(strong("dandelion-root"), "comfort");
+  // `settle` was renamed `digestive` and `comfort` was removed here as
+  // unsourced, so this summed two tokens that no longer exist and
+  // compared 0 to 0 — passing for the wrong reason until the removal
+  // made it fail honestly. `digestive` is the claim the citation is
+  // actually about: the root's bitter principles need decoction.
+  const lightSettle  = getEffect(light("dandelion-root"),  "digestive");
+  const strongSettle = getEffect(strong("dandelion-root"), "digestive");
   assert(strongSettle > lightSettle,
     `dandelion-root effect should rise with decoction time (${lightSettle} → ${strongSettle})`);
   assert(hasWarning(warningsFor(strong("dandelion-leaf")), "tannin"),

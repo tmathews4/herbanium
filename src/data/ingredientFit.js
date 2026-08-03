@@ -90,12 +90,24 @@ export const EFFECT_ANCHORS = Object.freeze({
   // and licorice are runners-up but lean into roasted-comfort and
   // throat-coat respectively.
   soothing:  { id: "rooibos",    strength: 5 },
-  // Comfort lives at strength 4 — no ingredient in the catalog hits
-  // a signature-5 "pure comfort" register; hojicha's roasted-cozy
-  // expression is the cleanest archetype, with vanilla a runner-up.
-  // The anchor at 4 keeps the rubric honest rather than inflating
-  // it to 5 just to satisfy the convention.
-  comfort:   { id: "hojicha",    strength: 4 },
+  // Comfort tops out at 3, and the previous note here was already
+  // circling why: "no ingredient in the catalog hits a signature-5
+  // pure comfort register". It anchored hojicha at 4 anyway.
+  //
+  // Once every unsourced `comfort` came out, the reason became plain.
+  // Across all 51 research docs the highest comfort any of them
+  // prescribes is 3 — rose and genmaicha. Hojicha's 4 was never
+  // researched; its doc rates soothing and warming, not comfort.
+  //
+  // Genmaicha is the honest archetype: §5 rates comfort 3, "toasty,
+  // grain-warm character; emotionally welcoming". Anchoring at the
+  // real ceiling rather than a convention-satisfying 5 is the same
+  // instinct the old note had, applied to a number the research
+  // actually supports.
+  //
+  // That comfort cannot muster a 4 anywhere is itself evidence about
+  // the register — see the comfort-vs-soothing question in CLAUDE.md.
+  comfort:   { id: "genmaicha",  strength: 3 },
 });
 
 // Flavor anchors — for each declared flavor axis, the ingredient

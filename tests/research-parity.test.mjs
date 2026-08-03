@@ -104,29 +104,11 @@ const ALIAS = { settle: "digestive" };
 // distinct from "physically warm". Each comes off the list by either
 // finding a genuine comfort claim in the literature or removing it.
 const KNOWN_UNSOURCED = {
-  assam: ["comfort"],
-  cardamom: ["comfort"],
-  ceylon: ["comfort"],
-  cinnamon: ["comfort"],
-  cloves: ["comfort"],
-  "dandelion-root": ["comfort"],
-  echinacea: ["comfort"],
-  elderflower: ["comfort"],
-  ginger: ["comfort"],
-  gunpowder: ["comfort"],
-  hojicha: ["comfort"],
-  lapsang: ["comfort"],
-  "licorice-root": ["comfort"],
-  linden: ["comfort"],
-  nettle: ["comfort"],
-  oolong: ["comfort"],
+  // orange-peel ships a `warming` its doc doesn't prescribe. The 20
+  // comfort entries that sat here were resolved by removal — see the
+  // note above the ALIAS.
   "orange-peel": ["warming"],
-  puerh: ["comfort"],
-  rooibos: ["comfort"],
-  turmeric: ["comfort"],
-  vanilla: ["comfort"],
 };
-
 const docIdFor = {};
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
   const slug = file.replace(/\.md$/, "");
@@ -334,7 +316,6 @@ const KNOWN_STRENGTH_DRIFT = new Set([
   "cranberry@100:uplifting",     // doc 1 -> app 3
   "cranberry@100:cooling",       // doc 1 -> app 3
   "dried-apple@100:comfort",     // doc 1 -> app 3
-  "elderflower@90:calm",         // doc 1 -> app 3
   "gyokuro@50:focus",            // doc 5 -> app 3
   "lemon-peel@95:cooling",       // doc 1 -> app 3
   "lemon-peel@100:cooling",      // doc 1 -> app 3

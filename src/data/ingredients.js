@@ -1517,7 +1517,7 @@ const INGREDIENTS = {
     ],
     overPull: { timeS: 360, reason: "tannin overtakes the rice-warmth" },
     caffeine: 20, tempC: [70, 85], timeS: [60, 150],
-    effects: [["soothing", 4], ["calm", 4], ["focus", 2], ["warming", 2], ["digestive", 2]],
+    effects: [["soothing", 4], ["calm", 4], ["comfort", 3], ["focus", 2], ["warming", 2], ["digestive", 2]],
     flavors: ["toasty", "nutty", "rice", "grassy", "sweet", "warm", "savory"],
     basicTastes: { umami: 3, sweet: 2, bitter: 1, astringent: 1, aromatic: 3 },
     pairs: [],
@@ -1638,7 +1638,7 @@ const INGREDIENTS = {
     // catalog hits a signature-5 "pure comfort" (the roasted-and-cozy
     // register lives at 4 here, with vanilla a runner-up); the anchor
     // sits at 4 deliberately so the rubric stays honest.
-    effects: [["soothing", 4], ["calm", 4], ["comfort", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
+    effects: [["soothing", 4], ["calm", 4], ["warming", 3], ["digestive", 3], ["grounding", 2]],
     flavors: ["roasted", "warm", "caramel", "nutty", "toasted", "woody", "sweet"],
     pairs: ["rooibos", "ginger", "vanilla"],
     dose: "1 tbsp · 250ml",
