@@ -42,9 +42,13 @@ const only = process.argv.includes("--ing")
 // words for one claim, and the app's word wins where it's the one the
 // user meets:
 //   settle  -> digestive  (docs' own glosses all say digestive)
-//   warming -> comfort    (comfort is what onboarding offers as the
-//                          warm register; carrying both made 21
-//                          ingredients assert it twice)
+//
+// `warming -> comfort` was here and is RETIRED. They are two claims:
+// ginger's doc rates warming 5 as "genuine TRPV1-agonist warming,
+// distinct from caffeine-driven warming or simply hot-drink warmth"
+// and rates its soothing consequence separately. Physical heat versus
+// warm relaxation. While the alias stood, a doc prescribing the first
+// was satisfied by the app shipping the second.
 //
 // Applied to BOTH sides — it's a canonicalisation, not a one-way
 // mapping, and tests/research-parity.test.mjs already learned this the
@@ -53,7 +57,7 @@ const only = process.argv.includes("--ing")
 // same time: one claim counted as both a gap and a surplus, on ~15
 // ingredients. That's not noise around the signal, it IS most of the
 // output, and it sends you off transcribing work that's already done.
-const ALIAS = { settle: "digestive", warming: "comfort" };
+const ALIAS = { settle: "digestive" };
 const canon = n => ALIAS[n] || n;
 
 /** Effect names prescribed anywhere in an ingredient's research doc. */

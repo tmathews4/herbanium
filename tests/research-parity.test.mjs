@@ -75,12 +75,57 @@ console.log("Research parity + family-tree integrity\n");
 
 // Where the docs and the app use different words for one claim. The
 // app's word wins because it's the one the user meets; see CLAUDE.md.
-const ALIAS = { settle: "digestive", warming: "comfort" };
+//
+// `warming -> comfort` USED TO BE HERE and has been retired. They are
+// two different claims, and the catalogue's own research says so most
+// clearly under ginger: warming 5 is "genuine TRPV1-agonist warming,
+// distinct from caffeine-driven warming or simply hot-drink warmth",
+// and soothing is rated SEPARATELY as its consequence ("the warming
+// character soothes"). One is measurable body heat — the spice makes
+// you physically warm. The other is warm relaxation, which arrives
+// with no temperature change at all.
+//
+// While the alias stood, a doc prescribing thermogenic warming was
+// satisfied by the app shipping affective comfort, and 21 pairs went
+// unexamined behind it. tools/lib/strength-drift.mjs already refused
+// this alias for the same reason.
+const ALIAS = { settle: "digestive" };
 
 // Unsourced effects that exist today, listed so they can be worked off
 // one at a time. Removing a line here after fixing the data is the
 // point; ADDING one should be a deliberate act with a reason.
-const KNOWN_UNSOURCED = {};
+// Reopened deliberately (see the ALIAS note above). Retiring
+// `warming -> comfort` revealed 21 pairs the alias had been covering.
+//
+// These are NOT mislabelled data: every one of the 20 comfort entries
+// ships alongside a `warming` its doc does prescribe, so the
+// thermogenic claim is present and sourced. What is unsourced is the
+// SECOND, affective claim sitting next to it — "warm relaxation" as
+// distinct from "physically warm". Each comes off the list by either
+// finding a genuine comfort claim in the literature or removing it.
+const KNOWN_UNSOURCED = {
+  assam: ["comfort"],
+  cardamom: ["comfort"],
+  ceylon: ["comfort"],
+  cinnamon: ["comfort"],
+  cloves: ["comfort"],
+  "dandelion-root": ["comfort"],
+  echinacea: ["comfort"],
+  elderflower: ["comfort"],
+  ginger: ["comfort"],
+  gunpowder: ["comfort"],
+  hojicha: ["comfort"],
+  lapsang: ["comfort"],
+  "licorice-root": ["comfort"],
+  linden: ["comfort"],
+  nettle: ["comfort"],
+  oolong: ["comfort"],
+  "orange-peel": ["warming"],
+  puerh: ["comfort"],
+  rooibos: ["comfort"],
+  turmeric: ["comfort"],
+  vanilla: ["comfort"],
+};
 
 const docIdFor = {};
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
