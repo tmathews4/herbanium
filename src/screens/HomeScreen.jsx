@@ -13,9 +13,9 @@ import {
 import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { OrnamentRule } from "../components/OrnamentRule";
 import { PoemLines, POEM_KEYFRAMES } from "../components/PoemLines";
+import { pickHomePoem, getTimeOfDay } from "../data/homePoem";
 import { TeaGreeting } from "../components/TeaGreeting";
 import { nextFollowUp } from "../data/followUp";
-import { WAIT_POEMS } from "../data/waitContent";
 import { getBlend, sessionAgo } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
@@ -43,57 +43,6 @@ let homeArrived = false;
 // where todTags carry the time-of-day keywords used to pick a
 // matching public-domain poem. The poem replaces the older
 // hand-written one-liner.
-const getTimeOfDay = (h) => {
-  if (h >= 5  && h <  8) return { label: "Early morning",  todTags: ["morning", "dawn"] };
-  if (h >= 8  && h < 11) return { label: "Morning",        todTags: ["morning"] };
-  if (h >= 11 && h < 13) return { label: "Late morning",   todTags: ["morning", "noon"] };
-  if (h >= 13 && h < 16) return { label: "Afternoon",      todTags: ["noon", "stillness"] };
-  if (h >= 16 && h < 19) return { label: "Late afternoon", todTags: ["evening"] };
-  if (h >= 19 && h < 22) return { label: "Evening",        todTags: ["evening", "night"] };
-  if (h >= 22 || h <  2) return { label: "Late evening",   todTags: ["night", "moon"] };
-  return                         { label: "Small hours",   todTags: ["night", "moon", "stillness"] };
-};
-
-// Northern-hemisphere season buckets keyed off month index. Used to
-// bias the home poem pick toward seasonal lines when one of the
-// candidate poems happens to share the season tag. Southern-hemi
-// users will see a mismatched season bias — acceptable for now,
-// no locale data available locally.
-const seasonOf = (m) => {
-  if (m === 11 || m <= 1) return "winter";
-  if (m >= 2 && m <= 4)  return "spring";
-  if (m >= 5 && m <= 7)  return "summer";
-  return "autumn";
-};
-
-// Pick a public-domain poem from WAIT_POEMS that fits the current
-// hour and (when possible) season. Rotates on each visit (each
-// fresh mount of HomeScreen) so a user returning to Home through
-// the day doesn't see the same line over and over. Time of day
-// AND season still bias the candidate pool — the rotation just
-// happens within the candidate set rather than across days.
-const pickHomePoem = (date) => {
-  const tod = getTimeOfDay(date.getHours());
-  const season = seasonOf(date.getMonth());
-  const todSet = new Set(tod.todTags);
-
-  const candidates = (WAIT_POEMS || []).filter(p => {
-    const tags = p.tags || [];
-    return tags.some(t => todSet.has(t));
-  });
-  // Soft season bias: when a strong seasonal subset exists (≥3 poems
-  // tagged for the current season at this time of day), use it;
-  // otherwise stay with the broader time-of-day pool so the rotation
-  // doesn't lock onto 1-2 seasonal poems for an entire season.
-  const seasonMatched = candidates.filter(p => (p.tags || []).includes(season));
-  const pool = seasonMatched.length >= 3 ? seasonMatched : candidates;
-  if (pool.length === 0) return null;
-
-  // Random pick — different each Home mount. Keeps a pool of >1 in
-  // genuinely fresh rotation while time-of-day / season bias still
-  // shapes which subset the pick happens within.
-  return pool[Math.floor(Math.random() * pool.length)];
-};
 
 export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods, addJournalEntry, journalEntries = [] }) => {
   const [arriving] = React.useState(() => {
@@ -101,10 +50,36 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
     homeArrived = true;
     return true;
   });
-  // Pick a poem ONCE per mount so the line is stable within a visit
-  // but fresh on each return to Home. Rotation comes from coming back
-  // to Home through the day rather than from re-rendering in place.
-  const homePoem = React.useMemo(() => pickHomePoem(new Date()), []);
+  // Pick a poem ONCE per mount so the line is stable within a visit,
+  // and again whenever the app comes back to the foreground.
+  //
+  // The mount-only version was the whole bug behind "I see the same
+  // poem every time I open the app". Rotation was supposed to come
+  // from re-mounting HomeScreen, which happens on tab switches — but
+  // packaged through Capacitor, reopening the app does NOT remount
+  // anything. iOS and Android SUSPEND the WebView rather than
+  // terminate it, so the JS context, the React tree and this useMemo
+  // all survive backgrounding. Someone who opens the app, reads, and
+  // closes it never leaves Home, so the poem was frozen until the OS
+  // finally killed the process — days, sometimes.
+  //
+  // Nothing in the app listened for foregrounding at all; the only
+  // Capacitor listener is the Android back button. visibilitychange
+  // covers both cases (native WebView resume and browser tab focus)
+  // without adding a plugin dependency.
+  const [visitNonce, setVisitNonce] = React.useState(0);
+  React.useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setVisitNonce(n => n + 1);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+  // Only re-picks when the app has actually been away and come back —
+  // a re-render in place keeps the line steady, which is what the
+  // original mount-only pick was protecting and is still worth having.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const homePoem = React.useMemo(() => pickHomePoem(new Date()), [visitNonce]);
   // Track whether this visit's poem has been saved as a journal entry,
   // so we can flip the action label to "Saved" without re-checking
   // journalEntries (which would also flip on a prior save in another
