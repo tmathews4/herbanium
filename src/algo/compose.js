@@ -1645,9 +1645,12 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // every reachable slider point through the in-zones cascade,
   // so the older outsider warning would double-report the same
   // information.
+  const atCuratedBaseline = curated
+    && baselineTempC != null && baselineTimeS != null
+    && tempC === baselineTempC && timeS === baselineTimeS;
+
   // Was this ingredient ALREADY outside its range at the recipe's own
-  // brew? If so the stretch belongs to the recipe, not to whatever the
-  // user just did with the slider.
+  // brew? Only asked AT that brew — see the note on recipeStretch.
   const stretchedAtBaseline = (id) => {
     if (baselineTempC == null || baselineTimeS == null) return false;
     const meta = INGREDIENTS[id];
@@ -1668,12 +1671,18 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
             : "time",
       tempDir: c.tempDir,  // "low" | "high" | null
       timeDir: c.timeDir,  // "under" | "over" | null
-      // A traditional recipe that already brewed this leaf past its own
-      // window is not a cup with a fault in it — the stretch IS the
-      // tradition, and the off-notes it produces are what the style is
-      // fond of. Chai boils the tea. Flagging that as "will extract
-      // unevenly" tells the user their cup is broken when it's correct.
-      recipeStretch: isTraditional && stretchedAtBaseline(c.id),
+      // ONLY on first open, at the recipe's own brew. A traditional
+      // style that brews a leaf past its own window is saying the
+      // tradition outranks the chemistry, and that is worth saying once
+      // — when the drinker opens the recipe and sees a cup our own
+      // guidance would call over-pulled.
+      //
+      // It is deliberately NOT sticky. Once the drinker moves a slider
+      // the cup is theirs, not the tradition's, and every stretch reads
+      // as an ordinary warning again. A note that followed the sliders
+      // would stop being a statement about the recipe and start being
+      // an excuse for whatever the user did to it.
+      recipeStretch: isTraditional && atCuratedBaseline && stretchedAtBaseline(c.id),
     }));
 
   // For curated blends sitting exactly on the curator's chosen brew,
@@ -1684,19 +1693,15 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // Tradition's whole point is that the modern algorithm flags it as
   // past-optimum, but the practice predates the algorithm — that's why
   // the tradition-over-literature note exists.
-  const atCuratedBaseline = curated
-    && baselineTempC != null && baselineTimeS != null
-    && tempC === baselineTempC && timeS === baselineTimeS;
   const suppressAtBaseline = atCuratedBaseline && isTraditional;
-  // Suppression used to be all-or-nothing on an EXACT baseline match,
-  // which had two bad edges. At baseline the user was told nothing, so
-  // never learned why the cup is stretched; and one nudge of either
-  // slider brought back the full list, blaming them for a stretch the
-  // recipe had all along.
+  // Suppression used to drop EVERYTHING at a traditional baseline, so
+  // the drinker was told nothing — and never learned that the recipe
+  // deliberately sits past where our own guidance would stop. That is
+  // the one thing worth saying there.
   //
-  // Now the recipe's own stretch travels with it as a character note
-  // whatever the sliders say, and only the stretch the USER introduced
-  // reads as a warning.
+  // So at baseline the recipe's own stretch surfaces as a character
+  // note and nothing else does; away from baseline the note is gone
+  // and ordinary warnings apply.
   const outsiders = suppressAtBaseline
     ? rawOutsiders.filter(o => o.recipeStretch)
     : rawOutsiders;

@@ -234,38 +234,46 @@ test("cimarron: high energy, bitterness present", () => {
 
 // ── Output ────────────────────────────────────────────────────
 
-// ── Traditional stretch reads as character, not fault ─────────────
+// ── The tradition note is a first-open signal, nothing more ───────
 //
 // Traditional styles are frequently built on brewing a leaf past its
 // own window — throat coat holds peppermint well over-steeped, chai
-// boils the tea. The off-notes that produces are what the style is
-// fond of, so telling the drinker the cup "will extract unevenly" says
-// their correct cup is broken.
+// boils the tea. Opening such a recipe and seeing a cup our own
+// guidance would call over-pulled deserves one line saying the
+// tradition outranks the chemistry here.
 //
-// The old rule suppressed every warning on an EXACT baseline match,
-// which had two bad edges: at baseline the drinker was told nothing
-// and never learned why the cup is stretched, and one nudge of either
-// slider brought the whole list back — blaming them for a stretch the
-// recipe had all along.
-test("a traditional recipe's own stretch is a character note at its baseline", () => {
+// It says that ONCE, at the recipe's own brew. The moment the drinker
+// moves a slider the cup is theirs rather than the tradition's, and
+// every stretch reads as an ordinary literature-based warning again. A
+// note that followed the sliders would stop being a statement about
+// the recipe and become an excuse for whatever was done to it.
+//
+// Before this, a traditional baseline dropped every note instead, so
+// the drinker was told nothing at the one moment there was something
+// worth saying.
+test("a stretched traditional recipe explains itself at its own brew", () => {
   const b = BLENDS.find(x => x.id === "throat-coat");
   const r = resolveBlendAtBrew(b.ingredients, b.tempC, b.timeS, b.tempC, b.timeS, true, true);
   const notes = (r.warnings || []).filter(w => w.kind === "tradition");
   const faults = (r.warnings || []).filter(w => w.kind === "outsider");
-  assert(notes.length > 0, "the recipe's own stretch should be explained, not hidden");
+  assert(notes.length > 0, "the recipe's own stretch should be named, not hidden");
   assert(faults.length === 0,
     `nothing at a traditional baseline is the drinker's fault: ${faults.map(f => f.text).join(" / ")}`);
 });
-test("steeping past a traditional baseline blames only the new stretch", () => {
+
+test("moving either slider ends the tradition note for good", () => {
   const b = BLENDS.find(x => x.id === "throat-coat");
-  const longer = Math.round((b.timeS * 1.6) / 30) * 30;
-  const r = resolveBlendAtBrew(b.ingredients, b.tempC, longer, b.tempC, b.timeS, true, true);
-  const notes = (r.warnings || []).filter(w => w.kind === "tradition");
-  const faults = (r.warnings || []).filter(w => w.kind === "outsider");
-  // The recipe's own stretch travels with it — still character.
-  assert(notes.length > 0, "the recipe's stretch shouldn't turn into a fault when the user moves a slider");
-  // And what the user added is honestly flagged.
-  assert(faults.length > 0, "a stretch the user introduced should still warn");
+  for (const [t, s, what] of [
+    [b.tempC, b.timeS + 60, "a nudge"],
+    [b.tempC, Math.round((b.timeS * 1.6) / 30) * 30, "a long steep"],
+  ]) {
+    const r = resolveBlendAtBrew(b.ingredients, t, s, b.tempC, b.timeS, true, true);
+    const notes = (r.warnings || []).filter(w => w.kind === "tradition");
+    const faults = (r.warnings || []).filter(w => w.kind === "outsider");
+    assert(notes.length === 0,
+      `${what}: the cup is the drinker's now — no tradition note should remain`);
+    assert(faults.length > 0, `${what}: ordinary warnings should apply once off the recipe's brew`);
+  }
 });
 
 console.log(`\n\n${pass} passed, ${fail} failed.`);
