@@ -54,7 +54,7 @@ export const FAMILY_BY_FLAVOR = {
   marine: "marine", oceanic: "marine", seaweed: "marine",
   "seafood-like": "marine",
   // body words
-  creamy: "body",
+  creamy: "mouthfeel",
   // off / diagnostic
   bitter: "off", bitterness: "off", astringent: "off", tannic: "off",
   harsh: "off", acrid: "off", soapy: "off", muddy: "off", medicinal: "off",
@@ -281,5 +281,5 @@ export const MOOD_COUNTERPARTS = Object.fromEntries(
 );
 
 export const FLAVOR_FAMILY_LABEL = {
-  fruit: "fruity", body: "creamy",
+  fruit: "fruity", mouthfeel: "creamy",
 };

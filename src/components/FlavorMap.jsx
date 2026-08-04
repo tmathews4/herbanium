@@ -65,7 +65,7 @@ const MAX_SECONDARY = 6;
 // off-notes. Detail-mode tokens inherit the order of their family.
 const FLAVOR_FAMILY_ORDER = [
   "fruit", "floral", "sweet", "fresh", "vegetal", "marine",
-  "spiced", "smoky", "earthy", "body",
+  "spiced", "smoky", "earthy", "mouthfeel",
   // 'off' family removed from the strip — bitter/astringent live in
   // the palate strip (their own diagnostic axes), and the rest of
   // the off-family tokens (medicinal/soapy/muddy/pith/sharp) already
@@ -95,12 +95,20 @@ export const FAMILY_COLORS = {
   vegetal:  "var(--family-vegetal)",
   marine:   "var(--family-marine)",
   sweet:    "var(--family-sweet)",
-  body:     "var(--family-body)",
+  mouthfeel: "var(--family-mouthfeel)",
   off:      "var(--family-off)",
 };
 
 
-const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] || "var(--ash)";
+// Where a token has no family. The family-tree guard in
+// research-parity forbids this, so it should be unreachable — but it
+// used to fall back to the literal "body", which silently coloured an
+// unknown token as if it were creamy (flavour) or digestive (effect).
+// Borrowing a real family's colour to represent "we don't know" is the
+// kind of thing that reads as data rather than as a gap.
+const UNKNOWN_FAMILY = "other";
+
+const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || UNKNOWN_FAMILY] || "var(--ash)";
 
 // Mood / effect → family. Mirrors the flavor hierarchy so the same
 // Simple/Detailed toggle can roll up moods. Cooling is split out of
@@ -111,7 +119,7 @@ const colorFor = (flavor) => FAMILY_COLORS[FAMILY_BY_FLAVOR[flavor] || "body"] |
 export { FAMILY_BY_FLAVOR, FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS };
 
 const colorForEffect = (effect) =>
-  EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || "body"] || "var(--ash)";
+  EFFECT_FAMILY_COLORS[FAMILY_BY_EFFECT[effect] || UNKNOWN_FAMILY] || "var(--ash)";
 
 // Palate / balance axes — diagnostic taste-structure dimensions
 // (bitterness, sweetness, astringency, tartness, menthol). Colored
@@ -301,7 +309,7 @@ const TrackMap = ({
         if (strength <= 0) continue;
         const familyName = (familyColors && familyColors[name])
           ? name
-          : (familyOf[name] || "body");
+          : (familyOf[name] || UNKNOWN_FAMILY);
         if (!map.has(familyName)) map.set(familyName, new Set());
         map.get(familyName).add(name);
       }
@@ -337,7 +345,7 @@ const TrackMap = ({
       if (!(strength > 0)) continue;
       const familyName = (familyColors && familyColors[name])
         ? name
-        : (familyOf[name] || "body");
+        : (familyOf[name] || UNKNOWN_FAMILY);
       const key = familyDisplayKey(familyName);
       if (!buckets[key]) buckets[key] = [];
       buckets[key].push(strength);

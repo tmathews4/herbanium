@@ -371,7 +371,7 @@ test("the known-over-ceiling list has no stale entries", () => {
 const KNOWN_FLAVOUR_GAPS = new Set([
   "black-pepper:fruit", "cardamom:fruit", "cardamom:sweet", "ceylon:floral",
   "cloves:sweet", "darjeeling:fresh", "dragonwell:floral", "ginger:fruit",
-  "gunpowder:fruit", "gunpowder:smoky", "hojicha:smoky", "gyokuro:body", 
+  "gunpowder:fruit", "gunpowder:smoky", "hojicha:smoky", "gyokuro:mouthfeel", 
   "lavender:vegetal", "lemonbalm:floral", "matcha:fresh", "nettle:fresh",
   "puerh:fresh", "puerh:sweet", "sencha:earthy", "spearmint:fruit",
   "tulsi:fruit", "tulsi:vegetal", "yerba-mate:fresh",
