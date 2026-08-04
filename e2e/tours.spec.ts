@@ -264,7 +264,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     const callout = page.getByTestId("tour-callout");
     const graph = page.locator('[data-tour="blend-graph"]');
 
-    await advanceTo(page, "Simple reads the blend by family");
+    await advanceTo(page, "Simple reads the taste by family");
     const simpleH = (await graph.boundingBox())!.height;
 
     // The step has to tell the reader something is about to change,

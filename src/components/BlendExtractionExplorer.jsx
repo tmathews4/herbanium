@@ -922,7 +922,7 @@ export const BlendExtractionExplorer = ({
           is both a truer grouping and less vertical load above the
           controls. See the "bars and sliders visible together" test in
           e2e/tours.spec.ts, which pins it. */}
-      <div style={{ marginBottom: 12 }}>
+      <div data-tour="blend-effects" style={{ marginBottom: 12 }}>
         <MindMap
           ingredients={ingredients}
           tempC={tempC}

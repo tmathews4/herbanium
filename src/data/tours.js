@@ -41,7 +41,7 @@ export const SCREEN_TOURS = {
     // alongside the toggle, because what the toggle DOES is the lesson.
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-graph"], familyMode: true,
-      body: "Simple reads the blend by family — floral, fruity, calm. One bar each. Tap Next and watch the bars change." },
+      body: "Simple reads the taste by family — floral, fruity, smoky. One bar each. Tap Next and watch the bars change." },
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-graph"], familyMode: false,
       body: "Detailed opens every family into the notes underneath it — apple and pear inside fruity, not just “fruity.” Same cup, finer read. We'll leave it on Simple." },
@@ -56,10 +56,18 @@ export const SCREEN_TOURS = {
     // short for the same reason.
     { target: "blend-graph", title: "The prediction", pad: 6, keepClear: ["blend-sliders"],
       familyMode: true, compact: true,
-      body: "These bars read the whole blend at once — flavor and effects." },
+      body: "What the cup tastes like — its flavours, and the palate underneath them." },
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
       familyMode: true, compact: true,
-      body: "Drag temperature or steep time — watch the bars above move." },
+      body: "Drag temperature or steep time — watch the bars move." },
+    // Added when the mood strip split into Mind and Body and moved
+    // BELOW the sliders. Without a step the user has no reason to
+    // scroll past the controls, and the two windows saying what the cup
+    // actually DOES — the app's whole claim — sit unseen under the
+    // fold. Reading order is taste, controls, effect; the tour walks
+    // all three now.
+    { target: "blend-effects", title: "What it does", pad: 8,
+      body: "Below the controls: what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,
