@@ -404,7 +404,31 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       spot: (await spotlight.boundingBox())!.height,
     });
 
-    const before = await heights();
+    // Settle before measuring anything. The cutout EASES to its box, so
+    // a reading taken while a step is still animating in describes a
+    // frame, not a resting state — and the padding this test is about is
+    // only constant at rest. The first version of this test skipped
+    // straight to a measurement and passed on pixel-9 purely because
+    // that viewport's animation happened to finish first; on the fold
+    // cover it baselined at pad=-23 (spotlight SHORTER than the strip,
+    // mid-ease) and then failed against the real value of 12.
+    //
+    // Two consecutive agreeing samples, not a fixed wait: the animation
+    // is however long the engine makes it, and a sleep long enough for
+    // WebKit would be dead time on every other project.
+    const settle = async () => {
+      let last = -1e9;
+      for (let i = 0; i < 40; i++) {
+        const now = await heights();
+        const pad = now.spot - now.bars;
+        if (Math.abs(pad - last) <= 0.5) return { ...now, pad };
+        last = pad;
+        await page.waitForTimeout(100);
+      }
+      throw new Error("the spotlight never stopped moving");
+    };
+
+    const before = await settle();
     // The overlay swallows clicks, so the slider is driven through the
     // native value setter — React's onChange listens for "input".
     const moved = await page.evaluate(() => {
@@ -420,19 +444,27 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     });
     expect(moved, "the prediction step should have the brew row open").toBe(true);
 
-    // Poll: the strip re-renders and the cutout eases to its new box.
-    await expect.poll(async () => {
-      const now = await heights();
-      return Math.abs((now.spot - now.bars) - (before.spot - before.bars)) <= 2;
-    }, {
-      message: "the spotlight should keep its constant padding around the strip as it resizes",
-      timeout: 8_000,
-    }).toBe(true);
+    // The strip re-renders and the cutout eases to its new box; settle
+    // again and compare like with like.
+    const after = await settle();
 
-    const after = await heights();
+    expect(Math.abs(after.pad - before.pad),
+      `the spotlight should hold its padding around the strip as it resizes `
+      + `(${before.pad.toFixed(1)}px before, ${after.pad.toFixed(1)}px after; `
+      + `strip ${Math.round(before.bars)}→${Math.round(after.bars)}px)`)
+      .toBeLessThanOrEqual(2);
+
+    // Report whether the strip actually MOVED on this viewport. The
+    // padding claim holds either way, but it's only the interesting
+    // claim when the thing being tracked changed size — and on the
+    // narrow projects the blend's rows sometimes land the same height
+    // at both ends of the slider. Logged rather than asserted: which
+    // viewports resize is a property of the seeded blend, not something
+    // this test should pin.
     // eslint-disable-next-line no-console
-    console.log(`  [${test.info().project.name}] strip ${Math.round(before.bars)}→${Math.round(after.bars)}px, `
-      + `spotlight ${Math.round(before.spot)}→${Math.round(after.spot)}px`);
+    console.log(`  [${test.info().project.name}] strip ${Math.round(before.bars)}→${Math.round(after.bars)}px `
+      + `(${after.bars === before.bars ? "no resize on this viewport" : "resized"}), `
+      + `padding held at ${before.pad.toFixed(1)}→${after.pad.toFixed(1)}px`);
   });
 
   test("both the prediction bars and the brew sliders stay clear", async ({ page }) => {
