@@ -497,21 +497,15 @@ export const BlendExtractionExplorer = ({
             Flavour is the opposite and keeps the toggle: `earthy`
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
-        <MindMap
+        <PalateMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
           tempCRange={tempCRange}
-          showAxis={false}
-          familyMode
-        />
-        <BodyMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-          showAxis={false}
-          familyMode
+          curated={curated}
+          isTraditional={isTraditional}
+          defaultTempC={defaultTempC}
+          defaultTimeS={defaultTimeS}
         />
       </div>
 
@@ -915,29 +909,35 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
-      {/* Balance — sits BELOW the sliders, not with the flavor/mood
-          strips above them. Flavor and mood are the prediction the
-          user is aiming at; balance is the caveat about it, and it
-          belongs with the other consequence signals (caffeine, the
-          warnings) rather than in the panorama. Reading order is
-          prediction → controls → consequences.
+      {/* Mind and Body sit BELOW the sliders. The reading order is what
+          the cup TASTES like (flavour, palate) → the controls → what it
+          DOES to you (mind, body).
 
-          The move is also what lets the tour teach its central point:
-          with balance in the middle, the flavor/mood bars and the
-          temp/steep sliders couldn't fit on one phone screen together,
-          so the user never saw the bars respond to the sliders. See
-          the "bars and sliders visible together" test in
-          e2e/tours.spec.ts, which pins that. */}
+          Palate used to live down here and the mood strip up there, on
+          the reasoning that flavour and mood were the prediction and
+          balance was the caveat. The four-window split changed the
+          arithmetic: three strips above the sliders pushed them toward
+          the fold and the tour's bars-and-sliders check reported the
+          pane cramping (60% clear, down from 67%). Two up and two down
+          is both a truer grouping and less vertical load above the
+          controls. See the "bars and sliders visible together" test in
+          e2e/tours.spec.ts, which pins it. */}
       <div style={{ marginBottom: 12 }}>
-        <PalateMap
+        <MindMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
           tempCRange={tempCRange}
-          curated={curated}
-          isTraditional={isTraditional}
-          defaultTempC={defaultTempC}
-          defaultTimeS={defaultTimeS}
+          showAxis={false}
+          familyMode
+        />
+        <BodyMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+          familyMode
         />
       </div>
 
