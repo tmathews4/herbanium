@@ -30,6 +30,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { strengthDrift, SEVERE } from "./lib/strength-drift.mjs";
+import { flavourFamilyGaps } from "./lib/flavour-parity.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -223,6 +224,17 @@ if (prepAll.length) {
   console.log(`\nPRESCRIBED ONLY IN A PREPARATION THE PROFILE CAN'T MODEL `
     + `(${prepAll.length}) — not drift, a structural limit:\n`);
   for (const r of prepAll) console.log(`  ${r.id.padEnd(20)} ${r.prepOnly.join(", ")}`);
+}
+
+const flavGaps = flavourFamilyGaps(EXTRACTION_PROFILES);
+if (flavGaps.length) {
+  console.log(`\nFLAVOUR FAMILIES THE RESEARCH NAMES AND NO CUP SHOWS (${flavGaps.length}):\n`);
+  console.log(`  Family-level, because the docs and the app use different words`);
+  console.log(`  for the same register — lapsang's doc says smoky, its profile`);
+  console.log(`  says smoked. The question is whether the register reaches the cup.\n`);
+  for (const g of flavGaps) {
+    console.log(`  ${g.id.padEnd(15)} ${g.family.padEnd(9)} asked for by: ${g.words.join(", ")}`);
+  }
 }
 
 if (noTable.length) {

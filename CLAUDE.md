@@ -38,6 +38,12 @@ node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at o
 node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
 ```
 
+The drift audit checks flavour at FAMILY level, not leaf level — the
+docs write descriptive prose for taste where they use controlled words
+for effects, and leaf words are near-synonyms (lapsang's doc says
+`smoky`, its profile says `smoked`). The question is whether the
+register reaches the cup, not whether both picked the same word.
+
 Brew parameters are the one axis where the app may legitimately depart
 from the docs — the research says how an ingredient is conventionally
 brewed, and the app also has to serve the blends it ships. Those

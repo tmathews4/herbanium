@@ -59,6 +59,7 @@ import {
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
+import { flavourFamilyGaps, flavourGapKey } from "../tools/lib/flavour-parity.mjs";
 import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
 import { outsideResearchedRange, paramKey, isDeliberate } from "../tools/lib/brew-params.mjs";
 import { DELIBERATE_RANGE_DEPARTURES, DELIBERATE_GRIDS } from "../src/data/brewIntent.js";
@@ -348,6 +349,43 @@ test("the known-over-ceiling list has no stale entries", () => {
   const stale = [...KNOWN_OVER_CEILING].filter(k => !live.has(k));
   assert(stale.length === 0,
     `no longer over the ceiling — remove from KNOWN_OVER_CEILING:\n    ${stale.join("\n    ")}`);
+});
+
+// ── 1f. Flavour the research names and the cup doesn't show ──────
+
+// The drift audit compared EFFECTS in both directions from the day it
+// was written and never looked at flavours. Sixteen sat prescribed in
+// §6 rows and absent from every profile, and were found by hand
+// through the unreachable audit rather than reported. This is that
+// blind spot closed.
+//
+// Family-level on purpose: flavour leaf words are near-synonyms in a
+// way effect words aren't. Lapsang's doc says `smoky` and its profile
+// says `smoked`; linden's doc says `honey-sweet` and its profile says
+// `honey`. Those are the same claim, and comparing leaves reports them
+// as gaps. What matters is whether the register reaches the cup.
+const KNOWN_FLAVOUR_GAPS = new Set([
+  "black-pepper:fruit", "cardamom:fruit", "cardamom:sweet", "ceylon:floral",
+  "cloves:sweet", "darjeeling:fresh", "dragonwell:floral", "ginger:fruit",
+  "gunpowder:fruit", "gunpowder:smoky", "hojicha:smoky", "gyokuro:body", 
+  "lavender:vegetal", "lemonbalm:floral", "matcha:fresh", "nettle:fresh",
+  "puerh:fresh", "puerh:sweet", "sencha:earthy", "spearmint:fruit",
+  "tulsi:fruit", "tulsi:vegetal", "yerba-mate:fresh",
+]);
+
+test("no new flavour family goes missing from the cup", () => {
+  const fresh = flavourFamilyGaps(EXTRACTION_PROFILES)
+    .filter(g => !KNOWN_FLAVOUR_GAPS.has(flavourGapKey(g)))
+    .map(g => `${g.id}: research names ${g.family} (${g.words.join(", ")}), no cup shows it`);
+  assert(fresh.length === 0,
+    `flavour families the research names and the cup doesn't:\n    ${fresh.join("\n    ")}`);
+});
+
+test("the known-flavour-gap list has no stale entries", () => {
+  const live = new Set(flavourFamilyGaps(EXTRACTION_PROFILES).map(flavourGapKey));
+  const stale = [...KNOWN_FLAVOUR_GAPS].filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `these flavour families now reach the cup — remove from KNOWN_FLAVOUR_GAPS:\n    ${stale.join("\n    ")}`);
 });
 
 // ── 1d. Vocabulary the app invented ──────────────────────────────
