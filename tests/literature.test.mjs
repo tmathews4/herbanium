@@ -68,8 +68,8 @@ const INGREDIENT_RANGE = {
   // cooling / digestive
   peppermint:  { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
   spearmint:   { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
-  lemongrass:  { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
-  fennel:      { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
+  lemongrass:  { tempLow: 90,  tempMid: 95,  tempHigh: 100, timeLow: 240, timeMid: 360, timeHigh: 600 },
+  fennel:      { tempLow: 90,  tempMid: 95,  tempHigh: 100, timeLow: 240, timeMid: 480, timeHigh: 600 },
   hibiscus:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
   rooibos:     { tempLow: 100, tempMid: 100, tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
   // adaptogens
@@ -80,7 +80,7 @@ const INGREDIENT_RANGE = {
   turmeric:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 600, timeMid: 750, timeHigh: 900 },
   cinnamon:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 420, timeMid: 510, timeHigh: 600 },
   cardamom:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 390, timeHigh: 480 },
-  cloves:      { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
+  cloves:      { tempLow: 90,  tempMid: 95,  tempHigh: 100, timeLow: 300, timeMid: 480, timeHigh: 600 },
   vanilla:     { tempLow: 85,  tempMid: 90,  tempHigh: 95,  timeLow: 600, timeMid: 900, timeHigh: 1200 },
   "black-pepper": { tempLow: 95, tempMid: 97, tempHigh: 100, timeLow: 300, timeMid: 600, timeHigh: 900 },
   // true teas

@@ -465,7 +465,7 @@ const INGREDIENTS = {
     shelfLife: "12 months airtight + dark",
     // Bright citrus-grass — citral releases fast; longer steeps
     // pull a softer aromatic body before turning grassy-flat.
-    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    caffeine: 0, tempC: [90, 100], timeS: [240, 480],
     tempZones: [
       { id: "under", tempC: [50, 90],  character: "citrus barely lifting.", moodImpact: "uplifting held back" },
       { id: "cool",  tempC: [90, 95],  character: "soft citrus-grass top.", moodImpact: "uplifting gentle; cooling clean" },
@@ -515,7 +515,7 @@ const INGREDIENTS = {
     shelfLife: "12–18 months whole; ground 6 months",
     // Digestive anchor (5). Bruised seeds release the licorice-anise
     // top fast; longer steeps deepen the cooling-digestive register.
-    caffeine: 0, tempC: [95, 100], timeS: [240, 420],
+    caffeine: 0, tempC: [95, 100], timeS: [300, 600],
     tempZones: [
       { id: "under", tempC: [50, 90],  character: "anethole barely surfaces.", moodImpact: "digestive held back" },
       { id: "cool",  tempC: [90, 95],  character: "soft licorice top, gentle aroma.", moodImpact: "digestive gentle; cooling present" },
@@ -1107,7 +1107,7 @@ const INGREDIENTS = {
     shelfLife: "12–18 months whole; ground 6 months",
     // Powerful aromatic — eugenol releases fast and goes medicinal
     // hard past 7 min; less is always more.
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    caffeine: 0, tempC: [95, 100], timeS: [300, 600],
     tempZones: [
       { id: "under", tempC: [50, 90], character: "spice quiet, perfume below the surface.", moodImpact: "warming barely lifts" },
       { id: "cool",  tempC: [90, 95], character: "soft clove top, gentle warmth.", moodImpact: "warming gentle; calm settles" },
