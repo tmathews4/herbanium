@@ -251,13 +251,36 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           to   { opacity: 1; }
         }
       `}</style>
-      {hole ? (
-        <>
-          {/* Dim layer + cutout — a transparent box whose huge spread
-              shadow darkens everything except the target. Matches the
-              target's border-radius so the cutout hugs its shape. */}
+      {/* THE DIM STOPS AT THE DOCK. Everything inside this box is
+          clipped to the page area, so the tour never darkens the main
+          menu or the brew row — the app's chrome stays lit and legible
+          while the tour runs, and the dim reads as covering the PAGE
+          rather than the whole device.
+
+          overflow:hidden clips normal-flow and absolute children but not
+          `position: fixed` ones, which escape any ancestor without a
+          transform. So the dim layer inside is absolute; the container's
+          own origin is the viewport's, which is why the same
+          getBoundingClientRect coordinates still work unchanged. */}
+      <div data-testid="tour-dim" style={{
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        bottom: "var(--app-dock-h, 0px)",
+        overflow: "hidden",
+        pointerEvents: "none",
+      }}>
+        {hole ? (
+          /* Dim layer + cutout — a transparent box whose huge spread
+             shadow darkens everything except the target. Matches the
+             target's border-radius so the cutout hugs its shape.
+
+             When the target lives in the dock the cutout sits below this
+             container and is clipped away entirely, which is the correct
+             result rather than a missing one: the spread still fills the
+             page, so the page dims, the chrome stays lit, and the
+             pulsing border below does the actual pointing. */
           <div data-testid="tour-spotlight" style={{
-            position: "fixed",
+            position: "absolute",
             left: hole.left, top: hole.top,
             width: hole.width, height: hole.height,
             borderRadius: targetRadius,
@@ -265,23 +288,33 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
             pointerEvents: "none",
             transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
           }} />
-          {/* Pulsing border — sits exactly on the element's edge (border-
-              box, matching radius) so it reads as the button's own border
-              lighting up and breathing. */}
-          <div style={{
-            position: "fixed",
-            left: hole.left, top: hole.top,
-            width: hole.width, height: hole.height,
-            borderRadius: targetRadius,
-            boxSizing: "border-box",
-            border: "2px solid rgba(255,255,255,0.38)",
-            pointerEvents: "none",
-            animation: "tourPulse 2.6s ease-in-out infinite",
-            transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
-          }} />
-        </>
-      ) : (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(20,16,10,0.66)" }} />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(20,16,10,0.66)" }} />
+        )}
+      </div>
+
+      {/* Pulsing border — sits exactly on the element's edge (border-box,
+          matching radius) so it reads as the button's own border lighting
+          up and breathing.
+
+          Deliberately OUTSIDE the clip above. Four of the blend tour's
+          steps point at things in the dock — the brew row, the axis
+          pills, the sliders, the sub-tabs — and clipping this with the
+          dim would leave those steps highlighting nothing at all. The
+          dim is context; this is the pointer, and the pointer has to be
+          able to reach the chrome. */}
+      {hole && (
+        <div style={{
+          position: "fixed",
+          left: hole.left, top: hole.top,
+          width: hole.width, height: hole.height,
+          borderRadius: targetRadius,
+          boxSizing: "border-box",
+          border: "2px solid rgba(255,255,255,0.38)",
+          pointerEvents: "none",
+          animation: "tourPulse 2.6s ease-in-out infinite",
+          transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
+        }} />
       )}
 
       {/* Callout — only rendered once the target has been measured.

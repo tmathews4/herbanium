@@ -849,7 +849,22 @@ export const BlendExtractionExplorer = ({
         // controls. The block is two sliders; if it ever outgrows the
         // dock, shorten it rather than scroll it.
         return createPortal(
-          <div style={{ borderBottom: `1px solid ${theme.ruleSoft}` }}>
+          // Tinted a shade off the dock it sits in, so the brew row reads
+          // as its own layer rather than as more tab bar. It is a
+          // different KIND of thing from the sub-tabs below it — those
+          // navigate, this adjusts the cup in front of you — and sharing
+          // one flat background made them look like one strip of
+          // controls.
+          //
+          // A tint, not transparency. Transparency here would reveal
+          // nothing: the dock is a flex SIBLING of the scrolling page,
+          // not a layer over it, so there is no content behind this row
+          // to show through. (The dock's inherited backdrop-blur is
+          // vestigial for the same reason.)
+          <div style={{
+            borderBottom: `1px solid ${theme.ruleSoft}`,
+            background: theme.cream,
+          }}>
             <div style={{ padding: "8px 12px 0" }}>
               <button
                 data-tour="blend-controls"

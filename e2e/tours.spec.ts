@@ -381,6 +381,52 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
+  test("the tour dims the page but never the chrome", async ({ page }) => {
+    // The dim used to be a 9999px spread shadow on a full-viewport
+    // layer, so it darkened the main menu and the brew row along with
+    // everything else — the app's own controls read as switched off for
+    // the length of the tour. It's clipped to the page area now.
+    //
+    // Geometry, not hit-testing: the tour is a deliberate click-catcher,
+    // so the menu is correctly UNreachable while a tour runs. The claim
+    // here is about what's darkened, which is a question about where the
+    // dim layer ends.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await expect(page.getByTestId("tour-callout")).toBeVisible();
+
+    const edges = await page.evaluate(() => {
+      const dim = document.querySelector('[data-testid="tour-dim"]');
+      const home = [...document.querySelectorAll("button")]
+        .find(b => b.textContent?.trim().toUpperCase() === "HOME");
+      if (!dim || !home) return null;
+      // Walk up from HOME to the dock — the element carrying the brew
+      // slot is the whole bottom bar, which is what must stay lit.
+      let bar: HTMLElement | null = home as HTMLElement;
+      while (bar && !bar.querySelector("#brew-dock")) bar = bar.parentElement;
+      return {
+        dimBottom: dim.getBoundingClientRect().bottom,
+        barTop: (bar || (home as HTMLElement)).getBoundingClientRect().top,
+        barFound: !!bar,
+      };
+    });
+    expect(edges, "the tour dim and the dock should both be on screen").not.toBeNull();
+    expect(edges!.barFound, "should have found the bottom bar by its brew slot").toBe(true);
+    expect(edges!.dimBottom,
+      `the dim should stop at the dock (dim ends ${Math.round(edges!.dimBottom)}, `
+      + `dock starts ${Math.round(edges!.barTop)})`)
+      .toBeLessThanOrEqual(edges!.barTop + 1);
+
+    // And the pointer is deliberately NOT clipped with it — four blend
+    // steps point at things inside the dock, and a clipped highlight
+    // would leave them pointing at nothing. Walk to one and check the
+    // spotlight geometry still lands on the dock element.
+    await advanceTo(page, "The brew row");
+    const row = await page.locator('[data-tour="blend-controls"]').boundingBox();
+    expect(row!.y, "the brew row step targets an element below the dim")
+      .toBeGreaterThan(edges!.dimBottom - 1);
+  });
+
   test("the spotlight tracks the strip when it resizes mid-step", async ({ page }) => {
     // The flavour strip is the one element left that changes size WHILE
     // a step is up — the temp/steep sliders are a fixed-height row in
