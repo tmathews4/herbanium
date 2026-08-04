@@ -114,7 +114,11 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
   if (!entry) {
     return (
       <div style={{
-        position: "absolute", inset: 0, zIndex: 30,
+        position: "absolute", top: 0, left: 0, right: 0,
+        // Stops at the dock instead of covering it — the main menu is
+        // never not on screen. Falls back to 0px so the screen still
+        // fills its container if rendered outside the app shell.
+        bottom: "var(--app-dock-h, 0px)", zIndex: 30,
         background: theme.ivory, padding: "22px",
       }}>
         <button onClick={onClose} style={{
@@ -184,7 +188,11 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
     <div
       onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
       style={{
-        position: "absolute", inset: 0, zIndex: 30,
+        position: "absolute", top: 0, left: 0, right: 0,
+        // Stops at the dock instead of covering it — the main menu is
+        // never not on screen. Falls back to 0px so the screen still
+        // fills its container if rendered outside the app shell.
+        bottom: "var(--app-dock-h, 0px)", zIndex: 30,
         background: theme.ivory, overflowY: "auto",
       }}
     >

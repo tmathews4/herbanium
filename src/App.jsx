@@ -148,7 +148,7 @@ const TourOfferCard = ({ onYes, onNo }) => (
    Tab bar
    ────────────────────────────────────────────────────────────── */
 
-const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction }) => {
+const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction, barRef, overlayOpen }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
     { k: "apothecary", label: "Apothecarium", icon: <Flask size={18} /> },
@@ -172,7 +172,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
                    : null;
 
   return (
-    <div style={{
+    <div ref={barRef} style={{
       flexShrink: 0,
       // Translucent ivory dock — composes from --ivory-rgb so the
       // bottom bar swaps to a warm-dark in prefers-color-scheme: dark
@@ -181,6 +181,14 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
       backdropFilter: "blur(8px)",
       borderTop: `1px solid ${theme.rule}`,
     }}>
+      {/* Hidden while an overlay is up. The overlay screens keep their
+          own dock now, and a recipe opened from Apothecary's "Try these"
+          row leaves ComposeScreen mounted underneath — so without this
+          the user would see the recipe's brew row AND Compose's stacked
+          above the sub-tabs. display:none rather than unmounting: the
+          portal target has to stay in the DOM or the controls would
+          remount and lose their axis and open/shut state on every
+          overlay. */}
       {/* Slot for the blend screen's brew controls, which mount into
           the dock from BlendExtractionExplorer via a portal (see
           BREW_DOCK_ID). They belong to the dock rather than to the
@@ -191,7 +199,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 
           No padding or border of its own: empty, it has to measure 0px,
           or every screen without a pot pays for a row it never shows. */}
-      <div id={BREW_DOCK_ID} />
+      <div id={BREW_DOCK_ID} style={overlayOpen ? { display: "none" } : undefined} />
       {subTabs && onSubClick && (
         <div data-tour="subtabs" style={{
           display: "grid",
@@ -557,88 +565,69 @@ const CheckInNotice = ({ blendName, choice, onChoose, onClose }) => (
 
 const BrewTimerBanner = ({ blendName, remaining, onTap }) => {
   const ready = remaining <= 0;
+  const accent = ready ? theme.sageDeep : theme.terra;
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "max(12px, env(safe-area-inset-top))",
-        left: 12, right: 12,
-        zIndex: 70,
-        display: "flex", justifyContent: "center",
-        pointerEvents: "none",
-        animation: "brewTimerBannerIn 0.32s ease forwards",
-      }}
-    >
-      <div
+    // A DOCK ROW AT THE TOP, in the same format as the brew controls at
+    // the bottom: label, mono readout, chevron, tap to expand. The two
+    // are the same kind of thing — a running process folded down to one
+    // line you can unfold — so they should read as the same control.
+    //
+    // A flex row rather than the floating card this used to be. The card
+    // was `position: fixed`, which meant it hovered over whatever screen
+    // you navigated to: it clipped the recipe filter row, and its own
+    // code carried a note about swallowing the detail screens' back
+    // button. Sitting in the layout, it cannot overlap anything, and the
+    // page below simply starts lower.
+    <div style={{
+      flexShrink: 0,
+      background: "rgba(var(--ivory-rgb),0.94)",
+      backdropFilter: "blur(8px)",
+      borderBottom: `1px solid ${theme.rule}`,
+      animation: "brewTimerBannerIn 0.32s ease forwards",
+    }}>
+      <button
         onClick={onTap}
-        role="button"
         aria-label="return to your steeping brew"
         data-testid="brew-banner"
         style={{
-          pointerEvents: "auto",
-          width: "100%", maxWidth: 460,
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "10px 12px",
-          background: theme.cream,
-          border: `1px solid ${ready ? theme.sageDeep : theme.terra}`,
-          borderRadius: 12,
-          boxShadow: "0 6px 22px rgba(30,24,18,0.18)",
-          cursor: "pointer",
+          width: "100%", background: "transparent", border: "none",
+          cursor: "pointer", padding: "8px 12px 6px",
+          display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8,
+          fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
+          fontWeight: 600, color: accent,
+          // Mirrors the brew row's active underline, on the other edge —
+          // this bar hangs from the top, so its rule belongs on top.
+          borderTop: `2px solid ${accent}`, marginTop: -1,
+          animation: ready ? "brewReadyPulse 2.2s ease-in-out infinite" : "none",
         }}
       >
-        {/* Pulsing kettle while brewing; steady sage when ready. */}
-        <div style={{
-          flexShrink: 0,
-          width: 38, height: 38,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          borderRadius: "50%",
-          background: ready
-            ? "radial-gradient(circle, rgba(98,124,92,0.20) 0%, transparent 70%)"
-            : "radial-gradient(circle, rgba(176,84,47,0.22) 0%, transparent 70%)",
-          animation: ready
-            ? "brewTimerReadyPulse 2.2s ease-in-out infinite"
-            : "brewTimerActiveGlow 1.8s ease-in-out infinite",
+        <span>{ready ? "Ready" : "Brewing"}</span>
+        <span style={{
+          fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          maxWidth: "45%",
         }}>
-          <Kettle size={26} c={ready ? theme.sageDeep : theme.terra} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: ready ? theme.sageDeep : theme.terra,
-            fontWeight: 600, marginBottom: 1,
-          }}>
-            {ready ? "ready to pour" : "brewing"}
-          </div>
-          <div style={{
-            fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
-            lineHeight: 1.35, whiteSpace: "nowrap",
-            overflow: "hidden", textOverflow: "ellipsis",
-          }}>
-            {blendName}
-          </div>
-        </div>
-        <div style={{
-          flexShrink: 0,
-          fontFamily: ff.mono, fontSize: 16, fontWeight: 600,
-          color: ready ? theme.sageDeep : theme.ink,
-          letterSpacing: "0.02em", paddingRight: 4,
-        }}>
+          {blendName}
+        </span>
+        <span style={{ fontFamily: ff.mono, fontSize: 11.5, color: accent }}>
           {ready ? "—:—" : mmssShort(remaining)}
-        </div>
-      </div>
+        </span>
+        {/* Points DOWN: this panel expands downward out of the top bar,
+            the mirror of the brew row's upward chevron. */}
+        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+          <path d="M1.5 3 L4.5 6 L7.5 3"
+                stroke={accent} strokeWidth="1.4"
+                strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      </button>
       <style>{`
         @keyframes brewTimerBannerIn {
           from { opacity: 0; transform: translateY(-12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes brewTimerActiveGlow {
-          0%, 100% { box-shadow: 0 0 0px 0px rgba(176,84,47,0.0); }
-          50%      { box-shadow: 0 0 18px 4px rgba(176,84,47,0.42); }
-        }
-        @keyframes brewTimerReadyPulse {
-          0%, 100% { box-shadow: 0 0 0px 0px rgba(98,124,92,0.0); }
-          50%      { box-shadow: 0 0 22px 6px rgba(98,124,92,0.55); }
+        @keyframes brewReadyPulse {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.62; }
         }
       `}</style>
     </div>
@@ -2113,6 +2102,37 @@ export default function App() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // How tall the bottom dock currently is, published to CSS as
+  // --app-dock-h.
+  //
+  // THE MAIN MENU MUST NEVER DISAPPEAR. Every detail screen is
+  // absolute/inset-0/z-30 inside this container, so by construction they
+  // covered the tab bar — a recipe, an ingredient, a cup, a journal
+  // entry and a running steep each took the whole app and left no way
+  // out but the back button. They now stop at `bottom: var(--app-dock-h)`
+  // and the menu stays put underneath.
+  //
+  // Measured rather than assumed, because the dock's height is not a
+  // constant: sub-tabs come and go with the section, and the brew
+  // controls add ~119px when a pot exists. A hardcoded inset would be
+  // wrong on most screens and would silently drift the first time the
+  // dock gained a row.
+  const tabBarRef = useRef(null);
+  const [dockH, setDockH] = useState(0);
+  useEffect(() => {
+    const el = tabBarRef.current;
+    if (!el) return undefined;
+    const read = () => setDockH(el.getBoundingClientRect().height);
+    read();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", read);
+      return () => window.removeEventListener("resize", read);
+    }
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   // Extract the actual app tree (scroll region + tab bar + overlays) so we can
   // render it directly on mobile or wrap it in the desktop-preview chrome.
   const appContent = (
@@ -2120,7 +2140,19 @@ export default function App() {
       width: "100%", height: "100%",
       display: "flex", flexDirection: "column",
       position: "relative",
+      "--app-dock-h": `${dockH}px`,
     }}>
+      {/* The minimized brew, as a dock row at the TOP — the mirror of
+          the brew controls at the bottom, and in the same format. First
+          in the column so it can't overlap the back button below it,
+          which is exactly what the old fixed-position card did. */}
+      {overlay === "steep" && steepMinimized && session && (
+        <BrewTimerBanner
+          blendName={session.blend?.name || "your brew"}
+          remaining={steepRemaining}
+          onTap={() => setSteepMinimized(false)}
+        />
+      )}
       {/* Top chrome bar — fixed-height layer above the scroll area
           so HintCards, notifications, and tab content can't drift
           underneath the back button. Houses the global back button
@@ -2240,6 +2272,15 @@ export default function App() {
         shelfMode={shelfMode}
         setApothecaryModeAction={setApothecaryModeAction}
         setShelfModeAction={setShelfModeAction}
+        barRef={tabBarRef}
+        // A MINIMIZED STEEP IS NOT A COVERING OVERLAY. `overlay` stays
+        // "steep" while the brew runs in the background — that's what
+        // keeps the top row alive across tab changes — but the user is
+        // browsing the app normally and the blend screen's brew controls
+        // must still dock. Reading `!!overlay` alone hid them for the
+        // whole time a cup was steeping, which is precisely when someone
+        // is most likely to be building the next one.
+        overlayOpen={!!overlay && !(overlay === "steep" && steepMinimized)}
       />
 
       {/* Tour opt-in — offered once, a beat after the user first
@@ -2329,19 +2370,12 @@ export default function App() {
           onClose={() => setCheckInNotice(null)}
         />
       )}
-      {/* Only while the steep is the active overlay. Showing it over
-          other overlays too was tried and reverted: the banner is
-          fixed to the top of the viewport and swallowed the detail
-          screens' back button, which is a worse bug than the gap it
-          closed. The brew surviving that detour is handled by
-          restingOverlay in popOverlayHistory instead. */}
-      {overlay === "steep" && steepMinimized && session && (
-        <BrewTimerBanner
-          blendName={session.blend?.name || "your brew"}
-          remaining={steepRemaining}
-          onTap={() => setSteepMinimized(false)}
-        />
-      )}
+      {/* The minimized-brew row moved to the top of the column — see
+          BrewTimerBanner's render above. It used to live here, fixed to
+          the viewport, which is why it could only be shown for the steep
+          overlay: as a floating card it swallowed the detail screens'
+          back button. In the layout it can't overlap anything, so that
+          constraint is gone. */}
       {overlay === "ingredient" && (
         <IngredientDetail
           id={ingredientId}

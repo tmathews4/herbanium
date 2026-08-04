@@ -153,7 +153,11 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
     // below the page instead of on top of it.
     <BrewDockProvider value={INGREDIENT_DETAIL_DOCK_ID}>
     <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
+      position: "absolute", top: 0, left: 0, right: 0,
+      // Stops at the dock instead of covering it — the main menu is
+      // never not on screen. Falls back to 0px so the screen still
+      // fills its container if rendered outside the app shell.
+      bottom: "var(--app-dock-h, 0px)", zIndex: 30,
       background: theme.ivory,
       boxSizing: "border-box",
       display: "flex", flexDirection: "column",

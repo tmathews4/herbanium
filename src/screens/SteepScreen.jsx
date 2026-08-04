@@ -267,7 +267,11 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
 
   return (
     <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
+      position: "absolute", top: 0, left: 0, right: 0,
+        // Stops at the dock instead of covering it — the main menu is
+        // never not on screen. Falls back to 0px so the screen still
+        // fills its container if rendered outside the app shell.
+        bottom: "var(--app-dock-h, 0px)", zIndex: 30,
       background: `radial-gradient(ellipse at 50% 20%, ${theme.cream} 0%, ${theme.paper} 60%, ${theme.ivory} 100%)`,
       // Minimize hides the steep page via display:none — keeps the
       // component mounted (timer ticks continue, native steep

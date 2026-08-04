@@ -146,8 +146,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
     // it and nothing is hidden underneath them. Same arrangement as the
     // app shell, one level down.
     <BrewDockProvider value={BLEND_DETAIL_DOCK_ID}>
-    <div style={{
-      position: "absolute", inset: 0, zIndex: 30,
+    <div data-testid="blend-detail" style={{
+      position: "absolute", top: 0, left: 0, right: 0,
+      // Stops at the dock instead of covering it — the main menu is
+      // never not on screen. Falls back to 0px so the screen still
+      // fills its container if rendered outside the app shell.
+      bottom: "var(--app-dock-h, 0px)", zIndex: 30,
       background: theme.ivory,
       display: "flex", flexDirection: "column",
     }}>
