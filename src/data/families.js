@@ -186,6 +186,22 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
+    // Added because three docs said outright they had no word for this
+    // and were using `soothing` as a stand-in — echinacea's opens with
+    // '"immune-support" effect gap in vocabulary v1', and its §5 rates
+    // soothing as the "best vocabulary mapping for immune support".
+    // Turmeric flagged the same gap for anti-inflammatory; that one is
+    // a single ingredient and hasn't earned an axis yet.
+    family: "immune", label: "immune", color: "var(--effect-immune)",
+    leaves: [{
+      token: "immune",
+      counterpart: "immunomodulant / immunostimulant — established Western herbal "
+        + "actions; modulate innate and adaptive response rather than stimulate blindly",
+      summary: "Steadying the body's defences — the cold-and-flu-season cup.",
+      body: "Echinacea's alkylamides and polysaccharides, elderflower's flavonoids (which bind influenza neuraminidase and haemagglutinin, and carry German Commission E approval for cold and flu), and reishi's beta-glucans binding Dectin-1 and TLR2. Distinct from soothing, which acts on irritated tissue — this acts on the immune response itself, and is slower and less felt than anything else in the vocabulary.",
+    }],
+  },
+  {
     family: "sleep", label: "sleepy", color: "var(--effect-sleep)",
     leaves: [{
       token: "sleepy",

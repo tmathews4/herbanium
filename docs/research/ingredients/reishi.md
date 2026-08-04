@@ -224,3 +224,34 @@ the slow, hot fraction, which is why §6's long decoction is where
 nothing.
 
 <!-- sourced-effects: sleepy -->
+
+---
+
+## Addendum — `soothing` becomes `immune` (2026-08-03)
+
+This doc is one of the three that named its own vocabulary gap. §5
+rated the primary claim under `soothing` while describing something
+else entirely, and echinacea's row said so outright: *"best vocabulary
+mapping for 'immune support' — the closest existing effect"*.
+
+There is now a word for it. `immune` is a family of its own, answering
+to the established Western herbal actions **immunomodulant** and
+**immunostimulant** — modulating the innate and adaptive response
+rather than stimulating it blindly.
+
+> Herbal immunostimulants and their phytochemicals —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC11945065/
+> Immunomodulant, Western herbal actions —
+> https://www.herbalreality.com/western-action/immunomodulant/
+
+`soothing` keeps the meaning it should always have had: the demulcent
+register, mucilage or tannin acting on irritated tissue. That is not
+what this ingredient's rating was describing, and holding two unrelated
+claims under one word is what made `soothing` overlap everything else
+in the catalogue.
+
+Transcribed at the same strengths. The evidence is unchanged; it
+finally has the right name.
+
+<!-- sourced-effects: immune -->
+<!-- superseded-effects: soothing -->

@@ -21,6 +21,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import { INGREDIENTS } from "./ingredients.js";
+import { FAMILY_BY_EFFECT } from "./families.js";
 
 // Qualitative → numeric. Authors should write tier names (not bare
 // numbers) when entering a new ingredient — keeps the rubric the
@@ -36,12 +37,17 @@ export const STRENGTH_RUBRIC = Object.freeze({
 // The canonical effect tags. Validators warn when a new ingredient
 // introduces a tag outside this set — typo guard for things like
 // "groundding" or "uplift".
+//
+// DERIVED from the tree in data/families.js rather than listed. This
+// was a hand-maintained fourth copy of the vocabulary, and it did what
+// hand-maintained copies do: adding the `immune` family made three
+// perfectly valid ingredients fail validation as typos. Deriving it
+// means a word added to the tree is canonical everywhere at once.
 export const CANONICAL_EFFECTS = new Set([
-  "calm", "focus", "energy", "sleepy", "comfort",
-  "soothing", "warming", "cooling", "digestive", "grounding", "uplifting",
-  // Perception-layer tag — not a chip mood, but legitimately appears
-  // in extraction-profile effects when extraction starts to pull
-  // bitter compounds.
+  ...Object.keys(FAMILY_BY_EFFECT),
+  // Perception-layer tag — not a chip mood, and deliberately not in the
+  // family tree, but it legitimately appears in extraction-profile
+  // effects once extraction starts pulling bitter compounds.
   "bitterness",
 ]);
 

@@ -2309,7 +2309,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "the medicine is muddied; root flat.", moodImpact: "soothing holds; cup is heavy" },
     ],
     overPull: { timeS: 1200, reason: "the cold-care register flattens past peak" },
-    effects: [["soothing", 3], ["warming", 1], ["uplifting", 1], ["digestive", 1]],
+    effects: [["immune", 3], ["warming", 1], ["uplifting", 1], ["digestive", 1]],
     flavors: ["earthy", "grassy", "bitter", "floral", "numbing"],
     basicTastes: { bitter: 2, astringent: 2, aromatic: 2, sweet: 1, tingling: 2 },
     pairs: ["elderflower", "ginger"],
@@ -2375,7 +2375,7 @@ const INGREDIENTS = {
       { id: "overpulled", character: "perfume flat, tannin overtaking.", moodImpact: "the brightness lost" },
     ],
     overPull: { timeS: 900, reason: "perfume flattens past the cold-care peak" },
-    effects: [["soothing", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
+    effects: [["immune", 4], ["uplifting", 3], ["warming", 1], ["cooling", 1], ["calm", 1], ["digestive", 1]],
     flavors: ["floral", "lychee", "sweet", "delicate", "honey-sweet"],
     basicTastes: { aromatic: 4, sweet: 2, bitter: 1, astringent: 1, sour: 1 },
     pairs: ["echinacea", "peppermint", "ginger", "linden", "rose"],
@@ -3208,7 +3208,7 @@ const INGREDIENTS = {
     overPull: { timeS: 10800, reason: "the cup is too thick — past brew, into broth" },
     // Calm 4: reishi's signature is grounding 5; calm sits at 4, supporting
     // rather than co-equal with the chamomile anchor.
-    effects: [["grounding", 5], ["sleepy", 4], ["calm", 4], ["soothing", 4], ["warming", 1]],
+    effects: [["grounding", 5], ["sleepy", 4], ["calm", 4], ["immune", 4], ["warming", 1]],
     flavors: ["bitter", "earthy", "woody", "mushroomy", "tannic"],
     basicTastes: { bitter: 5, astringent: 3, earthy: 4, umami: 1, sweet: 0 },
     pairs: ["ashwagandha", "cinnamon", "lions-mane"],

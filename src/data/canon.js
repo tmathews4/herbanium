@@ -49,6 +49,10 @@ export const PARENT_MOODS = [
   { key: "comfort",   family: "warm",   label: "Warmth",    note: "heat and warmth-of-spirit" },
   { key: "cooling",   family: "cool",   label: "Cooling",   note: "felt-temperature cooling" },
   { key: "digestive", family: "body",   label: "Digestive", note: "after-meal ease" },
+  // Added with the `immune` family — see data/families.js. Reaching for
+  // echinacea or elder in cold season is a real brewing goal, so it
+  // belongs among the targets rather than only in the strip.
+  { key: "immune",    family: "immune", label: "Immune",    note: "steadying the body's defences" },
   { key: "sleepy",    family: "sleep",  label: "Sleepy",    note: "drift toward rest" },
 ];
 
@@ -77,14 +81,19 @@ const CURRENT_FEEL_PARENTS = PARENT_MOODS.filter(m =>
 // Convenience export — what a "right now I feel" chip row offers.
 export const CURRENT_MOOD_CHIPS = [...CURRENT_FEEL_PARENTS, ...CURRENT_FEEL_EXTRAS];
 
-// Journal-specific chip pools — exclude stomach/digestive moods.
+// Journal-specific chip pools — exclude physiological registers.
 // Cup follow-ups care about digestive register because that's a real
 // effect tea has on the body; journal entries are about emotional /
 // mental arc, where 'digestive' or 'nauseous' read as physiological
 // symptoms rather than felt-states the user is reflecting on. The
 // stomach-related keys here are filtered out for both journal pickers
 // (Coming-in and Where-it-left-me) so they don't surface as chips.
-const STOMACH_MOOD_KEYS = new Set(["digestive", "nauseous"]);
+// `immune` joins these for the same reason digestive is here: it names
+// something happening in the body rather than a felt state. "Where it
+// left me: immune" doesn't parse — you can't notice your own immune
+// response over a cup, which is also why it's the least felt effect in
+// the vocabulary.
+const STOMACH_MOOD_KEYS = new Set(["digestive", "nauseous", "immune"]);
 export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
 export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
 
