@@ -396,6 +396,43 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
+  test("the slider step lifts the bars without cutting them out", async ({ page }) => {
+    // Three tiers on one screen: the sliders cut out fully (the
+    // subject), the bars lifted out of the dim (present but secondary),
+    // everything else dark. Asserted as the RELATIONSHIP — a soft light
+    // that covered the cutout, or one that never appeared, would both
+    // pass a simple existence check.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "Dial in the brew");
+
+    const soft = page.getByTestId("tour-softlight");
+    await expect(soft, "the slider step should soft-light the bars").toBeVisible();
+
+    await expect.poll(async () => {
+      const s = await soft.boundingBox();
+      const bars = await page.locator('[data-tour="blend-graph"]').boundingBox();
+      if (!s || !bars) return null;
+      // Covers the bars, give or take the few px of padding it adds.
+      return s.y <= bars.y + 2 && s.y + s.height >= bars.y + bars.height - 2;
+    }, {
+      message: "the soft light should settle over the whole bars block",
+      timeout: 8_000,
+    }).toBe(true);
+
+    // And it's a different treatment from the cutout, not a second one.
+    const cut = await page.getByTestId("tour-spotlight").boundingBox();
+    const lift = await soft.boundingBox();
+    expect(Math.abs(cut!.y - lift!.y),
+      "the cutout and the soft light should be on different elements")
+      .toBeGreaterThan(20);
+
+    // Gone once the step is, so it reads as this step's emphasis rather
+    // than as part of the furniture.
+    await advanceTo(page, "Brew or save");
+    await expect(soft, "soft light shouldn't linger past its step").toHaveCount(0);
+  });
+
   test("the pills step lights the brew window and pulses the pills", async ({ page }) => {
     // Mirrors the Simple/Detailed step: the spotlight covers the thing
     // the control CHANGES, and the control takes a terra pulse of its

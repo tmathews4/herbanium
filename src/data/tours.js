@@ -120,7 +120,16 @@ export const SCREEN_TOURS = {
     // to the flavour strips. That's the step doing its job rather than
     // a stray jump: an instruction to watch the bars move is worthless
     // if the bars aren't on screen.
+    //
+    // `softlight` on the graph, not `spotlight`. The sliders are the
+    // subject here, so folding the bars into the cutout would say they
+    // are equally the point; leaving them at full dim says the opposite,
+    // that they're switched off — which is absurd on the one step whose
+    // whole instruction is "watch the bars move". Soft light is the
+    // third tier: lifted out of the dim, plainly present, plainly
+    // secondary.
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
+      softlight: ["blend-graph"],
       familyMode: true, compact: true, openControls: true,
       body: "Drag the slider — watch the bars move." },
     { target: "blend-brew", title: "Brew or save", pad: 6,

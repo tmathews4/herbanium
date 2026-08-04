@@ -45,6 +45,9 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // that dragging the sliders moves the bars, which the user can only
   // learn if both are on screen and the callout is off both of them.
   const [clearRect, setClearRect] = useState(null);
+  // Union of the step's soft-lit elements, or null. Lifted out of the
+  // dim without being cut out of it — see softEls.
+  const [softRect, setSoftRect] = useState(null);
   // The target's own border-radius, so the pulse traces the element's
   // real shape (rounded button corners, square windows) rather than a
   // generic box.
@@ -85,6 +88,17 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     const spotEls = (el) => [el, ...(step.spotlight || [])
       .map(id => document.querySelector(`[data-tour="${id}"]`))
       .filter(Boolean)];
+    // `softlight` is a third tier, between lit and dimmed. `spotlight`
+    // folds an element into the cutout and makes it fully bright, which
+    // says "this is part of the subject"; a soft-lit element is only
+    // lifted out of the dim, which says "keep half an eye on this."
+    //
+    // The slider step needs exactly that: it's teaching the control, so
+    // the sliders are the subject — but the whole point is that the
+    // BARS respond, and bars sitting at full dim read as switched off.
+    const softEls = () => (step.softlight || [])
+      .map(id => document.querySelector(`[data-tour="${id}"]`))
+      .filter(Boolean);
     // How much of the bottom of the screen the dock is covering.
     //
     // Measured off the dock itself rather than read from --app-dock-h:
@@ -209,10 +223,15 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       const els = spotEls(el);
       const nextRect = unionRect(els.map(n => n.getBoundingClientRect()));
       const nextClear = unionOf(clearEls());
-      const key = JSON.stringify([nextRect, nextClear]);
+      const softs = softEls();
+      const nextSoft = softs.length
+        ? unionRect(softs.map(n => n.getBoundingClientRect()))
+        : null;
+      const key = JSON.stringify([nextRect, nextClear, nextSoft]);
       if (key === lastKey) return;
       lastKey = key;
       setRect(nextRect);
+      setSoftRect(nextSoft);
       // Radius comes from the primary target — with several elements
       // lit at once there's no single shape to trace, and the largest
       // one's corners read best around the group.
@@ -245,7 +264,9 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       if (ro || typeof ResizeObserver === "undefined") return;
       ro = new ResizeObserver(() => apply(el));
       const dockBar = document.getElementById(BREW_DOCK_ID)?.parentElement;
-      for (const n of [...spotEls(el), ...clearEls(), dockBar].filter(Boolean)) ro.observe(n);
+      for (const n of [...spotEls(el), ...clearEls(), ...softEls(), dockBar].filter(Boolean)) {
+        ro.observe(n);
+      }
     };
     const measure = () => {
       const el = document.querySelector(`[data-tour="${step.target}"]`);
@@ -436,6 +457,30 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           </>
         ) : (
           <div style={{ position: "absolute", inset: 0, background: "rgba(20,16,10,0.66)" }} />
+        )}
+        {/* SOFT LIGHT — a third tier between lit and dimmed.
+            Rendered after the dim so it lifts what the dim just laid
+            down, brightening the region back toward normal without
+            cutting a hole in it. The result reads as present but
+            secondary: clearly not background, clearly not the subject.
+
+            brightness() rather than a translucent white wash, which
+            would fog the colours — and colour is the whole content of
+            the bars this is used on. Where backdrop-filter isn't
+            supported the region simply stays dimmed, which is the old
+            behaviour rather than a broken one. */}
+        {softRect && (
+          <div data-testid="tour-softlight" style={{
+            position: "absolute",
+            left: softRect.left - 4, top: softRect.top - 4,
+            width: softRect.width + 8, height: softRect.height + 8,
+            borderRadius: 10,
+            backdropFilter: "brightness(1.7)",
+            WebkitBackdropFilter: "brightness(1.7)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            pointerEvents: "none",
+            transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
+          }} />
         )}
       </div>
 

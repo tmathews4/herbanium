@@ -415,6 +415,34 @@ test("the axis pills get a step of their own, after the row opens", () => {
     "the pills step must open the row — the pills don't render while it's shut");
 });
 
+test("the slider step soft-lights the bars it tells you to watch", () => {
+  // Not `spotlight` — folding the bars into the cutout would say they're
+  // equally the subject, and the subject here is the control. But full
+  // dim says they're switched off, on the one step whose entire
+  // instruction is "watch the bars move". Soft light is the third tier.
+  const step = blend[stepIndex("blend-sliders")];
+  assert(Array.isArray(step.softlight) && step.softlight.includes("blend-graph"),
+    `the slider step should soft-light the bars, got ${JSON.stringify(step.softlight)}`);
+  assert(!(step.spotlight || []).includes("blend-graph"),
+    "the bars should be soft-lit, not folded into the cutout as an equal subject");
+});
+
+test("soft light is only used where something must stay watchable", () => {
+  // A cheap guard against it becoming decoration. Anything soft-lit has
+  // to be a real tour target somewhere, or it's a typo that silently
+  // lights nothing.
+  const targets = new Set(
+    Object.values(SCREEN_TOURS).flat().map(s => s.target));
+  for (const [screen, steps] of Object.entries(SCREEN_TOURS)) {
+    for (const s of steps) {
+      for (const id of s.softlight || []) {
+        assert(targets.has(id),
+          `${screen} step "${s.target}" soft-lights "${id}", which is no step's target`);
+      }
+    }
+  }
+});
+
 test("the pills step lights the whole brew window, not just the pills", () => {
   // Same shape as the Simple/Detailed step: spotlight the thing the
   // control CHANGES, then mark the control itself with its own terra
