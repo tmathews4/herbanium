@@ -60,6 +60,7 @@ import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
 import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
+import { outsideResearchedRange, paramKey } from "../tools/lib/brew-params.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -261,6 +262,45 @@ test("every declared ingredient effect has a family", () => {
     }
   }
   assert(orphans.size === 0, `declared effects with no family:\n    ${[...orphans].join("\n    ")}`);
+});
+
+// ── 1e. Brewing advice the research doesn't support ──────────────
+
+// Every other guard here checks what a cup CLAIMS. This one checks the
+// numbers the app tells you to brew at, which is the most directly
+// user-facing data in the catalogue and the only place where being
+// wrong makes a worse cup rather than a wrong label. Nothing checked
+// it until the unpairable-brew-point count made the grids visible.
+//
+// Only ABOVE the researched ceiling is ratcheted. A range narrower
+// than the research is editorial — the docs may record a 25-100C span
+// for hibiscus because cold brew exists, and the app can reasonably
+// offer the hot band. Starting below the researched floor is a lighter
+// option, usually harmless. Exceeding the ceiling is the app
+// recommending a brew its own research argues against.
+const KNOWN_OVER_CEILING = new Set([
+  "dragonwell:time:above",   // doc [60,120]  app [75,150]
+  "gunpowder:temp:above",    // doc [75,85]   app [80,90]   green tea, 5C hot
+  "spearmint:temp:above",    // doc [85,95]   app [85,100]
+  "tulsi:temp:above",        // doc [85,95]   app [50,100]
+  "tulsi:time:above",        // doc [300,600] app [90,720]
+]);
+
+test("no new brew range exceeds what the research supports", () => {
+  const fresh = outsideResearchedRange(INGREDIENTS)
+    .filter(r => r.direction === "above")
+    .filter(r => !KNOWN_OVER_CEILING.has(paramKey(r)))
+    .map(r => `${r.id} ${r.axis}: doc [${r.doc}] but app [${r.app}]`);
+  assert(fresh.length === 0,
+    `brew advice beyond the research:\n    ${fresh.join("\n    ")}`);
+});
+
+test("the known-over-ceiling list has no stale entries", () => {
+  const live = new Set(outsideResearchedRange(INGREDIENTS)
+    .filter(r => r.direction === "above").map(paramKey));
+  const stale = [...KNOWN_OVER_CEILING].filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `no longer over the ceiling — remove from KNOWN_OVER_CEILING:\n    ${stale.join("\n    ")}`);
 });
 
 // ── 1d. Vocabulary the app invented ──────────────────────────────

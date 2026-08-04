@@ -260,14 +260,23 @@ export const EXTRACTION_PROFILES = {
   // shipped curve is hotter and far shorter than the research. Left
   // alone here, since changing brew windows is a calibration decision.
   vanilla: [
-    { tempC: 95,  timeS: 240, flavors: ["sweet", "creamy"],
-      effects: [["digestive", 2], ["comfort", 4], ["warming", 1], ["calm", 1], ["sleepy", 2], ["uplifting", 1]],
-      character: "Light vanilla — soft sweetness, a gentle comfort." },
-    { tempC: 98,  timeS: 360, flavors: ["sweet", "creamy", "floral", "warm"],
-      effects: [["digestive", 3], ["comfort", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
+    // Re-gridded onto the brew points §6 of the research actually
+    // prescribes. The profile used to sit at 95/98/100C over 4-7
+    // minutes — above the doc's temperature ceiling and below its time
+    // floor, against a doc that explains why: vanilla's aromatics are
+    // volatile and "high heat pushes them off", and a whole split pod
+    // extracts slowly. `soothing` in the doc's rows reads as `comfort`
+    // here per the superseded-effects note in vanilla.md; `digestive`
+    // is retained from the traditional-carminative addendum, which the
+    // brew-point rows predate.
+    { tempC: 85,  timeS: 600, flavors: ["sweet", "creamy"],
+      effects: [["comfort", 2], ["calm", 2], ["uplifting", 1], ["digestive", 2]],
+      character: "Light vanilla — soft sweetness, a gentle comfort. Ten minutes below boiling keeps the aromatics in the cup." },
+    { tempC: 90,  timeS: 900, flavors: ["sweet", "creamy", "floral", "warm"],
+      effects: [["comfort", 3], ["calm", 2], ["uplifting", 2], ["warming", 1], ["digestive", 3]],
       character: "The standard cup. Full vanilla bloom, warm and rounded." },
-    { tempC: 100, timeS: 420, flavors: ["sweet", "creamy", "floral", "warm", "woody"],
-      effects: [["digestive", 3], ["comfort", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["uplifting", 2]],
+    { tempC: 95,  timeS: 1200, flavors: ["sweet", "creamy", "floral", "warm", "woody"],
+      effects: [["comfort", 3], ["calm", 3], ["sleepy", 2], ["warming", 1], ["digestive", 3]],
       character: "Fuller extraction. Vanilla's woodier side emerges, still sweet." },
   ],
 

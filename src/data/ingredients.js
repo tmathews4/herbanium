@@ -1158,7 +1158,7 @@ const INGREDIENTS = {
     // Slow-extracting bean — vanillin is fat-soluble and patient;
     // tolerates long steeps without going off, but never delivers
     // big flavor at quick brews.
-    caffeine: 0, tempC: [95, 100], timeS: [300, 420],
+    caffeine: 0, tempC: [85, 95], timeS: [600, 900],
     tempZones: [
       { id: "under", tempC: [50, 90], character: "vanillin barely surfaces.", moodImpact: "comfort held back" },
       { id: "cool",  tempC: [90, 95], character: "soft sweet-cream top.", moodImpact: "comfort gentle; calm settles" },

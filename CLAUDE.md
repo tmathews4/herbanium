@@ -35,6 +35,7 @@ node tools/audit-research-drift.mjs    # shipped vs prescribed, both directions,
 node tools/audit-unreachable.mjs       # declared but never visible in a cup
 node tools/audit-vocabulary.mjs        # is a WORD invented? census vs the docs
 node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at once
+node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
 ```
 
 The last two work word-by-word rather than ingredient-by-ingredient,

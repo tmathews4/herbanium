@@ -81,7 +81,7 @@ const INGREDIENT_RANGE = {
   cinnamon:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 420, timeMid: 510, timeHigh: 600 },
   cardamom:    { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 390, timeHigh: 480 },
   cloves:      { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
-  vanilla:     { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 300, timeMid: 360, timeHigh: 420 },
+  vanilla:     { tempLow: 85,  tempMid: 90,  tempHigh: 95,  timeLow: 600, timeMid: 900, timeHigh: 1200 },
   "black-pepper": { tempLow: 95, tempMid: 97, tempHigh: 100, timeLow: 300, timeMid: 600, timeHigh: 900 },
   // true teas
   white:       { tempLow: 75,  tempMid: 80,  tempHigh: 85,  timeLow: 120, timeMid: 180, timeHigh: 240 },
