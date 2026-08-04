@@ -263,10 +263,12 @@ export const BlendExtractionExplorer = ({
 }) => {
   const { unit, weightUnit } = useUnit();
 
-  // Shared Simple/Detailed mode for the flavor + mood strips. One
-  // toggle at the top of the explorer drives both at once so the
-  // user picks a register (rolled-up families vs specific notes /
-  // leaf effects) for the whole panorama, not per-strip.
+  // Simple/Detailed mode for the FLAVOUR strip. It used to drive the
+  // mood strip too, and no longer does: every mood family became
+  // single-leaf when `warm` split into comfort and heat, so Simple and
+  // Detailed render identical rows there and the control was doing
+  // nothing. Flavour still has real depth — earthy holds 22 tokens —
+  // which is where a rollup is worth a toggle.
   // Default to Detailed (familyMode=false) — the leaf-level read is
   // the explorer's reason for being, and curious users seeing
   // "smoked / pine / tar / leather" learn more than the Smoky
@@ -484,13 +486,24 @@ export const BlendExtractionExplorer = ({
           showAxis={false}
           familyMode={shownFamilyMode}
         />
+        {/* The mood strip is pinned to family mode and ignores the
+            toggle. Every mood family is single-leaf since `warm` split
+            into comfort and heat — twelve families, twelve tokens, 1:1
+            — so Simple and Detailed produce identical rows there: a
+            self-named lone leaf is suppressed into its own parent.
+            Offering a control that changes nothing is worse than not
+            offering it.
+
+            Flavour is the opposite and keeps the toggle: `earthy`
+            holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
+            rollup earns its keep. */}
         <MoodMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
           tempCRange={tempCRange}
           showAxis={false}
-          familyMode={shownFamilyMode}
+          familyMode
         />
       </div>
 
