@@ -66,7 +66,7 @@ export const FLAVOR_FAMILY_CHIPS = [
   { key: "fresh",   family: "fresh",   label: "Fresh"   },
   { key: "vegetal", family: "vegetal", label: "Vegetal" },
   { key: "marine",  family: "marine",  label: "Marine"  },
-  { key: "creamy",  family: "body",    label: "Creamy"  },
+  { key: "creamy",  family: "mouthfeel", label: "Creamy"  },
 ];
 
 /* ── Curated named blends ──────────────────────────────────── */

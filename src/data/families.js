@@ -185,7 +185,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "body", label: "digestive", color: "var(--effect-body)",
+    family: "digestive", label: "digestive", color: "var(--effect-digestive)",
     leaves: [{
       token: "digestive",
       counterpart: "carminative — relieves gas and gastrointestinal spasm",

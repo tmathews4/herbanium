@@ -48,7 +48,7 @@ export const PARENT_MOODS = [
   // strip's family row now that `warm` holds two distinct leaves.
   { key: "comfort",   family: "warm",   label: "Warmth",    note: "heat and warmth-of-spirit" },
   { key: "cooling",   family: "cool",   label: "Cooling",   note: "felt-temperature cooling" },
-  { key: "digestive", family: "body",   label: "Digestive", note: "after-meal ease" },
+  { key: "digestive", family: "digestive", label: "Digestive", note: "after-meal ease" },
   // Added with the `immune` family — see data/families.js. Reaching for
   // echinacea or elder in cold season is a real brewing goal, so it
   // belongs among the targets rather than only in the strip.
@@ -101,4 +101,4 @@ export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS.filter(m => !STOMAC
 // FLAVOR_FAMILY_CHIPS in data/blends.js — re-exported here so callers
 // reach for `canon` whether they want moods or flavors and don't
 // have to remember which file each lives in.
-export { FLAVOR_FAMILY_CHIPS as PARENT_FLAVORS } from "./blends";
+export { FLAVOR_FAMILY_CHIPS as PARENT_FLAVORS } from "./blends.js";

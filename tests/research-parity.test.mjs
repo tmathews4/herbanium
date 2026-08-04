@@ -51,6 +51,8 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
+import { FLAVOR_FAMILY_CHIPS } from "../src/data/blends.js";
+import { PARENT_MOODS } from "../src/data/canon.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
@@ -628,9 +630,9 @@ test("every family label resolves to a vocabulary description", () => {
 // it because colour had never been measured, only chosen. It's indigo
 // now, ΔE 24-30 from its nearest neighbour.
 const KNOWN_CLOSE_COLOURS = new Set([
-  "light:body/grounding", "light:calm/grounding", "light:calm/soothing",
+  "light:digestive/grounding", "light:calm/grounding", "light:calm/soothing",
   "light:cool/focus",
-  "dark:body/calm", "dark:body/grounding", "dark:body/soothing",
+  "dark:calm/digestive", "dark:digestive/grounding", "dark:digestive/soothing",
   "dark:calm/grounding", "dark:calm/soothing", "dark:cool/focus",
   "dark:energy/uplifting", "dark:grounding/soothing",
 ]);
@@ -648,6 +650,28 @@ test("the known-close-colour list has no stale entries", () => {
   const stale = [...KNOWN_CLOSE_COLOURS].filter(k => !live.has(k));
   assert(stale.length === 0,
     `these are far enough apart now — remove from KNOWN_CLOSE_COLOURS:\n    ${stale.join("\n    ")}`);
+});
+
+test("every picker chip points at a family that exists", () => {
+  // A chip's `family` IS the filter value — LibraryScreen and
+  // ComposeScreen pass it straight through. A chip aimed at a family
+  // that no longer exists is a filter that silently matches nothing,
+  // and nothing else in the suite looks at it.
+  //
+  // Renaming the flavour family `body` to `mouthfeel` broke the Creamy
+  // chip exactly this way, and every test stayed green. Caught by
+  // grepping for stragglers, which is not a method.
+  const flavourFamilies = new Set(Object.values(FAMILY_BY_FLAVOR));
+  const badFlavour = FLAVOR_FAMILY_CHIPS
+    .filter(c => !flavourFamilies.has(c.family))
+    .map(c => `flavour chip "${c.label}" -> ${c.family}`);
+  const effectFamilies = new Set(Object.values(FAMILY_BY_EFFECT));
+  const badMood = PARENT_MOODS
+    .filter(m => !effectFamilies.has(m.family))
+    .map(m => `mood chip "${m.label}" -> ${m.family}`);
+  const bad = [...badFlavour, ...badMood];
+  assert(bad.length === 0,
+    `picker chips aimed at families that don't exist:\n    ${bad.join("\n    ")}`);
 });
 
 test("every effect family has a colour", () => {
