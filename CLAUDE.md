@@ -118,6 +118,26 @@ Assert on stable hooks added to our own markup — `data-tour="..."` for tour an
 
 ## Architecture decisions — settled, don't re-litigate
 
+- **An ingredient's `tempC` / `timeS` range is what we RECOMMEND, not
+  what you can explore.** The brew sliders are bounded by it, so a
+  profile's over-pull rows — vanilla's 1200s, dragonwell's 95°C — exist
+  in the model and are deliberately out of the slider's reach.
+
+  This came up because re-gridding profiles onto their researched brew
+  points moved several card ranges inside the point where a cup starts
+  going wrong, which raised the question of whether the sliders should
+  reach a deliberately bad cup for its teaching value. They shouldn't:
+  a blend's range is the INTERSECTION of its ingredients', so widening
+  every ingredient to cover over-pull territory drags the control out
+  of usable proportion the moment a short-steep herb shares a pot with
+  a long one. The teaching happens through the warnings and the
+  extraction explorer, not by letting the slider run to ruin.
+
+  Keep over-pull rows in the profiles — they still anchor the top of
+  the interpolated curve and the warning thresholds read from them.
+  Don't widen a card range to make one reachable.
+
+
 - **No backend.** Catalogue and extraction profiles ship bundled. Read-mostly reference data; bundling avoids network dependency, latency and hosting cost.
 - **Journaling is device-local, deliberately.** Single-purchase app, no subscription revenue, and mood data is sensitive.
 - **The algorithm stays in-process.** One client, no other consumers, and extracting it would break offline use.

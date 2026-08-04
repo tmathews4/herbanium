@@ -42,6 +42,13 @@ export const DELIBERATE_RANGE_DEPARTURES = {
 };
 
 /**
+ * NOTE ON RANGES GENERALLY — see CLAUDE.md. A card's tempC/timeS is
+ * what the app RECOMMENDS, not the full explorable span: the sliders
+ * are bounded by it and a blend's range is the intersection of its
+ * ingredients', so widening one to reach its own over-pull rows drags
+ * every mixed blend's control out of proportion. Profiles keep those
+ * rows; the slider just doesn't reach them.
+ *
  * Extraction grids that deliberately sit off the researched brew
  * points. These are why some doc rows can never be strength-checked:
  * the app is modelling a different, defensible way of making the cup.
