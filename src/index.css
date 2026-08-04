@@ -78,7 +78,7 @@
      hue to their old parents so a blend's mood strip still reads as a
      palette rather than as unrelated hues. */
   --effect-soothing: #6E8A6B;
-  --effect-immune:   #7FA3A0;
+  --effect-immune:   #6A6A9C;
   --effect-grounding:#5C6B4E;
   --effect-uplifting:#C09A3E;
 
@@ -191,7 +191,7 @@
     --effect-body:     #8FA876;
     --effect-sleep:    #A07090;
     --effect-soothing: #8FB88C;
-    --effect-immune:   #9CC0BC;
+    --effect-immune:   #A3A0D2;
     --effect-grounding:#88A072;
     --effect-uplifting:#E4BC6A;
   }

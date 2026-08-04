@@ -60,6 +60,7 @@ import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
 import { flavourFamilyGaps, flavourGapKey } from "../tools/lib/flavour-parity.mjs";
+import { tooCloseToTell, MIN_DELTA_E } from "../tools/lib/palette.mjs";
 import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
 import { outsideResearchedRange, paramKey, isDeliberate } from "../tools/lib/brew-params.mjs";
 import { DELIBERATE_RANGE_DEPARTURES, DELIBERATE_GRIDS } from "../src/data/brewIntent.js";
@@ -614,6 +615,39 @@ test("every family label resolves to a vocabulary description", () => {
     .filter(l => !EFFECT_DESCRIPTIONS[l]);
   assert(missing.length === 0,
     `family labels with no description entry: ${missing.join(", ")}`);
+});
+
+// Family colours that read as the same band at a glance. All of these
+// are the green cluster — calm, soothing, grounding, body — which are
+// semantically adjacent registers, so a viewer confusing two of them
+// is confusing two related things. That's a different and much smaller
+// problem than the one that prompted this check.
+//
+// `immune` was added at #7FA3A0 and landed ΔE 6.7 from `focus`: two
+// unrelated registers, indistinguishable side by side. Nothing caught
+// it because colour had never been measured, only chosen. It's indigo
+// now, ΔE 24-30 from its nearest neighbour.
+const KNOWN_CLOSE_COLOURS = new Set([
+  "light:body/grounding", "light:calm/grounding", "light:calm/soothing",
+  "light:cool/focus",
+  "dark:body/calm", "dark:body/grounding", "dark:body/soothing",
+  "dark:calm/grounding", "dark:calm/soothing", "dark:cool/focus",
+  "dark:energy/uplifting", "dark:grounding/soothing",
+]);
+
+test("no two effect families are the same colour to look at", () => {
+  const fresh = tooCloseToTell()
+    .filter(p => !KNOWN_CLOSE_COLOURS.has(p.key))
+    .map(p => `${p.key} — ΔE ${p.dE.toFixed(1)}, below ${MIN_DELTA_E}`);
+  assert(fresh.length === 0,
+    `family colours too close to tell apart:\n    ${fresh.join("\n    ")}`);
+});
+
+test("the known-close-colour list has no stale entries", () => {
+  const live = new Set(tooCloseToTell().map(p => p.key));
+  const stale = [...KNOWN_CLOSE_COLOURS].filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `these are far enough apart now — remove from KNOWN_CLOSE_COLOURS:\n    ${stale.join("\n    ")}`);
 });
 
 test("every effect family has a colour", () => {
