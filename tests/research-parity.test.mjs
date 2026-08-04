@@ -313,9 +313,12 @@ test("every declared ingredient effect has a family", () => {
 //
 // That distinction is the point of splitting them out. An exemption
 // list reads as "not yet fixed"; those four are finished.
-const KNOWN_OVER_CEILING = new Set([
-  "dragonwell:time:above",   // doc [60,120] app [75,150] — unaccounted for
-]);
+// EMPTY. dragonwell was the last one — its card ran [75,150]s against a
+// documented [60,120], and it's been pulled back to the research and
+// re-gridded onto the doc's brew points. The four that remain outside
+// the researched ceiling are deliberate and live in data/brewIntent.js
+// with their reasons, which is a different thing from an exemption.
+const KNOWN_OVER_CEILING = new Set([]);
 
 test("no new brew range exceeds what the research supports", () => {
   const fresh = outsideResearchedRange(INGREDIENTS)

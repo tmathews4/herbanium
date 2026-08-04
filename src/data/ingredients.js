@@ -1667,7 +1667,7 @@ const INGREDIENTS = {
     // Pan-fired Chinese green — chestnut-sweet with a clean
     // vegetal body. Less tannin-prone than sencha; tolerates a
     // touch more time and heat.
-    caffeine: 28, tempC: [75, 85], timeS: [75, 150],
+    caffeine: 28, tempC: [75, 85], timeS: [60, 120],
     tempZones: [
       { id: "under", tempC: [50, 70], character: "chestnut barely surfaces.", moodImpact: "focus held back" },
       { id: "cool",  tempC: [70, 78], character: "soft chestnut-sweet top.", moodImpact: "focus crisp; calm clean" },

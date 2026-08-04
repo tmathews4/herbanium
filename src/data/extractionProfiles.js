@@ -483,17 +483,17 @@ export const EXTRACTION_PROFILES = {
   // interpolation between three monotonically-rising points can't
   // express. Light (idx 0) keeps auto-annotation.
   dragonwell: [
-    { tempC: 75,  timeS: 75,  flavors: ["nutty", "sweet", "fresh"],
+    { tempC: 75,  timeS: 60,  flavors: ["nutty", "sweet", "fresh"],
       effects: [["focus", 3], ["calm", 2], ["energy", 2], ["uplifting", 2], ["cooling", 2]],
       character: "Light dragonwell — sweet chestnut, delicate sweetness, fresh top." },
-    { tempC: 80,  timeS: 110,
+    { tempC: 80,  timeS: 90,
       flavorStrengths: [
         ["chestnut", 4.2], ["nutty", 3.3], ["toasted", 2.5],
         ["sweet", 2.0], ["vegetal", 1.4], ["fresh", 1.2],
       ],
       effects: [["focus", 4], ["calm", 2], ["energy", 3], ["uplifting", 3], ["cooling", 2]],
       character: "The classic cup. Pan-fired chestnut and toasted-bean character, bright focus." },
-    { tempC: 82,  timeS: 125,
+    { tempC: 85,  timeS: 120,
       flavorStrengths: [
         ["chestnut", 4.5], ["nutty", 3.5], ["toasted", 2.8],
         ["sweet", 2.2], ["vegetal", 1.5], ["fresh", 1.0],

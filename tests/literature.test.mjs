@@ -91,7 +91,7 @@ const INGREDIENT_RANGE = {
   genmaicha:   { tempLow: 70,  tempMid: 78,  tempHigh: 85,  timeLow: 60,  timeMid: 105, timeHigh: 150 },
   gunpowder:   { tempLow: 80,  tempMid: 85,  tempHigh: 90,  timeLow: 90,  timeMid: 135, timeHigh: 180 },
   hojicha:     { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 30,  timeMid: 45,  timeHigh: 60 },
-  dragonwell:  { tempLow: 75,  tempMid: 80,  tempHigh: 85,  timeLow: 75,  timeMid: 110, timeHigh: 150 },
+  dragonwell:  { tempLow: 75,  tempMid: 80,  tempHigh: 85,  timeLow: 60,  timeMid: 90,  timeHigh: 120 },
   oolong:      { tempLow: 85,  tempMid: 90,  tempHigh: 95,  timeLow: 90,  timeMid: 135, timeHigh: 180 },
   assam:       { tempLow: 95,  tempMid: 97,  tempHigh: 100, timeLow: 180, timeMid: 240, timeHigh: 300 },
   darjeeling:  { tempLow: 85,  tempMid: 87,  tempHigh: 90,  timeLow: 180, timeMid: 210, timeHigh: 240 },
@@ -596,7 +596,18 @@ test("rose at over-steep triggers tannin warning (musky-tannic edge)", () => {
 // ─── BROAD AUDIT: every ingredient (except the legitimately
 // forgiving ones) fires SOMETHING at full pull. ────────────────
 
-const FORGIVING = new Set(["rooibos", "vanilla", "gyokuro", "hojicha"]);
+// Ingredients that don't over-pull at the top of their own slider.
+// Most do: the card range runs up to where the cup starts going wrong,
+// so the strong end is where a warning belongs.
+//
+// `dragonwell` is here for a different reason from the rest. It isn't
+// forgiving — it's a green tea and scorches readily. Its card range was
+// pulled back to the researched [60,120]s, and the doc is explicit that
+// 80-85C is canonical, so the top of its slider is the top of the
+// RECOMMENDED band rather than the beginning of trouble. Its over-pull
+// rows still exist in the profile at 150s and 95C; the slider just
+// doesn't reach them any more.
+const FORGIVING = new Set(["rooibos", "vanilla", "gyokuro", "hojicha", "dragonwell"]);
 
 test("every non-forgiving ingredient fires an over-pull warning at strong end", () => {
   const ids = Object.keys(INGREDIENT_RANGE);
@@ -716,8 +727,13 @@ test("white tea (Aaron Fisher, Global Tea Hut): boiling silver needle is a trage
 test("dragonwell (Path of Cha): hot water scorches the chestnut into flat", () => {
   assert(hasFlavor(standard("dragonwell"), "chestnut") || hasFlavor(standard("dragonwell"), "nutty"),
     `dragonwell at standard should carry chestnut/nutty`);
-  assert(hasWarning(warningsFor(strong("dragonwell")), "tannin"),
-    `dragonwell at 85°C should fire tannin (per Path of Cha brewing notes)`);
+  // Probed at 95C rather than at the slider top. Dragonwell's card range
+  // was pulled to its researched [60,120]s, and the doc is explicit that
+  // 80-85C is canonical — so the top of the slider is now the top of the
+  // RECOMMENDED band, not the start of trouble. Path of Cha's point is
+  // about hot water, so the probe uses water that is actually hot.
+  assert(hasWarning(warningsFor(resolveExtractionProfile("dragonwell", 95, 180)), "tannin"),
+    `dragonwell scorched at 95°C should fire tannin (per Path of Cha brewing notes)`);
 });
 
 test("matcha (r/tea consensus, Breakaway Matcha): hot water turns it spinach-bitter", () => {
