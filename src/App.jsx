@@ -9,6 +9,7 @@ import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/ico
 import { Button } from "./components/layout";
 import { DemoHint } from "./components/DemoHint";
 import { GuidedTour } from "./components/GuidedTour";
+import { BREW_DOCK_ID } from "./helpers/dock";
 // Screens — first-paint surfaces are eager so there's no chunk-load
 // flash on cold start. Everything reached by navigation or overlay
 // is React.lazy so it ships in its own chunk and only downloads when
@@ -180,6 +181,17 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
       backdropFilter: "blur(8px)",
       borderTop: `1px solid ${theme.rule}`,
     }}>
+      {/* Slot for the blend screen's brew controls, which mount into
+          the dock from BlendExtractionExplorer via a portal (see
+          BREW_DOCK_ID). They belong to the dock rather than to the
+          scrolling page — the same reasoning that puts the sub-tabs
+          here — but the temp/steep state they drive lives deep inside
+          Compose, and hauling it up to App just to render it in the
+          chrome would spread blend logic across the app shell.
+
+          No padding or border of its own: empty, it has to measure 0px,
+          or every screen without a pot pays for a row it never shows. */}
+      <div id={BREW_DOCK_ID} />
       {subTabs && onSubClick && (
         <div data-tour="subtabs" style={{
           display: "grid",
@@ -723,6 +735,10 @@ export default function App() {
   // follows the step — no timers, so a step can't advance out from
   // under a reader. null hands control back to the user's own choice.
   const [blendTourFamilyMode, setBlendTourFamilyMode] = useState(null);
+  // Same mechanism for the pinned brew controls, which are collapsed by
+  // default. The step that teaches the sliders has to open them, or it
+  // would point at an element that isn't rendered.
+  const [blendTourControlsOpen, setBlendTourControlsOpen] = useState(null);
   // Persisted lifetime tab-visit counts. Each time the active tab
   // changes the entry increments by one, fueling the "first time
   // visiting tab X" / "visited X N times" elemental triggers. Stored
@@ -2160,7 +2176,7 @@ export default function App() {
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} lodestoneCharge={lodestoneCharge} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} lodestoneCharge={lodestoneCharge} />}
         {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
@@ -2244,6 +2260,7 @@ export default function App() {
           onStep={(s) => {
             setActiveTourStep(s && s.target);
             setBlendTourFamilyMode(s && s.familyMode != null ? s.familyMode : null);
+            setBlendTourControlsOpen(s && s.openControls != null ? s.openControls : null);
           }}
           onClose={closeActiveTour}
         />

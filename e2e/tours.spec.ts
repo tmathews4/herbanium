@@ -159,7 +159,10 @@ test.describe("Blend tour — bars and sliders visible together", () => {
   async function advanceTo(page: Page, title: string) {
     const callout = page.getByTestId("tour-callout");
     await expect(callout, "blend tour should start").toBeVisible();
-    for (let guard = 0; guard < 12; guard++) {
+    // Guard is generous on purpose: it only has to exceed the tour's
+    // step count, and a tour that grows a step shouldn't fail here with
+    // "never reached" when the real answer is "needed one more click".
+    for (let guard = 0; guard < 20; guard++) {
       if ((await callout.innerText()).includes(title)) return;
       await callout.getByRole("button", { name: "Next", exact: true }).click();
     }
@@ -174,6 +177,14 @@ test.describe("Blend tour — bars and sliders visible together", () => {
   // that's 493px against a 658px window. The bars (~292) plus the
   // sliders (~232) plus the gap is ~538, which simply doesn't fit 493.
   // So the smallest phones clip something no matter what.
+  //
+  // The sliders live in the tab dock now rather than scrolling with the
+  // bars. That didn't buy the space back — the dock is a flex sibling
+  // of the pane, so every pixel it takes comes off the pane's height —
+  // but it did make the sliders' side of the promise structural: they
+  // can't scroll away, so only the bars are ever at risk. Their
+  // "fraction clear" is measured against the pane they aren't inside,
+  // which is why it reads a flat 100%.
   //
   // The guarantees that DO hold everywhere: the sliders stay essentially
   // whole and never sit under the callout (they're the control the step
@@ -309,10 +320,14 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     expect(detailedH, `Detailed should grow the graph (simple=${simpleH}, detailed=${detailedH})`)
       .toBeGreaterThan(simpleH + 40);
 
+
     // And advancing out of the walkthrough returns to the short layout
-    // the prediction/slider steps depend on.
+    // the prediction/slider steps depend on. The brew-bar step is what
+    // comes next — it carries no familyMode of its own, so the strips
+    // land on the persisted preference the toggle steps left behind,
+    // which is the thing being checked.
     await callout.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(callout).toContainText("The prediction");
+    await expect(callout).toContainText("The brew row");
     await expect(toggle, "and stop once the tour moves past them")
       .not.toHaveCSS("animation-name", "tourTogglePulse");
     // Tolerance in pixels, not toBeCloseTo. WebKit re-lays this SVG out
@@ -323,6 +338,101 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     const settledH = (await graph.boundingBox())!.height;
     expect(Math.abs(settledH - simpleH),
       `should settle back to Simple's height (${settledH} vs ${simpleH})`).toBeLessThan(4);
+  });
+
+  test("the tour drives the brew row, then hands it back", async ({ page }) => {
+    // The row arrives OPEN, and the tour has to fold it to explain that
+    // it folds — a step describing a tap while showing the opposite
+    // state describes nothing. The tour can't hand the user the tap
+    // itself (the overlay swallows clicks), so the steps drive it, and
+    // release it once they're done teaching it.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecarium");
+    const callout = page.getByTestId("tour-callout");
+    const sliders = page.locator('[data-tour="blend-sliders"]');
+
+    await advanceTo(page, "The brew row");
+    await expect(sliders, "the brew-row step should show the row folded away").toBeHidden();
+    await expect(page.locator('[data-tour="blend-controls"]'),
+      "and the collapsed row is what's being pointed at").toBeVisible();
+
+    // The pills only exist while the row is open, so their step has to
+    // re-open it — the step before deliberately shut it.
+    await advanceTo(page, "Time or temperature");
+    await expect(page.locator('[data-tour="blend-axis"]'),
+      "the pills step must actually have pills to point at").toBeVisible();
+
+    await callout.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(callout).toContainText("The prediction");
+    await expect(sliders, "the prediction step keepClears the sliders, so they must exist")
+      .toBeVisible();
+
+    await advanceTo(page, "Dial in the brew");
+    await expect(sliders, "and the slider step targets them directly").toBeVisible();
+
+    // Past the pair the tour stops steering: no openControls on the
+    // remaining steps, so the row falls back to whatever the USER left
+    // it at. That's open here, because open is the persisted default —
+    // the claim is "the tour hands control back", not "the tour ends
+    // with the row shut". Those read the same until the default flips,
+    // which is exactly when this needs to catch it.
+    await advanceTo(page, "What it does");
+    await expect(sliders, "the tour should stop driving the row after the slider step")
+      .toBeVisible();
+  });
+
+  test("the spotlight tracks the strip when it resizes mid-step", async ({ page }) => {
+    // The flavour strip is the one element left that changes size WHILE
+    // a step is up — the temp/steep sliders are a fixed-height row in
+    // the dock now. Changing the steep time drops family rows in and out
+    // of the strip; in the real app the tour's demo loop does this on a
+    // timer, and the block swings ~50px.
+    //
+    // Measured before the fix: bars 271→322 while the spotlight sat
+    // frozen at 317, so the cutout clipped the bars at their tallest.
+    // A once-per-step measurement can't see this, and neither can a
+    // check taken at a step boundary — which is why this drives the
+    // slider directly rather than clicking Next and hoping.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecarium");
+    await advanceTo(page, "The prediction");
+
+    const graph = page.locator('[data-tour="blend-graph"]');
+    const spotlight = page.getByTestId("tour-spotlight");
+    const heights = async () => ({
+      bars: (await graph.boundingBox())!.height,
+      spot: (await spotlight.boundingBox())!.height,
+    });
+
+    const before = await heights();
+    // The overlay swallows clicks, so the slider is driven through the
+    // native value setter — React's onChange listens for "input".
+    const moved = await page.evaluate(() => {
+      const el = document.querySelector(
+        '[data-tour="blend-sliders"] input[type=range]') as HTMLInputElement | null;
+      if (!el) return false;
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype, "value")!.set!;
+      const lo = Number(el.min), hi = Number(el.max);
+      setter.call(el, String(Number(el.value) > (lo + hi) / 2 ? lo : hi));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      return true;
+    });
+    expect(moved, "the prediction step should have the brew row open").toBe(true);
+
+    // Poll: the strip re-renders and the cutout eases to its new box.
+    await expect.poll(async () => {
+      const now = await heights();
+      return Math.abs((now.spot - now.bars) - (before.spot - before.bars)) <= 2;
+    }, {
+      message: "the spotlight should keep its constant padding around the strip as it resizes",
+      timeout: 8_000,
+    }).toBe(true);
+
+    const after = await heights();
+    // eslint-disable-next-line no-console
+    console.log(`  [${test.info().project.name}] strip ${Math.round(before.bars)}→${Math.round(after.bars)}px, `
+      + `spotlight ${Math.round(before.spot)}→${Math.round(after.spot)}px`);
   });
 
   test("both the prediction bars and the brew sliders stay clear", async ({ page }) => {

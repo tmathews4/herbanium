@@ -55,6 +55,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     if (!step) return undefined;
     let raf = 0;
     let scrolled = false;
+    let ro = null;
     // The step's keep-clear elements, or [] — they may legitimately not
     // exist (a step reused on a screen that doesn't render them), in
     // which case the step just behaves like an ordinary one.
@@ -69,62 +70,104 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     const spotEls = (el) => [el, ...(step.spotlight || [])
       .map(id => document.querySelector(`[data-tour="${id}"]`))
       .filter(Boolean)];
-    // Nearest scrollable ancestor — the app scrolls an inner pane, not
-    // the document, so scrollIntoView's container is what we have to
-    // nudge for the fine positioning below.
+    // Nearest scrollable ancestor, or null when nothing can scroll this
+    // element. The app scrolls an inner pane, not the document, so
+    // scrollIntoView's container is what we have to nudge for the fine
+    // positioning below — and null is a real answer: a step can point
+    // at app CHROME, which no amount of scrolling moves.
     const scrollParent = (el) => {
       for (let n = el.parentElement; n; n = n.parentElement) {
         const oy = window.getComputedStyle(n).overflowY;
         if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight) return n;
       }
-      return document.scrollingElement || document.documentElement;
+      return null;
     };
     // Position the step's subject. Plain steps center the target; steps
     // with keepClear then get nudged so the whole group sits flush to
     // the bottom margin — see groupScrollDelta for why.
     const position = (el) => {
-      el.scrollIntoView({ block: "center", inline: "nearest" });
       const extra = clearEls();
-      if (extra.length === 0) return;
+      const all = [...spotEls(el), ...extra];
+      // The pane this step scrolls: the first of its elements that
+      // lives in one. Anything outside that pane is chrome — the blend
+      // screen's brew controls sit in the tab dock — and scrolling can
+      // neither reveal nor hide it. Chrome takes no part in the group
+      // being fitted; it's on screen by construction. It still feeds
+      // clearRect below, so the callout goes on dodging it.
+      const pane = all.map(scrollParent).find(Boolean) || null;
+      const group = pane ? all.filter(n => pane.contains(n)) : [];
+      // Bring the subject on screen. When the target itself is chrome
+      // the scroll goes to whatever else the step needs to show.
+      const subject = group.includes(el) ? el : group[0];
+      if (subject) subject.scrollIntoView({ block: "center", inline: "nearest" });
+      if (extra.length === 0 || group.length === 0) return;
       // Converge rather than nudge once. scrollIntoView may act on a
       // different container than the one we adjust, so a single delta
       // can land short and leave the group high — which then pushes the
       // target under the callout. Re-measure and correct, bailing when
       // it's settled or the container has hit the end of its range.
-      const pane = scrollParent(el);
-      // The region the group can actually occupy is the pane's visible
-      // box, not the window — the app scrolls between a header and the
-      // tab dock, so on a small phone the pane is ~165px shorter.
-      const region = pane.getBoundingClientRect
-        ? pane.getBoundingClientRect()
-        : { top: 0, bottom: window.innerHeight };
+      //
+      // The region the group can occupy is the pane's visible box, not
+      // the window — the app scrolls between a header and the tab dock,
+      // so on a small phone the pane is ~165px shorter.
+      const region = pane.getBoundingClientRect();
       for (let pass = 0; pass < 3; pass++) {
-        const delta = groupScrollDelta(unionOf([...spotEls(el), ...extra]), region);
+        const delta = groupScrollDelta(unionOf(group), region);
         if (!delta) break;
         const before = pane.scrollTop;
         pane.scrollTop += delta;
         if (pane.scrollTop === before) break;
       }
     };
+    // Last geometry pushed to state, so a re-measure that finds nothing
+    // changed doesn't re-render. Matters more now that a ResizeObserver
+    // drives this: without it, every observed frame would set fresh
+    // object identities and churn.
+    let lastKey = "";
     const apply = (el) => {
       const els = spotEls(el);
-      setRect(unionRect(els.map(n => n.getBoundingClientRect())));
+      const nextRect = unionRect(els.map(n => n.getBoundingClientRect()));
+      const nextClear = unionOf(clearEls());
+      const key = JSON.stringify([nextRect, nextClear]);
+      if (key === lastKey) return;
+      lastKey = key;
+      setRect(nextRect);
       // Radius comes from the primary target — with several elements
       // lit at once there's no single shape to trace, and the largest
       // one's corners read best around the group.
       setTargetRadius(window.getComputedStyle(els.length > 1 ? els.at(-1) : el).borderRadius || "0px");
-      setClearRect(unionOf(clearEls()));
+      setClearRect(nextClear);
+    };
+    // Track the lit elements' SIZE, not just the step change.
+    //
+    // The flavour strip is the one thing left that resizes while a step
+    // is up: Simple/Detailed swaps family rows for leaf rows and the
+    // block grows ~200px. The temp/steep sliders used to do this too,
+    // which is what the double-rAF below was really compensating for —
+    // they're a fixed-height row in the tab dock now, and the strip is
+    // the last mover. A once-per-step measurement leaves the cutout
+    // tracing where the bars WERE, with the callout anchored to it.
+    const observe = (el) => {
+      if (ro || typeof ResizeObserver === "undefined") return;
+      ro = new ResizeObserver(() => apply(el));
+      for (const n of [...spotEls(el), ...clearEls()]) ro.observe(n);
     };
     const measure = () => {
       const el = document.querySelector(`[data-tour="${step.target}"]`);
       if (el) {
+        observe(el);
         if (!scrolled) {
           scrolled = true;
           // Position, let the frame settle, then position AGAIN before
           // measuring. The second pass matters: a step can change the
           // layout it just scrolled to (the Blend steps put the strips
           // back into Simple, which shortens them by ~200px), and the
-          // first scroll is computed against the old heights.
+          // first scroll is computed against the old heights. The
+          // observer above keeps the highlight honest afterwards; this
+          // pass is about where the group SCROLLS to, which the
+          // observer deliberately doesn't touch — re-scrolling under a
+          // reader who is watching the bars change would be worse than
+          // a slightly off group position.
           position(el);
           raf = requestAnimationFrame(() => {
             position(el);
@@ -142,6 +185,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     return () => {
       window.removeEventListener("resize", measure);
       if (raf) cancelAnimationFrame(raf);
+      if (ro) ro.disconnect();
     };
   }, [i, step]);
 

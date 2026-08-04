@@ -10,10 +10,13 @@
         it's arithmetic.
 
      2. Tour content (data/tours.js) — the Blend tour's step order,
-        keepClear pairing, and the two-step Simple/Detailed walkthrough.
-        These are load-bearing: the prediction and slider steps only fit
-        on a phone with the strips on Simple, and that's carried by the
-        steps' `familyMode` — easy to break while editing copy.
+        keepClear pairing, the two-step Simple/Detailed walkthrough, and
+        the open/shut schedule for the brew row in the tab dock. These
+        are load-bearing: the prediction and slider steps only fit on a
+        phone with the strips on Simple, and the slider step's target
+        doesn't exist at all unless the row is open. Both are carried by
+        a field on the step — `familyMode`, `openControls` — which is
+        easy to drop while editing copy.
 
    The device numbers below are measured, not guessed — see the
    comment above DEVICES.
@@ -374,6 +377,74 @@ test("every step after the toggle walkthrough holds the strips on Simple", () =>
   for (const target of ["blend-graph", "blend-sliders"]) {
     const step = blend[stepIndex(target)];
     assert(step.familyMode === true, `${target} step must pin the strips to Simple`);
+  }
+});
+
+// ── 8. The brew row in the dock ───────────────────────────────────────
+
+test("the tour teaches the tap before it teaches the sliders", () => {
+  // The bar is collapsed by default, so blend-sliders doesn't exist
+  // until something opens it. A user who never learns the tap can't
+  // reach the control the next two steps are about.
+  const controls = stepIndex("blend-controls");
+  assert(controls !== -1, "blend tour has no step for the brew row");
+  assert(controls < stepIndex("blend-sliders"),
+    "the brew-bar step must come before the slider step");
+});
+
+test("the brew-bar step forces the bar SHUT", () => {
+  // Not `null` — that hands the bar back to the user's own state, and
+  // a user who opened it before starting the tour would be shown an
+  // open panel by the step explaining how to open it.
+  const step = blend[stepIndex("blend-controls")];
+  assert(step.openControls === false,
+    `brew-bar step should pin the bar shut, got ${step.openControls}`);
+});
+
+test("the axis pills get a step of their own, after the row opens", () => {
+  // A control that REPLACES what's on screen rather than adding to it is
+  // invisible until something says it's there. It also can't be pointed
+  // at before the row is open — the pills don't exist while it's shut.
+  const pills = stepIndex("blend-axis");
+  assert(pills !== -1, "blend tour never explains the Time/Temp pills");
+  assert(pills > stepIndex("blend-controls"),
+    "the pills step must come after the row is introduced");
+  assert(pills < stepIndex("blend-sliders"),
+    "and before the slider step, which assumes you know what you're dragging");
+  assert(blend[pills].openControls === true,
+    "the pills step must open the row — the pills don't render while it's shut");
+});
+
+test("the prediction and slider steps both force the bar OPEN", () => {
+  // blend-sliders only exists while the bar is open, and the pair
+  // keepClear each other — so if the prediction step left it shut, its
+  // own keepClear target would be missing from the DOM.
+  for (const target of ["blend-graph", "blend-sliders"]) {
+    assert(blend[stepIndex(target)].openControls === true,
+      `${target} step must hold the brew bar open`);
+  }
+});
+
+test("the steps after the slider step release the bar", () => {
+  // Releasing means falling back to the user's own state, which is
+  // collapsed — the effects step needs that screen back.
+  const after = blend.slice(stepIndex("blend-sliders") + 1);
+  assert(after.length > 0, "the slider step shouldn't be last");
+  for (const s of after) {
+    assert(s.openControls === undefined,
+      `step "${s.target}" still pins the brew bar (${s.openControls})`);
+  }
+});
+
+test("no step outside the Blend tour carries openControls", () => {
+  // Same reasoning as familyMode: it only means anything to the
+  // extraction explorer, and elsewhere it reads as intent while doing
+  // nothing.
+  for (const [screen, steps] of Object.entries(SCREEN_TOURS)) {
+    if (screen === "blend") continue;
+    for (const s of steps) {
+      assert(s.openControls === undefined, `${screen} step "${s.target}" sets openControls`);
+    }
   }
 });
 

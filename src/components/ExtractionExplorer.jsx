@@ -127,7 +127,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
             textTransform: "uppercase", color: theme.inkSoft,
           }}>
-            Water
+            Temp
           </label>
           <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
             {displayTemp}
@@ -164,7 +164,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
             fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
             textTransform: "uppercase", color: theme.inkSoft,
           }}>
-            Steep
+            Time
           </label>
           <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
             {displayTime}

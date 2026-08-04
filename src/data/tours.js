@@ -45,6 +45,32 @@ export const SCREEN_TOURS = {
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-graph"], familyMode: false,
       body: "Detailed opens every family into the notes underneath it — apple and pear inside fruity, not just “fruity.” Same cup, finer read. We'll leave it on Simple." },
+    // Brew is a row in the tab dock, above Blend / Herbanium, and it
+    // arrives OPEN. This step has to show it SHUT anyway — a step
+    // explaining that the row folds while showing it unfolded explains
+    // nothing — which is what `openControls: false` is for.
+    //
+    // `openControls` on a step forces the row open or shut while it's up
+    // (see blendTourControlsOpen in App.jsx), the same demo-state
+    // mechanism as familyMode. `false` rather than null: null hands the
+    // row back to the user's own state, which is open, and the step
+    // would be describing something they aren't looking at.
+    //
+    // Copy says what the row DOES, not where it sits — the spotlight is
+    // already pointing at it, so describing its position spends the
+    // reader's attention on something they can see.
+    { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
+      body: "Tap this row to show or hide the brew sliders. While they're hidden, the row still shows the time and temperature you've set." },
+    // The axis pills. They get their own step for the same reason the
+    // Simple/Detailed toggle does: a control that REPLACES what's on
+    // screen rather than adding to it is invisible until someone says
+    // it's there. Mentioning it in the slider step's copy wasn't enough
+    // — that step is `compact` and the user's eye is on the bars.
+    //
+    // openControls: true because the pills only exist while the row is
+    // open, and the step before this one deliberately shut it.
+    { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
+      body: "Two sliders share this space: one sets how long the tea steeps, the other how hot the water is. Tap Time or Temp to switch between them." },
     // These two steps teach one thing between them — the sliders drive
     // the bars — so each keeps the other's element on screen and out
     // from under the callout. See GuidedTour's keepClear handling.
@@ -54,20 +80,27 @@ export const SCREEN_TOURS = {
     // user to watch the bars and the sliders at the same time, so the
     // callout has to give up room rather than take it. Copy is kept
     // short for the same reason.
+    //
+    // Both hold the row OPEN. The pair is one lesson, and keeping the
+    // sliders mounted across both is what lets each keepClear the
+    // other. Living in the dock is what makes the pairing cheap now:
+    // only the bars have to be scrolled to, the sliders can't leave the
+    // screen.
     { target: "blend-graph", title: "The prediction", pad: 6, keepClear: ["blend-sliders"],
-      familyMode: true, compact: true,
+      familyMode: true, compact: true, openControls: true,
       body: "What the cup tastes like — its flavours, and the palate underneath them." },
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
-      familyMode: true, compact: true,
-      body: "Drag temperature or steep time — watch the bars move." },
-    // Added when the mood strip split into Mind and Body and moved
-    // BELOW the sliders. Without a step the user has no reason to
-    // scroll past the controls, and the two windows saying what the cup
-    // actually DOES — the app's whole claim — sit unseen under the
-    // fold. Reading order is taste, controls, effect; the tour walks
-    // all three now.
+      familyMode: true, compact: true, openControls: true,
+      body: "Drag the slider — watch the bars move." },
+    // Added when the mood strip split into Mind and Body. Without a
+    // step the user has no reason to scroll past the flavour strips,
+    // and the two windows saying what the cup actually DOES — the app's
+    // whole claim — sit unseen under the fold.
+    //
+    // No openControls: past the pair the tour stops steering the row and
+    // hands it back to whatever the user left it at.
     { target: "blend-effects", title: "What it does", pad: 8,
-      body: "Below the controls: what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
+      body: "Scroll down past the flavours for what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,

@@ -26,7 +26,9 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { theme, ff } from "../theme";
+import { BREW_DOCK_ID } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
@@ -260,6 +262,11 @@ export const BlendExtractionExplorer = ({
                             // without touching the user's saved preference,
                             // so the Simple/Detailed step can flip between
                             // the two and leave the choice as it found it.
+  controlsOpenOverride = null, // tour demo only: opens or shuts the pinned
+                            // brew bar. Same idea, and the tour needs it for
+                            // a harder reason than presentation — the slider
+                            // step targets an element that only exists while
+                            // the bar is open.
 }) => {
   const { unit, weightUnit } = useUnit();
 
@@ -275,6 +282,35 @@ export const BlendExtractionExplorer = ({
   // rollup. Persisted so users who prefer Simple keep that across
   // sessions after flipping.
   const [familyMode, setFamilyMode] = usePersistedState("explorerFamilyMode", false);
+  // OPEN by default, and persisted.
+  //
+  // It shipped collapsed when the block was ~230px and opening it cost a
+  // quarter of the screen. One axis at a time took it to 85px, which
+  // changed the trade: a first-time user who never taps the row never
+  // learns the cup is adjustable at all, and that's the more expensive
+  // failure. So the sliders are there on arrival.
+  //
+  // Persisted for the other half of it. An unpersisted default-open
+  // would re-open on EVERY visit, so a user who learned the control and
+  // wanted the screen back could never make that stick — the tax would
+  // fall hardest on the people who least need the prompt.
+  const [controlsOpen, setControlsOpen] = usePersistedState("explorerControlsOpen", true);
+  // The dock slot App renders for those controls (helpers/dock.js). It's
+  // a DOM node outside this tree, so it's read rather than reffed.
+  //
+  // Normally the initializer finds it: this component sits behind a
+  // lazy() boundary, so App — and the dock with it — is committed before
+  // we ever render. The effect is the safety net for the case where it
+  // isn't, because a null here means the controls silently never appear.
+  // It re-reads the same node and React bails on the identical value.
+  const [brewDock, setBrewDock] = useState(() => document.getElementById(BREW_DOCK_ID));
+  // Runs once and re-reads the same node, so React bails on the identical
+  // value rather than cascading. This trips react-hooks/set-state-in-effect,
+  // which can't be suppressed by a directive (the compiler-based rules
+  // ignore them — see the three unsuppressed ones already in App.jsx). Kept
+  // anyway: a null dock means the controls silently never appear, and a
+  // lint error is the cheaper of the two.
+  useEffect(() => { setBrewDock(document.getElementById(BREW_DOCK_ID)); }, []);
 
   // Guided tour: the tour's toggle step explains Simple vs Detailed and
   // leaves the strips on Simple. That isn't only pedagogy — family rows
@@ -291,6 +327,27 @@ export const BlendExtractionExplorer = ({
   // What the strips render. The override is transient demo state; the
   // persisted preference is what survives the tour.
   const shownFamilyMode = familyModeOverride ?? familyMode;
+  // The tour's slider step has to open the panel — it teaches a control
+  // that is collapsed by default, so pointing at it while closed would
+  // target an element that isn't rendered.
+  const shownControlsOpen = controlsOpenOverride ?? controlsOpen;
+  // Which of the two brew sliders is on screen. Only one is, so each
+  // keeps the full width — see the note on the control block below.
+  //
+  // Opens on TIME, and it's first in the pill order for the same
+  // reason. Time has 36 steps against temperature's 6, so dragging it
+  // moves the prediction bars in a gradient rather than in six jumps —
+  // which is what a first-time user needs to see to understand that the
+  // sliders drive the graph at all. Temperature is also the parameter a
+  // newcomer is least likely to want to change.
+  const [axis, setAxis] = useState("timeS");
+  // The tour's demo oscillates steep time so the user watches the
+  // prediction bars respond. If Temp happened to be the axis showing,
+  // they'd watch the bars move beside a slider that doesn't — the
+  // lesson inverted. Those two steps force Time; every other step
+  // leaves the user's own choice alone.
+  const tourAxis = (tourStep === "blend-graph" || tourStep === "blend-sliders") ? "timeS" : null;
+  const shownAxis = tourAxis ?? axis;
 
   // Range-band selection. Each axis ("tempC" / "timeS") gets its
   // own slot — tapping a band toggles a description panel below
@@ -753,165 +810,272 @@ export const BlendExtractionExplorer = ({
           );
         };
 
-        return (
-          <div data-tour="blend-sliders">
-            {/* Temp + time sliders. Sit BELOW the maps now that the
-                maps are fixed-height (per-track normalization keeps
-                each band's intensity stable; only the vertical
-                indicator moves). The user reads the envelope first,
-                then aims for a point in it with the sliders. */}
-            <div style={{ marginTop: 14, marginBottom: 14 }}>
-              <div style={{
-                display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                marginBottom: 6,
-              }}>
-                <label style={{
-                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-                  textTransform: "uppercase", color: theme.inkSoft,
-                }}>
-                  Water
-                </label>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                  <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-                    {displayTemp}
-                  </div>
-                  {(() => {
-                    const hint = restHintForCelsius(tempC);
-                    if (!hint) return null;
-                    return (
-                      <div style={{
-                        fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
-                        color: theme.ash, marginTop: 1, textAlign: "right",
-                      }}>
-                        {hint}
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-              <input
-                type="range"
-                min={tempCRange[0]}
-                max={tempCRange[1]}
-                step={5}
-                value={tempC}
-                onChange={(e) => setTempC(Number(e.target.value))}
-                style={{
-                  width: "100%",
-                  accentColor: theme.terra,
-                }}
-              />
-              <RangeBands
-                rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
-                selected={bandSelected.tempC}
-                onSelect={(k) => selectBand("tempC", k)}
-              />
-              <div style={{
-                display: "flex", justifyContent: "space-between",
-                fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-              }}>
-                <span>{tempMinDisplay}°</span>
-                <span>{tempMaxDisplay}°</span>
-              </div>
-              <BandDescription axis="tempC" kind={bandSelected.tempC} />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{
-                display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                marginBottom: 6,
-              }}>
-                <label style={{
-                  fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
-                  textTransform: "uppercase", color: theme.inkSoft,
-                }}>
-                  Steep
-                </label>
-                <div style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
-                  {displayTime}
-                </div>
-              </div>
-              <input
-                type="range"
-                min={timeSRange[0]}
-                max={timeSRange[1]}
-                step={15}
-                value={timeS}
-                onChange={(e) => setTimeS(Number(e.target.value))}
-                style={{
-                  width: "100%",
-                  accentColor: theme.sage,
-                }}
-              />
-              <RangeBands
-                rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
-                selected={bandSelected.timeS}
-                onSelect={(k) => selectBand("timeS", k)}
-              />
-              <div style={{
-                display: "flex", justifyContent: "space-between",
-                fontFamily: ff.mono, fontSize: 10, color: theme.ash, marginTop: 2,
-              }}>
-                <span>{Math.round(timeSRange[0] / 60)} min</span>
-                <span>{Math.round(timeSRange[1] / 60)} min</span>
-              </div>
-              <BandDescription axis="timeS" kind={bandSelected.timeS} />
+        /* BREW CONTROLS — a row in the tab dock, above Blend /
+           Herbanium, collapsed by default.
 
-              {/* No-overlap warning — fires when the blend has 2+ lead
-                  ingredients whose timeS ranges don't share a single
-                  window. A matcha (15-30s) + chamomile (300-420s)
-                  blend has no steep where both extract correctly;
-                  whatever the slider lands on, one lead is wrong.
-                  Only fires on lead vs lead — accents and
-                  catalysts are intentionally stretched. */}
-              {ingredients.length >= 2 && (() => {
-                const leads = ingredients
-                  .filter(({ role }) => (role || "lead") === "lead")
-                  .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
-                  .filter(({ meta }) => meta?.timeS);
-                if (leads.length < 2) return null;
-                const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
-                const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
-                if (intersectLo <= intersectHi) return null;
-                // Identify the two leads with the most extreme tension
-                // — one with the highest min, one with the lowest max.
-                const earliestEnder = leads.reduce((a, b) =>
-                  a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
-                const latestStarter = leads.reduce((a, b) =>
-                  a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
-                return (
+           They used to sit in the scroll flow between the graphs, which
+           forced a constraint on everything around them: the bars and
+           the sliders had to fit on one phone screen together or the
+           user never saw the bars respond. That is why Palate moved and
+           why the tour holds Simple mode. Moving them to the dock
+           dissolves it — they're on screen whatever is scrolled above,
+           and the dock is a flex sibling of the scroll pane, so the
+           space they take is space the pane simply doesn't have rather
+           than something they cover.
+
+           The dock, not a floating bar over the page: the controls are
+           app chrome, they should read as chrome, and a fixed overlay
+           positioned against the VIEWPORT spans the whole browser
+           window on desktop while the app itself is a 520px column.
+
+           Collapsed by default because the graphs are what the screen
+           is for. The collapsed row still reads the current brew, so
+           nothing is hidden — only the means of changing it. It's
+           styled as a peer of the sub-tab buttons underneath it, and
+           behaves like one: tap to make it active, and it opens. The
+           tour teaches the tap. */
+        if (!brewDock) return null;
+        // The wrapper is deliberately NOT scrollable. A max-height with
+        // overflow would make it a scroll parent, and the guided tour
+        // picks the pane it scrolls by looking for one — it would find
+        // this and try to fit the prediction bars inside the brew
+        // controls. The block is two sliders; if it ever outgrows the
+        // dock, shorten it rather than scroll it.
+        return createPortal(
+          <div style={{ borderBottom: `1px solid ${theme.ruleSoft}` }}>
+            <div style={{ padding: "8px 12px 0" }}>
+              <button
+                data-tour="blend-controls"
+                onClick={() => setControlsOpen(v => !v)}
+                aria-expanded={shownControlsOpen}
+                style={{
+                  width: "100%", background: "transparent", border: "none",
+                  cursor: "pointer", padding: "6px 4px 8px",
+                  display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8,
+                  // Matches the sub-tab buttons directly below: same
+                  // face, same active underline, same colour switch.
+                  fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
+                  fontWeight: shownControlsOpen ? 600 : 500,
+                  color: shownControlsOpen ? theme.terra : theme.inkSoft,
+                  borderBottom: shownControlsOpen
+                    ? `2px solid ${theme.terra}`
+                    : "2px solid transparent",
+                  marginBottom: -1,
+                  transition: "color 0.2s ease, border-color 0.2s ease",
+                }}
+              >
+                <span>Brew</span>
+                <span style={{
+                  fontFamily: ff.mono, fontSize: 11.5,
+                  color: shownControlsOpen ? theme.terra : theme.ash,
+                }}>
+                  {displayTemp} · {Math.round(timeS / 60)} min
+                </span>
+                {/* Same chevron as the "more filters" toggle on Compose,
+                    so an expanding control looks the same everywhere.
+                    Rotation is inverted here because this panel opens
+                    UPWARD out of the dock: pointing up means "expand",
+                    pointing down means "close". */}
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
+                     style={{
+                       transition: "transform 0.18s ease",
+                       transform: shownControlsOpen ? "rotate(0deg)" : "rotate(180deg)",
+                     }}>
+                  <path d="M1.5 3 L4.5 6 L7.5 3"
+                        stroke={shownControlsOpen ? theme.terra : theme.inkSoft}
+                        strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                </svg>
+              </button>
+            </div>
+            {shownControlsOpen && (
+              <div style={{ padding: "0 12px 4px" }}>
+                <div data-tour="blend-sliders">
+                  {/* ONE AXIS AT A TIME, chosen by the pill above it.
+                      The two sliders read as a symmetric pair and are
+                      nothing of the sort: temp spans 6 steps, steep 36.
+                      Side by side, steep would have fallen to ~4px per
+                      step on a 320px phone — below the point where you
+                      can land on a given minute. Stacked, they cost
+                      128px of a pane the dock is already taking from.
+
+                      Swapping instead of splitting keeps the full width
+                      for whichever slider is up, so steep holds the
+                      ~9px/step it has today and temp — which never
+                      needed the room — simply gets out of the way. The
+                      collapsed row still reads both values, so nothing
+                      is hidden by the choice; only one is adjustable at
+                      a time, and you adjust one at a time anyway. */}
                   <div style={{
-                    marginTop: 10,
-                    padding: "8px 10px",
-                    borderLeft: `2px solid ${theme.terra}`,
-                    background: "rgba(176,84,47,0.08)",
-                    borderRadius: "2px 6px 6px 2px",
-                    fontFamily: ff.serif, fontSize: 12.5,
-                    color: theme.ink, lineHeight: 1.5,
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    gap: 8, marginTop: 8, marginBottom: 4,
                   }}>
-                    <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-                      No shared steep window.
-                    </span>{" "}
-                    <span style={{ color: theme.terra, fontStyle: "normal" }}>
-                      {earliestEnder.meta.name}
-                    </span>{" "}
-                    finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
-                    <span style={{ color: theme.terra, fontStyle: "normal" }}>
-                      {latestStarter.meta.name}
-                    </span>{" "}
-                    needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
-                    lands, one lead won't extract right. Best to brew these separately.
+                    <div data-tour="blend-axis" style={{
+                      display: "inline-flex", flexShrink: 0,
+                      border: `1px solid ${theme.ruleSoft}`, borderRadius: 999,
+                      overflow: "hidden",
+                    }}>
+                      {[["timeS", "Time", theme.sage], ["tempC", "Temp", theme.terra]]
+                        .map(([key, label, accent]) => {
+                          const on = shownAxis === key;
+                          return (
+                            <button
+                              key={key}
+                              data-testid={`brew-axis-${key}`}
+                              onClick={() => setAxis(key)}
+                              aria-pressed={on}
+                              style={{
+                                // A filled pill, not the sub-tabs' underline:
+                                // the row of sub-tabs is inches below this and
+                                // two underlined tab strips would read as two
+                                // levels of navigation rather than a control.
+                                padding: "3px 11px", border: "none", cursor: "pointer",
+                                background: on ? accent : "transparent",
+                                color: on ? theme.cream : theme.inkSoft,
+                                fontFamily: ff.sans, fontSize: 10,
+                                letterSpacing: "0.08em", textTransform: "uppercase",
+                                fontWeight: on ? 600 : 500,
+                                transition: "background 0.18s ease, color 0.18s ease",
+                              }}
+                            >{label}</button>
+                          );
+                        })}
+                    </div>
+                    <div style={{
+                      display: "flex", alignItems: "baseline", gap: 6, minWidth: 0,
+                    }}>
+                      <span style={{
+                        fontFamily: ff.mono, fontSize: 10, color: theme.ash,
+                        whiteSpace: "nowrap",
+                      }}>
+                        {shownAxis === "tempC"
+                          ? `${tempMinDisplay}–${tempMaxDisplay}°`
+                          : `${Math.round(timeSRange[0] / 60)}–${Math.round(timeSRange[1] / 60)} min`}
+                      </span>
+                      {shownAxis === "tempC" && (() => {
+                        const hint = restHintForCelsius(tempC);
+                        if (!hint) return null;
+                        return (
+                          <span style={{
+                            fontFamily: ff.serif, fontStyle: "italic", fontSize: 10.5,
+                            color: theme.ash, textAlign: "right",
+                          }}>{hint}</span>
+                        );
+                      })()}
+                      <span style={{ fontFamily: ff.mono, fontSize: 13, color: theme.ink }}>
+                        {shownAxis === "tempC" ? displayTemp : displayTime}
+                      </span>
+                    </div>
                   </div>
-                );
-              })()}
+                  <div style={{ marginBottom: 6 }}>
+                    {shownAxis === "tempC" ? (
+                      <>
+                        <input
+                          type="range"
+                          aria-label="Water temperature"
+                          min={tempCRange[0]}
+                          max={tempCRange[1]}
+                          step={5}
+                          value={tempC}
+                          onChange={(e) => setTempC(Number(e.target.value))}
+                          style={{
+                            width: "100%", display: "block", margin: 0,
+                            accentColor: theme.terra,
+                          }}
+                        />
+                        <RangeBands
+                          rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
+                          selected={bandSelected.tempC}
+                          onSelect={(k) => selectBand("tempC", k)}
+                        />
+                        <BandDescription axis="tempC" kind={bandSelected.tempC} />
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="range"
+                          aria-label="Steep time"
+                          min={timeSRange[0]}
+                          max={timeSRange[1]}
+                          step={15}
+                          value={timeS}
+                          onChange={(e) => setTimeS(Number(e.target.value))}
+                          style={{
+                            width: "100%", display: "block", margin: 0,
+                            accentColor: theme.sage,
+                          }}
+                        />
+                        <RangeBands
+                          rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
+                          selected={bandSelected.timeS}
+                          onSelect={(k) => selectBand("timeS", k)}
+                        />
+                        <BandDescription axis="timeS" kind={bandSelected.timeS} />
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>,
+          brewDock,
+        );
+      })()}
 
-            </div>
+      {/* No-overlap warning — fires when the blend has 2+ lead
+          ingredients whose timeS ranges don't share a single window. A
+          matcha (15-30s) + chamomile (300-420s) blend has no steep where
+          both extract correctly; whatever the slider lands on, one lead
+          is wrong. Only fires on lead vs lead — accents and catalysts
+          are intentionally stretched.
+
+          It sat with the steep slider until the controls moved into the
+          tab dock. It's prose about the BLEND, not about where the
+          slider is, and putting conditional prose in the dock made the
+          dock's height jump by ~60px the moment a user added a second
+          lead. Controls in the chrome, explanation on the page. */}
+      {ingredients.length >= 2 && (() => {
+        const leads = ingredients
+          .filter(({ role }) => (role || "lead") === "lead")
+          .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
+          .filter(({ meta }) => meta?.timeS);
+        if (leads.length < 2) return null;
+        const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
+        const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
+        if (intersectLo <= intersectHi) return null;
+        // Identify the two leads with the most extreme tension — one
+        // with the highest min, one with the lowest max.
+        const earliestEnder = leads.reduce((a, b) =>
+          a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
+        const latestStarter = leads.reduce((a, b) =>
+          a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
+        return (
+          <div style={{
+            marginBottom: 12,
+            padding: "8px 10px",
+            borderLeft: `2px solid ${theme.terra}`,
+            background: "rgba(176,84,47,0.08)",
+            borderRadius: "2px 6px 6px 2px",
+            fontFamily: ff.serif, fontSize: 12.5,
+            color: theme.ink, lineHeight: 1.5,
+          }}>
+            <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+              No shared steep window.
+            </span>{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {earliestEnder.meta.name}
+            </span>{" "}
+            finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {latestStarter.meta.name}
+            </span>{" "}
+            needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
+            lands, one lead won't extract right. Best to brew these separately.
           </div>
         );
       })()}
 
-      {/* Mind and Body sit BELOW the sliders. The reading order is what
-          the cup TASTES like (flavour, palate) → the controls → what it
-          DOES to you (mind, body).
+      {/* Mind and Body read as what the cup DOES to you, after what it
+          TASTES like (flavour, palate) above them.
 
           Palate used to live down here and the mood strip up there, on
           the reasoning that flavour and mood were the prediction and
@@ -920,8 +1084,12 @@ export const BlendExtractionExplorer = ({
           the fold and the tour's bars-and-sliders check reported the
           pane cramping (60% clear, down from 67%). Two up and two down
           is both a truer grouping and less vertical load above the
-          controls. See the "bars and sliders visible together" test in
-          e2e/tours.spec.ts, which pins it. */}
+          controls.
+
+          Pinning the controls settled the cramping for good — they no
+          longer compete with the strips for the same screen — but the
+          grouping is right on its own terms, so it stays. The "bars and
+          sliders stay clear" test in e2e/tours.spec.ts still pins it. */}
       <div data-tour="blend-effects" style={{ marginBottom: 12 }}>
         <MindMap
           ingredients={ingredients}

@@ -112,8 +112,82 @@ for (const withBrew of [false, true]) {
       const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
       await search.fill("chamomile");
       await page.getByRole("button", { name: /chamomile/i }).first().click();
-      await expect(page.locator('[data-tour="blend-sliders"]'),
-        "a pot should expose brew controls").toBeVisible();
+      // The brew controls are a row in the tab dock, above Blend /
+      // Herbanium, and they arrive OPEN. That's the deliberate part: a
+      // first-time user who never taps the row never learns the cup is
+      // adjustable, so the sliders are on screen from the start.
+      const controls = page.locator('[data-tour="blend-controls"]');
+      const sliders = page.locator('[data-tour="blend-sliders"]');
+      await expect(controls, "a pot should expose the brew row").toBeVisible();
+      await expect(sliders, "and it should arrive open, not hidden behind a tap")
+        .toBeVisible();
+      // The chevron is what says the row folds — open it points down
+      // (close), shut it points up (expand). Asserted as a rotation
+      // matrix because that's what getComputedStyle resolves a transform
+      // to: rotate(180deg) is (-1,0,0,-1).
+      const chevron = controls.locator("svg");
+      await expect(chevron, "open, the arrow points down")
+        .toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+
+      // How much of the page the controls cost. They live in the dock,
+      // which is a flex sibling of the scroll pane rather than an
+      // overlay, so every pixel they take comes straight off the pane —
+      // that's the whole reason the block is condensed, and why opening
+      // by default was only affordable once it was. Measured as a ratio,
+      // not a pixel budget: WebKit renders this text ~35% taller than
+      // Chromium and a hardcoded height would only ever describe
+      // whichever engine happened to be measured.
+      const paneHeight = () => page.evaluate(() => {
+        const pane = [...document.querySelectorAll("*")].find(n => {
+          const s = getComputedStyle(n as HTMLElement);
+          return (s.overflowY === "auto" || s.overflowY === "scroll")
+            && (n as HTMLElement).scrollHeight > (n as HTMLElement).clientHeight;
+        });
+        return pane ? pane.getBoundingClientRect().height : 0;
+      });
+      const openPane = await paneHeight();
+      expect(openPane, "the page should be scrolling to begin with").toBeGreaterThan(0);
+
+      // Folding it away has to work and has to give the page back.
+      await controls.click();
+      await expect(sliders, "tapping the row should fold the controls away").toBeHidden();
+      await expect(controls, "shut, it still reads the brew")
+        .toContainText(/\d+\s*°[CF].*\d+\s*min/s);
+      await expect(chevron, "and the arrow flips to point up")
+        .toHaveCSS("transform", "matrix(-1, 0, 0, -1, 0, 0)");
+
+      const shutPane = await paneHeight();
+      expect(openPane / shutPane,
+        `open controls should leave most of the page (${Math.round(openPane)}px of ${Math.round(shutPane)}px)`)
+        .toBeGreaterThan(0.6);
+
+      await controls.click();
+      await expect(sliders, "and tapping again brings them back").toBeVisible();
+
+      // One slider at a time, swapped by the pills — which is what buys
+      // the width back. The point of the whole arrangement is that the
+      // slider on screen spans the full row, so assert that rather than
+      // just that the pills toggle something.
+      //
+      // It opens on TIME: 36 steps against temperature's 6, so a first
+      // drag moves the prediction bars as a gradient instead of in six
+      // jumps. Asserted, not assumed — "which slider you meet first" is
+      // a deliberate choice and silently flipping it would undo it.
+      const slider = page.locator('[data-tour="blend-sliders"] input[type=range]');
+      await expect(slider, "exactly one slider should be on screen").toHaveCount(1);
+      await expect(page.getByTestId("brew-axis-timeS"),
+        "a fresh pot should open on Time").toHaveAttribute("aria-pressed", "true");
+      const timeWidth = (await slider.boundingBox())!.width;
+      const timeMax = await slider.getAttribute("max");
+
+      await page.getByTestId("brew-axis-tempC").click();
+      await expect(slider, "still exactly one after swapping").toHaveCount(1);
+      expect(await slider.getAttribute("max"),
+        "the pills should swap which axis is bound").not.toBe(timeMax);
+      expect((await slider.boundingBox())!.width,
+        "and the temp slider should get the same full width time had")
+        .toBeCloseTo(timeWidth, 0);
+
       await expect(page.locator('[data-tour="blend-brew"]'),
         "and a way to brew or save it").toBeVisible();
     });
