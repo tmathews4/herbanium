@@ -219,9 +219,15 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
       <div
         id={BREW_DOCK_ID}
         style={overlayOpen ? { display: "none" } : {
-          background: "rgba(var(--ivory-rgb),0.72)",
-          backdropFilter: "blur(14px) saturate(1.1)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+          // THE BLUR RADIUS IS THE KNOB, not the alpha. At blur(14px)
+          // the strips behind smear into a uniform cream, and dropping
+          // the fill from 0.72 all the way to 0.28 looked identical —
+          // opacity can't reveal shapes the blur has already destroyed.
+          // 4px keeps the bars legible as bars while still softening
+          // them enough that the readout on top stays readable.
+          background: "rgba(var(--ivory-rgb),0.45)",
+          backdropFilter: "blur(4px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(4px) saturate(1.1)",
         }}
       />
       {/* NAVIGATION SITS ON SOLID GROUND. Opaque, unlike the brew row
