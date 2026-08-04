@@ -179,6 +179,30 @@ test("no ingredient ships an effect its research doesn't prescribe", () => {
     `unsourced effects — add the research first, then transcribe:\n    ${offenders.join("\n    ")}`);
 });
 
+// Docs that deliberately describe a CATEGORY rather than one shipped
+// ingredient. green-tea.md covers green tea as a class; the catalogue
+// ships sencha, dragonwell, gunpowder and the rest individually.
+const CATEGORY_DOCS = new Set(["green-tea"]);
+
+test("no research doc is orphaned from the ingredient it describes", () => {
+  // white tea's 397-line doc sat in white-tea.md while the profile id
+  // is `white`, so the resolver matched neither "white-tea" nor
+  // "whitetea" and the doc was never checked against anything. The
+  // drift audit had been printing it under "DOC WITHOUT A MATCHING
+  // PROFILE ID" the whole time, which reads as a filing note rather
+  // than an ingredient with no oversight. Renaming it to white.md
+  // immediately surfaced a real strength disagreement.
+  //
+  // Same shape as the lemon-balm hole: a doc that isn't reachable
+  // can't guard anything.
+  const orphans = readdirSync(DOCS).filter(f => f.endsWith(".md"))
+    .map(f => f.replace(/\.md$/, ""))
+    .filter(slug => !CATEGORY_DOCS.has(slug))
+    .filter(slug => ![slug, slug.replace(/-/g, "")].some(c => EXTRACTION_PROFILES[c]));
+  assert(orphans.length === 0,
+    `research docs matching no ingredient — nothing checks these:\n    ${orphans.join("\n    ")}`);
+});
+
 test("no two research docs claim the same ingredient", () => {
   // Doc -> id resolution tries the slug and the slug without dashes, so
   // lemon-balm.md and lemonbalm.md BOTH resolved to `lemonbalm` and the
@@ -397,6 +421,18 @@ test("the known-undescribed list has no stale entries", () => {
 // compared magnitudes at all, so a claim could sit at 6x its researched
 // strength with the whole suite green.
 const KNOWN_STRENGTH_DRIFT = new Set([
+  // white@95:focus — doc 4, app 2, and this one is a genuine
+  // disagreement rather than a transcription slip. The doc rates focus
+  // 4 at 95C on compound grounds: its own range note says 95C "yields
+  // highest polyphenol content (Yang 2018)... but flavor suffers". The
+  // app models the FELT cup, where focus drops as catechins mask
+  // theanine — which is how sencha, gyokuro and dragonwell are all
+  // modelled at their top temperatures.
+  //
+  // Surfaced only now because white tea's research lived in
+  // white-tea.md, which bound to no profile id, so nothing had ever
+  // compared the two. Left for a human call on which reading wins.
+  "white@95:focus",
   // EMPTY. Of the 13 that sat here, five were real and were transcribed
   // to their researched values — cranberry's uplifting and cooling,
   // lemon-peel's cooling, licorice-root's warming, all cases of the app

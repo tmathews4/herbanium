@@ -368,3 +368,23 @@
    produce the cooling aromatics). Like Darjeeling muscatel, this
    is a terroir × seasonality phenomenon that fixed-data systems
    can't fully represent.
+
+---
+
+## Addendum — `digestive` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found it declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `digestive`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | digestive | 2 | Mild traditional claim; modest clinical evidence for black tea |
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: digestive -->

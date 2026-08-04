@@ -353,13 +353,13 @@ export const EXTRACTION_PROFILES = {
     // past-peak knots aren't a stylistic choice — they're what
     // actually happens to the leaf when brewed wrong.
     { tempC: 50,  timeS: 60,  flavors: ["umami", "sweet"],
-      effects: [["focus", 3], ["calm", 3], ["energy", 2], ["uplifting", 2]],
+      effects: [["focus", 3], ["calm", 3], ["energy", 2], ["uplifting", 2], ["soothing", 2], ["grounding", 1]],
       character: "Ultra-gentle gyokuro — pure sweet umami, a delicate brew." },
     { tempC: 55,  timeS: 100, flavors: ["umami", "marine", "sweet", "buttery"],
-      effects: [["focus", 5], ["calm", 4], ["energy", 3], ["uplifting", 2]],
+      effects: [["focus", 5], ["calm", 4], ["energy", 3], ["uplifting", 2], ["soothing", 2], ["grounding", 1]],
       character: "The classic cup. Dense umami, deep focus, meditative." },
     { tempC: 60,  timeS: 120, flavors: ["umami", "marine", "sweet", "buttery", "seaweed"],
-      effects: [["focus", 5], ["calm", 3], ["energy", 3], ["bitterness", 1], ["cooling", 2]],
+      effects: [["focus", 5], ["calm", 3], ["energy", 3], ["bitterness", 1], ["cooling", 2], ["soothing", 2], ["grounding", 1]],
       character: "Fuller body. Seaweed notes deepen; slight brisk edge." },
     { tempC: 70,  timeS: 120,
       flavorStrengths: [
@@ -526,7 +526,7 @@ export const EXTRACTION_PROFILES = {
   // by tannin grip, not boil-off). Light (idx 0) keeps auto.
   white: [
     { tempC: 75,  timeS: 120, flavors: ["sweet", "delicate", "floral"],
-      effects: [["calm", 2], ["energy", 2]],
+      effects: [["calm", 2], ["energy", 2], ["uplifting", 2], ["cooling", 2]],
       character: "Light white tea — ghost-sweet, barely extracted, floral whispers." },
     { tempC: 80,  timeS: 180,
       flavorStrengths: [
@@ -534,7 +534,7 @@ export const EXTRACTION_PROFILES = {
         ["floral", 2.0], ["apricot", 1.6], ["melon", 1.3],
         ["delicate", 1.1],
       ],
-      effects: [["calm", 3], ["energy", 3], ["focus", 3]],
+      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["uplifting", 3], ["cooling", 2]],
       character: "The standard cup. Full silver-needle — honeyed top, hay body, soft stone-fruit and floral edges." },
     { tempC: 82,  timeS: 210,
       flavorStrengths: [
@@ -542,34 +542,34 @@ export const EXTRACTION_PROFILES = {
         ["floral", 2.0], ["apricot", 1.6], ["melon", 1.3],
         ["delicate", 0.9],
       ],
-      effects: [["calm", 3], ["energy", 3], ["focus", 3]],
+      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["uplifting", 3], ["cooling", 2]],
       character: "The sweet peak. Full honeyed silver-needle — the leaf's gentlest window before tannins tighten." },
     { tempC: 85,  timeS: 240,
       flavorStrengths: [
         ["honey", 3.0], ["hay", 3.0], ["apricot", 1.4], ["melon", 1.2],
         ["woody", 1.5], ["delicate", 0.7], ["astringent", 2.5],
       ],
-      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2]],
+      effects: [["calm", 3], ["energy", 3], ["focus", 3], ["bitterness", 2], ["uplifting", 3], ["cooling", 2]],
       character: "Past the leaf's tolerance. Honey thins; hay turns tannic." },
     { tempC: 95,  timeS: 270,
       flavorStrengths: [
         ["astringent", 4.0], ["hay", 2.5], ["bitter", 2.5],
         ["woody", 2.0], ["honey", 1.0],
       ],
-      effects: [["energy", 3.5], ["focus", 2], ["bitterness", 3]],
+      effects: [["energy", 3.5], ["focus", 2], ["bitterness", 3], ["cooling", 2]],
       character: "Delicate leaf overrun — catechins outpace the Maillard sweetness, the cup turns tannic and hay-flat." },
   ],
 
   // ─── True teas: Oolong ────────────────────────────────────────
   oolong: [
     { tempC: 85,  timeS: 90,  flavors: ["floral", "fruit", "orchid", "sweet", "delicate"],
-      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["uplifting", 3]],
+      effects: [["focus", 2], ["calm", 2], ["energy", 2], ["uplifting", 3], ["soothing", 2]],
       character: "Light oolong — floral top with orchid edge, gentle lift, early extraction." },
     { tempC: 90,  timeS: 135, flavors: ["floral", "honey", "fruit", "orchid", "peach", "creamy", "toasted"],
-      effects: [["focus", 3], ["calm", 2], ["energy", 3], ["uplifting", 3], ["warming", 2]],
+      effects: [["focus", 3], ["calm", 2], ["energy", 3], ["uplifting", 3], ["warming", 2], ["soothing", 2]],
       character: "The standard cup. Full oolong spectrum — orchid, stone fruit, honey-creamy body, toasted edge." },
     { tempC: 95,  timeS: 180, flavors: ["floral", "honey", "fruit", "peach", "toasted", "mineral", "astringent"],
-      effects: [["focus", 3], ["calm", 1], ["energy", 3], ["bitterness", 2], ["warming", 4], ["grounding", 2]],
+      effects: [["focus", 3], ["calm", 1], ["energy", 3], ["bitterness", 2], ["warming", 4], ["grounding", 2], ["soothing", 2]],
       character: "Long pull. Floral notes thin, mineral and tannin take the stage." },
   ],
 
@@ -607,13 +607,13 @@ export const EXTRACTION_PROFILES = {
 
   ceylon: [
     { tempC: 95,  timeS: 120, flavors: ["citrus", "bright", "honey"],
-      effects: [["energy", 2], ["focus", 2], ["uplifting", 3], ["warming", 3]],
+      effects: [["energy", 2], ["focus", 2], ["uplifting", 3], ["warming", 3], ["digestive", 2]],
       character: "Light ceylon — citrus-honey top, gentle lift, quick brew." },
     { tempC: 98,  timeS: 200, flavors: ["citrus", "bright", "brisk", "honey", "woody", "spiced"],
-      effects: [["energy", 3], ["focus", 3], ["uplifting", 3], ["warming", 3]],
+      effects: [["energy", 3], ["focus", 3], ["uplifting", 3], ["warming", 3], ["digestive", 2]],
       character: "The standard cup. Full ceylon — crisp citrus, honeyed body, faint cinnamon edge, takes milk well." },
     { tempC: 100, timeS: 240, flavors: ["citrus", "bright", "brisk", "honey", "woody", "spiced", "astringent"],
-      effects: [["energy", 3], ["focus", 2], ["bitterness", 2], ["uplifting", 3], ["warming", 4]],
+      effects: [["energy", 3], ["focus", 2], ["bitterness", 2], ["uplifting", 3], ["warming", 4], ["digestive", 2]],
       character: "Stronger pull. Tannins assert; classic English-breakfast strength." },
   ],
 
@@ -635,28 +635,28 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [
         ["smoked", 3.0], ["pine", 1.8], ["campfire", 1.2], ["woody", 1.0],
       ],
-      effects: [["energy", 2], ["warming", 3], ["digestive", 1], ["grounding", 2]],
+      effects: [["energy", 2], ["warming", 3], ["digestive", 1], ["grounding", 2], ["focus", 2]],
       character: "Warming pour — smoke emerging cleanly, no tannin grip yet, the gentler register." },
     { tempC: 95,  timeS: 200,
       flavorStrengths: [
         ["smoked", 4.0], ["pine", 2.5], ["campfire", 2.0], ["leather", 1.2],
         ["tar", 0.8], ["woody", 0.6],
       ],
-      effects: [["energy", 3], ["warming", 4], ["digestive", 2], ["grounding", 3]],
+      effects: [["energy", 3], ["warming", 4], ["digestive", 2], ["grounding", 3], ["focus", 2]],
       character: "The canonical cup. Full campfire — pine smoke, leather, soft tar — singular and warming." },
     { tempC: 100, timeS: 240,
       flavorStrengths: [
         ["smoked", 4.5], ["pine", 3.0], ["campfire", 2.5], ["leather", 2.0],
         ["tar", 1.8], ["astringent", 2.5], ["woody", 0.5],
       ],
-      effects: [["energy", 3], ["warming", 4], ["digestive", 2], ["bitterness", 2], ["grounding", 4]],
+      effects: [["energy", 3], ["warming", 4], ["digestive", 2], ["bitterness", 2], ["grounding", 4], ["focus", 2]],
       character: "Pushed — smoke holds strong but black-tea catechins surface underneath, tannin grip emerging." },
     { tempC: 100, timeS: 360,
       flavorStrengths: [
         ["smoked", 4.5], ["astringent", 4.0], ["tar", 2.8], ["bitter", 2.5],
         ["pine", 2.5], ["leather", 2.0],
       ],
-      effects: [["energy", 3], ["warming", 4], ["bitterness", 3.5], ["grounding", 4], ["digestive", 2]],
+      effects: [["energy", 3], ["warming", 4], ["bitterness", 3.5], ["grounding", 4], ["digestive", 2], ["focus", 2]],
       character: "Over-pulled — smoke saturated, tannin and tar dominate the back palate, comfort recedes behind the grip." },
   ],
 
@@ -668,13 +668,13 @@ export const EXTRACTION_PROFILES = {
   // This is why pu-erh's doc rows never pair for the strength audit.
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
-      effects: [["digestive", 2], ["grounding", 2], ["warming", 1.5], ["comfort", 2]],
+      effects: [["digestive", 2], ["grounding", 2], ["warming", 1.5], ["comfort", 2], ["focus", 2]],
       character: "Light puerh — earthy wash, mushroom-damp, quick and mild. Traditional first-pour." },
     { tempC: 98,  timeS: 90,  flavors: ["earthy", "woody", "mushroom", "dark", "leather"],
-      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["comfort", 2]],
+      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["comfort", 2], ["focus", 2]],
       character: "The standard cup. Full puerh — earth, damp wood, mushroom depth, leather warmth." },
     { tempC: 100, timeS: 180, flavors: ["earthy", "woody", "mushroom", "dark", "leather", "mineral", "astringent"],
-      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["bitterness", 2], ["energy", 2]],
+      effects: [["digestive", 3], ["grounding", 3], ["warming", 2], ["bitterness", 2], ["energy", 2], ["focus", 2]],
       character: "Deep extraction. Mineral depth at maximum; tannins climb behind it." },
   ],
 
@@ -798,20 +798,20 @@ export const EXTRACTION_PROFILES = {
   // ─── Caffeinated herbal ─────────────────────────────────────
   "yerba-mate": [
     { tempC: 70, timeS: 60,  flavors: ["earthy", "grassy"],
-      effects: [["energy", 3], ["focus", 2], ["uplifting", 1]],
+      effects: [["energy", 3], ["focus", 2], ["uplifting", 1], ["warming", 1]],
       character: "First fill — bright and herbal, the gentle wake." },
     { tempC: 78, timeS: 180, flavors: ["earthy", "grassy", "herbaceous", "bitter"],
-      effects: [["energy", 4], ["focus", 3], ["digestive", 2], ["uplifting", 2]],
+      effects: [["energy", 4], ["focus", 3], ["digestive", 2], ["uplifting", 2], ["warming", 1]],
       character: "The classic gourd cup. Full mate — the durative caffeine pull." },
     { tempC: 85, timeS: 300, flavors: ["earthy", "grassy", "herbaceous", "bitter", "smoky"],
-      effects: [["energy", 4], ["focus", 3], ["bitterness", 2], ["uplifting", 2]],
+      effects: [["energy", 4], ["focus", 3], ["bitterness", 2], ["uplifting", 2], ["warming", 1]],
       character: "Pushed long. Saponins surface — tongue-coating bitter." },
     { tempC: 95, timeS: 360,
       flavorStrengths: [
         ["bitter", 4.0], ["astringent", 3.5], ["harsh", 3.0],
         ["earthy", 2.5], ["herbaceous", 2.0], ["smoky", 1.8],
       ],
-      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5], ["uplifting", 2]],
+      effects: [["energy", 4], ["focus", 2], ["bitterness", 3.5], ["uplifting", 2], ["warming", 1]],
       character: "The 'quemado' cup — water too hot for the gourd. Saponins and chlorogenic acids strip the herb of its bright top, leaving harsh-bitter under-tongue." },
   ],
 

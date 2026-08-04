@@ -419,3 +419,23 @@
    Darjeeling muscatel.** Worth noting in cross-references — the
    same insect-mediated flavor development operates in both teas.
    Tea education benefits from this connection.
+
+---
+
+## Addendum — `soothing` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found it declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `soothing`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | soothing | 2 | Quality oolong has a meditative, ritual quality — especially when brewed gongfu |
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: soothing -->

@@ -436,3 +436,27 @@
    quality marker for Gyokuro, but Western-market tea education
    often treats this as a flaw. Worth flagging in user-facing
    copy so newcomers expect (and appreciate) this character.
+
+---
+
+## Addendum — `soothing` and `grounding` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found both declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `soothing` and `grounding`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | soothing | 2 | The meditative ritual quality of proper Gyokuro brewing soothes |
+> | grounding | 1 | Slight — the deep mouthfeel has grounding quality |
+
+Both are carried only at 50-60C, the band §6 describes as proper
+gyokuro. Above that the cup is no longer the thing §5 is rating.
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: soothing, grounding -->

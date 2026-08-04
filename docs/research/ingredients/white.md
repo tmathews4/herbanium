@@ -395,3 +395,28 @@
    headed uplift" feeling is somewhere between focus (mental
    clarity) and uplifting (mood lift) — both are listed here to
    capture the full character.
+
+---
+
+## Addendum — `uplifting` and `cooling` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found both declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `uplifting` and `cooling`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | uplifting | 3 | The delicate, bright character lifts without stimulating |
+> | cooling | 2 | TCM Yin energy — minimally processed, lighter than black tea |
+
+`uplifting` is not carried at the 95C over-pull row, where the profile
+already drops calm and most of focus — a cup past its point does not
+lift.
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: uplifting, cooling -->

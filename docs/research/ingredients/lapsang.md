@@ -442,3 +442,26 @@
    genuinely earns it — but worth checking against future
    ingredients (pu-erh especially) to ensure relative calibration
    stays consistent.
+
+---
+
+## Addendum — `focus` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found it declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `focus`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | focus | 2 | Caffeine + some L-theanine; not the primary register for this tea |
+
+Not carried at the 70C row, which is a single-effect token pour rather
+than a formed cup.
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: focus -->

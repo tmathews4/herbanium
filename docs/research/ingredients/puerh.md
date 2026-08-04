@@ -501,3 +501,27 @@ unchanged; the word is corrected.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+---
+
+## Addendum — `focus` transcribed from §5 (2026-08-03)
+
+An audit of unreachable properties found it declared on the
+ingredient card and named nowhere in the extraction profile — so the
+page promised a property no cup could ever show.
+
+The research was there the whole time. §5 rates `focus`, and the
+§6 brew-point tables simply never carried it; the transcription pass
+that built the profiles worked from §6 alone.
+
+> | focus | 2 | Lower than other true teas. Pu-erh lacks the L-theanine + caffeine synergy |
+
+Rated low deliberately — §5 is explicit that pu-erh has essentially no
+L-theanine, so this is caffeine-only alertness rather than the
+theanine-shaped focus green teas carry.
+
+Transcribed at the §5 strength. Nothing new is claimed here — this
+closes the gap between what the card promises and what a cup can
+deliver.
+
+<!-- sourced-effects: focus -->
