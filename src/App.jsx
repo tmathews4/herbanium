@@ -219,15 +219,25 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
       <div
         id={BREW_DOCK_ID}
         style={overlayOpen ? { display: "none" } : {
-          // THE BLUR RADIUS IS THE KNOB, not the alpha. At blur(14px)
-          // the strips behind smear into a uniform cream, and dropping
-          // the fill from 0.72 all the way to 0.28 looked identical —
-          // opacity can't reveal shapes the blur has already destroyed.
-          // 4px keeps the bars legible as bars while still softening
-          // them enough that the readout on top stays readable.
-          background: "rgba(var(--ivory-rgb),0.45)",
-          backdropFilter: "blur(4px) saturate(1.1)",
-          WebkitBackdropFilter: "blur(4px) saturate(1.1)",
+          // A MILD EFFECT ON PURPOSE — depth, not a window.
+          //
+          // The blur radius, not the alpha, is what controls whether
+          // anything behind survives as a shape: at 14px the strips
+          // smear to a uniform cream, and dropping the fill from 0.72
+          // through 0.28 looked identical, because opacity can't reveal
+          // what the blur has already destroyed.
+          //
+          // 4px/0.45 was tried and reverted. It worked — you could read
+          // the flavour bars through the row — and that was the problem.
+          // The RANGE BAND under the slider is itself a coloured bar
+          // saying where the recommended brew sits, and other coloured
+          // bars drifting behind it made it ambiguous which bar was the
+          // recommendation. The one element here that must be
+          // unmistakable is the one that competes most directly with
+          // what's underneath.
+          background: "rgba(var(--ivory-rgb),0.72)",
+          backdropFilter: "blur(14px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
         }}
       />
       {/* NAVIGATION SITS ON SOLID GROUND. Opaque, unlike the brew row
