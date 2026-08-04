@@ -234,7 +234,7 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
         </div>
       </div>
 
-      {/* Tabs — match the Apothecarium/Journal sub-tab dock pattern
+      {/* Tabs — match the Apothecary/Journal sub-tab dock pattern
           (sans-uppercase, terra-on-active, weight-shift on active)
           so the IngredientDetail's tabs read as part of the same
           tab system instead of a one-off serif treatment. */}

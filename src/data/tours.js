@@ -28,7 +28,7 @@ export const SCREEN_TOURS = {
   ],
   blend: [
     { target: "blend-search", title: "Add ingredients", pad: 6,
-      body: "Search or filter the apothecarium, then tap an ingredient to drop it in your pot." },
+      body: "Search or filter the apothecary, then tap an ingredient to drop it in your pot." },
     { target: "blend-quantity", title: "Set the parts", pad: 8,
       body: "We've dropped in an example blend. Use − / + to set each ingredient's “parts” — its share of the cup. The most parts leads; the others accent it." },
     // The toggle gets demonstrated rather than described — one step per
@@ -104,7 +104,7 @@ export const SCREEN_TOURS = {
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,
-      body: "The Apothecarium has two sides — Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
+      body: "The Apothecary has two sides — Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
   ],
   herbanium: [
     { target: "herb-search", title: "The compendium", pad: 6,

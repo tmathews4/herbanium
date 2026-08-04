@@ -48,8 +48,8 @@ test.describe("a minimized brew survives the whole app", () => {
     // screen has actually rendered, so a silently blank tab fails.
     const stops: Array<[string, string | null, string]> = [
       ["Home",         null,           '[data-tour="home-experiment"]'],
-      ["Apothecarium", null,           '[data-tour="blend-search"]'],
-      ["Apothecarium", "Herbanium",    '[data-tour="herb-search"]'],
+      ["Apothecary", null,           '[data-tour="blend-search"]'],
+      ["Apothecary", "Herbanium",    '[data-tour="herb-search"]'],
       ["Journal",      "Recipes",      '[data-tour="recipes-filter"]'],
       ["Journal",      "Reflections",  '[data-tour="reflections-log"]'],
       ["Journal",      "Field Notes",  '[data-tour="fieldnotes-lodestone"]'],
@@ -73,7 +73,7 @@ test.describe("a minimized brew survives the whole app", () => {
     async ({ page }) => {
       const before = (await banner(page).innerText()).trim();
 
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       await openTab(page, "Home");
       await expect(banner(page)).toBeVisible();
 
@@ -97,7 +97,7 @@ test.describe("a minimized brew survives the whole app", () => {
     // The steep overlay is technically still open while minimized. If
     // it were still capturing pointer events, everything below would be
     // dead — so exercise a real control, not just visibility.
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     await openSubTab(page, "Herbanium");
     const search = page.locator('[data-tour="herb-search"]').getByRole("textbox").first();
     await search.fill("chamomile");

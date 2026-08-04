@@ -329,7 +329,7 @@ export const ATTRIBUTES = [
     earned: ctx => ctx.lifetime.distinctIngredients >= Math.floor(ctx.allIngs.length * 0.25) },
   { id: "apothecary-master", name: "The Wayfarer-Hare", rarity: "legendary", window: "lifetime",
     glyph: "leaf", tint: "plum", frame: "diamond", accent: "rays",
-    desc: "White hare with knowing eyes, a small bundle of bound herbs at its paws. Drawn by a journey through half the apothecarium.",
+    desc: "White hare with knowing eyes, a small bundle of bound herbs at its paws. Drawn by a journey through half the apothecary.",
     earned: ctx => ctx.lifetime.distinctIngredients >= Math.floor(ctx.allIngs.length * 0.5) },
   { id: "lavandiere-life", name: "The Naiad", rarity: "rare", window: "lifetime",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "star",
@@ -1254,11 +1254,11 @@ export const ATTRIBUTES = [
   //     "The {adjective} {creature}" for each user. ──────────────────
   { id: "first-apothecary", name: "The Stoat", rarity: "common", window: "lifetime",
     glyph: "leaf", tint: "ochre", frame: "circle", accent: "none",
-    desc: "Sleek hunter that pokes its head into every burrow at the meadow's edge. Drawn by your first step into the apothecarium.",
+    desc: "Sleek hunter that pokes its head into every burrow at the meadow's edge. Drawn by your first step into the apothecary.",
     earned: ctx => tabVisitedAtLeast(ctx, "apothecary", 1) },
   { id: "apothecary-regular", name: "The Mole", rarity: "uncommon", window: "lifetime",
     glyph: "leaf", tint: "sage", frame: "hex", accent: "dot",
-    desc: "Velvet-coated burrower keeping a dozen tunnels in the same dark soil. Drawn by returning to the apothecarium, again and again.",
+    desc: "Velvet-coated burrower keeping a dozen tunnels in the same dark soil. Drawn by returning to the apothecary, again and again.",
     earned: ctx => tabVisitedAtLeast(ctx, "apothecary", 10) },
   // Internal tab id stays "shelf" — that's the long-lived visit-counter
   // key from before the rename. User-facing copy uses the new name
@@ -1277,7 +1277,7 @@ export const ATTRIBUTES = [
     earned: ctx => tabVisitedAtLeast(ctx, "profile", 1) },
   { id: "four-corners", name: "The Wandering-Fox", rarity: "uncommon", window: "lifetime",
     glyph: "compass", tint: "ochre", frame: "diamond", accent: "rays",
-    desc: "Russet-coated walker who has set foot in every corner of the wood. Drawn by visiting all four surfaces — home, apothecarium, notebook, profile.",
+    desc: "Russet-coated walker who has set foot in every corner of the wood. Drawn by visiting all four surfaces — home, apothecary, notebook, profile.",
     earned: ctx =>
          tabVisitedAtLeast(ctx, "home", 1)
       && tabVisitedAtLeast(ctx, "apothecary", 1)

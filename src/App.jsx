@@ -151,7 +151,7 @@ const TourOfferCard = ({ onYes, onNo }) => (
 const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeAction, setShelfModeAction, barRef, overlayOpen }) => {
   const tabs = [
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
-    { k: "apothecary", label: "Apothecarium", icon: <Flask size={18} /> },
+    { k: "apothecary", label: "Apothecary", icon: <Flask size={18} /> },
     { k: "shelf",      label: "Journal",   icon: <Pencil size={18} /> },
     { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
   ];
@@ -843,7 +843,7 @@ export default function App() {
     });
     // Chance-based elemental roll on tab visit. Each tab maps to its
     // own action key — different elementals live in different visit
-    // pools, so opening apothecary can land an apothecarium-themed
+    // pools, so opening apothecary can land an apothecary-themed
     // creature while opening notebook lands a journal-keeper.
     tryRollOnAction(`visit:${tab}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1204,7 +1204,7 @@ export default function App() {
     if (apothecaryMode === "forward") setApothecaryMode("reverse");
     // The Crystalarium experiment briefly lived here; rolled back
     // to Notebook → Visitors. Bump anyone persisted there back to
-    // the apothecarium's default Blend mode.
+    // the apothecary's default Blend mode.
     if (apothecaryMode === "crystalarium") setApothecaryMode("reverse");
   }, [apothecaryMode]);
   const [shelfMode, setShelfMode]           = usePersistedState("shelfMode", "recipes");

@@ -54,14 +54,14 @@ test.describe("tab + sub-tab render regression", () => {
     await expect(page.locator('[data-tour="home-experiment"]')).toBeVisible();
   });
 
-  test("Apothecarium · Blend", async ({ page }) => {
-    await openTab(page, "Apothecarium");
+  test("Apothecary · Blend", async ({ page }) => {
+    await openTab(page, "Apothecary");
     await expect(page.locator('[data-tour="subtabs"]')).toBeVisible();
     await expect(page.locator('[data-tour="blend-search"]')).toBeVisible();
   });
 
-  test("Apothecarium · Herbanium", async ({ page }) => {
-    await openTab(page, "Apothecarium");
+  test("Apothecary · Herbanium", async ({ page }) => {
+    await openTab(page, "Apothecary");
     await openSubTab(page, "Herbanium");
     await expect(page.locator('[data-tour="herb-search"]')).toBeVisible();
   });

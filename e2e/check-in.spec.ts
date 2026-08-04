@@ -66,7 +66,7 @@ test.describe("post-brew check-in notice", () => {
     await brewACup(page);
     await notice(page).getByRole("button", { name: "dismiss" }).click();
     await expect(notice(page)).toBeHidden();
-    await page.getByRole("button", { name: "Apothecarium", exact: true }).click();
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
     await page.getByRole("button", { name: "Home", exact: true }).click();
     await expect(notice(page), "a dismissed notice should not come back").toBeHidden();
   });

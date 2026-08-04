@@ -20,14 +20,14 @@
    Each elemental's display data (name, desc, glyph, frame, accent,
    tint, rarity) still comes from attributes.js — only the *when*
    has changed. The desc still hints at the action that earned it
-   ("Drawn by your first step into the apothecarium"); now those
+   ("Drawn by your first step into the apothecary"); now those
    hints describe the action *category* the roll fired on, not a
    specific milestone count.
    ────────────────────────────────────────────────────────────── */
 
 // Action vocabulary. Each value is a string the action sites pass to
 // rollOnAction; matched against an elemental's TRIGGER pool.
-//   visit:apothecary  — opening the apothecarium tab
+//   visit:apothecary  — opening the apothecary tab
 //   visit:shelf       — opening the notebook tab
 //   visit:profile     — opening the profile tab
 //   visit:home        — opening home (or arriving on it)

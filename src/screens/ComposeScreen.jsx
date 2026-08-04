@@ -1313,7 +1313,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           immediately. The pot below fills as ingredients are added,
           sitting next to the brewer so the pot contents stay visible
           while the user slides temperature/time. */}
-      <SectionLabel n="i">Add from the apothecarium</SectionLabel>
+      <SectionLabel n="i">Add from the apothecary</SectionLabel>
       <div style={{
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
@@ -1553,7 +1553,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
               fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
               color: theme.ash, padding: "12px 0", textAlign: "center",
             }}>
-              no match in your apothecarium.
+              no match in your apothecary.
             </div>
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>

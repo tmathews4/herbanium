@@ -2,7 +2,7 @@
    components/FirstCupHintCard.jsx — first-visit tutorial card.
 
    Anchored above the tab bar at the bottom of the screen on
-   first load. Explains the two main destinations (Apothecarium,
+   first load. Explains the two main destinations (Apothecary,
    Notebook) and dismisses with a single full-width OK button
    below the body. Persisted dismiss flag so it doesn't return.
    ────────────────────────────────────────────────────────────── */
@@ -29,7 +29,7 @@ export const FirstCupHintCard = ({ onDismiss }) => (
         color: theme.inkSoft, lineHeight: 1.45, textAlign: "left",
       }}>
         <div>
-          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecarium</strong> — Build a recipe, browse the Herbanium.
+          <strong style={{ color: theme.terra, fontWeight: 600 }}>Apothecary</strong> — Build a recipe, browse the Herbanium.
         </div>
         <div>
           <strong style={{ color: theme.terra, fontWeight: 600 }}>Journal</strong> — Your recipes, your reflections, your field notes.

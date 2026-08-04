@@ -90,7 +90,7 @@ for (const withBrew of [false, true]) {
     });
 
     test("Blend — adding an ingredient builds a pot", async ({ page }) => {
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
       await search.fill("chamomile");
       const hit = page.getByRole("button", { name: /chamomile/i }).first();
@@ -116,7 +116,7 @@ for (const withBrew of [false, true]) {
       // (2 rows) because iPhone is CI-only and can't be checked from
       // here — the real numbers are logged so the CI output says what
       // Safari actually gets.
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       const results = page.getByTestId("ingredient-results");
       await expect(results, "the picker should be on screen").toBeVisible();
 
@@ -161,7 +161,7 @@ for (const withBrew of [false, true]) {
       // component re-syncs to the profile, so poking it is an edge case
       // rather than a smoke check. The tour spec covers the bars-and-
       // sliders relationship properly.
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
       await search.fill("chamomile");
       await page.getByRole("button", { name: /chamomile/i }).first().click();
@@ -318,7 +318,7 @@ for (const withBrew of [false, true]) {
     });
 
     test("Herbanium — an ingredient's brew is adjustable too", async ({ page }) => {
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       await openSubTab(page, "Herbanium");
       // Chamomile rather than whatever sorts first: the explorer only
       // renders for ingredients that HAVE an extraction profile, so the
@@ -338,7 +338,7 @@ for (const withBrew of [false, true]) {
     });
 
     test("Herbanium — search and filters narrow the list", async ({ page }) => {
-      await openTab(page, "Apothecarium");
+      await openTab(page, "Apothecary");
       await openSubTab(page, "Herbanium");
       // Only the first row carries the tour anchor, so filtering is
       // checked by what's on screen rather than by a row count: one

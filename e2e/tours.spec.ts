@@ -109,13 +109,13 @@ test.describe("guided tours stay on-screen, end to end", () => {
 
   test("Blend tour (the tall-graph regression)", async ({ page }) => {
     await armTour(page, "blend");
-    await openTab(page, "Apothecarium"); // reverse/Blend is the default sub-mode
+    await openTab(page, "Apothecary"); // reverse/Blend is the default sub-mode
     await walkTour(page, "blend");
   });
 
   test("Herbanium tour", async ({ page }) => {
     await armTour(page, "herbanium");
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     await openSubTab(page, "Herbanium");
     await walkTour(page, "herbanium");
   });
@@ -271,7 +271,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
   test("the Simple/Detailed steps walk the toggle and change the bars", async ({ page }) => {
     await armTour(page, "blend");
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     const callout = page.getByTestId("tour-callout");
     const graph = page.locator('[data-tour="blend-graph"]');
 
@@ -347,7 +347,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // itself (the overlay swallows clicks), so the steps drive it, and
     // release it once they're done teaching it.
     await armTour(page, "blend");
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     const callout = page.getByTestId("tour-callout");
     const sliders = page.locator('[data-tour="blend-sliders"]');
 
@@ -394,7 +394,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // check taken at a step boundary — which is why this drives the
     // slider directly rather than clicking Next and hoping.
     await armTour(page, "blend");
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     await advanceTo(page, "The prediction");
 
     const graph = page.locator('[data-tour="blend-graph"]');
@@ -469,7 +469,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
   test("both the prediction bars and the brew sliders stay clear", async ({ page }) => {
     await armTour(page, "blend");
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
 
     await advanceTo(page, "The prediction");
     await expectBothClear(page, "prediction step");

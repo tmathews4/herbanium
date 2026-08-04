@@ -97,11 +97,11 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
   test("every tab and sub-tab", async ({ page }) => {
     await expectMenu(page, "Home");
 
-    await openTab(page, "Apothecarium");
-    await expectMenu(page, "Apothecarium");
+    await openTab(page, "Apothecary");
+    await expectMenu(page, "Apothecary");
     for (const sub of ["Blend", "Herbanium"]) {
       await openSubTab(page, sub);
-      await expectMenu(page, `Apothecarium · ${sub}`);
+      await expectMenu(page, `Apothecary · ${sub}`);
     }
 
     await openTab(page, "Journal");
@@ -138,7 +138,7 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
   });
 
   test("an ingredient from the compendium, on all three of its tabs", async ({ page }) => {
-    await openTab(page, "Apothecarium");
+    await openTab(page, "Apothecary");
     await openSubTab(page, "Herbanium");
     await page.getByRole("button", { name: /Chamomile/i }).first().click();
     for (const t of ["Overview", "Brewing", "Pairings"]) {
@@ -189,7 +189,7 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
 
     // The menu is what makes this possible at all — with the steep
     // covering it there was nowhere to tap.
-    for (const tab of ["Home", "Apothecarium", "Journal", "Profile"]) {
+    for (const tab of ["Home", "Apothecary", "Journal", "Profile"]) {
       await openTab(page, tab);
       await expectMenu(page, `${tab} with a brew running`);
       await expect(page.getByTestId("brew-banner"),
