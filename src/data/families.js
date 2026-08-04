@@ -295,6 +295,10 @@ export const MOOD_DESCRIPTIONS = Object.fromEntries([
  */
 export const MIND_FAMILIES = MOOD_VOCABULARY.filter(f => f.category === "mind").map(f => f.family);
 export const BODY_FAMILIES = MOOD_VOCABULARY.filter(f => f.category === "body").map(f => f.family);
+export const CATEGORY_OF_FAMILY = Object.fromEntries(
+  MOOD_VOCABULARY.map(f => [f.family, f.category])
+);
+
 export const CATEGORY_OF_EFFECT = Object.fromEntries(
   MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, f.category]))
 );

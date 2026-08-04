@@ -31,7 +31,7 @@ import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
-import { FlavorMap, MoodMap, PalateMap } from "./FlavorMap";
+import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
 
@@ -497,7 +497,15 @@ export const BlendExtractionExplorer = ({
             Flavour is the opposite and keeps the toggle: `earthy`
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
-        <MoodMap
+        <MindMap
+          ingredients={ingredients}
+          tempC={tempC}
+          timeS={timeS}
+          tempCRange={tempCRange}
+          showAxis={false}
+          familyMode
+        />
+        <BodyMap
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}

@@ -16,7 +16,8 @@
 
    Two views share the same shape:
      - <FlavorMap />       — taste notes (flavors)
-     - <MoodMap />         — felt-state effects (moods)
+     - <MindMap /> <BodyMap /> — felt-state effects, split by
+       whether they act on the mind or the body
    Both wrap the shared TrackMap component below.
 
    Cost: N brew-engine evaluations per render, shared between the
@@ -31,6 +32,7 @@ import { resolveBlendAtBrew } from "../algo/compose";
 import {
   EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
   MOOD_FAMILY_LABEL, FLAVOR_FAMILY_LABEL, MOOD_LEAF_LABEL,
+  CATEGORY_OF_FAMILY, CATEGORY_OF_EFFECT,
 } from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
@@ -207,6 +209,9 @@ const hexToRgb = (color) => {
 const TrackMap = ({
   kind, ingredients, tempC, timeS, tempCRange,
   showAxis = true, title,
+  // Scopes a mood strip to one category, so Mind and Body can be their
+  // own windows the way Flavors and Palate are. Null shows everything.
+  category = null,
   // Tradition-deference suppression. When the strip is rendering a
   // curated traditional recipe (e.g. Wuyi yancha at 212°F, gongfu
   // black at 195°F × 30s) and the user is sitting AT or BELOW that
@@ -480,8 +485,15 @@ const TrackMap = ({
       const idx = familyOrder.indexOf(fam);
       return idx === -1 ? familyOrder.length : idx;
     };
+    // A mood strip can be scoped to one category, which is how Mind and
+    // Body get their own windows rather than sharing one. `name` is a
+    // family key in family mode and a leaf token in detail mode, so
+    // both maps are consulted.
+    const inCategory = (name) =>
+      !category || (CATEGORY_OF_FAMILY[name] ?? CATEGORY_OF_EFFECT[name]) === category;
+
     const tracks = Object.entries(peaks)
-      .filter(([, peak]) => peak >= SECONDARY_THRESHOLD)
+      .filter(([name, peak]) => peak >= SECONDARY_THRESHOLD && inCategory(name))
       .sort((a, b) => {
         const oi = orderIndex(a[0]) - orderIndex(b[0]);
         if (oi !== 0) return oi;
@@ -494,7 +506,7 @@ const TrackMap = ({
     // detail-filtered one — the track set must recompute when the
     // user toggles the segmented control.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [samples, kind, useFamilyMode]);
+  }, [samples, kind, useFamilyMode, category]);
   // Track-description selection. Clicking a band or its label opens
   // a fixed-position description panel below the strip; clicking the
   // same row again closes it. Single panel per strip keeps layout
@@ -1319,10 +1331,21 @@ export const FlavorMap = (props) => (
   <TrackMap {...props} kind="flavor" title="Flavors" />
 );
 
-export const MoodMap = (props) => (
-  <TrackMap {...props} kind="mood" title="Moods" />
+// Mind and Body are separate windows rather than one Moods strip with
+// a rollup. Every mood family is single-leaf, so there is no useful
+// parent tier left inside them — the categories are the only grouping
+// that means anything, and two windows say it more plainly than two
+// aggregate bands would. It also avoids inventing an aggregate: a
+// "Mind" band would need a value, and max-of-children would read a cup
+// with one strong calm the same as one with four moderate registers.
+export const MindMap = (props) => (
+  <TrackMap {...props} kind="mood" category="mind" title="Mind" />
+);
+
+export const BodyMap = (props) => (
+  <TrackMap {...props} kind="mood" category="body" title="Body" />
 );
 
 export const PalateMap = (props) => (
-  <TrackMap {...props} kind="palate" title="Balance" />
+  <TrackMap {...props} kind="palate" title="Palate" />
 );
