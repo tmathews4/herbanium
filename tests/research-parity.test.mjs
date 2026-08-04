@@ -56,7 +56,7 @@ import { PARENT_MOODS } from "../src/data/canon.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
-  MOOD_FAMILY_LABEL, MOOD_VOCABULARY, MOOD_LEAF_LABEL,
+  MOOD_FAMILY_LABEL, MOOD_VOCABULARY, MOOD_LEAF_LABEL, CATEGORY_OF_EFFECT,
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
@@ -672,6 +672,21 @@ test("every picker chip points at a family that exists", () => {
   const bad = [...badFlavour, ...badMood];
   assert(bad.length === 0,
     `picker chips aimed at families that don't exist:\n    ${bad.join("\n    ")}`);
+});
+
+test("every family declares a category", () => {
+  // Mind or body — nothing may sit outside the split. A family added
+  // without one would be invisible to whichever picker or strip it
+  // belongs in, and the omission wouldn't look like anything.
+  const orphans = MOOD_VOCABULARY
+    .filter(f => f.category !== "mind" && f.category !== "body")
+    .map(f => `${f.family} -> ${f.category ?? "(none)"}`);
+  assert(orphans.length === 0, `families with no category:\n    ${orphans.join("\n    ")}`);
+});
+
+test("every effect token resolves to a category", () => {
+  const missing = Object.keys(FAMILY_BY_EFFECT).filter(t => !CATEGORY_OF_EFFECT[t]);
+  assert(missing.length === 0, `effect tokens with no category: ${missing.join(", ")}`);
 });
 
 test("every effect family has a colour", () => {

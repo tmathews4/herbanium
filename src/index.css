@@ -71,6 +71,7 @@
   --effect-focus:    #7F9AA0;
   --effect-energy:   #A57836;
   --effect-warm:     #C37959;
+  --effect-heat:     #A83E4A;
   --effect-cool:     #5A8E8E;
   --effect-digestive:     #4A573A;
   --effect-sleep:    #7B4A5A;
@@ -187,6 +188,7 @@
     --effect-focus:    #A8C4CB;
     --effect-energy:   #D9A458;
     --effect-warm:     #E08F73;
+    --effect-heat:     #D9737E;
     --effect-cool:     #82BCBC;
     --effect-digestive:     #8FA876;
     --effect-sleep:    #A07090;

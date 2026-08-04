@@ -85,7 +85,7 @@ export const FAMILY_BY_FLAVOR = {
    ────────────────────────────────────────────────────────────── */
 export const MOOD_VOCABULARY = [
   {
-    family: "calm", label: "calm", color: "var(--effect-calm)",
+    family: "calm", label: "calm", category: "mind", color: "var(--effect-calm)",
     leaves: [{
       token: "calm",
       counterpart: "nervine / relaxant — acts on the nervous system without sedation",
@@ -94,7 +94,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "soothing", label: "soothing", color: "var(--effect-soothing)",
+    family: "soothing", label: "soothing", category: "body", color: "var(--effect-soothing)",
     leaves: [{
       token: "soothing",
       counterpart: "demulcent (internal) / emollient (topical) — mucilage coating and "
@@ -109,7 +109,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "grounding", label: "grounding", color: "var(--effect-grounding)",
+    family: "grounding", label: "grounding", category: "mind", color: "var(--effect-grounding)",
     leaves: [{
       token: "grounding",
       counterpart: null,   // adaptogen-adjacent; largely TCM and lay usage
@@ -118,7 +118,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "focus", label: "focus", color: "var(--effect-focus)",
+    family: "focus", label: "focus", category: "mind", color: "var(--effect-focus)",
     leaves: [{
       token: "focus",
       counterpart: "nootropic / cerebral stimulant",
@@ -127,7 +127,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "energy", label: "energy", color: "var(--effect-energy)",
+    family: "energy", label: "energy", category: "mind", color: "var(--effect-energy)",
     leaves: [{
       token: "energy",
       counterpart: "stimulant",
@@ -136,7 +136,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "uplifting", label: "uplifting", color: "var(--effect-uplifting)",
+    family: "uplifting", label: "uplifting", category: "mind", color: "var(--effect-uplifting)",
     leaves: [{
       token: "uplifting",
       counterpart: "thymoleptic — mood-elevating",
@@ -145,38 +145,39 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    // The only family with more than one leaf, and the one that needed
-    // a definition of its own — the parent used to borrow the name
-    // "comfort" from its own child, so Detail mode drew the family
-    // aggregate under a leaf's name and hid that leaf entirely.
-    family: "warm", label: "warmth", color: "var(--effect-warm)",
-    summary: "The warm register — physical heat and warm relaxation together.",
-    body: "The family above two different claims. `warming` is thermogenic: gingerol and piperine act on TRPV1 heat receptors, so the cup raises real body heat. `comfort` is the wrapped-blanket feeling, which arrives with no temperature change at all. Most warming spices carry both, and a cup can carry either alone — rooibos comforts without heating, a black tea can heat without comforting.",
-    leaves: [
-      {
-        token: "warming",
-        // Displayed as "heat". The token stays `warming` — it's
-        // persisted in journal targetMoods, named in 25 research docs,
-        // and referenced across blends and attributes — but "warming"
-        // sitting under a parent called "warmth" gave a reader two
-        // near-identical words at different levels of the hierarchy,
-        // exactly where the distinction needs to be sharp. "heat" and
-        // "comfort" under "warmth" reads instantly.
-        label: "heat",
-        counterpart: "thermogenic; TCM warm-natured, Ayurvedic ushna virya",
-        summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
-        body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
-      },
-      {
-        token: "comfort",
-        counterpart: null,   // no counterpart in the herbal action vocabulary
-        summary: "Warm relaxation — a wrapped-blanket ease that isn't about temperature.",
-        body: "Rooibos, vanilla and hojicha are the archetypes: round, sweet, familiar. Distinct from warming, which is measurable body heat, and from soothing, which acts on the body's tissues. This one is affective — it is how the cup feels to meet, not what it does.",
-      },
-    ],
+    // `warm` and `heat` were one family until the Mind/Body split. They
+    // had exactly two leaves and those leaves belong on opposite sides
+    // — comfort is felt, heat is physical — so the family earned
+    // nothing by existing and became two single-leaf parents.
+    //
+    // The token stays `comfort`: it's persisted in journal entries as
+    // actual/targetMoods/extraMoods and three curated blends carry
+    // mood: "comfort". Only the label reads "warm".
+    family: "warm", label: "warm", category: "mind", color: "var(--effect-warm)",
+    leaves: [{
+      token: "comfort",
+      label: "warm",
+      counterpart: null,   // no counterpart in the herbal action vocabulary
+      summary: "Warm relaxation — a wrapped-blanket ease that isn't about temperature.",
+      body: "Rooibos, vanilla and hojicha are the archetypes: round, sweet, familiar. Distinct from heat, which is measurable body warmth, and from soothing, which acts on the body's tissues. This one is affective — it is how the cup feels to meet, not what it does.",
+    }],
   },
   {
-    family: "cool", label: "cooling", color: "var(--effect-cool)",
+    // Physical warmth. Token stays `warming` — it's named in 25
+    // research docs and persisted in journal entries — and displays as
+    // "heat", which is what it means and doesn't collide with `warm`
+    // one category over.
+    family: "heat", label: "heat", category: "body", color: "var(--effect-heat)",
+    leaves: [{
+      token: "warming",
+      label: "heat",
+      counterpart: "thermogenic; TCM warm-natured, Ayurvedic ushna virya",
+      summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
+      body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
+    }],
+  },
+  {
+    family: "cool", label: "cooling", category: "body", color: "var(--effect-cool)",
     leaves: [{
       token: "cooling",
       counterpart: "refrigerant; TCM cool-natured / Yin",
@@ -185,7 +186,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "digestive", label: "digestive", color: "var(--effect-digestive)",
+    family: "digestive", label: "digestive", category: "body", color: "var(--effect-digestive)",
     leaves: [{
       token: "digestive",
       counterpart: "carminative — relieves gas and gastrointestinal spasm",
@@ -200,7 +201,7 @@ export const MOOD_VOCABULARY = [
     // soothing as the "best vocabulary mapping for immune support".
     // Turmeric flagged the same gap for anti-inflammatory; that one is
     // a single ingredient and hasn't earned an axis yet.
-    family: "immune", label: "immune", color: "var(--effect-immune)",
+    family: "immune", label: "immune", category: "body", color: "var(--effect-immune)",
     leaves: [{
       token: "immune",
       counterpart: "immunomodulant / immunostimulant — established Western herbal "
@@ -210,7 +211,7 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "sleep", label: "sleepy", color: "var(--effect-sleep)",
+    family: "sleep", label: "sleepy", category: "mind", color: "var(--effect-sleep)",
     leaves: [{
       token: "sleepy",
       counterpart: "sedative / hypnotic — a separate materia medica category from nervine",
@@ -274,6 +275,27 @@ export const MOOD_DESCRIPTIONS = Object.fromEntries([
   ...MOOD_VOCABULARY.flatMap(f => f.leaves.filter(l => l.label)
     .map(l => [l.label, { summary: l.summary, body: l.body }])),
 ]);
+
+/**
+ * MIND or BODY — the top-level split. Mind is what you can notice in
+ * yourself: calm, focus, a lift, warmth of feeling. Body is what the
+ * cup does to your tissues whether you notice or not — demulcent
+ * action, thermogenesis, digestion, immune modulation.
+ *
+ * The definitions were written in this language before the categories
+ * were named. `soothing` reads "the cup that settles the body rather
+ * than the mind"; `calm` reads "the mind quiets but stays present".
+ *
+ * It also replaces a hack: canon.js excluded digestive, nauseous and
+ * immune from journal pickers via a hand-kept STOMACH_MOOD_KEYS set,
+ * because "where it left me: digestive" doesn't parse. That set was
+ * this taxonomy, found one ingredient at a time.
+ */
+export const MIND_FAMILIES = MOOD_VOCABULARY.filter(f => f.category === "mind").map(f => f.family);
+export const BODY_FAMILIES = MOOD_VOCABULARY.filter(f => f.category === "body").map(f => f.family);
+export const CATEGORY_OF_EFFECT = Object.fromEntries(
+  MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, f.category]))
+);
 
 /** The established action a word answers to, or null. */
 export const MOOD_COUNTERPARTS = Object.fromEntries(

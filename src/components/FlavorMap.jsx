@@ -607,7 +607,7 @@ const TrackMap = ({
     // It used to alias to "warming" while the row was labelled
     // "comfort", so tapping a row that said comfort opened the
     // thermogenic-spice blurb.
-    warm:  "warmth",
+    warm:  "warm",
     cool:  "cooling",
     body:  "digestive",
     sleep: "sleepy",

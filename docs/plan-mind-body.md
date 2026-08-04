@@ -1,6 +1,6 @@
 # Plan — Flavors / Balance / Mind / Body
 
-Status: **proposed, not started.** Written before touching code because
+Status: **phases 1-3 done.** See the git log; phases 4-5 remain. Written before touching code because
 the refactor moves family keys and I'd rather not discover a third
 `body` halfway through.
 
@@ -10,11 +10,13 @@ the refactor moves family keys and I'd rather not discover a third
 ┌ Flavors ─────────┐   what it tastes of
 │ Balance          │   bitterness · sweetness · astringency · tartness · menthol
 ├ Temp / Steep ────┤   the thing you change
-│ Mind             │   calm · sleepy · focus · energy · uplifting · comfort
-└ Body ────────────┘   digestive · soothing · heat · cooling · immune
+│ Mind             │   calm · grounding · focus · energy · uplifting · warm · sleepy
+└ Body ────────────┘   soothing · heat · cooling · digestive · immune
 ```
 
-Six and five. The order matters: the cup is described above the
+Seven and five. (An earlier draft of this list said six and five and
+dropped `grounding` — "settling, centering, settled in yourself" is a
+felt state, so Mind.) The order matters: the cup is described above the
 controls, what it does to you below them.
 
 ## Why mind/body rather than a rename
