@@ -110,7 +110,37 @@ Two mood strips instead of one, or one strip with a divider. This is
 the visible change and the one worth doing last, when everything under
 it is stable.
 
-## The `warm` family straddles
+## Decisions taken (2026-08-03)
+
+**`warm` splits into two single-leaf parents** rather than straddling
+the categories. It only ever had two children and they belong on
+opposite sides, so the family earned nothing by existing.
+
+  Mind  ->  family `warm`, leaf `comfort`, shown as "warm"
+  Body  ->  family `heat`, leaf `warming`, shown as "heat"
+
+Both self-named and single-leaf, so each renders as one row — the
+collision guard only fires on families with more than one leaf.
+
+**`comfort` displays as "warm"; the TOKEN does not change.** Renaming
+it would orphan real data: `comfort` is persisted in journal entries
+as `actual`, `targetMoods` and `extraMoods`, and three curated blends
+carry `mood: "comfort"`. Same treatment `warming` already gets — it
+displays as "heat" while the token stays put. MOOD_LEAF_LABEL exists
+for exactly this.
+
+**Balance stays nested under Flavors**, as its own window the way it
+is now.
+
+### Consequence: the split needs a new colour
+
+`warm` and `heat` currently share `--effect-warm`. Two parents need
+two colours, and the new one has to clear ΔE 12 from all eleven
+others — the palette is getting crowded and the greens are already
+ratcheted as too-close. Budget for this in phase 3; it is the kind of
+thing that looks free and isn't.
+
+## The old note on straddling, kept for the reasoning
 
 `warm` holds `comfort` (Mind) and `heat` (Body). Under Mood/Body that
 looked like a problem. Under Mind/Body it's the point: one register,
