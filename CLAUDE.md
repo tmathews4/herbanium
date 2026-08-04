@@ -107,6 +107,19 @@ Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true local
 
 Assert on stable hooks added to our own markup — `data-tour="..."` for tour anchors, `data-testid="..."` for test-only handles. No brittle absolute paths, no text matching where a hook would do. Add the hook at generation time rather than retrofitting it.
 
+## Native builds
+
+`npm run cap:sync` (build + `npx cap sync`) before any native build, or
+the WebView serves a stale bundle. This is not hypothetical: the iOS
+bundle sat three months behind the web app and kept serving a fixed bug
+to a real device.
+
+The config is `capacitor.config.json` and **must stay JSON** — the CLI
+transpiles a `.ts` config with the TypeScript 5 compiler API, which
+`typescript@^7` doesn't provide, and a `.js` config silently falls back
+to defaults under `"type": "module"`. Reasoning and per-setting notes
+live in `docs/capacitor-config.md`.
+
 ## Dev environment
 
 - Vite dev server runs on **5174** (`npx vite --port 5174 --strictPort`). Never 5173 — Playwright's `webServer` owns that port.

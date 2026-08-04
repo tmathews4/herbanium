@@ -1,0 +1,21 @@
+{
+  "appId": "app.herbanium",
+  "appName": "Herbanium",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "DARK",
+      "backgroundColor": "#F3ECDC"
+    }
+  }
+}
