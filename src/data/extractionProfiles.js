@@ -302,6 +302,10 @@ export const EXTRACTION_PROFILES = {
   // is about attention and working memory, not stimulation, and it is
   // caffeine-free; `focus` carries that claim and is now sourced. See
   // docs/research/ingredients/tulsi.md.
+  // Deliberately wide — five points from 50C to 100C where the research
+  // documents 85-95C. See data/brewIntent.js: tulsi is served from a
+  // cool steep to a hard boil, and the range is fitted to the signature
+  // blend.
   tulsi: [
     { tempC: 60,  timeS: 240, flavors: ["aromatic", "fresh", "sweet"],
       effects: [["calm", 2], ["soothing", 2]],
@@ -426,6 +430,9 @@ export const EXTRACTION_PROFILES = {
       character: "Past peak — astringency leads, vegetal-burnt edge, brisk freshness gone." },
   ],
 
+  // The 105C row sits above the doc's 100C ceiling on purpose — hojicha
+  // is roasted and forgiving, and the row shows what happens past
+  // boiling rather than recommending it. See data/brewIntent.js.
   hojicha: [
     // Already-roasted leaf — character is largely baked-in, not
     // pulled by water. Hotter brewing barely intensifies (the
@@ -654,6 +661,11 @@ export const EXTRACTION_PROFILES = {
   ],
 
   // ─── True teas: Pu-erh ────────────────────────────────────────
+  // Gongfu, not western — 30s / 90s / 180s against a doc prescribing
+  // 180 / 240 / 300. Deliberate; see data/brewIntent.js. Short repeated
+  // infusions are how pu-erh is actually drunk, so transcribing the
+  // doc's western times would make the app worse, not more accurate.
+  // This is why pu-erh's doc rows never pair for the strength audit.
   puerh: [
     { tempC: 95,  timeS: 30,  flavors: ["earthy", "woody", "mushroom"],
       effects: [["digestive", 2], ["grounding", 2], ["warming", 1.5], ["comfort", 2]],

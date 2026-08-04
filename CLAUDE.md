@@ -38,6 +38,14 @@ node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at o
 node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
 ```
 
+Brew parameters are the one axis where the app may legitimately depart
+from the docs — the research says how an ingredient is conventionally
+brewed, and the app also has to serve the blends it ships. Those
+departures live in `src/data/brewIntent.js` **with their reason**, not
+in an exemption list, because an exemption reads as "not yet fixed" and
+these are decisions. Removing an entry makes the audit report that
+ingredient again, which is correct if the intent changes.
+
 The last two work word-by-word rather than ingredient-by-ingredient,
 which is the gap `comfort` lived in: no single ingredient looked wrong,
 but the word shipped on 27 ingredients while 7 docs prescribed it.

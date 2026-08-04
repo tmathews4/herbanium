@@ -60,7 +60,8 @@ import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
 import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
-import { outsideResearchedRange, paramKey } from "../tools/lib/brew-params.mjs";
+import { outsideResearchedRange, paramKey, isDeliberate } from "../tools/lib/brew-params.mjs";
+import { DELIBERATE_RANGE_DEPARTURES, DELIBERATE_GRIDS } from "../src/data/brewIntent.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -278,26 +279,48 @@ test("every declared ingredient effect has a family", () => {
 // offer the hot band. Starting below the researched floor is a lighter
 // option, usually harmless. Exceeding the ceiling is the app
 // recommending a brew its own research argues against.
+// Only dragonwell now. The other four over-ceiling ranges are
+// deliberate and live in data/brewIntent.js with their reasons — they
+// are fitted to a blend that is brewed hotter and longer than any of
+// those leaves would be taken alone, and holding them to the
+// researched ceiling would fire over-pull warnings on a cup that is
+// made on purpose and tastes right.
+//
+// That distinction is the point of splitting them out. An exemption
+// list reads as "not yet fixed"; those four are finished.
 const KNOWN_OVER_CEILING = new Set([
-  "dragonwell:time:above",   // doc [60,120]  app [75,150]
-  "gunpowder:temp:above",    // doc [75,85]   app [80,90]   green tea, 5C hot
-  "spearmint:temp:above",    // doc [85,95]   app [85,100]
-  "tulsi:temp:above",        // doc [85,95]   app [50,100]
-  "tulsi:time:above",        // doc [300,600] app [90,720]
+  "dragonwell:time:above",   // doc [60,120] app [75,150] — unaccounted for
 ]);
 
 test("no new brew range exceeds what the research supports", () => {
   const fresh = outsideResearchedRange(INGREDIENTS)
     .filter(r => r.direction === "above")
+    .filter(r => !isDeliberate(r))
     .filter(r => !KNOWN_OVER_CEILING.has(paramKey(r)))
     .map(r => `${r.id} ${r.axis}: doc [${r.doc}] but app [${r.app}]`);
   assert(fresh.length === 0,
     `brew advice beyond the research:\n    ${fresh.join("\n    ")}`);
 });
 
+test("every recorded brew-intent departure still exists", () => {
+  // brewIntent.js explains departures that are real. If one stops
+  // being a departure — the doc widens, or the card is pulled back —
+  // the explanation becomes a lie about the data and should go.
+  const live = new Set(outsideResearchedRange(INGREDIENTS)
+    .filter(r => r.direction === "above").map(r => `${r.id}:${r.axis}`));
+  const stale = Object.keys(DELIBERATE_RANGE_DEPARTURES).filter(k => !live.has(k));
+  assert(stale.length === 0,
+    `brewIntent explains departures that no longer exist:\n    ${stale.join("\n    ")}`);
+});
+
+test("every recorded deliberate grid names a real ingredient", () => {
+  const unknown = Object.keys(DELIBERATE_GRIDS).filter(id => !EXTRACTION_PROFILES[id]);
+  assert(unknown.length === 0, `brewIntent grids for unknown ingredients: ${unknown.join(", ")}`);
+});
+
 test("the known-over-ceiling list has no stale entries", () => {
   const live = new Set(outsideResearchedRange(INGREDIENTS)
-    .filter(r => r.direction === "above").map(paramKey));
+    .filter(r => r.direction === "above" && !isDeliberate(r)).map(paramKey));
   const stale = [...KNOWN_OVER_CEILING].filter(k => !live.has(k));
   assert(stale.length === 0,
     `no longer over the ceiling — remove from KNOWN_OVER_CEILING:\n    ${stale.join("\n    ")}`);

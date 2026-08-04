@@ -33,6 +33,7 @@
 import { readFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 import { DOCS } from "./strength-drift.mjs";
+import { DELIBERATE_RANGE_DEPARTURES } from "../../src/data/brewIntent.js";
 
 const range = (src, label) => {
   const m = src.match(new RegExp(`\\|\\s*\\*\\*${label}[^|]*\\|\\s*\\[\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*\\]`));
@@ -69,3 +70,12 @@ export function outsideResearchedRange(INGREDIENTS) {
 }
 
 export const paramKey = r => `${r.id}:${r.axis}:${r.direction}`;
+
+/** The `<id>:<axis>` key brewIntent records departures under. */
+export const intentKey = r => `${r.id}:${r.axis}`;
+
+/** Departures the catalogue has deliberately chosen — see brewIntent.js. */
+export const isDeliberate = r =>
+  Object.prototype.hasOwnProperty.call(DELIBERATE_RANGE_DEPARTURES, intentKey(r));
+
+export const departureReason = r => DELIBERATE_RANGE_DEPARTURES[intentKey(r)];

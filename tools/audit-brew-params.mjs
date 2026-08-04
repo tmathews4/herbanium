@@ -2,10 +2,11 @@
    See tools/lib/brew-params.mjs for what counts as a difference.
    Run: node tools/audit-brew-params.mjs */
 import { INGREDIENTS } from "../src/data/ingredients.js";
-import { outsideResearchedRange } from "./lib/brew-params.mjs";
+import { outsideResearchedRange, isDeliberate, departureReason } from "./lib/brew-params.mjs";
 
 const rows = outsideResearchedRange(INGREDIENTS);
-const above = rows.filter(r => r.direction === "above");
+const above = rows.filter(r => r.direction === "above" && !isDeliberate(r));
+const intended = rows.filter(r => r.direction === "above" && isDeliberate(r));
 const below = rows.filter(r => r.direction === "below");
 
 console.log(`\nBREW PARAMETERS — app range vs researched range\n`);
@@ -19,4 +20,12 @@ console.log(`research documents; usually harmless, listed for completeness:\n`);
 for (const r of below) {
   console.log(`  ${r.id.padEnd(14)} ${r.axis.padEnd(5)} doc [${r.doc}]  app [${r.app}]`);
 }
+if (intended.length) {
+  console.log(`\nBY DESIGN (${intended.length}) — recorded in data/brewIntent.js, not findings:\n`);
+  for (const r of intended) {
+    console.log(`  ${r.id.padEnd(14)} ${r.axis.padEnd(5)} app [${r.app}]`);
+    console.log(`      ${departureReason(r)}`);
+  }
+}
+
 console.log(`\nRanges narrower than the research are editorial and not reported.\n`);
