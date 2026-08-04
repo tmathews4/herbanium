@@ -31,7 +31,7 @@ import { theme, ff } from "../theme";
 import { BREW_DOCK_ID } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
-import { unionAndPadTempRange, unionAndPadTimeRange } from "../algo/brewBounds";
+import { unionAndPadTempRange, unionAndPadTimeRange, TIME_STEP_S } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
@@ -335,10 +335,11 @@ export const BlendExtractionExplorer = ({
   // keeps the full width — see the note on the control block below.
   //
   // Opens on TIME, and it's first in the pill order for the same
-  // reason. Time has 36 steps against temperature's 6, so dragging it
-  // moves the prediction bars in a gradient rather than in six jumps —
-  // which is what a first-time user needs to see to understand that the
-  // sliders drive the graph at all. Temperature is also the parameter a
+  // reason. Time steps by the second against temperature's 5°C notches
+  // — hundreds of positions against six — so dragging it moves the
+  // prediction bars as a gradient rather than in six jumps, which is
+  // what a first-time user needs to see to understand that the sliders
+  // drive the graph at all. Temperature is also the parameter a
   // newcomer is least likely to want to change.
   const [axis, setAxis] = useState("timeS");
   // The tour's demo oscillates steep time so the user watches the
@@ -869,7 +870,13 @@ export const BlendExtractionExplorer = ({
                   fontFamily: ff.mono, fontSize: 11.5,
                   color: shownControlsOpen ? theme.terra : theme.ash,
                 }}>
-                  {displayTemp} · {Math.round(timeS / 60)} min
+                  {/* M:SS, not "4 min". The row is the only readout
+                      while the sliders are folded away, and rounding to
+                      the minute would report 3:47 as "4 min" — which
+                      undoes the second-level step the moment anyone
+                      uses it. Same format the open panel shows, so
+                      folding the row doesn't change the number. */}
+                  {displayTemp} · {displayTime}
                 </span>
                 {/* Same chevron as the "more filters" toggle on Compose,
                     so an expanding control looks the same everywhere.
@@ -892,19 +899,21 @@ export const BlendExtractionExplorer = ({
                 <div data-tour="blend-sliders">
                   {/* ONE AXIS AT A TIME, chosen by the pill above it.
                       The two sliders read as a symmetric pair and are
-                      nothing of the sort: temp spans 6 steps, steep 36.
-                      Side by side, steep would have fallen to ~4px per
-                      step on a 320px phone — below the point where you
-                      can land on a given minute. Stacked, they cost
-                      128px of a pane the dock is already taking from.
+                      nothing of the sort: temp moves in six 5°C notches
+                      where steep is continuous to the second. Side by
+                      side, steep would have fallen to a fraction of a
+                      pixel per second on a 320px phone. Stacked, they
+                      cost 128px of a pane the dock is already taking
+                      from.
 
                       Swapping instead of splitting keeps the full width
-                      for whichever slider is up, so steep holds the
-                      ~9px/step it has today and temp — which never
-                      needed the room — simply gets out of the way. The
-                      collapsed row still reads both values, so nothing
-                      is hidden by the choice; only one is adjustable at
-                      a time, and you adjust one at a time anyway. */}
+                      for whichever slider is up, so steep gets every
+                      pixel its resolution can use and temp — which
+                      never needed the room — simply gets out of the
+                      way. The collapsed row still reads both values, so
+                      nothing is hidden by the choice; only one is
+                      adjustable at a time, and you adjust one at a
+                      time anyway. */}
                   <div style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     gap: 8, marginTop: 8, marginBottom: 4,
@@ -996,7 +1005,7 @@ export const BlendExtractionExplorer = ({
                           aria-label="Steep time"
                           min={timeSRange[0]}
                           max={timeSRange[1]}
-                          step={15}
+                          step={TIME_STEP_S}
                           value={timeS}
                           onChange={(e) => setTimeS(Number(e.target.value))}
                           style={{

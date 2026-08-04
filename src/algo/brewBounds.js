@@ -60,7 +60,22 @@ export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
 // rounded UP to a multiple of this so the slider thumb can land on
 // it — otherwise the input snaps to the largest step ≤ upper bound
 // and the user feels stuck near the right edge.
-export const TIME_STEP_S = 15;
+//
+// ONE SECOND, where temperature still moves in 5°C notches. The two
+// axes look symmetric and aren't, in a second way beyond their spans:
+// temperature is something the user has to REPRODUCE at a kettle, and
+// most kettles have no thermostat — which is why the app answers a
+// temperature with rest-time advice ("off the boil ~2 min"). Advice
+// like that only means anything against round numbers; 5°C notches are
+// what makes it sayable. Steep time has no such problem. A timer does
+// seconds natively, so the notches were never buying the user
+// anything — they were only ever a slider-geometry compromise, and
+// moving to one axis at a time in the dock gave the width back.
+//
+// The read-through: the prediction bars now respond continuously to a
+// drag instead of in 15s jumps, which is the whole reason Time is the
+// axis the sliders open on.
+export const TIME_STEP_S = 1;
 
 /**
  * Single-range helpers used by IngredientDetail (where the explorer
@@ -157,11 +172,14 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
     }
   }
   if (!Number.isFinite(leadHi)) leadHi = 600;
-  // Round UP to the slider's 15s step boundary so the slider thumb
-  // can actually reach the upper edge. Without this, leadHi×1.3 can
-  // fall between two step values (e.g., 546s when steps are 15s),
-  // and the slider snaps to floor(546/15)*15 = 540 — leaving the
-  // user feeling stuck near the right end.
+  // Round UP to the slider's step boundary so the slider thumb can
+  // actually reach the upper edge. Without this, leadHi×1.3 can fall
+  // between two step values and the slider snaps to the largest step
+  // below it, leaving the user feeling stuck near the right end.
+  //
+  // At a 1s step this only clears the fraction 1.3× leaves behind
+  // (175 → 227.5 → 228) rather than the up-to-14s it used to add. Still
+  // load-bearing, and still the same rule — the max has to be landable.
   const padded = leadHi * (1 + TIME_PAD_RATIO);
   const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
   return [

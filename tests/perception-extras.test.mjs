@@ -19,7 +19,7 @@ import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import {
   padTempRange, padTimeRange,
   TEMP_HARD_MIN, TEMP_HARD_MAX, TIME_HARD_MIN, TIME_HARD_MAX,
-  TEMP_PAD_BELOW, TEMP_MIN_SLIDER_RANGE, TIME_PAD_RATIO,
+  TEMP_PAD_BELOW, TEMP_MIN_SLIDER_RANGE, TIME_PAD_RATIO, TIME_STEP_S,
 } from "../src/algo/brewBounds.js";
 import { BLENDS } from "../src/data/blends.js";
 
@@ -248,12 +248,33 @@ test("padTimeRange: lower = TIME_HARD_MIN; upper aligned to slider step", () => 
   const out = padTimeRange([180, 360]);
   assert(out[0] === TIME_HARD_MIN,
     `lower should be ${TIME_HARD_MIN}, got ${out[0]}`);
-  // Upper rounds UP to the 15s slider step boundary so the slider
-  // thumb can reach the labeled max. 360 × 1.3 = 468; ceil to 480.
+  // Upper rounds UP to the slider's step boundary so the thumb can
+  // reach the labeled max. Reads TIME_STEP_S rather than a literal:
+  // the step is the reason this rounding exists, so hardcoding one
+  // would let the two drift apart silently — which is exactly what
+  // this test is for.
   const padded = 360 * (1 + TIME_PAD_RATIO);
-  const expectedHi = Math.ceil(padded / 15) * 15;
+  const expectedHi = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
   assert(out[1] === expectedHi,
-    `expected upper = ceil(${padded} / 15) * 15 = ${expectedHi}, got ${out[1]}`);
+    `expected upper = ceil(${padded} / ${TIME_STEP_S}) * ${TIME_STEP_S} = ${expectedHi}, got ${out[1]}`);
+});
+
+test("padTimeRange: the labeled max is landable from the floor", () => {
+  // What the step alignment is actually FOR, stated as the property
+  // rather than as the formula: whatever the step is, the slider's
+  // right edge has to be a value the thumb can stop on. An HTML range
+  // steps from `min`, so the span has to divide evenly.
+  //
+  // This is the test the 15 -> 1 change needed. The old assertion
+  // above would have passed just as happily with the literal left at
+  // 15 and the slider set to 1 — it only ever checked the arithmetic
+  // against itself.
+  for (const hi of [60, 175, 240, 360, 420, 600, 900]) {
+    const [lo, up] = padTimeRange([30, hi]);
+    assert(Number.isInteger(up), `upper should be whole seconds, got ${up} for hi=${hi}`);
+    assert((up - lo) % TIME_STEP_S === 0,
+      `span ${up}-${lo}=${up - lo} isn't a whole number of ${TIME_STEP_S}s steps (hi=${hi})`);
+  }
 });
 test("padTimeRange: lower always TIME_HARD_MIN regardless of input", () => {
   const out = padTimeRange([30, 60]);

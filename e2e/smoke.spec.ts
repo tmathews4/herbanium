@@ -151,8 +151,11 @@ for (const withBrew of [false, true]) {
       // Folding it away has to work and has to give the page back.
       await controls.click();
       await expect(sliders, "tapping the row should fold the controls away").toBeHidden();
-      await expect(controls, "shut, it still reads the brew")
-        .toContainText(/\d+\s*°[CF].*\d+\s*min/s);
+      // M:SS, not "4 min". Folded, this row is the ONLY readout, and a
+      // minute-rounded one would report 3:47 as "4 min" — undoing the
+      // second-level step as soon as anyone used it.
+      await expect(controls, "shut, it still reads the brew — to the second")
+        .toContainText(/\d+\s*°[CF].*\d+:\d{2}/s);
       await expect(chevron, "and the arrow flips to point up")
         .toHaveCSS("transform", "matrix(-1, 0, 0, -1, 0, 0)");
 
@@ -169,10 +172,11 @@ for (const withBrew of [false, true]) {
       // slider on screen spans the full row, so assert that rather than
       // just that the pills toggle something.
       //
-      // It opens on TIME: 36 steps against temperature's 6, so a first
-      // drag moves the prediction bars as a gradient instead of in six
-      // jumps. Asserted, not assumed — "which slider you meet first" is
-      // a deliberate choice and silently flipping it would undo it.
+      // It opens on TIME: seconds against temperature's 5°C notches, so
+      // a first drag moves the prediction bars as a gradient instead of
+      // in six jumps. Asserted, not assumed — "which slider you meet
+      // first" is a deliberate choice and silently flipping it would
+      // undo it.
       const slider = page.locator('[data-tour="blend-sliders"] input[type=range]');
       await expect(slider, "exactly one slider should be on screen").toHaveCount(1);
       await expect(page.getByTestId("brew-axis-timeS"),
@@ -180,8 +184,21 @@ for (const withBrew of [false, true]) {
       const timeWidth = (await slider.boundingBox())!.width;
       const timeMax = await slider.getAttribute("max");
 
+      // The two axes are deliberately NOT equally granular. Time steps
+      // by the second because a timer does seconds natively and the
+      // bars should answer a drag as a gradient. Temperature stays on
+      // 5°C notches because the user has to REPRODUCE it at a kettle
+      // that probably has no thermostat, and the rest-time advice the
+      // app gives ("off the boil ~2 min") is only sayable against round
+      // numbers. Asserted as the pair, since it's the asymmetry that's
+      // the decision — either one alone reads as an arbitrary constant.
+      await expect(slider, "time should move a second at a time")
+        .toHaveAttribute("step", "1");
+
       await page.getByTestId("brew-axis-tempC").click();
       await expect(slider, "still exactly one after swapping").toHaveCount(1);
+      await expect(slider, "temperature should stay on 5°C notches")
+        .toHaveAttribute("step", "5");
       expect(await slider.getAttribute("max"),
         "the pills should swap which axis is bound").not.toBe(timeMax);
       expect((await slider.boundingBox())!.width,
