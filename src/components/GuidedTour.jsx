@@ -20,10 +20,25 @@
 import React, { useLayoutEffect, useState } from "react";
 import { theme, ff, radius, shadow } from "../theme";
 import { unionSpan, unionRect, groupScrollDelta, calloutPlacement } from "../helpers/tourLayout";
+import { BREW_DOCK_ID } from "../helpers/dock";
+
+// Top edge of the bottom dock — the line the tour's cutout is clamped
+// against. A huge fallback when there's no dock, so the clamp becomes a
+// no-op rather than collapsing every hole to nothing.
+const readDockTop = () => {
+  if (typeof window === "undefined" || typeof document === "undefined") return 1e9;
+  const bar = document.getElementById(BREW_DOCK_ID)?.parentElement;
+  const top = bar ? bar.getBoundingClientRect().top : window.innerHeight;
+  return Number.isFinite(top) ? Math.max(0, top) : window.innerHeight;
+};
 
 export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   const [i, setI] = useState(0);
   const [rect, setRect] = useState(null);
+  // The clamp line. State rather than a render-time read so it can be
+  // refreshed by the ResizeObserver when a step opens or shuts the brew
+  // row and the dock changes height under us.
+  const [dockTop, setDockTop] = useState(readDockTop);
   // Union of the step's `keepClear` targets, if it has any — other
   // elements the user must be able to see WHILE reading this step. The
   // Blend tour's prediction/slider steps use it: the whole lesson is
@@ -70,6 +85,17 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     const spotEls = (el) => [el, ...(step.spotlight || [])
       .map(id => document.querySelector(`[data-tour="${id}"]`))
       .filter(Boolean)];
+    // How much of the bottom of the screen the dock is covering.
+    //
+    // Measured off the dock itself rather than read from --app-dock-h:
+    // that property is set on the app root, not on documentElement, so
+    // getComputedStyle at the top of the tree returns "" and this would
+    // silently be 0 — the exact failure the value exists to prevent.
+    // The slot's parent is the bar, which is the element App measures.
+    const dockHeight = () => {
+      const bar = document.getElementById(BREW_DOCK_ID)?.parentElement;
+      return bar ? bar.getBoundingClientRect().height : 0;
+    };
     // Nearest scrollable ancestor, or null when nothing can scroll this
     // element. The app scrolls an inner pane, not the document, so
     // scrollIntoView's container is what we have to nudge for the fine
@@ -110,7 +136,13 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // The region the group can occupy is the pane's visible box, not
       // the window — the app scrolls between a header and the tab dock,
       // so on a small phone the pane is ~165px shorter.
-      const region = pane.getBoundingClientRect();
+      // The pane's box MINUS the dock. The page scrolls underneath the
+      // bottom bar now — that's what makes it read as glass — so the
+      // pane extends further down than the user can actually see. Fit
+      // the group to what's visible, or the tour cheerfully centres its
+      // subject half-behind the menu and reports it as on screen.
+      const paneRect = pane.getBoundingClientRect();
+      const region = { ...paneRect, bottom: paneRect.bottom - dockHeight() };
       for (let pass = 0; pass < 3; pass++) {
         const delta = groupScrollDelta(unionOf(group), region);
         if (!delta) break;
@@ -125,6 +157,13 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     // object identities and churn.
     let lastKey = "";
     const apply = (el) => {
+      // Before the early-out below. A page target doesn't MOVE when the
+      // dock grows — the scroll region's padding absorbs it — so its
+      // rect is unchanged and the key check would bail, leaving the
+      // clamp measured against the dock's old height. This is the one
+      // value that has to refresh even when nothing about the target
+      // did. React bails on an unchanged number, so it costs nothing.
+      setDockTop(readDockTop());
       const els = spotEls(el);
       const nextRect = unionRect(els.map(n => n.getBoundingClientRect()));
       const nextClear = unionOf(clearEls());
@@ -147,10 +186,24 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     // they're a fixed-height row in the tab dock now, and the strip is
     // the last mover. A once-per-step measurement leaves the cutout
     // tracing where the bars WERE, with the callout anchored to it.
+    //
+    // THE DOCK IS OBSERVED TOO, and it isn't one of the lit elements —
+    // it's the thing the cutout is clamped against. Steps open and shut
+    // the brew row as they go, which changes the dock's height by ~200px
+    // and so moves both the clamp line and every dock element under it.
+    // Without this the tour clamps against where the dock USED to be:
+    // the prediction step opens the row, the bar grows upward, and a
+    // hole measured a moment earlier runs 70px into the menu.
+    //
+    // It re-measures the target rather than just the dock, which is what
+    // also fixes dock-targeted steps — collapsing the row MOVES the brew
+    // row without resizing it, and a ResizeObserver on the target alone
+    // never hears about a move.
     const observe = (el) => {
       if (ro || typeof ResizeObserver === "undefined") return;
       ro = new ResizeObserver(() => apply(el));
-      for (const n of [...spotEls(el), ...clearEls()]) ro.observe(n);
+      const dockBar = document.getElementById(BREW_DOCK_ID)?.parentElement;
+      for (const n of [...spotEls(el), ...clearEls(), dockBar].filter(Boolean)) ro.observe(n);
     };
     const measure = () => {
       const el = document.querySelector(`[data-tour="${step.target}"]`);
@@ -198,13 +251,45 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // targets whose content runs to the edge (e.g. a section wrapper) can
   // set `pad` on their step to give the highlight some breathing room.
   const pad = step.pad != null ? step.pad : 0;
+  // Whether this step points at the app's chrome rather than at the
+  // page. Asked geometrically — does the target START below where the
+  // visible page ends — rather than by keeping a list of dock target
+  // names, so a step added to the dock later gets the right treatment
+  // without anyone remembering to register it.
+  //
+  // dockTop is STATE, refreshed by the same observer that tracks the
+  // target (see `apply`), because the dock's height is not fixed: steps
+  // open and shut the brew row, moving this line by ~200px. Computed
+  // during render instead, it was a frame behind on exactly the steps
+  // that move it, and the hole ran into the menu.
+  const targetInDock = !!rect && rect.top >= dockTop - 1;
+
   const hole = rect
-    ? {
-        left: rect.left - pad,
-        top: rect.top - pad,
-        width: rect.width + pad * 2,
-        height: rect.height + pad * 2,
-      }
+    ? (() => {
+        const box = {
+          left: rect.left - pad,
+          top: rect.top - pad,
+          width: rect.width + pad * 2,
+          height: rect.height + pad * 2,
+        };
+        // CLAMP THE CUTOUT AT THE DOCK. The page scrolls underneath the
+        // glass bar, so a tall page element runs past the bottom of the
+        // screen — and an unclamped hole punched straight through the
+        // menu, making the tour look like it was highlighting the tab
+        // bar along with its actual subject.
+        //
+        // Clamping the RECT rather than clipping the layer. Clipping
+        // worked but cut the pulsing glow at the container edge, so the
+        // highlight flickered along that line as it breathed. One
+        // full-screen dim with a shorter hole has no seam to flicker on.
+        //
+        // Only page targets are clamped: four blend steps point at the
+        // dock itself, and those need their hole exactly where it is.
+        if (!targetInDock && box.top + box.height > dockTop) {
+          box.height = Math.max(0, dockTop - box.top);
+        }
+        return box;
+      })()
     : null;
 
   // Where the callout goes — pure geometry, in helpers/tourLayout.js so
@@ -251,71 +336,66 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           to   { opacity: 1; }
         }
       `}</style>
-      {/* THE DIM STOPS AT THE DOCK. Everything inside this box is
-          clipped to the page area, so the tour never darkens the main
-          menu or the brew row — the app's chrome stays lit and legible
-          while the tour runs, and the dim reads as covering the PAGE
-          rather than the whole device.
+      {/* EVERYTHING DIMS — page and chrome alike. What must not cross
+          between them is the CUTOUT: a page element that runs under the
+          glass dock used to punch its bright hole straight through the
+          menu, so the tour looked like it was highlighting the tab bar
+          along with the thing it was actually pointing at.
 
-          overflow:hidden clips normal-flow and absolute children but not
-          `position: fixed` ones, which escape any ancestor without a
-          transform. So the dim layer inside is absolute; the container's
-          own origin is the viewport's, which is why the same
-          getBoundingClientRect coordinates still work unchanged. */}
+          Two bands, split at the dock's top edge, sharing one hole. The
+          band containing the target shows the cutout; the other clips it
+          away and renders as solid dim, because the 9999px spread fills
+          whatever is left. So the dim is continuous across the whole
+          screen while the hole is confined to one side of the line.
+
+          overflow:hidden clips absolute children but not `position:
+          fixed` ones, which escape any ancestor without a transform —
+          hence absolute children throughout, offset by the band's own
+          top so viewport coordinates still describe them. */}
+      {/* ONE dim over the whole screen — page, brew row, sub-tabs and
+          main menu alike. A tour that leaves the chrome lit makes the
+          app's own controls read as still live while everything else is
+          switched off. The cutout is kept off the chrome by clamping the
+          hole above (see `hole`), not by clipping this layer, so there's
+          no container edge for the pulsing glow to flicker against. */}
       <div data-testid="tour-dim" style={{
-        position: "fixed",
-        top: 0, left: 0, right: 0,
-        bottom: "var(--app-dock-h, 0px)",
-        overflow: "hidden",
-        pointerEvents: "none",
+        position: "fixed", inset: 0, pointerEvents: "none",
       }}>
         {hole ? (
-          /* Dim layer + cutout — a transparent box whose huge spread
-             shadow darkens everything except the target. Matches the
-             target's border-radius so the cutout hugs its shape.
-
-             When the target lives in the dock the cutout sits below this
-             container and is clipped away entirely, which is the correct
-             result rather than a missing one: the spread still fills the
-             page, so the page dims, the chrome stays lit, and the
-             pulsing border below does the actual pointing. */
-          <div data-testid="tour-spotlight" style={{
-            position: "absolute",
-            left: hole.left, top: hole.top,
-            width: hole.width, height: hole.height,
-            borderRadius: targetRadius,
-            boxShadow: "0 0 0 9999px rgba(20,16,10,0.66)",
-            pointerEvents: "none",
-            transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
-          }} />
+          <>
+            {/* Transparent box whose huge spread shadow darkens
+                everything except the target, matching its radius so the
+                cutout hugs the shape. */}
+            <div data-testid="tour-spotlight" style={{
+              position: "absolute",
+              left: hole.left, top: hole.top,
+              width: hole.width, height: hole.height,
+              borderRadius: targetRadius,
+              boxShadow: "0 0 0 9999px rgba(20,16,10,0.66)",
+              pointerEvents: "none",
+              transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
+            }} />
+            {/* Pulsing border — sits exactly on the element's edge so it
+                reads as the target's own border lighting up and
+                breathing. Shares the clamped rect, so it stops at the
+                dock with the cutout rather than drawing a bright line
+                across the Time/Temp pills. */}
+            <div style={{
+              position: "absolute",
+              left: hole.left, top: hole.top,
+              width: hole.width, height: hole.height,
+              borderRadius: targetRadius,
+              boxSizing: "border-box",
+              border: "2px solid rgba(255,255,255,0.38)",
+              pointerEvents: "none",
+              animation: "tourPulse 2.6s ease-in-out infinite",
+              transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
+            }} />
+          </>
         ) : (
           <div style={{ position: "absolute", inset: 0, background: "rgba(20,16,10,0.66)" }} />
         )}
       </div>
-
-      {/* Pulsing border — sits exactly on the element's edge (border-box,
-          matching radius) so it reads as the button's own border lighting
-          up and breathing.
-
-          Deliberately OUTSIDE the clip above. Four of the blend tour's
-          steps point at things in the dock — the brew row, the axis
-          pills, the sliders, the sub-tabs — and clipping this with the
-          dim would leave those steps highlighting nothing at all. The
-          dim is context; this is the pointer, and the pointer has to be
-          able to reach the chrome. */}
-      {hole && (
-        <div style={{
-          position: "fixed",
-          left: hole.left, top: hole.top,
-          width: hole.width, height: hole.height,
-          borderRadius: targetRadius,
-          boxSizing: "border-box",
-          border: "2px solid rgba(255,255,255,0.38)",
-          pointerEvents: "none",
-          animation: "tourPulse 2.6s ease-in-out infinite",
-          transition: "left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease",
-        }} />
-      )}
 
       {/* Callout — only rendered once the target has been measured.
           Before `rect` lands the placement math would fall back to a

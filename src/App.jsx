@@ -173,12 +173,22 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
 
   return (
     <div ref={barRef} style={{
-      flexShrink: 0,
-      // Translucent ivory dock — composes from --ivory-rgb so the
-      // bottom bar swaps to a warm-dark in prefers-color-scheme: dark
-      // instead of staying cream over the dark page.
-      background: "rgba(var(--ivory-rgb),0.94)",
-      backdropFilter: "blur(8px)",
+      // OVERLAYS the page rather than sitting beside it, so the page
+      // shows through — the whole point of the glass. It used to be a
+      // flex sibling, which displaced the page instead of covering it,
+      // and meant the backdrop-filter below was blurring nothing at all.
+      // The scroll region pads by --app-dock-h so nothing ends up
+      // permanently underneath.
+      position: "absolute", left: 0, right: 0, bottom: 0,
+      // Above the detail overlays (z-30) as well. They already stop at
+      // the dock, so this is belt and braces rather than load-bearing —
+      // but the menu outranking everything is the rule now, and the
+      // stacking should say so.
+      zIndex: 40,
+      // NO background of its own. The glass is the brew row's alone —
+      // navigation should sit on something solid, or the labels you
+      // steer by shimmer as the page moves under them. The two halves
+      // below set their own surfaces.
       borderTop: `1px solid ${theme.rule}`,
     }}>
       {/* Hidden while an overlay is up. The overlay screens keep their
@@ -198,8 +208,28 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
           chrome would spread blend logic across the app shell.
 
           No padding or border of its own: empty, it has to measure 0px,
-          or every screen without a pot pays for a row it never shows. */}
-      <div id={BREW_DOCK_ID} style={overlayOpen ? { display: "none" } : undefined} />
+          or every screen without a pot pays for a row it never shows.
+
+          THE GLASS LIVES HERE and nowhere else in the bar. This row
+          adjusts the cup you're looking at, so letting the cup show
+          through it is honest; the sub-tabs and main menu below are
+          navigation, and navigation on a moving background is just hard
+          to read. The blur is what keeps the readout legible over
+          whatever scrolls past. */}
+      <div
+        id={BREW_DOCK_ID}
+        style={overlayOpen ? { display: "none" } : {
+          background: "rgba(var(--ivory-rgb),0.72)",
+          backdropFilter: "blur(14px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+        }}
+      />
+      {/* NAVIGATION SITS ON SOLID GROUND. Opaque, unlike the brew row
+          above it: these are the controls you steer the app by, and
+          labels over a scrolling background are the ones you can least
+          afford to have shimmer. The contrast between the two surfaces
+          is also what tells you they're different kinds of control. */}
+      <div style={{ background: theme.ivory }}>
       {subTabs && onSubClick && (
         <div data-tour="subtabs" style={{
           display: "grid",
@@ -252,6 +282,7 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
             }}>{t.label}</span>
           </button>
         ))}
+      </div>
       </div>
     </div>
   );
@@ -2205,6 +2236,12 @@ export default function App() {
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
+        // The page runs UNDER the dock, which is what makes the dock
+        // read as glass — there has to be something behind it to see.
+        // The padding is what keeps that honest: the last thing on the
+        // page can still be scrolled clear of the bar, so nothing is
+        // permanently hidden, only temporarily passed beneath.
+        paddingBottom: "var(--app-dock-h, 0px)",
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}

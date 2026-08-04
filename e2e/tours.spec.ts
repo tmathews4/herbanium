@@ -290,16 +290,28 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // (see the transition on the spotlight in GuidedTour). Reading it
     // once catches it mid-move and fails for a reason that has nothing
     // to do with what's being tested.
+    // "The whole block" now means "everything of it the user can see".
+    // The page scrolls under the glass dock, so a tall strip runs past
+    // the bottom of the screen and its cutout is deliberately clamped at
+    // the dock — otherwise the hole punches through the menu and the
+    // tour looks like it's highlighting the tab bar too. So the bottom
+    // is satisfied by reaching either the end of the block or the dock,
+    // whichever comes first.
     await expect.poll(async () => {
       const spot = await page.getByTestId("tour-spotlight").boundingBox();
       const bars = await graph.boundingBox();
       if (!spot || !bars) return null;
+      const dockTop = await page.evaluate(() => {
+        const bar = document.getElementById("brew-dock")?.parentElement;
+        return bar ? bar.getBoundingClientRect().top : window.innerHeight;
+      });
+      const spotBottom = spot.y + spot.height;
       return {
         coversTop: spot.y <= bars.y + 1,
-        coversBottom: spot.y + spot.height >= bars.y + bars.height - 1,
+        coversBottom: spotBottom >= Math.min(bars.y + bars.height, dockTop) - 1,
       };
     }, {
-      message: "spotlight should settle over the whole bars block",
+      message: "spotlight should settle over the visible part of the bars block",
     }).toEqual({ coversTop: true, coversBottom: true });
 
     // The toggle itself pulses in terra while these steps are up. The
@@ -381,50 +393,93 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
-  test("the tour dims the page but never the chrome", async ({ page }) => {
-    // The dim used to be a 9999px spread shadow on a full-viewport
-    // layer, so it darkened the main menu and the brew row along with
-    // everything else — the app's own controls read as switched off for
-    // the length of the tour. It's clipped to the page area now.
+  test("the tour dims everything, and the cutout never crosses onto the chrome", async ({ page }) => {
+    // Two claims, and they pull against each other, which is why they're
+    // asserted together.
     //
-    // Geometry, not hit-testing: the tour is a deliberate click-catcher,
-    // so the menu is correctly UNreachable while a tour runs. The claim
-    // here is about what's darkened, which is a question about where the
-    // dim layer ends.
+    // EVERYTHING DIMS — page, brew row, sub-tabs, main menu. A tour that
+    // leaves the chrome lit makes the app's own controls read as still
+    // active while the rest is switched off.
+    //
+    // THE CUTOUT STAYS ON ONE SIDE. The page scrolls under the glass
+    // dock, so a tall page element extends past the bottom of the
+    // screen; without the split its bright hole punched straight through
+    // the menu and the tour looked like it was highlighting the tab bar
+    // too. The dim is two bands sharing one hole, divided at the dock.
+    //
+    // Geometry rather than hit-testing: a tour is a deliberate
+    // click-catcher, so the menu is correctly unreachable while one
+    // runs. The question is what's DARKENED and where the hole is.
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
     await expect(page.getByTestId("tour-callout")).toBeVisible();
 
-    const edges = await page.evaluate(() => {
-      const dim = document.querySelector('[data-testid="tour-dim"]');
+    const geom = async () => page.evaluate(() => {
       const home = [...document.querySelectorAll("button")]
         .find(b => b.textContent?.trim().toUpperCase() === "HOME");
-      if (!dim || !home) return null;
-      // Walk up from HOME to the dock — the element carrying the brew
-      // slot is the whole bottom bar, which is what must stay lit.
-      let bar: HTMLElement | null = home as HTMLElement;
+      let bar: HTMLElement | null = (home as HTMLElement) || null;
       while (bar && !bar.querySelector("#brew-dock")) bar = bar.parentElement;
+      const dim = document.querySelector('[data-testid="tour-dim"]');
+      const spot = document.querySelector('[data-testid="tour-spotlight"]');
+      const sr = spot?.getBoundingClientRect();
+      const dr = dim?.getBoundingClientRect();
       return {
-        dimBottom: dim.getBoundingClientRect().bottom,
-        barTop: (bar || (home as HTMLElement)).getBoundingClientRect().top,
-        barFound: !!bar,
+        barTop: bar ? bar.getBoundingClientRect().top : null,
+        dim: dr && { top: dr.top, bottom: dr.bottom },
+        spot: sr && { top: sr.top, bottom: sr.bottom, height: sr.height },
+        vh: window.innerHeight,
       };
     });
-    expect(edges, "the tour dim and the dock should both be on screen").not.toBeNull();
-    expect(edges!.barFound, "should have found the bottom bar by its brew slot").toBe(true);
-    expect(edges!.dimBottom,
-      `the dim should stop at the dock (dim ends ${Math.round(edges!.dimBottom)}, `
-      + `dock starts ${Math.round(edges!.barTop)})`)
-      .toBeLessThanOrEqual(edges!.barTop + 1);
 
-    // And the pointer is deliberately NOT clipped with it — four blend
-    // steps point at things inside the dock, and a clipped highlight
-    // would leave them pointing at nothing. Walk to one and check the
-    // spotlight geometry still lands on the dock element.
+    const onPage = await geom();
+    expect(onPage.barTop, "should have found the bottom bar by its brew slot").not.toBeNull();
+
+    // The dim covers the whole screen — nothing is left lit, chrome
+    // included.
+    expect(onPage.dim!.top, "the dim should start at the top of the screen")
+      .toBeLessThanOrEqual(1);
+    expect(onPage.dim!.bottom, "and reach the bottom, over the dock")
+      .toBeGreaterThanOrEqual(onPage.vh - 1);
+
+    // Dock step FIRST — the brew row comes before the prediction in the
+    // tour, and advanceTo only walks forwards. Asking for them in
+    // reading order instead of tour order clicked Next past the last
+    // step and hung on a button that was no longer there.
+    //
+    // A chrome step's cutout is left alone; clamping it would leave the
+    // four blend steps that point at the dock highlighting nothing.
     await advanceTo(page, "The brew row");
-    const row = await page.locator('[data-tour="blend-controls"]').boundingBox();
-    expect(row!.y, "the brew row step targets an element below the dim")
-      .toBeGreaterThan(edges!.dimBottom - 1);
+    // Polled. This step shuts the brew row, which MOVES the target
+    // without resizing it — and the tour's ResizeObserver only fires on
+    // size — so the cutout eases into place a beat after the dock
+    // settles. A single read catches it at the row's old position and
+    // fails for a reason unrelated to the claim.
+    await expect.poll(async () => {
+      const g = await geom();
+      return g.spot!.top >= g.barTop! - 1;
+    }, {
+      message: "a dock target's cutout should settle onto the dock, unclamped",
+      timeout: 8_000,
+    }).toBe(true);
+
+    // A page step's cutout stops at the dock rather than punching
+    // through the menu.
+    // Polled, like the step above. This step OPENS the brew row, so the
+    // dock grows ~200px and the clamp line moves while the cutout is
+    // still easing into place — a single sample catches the hole
+    // mid-flight, overshooting by whatever the dock has left to grow.
+    // The claim is about where it comes to rest.
+    await advanceTo(page, "The prediction");
+    await expect.poll(async () => {
+      const g = await geom();
+      return {
+        stopsAtDock: g.spot!.bottom <= g.barTop! + 1,
+        isARealHole: g.spot!.height > 20,
+      };
+    }, {
+      message: "a page cutout should settle stopping at the dock, without collapsing to nothing",
+      timeout: 8_000,
+    }).toEqual({ stopsAtDock: true, isARealHole: true });
   });
 
   test("the spotlight tracks the strip when it resizes mid-step", async ({ page }) => {
@@ -445,10 +500,21 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
     const graph = page.locator('[data-tour="blend-graph"]');
     const spotlight = page.getByTestId("tour-spotlight");
-    const heights = async () => ({
-      bars: (await graph.boundingBox())!.height,
-      spot: (await spotlight.boundingBox())!.height,
-    });
+    // Tracks the TOP edge, not the height.
+    //
+    // The cutout is clamped at the dock now — a strip tall enough to run
+    // under the glass bar gets a SHORTER hole on purpose, so its height
+    // no longer keeps a constant padding and the old height-based
+    // measure read -37.9px before the resize and 12.0px after. That's
+    // the clamp working, not the tracking failing. What still has to
+    // hold, and what this test is actually about, is that the cutout
+    // follows the strip as it changes size instead of sitting frozen
+    // where the strip used to be.
+    const heights = async () => {
+      const g = (await graph.boundingBox())!;
+      const s = (await spotlight.boundingBox())!;
+      return { bars: g.height, spot: s.height, offset: g.y - s.y };
+    };
 
     // Settle before measuring anything. The cutout EASES to its box, so
     // a reading taken while a step is still animating in describes a
@@ -466,7 +532,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       let last = -1e9;
       for (let i = 0; i < 40; i++) {
         const now = await heights();
-        const pad = now.spot - now.bars;
+        const pad = now.offset;
         if (Math.abs(pad - last) <= 0.5) return { ...now, pad };
         last = pad;
         await page.waitForTimeout(100);
@@ -495,10 +561,23 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     const after = await settle();
 
     expect(Math.abs(after.pad - before.pad),
-      `the spotlight should hold its padding around the strip as it resizes `
-      + `(${before.pad.toFixed(1)}px before, ${after.pad.toFixed(1)}px after; `
+      `the cutout's top should stay pinned to the strip's as it resizes `
+      + `(offset ${before.pad.toFixed(1)}px before, ${after.pad.toFixed(1)}px after; `
       + `strip ${Math.round(before.bars)}→${Math.round(after.bars)}px)`)
       .toBeLessThanOrEqual(2);
+
+    // The bottom is the clamp's business, not the tracking's: however
+    // tall the strip gets, the hole must not reach past the dock.
+    const dockTop = await page.evaluate(() => {
+      const bar = document.getElementById("brew-dock")?.parentElement;
+      return bar ? bar.getBoundingClientRect().top : window.innerHeight;
+    });
+    for (const [when, m] of [["before", before], ["after", after]] as const) {
+      const spot = (await spotlight.boundingBox())!;
+      expect(spot.y + spot.height,
+        `the cutout should never cross onto the dock (${when} the resize)`)
+        .toBeLessThanOrEqual(dockTop + 1);
+    }
 
     // Report whether the strip actually MOVED on this viewport. The
     // padding claim holds either way, but it's only the interesting
