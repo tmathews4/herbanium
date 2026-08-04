@@ -69,7 +69,16 @@ export const SCREEN_TOURS = {
     //
     // openControls: true because the pills only exist while the row is
     // open, and the step before this one deliberately shut it.
+    //
+    // Lights the whole brew window, not just the pills — the same shape
+    // as the Simple/Detailed step above. What the pills DO is swap what
+    // that window contains, so the window is the lesson and the pills
+    // are the control; spotlighting the pills alone would show the
+    // control without the thing it changes. The pills then take a terra
+    // outline and pulse of their own to say which part to look at (see
+    // tourTogglePulse in BlendExtractionExplorer).
     { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
+      spotlight: ["blend-controls", "blend-sliders"],
       body: "Two sliders share this space: one sets how long the tea steeps, the other how hot the water is. Tap Time or Temp to switch between them." },
     // These two steps teach one thing between them — the sliders drive
     // the bars — so each keeps the other's element on screen and out

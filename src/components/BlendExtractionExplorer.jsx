@@ -488,7 +488,12 @@ export const BlendExtractionExplorer = ({
               actually look at. Terra rather than the spotlight's white
               so the two read as different jobs: the halo is "look
               here", this is "this is the control". */}
-          {tourStep === "blend-mode" && (
+          {/* Injected for the axis-pill step too. That control is in the
+              dock, several hundred lines away in a portal, but the
+              keyframes are global once mounted and this block always
+              renders — so one definition serves both rather than two
+              copies drifting apart. */}
+          {(tourStep === "blend-mode" || tourStep === "blend-axis") && (
             <style>{`
               @keyframes tourTogglePulse {
                 0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.55); }
@@ -936,10 +941,28 @@ export const BlendExtractionExplorer = ({
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     gap: 8, marginTop: 8, marginBottom: 4,
                   }}>
+                    {/* Same terra outline and slow pulse the
+                        Simple/Detailed toggle takes during its own step,
+                        and for the same reason. The spotlight lights the
+                        whole brew window — correct, because what the
+                        pills DO is swap what that window contains — but
+                        that leaves the pills as one more thing inside a
+                        large bright area. The second, smaller signal
+                        says which part to look at. Terra rather than the
+                        spotlight's white so the two read as different
+                        jobs: the halo is "look here", this is "this is
+                        the control". */}
                     <div data-tour="blend-axis" style={{
                       display: "inline-flex", flexShrink: 0,
-                      border: `1px solid ${theme.ruleSoft}`, borderRadius: 999,
+                      border: tourStep === "blend-axis"
+                        ? `1.5px solid ${theme.terra}`
+                        : `1px solid ${theme.ruleSoft}`,
+                      borderRadius: 999,
                       overflow: "hidden",
+                      animation: tourStep === "blend-axis"
+                        ? "tourTogglePulse 1.9s ease-in-out infinite"
+                        : undefined,
+                      transition: "border-color 0.3s ease",
                     }}>
                       {[["timeS", "Time", theme.sage], ["tempC", "Temp", theme.terra]]
                         .map(([key, label, accent]) => {

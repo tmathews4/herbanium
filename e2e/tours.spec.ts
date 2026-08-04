@@ -393,6 +393,39 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
+  test("the pills step lights the brew window and pulses the pills", async ({ page }) => {
+    // Mirrors the Simple/Detailed step: the spotlight covers the thing
+    // the control CHANGES, and the control takes a terra pulse of its
+    // own so you can tell which part of a large bright area to look at.
+    // Both halves asserted, because either alone is the wrong lesson —
+    // pills without the window shows a control with no consequence, and
+    // the window without the pulse leaves the control lost inside it.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "Time or temperature");
+
+    const pills = page.locator('[data-tour="blend-axis"]');
+    await expect(pills, "the pills should carry the tour's own pulse")
+      .toHaveCSS("animation-name", "tourTogglePulse");
+
+    await expect.poll(async () => {
+      const spot = await page.getByTestId("tour-spotlight").boundingBox();
+      const row = await page.locator('[data-tour="blend-controls"]').boundingBox();
+      const sliders = await page.locator('[data-tour="blend-sliders"]').boundingBox();
+      if (!spot || !row || !sliders) return null;
+      return spot.y <= row.y + 2 && spot.y + spot.height >= sliders.y + sliders.height - 2;
+    }, {
+      message: "the cutout should settle over the whole brew window, row and sliders",
+      timeout: 8_000,
+    }).toBe(true);
+
+    // And it lets go once the tour moves on, like the toggle does.
+    await page.getByTestId("tour-callout")
+      .getByRole("button", { name: "Next", exact: true }).click();
+    await expect(pills, "the pulse should stop when the step does")
+      .not.toHaveCSS("animation-name", "tourTogglePulse");
+  });
+
   test("the tour dims everything, and the cutout never crosses onto the chrome", async ({ page }) => {
     // Two claims, and they pull against each other, which is why they're
     // asserted together.

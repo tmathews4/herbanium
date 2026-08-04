@@ -415,6 +415,19 @@ test("the axis pills get a step of their own, after the row opens", () => {
     "the pills step must open the row — the pills don't render while it's shut");
 });
 
+test("the pills step lights the whole brew window, not just the pills", () => {
+  // Same shape as the Simple/Detailed step: spotlight the thing the
+  // control CHANGES, then mark the control itself with its own terra
+  // pulse. Lighting the pills alone would show the control without the
+  // window it swaps the contents of, which is the actual lesson.
+  const step = blend[stepIndex("blend-axis")];
+  const lit = step.spotlight || [];
+  for (const id of ["blend-controls", "blend-sliders"]) {
+    assert(lit.includes(id),
+      `the pills step should keep ${id} lit (spotlight: ${JSON.stringify(lit)})`);
+  }
+});
+
 test("the prediction and slider steps both force the bar OPEN", () => {
   // blend-sliders only exists while the bar is open, and the pair
   // keepClear each other — so if the prediction step left it shut, its
