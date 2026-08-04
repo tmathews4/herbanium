@@ -180,6 +180,43 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
     await expectMenu(page, "a restored steep");
   });
 
+  test("the menu actually navigates out of a detail screen", async ({ page }) => {
+    // A visible menu is only half of it. Sub-tabs became reachable from
+    // detail screens the moment those screens stopped covering the dock,
+    // and the sub-tab handler didn't dismiss the overlay the way the
+    // main-tab handler does — so the tap changed the mode UNDERNEATH the
+    // detail screen and read as a dead button. Reported as "open Brewing
+    // on an ingredient, tap Blend, nothing happens".
+    //
+    // Both kinds of tab are checked from inside a detail screen, because
+    // "the menu is on screen" and "the menu works from here" are
+    // different claims and only the first was ever tested.
+    await openTab(page, "Apothecary");
+    await openSubTab(page, "Herbanium");
+    await page.getByRole("button", { name: /Chamomile/i }).first().click();
+    await page.getByRole("button", { name: "Brewing", exact: true }).click();
+    await expect(page.locator('[data-tour="blend-controls"]'),
+      "the ingredient's brewing tab should be open").toBeVisible();
+
+    // Sub-tab out of it.
+    await openSubTab(page, "Blend");
+    await expect(page.locator('[data-tour="blend-search"]'),
+      "tapping Blend should land on the compose screen, not sit behind the ingredient")
+      .toBeVisible();
+    await expect(page.locator("#brew-dock-ingredient-detail"),
+      "and the ingredient screen should be gone").toHaveCount(0);
+
+    // Main tab out of one too, for the same reason. Back via Herbanium
+    // first — on the Blend screen a "Chamomile" chip ADDS the
+    // ingredient to the pot rather than opening its page.
+    await openSubTab(page, "Herbanium");
+    await page.getByRole("button", { name: /Chamomile/i }).first().click();
+    await expect(page.getByRole("button", { name: "Brewing", exact: true })).toBeVisible();
+    await openTab(page, "Journal");
+    await expect(page.locator("#brew-dock-ingredient-detail"),
+      "a main tab should leave the detail screen as well").toHaveCount(0);
+  });
+
   test("navigating away mid-brew keeps both the menu and the brew", async ({ page }) => {
     await openTab(page, "Journal");
     await openSubTab(page, "Recipes");

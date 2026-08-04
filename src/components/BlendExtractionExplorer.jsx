@@ -1016,7 +1016,19 @@ export const BlendExtractionExplorer = ({
                       </span>
                     </div>
                   </div>
-                  <div style={{ marginBottom: 6 }}>
+                  {/* HELD OFF THE SCREEN EDGES. Android's back gesture
+                      and iOS's interactive-pop both claim a strip along
+                      each side, so a slider running the full width hands
+                      its last few degrees and seconds to the OS — you
+                      reach for the end of the range and leave the
+                      screen instead. The dock already insets 12px; this
+                      adds enough to clear the ~20px the gesture zones
+                      typically take.
+
+                      On the wrapper rather than the input, so the range
+                      bands underneath stay aligned with the track they
+                      describe. */}
+                  <div style={{ marginBottom: 6, padding: "0 12px" }}>
                     {shownAxis === "tempC" ? (
                       <>
                         <input

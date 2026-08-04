@@ -1399,8 +1399,30 @@ export default function App() {
   const [catalogueFilter, setCatalogueFilter] = useState({
     collection: "favorites", moods: [], flavors: [],
   });
-  const setApothecaryModeAction = (k) => setApothecaryMode(k);
+  // Tapping a sub-tab is navigation, so it has to leave whatever detail
+  // screen you're on — exactly as tapping a main tab does.
+  //
+  // This only became reachable when the menu stopped being covered. The
+  // detail screens used to paint over the whole dock, so a sub-tab
+  // couldn't be clicked from one; now it can, and without this the tap
+  // changed the mode UNDERNEATH the overlay and looked like a dead
+  // button. Reported as "open Brewing on an ingredient, tap Blend,
+  // nothing happens" — the mode really had changed, on a screen you
+  // couldn't see.
+  //
+  // Same minimized-steep exemption as the main tabs: a brew running in
+  // the background isn't a screen you're leaving.
+  const leaveDetailForNav = () => {
+    if (overlay === "steep" && steepMinimized) return;
+    setOverlay(null);
+    clearOverlayHistory();
+  };
+  const setApothecaryModeAction = (k) => {
+    leaveDetailForNav();
+    setApothecaryMode(k);
+  };
   const setShelfModeAction = (k) => {
+    leaveDetailForNav();
     // Recipes lands on the user's Favorites by default — that's the
     // most common destination on a brew-now visit. The user can
     // flip to All / Traditional / etc. via the chip strip if they

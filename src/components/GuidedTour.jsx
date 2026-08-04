@@ -72,6 +72,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   useLayoutEffect(() => {
     if (!step) return undefined;
     let raf = 0;
+    let settle = 0;
     let scrolled = false;
     let ro = null;
     // The step's keep-clear elements, or [] — they may legitimately not
@@ -120,6 +121,29 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         const oy = window.getComputedStyle(n).overflowY;
         if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight) return n;
       }
+      // Fall back to the document when IT is what scrolls.
+      //
+      // On a phone the app's inner pane overflows and the loop finds it.
+      // On desktop the app is a fixed column inside a taller preview
+      // page: the inner pane doesn't overflow, the DOCUMENT does, and
+      // computed overflowY on <html> is "visible" so the loop above
+      // never matches it. Returning null there skipped all the fine
+      // positioning — the tour did a bare scrollIntoView and left the
+      // prediction bars under the callout the moment a step arrived from
+      // further down the page.
+      //
+      // Guarded on actually overflowing, so the null case still means
+      // what it was changed to mean: a step pointing at app CHROME,
+      // which no amount of scrolling moves.
+      // Chrome first: the document contains the dock as much as it
+      // contains the page, so without this the fallback hands back a
+      // scroller for elements scrolling cannot move, and the dock's
+      // sliders get pulled into the group being fitted — which is the
+      // exclusion the dock work added in the first place.
+      const dockBar = document.getElementById(BREW_DOCK_ID)?.parentElement;
+      if (dockBar && dockBar.contains(el)) return null;
+      const doc = document.scrollingElement || document.documentElement;
+      if (doc && doc.scrollHeight > doc.clientHeight && doc.contains(el)) return doc;
       return null;
     };
     // Position the step's subject. Plain steps center the target; steps
@@ -139,7 +163,40 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // Bring the subject on screen. When the target itself is chrome
       // the scroll goes to whatever else the step needs to show.
       const subject = group.includes(el) ? el : group[0];
-      if (subject) subject.scrollIntoView({ block: "center", inline: "nearest" });
+      // Scroll the pane OURSELVES rather than asking scrollIntoView to.
+      //
+      // scrollIntoView picks its own container and on desktop that's the
+      // outer preview wrapper, not the inner pane — the one the converge
+      // loop below then adjusts. The two disagreeing is why the slider
+      // step stopped repositioning at all once it followed the effects
+      // step: the subject was already "in view" as far as the outer
+      // scroller was concerned, so nothing moved, and the bars stayed
+      // where the previous step had left them with the callout across
+      // their top.
+      //
+      // Centring is measured against the VISIBLE region — pane minus the
+      // dock — for the same reason everything else here is.
+      if (subject) {
+        // BOTH, in this order. scrollIntoView is the only thing that
+        // moves the OUTER scrollers — on desktop the document itself
+        // scrolls, and the app column can sit 80px above the viewport
+        // with nothing in the pane able to fix it. Dropping this call
+        // and steering only the pane left the desktop tour measuring
+        // its bars at top -82, off screen entirely.
+        subject.scrollIntoView({ block: "center", inline: "nearest" });
+        // Then the fine pass, on the pane we actually adjust below.
+        // scrollIntoView centres within the pane's whole box, which now
+        // runs under the dock; this re-centres against the part the
+        // user can see. Without it the subject settles low and the
+        // converge loop starts from the wrong place.
+        if (pane) {
+          const pr = pane.getBoundingClientRect();
+          const sr = subject.getBoundingClientRect();
+          const room = pr.height - dockHeight();
+          const wantTop = pr.top + Math.max(0, (room - sr.height) / 2);
+          pane.scrollTop += sr.top - wantTop;
+        }
+      }
       if (group.length === 0) return;
       // PLAIN STEPS STILL HAVE TO CLEAR THE DOCK. `block: "center"` is
       // relative to the scroll pane, and the pane now runs UNDER the
@@ -155,13 +212,26 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // Pull the subject up out of the dock if it's overhanging. Used by
       // both paths below.
       const clearTheDock = () => {
-        const visibleBottom = pane.getBoundingClientRect().bottom - dockHeight();
+        const paneBox = pane.getBoundingClientRect();
+        const visibleBottom = paneBox.bottom - dockHeight();
         for (let pass = 0; pass < 3; pass++) {
           const r = subject.getBoundingClientRect();
           const over = r.bottom - (visibleBottom - 12);
           if (over <= 1) break;
+          // Never buy bottom clearance by pushing the top off screen.
+          // Without this bound a tall subject gets shoved up until its
+          // head is above the pane and under the callout — measured on
+          // desktop as the prediction bars at top -52 with 124px of them
+          // behind the callout, on a pane with room for the lot.
+          //
+          // When the subject genuinely can't fit, stop at flush-to-top
+          // and let the bottom overhang: the callout is the more
+          // destructive overlap of the two, since it's opaque.
+          const headroom = r.top - (paneBox.top + 12);
+          const move = Math.min(over, Math.max(0, headroom));
+          if (move <= 1) break;
           const before = pane.scrollTop;
-          pane.scrollTop += over;
+          pane.scrollTop += move;
           if (pane.scrollTop === before) break;
         }
       };
@@ -287,7 +357,21 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           position(el);
           raf = requestAnimationFrame(() => {
             position(el);
-            raf = requestAnimationFrame(() => apply(el));
+            raf = requestAnimationFrame(() => {
+              apply(el);
+              // A THIRD PASS, late. Two frames isn't always enough: this
+              // step opens the brew row AND flips the strips back to
+              // Simple, and on the desktop layout the group was still
+              // settling after both — the prediction bars ended up at
+              // top -82 with 21% of them inside the pane, on the one
+              // step that says "watch the bars move".
+              //
+              // 160ms is inside the window where nobody has started
+              // reading yet, so this doesn't violate the rule the
+              // observer follows (never re-scroll under a reader). It
+              // runs once, not on a loop.
+              settle = setTimeout(() => { position(el); apply(el); }, 160);
+            });
           });
         } else {
           apply(el);
@@ -301,6 +385,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     return () => {
       window.removeEventListener("resize", measure);
       if (raf) cancelAnimationFrame(raf);
+      if (settle) clearTimeout(settle);
       if (ro) ro.disconnect();
     };
   }, [i, step]);
