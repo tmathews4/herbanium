@@ -1645,6 +1645,19 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // every reachable slider point through the in-zones cascade,
   // so the older outsider warning would double-report the same
   // information.
+  // Was this ingredient ALREADY outside its range at the recipe's own
+  // brew? If so the stretch belongs to the recipe, not to whatever the
+  // user just did with the slider.
+  const stretchedAtBaseline = (id) => {
+    if (baselineTempC == null || baselineTimeS == null) return false;
+    const meta = INGREDIENTS[id];
+    if (!meta) return false;
+    const [tLo, tHi] = meta.tempC;
+    const [sLo, sHi] = meta.timeS || [0, Infinity];
+    return baselineTempC < tLo || baselineTempC > tHi
+        || baselineTimeS < sLo || baselineTimeS > sHi;
+  };
+
   const rawOutsiders = contributions
     .filter(c => !c.inRange && c.role !== "catalyst" && !(c.tempZone && c.timeZone))
     .map(c => ({
@@ -1655,6 +1668,12 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
             : "time",
       tempDir: c.tempDir,  // "low" | "high" | null
       timeDir: c.timeDir,  // "under" | "over" | null
+      // A traditional recipe that already brewed this leaf past its own
+      // window is not a cup with a fault in it — the stretch IS the
+      // tradition, and the off-notes it produces are what the style is
+      // fond of. Chai boils the tea. Flagging that as "will extract
+      // unevenly" tells the user their cup is broken when it's correct.
+      recipeStretch: isTraditional && stretchedAtBaseline(c.id),
     }));
 
   // For curated blends sitting exactly on the curator's chosen brew,
@@ -1669,7 +1688,18 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     && baselineTempC != null && baselineTimeS != null
     && tempC === baselineTempC && timeS === baselineTimeS;
   const suppressAtBaseline = atCuratedBaseline && isTraditional;
-  const outsiders = suppressAtBaseline ? [] : rawOutsiders;
+  // Suppression used to be all-or-nothing on an EXACT baseline match,
+  // which had two bad edges. At baseline the user was told nothing, so
+  // never learned why the cup is stretched; and one nudge of either
+  // slider brought back the full list, blaming them for a stretch the
+  // recipe had all along.
+  //
+  // Now the recipe's own stretch travels with it as a character note
+  // whatever the sliders say, and only the stretch the USER introduced
+  // reads as a warning.
+  const outsiders = suppressAtBaseline
+    ? rawOutsiders.filter(o => o.recipeStretch)
+    : rawOutsiders;
 
   // (5a) Cup-level warnings — what the average reads.
   const rawCupWarnings = buildWarnings({

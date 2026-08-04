@@ -234,6 +234,40 @@ test("cimarron: high energy, bitterness present", () => {
 
 // ── Output ────────────────────────────────────────────────────
 
+// ── Traditional stretch reads as character, not fault ─────────────
+//
+// Traditional styles are frequently built on brewing a leaf past its
+// own window — throat coat holds peppermint well over-steeped, chai
+// boils the tea. The off-notes that produces are what the style is
+// fond of, so telling the drinker the cup "will extract unevenly" says
+// their correct cup is broken.
+//
+// The old rule suppressed every warning on an EXACT baseline match,
+// which had two bad edges: at baseline the drinker was told nothing
+// and never learned why the cup is stretched, and one nudge of either
+// slider brought the whole list back — blaming them for a stretch the
+// recipe had all along.
+test("a traditional recipe's own stretch is a character note at its baseline", () => {
+  const b = BLENDS.find(x => x.id === "throat-coat");
+  const r = resolveBlendAtBrew(b.ingredients, b.tempC, b.timeS, b.tempC, b.timeS, true, true);
+  const notes = (r.warnings || []).filter(w => w.kind === "tradition");
+  const faults = (r.warnings || []).filter(w => w.kind === "outsider");
+  assert(notes.length > 0, "the recipe's own stretch should be explained, not hidden");
+  assert(faults.length === 0,
+    `nothing at a traditional baseline is the drinker's fault: ${faults.map(f => f.text).join(" / ")}`);
+});
+test("steeping past a traditional baseline blames only the new stretch", () => {
+  const b = BLENDS.find(x => x.id === "throat-coat");
+  const longer = Math.round((b.timeS * 1.6) / 30) * 30;
+  const r = resolveBlendAtBrew(b.ingredients, b.tempC, longer, b.tempC, b.timeS, true, true);
+  const notes = (r.warnings || []).filter(w => w.kind === "tradition");
+  const faults = (r.warnings || []).filter(w => w.kind === "outsider");
+  // The recipe's own stretch travels with it — still character.
+  assert(notes.length > 0, "the recipe's stretch shouldn't turn into a fault when the user moves a slider");
+  // And what the user added is honestly flagged.
+  assert(faults.length > 0, "a stretch the user introduced should still warn");
+});
+
 console.log(`\n\n${pass} passed, ${fail} failed.`);
 if (fail > 0) {
   console.log("\nFailures:");

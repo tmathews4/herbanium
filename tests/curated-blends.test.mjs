@@ -121,7 +121,15 @@ for (const b of blends) {
     assert(issues.length === 0,
       `${b.name} (${b.isTraditional ? "tradition" : "custom"}) fires ${issues.length} lead-role warning(s) at its own default brew (${b.t}°C / ${b.s}s):\n        - ` +
       issues.map(o => `[${o.kind}] ${o.text}`).join("\n        - "));
+    // `recipeStretch` entries are excluded: a traditional recipe that
+    // already brews a leaf past its own window isn't a fault at its own
+    // baseline, it's the style. Those now surface as `tradition`
+    // character notes rather than being suppressed entirely, so they
+    // appear in `outsiders` where they used to be stripped. The
+    // assertion still means what it meant — nothing at a curated
+    // default should read as the drinker's mistake.
     const leadOutsiderNames = brew.outsiders
+      .filter(o => !(o && typeof o === "object" && o.recipeStretch))
       .filter(isLeadOutsider)
       .map(o => typeof o === "object" ? o.name : o);
     assert(leadOutsiderNames.length === 0,

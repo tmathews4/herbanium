@@ -499,11 +499,26 @@ export function buildWarnings({
     else if (tempPhrase)          phrase = tempPhrase;
     else if (timePhrase)          phrase = timePhrase;
     else                          phrase = "outside its preferred range";  // legacy fallback
-    warnings.push({
-      kind: "outsider", role,
-      tempDir, timeDir,
-      text: `${name} is ${phrase} — will extract unevenly.`,
-    });
+    // A stretch the RECIPE already had is a character note, not a
+    // fault. Traditional styles are often built on brewing a leaf past
+    // its own window — chai boils the tea — and the off-notes that
+    // produces are what the style is fond of. Telling the drinker the
+    // cup will "extract unevenly" says their correct cup is broken.
+    //
+    // Only a stretch the user introduced reads as a warning.
+    if (isObj && o.recipeStretch) {
+      warnings.push({
+        kind: "tradition", role,
+        tempDir, timeDir,
+        text: `${name} sits ${phrase} — the recipe means it to. That edge is where the character comes from.`,
+      });
+    } else {
+      warnings.push({
+        kind: "outsider", role,
+        tempDir, timeDir,
+        text: `${name} is ${phrase} — will extract unevenly.`,
+      });
+    }
   }
 
   // Coalesce masking notes by masker for cleaner copy
