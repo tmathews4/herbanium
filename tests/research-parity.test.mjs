@@ -52,7 +52,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { FLAVOR_FAMILY_CHIPS } from "../src/data/blends.js";
-import { PARENT_MOODS } from "../src/data/canon.js";
+import { PARENT_MOODS, JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS } from "../src/data/canon.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
@@ -687,6 +687,30 @@ test("every family declares a category", () => {
 test("every effect token resolves to a category", () => {
   const missing = Object.keys(FAMILY_BY_EFFECT).filter(t => !CATEGORY_OF_EFFECT[t]);
   assert(missing.length === 0, `effect tokens with no category: ${missing.join(", ")}`);
+});
+
+test("journal pickers offer no body register", () => {
+  // "Where it left me: digestive" isn't a sentence, and you can't
+  // notice your own immune response over a cup. Journals are about
+  // mental arc; body registers belong in the TARGET pickers, where
+  // brewing for digestion is a perfectly ordinary thing to want.
+  //
+  // This replaced a hand-kept exclusion list that grew one entry at a
+  // time as each new body word was noticed reading strangely. The
+  // guard exists so the next one is caught by the build instead.
+  const leaked = [...JOURNAL_PARENT_MOODS, ...JOURNAL_CURRENT_MOOD_CHIPS]
+    .filter(m => CATEGORY_OF_EFFECT[m.key] === "body")
+    .map(m => m.key);
+  assert(leaked.length === 0,
+    `body registers in a journal picker: ${[...new Set(leaked)].join(", ")}`);
+});
+
+test("target pickers still offer both categories", () => {
+  // The mirror: narrowing journals must not narrow what you can brew
+  // FOR. If this fails, someone filtered the wrong list.
+  const cats = new Set(PARENT_MOODS.map(m => CATEGORY_OF_EFFECT[m.key]).filter(Boolean));
+  assert(cats.has("mind") && cats.has("body"),
+    `target pickers lost a category — offering only ${[...cats].join(", ")}`);
 });
 
 test("every effect family has a colour", () => {

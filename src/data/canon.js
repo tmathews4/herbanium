@@ -30,6 +30,8 @@
 // rising in the middle, drifting to rest at the end). Order matches
 // the TrackMap mood strip's left-to-right family layout so the chip
 // row and the graph below it scan the same direction.
+import { CATEGORY_OF_EFFECT } from "./families.js";
+
 export const PARENT_MOODS = [
   { key: "calm",      family: "calm",   label: "Calm",      note: "settling, mind-quieting" },
   // soothing, grounding and uplifting became their own families when
@@ -46,7 +48,7 @@ export const PARENT_MOODS = [
   // targetMoods, and there is no migration path (bumping CURRENT_SCHEMA
   // wipes rather than migrates). Only the label moves, to match the
   // strip's family row now that `warm` holds two distinct leaves.
-  { key: "comfort",   family: "warm",   label: "Warmth",    note: "heat and warmth-of-spirit" },
+  { key: "comfort",   family: "comfort", label: "Comfort",   note: "warm relaxation, the familiar cup" },
   { key: "cooling",   family: "cool",   label: "Cooling",   note: "felt-temperature cooling" },
   { key: "digestive", family: "digestive", label: "Digestive", note: "after-meal ease" },
   // Added with the `immune` family — see data/families.js. Reaching for
@@ -81,21 +83,31 @@ const CURRENT_FEEL_PARENTS = PARENT_MOODS.filter(m =>
 // Convenience export — what a "right now I feel" chip row offers.
 export const CURRENT_MOOD_CHIPS = [...CURRENT_FEEL_PARENTS, ...CURRENT_FEEL_EXTRAS];
 
-// Journal-specific chip pools — exclude physiological registers.
-// Cup follow-ups care about digestive register because that's a real
-// effect tea has on the body; journal entries are about emotional /
-// mental arc, where 'digestive' or 'nauseous' read as physiological
-// symptoms rather than felt-states the user is reflecting on. The
-// stomach-related keys here are filtered out for both journal pickers
-// (Coming-in and Where-it-left-me) so they don't surface as chips.
-// `immune` joins these for the same reason digestive is here: it names
-// something happening in the body rather than a felt state. "Where it
-// left me: immune" doesn't parse — you can't notice your own immune
-// response over a cup, which is also why it's the least felt effect in
-// the vocabulary.
-const STOMACH_MOOD_KEYS = new Set(["digestive", "nauseous", "immune"]);
-export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
-export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS.filter(m => !STOMACH_MOOD_KEYS.has(m.key));
+// Journal-specific chip pools — MIND only.
+//
+// Journal entries are about emotional and mental arc. A body register
+// doesn't parse as something you reflect on afterwards: "where it left
+// me: digestive" isn't a sentence, and you cannot notice your own
+// immune response over a cup at all.
+//
+// This used to be a hand-kept STOMACH_MOOD_KEYS set — digestive,
+// nauseous, immune — grown an entry at a time as each new body word
+// was added and someone noticed it reading strangely in a picker. That
+// set was the mind/body split, discovered piecemeal. Derived now, so a
+// body register added later is excluded the day it arrives rather than
+// the day someone spots it.
+//
+// STRICTER than the old list: `soothing` and `cooling` are body
+// registers too and used to reach the journal pickers.
+const isBodily = (m) => CATEGORY_OF_EFFECT[m.key] === "body";
+// `nauseous` is a current-feel extra rather than an effect, so it has
+// no category to read. The one thing still named by hand, and the only
+// physiological word among the extras.
+const NON_MIND_EXTRAS = new Set(["nauseous"]);
+
+export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !isBodily(m));
+export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS
+  .filter(m => !isBodily(m) && !NON_MIND_EXTRAS.has(m.key));
 
 // 10 parent flavor families, aligned to FAMILY_BY_FLAVOR. Mirrors
 // FLAVOR_FAMILY_CHIPS in data/blends.js — re-exported here so callers

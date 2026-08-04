@@ -150,13 +150,15 @@ export const MOOD_VOCABULARY = [
     // — comfort is felt, heat is physical — so the family earned
     // nothing by existing and became two single-leaf parents.
     //
-    // The token stays `comfort`: it's persisted in journal entries as
-    // actual/targetMoods/extraMoods and three curated blends carry
-    // mood: "comfort". Only the label reads "warm".
-    family: "warm", label: "warm", category: "mind", color: "var(--effect-warm)",
+    // Self-named, like calm and focus — token, family and label are all
+    // `comfort`, so there's no indirection to keep straight. It briefly
+    // displayed as "warm", which was only ever a workaround for the
+    // family swallowing its own leaf; once the family holds one leaf
+    // that pressure is gone, and "comfort" reads better beside "heat"
+    // than "warm" did.
+    family: "comfort", label: "comfort", category: "mind", color: "var(--effect-comfort)",
     leaves: [{
       token: "comfort",
-      label: "warm",
       counterpart: null,   // no counterpart in the herbal action vocabulary
       summary: "Warm relaxation — a wrapped-blanket ease that isn't about temperature.",
       body: "Rooibos, vanilla and hojicha are the archetypes: round, sweet, familiar. Distinct from heat, which is measurable body warmth, and from soothing, which acts on the body's tissues. This one is affective — it is how the cup feels to meet, not what it does.",
