@@ -835,7 +835,13 @@ const BLENDS = [
       { id: "lemon-peel", g: 0.4, role: "accent" },
       { id: "ginger",     g: 0.2, role: "accent" },
     ],
-    tempC: 95, timeS: 300, ml: 250,
+    // 300s -> 240s. Sage's profile was re-gridded onto the brew points
+    // its research prescribes, and the doc puts camphor at every one of
+    // them — the app's old curve only produced it from 96C, so this
+    // baseline used to land just short of it. At 300s the cup is now
+    // honestly camphor-forward and the aromatic over-pull warning fires.
+    // 240s is the floor of sage's researched range and reads clean.
+    tempC: 95, timeS: 240, ml: 250,
     mood: "soothing", flavor: "savory",
     public: true, experimental: true, house: true,
     twist: true,
