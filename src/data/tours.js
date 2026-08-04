@@ -95,21 +95,34 @@ export const SCREEN_TOURS = {
     // other. Living in the dock is what makes the pairing cheap now:
     // only the bars have to be scrolled to, the sliders can't leave the
     // screen.
+    // THE TWO READOUT STEPS RUN BACK TO BACK. What the cup tastes like
+    // and what it does to you are one idea in two halves — the app
+    // predicts a cup, and that prediction has a flavour side and an
+    // effect side. The slider step used to sit between them, which read
+    // as a detour into the controls in the middle of a sentence. Taste
+    // first, effect second, then the control that moves both.
     { target: "blend-graph", title: "The prediction", pad: 6, keepClear: ["blend-sliders"],
       familyMode: true, compact: true, openControls: true,
       body: "What the cup tastes like — its flavours, and the palate underneath them." },
+    // The other half. Without a step here the user has no reason to
+    // scroll past the flavour strips, and the two windows saying what
+    // the cup actually DOES — the app's whole claim — sit unseen under
+    // the fold.
+    //
+    // No openControls: the row falls back to whatever the user left it
+    // at, which is open. The step after this one pins it again.
+    { target: "blend-effects", title: "What it does", pad: 8,
+      body: "And what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
+    // Now the control, once both readouts have been named — so "the
+    // bars" means all four windows rather than just the flavour ones.
+    //
+    // It keepClears blend-graph, so reaching this step scrolls back up
+    // to the flavour strips. That's the step doing its job rather than
+    // a stray jump: an instruction to watch the bars move is worthless
+    // if the bars aren't on screen.
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
       familyMode: true, compact: true, openControls: true,
       body: "Drag the slider — watch the bars move." },
-    // Added when the mood strip split into Mind and Body. Without a
-    // step the user has no reason to scroll past the flavour strips,
-    // and the two windows saying what the cup actually DOES — the app's
-    // whole claim — sit unseen under the fold.
-    //
-    // No openControls: past the pair the tour stops steering the row and
-    // hands it back to whatever the user left it at.
-    { target: "blend-effects", title: "What it does", pad: 8,
-      body: "Scroll down past the flavours for what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,

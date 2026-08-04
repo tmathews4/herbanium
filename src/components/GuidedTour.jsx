@@ -126,7 +126,35 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // the scroll goes to whatever else the step needs to show.
       const subject = group.includes(el) ? el : group[0];
       if (subject) subject.scrollIntoView({ block: "center", inline: "nearest" });
-      if (extra.length === 0 || group.length === 0) return;
+      if (group.length === 0) return;
+      // PLAIN STEPS STILL HAVE TO CLEAR THE DOCK. `block: "center"` is
+      // relative to the scroll pane, and the pane now runs UNDER the
+      // bottom bar — so a target near the end of the page centres into
+      // a region whose lower third is covered, and lands behind the
+      // menu. "Brew or save" did exactly this: highlighted, scrolled to,
+      // and hidden.
+      //
+      // Only a correction, not a re-layout: if the target already sits
+      // inside the visible band the delta is zero and centring stands.
+      // The keepClear path below does its own, stronger fit, so this
+      // runs for the steps that have no group to fit.
+      // Pull the subject up out of the dock if it's overhanging. Used by
+      // both paths below.
+      const clearTheDock = () => {
+        const visibleBottom = pane.getBoundingClientRect().bottom - dockHeight();
+        for (let pass = 0; pass < 3; pass++) {
+          const r = subject.getBoundingClientRect();
+          const over = r.bottom - (visibleBottom - 12);
+          if (over <= 1) break;
+          const before = pane.scrollTop;
+          pane.scrollTop += over;
+          if (pane.scrollTop === before) break;
+        }
+      };
+      if (extra.length === 0) {
+        clearTheDock();
+        return;
+      }
       // Converge rather than nudge once. scrollIntoView may act on a
       // different container than the one we adjust, so a single delta
       // can land short and leave the group high — which then pushes the
@@ -150,6 +178,20 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         pane.scrollTop += delta;
         if (pane.scrollTop === before) break;
       }
+      // Then refuse any overhang left over.
+      //
+      // groupScrollDelta deliberately lets an oversized group hang 20%
+      // of its overflow off the bottom, taking the other 80% off the
+      // top. That split was written when the keep-clear element — the
+      // temp/steep sliders — sat at the BOTTOM of the group and would
+      // have taken the whole loss. The sliders live in the dock now, so
+      // they are never in the group and never at risk, and the only
+      // thing that bottom overhang can do is push the bars behind the
+      // menu. Measured at 44px on a Pixel 9 before this.
+      //
+      // Losing it off the top instead is the documented preference: the
+      // bars are tall enough to spare their upper edge.
+      clearTheDock();
     };
     // Last geometry pushed to state, so a re-measure that finds nothing
     // changed doesn't re-render. Matters more now that a ResizeObserver

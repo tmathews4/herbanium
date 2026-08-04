@@ -379,16 +379,19 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expect(sliders, "the prediction step keepClears the sliders, so they must exist")
       .toBeVisible();
 
+    // The two readout steps run back to back now — taste, then effect —
+    // with the slider step after them, so this walks that order.
+    await advanceTo(page, "What it does");
     await advanceTo(page, "Dial in the brew");
     await expect(sliders, "and the slider step targets them directly").toBeVisible();
 
-    // Past the pair the tour stops steering: no openControls on the
-    // remaining steps, so the row falls back to whatever the USER left
-    // it at. That's open here, because open is the persisted default —
-    // the claim is "the tour hands control back", not "the tour ends
-    // with the row shut". Those read the same until the default flips,
-    // which is exactly when this needs to catch it.
-    await advanceTo(page, "What it does");
+    // Past the slider step the tour stops steering: no openControls on
+    // the remaining steps, so the row falls back to whatever the USER
+    // left it at. That's open here, because open is the persisted
+    // default — the claim is "the tour hands control back", not "the
+    // tour ends with the row shut". Those read the same until the
+    // default flips, which is exactly when this needs to catch it.
+    await advanceTo(page, "Brew or save");
     await expect(sliders, "the tour should stop driving the row after the slider step")
       .toBeVisible();
   });
