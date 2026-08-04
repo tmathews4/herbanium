@@ -369,3 +369,19 @@ whether the anxiolytic effect at tea doses is clinically detectable.
    missed opportunity; addressing it with "tea is fine because this
    was topical" is more informative and honest than pretending the
    concern doesn't exist.
+
+---
+
+## Addendum — `soothing` removed (2026-08-03)
+
+An audit of unreachable properties found `soothing` declared on the
+ingredient card and named in no brew point — the page promising
+something no cup could show. Checked against the research rather than
+transcribed into the profile to make the audit quiet.
+
+§5 rates `calm` 3, `sleepy` 2, `settle` 2, `comfort` 2 and `cooling` 2 — no soothing. Lavender works through linalool on the nervous system; it has no mucilage and no demulcent action, so `soothing` is the wrong register for it. What the rating was reaching for is already carried, and better, by `calm` 4.
+
+Removed from the card. Nothing is lost from the cup; the claim either
+never had support or is carried by a neighbour that does.
+
+<!-- sourced-effects: calm, sleepy -->

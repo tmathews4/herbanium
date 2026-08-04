@@ -255,3 +255,21 @@ finally has the right name.
 
 <!-- sourced-effects: immune -->
 <!-- superseded-effects: soothing -->
+
+---
+
+## Addendum — `warming` removed (2026-08-03)
+
+An audit of unreachable properties found `warming` declared on the
+ingredient card and named in no brew point — the page promising
+something no cup could show. Checked against the research rather than
+transcribed into the profile to make the audit quiet.
+
+§5 rates grounding, calm, immune and comfort — no warming. TCM classifies Ling Zhi as **neutral**, or neutral-to-slightly-warm depending on the source; the sources disagree and lean neutral, which is not enough to carry a claim.
+
+It also fails the test the catalogue now applies to this word. `warming` is thermogenic — gingerol and piperine acting on TRPV1 — and reishi has no such constituent. Its actives are triterpenes and beta-glucans, which is why its sourced registers are grounding, sleepy and immune.
+
+Removed from the card. Nothing is lost from the cup; the claim either
+never had support or is carried by a neighbour that does.
+
+<!-- sourced-effects: grounding, calm, immune, comfort -->

@@ -196,3 +196,46 @@ Removed. `grounding` carries the mushroom's body and quietness, which
 is the register it actually has.
 
 <!-- sourced-effects: focus, grounding, calm -->
+
+---
+
+## Addendum — `digestive` kept and sourced, `uplifting` removed (2026-08-03)
+
+An audit of unreachable properties found both declared on the card and
+present in no cup. §5 rates neither. They needed opposite answers.
+
+### `digestive` — kept, and better evidenced than the effect it sits beside
+
+> *Hericium erinaceus, a medicinal fungus with a centuries-old history:
+> evidence in gastrointestinal diseases.* World J Gastroenterol —
+> https://doi.org/10.3748/wjg.v29.i20.3048
+>
+> *Gastroprotective effects of Hericium erinaceus extract against
+> ethanol-induced ulcer in rats* —
+> https://pmc.ncbi.nlm.nih.gov/articles/PMC3835629/
+
+Hericium has been used in Chinese medicine for gastric and duodenal
+ulcers and for gastritis for centuries, and the modern work backs the
+tradition rather than merely echoing it: the polysaccharide fraction
+EP-1 is identified as the anti-gastritis active, extracts reduce ulcer
+area and prevent depletion of antioxidant enzymes in the gastric
+mucosa, and a 1985 Chinese clinical report on 25 atrophic-gastritis
+patients found clinical improvement in 63% and histological improvement
+in 52%.
+
+Carried at the long decoctions only. The active fraction is
+polysaccharide, which needs sustained heat to come out — the same
+reason §6's gentler rows are thin.
+
+### `uplifting` — removed
+
+The nearest evidence is Nagano 2010, four weeks of *H. erinaceus*
+cookies in ~30 women. **The depression and sleep scales showed no
+difference from placebo**; only some sub-items of an indefinite-
+complaints index moved, and those were "irritating", "anxious" and
+"palpitation" — the anxiolytic direction, not a lift.
+
+Whatever is there is already carried by `calm` 2. `uplifting` claims
+the cup brightens mood, and nothing supports that.
+
+<!-- sourced-effects: digestive -->

@@ -239,3 +239,19 @@
 | Facts | 3 | All cross-referenced; medieval and Roman context strongly attested |
 
 **Overall status:** Verified — confident enough to ship.
+
+---
+
+## Addendum — `warming` removed (2026-08-03)
+
+An audit of unreachable properties found `warming` declared on the
+ingredient card and named in no brew point — the page promising
+something no cup could show. Checked against the research rather than
+transcribed into the profile to make the audit quiet.
+
+This one is a straight contradiction. §5 rates **`cooling` 2** — "camphor + 1,8-cineole give a faint menthol-like register; lighter than peppermint" — and the card declared `warming` 1 alongside it. Sage's volatile fraction is the cooling one; nothing in the doc supports heat.
+
+Removed from the card. Nothing is lost from the cup; the claim either
+never had support or is carried by a neighbour that does.
+
+<!-- sourced-effects: focus, soothing, digestive, cooling -->

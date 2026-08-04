@@ -377,3 +377,21 @@ throughout as anxiolytic, hypnotic and sedative — never stimulant.
 Removed. `calm` and `sleepy` already carry the sourced picture.
 
 <!-- sourced-effects: calm, sleepy -->
+
+---
+
+## Addendum — `soothing` and `uplifting` removed (2026-08-03)
+
+An audit of unreachable properties found `soothing` and `uplifting` declared on the
+ingredient card and named in no brew point — the page promising
+something no cup could show. Checked against the research rather than
+transcribed into the profile to make the audit quiet.
+
+§5 rates `comfort` 3 — "central to rose's cultural use, the comforting/heart-soothing herb across Persian, Indian and European traditions". That is the affective register, and rose has no demulcent constituent, so `soothing` was comfort under the wrong name.
+
+`uplifting` fails for the reason `energy` already did in cycle 3. §5 marks energy **"Not an energizing herb"**, and the literature runs the other way — Hongratanaworakit's work is titled *Relaxing Effect of Rose Oil on Humans*, and the Rosa damascena meta-analysis found anxiolytic and sleep-quality effects. A herb documented as anxiolytic, hypnotic and sedative does not also brighten mood.
+
+Removed from the card. Nothing is lost from the cup; the claim either
+never had support or is carried by a neighbour that does.
+
+<!-- sourced-effects: calm, sleepy -->

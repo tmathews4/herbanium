@@ -202,3 +202,34 @@ cost, which is why it sits at 2 rather than with the 4s. No trial
 tests it as a digestive aid, and it should not be presented as one.
 
 <!-- sourced-effects: digestive -->
+
+---
+
+## Addendum — `warming` kept, sourced as tradition (2026-08-03)
+
+An audit found `warming` declared on the card with no §6 row and no §5
+rating. Kept: the claim is real, and it is the same mechanism this
+catalogue already accepts for the thermal nature of tea.
+
+> Processing — oxidation and **oven roasting** — converts the cooling
+> property of raw green tea toward neutral or warming. The most warming
+> teas are the most processed.
+> https://pathofcha.com/blogs/all-about-tea/traditional-chinese-medicine-heating-chinese-teas
+
+Genmaicha is green tea plus **roasted** brown rice, and it is
+documented as a Japanese winter favourite for exactly that reason —
+the roast is what warms it. The same transformation is why hojicha,
+roasted leaf rather than roasted grain, reads warm while its unroasted
+parent reads cool.
+
+Note the shape this gives genmaicha: sencha's `cooling` is sourced on
+its being unoxidised and steam-fixed, and genmaicha is that leaf with
+a roasted grain added. The rice is doing the work, which is why
+`warming` sits at 2 and only from 78°C — below that the cup is the
+delicate first steep and the roast has barely arrived.
+
+**No trial measures it**, and it should not be presented as though one
+did. Tradition, on the same footing as the catalogue's other
+`sources: traditional` entries.
+
+<!-- sourced-effects: warming -->
