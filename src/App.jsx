@@ -219,25 +219,28 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
       <div
         id={BREW_DOCK_ID}
         style={overlayOpen ? { display: "none" } : {
-          // A MILD EFFECT ON PURPOSE — depth, not a window.
+          // THE BLUR RADIUS IS THE KNOB, not the alpha. At 14px the
+          // strips behind smear into a uniform cream, and dropping the
+          // fill from 0.72 through 0.28 rendered indistinguishably —
+          // opacity cannot reveal shapes the blur has already
+          // destroyed. Anyone reaching for "more transparency" will
+          // reach for the alpha first and see nothing happen.
           //
-          // The blur radius, not the alpha, is what controls whether
-          // anything behind survives as a shape: at 14px the strips
-          // smear to a uniform cream, and dropping the fill from 0.72
-          // through 0.28 looked identical, because opacity can't reveal
-          // what the blur has already destroyed.
+          // Halfway between the two settings that were tried on a real
+          // phone: 14px/0.72 read as a flat panel with no depth at all,
+          // and 4px/0.45 let the flavour bars through clearly enough to
+          // compete with the RANGE BAND under the slider — itself a
+          // coloured bar, saying where the recommended brew sits, and
+          // the one element here that has to stay unmistakable.
           //
-          // 4px/0.45 was tried and reverted. It worked — you could read
-          // the flavour bars through the row — and that was the problem.
-          // The RANGE BAND under the slider is itself a coloured bar
-          // saying where the recommended brew sits, and other coloured
-          // bars drifting behind it made it ambiguous which bar was the
-          // recommendation. The one element here that must be
-          // unmistakable is the one that competes most directly with
-          // what's underneath.
-          background: "rgba(var(--ivory-rgb),0.72)",
-          backdropFilter: "blur(14px) saturate(1.1)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+          // 9px/0.58 keeps the sense that something is behind the row
+          // without resolving it into bars you could mistake for the
+          // band. Settled on a handset rather than a desktop capture;
+          // the layers separate differently in motion than they do in a
+          // screenshot.
+          background: "rgba(var(--ivory-rgb),0.58)",
+          backdropFilter: "blur(9px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.1)",
         }}
       />
       {/* NAVIGATION SITS ON SOLID GROUND. Opaque, unlike the brew row
