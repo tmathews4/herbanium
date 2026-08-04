@@ -155,6 +155,14 @@ export const MOOD_VOCABULARY = [
     leaves: [
       {
         token: "warming",
+        // Displayed as "heat". The token stays `warming` — it's
+        // persisted in journal targetMoods, named in 25 research docs,
+        // and referenced across blends and attributes — but "warming"
+        // sitting under a parent called "warmth" gave a reader two
+        // near-identical words at different levels of the hierarchy,
+        // exactly where the distinction needs to be sharp. "heat" and
+        // "comfort" under "warmth" reads instantly.
+        label: "heat",
         counterpart: "thermogenic; TCM warm-natured, Ayurvedic ushna virya",
         summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
         body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
@@ -237,6 +245,22 @@ export const MOOD_FAMILY_LABEL = Object.fromEntries(
   MOOD_VOCABULARY.map(f => [f.family, f.label])
 );
 
+/**
+ * How a LEAF is labelled on screen, where that differs from its token.
+ * Same purpose as MOOD_FAMILY_LABEL one level down: the token is the
+ * stable key that data and journals use, the label is what a reader
+ * sees. Tokens without an entry display as themselves.
+ *
+ * THE RULE, enforced in tests/research-parity.test.mjs: a leaf's label
+ * must not equal its own family's label, for the same reason a family's
+ * label must not equal one of its leaves' — Detail mode draws parent
+ * and child together, and two rows reading the same word is unreadable
+ * whichever direction the collision comes from.
+ */
+export const MOOD_LEAF_LABEL = Object.fromEntries(
+  MOOD_VOCABULARY.flatMap(f => f.leaves.filter(l => l.label).map(l => [l.token, l.label]))
+);
+
 /** Definition for a leaf token or a family key — whichever is asked for. */
 export const MOOD_DESCRIPTIONS = Object.fromEntries([
   ...MOOD_VOCABULARY.flatMap(f => f.leaves.map(l =>
@@ -245,6 +269,10 @@ export const MOOD_DESCRIPTIONS = Object.fromEntries([
   // the strip shows and therefore what it looks a description up by.
   ...MOOD_VOCABULARY.filter(f => f.summary)
     .map(f => [f.label, { summary: f.summary, body: f.body }]),
+  // ...and under a leaf's display label, so a row reading "heat" can
+  // find `warming`'s definition when it's tapped.
+  ...MOOD_VOCABULARY.flatMap(f => f.leaves.filter(l => l.label)
+    .map(l => [l.label, { summary: l.summary, body: l.body }])),
 ]);
 
 /** The established action a word answers to, or null. */

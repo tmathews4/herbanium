@@ -54,7 +54,7 @@ import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import {
   FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, EFFECT_FAMILY_COLORS, MOOD_FAMILY_ORDER,
-  MOOD_FAMILY_LABEL, MOOD_VOCABULARY,
+  MOOD_FAMILY_LABEL, MOOD_VOCABULARY, MOOD_LEAF_LABEL,
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
@@ -575,6 +575,35 @@ test("a multi-leaf family defines itself, not just its children", () => {
     }
   }
   assert(missing.length === 0, `family definitions:\n    ${missing.join("\n    ")}`);
+});
+
+test("no leaf label collides with its own family's label", () => {
+  // The mirror of the guard above, and it exists because fixing that
+  // one caused this one. `warm` was renamed to "warmth" so it would
+  // stop swallowing its `comfort` leaf — which left a parent called
+  // "warmth" sitting directly above a child called "warming". Two
+  // near-identical words at different levels of the tree, in the one
+  // place a reader needs them distinct. The leaf now displays as
+  // "heat".
+  //
+  // Collision in either direction is unreadable, so both are checked.
+  const clashes = [];
+  for (const fam of MOOD_VOCABULARY) {
+    for (const leaf of fam.leaves) {
+      const shown = MOOD_LEAF_LABEL[leaf.token] || leaf.token;
+      if (fam.leaves.length > 1 && shown === fam.label) {
+        clashes.push(`${fam.family}: leaf ${leaf.token} shows as "${shown}", same as its family`);
+      }
+    }
+  }
+  assert(clashes.length === 0, `leaf/family label collisions:\n    ${clashes.join("\n    ")}`);
+});
+
+test("every leaf label resolves to a vocabulary description", () => {
+  // A renamed leaf is still tappable, and must find its own blurb
+  // under the name it's displaying rather than opening empty.
+  const missing = Object.values(MOOD_LEAF_LABEL).filter(l => !EFFECT_DESCRIPTIONS[l]?.summary);
+  assert(missing.length === 0, `leaf labels with no description: ${missing.join(", ")}`);
 });
 
 test("every family label resolves to a vocabulary description", () => {

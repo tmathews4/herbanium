@@ -30,7 +30,7 @@ import React, { useMemo, useState } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import {
   EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
-  MOOD_FAMILY_LABEL, FLAVOR_FAMILY_LABEL,
+  MOOD_FAMILY_LABEL, FLAVOR_FAMILY_LABEL, MOOD_LEAF_LABEL,
 } from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
@@ -656,7 +656,13 @@ const TrackMap = ({
       if (kind === "flavor") return FAMILY_LABEL_FLAVOR[fam] || fam;
       return fam;
     }
-    if (!useFamilyMode) return name;
+    // Detail mode: leaf rows. A few leaves display as something other
+    // than their token — `warming` reads "heat", because a child called
+    // "warming" under a parent called "warmth" is two near-identical
+    // words at different levels of the tree, which is precisely where a
+    // reader needs them distinct. The token stays put; only the label
+    // moves.
+    if (!useFamilyMode) return (kind === "mood" && MOOD_LEAF_LABEL[name]) || name;
     if (kind === "mood") return FAMILY_LABEL_MOOD[name] || name;
     if (kind === "flavor") return FAMILY_LABEL_FLAVOR[name] || name;
     return name;
