@@ -7,6 +7,7 @@ import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import { hasExtractionProfile } from "../components/ExtractionExplorer";
+import { BrewDockProvider, INGREDIENT_DETAIL_DOCK_ID } from "../helpers/dock";
 import {
   FAMILY_BY_FLAVOR, FAMILY_COLORS,
   FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS,
@@ -146,13 +147,22 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
   const [scrolled, setScrolled] = useState(false);
 
   return (
+    // Same reasoning as BlendDetail: this screen paints over the tab
+    // bar, so it provides its own dock rather than portaling the brew
+    // controls somewhere the user can't reach. Column layout puts them
+    // below the page instead of on top of it.
+    <BrewDockProvider value={INGREDIENT_DETAIL_DOCK_ID}>
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 30,
+      background: theme.ivory,
+      boxSizing: "border-box",
+      display: "flex", flexDirection: "column",
+    }}>
     <div
       onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
-      style={{
-        position: "absolute", inset: 0, zIndex: 30,
-        background: theme.ivory, overflowY: "auto",
-        boxSizing: "border-box",
-      }}
+      // minHeight:0 so the scroll area can shrink rather than shoving
+      // the dock off the bottom.
+      style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}
     >
       {/* Sticky header row — back button + eyebrow stay pinned at
           the top of the scroll viewport so they're always reachable
@@ -564,5 +574,20 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
       )}
       </div>
     </div>
+
+      {/* Brew controls dock here, on the Brewing tab only — that's the
+          one tab whose explorer is mounted. Chrome only when something
+          is actually in it, so Overview and Pairings don't pay for an
+          empty rule line. */}
+      <div
+        id={INGREDIENT_DETAIL_DOCK_ID}
+        style={tab === "brewing" && hasExtractionProfile(id) ? {
+          flexShrink: 0,
+          background: theme.ivory,
+          borderTop: `1px solid ${theme.rule}`,
+        } : { flexShrink: 0 }}
+      />
+    </div>
+    </BrewDockProvider>
   );
 };

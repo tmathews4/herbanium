@@ -4,6 +4,7 @@
 
 import React from "react";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
+import { BrewDockProvider, BLEND_DETAIL_DOCK_ID } from "../helpers/dock";
 import {
   Flower, Kettle, MOOD_ICONS,
 } from "../components/icons";
@@ -135,12 +136,27 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   const [scrolled, setScrolled] = React.useState(false);
 
   return (
+    // This screen covers the tab bar — absolute, inset 0, above it in
+    // the stack — so it has to provide its own dock or the brew controls
+    // portal to a slot the user can't see. They did exactly that for two
+    // commits, which is what made the recipe page look read-only.
+    //
+    // Column, not one scrolling box: the dock is a flex SIBLING of the
+    // scroll area, so the controls sit below the page rather than over
+    // it and nothing is hidden underneath them. Same arrangement as the
+    // app shell, one level down.
+    <BrewDockProvider value={BLEND_DETAIL_DOCK_ID}>
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 30,
+      background: theme.ivory,
+      display: "flex", flexDirection: "column",
+    }}>
     <div
       onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
-      style={{
-        position: "absolute", inset: 0, zIndex: 30,
-        background: theme.ivory, overflowY: "auto",
-      }}
+      // minHeight:0 so this can actually shrink — without it a flex item
+      // floors at its content height and the dock gets pushed off the
+      // bottom of the screen instead of the page scrolling.
+      style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}
     >
       {/* Sticky header — back + eyebrow + favorite-star stay pinned
           to the top of the scroll viewport. Pulled out of the cream
@@ -1054,6 +1070,21 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         />
       )}
     </div>
+
+      {/* The brew controls land here. Chrome only while the Brewing
+          section is expanded — collapsed, the explorer isn't mounted and
+          the slot has to measure 0px, or every recipe pays for a rule
+          line and a strip of ivory it never fills. */}
+      <div
+        id={BLEND_DETAIL_DOCK_ID}
+        style={brewingOpen ? {
+          flexShrink: 0,
+          background: theme.ivory,
+          borderTop: `1px solid ${theme.rule}`,
+        } : { flexShrink: 0 }}
+      />
+    </div>
+    </BrewDockProvider>
   );
 };
 

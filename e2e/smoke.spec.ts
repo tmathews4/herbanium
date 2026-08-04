@@ -102,6 +102,59 @@ for (const withBrew of [false, true]) {
         "and a live prediction").toBeVisible();
     });
 
+    test("Blend — the ingredient picker stays small without going useless", async ({ page }) => {
+      // The results list was halved (180px -> 90px) because the selector
+      // card was eating 56% of the pane on a Pixel 9 — most of the first
+      // screen spent on the thing you fill the pot WITH rather than on
+      // the pot. Halving it is only worth anything if the list is still
+      // browsable, so both halves of that trade get asserted.
+      //
+      // Counts, not pixels. The maxHeight is a fixed 90px on every
+      // engine, so a pixel assertion would only ever restate the
+      // constant; what actually varies is how many chips FIT in it, and
+      // WebKit renders this text taller. The floor is deliberately low
+      // (2 rows) because iPhone is CI-only and can't be checked from
+      // here — the real numbers are logged so the CI output says what
+      // Safari actually gets.
+      await openTab(page, "Apothecarium");
+      const results = page.getByTestId("ingredient-results");
+      await expect(results, "the picker should be on screen").toBeVisible();
+
+      const shape = await results.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const chips = [...el.querySelectorAll("button")];
+        const tops = [...new Set(chips.map(c =>
+          Math.round(c.getBoundingClientRect().top - box.top)))].sort((a, b) => a - b);
+        return {
+          scrollable: el.scrollHeight > el.clientHeight + 1,
+          total: chips.length,
+          reachable: chips.filter(c =>
+            c.getBoundingClientRect().top - box.top < box.height).length,
+          rows: tops.filter(t => t < box.height).length,
+          height: Math.round(box.height),
+        };
+      });
+
+      // eslint-disable-next-line no-console
+      console.log(`  [${test.info().project.name}] picker ${shape.height}px: `
+        + `${shape.rows} rows, ${shape.reachable} of ${shape.total} ingredients reachable without scrolling`);
+
+      expect(shape.scrollable,
+        `a ${shape.height}px window over ${shape.total} ingredients should scroll`).toBe(true);
+      expect(shape.rows,
+        `the picker should still open on more than one row (got ${shape.rows})`)
+        .toBeGreaterThanOrEqual(2);
+      expect(shape.reachable,
+        `enough ingredients should be reachable without scrolling (got ${shape.reachable})`)
+        .toBeGreaterThanOrEqual(4);
+
+      // Still functional at the smaller size — the point of shrinking it
+      // is that it costs nothing, so prove the picker still picks.
+      await results.getByRole("button").first().click();
+      await expect(page.locator('[data-tour="blend-controls"]'),
+        "picking from the shrunk list should still build a pot").toBeVisible();
+    });
+
     test("Blend — a composed pot offers a brew", async ({ page }) => {
       // Deliberately not asserting on the slider value: the range's
       // bounds come from the blend's own extraction window and the
@@ -207,6 +260,81 @@ for (const withBrew of [false, true]) {
 
       await expect(page.locator('[data-tour="blend-brew"]'),
         "and a way to brew or save it").toBeVisible();
+    });
+
+    // Both detail screens paint over the tab bar, so their brew controls
+    // can't live in the tab dock — each provides its own. These two
+    // tests exist because the bug they guard was invisible to every
+    // check we had: the controls WERE in the DOM, WERE `visible` to
+    // Playwright, and were painted under a full-screen overlay where no
+    // user could touch them. So the assertion is hit-testing, not
+    // visibility. `toBeVisible` would have passed throughout the two
+    // commits the recipe page was unusable.
+    const assertReachable = async (page: Page, what: string) => {
+      const hit = await page.locator('[data-tour="blend-controls"]').evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.height === 0) return "zero height";
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        if (!top) return "nothing at that point";
+        return el.contains(top) || el === top
+          ? "reachable"
+          : `covered by <${top.tagName}${top.id ? "#" + top.id : ""}>`;
+      });
+      expect(hit, `${what}: the brew row must be touchable, not just present`).toBe("reachable");
+    };
+
+    test("Recipes — a pre-made recipe's brew is adjustable, not read-only", async ({ page }) => {
+      await openTab(page, "Journal");
+      await openSubTab(page, "Recipes");
+      await page.locator('[data-tour="recipes-row"]').first().click();
+
+      const controls = page.locator('[data-tour="blend-controls"]');
+      await expect(controls, "a recipe should offer the brew row").toBeVisible();
+      await assertReachable(page, "recipe detail");
+
+      // Same control as the compose screen, not a second design: the
+      // axis pills swap which slider is bound, one at a time.
+      const slider = page.locator('[data-tour="blend-sliders"] input[type=range]');
+      await expect(slider, "exactly one slider, as everywhere else").toHaveCount(1);
+      const timeMax = await slider.getAttribute("max");
+      await page.getByTestId("brew-axis-tempC").click();
+      expect(await slider.getAttribute("max"),
+        "the pills should swap the bound axis here too").not.toBe(timeMax);
+      await expect(slider, "and temperature keeps its 5°C notches")
+        .toHaveAttribute("step", "5");
+
+      // And it folds, same as the dock version.
+      await controls.click();
+      await expect(page.locator('[data-tour="blend-sliders"]'),
+        "the row should fold on a recipe too").toBeHidden();
+      await expect(controls, "and still read the brew while folded")
+        .toContainText(/\d+\s*°[CF].*\d+:\d{2}/s);
+
+      // Back out before the test ends. A detail overlay replaces
+      // `overlay`, and the brew banner only renders while that's the
+      // steep — so leaving one open trips the afterEach that guards a
+      // running brew. Same reason the recipe-detail smoke test does it.
+      await page.getByRole("button", { name: "← back", exact: true }).click();
+    });
+
+    test("Herbanium — an ingredient's brew is adjustable too", async ({ page }) => {
+      await openTab(page, "Apothecarium");
+      await openSubTab(page, "Herbanium");
+      // Chamomile rather than whatever sorts first: the explorer only
+      // renders for ingredients that HAVE an extraction profile, so the
+      // test needs one it knows does.
+      await page.getByRole("button", { name: /Chamomile/i }).first().click();
+      // The explorer only mounts on the Brewing tab, which is also the
+      // only tab whose dock takes chrome.
+      await page.getByRole("button", { name: "Brewing", exact: true }).click();
+
+      const controls = page.locator('[data-tour="blend-controls"]');
+      await expect(controls, "an ingredient should offer the brew row").toBeVisible();
+      await assertReachable(page, "ingredient detail");
+      await expect(page.locator('[data-tour="blend-sliders"] input[type=range]'),
+        "one slider here as well").toHaveCount(1);
+
+      await page.getByRole("button", { name: "← back", exact: true }).click();
     });
 
     test("Herbanium — search and filters narrow the list", async ({ page }) => {

@@ -28,7 +28,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { theme, ff } from "../theme";
-import { BREW_DOCK_ID } from "../helpers/dock";
+import { useBrewDockId } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange, TIME_STEP_S } from "../algo/brewBounds";
@@ -295,22 +295,28 @@ export const BlendExtractionExplorer = ({
   // wanted the screen back could never make that stick — the tax would
   // fall hardest on the people who least need the prompt.
   const [controlsOpen, setControlsOpen] = usePersistedState("explorerControlsOpen", true);
-  // The dock slot App renders for those controls (helpers/dock.js). It's
-  // a DOM node outside this tree, so it's read rather than reffed.
+  // Which slot these controls dock into. The tab dock by default; a
+  // full-screen overlay that covers the tab bar provides its own, since
+  // controls portaled under it are unreachable. See helpers/dock.js.
+  const dockId = useBrewDockId();
+  // The dock slot itself. It's a DOM node outside this tree, so it's
+  // read rather than reffed.
   //
   // Normally the initializer finds it: this component sits behind a
-  // lazy() boundary, so App — and the dock with it — is committed before
-  // we ever render. The effect is the safety net for the case where it
-  // isn't, because a null here means the controls silently never appear.
-  // It re-reads the same node and React bails on the identical value.
-  const [brewDock, setBrewDock] = useState(() => document.getElementById(BREW_DOCK_ID));
-  // Runs once and re-reads the same node, so React bails on the identical
-  // value rather than cascading. This trips react-hooks/set-state-in-effect,
-  // which can't be suppressed by a directive (the compiler-based rules
-  // ignore them — see the three unsuppressed ones already in App.jsx). Kept
+  // lazy() boundary, so the host — and its dock with it — is committed
+  // before we ever render. The effect is the safety net for the case
+  // where it isn't, because a null here means the controls silently
+  // never appear. It re-reads the same node and React bails on the
+  // identical value.
+  const [brewDock, setBrewDock] = useState(() => document.getElementById(dockId));
+  // Re-reads on mount, and again if the host changes which dock it
+  // wants. Normally lands on the identical node, so React bails rather
+  // than cascading. This trips react-hooks/set-state-in-effect, which
+  // can't be suppressed by a directive (the compiler-based rules ignore
+  // them — see the three unsuppressed ones already in App.jsx). Kept
   // anyway: a null dock means the controls silently never appear, and a
   // lint error is the cheaper of the two.
-  useEffect(() => { setBrewDock(document.getElementById(BREW_DOCK_ID)); }, []);
+  useEffect(() => { setBrewDock(document.getElementById(dockId)); }, [dockId]);
 
   // Guided tour: the tour's toggle step explains Simple vs Detailed and
   // leaves the strips on Simple. That isn't only pedagogy — family rows

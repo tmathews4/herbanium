@@ -1529,9 +1529,23 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
 
         {/* Scrollable results — soft ivory wash so the chip list reads
-            as a distinct zone from the filter chips above. */}
-        <div style={{
-          maxHeight: 180, overflowY: "auto",
+            as a distinct zone from the filter chips above.
+
+            HALF THE HEIGHT IT USED TO BE (180 -> 90). The selector card
+            was 418px of a 750px pane on a Pixel 9 — 56% of the screen
+            spent on the thing you use to fill the pot rather than on the
+            pot. At 90 the list still opens on three rows (~8 chips of
+            53), with the third clipped, which is the scroll affordance:
+            a list cut exactly at a row boundary reads as complete and
+            nobody scrolls it.
+
+            Worth knowing where the rest of the card goes, because
+            halving this only reclaims 90 of those 418px: search 41,
+            category chips 74, "more filters" 22, the results label 23,
+            and ~77 of padding and margins. The list was the biggest
+            single piece but not the majority. */}
+        <div data-testid="ingredient-results" style={{
+          maxHeight: 90, overflowY: "auto",
           paddingRight: 4,
         }}>
           {filteredAvailable.length === 0 ? (
