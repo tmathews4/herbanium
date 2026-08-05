@@ -61,21 +61,44 @@ export const TIME_PAD_RATIO = 0.30; // +30% past the recipe's max steep
 // it — otherwise the input snaps to the largest step ≤ upper bound
 // and the user feels stuck near the right edge.
 //
-// ONE SECOND, where temperature still moves in 5°C notches. The two
-// axes look symmetric and aren't, in a second way beyond their spans:
-// temperature is something the user has to REPRODUCE at a kettle, and
-// most kettles have no thermostat — which is why the app answers a
-// temperature with rest-time advice ("off the boil ~2 min"). Advice
-// like that only means anything against round numbers; 5°C notches are
-// what makes it sayable. Steep time has no such problem. A timer does
-// seconds natively, so the notches were never buying the user
-// anything — they were only ever a slider-geometry compromise, and
-// moving to one axis at a time in the dock gave the width back.
+// FIVE SECONDS, arrived at from 15 via 1.
 //
-// The read-through: the prediction bars now respond continuously to a
-// drag instead of in 15s jumps, which is the whole reason Time is the
-// axis the sliders open on.
-export const TIME_STEP_S = 1;
+// 15s was a slider-geometry compromise from when both axes shared the
+// width, and it made the prediction bars jump rather than sweep. 1s
+// fixed the sweep and overshot: a chamomile blend became 531 steps over
+// a ~364px track, 0.69px each, which is precision the data has and a
+// finger does not. 5s keeps the sweep, makes every position reachable,
+// and lands on the numbers people set timers to.
+//
+// Temperature stays on 5°C notches for a different reason, worth not
+// conflating: temp is a value the user has to REPRODUCE at a kettle
+// that probably has no thermostat, which is why the app answers it with
+// rest-time advice ("off the boil ~2 min") — and advice like that is
+// only sayable against round numbers. Time's notches are about the
+// slider; temp's are about the kettle.
+export const TIME_STEP_S = 5;
+// Below this span the coarse step costs more than it buys.
+export const TIME_FINE_SPAN_S = 90;
+export const TIME_STEP_FINE_S = 1;
+
+/**
+ * The step for a given time range.
+ *
+ * 5s almost everywhere. At 1s a chamomile blend is 531 steps across a
+ * ~364px track — 0.69px each, which is sub-pixel: the precision existed
+ * in the data and not in anything a finger could do. 5s gives 106
+ * positions at 3.4px, still a gradient under a drag, and lands on the
+ * round numbers people actually set timers to.
+ *
+ * But a flat 5s guts the short end. Matcha's window is 15-39s: 24
+ * positions at 1s, FIVE at 5s. Seconds are the whole resolution of a
+ * whisk time or a gongfu flash steep, so ranges that short keep them.
+ */
+export function timeStepFor(range) {
+  if (!range) return TIME_STEP_S;
+  const [lo, hi] = range;
+  return (hi - lo) <= TIME_FINE_SPAN_S ? TIME_STEP_FINE_S : TIME_STEP_S;
+}
 
 /**
  * Single-range helpers used by IngredientDetail (where the explorer
@@ -93,7 +116,14 @@ export function padTempRange([lo, _hi]) {
 
 export function padTimeRange([_lo, hi]) {
   const padded = hi * (1 + TIME_PAD_RATIO);
-  const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
+  // Round the SPAN, not the value, so the labeled max is landable: an
+  // HTML range steps from `min`, so hi - lo has to divide by the step.
+  // The step itself depends on the span, so it's picked from the
+  // unrounded figure first — a boundary case can only move it by one
+  // step, which the ceil then absorbs.
+  const step = timeStepFor([TIME_HARD_MIN, Math.ceil(padded)]);
+  const stepAligned = TIME_HARD_MIN
+    + Math.ceil((Math.ceil(padded) - TIME_HARD_MIN) / step) * step;
   return [
     TIME_HARD_MIN,
     Math.min(TIME_HARD_MAX, stepAligned),
@@ -147,7 +177,14 @@ export function unionAndPadTempRange(ingredients, INGREDIENTS) {
 export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
   if (!ingredients?.length) {
     const padded = 600 * (1 + TIME_PAD_RATIO);
-    const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
+    // Round the SPAN, not the value, so the labeled max is landable: an
+  // HTML range steps from `min`, so hi - lo has to divide by the step.
+  // The step itself depends on the span, so it's picked from the
+  // unrounded figure first — a boundary case can only move it by one
+  // step, which the ceil then absorbs.
+  const step = timeStepFor([TIME_HARD_MIN, Math.ceil(padded)]);
+  const stepAligned = TIME_HARD_MIN
+    + Math.ceil((Math.ceil(padded) - TIME_HARD_MIN) / step) * step;
     return [TIME_HARD_MIN, Math.min(TIME_HARD_MAX, stepAligned)];
   }
   let leadHi = Infinity;   // min of lead maxes
@@ -181,7 +218,14 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
   // (175 → 227.5 → 228) rather than the up-to-14s it used to add. Still
   // load-bearing, and still the same rule — the max has to be landable.
   const padded = leadHi * (1 + TIME_PAD_RATIO);
-  const stepAligned = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
+  // Round the SPAN, not the value, so the labeled max is landable: an
+  // HTML range steps from `min`, so hi - lo has to divide by the step.
+  // The step itself depends on the span, so it's picked from the
+  // unrounded figure first — a boundary case can only move it by one
+  // step, which the ceil then absorbs.
+  const step = timeStepFor([TIME_HARD_MIN, Math.ceil(padded)]);
+  const stepAligned = TIME_HARD_MIN
+    + Math.ceil((Math.ceil(padded) - TIME_HARD_MIN) / step) * step;
   return [
     TIME_HARD_MIN,
     Math.min(TIME_HARD_MAX, stepAligned),

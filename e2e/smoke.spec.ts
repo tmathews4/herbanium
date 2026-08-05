@@ -237,16 +237,23 @@ for (const withBrew of [false, true]) {
       const timeWidth = (await slider.boundingBox())!.width;
       const timeMax = await slider.getAttribute("max");
 
-      // The two axes are deliberately NOT equally granular. Time steps
-      // by the second because a timer does seconds natively and the
-      // bars should answer a drag as a gradient. Temperature stays on
-      // 5°C notches because the user has to REPRODUCE it at a kettle
+      // Time's step is chosen from its RANGE, not fixed: 5s on an
+      // ordinary blend, 1s on windows short enough that seconds are the
+      // whole resolution (matcha is 15-39s — five positions at 5s).
+      // Asserted as "one of the two" rather than a literal, so the rule
+      // can be re-tuned in brewBounds without a test that only ever
+      // restated the constant back to itself.
+      //
+      // Temperature is on 5°C notches for an unrelated reason worth not
+      // conflating: it's a value the user has to REPRODUCE at a kettle
       // that probably has no thermostat, and the rest-time advice the
       // app gives ("off the boil ~2 min") is only sayable against round
-      // numbers. Asserted as the pair, since it's the asymmetry that's
-      // the decision — either one alone reads as an arbitrary constant.
-      await expect(slider, "time should move a second at a time")
-        .toHaveAttribute("step", "1");
+      // numbers. Time's notches are about the slider; temp's are about
+      // the kettle. Checked as a pair because the asymmetry is the
+      // decision — either alone reads as an arbitrary constant.
+      const timeStep = await slider.getAttribute("step");
+      expect(["1", "5"], `time step should be range-appropriate, got ${timeStep}`)
+        .toContain(timeStep);
 
       await page.getByTestId("brew-axis-tempC").click();
       await expect(slider, "still exactly one after swapping").toHaveCount(1);

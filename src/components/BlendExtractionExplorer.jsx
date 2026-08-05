@@ -31,7 +31,7 @@ import { theme, ff } from "../theme";
 import { useBrewDockId } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
-import { unionAndPadTempRange, unionAndPadTimeRange, TIME_STEP_S } from "../algo/brewBounds";
+import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
@@ -1058,7 +1058,7 @@ export const BlendExtractionExplorer = ({
                           aria-label="Steep time"
                           min={timeSRange[0]}
                           max={timeSRange[1]}
-                          step={TIME_STEP_S}
+                          step={timeStepFor(timeSRange)}
                           value={timeS}
                           onChange={(e) => setTimeS(Number(e.target.value))}
                           style={{

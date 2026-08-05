@@ -19,7 +19,7 @@ import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import {
   padTempRange, padTimeRange,
   TEMP_HARD_MIN, TEMP_HARD_MAX, TIME_HARD_MIN, TIME_HARD_MAX,
-  TEMP_PAD_BELOW, TEMP_MIN_SLIDER_RANGE, TIME_PAD_RATIO, TIME_STEP_S,
+  TEMP_PAD_BELOW, TEMP_MIN_SLIDER_RANGE, TIME_PAD_RATIO, timeStepFor,
 } from "../src/algo/brewBounds.js";
 import { BLENDS } from "../src/data/blends.js";
 
@@ -254,9 +254,11 @@ test("padTimeRange: lower = TIME_HARD_MIN; upper aligned to slider step", () => 
   // would let the two drift apart silently — which is exactly what
   // this test is for.
   const padded = 360 * (1 + TIME_PAD_RATIO);
-  const expectedHi = Math.ceil(padded / TIME_STEP_S) * TIME_STEP_S;
+  const step = timeStepFor([TIME_HARD_MIN, Math.ceil(padded)]);
+  const expectedHi = TIME_HARD_MIN
+    + Math.ceil((Math.ceil(padded) - TIME_HARD_MIN) / step) * step;
   assert(out[1] === expectedHi,
-    `expected upper = ceil(${padded} / ${TIME_STEP_S}) * ${TIME_STEP_S} = ${expectedHi}, got ${out[1]}`);
+    `expected upper = ${TIME_HARD_MIN} + ceil((${Math.ceil(padded)} - ${TIME_HARD_MIN}) / ${step}) * ${step} = ${expectedHi}, got ${out[1]}`);
 });
 
 test("padTimeRange: the labeled max is landable from the floor", () => {
@@ -272,8 +274,9 @@ test("padTimeRange: the labeled max is landable from the floor", () => {
   for (const hi of [60, 175, 240, 360, 420, 600, 900]) {
     const [lo, up] = padTimeRange([30, hi]);
     assert(Number.isInteger(up), `upper should be whole seconds, got ${up} for hi=${hi}`);
-    assert((up - lo) % TIME_STEP_S === 0,
-      `span ${up}-${lo}=${up - lo} isn't a whole number of ${TIME_STEP_S}s steps (hi=${hi})`);
+    const step = timeStepFor([lo, up]);
+    assert((up - lo) % step === 0,
+      `span ${up}-${lo}=${up - lo} isn't a whole number of ${step}s steps (hi=${hi})`);
   }
 });
 test("padTimeRange: lower always TIME_HARD_MIN regardless of input", () => {

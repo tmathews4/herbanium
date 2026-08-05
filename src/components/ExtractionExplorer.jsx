@@ -34,7 +34,7 @@ import { buildWarnings } from "../algo/perception";
 // Same step the blend explorer's time slider uses — one ingredient or
 // twelve, "a second" means the same thing, and two granularities for
 // the same control would read as one of them being wrong.
-import { TIME_STEP_S } from "../algo/brewBounds";
+import { timeStepFor } from "../algo/brewBounds";
 import { EffectBar } from "./EffectBar";
 import { VocabInfoCard } from "./layout";
 
@@ -178,7 +178,7 @@ export const ExtractionExplorer = ({ ingredientId, tempCRange, timeSRange }) => 
           type="range"
           min={timeSRange[0]}
           max={timeSRange[1]}
-          step={TIME_STEP_S}
+          step={timeStepFor(timeSRange)}
           value={timeS}
           onChange={(e) => setTimeS(Number(e.target.value))}
           style={{
