@@ -1859,6 +1859,40 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             tourStep={blendTourStep}
             familyModeOverride={blendTourFamilyMode}
             controlsOpenOverride={blendTourControlsOpen}
+            // Brew lives in the dock's brew panel now, not at the foot
+            // of the page. It was the one action you had to leave the
+            // controls to reach — scroll past every graph to commit the
+            // cup you'd just been dialling in. Save moved to the steep
+            // screen rather than doubling up here: one button keeps the
+            // panel readable, and saving is the occasional act.
+            brewAction={(
+              <Button
+                variant="primary"
+                disabled={reverseIngs.length === 0}
+                onClick={() => {
+                  if (reverseIngs.length === 0) return;
+                  const candidate = {
+                    name: "Untitled blend",
+                    ingredients: ingsForProfile,
+                    tempC: brewTempC,
+                    timeS: brewTimeS,
+                  };
+                  const allCatalogue = [
+                    ...BLENDS,
+                    ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
+                  ];
+                  const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+                  if (dup) {
+                    startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
+                    return;
+                  }
+                  setRcPendingBrew({ candidate, moods: ["calm"] });
+                  setRcBrewAsk(true);
+                }}
+                icon={<Kettle size={16} c={theme.cream} />}
+                style={{ width: "100%", fontSize: 13.5, padding: "9px 14px", gap: 8 }}
+              >Start brewing</Button>
+            )}
           />
         </div>
       )}
@@ -1924,39 +1958,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           textAlign: "center",
         }}>{rcSaveStatus.text}</div>
       )}
-      <div data-tour="blend-brew" style={{ display: "flex", gap: 10, marginTop: 14 }}>
-        <Button
-          variant="secondary"
-          disabled={!saveComposedBlend || reverseIngs.length === 0}
-          onClick={() => {
-            setRcSaveName("");
-            setRcSavePromptOpen(true);
-            setRcSaveStatus(null);
-          }}
-          style={{ fontSize: 14, padding: "10px 18px" }}
-        >Save</Button>
-        <Button
-          variant="primary"
-          disabled={reverseIngs.length === 0}
-          onClick={() => {
-            if (reverseIngs.length === 0) return;
-            const candidate = { name: "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS };
-            const allCatalogue = [
-              ...BLENDS,
-              ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
-            ];
-            const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
-            if (dup) {
-              startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
-              return;
-            }
-            setRcPendingBrew({ candidate, moods: ["calm"] });
-            setRcBrewAsk(true);
-          }}
-          icon={<Kettle size={17} c={theme.cream} />}
-          style={{ flex: 1, fontSize: 14, padding: "10px 14px", gap: 8 }}
-        >Start brewing</Button>
-      </div>
 
       {rcBrewAsk && rcPendingBrew && (
         <BrewSavePrompt

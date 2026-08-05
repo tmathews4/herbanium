@@ -267,6 +267,14 @@ export const BlendExtractionExplorer = ({
                             // a harder reason than presentation — the slider
                             // step targets an element that only exists while
                             // the bar is open.
+  brewAction = null,        // node rendered at the foot of the open brew
+                            // panel — the Brew button on Compose. Passed
+                            // in rather than built here: what it DOES is
+                            // blend logic (duplicate detection, the mood
+                            // prompt) and belongs to the screen that owns
+                            // the pot; this component owns only where it
+                            // sits. Absent on the detail screens, which
+                            // have their own brew affordance.
 }) => {
   const { unit, weightUnit } = useUnit();
 
@@ -1076,6 +1084,26 @@ export const BlendExtractionExplorer = ({
                     )}
                   </div>
                 </div>
+                {/* THE COMMIT ACTION, inside the panel and under the
+                    slider: adjust above, commit below.
+
+                    Full width rather than tucked into a corner. The
+                    corners are where a drag ENDS — the track is inset
+                    12px each side precisely to keep its ends out of the
+                    phone's back-gesture strip, and putting a button that
+                    commits a brew in that same reach invites a mis-tap
+                    on the one control you can't undo by dragging back.
+
+                    Rendered from a prop, not built here. The decision it
+                    triggers (duplicate detection against the catalogue,
+                    the mood prompt) is blend logic and belongs in
+                    Compose; this component only owns where it sits. Same
+                    reasoning that keeps the temp/steep state out of App. */}
+                {brewAction && (
+                  <div data-tour="blend-brew" style={{ padding: "2px 12px 8px" }}>
+                    {brewAction}
+                  </div>
+                )}
               </div>
             )}
           </div>,

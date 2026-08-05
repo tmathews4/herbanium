@@ -29,7 +29,7 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange, onSaveRecipe, alreadySaved = false }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -406,6 +406,39 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
             ) : null;
           })}
         </div>
+
+        {/* SAVE LIVES HERE NOW, not at the foot of the compose page.
+            Only Brew moved into the brew panel — two buttons in that row
+            would have crowded the one control you drag — and saving is
+            the occasional act, so it belongs where you've committed to
+            the cup rather than beside the dial you're still turning.
+
+            Disabled once the recipe is already saved: arriving from a
+            saved recipe, or after saving it here. Shown disabled rather
+            than hidden, so the answer to "can I keep this?" is on screen
+            either way — a missing button reads as a missing feature. */}
+        {onSaveRecipe && (
+          <div style={{ marginTop: 14, display: "flex", justifyContent: "center" }}>
+            <button
+              onClick={alreadySaved ? undefined : onSaveRecipe}
+              disabled={alreadySaved}
+              data-testid="steep-save"
+              style={{
+                background: "transparent",
+                border: `1px solid ${alreadySaved ? theme.ruleSoft : theme.rule}`,
+                borderRadius: 999,
+                padding: "6px 16px",
+                fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: alreadySaved ? theme.ash : theme.inkSoft,
+                cursor: alreadySaved ? "default" : "pointer",
+                transition: "color 0.2s ease, border-color 0.2s ease",
+              }}
+            >
+              {alreadySaved ? "saved" : "save this recipe"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mood check-in — only the 'right now' read survives on the

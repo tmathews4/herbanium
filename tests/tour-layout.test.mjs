@@ -445,7 +445,7 @@ test("every step that points into the brew row forces it OPEN", () => {
   // blend-sliders and blend-axis only exist while the row is open, so a
   // step targeting either without pinning it would point at nothing on
   // a user who had folded the row away.
-  for (const target of ["blend-sliders", "blend-axis"]) {
+  for (const target of ["blend-sliders", "blend-axis", "blend-brew"]) {
     assert(blend[stepIndex(target)].openControls === true,
       `${target} step must hold the brew row open`);
   }
@@ -455,8 +455,11 @@ test("the steps after the brew mechanics release the row", () => {
   // Releasing means falling back to the user's own state. The mechanics
   // steps (sliders, row, pills) are the last ones that steer it; from
   // Brew-or-save onward the row is the user's again.
-  const after = blend.slice(stepIndex("blend-axis") + 1);
-  assert(after.length > 0, "the pills step shouldn't be last");
+  // The brew step holds it open too — the Brew button lives IN the
+  // panel now, so a released row would leave that step pointing at
+  // nothing. Release starts after it.
+  const after = blend.slice(stepIndex("blend-brew") + 1);
+  assert(after.length > 0, "the brew step shouldn't be last");
   for (const s of after) {
     assert(s.openControls === undefined,
       `step "${s.target}" still pins the brew bar (${s.openControls})`);

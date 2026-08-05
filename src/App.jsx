@@ -2405,6 +2405,24 @@ export default function App() {
           minimized={steepMinimized}
           onMinimize={() => setSteepMinimized(true)}
           onRemainingChange={setSteepRemaining}
+          // Save moved here from the foot of the compose page. Only Brew
+          // went into the dock's brew panel — two buttons would have
+          // crowded the control you drag — and this is where you've
+          // committed to the cup, which is the moment worth keeping it.
+          //
+          // Already-saved covers both arriving from a saved recipe and
+          // saving it here a moment ago; the session's blend carries an
+          // id once either has happened.
+          alreadySaved={!!session.blend?.id && savedBlendIds.has(session.blend.id)}
+          onSaveRecipe={() => {
+            const b = session.blend;
+            if (!b || !saveComposedBlend) return;
+            const id = saveComposedBlend(b, b.name || "Untitled blend");
+            // Re-point the running session at the persisted blend so the
+            // button flips to "saved" and the finished cup logs against
+            // the recipe rather than an anonymous one.
+            if (id) setSession(s => (s ? { ...s, blend: { ...s.blend, id } } : s));
+          }}
           onDone={() => {
             // Single-check-in flow: brew completion logs the session
             // immediately with default flavor/taste (the unified

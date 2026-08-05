@@ -95,10 +95,16 @@ export const SCREEN_TOURS = {
     { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
       spotlight: ["blend-controls", "blend-sliders"],
       body: "One slider at a time. Tap Time or Temp to choose which \u2014 how long it steeps, or how hot the water is." },
-    // Past here the tour stops steering the row and hands it back to
-    // whatever the user left it at.
-    { target: "blend-brew", title: "Brew or save", pad: 6,
-      body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
+    // Brew lives in the panel now, under the slider — so this step has
+    // to hold the row OPEN or it would point at a button that isn't
+    // rendered. It's the last step that steers the row; past here it's
+    // the user's again.
+    //
+    // Saving is no longer mentioned: it moved to the steep screen, and
+    // naming it here would send the user looking for a button that isn't
+    // on this screen.
+    { target: "blend-brew", title: "Brew it", pad: 6, openControls: true,
+      body: "Happy with it? Start the timer — the cup you've dialled in is the one you'll get." },
     { target: "subtabs", title: "Two sides", pad: 4,
       body: "The Apothecary has two sides \u2014 Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
   ],

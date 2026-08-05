@@ -344,6 +344,54 @@ for (const withBrew of [false, true]) {
       await page.getByRole("button", { name: "← back", exact: true }).click();
     });
 
+    test("Brewing — Brew is in the dock, Save is on the steep screen", async ({ page }) => {
+      // The two actions used to sit together at the foot of the compose
+      // page, which meant scrolling past every graph to commit the cup
+      // you'd just dialled in. Brew moved into the brew panel, under the
+      // slider; Save moved to the steep screen, where you've already
+      // committed. Neither is on the page any more.
+      await openTab(page, "Apothecary");
+      const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+      await search.fill("chamomile");
+      await page.getByRole("button", { name: /chamomile/i }).first().click();
+
+      const brew = page.locator('[data-tour="blend-brew"]');
+      await expect(brew, "Brew should live in the brew panel").toBeVisible();
+      const dockHoldsBrew = await brew.evaluate((el) => {
+        const bar = document.getElementById("brew-dock")?.parentElement;
+        return !!bar && bar.contains(el);
+      });
+      expect(dockHoldsBrew, "and it should be inside the dock, not on the page").toBe(true);
+
+      // Folding the panel takes Brew with it — it's part of the brewing
+      // surface, not a permanent fixture of the chrome.
+      await page.locator('[data-tour="blend-controls"]').click();
+      await expect(brew, "folding the panel should take Brew with it").toBeHidden();
+      await page.locator('[data-tour="blend-controls"]').click();
+      await expect(brew).toBeVisible();
+    });
+
+    test("Brewing — Save is disabled for a recipe that's already saved", async ({ page }) => {
+      // Not in the minimized-brew pass: that variant starts with a steep
+      // already collapsed to the top row, so the steep screen renders
+      // display:none and there's nothing to look at. The claim is about
+      // the button's state, which doesn't vary with that setup.
+      test.skip(withBrew, "steep screen is collapsed in the minimized-brew pass");
+      // Arriving from a saved recipe, there's nothing to save. Shown
+      // disabled rather than hidden, so the answer to "can I keep this?"
+      // is on screen either way — a missing button reads as a missing
+      // feature.
+      await openTab(page, "Journal");
+      await openSubTab(page, "Recipes");
+      await page.locator('[data-tour="recipes-row"]').first().click();
+      await page.getByRole("button", { name: /Brew this cup/i }).click();
+
+      const save = page.getByTestId("steep-save");
+      await expect(save, "the steep screen should offer Save").toBeVisible();
+      await expect(save, "a curated recipe is already saved").toBeDisabled();
+      await expect(save).toHaveText(/saved/i);
+    });
+
     test("Herbanium — search and filters narrow the list", async ({ page }) => {
       await openTab(page, "Apothecary");
       await openSubTab(page, "Herbanium");

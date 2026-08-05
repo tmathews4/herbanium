@@ -412,13 +412,13 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expect(page.locator('[data-tour="blend-axis"]'),
       "the pills step must actually have pills to point at").toBeVisible();
 
-    // Past the mechanics the tour stops steering: no openControls on the
-    // remaining steps, so the row falls back to whatever the USER left
-    // it at. That's open here, because open is the persisted default —
-    // the claim is "the tour hands control back", not "the tour ends
-    // with the row shut". Those read the same until the default flips,
-    // which is exactly when this needs to catch it.
-    await advanceTo(page, "Brew or save");
+    // The brew step holds the row open too — the Brew button lives in
+    // the panel now, so it has to. Release is the step after it, and
+    // "released" means falling back to the user's own state, which is
+    // open by default. The claim is "the tour hands control back", not
+    // "the tour ends with the row shut": those read the same until the
+    // default flips, which is exactly when this should catch it.
+    await advanceTo(page, "Brew it");
     await expect(sliders, "the tour should stop driving the row after the mechanics steps")
       .toBeVisible();
   });
