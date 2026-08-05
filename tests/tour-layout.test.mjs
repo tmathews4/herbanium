@@ -448,7 +448,10 @@ test("every step that points into the brew row forces it OPEN", () => {
   // EVERY step with these targets, not just the first — the pills are
   // demonstrated across two steps now, and a second one that forgot to
   // pin the row would point at nothing for anyone who had folded it.
-  for (const target of ["blend-sliders", "blend-axis", "blend-brew"]) {
+  //
+  // blend-brew is deliberately NOT here: Brew lives in the row's header
+  // and survives folding, so its step works in either state.
+  for (const target of ["blend-sliders", "blend-axis", "blend-ranges"]) {
     const steps = blend.filter(s => s.target === target);
     assert(steps.length > 0, `no ${target} step`);
     for (const s of steps) {

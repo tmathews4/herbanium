@@ -1890,9 +1890,16 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   setRcPendingBrew({ candidate, moods: ["calm"] });
                   setRcBrewAsk(true);
                 }}
-                icon={<Kettle size={16} c={theme.cream} />}
-                style={{ width: "100%", fontSize: 13.5, padding: "9px 14px", gap: 8 }}
-              >Start brewing</Button>
+                icon={<Kettle size={14} c={theme.cream} />}
+                // Compact pill, sized to sit in the dock's header row
+                // beside the readout rather than as a band under the
+                // slider. Short label for the same reason: "Start
+                // brewing" needs a full-width button, "Brew" doesn't.
+                style={{
+                  fontSize: 12, padding: "5px 14px", gap: 6,
+                  borderRadius: 999, letterSpacing: "0.04em",
+                }}
+              >Brew</Button>
             )}
           />
         </div>

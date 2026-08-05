@@ -77,13 +77,26 @@ export const SCREEN_TOURS = {
     { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
       familyMode: true, compact: true, openControls: true,
       body: "Drag the slider \u2014 watch the bars move." },
+    // The recommended band. It sits right under the track and reads as
+    // decoration until someone says otherwise — a coloured stripe among
+    // coloured stripes. Placed straight after the drag, while the user
+    // is still looking at the slider they just moved.
+    //
+    // openControls because the band only renders inside the open panel.
+    // No spotlight list: the band alone is the subject. Folding the
+    // whole slider block in made the union tall enough that the callout
+    // had nowhere to sit but on top of it — covering the very thing the
+    // step is describing.
+    { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
+      familyMode: true,
+      body: "The shaded band under the track is where these leaves agree \u2014 brew inside it and every ingredient is working. Tap it for the reasoning." },
     // Only now the mechanics of the row itself, once the user has seen
     // what it's for. Shown SHUT \u2014 a step explaining that the row folds
     // while showing it unfolded explains nothing \u2014 which is what
     // `openControls: false` is for. `false` rather than null: null hands
     // the row back to the user's own state, which is open.
     { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
-      body: "The sliders live in this row. Tap it to fold them away \u2014 folded, it still reads the time and temperature you've set." },
+      body: "The sliders live in this row. Tap here to fold them away \u2014 folded, it still reads your time and temperature, and Brew stays where it is." },
     // The axis pills. A control that REPLACES what's on screen rather
     // than adding to it is invisible until someone says it's there.
     //

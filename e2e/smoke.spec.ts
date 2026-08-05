@@ -363,12 +363,13 @@ for (const withBrew of [false, true]) {
       });
       expect(dockHoldsBrew, "and it should be inside the dock, not on the page").toBe(true);
 
-      // Folding the panel takes Brew with it — it's part of the brewing
-      // surface, not a permanent fixture of the chrome.
+      // And it SURVIVES folding — that's the whole reason it sits in the
+      // row's header rather than under the slider. Committing the cup
+      // shouldn't require unfolding anything.
       await page.locator('[data-tour="blend-controls"]').click();
-      await expect(brew, "folding the panel should take Brew with it").toBeHidden();
-      await page.locator('[data-tour="blend-controls"]').click();
-      await expect(brew).toBeVisible();
+      await expect(page.locator('[data-tour="blend-sliders"]'),
+        "folding should put the sliders away").toBeHidden();
+      await expect(brew, "but Brew should stay reachable while folded").toBeVisible();
     });
 
     test("Brewing — Save is disabled for a recipe that's already saved", async ({ page }) => {

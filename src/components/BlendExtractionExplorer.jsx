@@ -504,7 +504,7 @@ export const BlendExtractionExplorer = ({
               keyframes are global once mounted and this block always
               renders — so one definition serves both rather than two
               copies drifting apart. */}
-          {(tourStep === "blend-mode" || tourStep === "blend-axis") && (
+          {["blend-mode", "blend-axis", "blend-brew", "blend-ranges"].includes(tourStep) && (
             <style>{`
               @keyframes tourTogglePulse {
                 0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.55); }
@@ -711,10 +711,23 @@ export const BlendExtractionExplorer = ({
             // is transparent click area so finger / mouse can land
             // on it reliably.
             return (
-              <div style={{
+              // The recommended band gets its own tour step, and the
+              // same terra pulse the other controls take during theirs —
+              // it's a small shape inside a bright cutout, so the
+              // spotlight alone doesn't say which part is the subject.
+              <div data-tour="blend-ranges" style={{
                 position: "relative",
                 height: 16,
                 marginTop: 2, marginBottom: 2,
+                borderRadius: 4,
+                boxSizing: "border-box",
+                border: tourStep === "blend-ranges"
+                  ? `1.5px solid ${theme.terra}`
+                  : "1.5px solid transparent",
+                animation: tourStep === "blend-ranges"
+                  ? "tourTogglePulse 1.9s ease-in-out infinite"
+                  : undefined,
+                transition: "border-color 0.3s ease",
               }}>
                 <button
                   type="button"
@@ -878,45 +891,75 @@ export const BlendExtractionExplorer = ({
           // done here is flat colour, so the honest choice is the
           // quieter one.
           <div style={{ borderBottom: `1px solid ${theme.ruleSoft}` }}>
-            <div style={{ padding: "8px 12px 0" }}>
+            {/* THE HEADER IS TWO TARGETS, not one.
+                BREW ON THE LEFT, where the word "Brew" already sat — so
+                the thing that said Brew is the thing that does it. It
+                stays put whether the panel is open or folded, which is
+                the point: the commit action shouldn't require unfolding
+                anything, and the full-width button under the slider that
+                used to carry it cost the dock 44px whenever the panel
+                was open.
+
+                Not centred. The temp and time readout scans as one unit
+                and splitting it with a button breaks that read — and
+                left puts the commit action at the OPPOSITE end from the
+                chevron, so the two easiest mis-taps are a row apart
+                rather than adjacent. Commit and fold shouldn't be
+                neighbours.
+
+                Sibling buttons rather than one nested inside the other:
+                a button inside a button is invalid, and the whole reason
+                for the split is that these are two different actions. */}
+            <div style={{
+              padding: "8px 12px 0",
+              display: "flex", alignItems: "stretch", gap: 8,
+              borderBottom: shownControlsOpen
+                ? `2px solid ${theme.terra}`
+                : "2px solid transparent",
+              marginBottom: -1,
+              transition: "border-color 0.2s ease",
+            }}>
+              {brewAction && (
+                <div data-tour="blend-brew" style={{
+                  flexShrink: 0, paddingBottom: 6,
+                  borderRadius: 999,
+                  animation: tourStep === "blend-brew"
+                    ? "tourTogglePulse 1.9s ease-in-out infinite"
+                    : undefined,
+                }}>
+                  {brewAction}
+                </div>
+              )}
               <button
                 data-tour="blend-controls"
                 onClick={() => setControlsOpen(v => !v)}
                 aria-expanded={shownControlsOpen}
+                aria-label={shownControlsOpen ? "hide the brew sliders" : "show the brew sliders"}
                 style={{
-                  width: "100%", background: "transparent", border: "none",
+                  flex: 1, background: "transparent", border: "none",
                   cursor: "pointer", padding: "6px 4px 8px",
-                  display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8,
-                  // Matches the sub-tab buttons directly below: same
-                  // face, same active underline, same colour switch.
+                  display: "flex", alignItems: "baseline",
+                  justifyContent: brewAction ? "flex-end" : "center", gap: 8,
                   fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
                   fontWeight: shownControlsOpen ? 600 : 500,
                   color: shownControlsOpen ? theme.terra : theme.inkSoft,
-                  borderBottom: shownControlsOpen
-                    ? `2px solid ${theme.terra}`
-                    : "2px solid transparent",
-                  marginBottom: -1,
-                  transition: "color 0.2s ease, border-color 0.2s ease",
+                  transition: "color 0.2s ease",
                 }}
               >
-                <span>Brew</span>
+                {!brewAction && <span>Brew</span>}
                 <span style={{
                   fontFamily: ff.mono, fontSize: 11.5,
                   color: shownControlsOpen ? theme.terra : theme.ash,
                 }}>
-                  {/* M:SS, not "4 min". The row is the only readout
-                      while the sliders are folded away, and rounding to
-                      the minute would report 3:47 as "4 min" — which
-                      undoes the second-level step the moment anyone
-                      uses it. Same format the open panel shows, so
-                      folding the row doesn't change the number. */}
+                  {/* M:SS, not "4 min". The row is the only readout while
+                      the sliders are folded away, and rounding to the
+                      minute would report 3:47 as "4 min" — undoing the
+                      finer step the moment anyone used it. */}
                   {displayTemp} · {displayTime}
                 </span>
-                {/* Same chevron as the "more filters" toggle on Compose,
-                    so an expanding control looks the same everywhere.
-                    Rotation is inverted here because this panel opens
-                    UPWARD out of the dock: pointing up means "expand",
-                    pointing down means "close". */}
+                {/* Same chevron as the "more filters" toggle on Compose.
+                    Rotation is inverted because this panel opens UPWARD
+                    out of the dock: up means expand, down means close. */}
                 <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
                      style={{
                        transition: "transform 0.18s ease",
@@ -1087,26 +1130,6 @@ export const BlendExtractionExplorer = ({
                     )}
                   </div>
                 </div>
-                {/* THE COMMIT ACTION, inside the panel and under the
-                    slider: adjust above, commit below.
-
-                    Full width rather than tucked into a corner. The
-                    corners are where a drag ENDS — the track is inset
-                    12px each side precisely to keep its ends out of the
-                    phone's back-gesture strip, and putting a button that
-                    commits a brew in that same reach invites a mis-tap
-                    on the one control you can't undo by dragging back.
-
-                    Rendered from a prop, not built here. The decision it
-                    triggers (duplicate detection against the catalogue,
-                    the mood prompt) is blend logic and belongs in
-                    Compose; this component only owns where it sits. Same
-                    reasoning that keeps the temp/steep state out of App. */}
-                {brewAction && (
-                  <div data-tour="blend-brew" style={{ padding: "2px 12px 8px" }}>
-                    {brewAction}
-                  </div>
-                )}
               </div>
             )}
           </div>,
