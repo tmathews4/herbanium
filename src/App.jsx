@@ -96,7 +96,7 @@ import { GREETING_ARRIVAL_MS } from "./components/TeaGreeting";
    on Profile re-enables.
    ────────────────────────────────────────────────────────────── */
 const TourOfferCard = ({ onYes, onNo }) => (
-  <div style={{
+  <div data-testid="tour-offer" style={{
     position: "absolute", left: 14, right: 14,
     bottom: "calc(96px + env(safe-area-inset-bottom))",
     zIndex: 46,
@@ -116,13 +116,13 @@ const TourOfferCard = ({ onYes, onNo }) => (
       You can replay it anytime from Profile.
     </div>
     <div style={{ display: "flex", gap: 8 }}>
-      <button onClick={onYes} style={{
+      <button onClick={onYes} data-testid="tour-offer-yes" style={{
         flex: 1, fontFamily: ff.sans, fontSize: 12.5, fontWeight: 600,
         padding: "10px 12px", borderRadius: 10, cursor: "pointer",
         background: theme.terra, border: `1px solid ${theme.terra}`,
         color: theme.ivory,
       }}>show me around</button>
-      <button onClick={onNo} style={{
+      <button onClick={onNo} data-testid="tour-offer-no" style={{
         flex: 1, fontFamily: ff.sans, fontSize: 12.5,
         padding: "10px 12px", borderRadius: 10, cursor: "pointer",
         background: "transparent", border: `1px solid ${theme.rule}`,

@@ -537,6 +537,8 @@ export const BlendExtractionExplorer = ({
               return (
                 <button
                   key={opt.id}
+                  data-testid={`blend-mode-${opt.id}`}
+                  aria-pressed={active}
                   onClick={() => {
                     const want = opt.id === "simple";
                     if (want === shownFamilyMode) return;

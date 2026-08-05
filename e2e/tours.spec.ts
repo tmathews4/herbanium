@@ -674,3 +674,169 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expectBothClear(page, "slider step");
   });
 });
+
+/* ──────────────────────────────────────────────────────────────
+   THE CALLOUT HOLDS STILL.
+
+   The spotlight tracks its target and the callout does not, and the
+   tests above only pin the first half. The second half is a usability
+   claim rather than a layout one: the callout carries Next, the user is
+   reaching for Next, and the blend screen changes size underneath them
+   constantly — the example blend drops in, the strips swap between
+   family rows and leaf rows, the brew row folds. Re-placing the callout
+   every time meant the button walked out from under a thumb already on
+   its way down.
+
+   The trade is deliberate and it costs display space: a strip that grows
+   after the anchor is set can end up partly behind the callout, where
+   re-placing would have dodged it. Accepted — the tour teaches by
+   pointing, and a target slightly covered is recoverable where a mis-tap
+   isn't.
+   ────────────────────────────────────────────────────────────── */
+test.describe("the tour callout holds its position", () => {
+  async function advanceTo(page: Page, text: string) {
+    const callout = page.getByTestId("tour-callout");
+    await expect(callout, "blend tour should start").toBeVisible();
+    for (let guard = 0; guard < 20; guard++) {
+      if ((await callout.innerText()).includes(text)) return;
+      await callout.getByRole("button", { name: "Next", exact: true }).click();
+    }
+    throw new Error(`Blend tour never reached the "${text}" step`);
+  }
+
+  // Long enough to cover the tour's own settle pass (160ms) and the
+  // 250ms position transition, so "before" is a resting position rather
+  // than a frame mid-flight. Measuring against a moving baseline would
+  // make this test pass for the wrong reason.
+  const REST = 900;
+
+  test("a strip resizing mid-step doesn't move the callout or its button", async ({ page }) => {
+    // The strongest form of the claim, because nothing else changes: the
+    // step is the same, its text is the same, so every pixel of the
+    // callout should be where it was. Only the graph resized.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "The prediction");
+
+    const callout = page.getByTestId("tour-callout");
+    const next = callout.getByRole("button", { name: "Next", exact: true });
+    const graph = page.locator('[data-tour="blend-graph"]');
+
+    await page.waitForTimeout(REST);
+    const before = (await callout.boundingBox())!;
+    const buttonBefore = (await next.boundingBox())!;
+    const graphBefore = (await graph.boundingBox())!;
+
+    // Same technique the spotlight-tracking test uses: the overlay
+    // swallows clicks, so the slider is driven through the native value
+    // setter (React's onChange listens for "input"). Changing the steep
+    // time drops family rows in and out of the strip.
+    const moved = await page.evaluate(() => {
+      const el = document.querySelector(
+        '[data-tour="blend-sliders"] input[type=range]') as HTMLInputElement | null;
+      if (!el) return false;
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype, "value")!.set!;
+      const lo = Number(el.min), hi = Number(el.max);
+      setter.call(el, String(Number(el.value) > (lo + hi) / 2 ? lo : hi));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      return true;
+    });
+    expect(moved, "the prediction step should have the brew row open").toBe(true);
+
+    // Give the strip time to re-render AND the tour every chance to
+    // re-place the callout if it were still going to. A pass here has to
+    // mean "it held", not "we looked too early".
+    await page.waitForTimeout(REST);
+
+    const after = (await callout.boundingBox())!;
+    const buttonAfter = (await next.boundingBox())!;
+    const graphAfter = (await graph.boundingBox())!;
+
+    expect(Math.abs(after.y - before.y),
+      `the callout shifted ${(after.y - before.y).toFixed(1)}px while the strip resized `
+      + `(${Math.round(graphBefore.height)}→${Math.round(graphAfter.height)}px)`)
+      .toBeLessThanOrEqual(1);
+    expect(Math.abs(buttonAfter.y - buttonBefore.y),
+      `Next moved ${(buttonAfter.y - buttonBefore.y).toFixed(1)}px under the user's thumb`)
+      .toBeLessThanOrEqual(1);
+
+    // Whether the strip actually resized is a property of the seeded
+    // blend and this viewport, not something this test should pin — the
+    // held-position claim holds either way, but it's only the
+    // INTERESTING claim when the layout underneath actually moved.
+    // eslint-disable-next-line no-console
+    console.log(`  [${test.info().project.name}] strip `
+      + `${Math.round(graphBefore.height)}→${Math.round(graphAfter.height)}px `
+      + `(${graphAfter.height === graphBefore.height ? "no resize on this viewport" : "resized"}), `
+      + `callout held at y=${before.y.toFixed(1)}`);
+  });
+
+  test("Simple → Detailed grows the graph without moving Next", async ({ page }) => {
+    // The step-to-step half of the same claim. These two steps share a
+    // target and a button position — the user has just been told to tap
+    // Next and watch, so Next is exactly where their finger is — and the
+    // step they land on grows the graph by ~200px. Re-anchoring against
+    // that new layout is precisely the move that shifts the button.
+    //
+    // Asserted on the BUTTON rather than the callout box: the two steps
+    // carry different copy, so the box legitimately changes height. What
+    // must not move is the thing being pressed.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    const callout = page.getByTestId("tour-callout");
+    const next = callout.getByRole("button", { name: "Next", exact: true });
+    const graph = page.locator('[data-tour="blend-flavors"]');
+
+    await advanceTo(page, "Simple reads the taste by family");
+    await page.waitForTimeout(REST);
+    const buttonBefore = (await next.boundingBox())!;
+    const simpleH = (await graph.boundingBox())!.height;
+
+    await next.click();
+    await expect(callout).toContainText("Detailed opens every family");
+    await page.waitForTimeout(REST);
+    const buttonAfter = (await next.boundingBox())!;
+    const detailedH = (await graph.boundingBox())!.height;
+
+    expect(detailedH, "the graph should actually have grown, or this proves nothing")
+      .toBeGreaterThan(simpleH + 40);
+    expect(Math.abs(buttonAfter.y - buttonBefore.y),
+      `Next moved ${(buttonAfter.y - buttonBefore.y).toFixed(1)}px when the graph grew `
+      + `(${Math.round(simpleH)}→${Math.round(detailedH)}px)`)
+      .toBeLessThanOrEqual(1);
+  });
+
+  test("the two axis pill steps don't move Next either", async ({ page }) => {
+    // A THIRD CASE, and it exists because the two tests above missed a
+    // real 23px regression between them.
+    //
+    // Both of those steps place the callout by its TOP, where the held
+    // bottom edge takes over and hides whether the anchor underneath is
+    // stable. This pair places by the BOTTOM — calloutPlacement flips to
+    // whichever side has more room — and there the bottom-pin never
+    // engages, so the held anchor is the only thing keeping the button
+    // still. Bypassing the anchor freeze moved Next 23px here while both
+    // tests above stayed green.
+    //
+    // Same shape as the Simple/Detailed pair otherwise: one target, two
+    // steps, and the first one tells the reader to tap Next.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    const callout = page.getByTestId("tour-callout");
+    const next = callout.getByRole("button", { name: "Next", exact: true });
+
+    await advanceTo(page, "This is Time");
+    await page.waitForTimeout(REST);
+    const before = (await next.boundingBox())!;
+
+    await next.click();
+    await expect(callout).toContainText("And Temp");
+    await page.waitForTimeout(REST);
+    const after = (await next.boundingBox())!;
+
+    expect(Math.abs(after.y - before.y),
+      `Next moved ${(after.y - before.y).toFixed(1)}px between the Time and Temp steps`)
+      .toBeLessThanOrEqual(1);
+  });
+});

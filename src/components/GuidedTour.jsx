@@ -19,7 +19,7 @@
 
 import React, { useLayoutEffect, useState } from "react";
 import { theme, ff, radius, shadow } from "../theme";
-import { unionSpan, unionRect, groupScrollDelta, calloutPlacement } from "../helpers/tourLayout";
+import { unionSpan, unionRect, groupScrollDelta, calloutPlacement, MARGIN } from "../helpers/tourLayout";
 import { BREW_DOCK_ID } from "../helpers/dock";
 
 // Top edge of the bottom dock — the line the tour's cutout is clamped
@@ -45,6 +45,50 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // that dragging the sliders moves the bars, which the user can only
   // learn if both are on screen and the callout is off both of them.
   const [clearRect, setClearRect] = useState(null);
+  // WHERE THE CALLOUT SITS — deliberately NOT the same geometry the
+  // spotlight uses.
+  //
+  // The spotlight has to track its target: the strip grows and shrinks
+  // as rows come and go, and a cutout left behind would be lighting up
+  // where the bars used to be. The callout has the opposite obligation.
+  // It carries Next, the user is reaching for Next, and a button that
+  // slides out from under a thumb because a graph grew somewhere else on
+  // screen is the app moving the goalposts mid-tap.
+  //
+  // So the callout is anchored ONCE per target and then held, while
+  // `rect`/`clearRect` go on tracking underneath it. The cost is real
+  // and accepted: a strip that grows after the anchor is set can end up
+  // partly behind the callout, where re-placing would have dodged it.
+  // A stationary button is worth more than the pixels.
+  const [anchorRect, setAnchorRect] = useState(null);
+  const [anchorClear, setAnchorClear] = useState(null);
+  // Held or free. Set false only when the callout has earned the right
+  // to move: a new target to point at, or a viewport that changed size
+  // under it.
+  const anchorLocked = React.useRef(false);
+  // The target the current anchor was computed for. Consecutive steps
+  // sharing a target (Simple/Detailed, the two axis pills) are one
+  // continuous reading position as far as the user is concerned — the
+  // callout says a bit more and the same button is still under their
+  // thumb — so the anchor carries across them rather than being
+  // recomputed against a layout the step itself just changed.
+  const anchorTarget = React.useRef(null);
+  // HOLDING THE ANCHOR ISN'T ENOUGH ON ITS OWN.
+  //
+  // A held anchor pins whichever edge calloutPlacement chose, and when
+  // that edge is the TOP the box still grows downward as the copy
+  // changes — so consecutive steps sharing a target move the button by
+  // however much taller the second one's text is. Measured at 18.8px
+  // between "Simple reads the taste by family" and "Detailed opens every
+  // family": same anchor, same target, one extra line of copy, and Next
+  // slides down the screen on the exact step that says "Tap Next".
+  //
+  // So the edge that gets held is the one the button is on. Captured
+  // from the real box once the step has settled, which reproduces the
+  // current position exactly (no jump when it takes over) and then keeps
+  // the bottom fixed while the box grows or shrinks upward instead.
+  const calloutRef = React.useRef(null);
+  const [heldBottom, setHeldBottom] = useState(null);
   // The target's own border-radius, so the pulse traces the element's
   // real shape (rounded button corners, square windows) rather than a
   // generic box.
@@ -72,6 +116,18 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     let settle = 0;
     let scrolled = false;
     let ro = null;
+    // A new target is the one thing that entitles the callout to move.
+    // Same target as the step before → the anchor stays exactly where it
+    // was, and the settle passes below reposition CONTENT under a
+    // callout that doesn't budge.
+    if (anchorTarget.current !== step.target) {
+      anchorTarget.current = step.target;
+      anchorLocked.current = false;
+      // A new target places from scratch — the held bottom belonged to
+      // the last one and would drag the callout to a position that has
+      // nothing to do with what's being pointed at now.
+      setHeldBottom(null);
+    }
     // The step's keep-clear elements, or [] — they may legitimately not
     // exist (a step reused on a screen that doesn't render them), in
     // which case the step just behaves like an ordinary one.
@@ -290,6 +346,13 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       const key = JSON.stringify([nextRect, nextClear]);
       if (key === lastKey) return;
       lastKey = key;
+      // The spotlight's geometry always refreshes. The callout's only
+      // does while the anchor is unlocked — during a new target's settle
+      // window, before anyone has started reading it.
+      if (!anchorLocked.current) {
+        setAnchorRect(nextRect);
+        setAnchorClear(nextClear);
+      }
       setRect(nextRect);
       // Radius comes from the primary target — with several elements
       // lit at once there's no single shape to trace, and the largest
@@ -367,6 +430,20 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
                 const live = document.querySelector(`[data-tour="${step.target}"]`);
                 if (live && ro && live !== el) ro.observe(live);
                 apply(el);
+                // THE ANCHOR SETS HERE, and doesn't move again for this
+                // target. Everything before this point is the step
+                // arriving — scrolling, opening the brew row, swapping
+                // the strips — and placing against a layout still in
+                // motion is what produced the jump the moment the graphs
+                // finished rendering. Everything after it is a reader
+                // with a finger on Next.
+                anchorLocked.current = true;
+                // And pin the button's edge, from the box as actually
+                // rendered. The callout has no transition, so by now it
+                // is sitting at its final place and this captures that
+                // exact line rather than a predicted one.
+                const box = calloutRef.current?.getBoundingClientRect();
+                if (box && box.height > 0) setHeldBottom(window.innerHeight - box.bottom);
               }, 160);
             });
           });
@@ -378,9 +455,30 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       }
     };
     measure();
-    window.addEventListener("resize", measure);
+    // A VIEWPORT CHANGE IS THE OTHER THING THAT EARNS A MOVE. Rotating
+    // the phone or opening the fold invalidates the placement outright —
+    // the held position may not even be on screen any more — so the
+    // anchor is released for exactly one re-measure and taken back.
+    // Re-locking immediately (rather than waiting for a settle that only
+    // runs on a fresh step) is what stops a resize from leaving the
+    // callout loose for the rest of the step.
+    const onViewportChange = () => {
+      anchorLocked.current = false;
+      // The held line is a distance from the OLD bottom edge, so it's
+      // meaningless once the viewport changes height — kept, it could
+      // place the callout off screen entirely. Dropped rather than
+      // re-captured: the DOM hasn't re-rendered at this point, so a
+      // fresh read here would just record the pre-resize box. The step
+      // finishes on ordinary placement, which costs nothing because copy
+      // doesn't change within a step — the button has nothing to move
+      // for.
+      setHeldBottom(null);
+      measure();
+      anchorLocked.current = true;
+    };
+    window.addEventListener("resize", onViewportChange);
     return () => {
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", onViewportChange);
       if (raf) cancelAnimationFrame(raf);
       if (settle) clearTimeout(settle);
       if (ro) ro.disconnect();
@@ -443,7 +541,29 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
   // room; when neither side fits, overlay the target rather than the
   // step's keep-clear element.
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-  const calloutPos = calloutPlacement({ rect, clearRect, vh });
+  // Placed against the HELD anchor, not the live rect — that separation
+  // is the whole point (see anchorRect above). Falls back to the live
+  // geometry for the first frame of the very first step, before an
+  // anchor exists.
+  const placed = calloutPlacement({
+    rect: anchorRect || rect,
+    clearRect: anchorRect ? anchorClear : clearRect,
+    vh,
+  });
+  // Swap a top-pinned box for a bottom-pinned one at the same line, so
+  // the button stays put while the copy above it changes length. Only
+  // when the placement chose the top — a box already pinned by its
+  // bottom is holding the right edge already.
+  //
+  // maxHeight is re-capped so growing UPWARD can't push the head off the
+  // screen: whatever calloutPlacement allowed, the box also can't be
+  // taller than the room between the held line and the top margin.
+  const calloutPos = heldBottom != null && placed.top != null
+    ? {
+        bottom: heldBottom,
+        maxHeight: Math.min(placed.maxHeight ?? Infinity, vh - heldBottom - MARGIN),
+      }
+    : placed;
   // Compact steps trade callout size for screen. A step that says "watch
   // these two things at once" is competing with its own subject for
   // space, and on a small phone the ordinary callout wins that fight —
@@ -548,7 +668,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
           a frame later; hiding it until measurement makes it appear
           in place (the mount fade covers the one-frame delay). */}
       {rect && (
-      <div data-testid="tour-callout" style={{
+      <div data-testid="tour-callout" ref={calloutRef} style={{
         position: "fixed",
         left: 16, right: 16, maxWidth: 420, margin: "0 auto",
         ...calloutPos,
