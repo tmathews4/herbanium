@@ -92,9 +92,22 @@ export const SCREEN_TOURS = {
     // and the pills are the control. They take a terra outline and pulse
     // of their own to say which part to look at (tourTogglePulse in
     // BlendExtractionExplorer).
+    // DEMONSTRATED, not described — one step per axis, the same shape as
+    // the Simple/Detailed pair above and for the same reason. A timed
+    // flip was the obvious alternative and is the worse one: a quick
+    // reader moves on before it happens and never sees the swap, and a
+    // slow one watches it cycle while trying to read. Tying it to Next
+    // means the change happens when the user is looking at it.
+    //
+    // `axisMode` forces which slider is bound while the step is up (see
+    // blendTourAxis in App.jsx) — the same demo-state mechanism as
+    // familyMode and openControls.
     { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
-      spotlight: ["blend-controls", "blend-sliders"],
-      body: "One slider at a time. Tap Time or Temp to choose which \u2014 how long it steeps, or how hot the water is." },
+      spotlight: ["blend-controls", "blend-sliders"], axisMode: "timeS",
+      body: "One slider at a time. This is Time \u2014 how long the leaf sits in the water. Tap Next to see the other." },
+    { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
+      spotlight: ["blend-controls", "blend-sliders"], axisMode: "tempC",
+      body: "And Temp \u2014 how hot the water is. The slider swaps with the pill; whichever you're not holding keeps its value." },
     // Brew lives in the panel now, under the slider — so this step has
     // to hold the row OPEN or it would point at a button that isn't
     // rendered. It's the last step that steers the row; past here it's
@@ -105,8 +118,6 @@ export const SCREEN_TOURS = {
     // on this screen.
     { target: "blend-brew", title: "Brew it", pad: 6, openControls: true,
       body: "Happy with it? Start the timer — the cup you've dialled in is the one you'll get." },
-    { target: "subtabs", title: "Two sides", pad: 4,
-      body: "The Apothecary has two sides \u2014 Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
   ],
   herbanium: [
     { target: "herb-search", title: "The compendium", pad: 6,
@@ -121,8 +132,6 @@ export const SCREEN_TOURS = {
       body: "Your saved and curated blends live here. Filter by collection, mood, or flavor to find one." },
     { target: "recipes-row", title: "Brew again", pad: 6,
       body: "Tap any recipe to open it — then brew it, or tweak it into something new." },
-    { target: "subtabs", title: "Three parts", pad: 4,
-      body: "Your notebook has three parts — Recipes (here), Reflections (your tea log), and Field Notes (the spirits you draw in). Switch between them here." },
   ],
   reflections: [
     { target: "reflections-log", title: "Your tea log", pad: 6,

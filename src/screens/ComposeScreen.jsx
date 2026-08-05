@@ -63,7 +63,7 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, lodestoneCharge = 0, onChargedSummon }) => {
+export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -163,7 +163,7 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} />
       )}
 
       {/* Visitors — the notebook's third sub-tab. The lodestone
@@ -1027,7 +1027,7 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis }) => {
   // When the guided Blend tour starts on an empty pot, drop in a small
   // example *blend* — two ingredients at different parts (2 / 1) — so the
   // walkthrough shows what blending actually is: balancing ingredients,
@@ -1859,6 +1859,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             tourStep={blendTourStep}
             familyModeOverride={blendTourFamilyMode}
             controlsOpenOverride={blendTourControlsOpen}
+            axisOverride={blendTourAxis}
             // Brew lives in the dock's brew panel now, not at the foot
             // of the page. It was the one action you had to leave the
             // controls to reach — scroll past every graph to commit the

@@ -267,6 +267,9 @@ export const BlendExtractionExplorer = ({
                             // a harder reason than presentation — the slider
                             // step targets an element that only exists while
                             // the bar is open.
+  axisOverride = null,      // tour demo only: forces which slider is
+                            // bound, so the pills step can show each in
+                            // turn on the user's own Next tap.
   brewAction = null,        // node rendered at the foot of the open brew
                             // panel — the Brew button on Compose. Passed
                             // in rather than built here: what it DOES is
@@ -362,7 +365,7 @@ export const BlendExtractionExplorer = ({
   // lesson inverted. Those two steps force Time; every other step
   // leaves the user's own choice alone.
   const tourAxis = (tourStep === "blend-graph" || tourStep === "blend-sliders") ? "timeS" : null;
-  const shownAxis = tourAxis ?? axis;
+  const shownAxis = axisOverride ?? tourAxis ?? axis;
 
   // Range-band selection. Each axis ("tempC" / "timeS") gets its
   // own slot — tapping a band toggles a description panel below

@@ -449,10 +449,16 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       timeout: 8_000,
     }).toBe(true);
 
-    // And it lets go once the tour moves on, like the toggle does.
-    await page.getByTestId("tour-callout")
-      .getByRole("button", { name: "Next", exact: true }).click();
-    await expect(pills, "the pulse should stop when the step does")
+    // The pills are demonstrated over TWO steps now, one per axis, so
+    // the pulse is expected to survive the first Next — it's the same
+    // lesson continuing. It should let go once the pair is done.
+    const callout = page.getByTestId("tour-callout");
+    await callout.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(pills, "the pulse should hold across the second pill step")
+      .toHaveCSS("animation-name", "tourTogglePulse");
+
+    await advanceTo(page, "Brew it");
+    await expect(pills, "the pulse should stop once the pair is done")
       .not.toHaveCSS("animation-name", "tourTogglePulse");
   });
 

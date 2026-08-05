@@ -445,25 +445,58 @@ test("every step that points into the brew row forces it OPEN", () => {
   // blend-sliders and blend-axis only exist while the row is open, so a
   // step targeting either without pinning it would point at nothing on
   // a user who had folded the row away.
+  // EVERY step with these targets, not just the first — the pills are
+  // demonstrated across two steps now, and a second one that forgot to
+  // pin the row would point at nothing for anyone who had folded it.
   for (const target of ["blend-sliders", "blend-axis", "blend-brew"]) {
-    assert(blend[stepIndex(target)].openControls === true,
-      `${target} step must hold the brew row open`);
+    const steps = blend.filter(s => s.target === target);
+    assert(steps.length > 0, `no ${target} step`);
+    for (const s of steps) {
+      assert(s.openControls === true, `a ${target} step doesn't hold the brew row open`);
+    }
   }
 });
 
-test("the steps after the brew mechanics release the row", () => {
-  // Releasing means falling back to the user's own state. The mechanics
-  // steps (sliders, row, pills) are the last ones that steer it; from
-  // Brew-or-save onward the row is the user's again.
-  // The brew step holds it open too — the Brew button lives IN the
-  // panel now, so a released row would leave that step pointing at
-  // nothing. Release starts after it.
-  const after = blend.slice(stepIndex("blend-brew") + 1);
-  assert(after.length > 0, "the brew step shouldn't be last");
-  for (const s of after) {
-    assert(s.openControls === undefined,
-      `step "${s.target}" still pins the brew bar (${s.openControls})`);
+test("the pills step demonstrates both axes, one per tap", () => {
+  // Same shape as the Simple/Detailed pair: one step per state, so the
+  // swap happens on the user's own Next rather than on a timer they can
+  // read straight past. A single step describing the pills would be
+  // telling rather than showing.
+  const axisSteps = blend.filter(s => s.target === "blend-axis");
+  assert(axisSteps.length === 2,
+    `expected two pill steps, one per axis, got ${axisSteps.length}`);
+  const modes = axisSteps.map(s => s.axisMode);
+  for (const want of ["timeS", "tempC"]) {
+    assert(modes.includes(want), `no pill step shows ${want} (got ${JSON.stringify(modes)})`);
   }
+});
+
+test("axisMode is only used inside the Blend tour", () => {
+  // Same reasoning as familyMode and openControls: it means something
+  // only to the extraction explorer, and elsewhere it reads as intent
+  // while doing nothing.
+  for (const [screen, steps] of Object.entries(SCREEN_TOURS)) {
+    if (screen === "blend") continue;
+    for (const s of steps) {
+      assert(s.axisMode === undefined, `${screen} step "${s.target}" sets axisMode`);
+    }
+  }
+});
+
+test("only the brew-mechanics steps steer the row", () => {
+  // The tour used to end on a sub-tab step, so "release" could be
+  // checked as "the steps after it don't pin". That step is gone — the
+  // tour now ends on Brew — so the claim is stated from the other side:
+  // nothing BEFORE the mechanics touches the row, and the mechanics are
+  // the last thing in the tour, so it's handed back when the tour ends.
+  const firstMechanic = stepIndex("blend-sliders");
+  assert(firstMechanic !== -1, "blend tour lost its slider step");
+  blend.slice(0, firstMechanic).forEach((s, i) => {
+    assert(s.openControls === undefined,
+      `step ${i} "${s.target}" pins the brew row before the tour teaches it`);
+  });
+  assert(blend[blend.length - 1].target === "blend-brew",
+    "the tour should end on the brew step, so the row is released by the tour ending");
 });
 
 test("no step outside the Blend tour carries openControls", () => {
