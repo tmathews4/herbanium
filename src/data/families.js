@@ -308,6 +308,32 @@ export const MOOD_COUNTERPARTS = Object.fromEntries(
   MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, l.counterpart]))
 );
 
+/* What the user reads on a family bar, where that differs from the key.
+   `fruity` makes the key adjectival; `creamy` swaps a structural word
+   for the thing actually tasted.
+
+   `sweet aroma` is the odd one — the only two-word label, and the break
+   is deliberate. The flavour family and the palate axis `sweetness`
+   were drawing two bars from the same words on the same screen, and a
+   reader had no way to tell why. They are not the same claim:
+
+     sweet aroma  — honey, vanilla, caramel. Compounds that SMELL sweet.
+                    Vanillin has essentially no sweet taste; the brain
+                    reads the odour as sweetness.
+     sweetness    — the tongue register, beside bitterness and
+                    astringency. Sugars and amino acids.
+
+   Descriptive sensory analysis calls that first cluster "sweet
+   aromatics" precisely to hold it apart from the basic taste, and tea's
+   own evaluation vocabulary makes the same cut natively (甜香 sweet
+   aroma vs 甜味 sweet taste). docs/vocabulary.md had both senses under
+   one token with the note "context clarifies" — it doesn't, when the
+   app draws both bars at once, so the qualifier moved into the label.
+
+   `honeyed` was the single-word candidate that would have kept the
+   adjective pattern. Rejected on the data: `sweet` is 60% of the
+   family's uses against honey's 25%, so the commonest member would
+   have sat under a narrower parent. */
 export const FLAVOR_FAMILY_LABEL = {
-  fruit: "fruity", mouthfeel: "creamy",
+  fruit: "fruity", mouthfeel: "creamy", sweet: "sweet aroma",
 };

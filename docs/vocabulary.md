@@ -134,8 +134,34 @@ family has sub-descriptors. Use the most specific accurate term —
 - `nutty` — general family header
 - `almond`, `chestnut`, `hazelnut`, `walnut`, `peanut`
 
-### Sweet (descriptive, not the tongue taste)
-- `sweet` — general header (also a tongue taste; context clarifies)
+### Sweet aroma (descriptive, not the tongue taste)
+
+This family is **displayed as "sweet aroma"**, not "sweet". The token
+stays `sweet`; only the label a user reads changed (see
+`FLAVOR_FAMILY_LABEL` in `data/families.js`).
+
+The note here used to read "*also a tongue taste; context clarifies*".
+It doesn't. The app draws this family on the flavour strip and the
+palate axis `sweetness` directly underneath it, both computed from the
+same four tokens — `BALANCE_AXES` re-sums `sweet`, `honey`, `honeyed`,
+`honey-sweet` — so 76 of the 87 sweet-bearing profile rows drew two bars
+off one word with nothing to tell them apart. The qualifier moved out of
+this heading and into the label, which is where the reader is.
+
+The distinction is real and worth teaching, which is why the fix is a
+better word rather than a deletion: these compounds **smell** sweet.
+Vanillin has essentially no sweet taste; the brain reads the odour as
+sweetness. Descriptive sensory analysis names this cluster *sweet
+aromatics* for exactly that reason, and tea's own evaluation vocabulary
+makes the same cut natively — 甜香 (sweet aroma) against 甜味 (sweet
+taste). `sweetness` on the palate strip keeps the tongue register,
+beside `bitterness` and `astringency`.
+
+Guarded by `tests/register-collision.test.mjs`, which fails if any
+flavour family is displayed under a palate axis's name — or merely a
+stem away from one, which is the form this bug actually took.
+
+- `sweet` — general header for the aromatic register
 - `honey`, `caramel`, `malt`, `vanilla`
 - `brown sugar`, `molasses`, `toffee`
 - `malty` — malt-forward, Assam signature
