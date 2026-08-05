@@ -29,7 +29,7 @@ import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
 // anxious), current-feel row concats the rough-edged extras.
 const DESIRED_MOOD_CHIPS = PARENT_MOODS;
 
-export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange, onSaveRecipe, alreadySaved = false }) => {
+export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange, onSaveRecipe, onRenameBlend, alreadySaved = false }) => {
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
@@ -45,6 +45,9 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   // fade-in. Cleared by a timeout so the pulse plays once per
   // brew cycle rather than looping.
   const [justFinished, setJustFinished] = useState(false);
+  // Inline rename of the blend, offered beside its title.
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
 
   // Journal textarea auto-grow — start compact (≈2 lines) so the
   // wait card and bottom buttons stay above the fold on shorter
@@ -388,7 +391,64 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
 
       {/* blend details */}
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink }}>{blend.name}</div>
+        {/* THE NAME IS EDITABLE HERE. With the save-or-brew prompt gone,
+            nothing asks what to call a composed blend any more — it
+            would save as "Untitled blend" and be unfindable later. This
+            is the moment to name it: the cup is going, the user knows
+            what they made, and nothing is blocking on the answer.
+
+            Rename goes up to App rather than being held locally, so the
+            session and the saved recipe stay one source of truth. */}
+        {onRenameBlend && editingName ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const next = nameDraft.trim();
+              if (next) onRenameBlend(next);
+              setEditingName(false);
+            }}
+            style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}
+          >
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onBlur={() => {
+                const next = nameDraft.trim();
+                if (next) onRenameBlend(next);
+                setEditingName(false);
+              }}
+              aria-label="blend name"
+              data-testid="steep-name-input"
+              style={{
+                fontFamily: ff.serif, fontSize: 22, color: theme.ink,
+                textAlign: "center", background: "transparent",
+                border: "none", borderBottom: `1px solid ${theme.terra}`,
+                outline: "none", padding: "2px 4px", maxWidth: 260,
+              }}
+            />
+          </form>
+        ) : (
+          <div style={{
+            display: "flex", alignItems: "baseline", gap: 6, justifyContent: "center",
+          }}>
+            <div style={{ fontFamily: ff.serif, fontSize: 22, color: theme.ink }}>{blend.name}</div>
+            {onRenameBlend && (
+              <button
+                onClick={() => { setNameDraft(blend.name || ""); setEditingName(true); }}
+                aria-label="rename this blend"
+                data-testid="steep-rename"
+                style={{
+                  background: "transparent", border: "none", cursor: "pointer",
+                  padding: "0 2px", lineHeight: 1, color: theme.ash,
+                  display: "inline-flex", alignItems: "center",
+                }}
+              >
+                <Pencil size={13} c={theme.ash} />
+              </button>
+            )}
+          </div>
+        )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 8 }}>
           {(blend.ingredients || []).map(item => {
             const id = typeof item === "string" ? item : item.id;

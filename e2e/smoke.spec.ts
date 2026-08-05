@@ -393,6 +393,29 @@ for (const withBrew of [false, true]) {
       await expect(save).toHaveText(/saved/i);
     });
 
+    test("Brewing — the blend can be renamed from the timer", async ({ page }) => {
+      // With the save-or-brew prompt gone, nothing asks what to call a
+      // composed blend — it would save as "Untitled blend" and be
+      // unfindable. Naming moved to the timer, where the cup is already
+      // going and nothing is blocking on the answer.
+      test.skip(withBrew, "steep screen is collapsed in the minimized-brew pass");
+      await openTab(page, "Journal");
+      await openSubTab(page, "Recipes");
+      await page.locator('[data-tour="recipes-row"]').first().click();
+      await page.getByRole("button", { name: /Brew this cup/i }).click();
+
+      await page.getByTestId("steep-rename").click();
+      const input = page.getByTestId("steep-name-input");
+      await expect(input, "renaming should open an inline field").toBeVisible();
+      await input.fill("Evening cup");
+      await input.press("Enter");
+
+      await expect(page.getByText("Evening cup"),
+        "the new name should show on the timer").toBeVisible();
+      await expect(page.getByTestId("steep-name-input"),
+        "and the field should close").toHaveCount(0);
+    });
+
     test("Herbanium — search and filters narrow the list", async ({ page }) => {
       await openTab(page, "Apothecary");
       await openSubTab(page, "Herbanium");

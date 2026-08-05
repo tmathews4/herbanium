@@ -2419,6 +2419,21 @@ export default function App() {
           // saving it here a moment ago; the session's blend carries an
           // id once either has happened.
           alreadySaved={!!session.blend?.id && savedBlendIds.has(session.blend.id)}
+          // Renaming updates the running session, and the saved recipe
+          // too when there is one — otherwise the title on screen and
+          // the entry in the journal would drift apart. LOCAL_BLENDS is
+          // the lookup getBlend reads, so it has to move with the list.
+          onRenameBlend={(name) => {
+            const next = (name || "").trim();
+            if (!next) return;
+            setSession(s => (s ? { ...s, blend: { ...s.blend, name: next } } : s));
+            const id = session.blend?.id;
+            if (id && savedBlendIds.has(id)) {
+              if (LOCAL_BLENDS[id]) LOCAL_BLENDS[id] = { ...LOCAL_BLENDS[id], name: next };
+              setGeneratedBlends(prev =>
+                (prev || []).map(b => (b.id === id ? { ...b, name: next } : b)));
+            }
+          }}
           onSaveRecipe={() => {
             const b = session.blend;
             if (!b || !saveComposedBlend) return;
