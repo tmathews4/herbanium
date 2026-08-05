@@ -268,7 +268,15 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     // drives this: without it, every observed frame would set fresh
     // object identities and churn.
     let lastKey = "";
-    const apply = (el) => {
+    const apply = (captured) => {
+      // Re-query rather than trust the node we captured. React recreates
+      // some targets on re-render — the recommended-range band is rebuilt
+      // whenever the axis or selection changes — which leaves the
+      // ResizeObserver watching a DETACHED node. It never fires again, so
+      // the rect stays whatever it was at first measure: zero, if the
+      // panel was still opening. A 0x0 rect padded by 6 is the 12x12
+      // square that was appearing in the corner.
+      const el = document.querySelector(`[data-tour="${step.target}"]`) || captured;
       // Before the early-out below. A page target doesn't MOVE when the
       // dock grows — the scroll region's padding absorbs it — so its
       // rect is unchanged and the key check would bail, leaving the
@@ -351,7 +359,15 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
               // reading yet, so this doesn't violate the rule the
               // observer follows (never re-scroll under a reader). It
               // runs once, not on a loop.
-              settle = setTimeout(() => { position(el); apply(el); }, 160);
+              settle = setTimeout(() => {
+                position(el);
+                // Re-attach the observer if the node was replaced while
+                // the step was settling — otherwise later resizes of the
+                // new node go unheard.
+                const live = document.querySelector(`[data-tour="${step.target}"]`);
+                if (live && ro && live !== el) ro.observe(live);
+                apply(el);
+              }, 160);
             });
           });
         } else {

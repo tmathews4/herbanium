@@ -74,22 +74,10 @@ export const SCREEN_TOURS = {
     //
     // openControls because the sliders must be there to drag; the two
     // steps after this one are what explain the row they live in.
-    { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
+    { target: "blend-sliders", title: "Dial in the brew", pad: 6,
+      keepClear: ["blend-graph", "blend-effects"],
       familyMode: true, compact: true, openControls: true,
-      body: "Drag the slider \u2014 watch the bars move." },
-    // The recommended band. It sits right under the track and reads as
-    // decoration until someone says otherwise — a coloured stripe among
-    // coloured stripes. Placed straight after the drag, while the user
-    // is still looking at the slider they just moved.
-    //
-    // openControls because the band only renders inside the open panel.
-    // No spotlight list: the band alone is the subject. Folding the
-    // whole slider block in made the union tall enough that the callout
-    // had nowhere to sit but on top of it — covering the very thing the
-    // step is describing.
-    { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
-      familyMode: true,
-      body: "The shaded band under the track is where these leaves agree \u2014 brew inside it and every ingredient is working. Tap it for the reasoning." },
+      body: "Drag the slider \u2014 watch all four windows move." },
     // Only now the mechanics of the row itself, once the user has seen
     // what it's for. Shown SHUT \u2014 a step explaining that the row folds
     // while showing it unfolded explains nothing \u2014 which is what
@@ -121,15 +109,28 @@ export const SCREEN_TOURS = {
     { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
       spotlight: ["blend-controls", "blend-sliders"], axisMode: "tempC",
       body: "And Temp \u2014 how hot the water is. The slider swaps with the pill; whichever you're not holding keeps its value." },
-    // Brew lives in the panel now, under the slider — so this step has
-    // to hold the row OPEN or it would point at a button that isn't
-    // rendered. It's the last step that steers the row; past here it's
-    // the user's again.
+    // The recommended band. It sits right under the track and reads as
+    // decoration until someone says otherwise — a coloured stripe among
+    // coloured stripes. Placed straight after the drag, while the user
+    // is still looking at the slider they just moved.
     //
-    // Saving is no longer mentioned: it moved to the steep screen, and
-    // naming it here would send the user looking for a button that isn't
-    // on this screen.
-    { target: "blend-brew", title: "Brew it", pad: 6, openControls: true,
+    // openControls because the band only renders inside the open panel.
+    // No spotlight list: the band alone is the subject. Folding the
+    // whole slider block in made the union tall enough that the callout
+    // had nowhere to sit but on top of it — covering the very thing the
+    // step is describing.
+    { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
+      familyMode: true,
+      body: "The shaded band under the track is where these leaves agree \u2014 brew inside it and every ingredient is working. Tap it for the reasoning." },
+    // No openControls. Brew sits in the row's HEADER, left of the
+    // readout, so it's there whether the panel is open or folded — the
+    // whole reason it moved out from under the slider. The step points
+    // at it in either state.
+    //
+    // Saving isn't mentioned: it moved to the steep screen, and naming
+    // it here would send the user hunting for a button that isn't on
+    // this screen.
+    { target: "blend-brew", title: "Brew it", pad: 6,
       body: "Happy with it? Start the timer — the cup you've dialled in is the one you'll get." },
   ],
   herbanium: [

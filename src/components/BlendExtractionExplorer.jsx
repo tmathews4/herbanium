@@ -711,26 +711,20 @@ export const BlendExtractionExplorer = ({
             // is transparent click area so finger / mouse can land
             // on it reliably.
             return (
-              // The recommended band gets its own tour step, and the
-              // same terra pulse the other controls take during theirs —
-              // it's a small shape inside a bright cutout, so the
-              // spotlight alone doesn't say which part is the subject.
-              <div data-tour="blend-ranges" style={{
+              <div style={{
                 position: "relative",
                 height: 16,
                 marginTop: 2, marginBottom: 2,
-                borderRadius: 4,
-                boxSizing: "border-box",
-                border: tourStep === "blend-ranges"
-                  ? `1.5px solid ${theme.terra}`
-                  : "1.5px solid transparent",
-                animation: tourStep === "blend-ranges"
-                  ? "tourTogglePulse 1.9s ease-in-out infinite"
-                  : undefined,
-                transition: "border-color 0.3s ease",
               }}>
+                {/* The tour hook and pulse sit on the BAND, not on the
+                    track wrapper around it. The wrapper spans the full
+                    width; the band is the coloured span inside it — 122px
+                    of 364 on a two-ingredient blend — so outlining the
+                    wrapper drew a box around the whole track and said
+                    nothing about where the recommendation actually is. */}
                 <button
                   type="button"
+                  data-tour="blend-ranges"
                   title={tooltip}
                   onClick={(e) => {
                     e.preventDefault();
@@ -757,7 +751,16 @@ export const BlendExtractionExplorer = ({
                     height: 6,
                     background: color,
                     borderRadius: 2,
-                    boxShadow: isSelected ? `0 0 0 1.5px ${theme.terra}` : "none",
+                    // The tour's terra pulse traces the band's own span,
+                    // so it says WHERE the recommendation is rather than
+                    // just that a band exists. Falls back to the
+                    // selected-state ring when no tour is running.
+                    boxShadow: tourStep === "blend-ranges"
+                      ? `0 0 0 1.5px ${theme.terra}`
+                      : (isSelected ? `0 0 0 1.5px ${theme.terra}` : "none"),
+                    animation: tourStep === "blend-ranges"
+                      ? "tourTogglePulse 1.9s ease-in-out infinite"
+                      : undefined,
                     transition: "box-shadow 0.15s ease",
                     pointerEvents: "none",
                   }} />
