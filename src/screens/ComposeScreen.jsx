@@ -20,7 +20,7 @@ import { PARENT_MOODS } from "../data/canon";
 import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
-import { getBlend, iconBtn, suggestBlendName, formatAgo } from "../helpers/misc";
+import { getBlend, iconBtn, formatAgo } from "../helpers/misc";
 import { recommendBlends } from "../helpers/recommend";
 import {
   ff, theme, shadow, radius,
@@ -58,6 +58,101 @@ function findDuplicateBlend(candidate, allBlends, hidden) {
     && ingredientsKey(b.ingredients) === key
   ) || null;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   JournalEntryRow — chronological row for a free-form entry or
+   haiku ad-lib in the Journal sub-tab. Visually distinct from
+   SessionRow (which renders cups) so the timeline reads as two
+   things in one stream rather than one homogenous list.
+   ────────────────────────────────────────────────────────────── */
+
+const JournalEntryRow = ({ entry, first, openEntry }) => {
+  const isHaiku    = entry.kind === "haiku";
+  const isLimerick = entry.kind === "limerick";
+  const isPoem     = entry.kind === "poem";
+  const isVerse    = isHaiku || isLimerick || isPoem;
+  const stamp = entry.ts ? new Date(entry.ts) : null;
+  const ago = stamp ? formatAgo(stamp) : "";
+  const label =
+    isHaiku    ? "a verse"
+    : isLimerick ? "a limerick"
+    : isPoem    ? "a poem"
+    : "an entry";
+  // Single-line preview of the entry body. Used as a fallback
+  // headline when the entry has no title (legacy entries from
+  // before the title field landed) so the timeline doesn't show
+  // empty rows for those.
+  const preview = (entry.text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  // Headline rendered for the row: prefer the user's title; fall
+  // back to a truncated preview; last-resort, the kind label.
+  const headline = (entry.title && entry.title.trim()) || preview || label;
+  // Mood arc — same registers as SessionRow so cup rows and entry
+  // rows share visual vocabulary in the timeline.
+  const start = (entry.currentMoods || []).join(", ").trim();
+  const end   = (entry.landedMoods   || []).join(", ").trim();
+  // Edge color + glyph differ for verse vs prose so the journal
+  // timeline tells them apart at a glance. Sprig (sage) for verse —
+  // a poetic flourish; Pencil (terra) for prose entries — the
+  // utilitarian writing tool.
+  const Glyph = isVerse ? Sprig : Pencil;
+  const accent = isVerse ? theme.sage : theme.terra;
+  const glyphColor = isVerse ? theme.sageDeep : theme.terra;
+  return (
+    <button
+      onClick={() => openEntry?.(entry.id)}
+      style={{
+        width: "100%", textAlign: "left", background: "transparent",
+        border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
+        borderLeft: `2px solid ${accent}`,
+        padding: "10px 2px 10px 10px", cursor: "pointer",
+        display: "flex", gap: 8, minWidth: 0,
+      }}
+    >
+      <span style={{ flexShrink: 0, display: "inline-flex", paddingTop: 2 }}>
+        <Glyph size={12} c={glyphColor} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        {/* Header: headline (title || preview) on left, time on right. */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
+        }}>
+          <span style={{
+            flex: 1, minWidth: 0,
+            fontFamily: ff.serif,
+            fontStyle: isVerse && !entry.title ? "italic" : "normal",
+            fontSize: 13.5, color: theme.ink,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {headline}
+          </span>
+          <span style={{
+            flexShrink: 0,
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
+          }}>{ago}</span>
+        </div>
+        {/* Mood arc — same coloring as cups (ochre coming-in → terra
+            arrow → sage-deep landed). Only renders when at least one
+            side of the arc is logged so untouched entries stay quiet. */}
+        {(start || end) && (
+          <div style={{
+            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {start && (
+              <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
+            )}
+            <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
+            {end && (
+              <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
+            )}
+          </div>
+        )}
+      </div>
+    </button>
+  );
+};
 
 /* ──────────────────────────────────────────────────────────────
    Screen: COMPOSE
@@ -1047,8 +1142,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
   const [rcSaveStatus, setRcSaveStatus] = useState(null);
   // Brew-save confirmation — reverse-built blends always start unsaved.
-  const [rcBrewAsk, setRcBrewAsk] = useState(false);
-  const [rcPendingBrew, setRcPendingBrew] = useState(null);
   const { unit, weightUnit } = useUnit();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -1267,7 +1360,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // showing the user that the sliders drive the graph. It's demo-only
   // motion; it stops when the step advances or the tour ends. Honors
   // prefers-reduced-motion.
-  const tourDemoActive = blendTourStep === "blend-graph" || blendTourStep === "blend-sliders";
+  // blend-effects is in the list too: Mind and Body respond to the brew
+  // exactly as flavour and palate do, and a step that introduces them
+  // while they sit perfectly still reads as though they're static
+  // properties of the recipe rather than a prediction about the cup.
+  const tourDemoActive = ["blend-graph", "blend-effects", "blend-sliders"]
+    .includes(blendTourStep);
   useEffect(() => {
     if (!tourDemoActive) return undefined;
     const times = reverseIngs.map(id => INGREDIENTS[id]?.timeS).filter(Boolean);
@@ -1882,13 +1980,19 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                     ...BLENDS,
                     ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
                   ];
+                  // Straight to the timer. Brew used to open a
+                  // save-or-just-brew prompt first, which put a naming
+                  // decision between the user and the thing they asked
+                  // for — and asked it at the worst moment, before
+                  // they'd tasted anything. Saving lives on the steep
+                  // screen now, where the cup is already going.
                   const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
-                  if (dup) {
-                    startBrew({ ...dup, tempC: candidate.tempC, timeS: candidate.timeS }, "", ["calm"]);
-                    return;
-                  }
-                  setRcPendingBrew({ candidate, moods: ["calm"] });
-                  setRcBrewAsk(true);
+                  startBrew(
+                    dup
+                      ? { ...dup, tempC: candidate.tempC, timeS: candidate.timeS }
+                      : candidate,
+                    "", ["calm"],
+                  );
                 }}
                 icon={<Kettle size={14} c={theme.cream} />}
                 // Compact pill, sized to sit in the dock's header row
@@ -1967,28 +2071,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         }}>{rcSaveStatus.text}</div>
       )}
 
-      {rcBrewAsk && rcPendingBrew && (
-        <BrewSavePrompt
-          defaultName={suggestBlendName(rcPendingBrew.candidate.ingredients)}
-          onSaveAndBrew={(chosenName) => {
-            if (saveComposedBlend) {
-              const id = saveComposedBlend(rcPendingBrew.candidate, chosenName);
-              if (id) {
-                const persisted = { ...rcPendingBrew.candidate, id, name: chosenName };
-                startBrew(persisted, "", rcPendingBrew.moods);
-              }
-            }
-            setRcBrewAsk(false);
-            setRcPendingBrew(null);
-          }}
-          onJustBrew={() => {
-            startBrew(rcPendingBrew.candidate, "", rcPendingBrew.moods);
-            setRcBrewAsk(false);
-            setRcPendingBrew(null);
-          }}
-          onCancel={() => { setRcBrewAsk(false); setRcPendingBrew(null); }}
-        />
-      )}
     </>
   );
 };
@@ -2001,235 +2083,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
    (they're gone from storage, not just hidden).
    ────────────────────────────────────────────────────────────── */
 
-/* ──────────────────────────────────────────────────────────────
-   BrewSavePrompt — small modal that fires when the user starts
-   brewing a custom blend that hasn't been saved yet. Three actions:
-   save it to the catalogue and brew, brew without saving, or cancel.
-   Backdrop tap closes via the cancel handler.
-   ────────────────────────────────────────────────────────────── */
-
-/* ──────────────────────────────────────────────────────────────
-   JournalEntryRow — chronological row for a free-form entry or
-   haiku ad-lib in the Journal sub-tab. Visually distinct from
-   SessionRow (which renders cups) so the timeline reads as two
-   things in one stream rather than one homogenous list.
-   ────────────────────────────────────────────────────────────── */
-
-const JournalEntryRow = ({ entry, first, openEntry }) => {
-  const isHaiku    = entry.kind === "haiku";
-  const isLimerick = entry.kind === "limerick";
-  const isPoem     = entry.kind === "poem";
-  const isVerse    = isHaiku || isLimerick || isPoem;
-  const stamp = entry.ts ? new Date(entry.ts) : null;
-  const ago = stamp ? formatAgo(stamp) : "";
-  const label =
-    isHaiku    ? "a verse"
-    : isLimerick ? "a limerick"
-    : isPoem    ? "a poem"
-    : "an entry";
-  // Single-line preview of the entry body. Used as a fallback
-  // headline when the entry has no title (legacy entries from
-  // before the title field landed) so the timeline doesn't show
-  // empty rows for those.
-  const preview = (entry.text || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  // Headline rendered for the row: prefer the user's title; fall
-  // back to a truncated preview; last-resort, the kind label.
-  const headline = (entry.title && entry.title.trim()) || preview || label;
-  // Mood arc — same registers as SessionRow so cup rows and entry
-  // rows share visual vocabulary in the timeline.
-  const start = (entry.currentMoods || []).join(", ").trim();
-  const end   = (entry.landedMoods   || []).join(", ").trim();
-  // Edge color + glyph differ for verse vs prose so the journal
-  // timeline tells them apart at a glance. Sprig (sage) for verse —
-  // a poetic flourish; Pencil (terra) for prose entries — the
-  // utilitarian writing tool.
-  const Glyph = isVerse ? Sprig : Pencil;
-  const accent = isVerse ? theme.sage : theme.terra;
-  const glyphColor = isVerse ? theme.sageDeep : theme.terra;
-  return (
-    <button
-      onClick={() => openEntry?.(entry.id)}
-      style={{
-        width: "100%", textAlign: "left", background: "transparent",
-        border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
-        borderLeft: `2px solid ${accent}`,
-        padding: "10px 2px 10px 10px", cursor: "pointer",
-        display: "flex", gap: 8, minWidth: 0,
-      }}
-    >
-      <span style={{ flexShrink: 0, display: "inline-flex", paddingTop: 2 }}>
-        <Glyph size={12} c={glyphColor} />
-      </span>
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
-        {/* Header: headline (title || preview) on left, time on right. */}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
-        }}>
-          <span style={{
-            flex: 1, minWidth: 0,
-            fontFamily: ff.serif,
-            fontStyle: isVerse && !entry.title ? "italic" : "normal",
-            fontSize: 13.5, color: theme.ink,
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>
-            {headline}
-          </span>
-          <span style={{
-            flexShrink: 0,
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11, color: theme.ash,
-          }}>{ago}</span>
-        </div>
-        {/* Mood arc — same coloring as cups (ochre coming-in → terra
-            arrow → sage-deep landed). Only renders when at least one
-            side of the arc is logged so untouched entries stay quiet. */}
-        {(start || end) && (
-          <div style={{
-            fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>
-            {start && (
-              <span style={{ color: theme.ochre, fontStyle: "normal" }}>{start}</span>
-            )}
-            <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
-            {end && (
-              <span style={{ color: theme.sageDeep, fontStyle: "normal" }}>{end}</span>
-            )}
-          </div>
-        )}
-      </div>
-    </button>
-  );
-};
-
-const BrewSavePrompt = ({ defaultName, onSaveAndBrew, onJustBrew, onCancel }) => {
-  // Pre-fill with the suggested name from the ingredients. The
-  // "Untitled blend" fallback (no ingredients) opens empty so the
-  // user is nudged to write something of their own.
-  const seed = (defaultName && defaultName !== "Untitled blend") ? defaultName : "";
-  const [name, setName] = useState(seed);
-  const trimmed = name.trim();
-  const canSave = trimmed.length > 0;
-
-  return (
-    <div
-      onClick={onCancel}
-      style={{
-        position: "fixed", inset: 0, zIndex: 220,
-        background: "rgba(40, 30, 20, 0.35)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "0 24px",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: 360, width: "100%",
-          background: theme.cream,
-          border: `1px solid ${theme.ruleSoft}`,
-          borderRadius: 12,
-          padding: "18px 20px",
-          boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
-        }}
-      >
-        <div style={{
-          fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-          lineHeight: 1.35, marginBottom: 6,
-        }}>
-          Save this blend first?
-        </div>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 13,
-          color: theme.inkSoft, lineHeight: 1.5, marginBottom: 12,
-        }}>
-          It isn't in your catalogue yet. Name it to save and brew, or
-          skip and brew it without saving.
-        </div>
-        <div style={{
-          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-          textTransform: "uppercase", color: theme.ash,
-          marginBottom: 6,
-          display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
-        }}>
-          <span>Name</span>
-          <span style={{
-            fontFamily: ff.serif, fontStyle: "italic",
-            fontSize: 10.5, letterSpacing: 0,
-            textTransform: "none", color: theme.terra,
-          }}>— suggested from your ingredients, edit anything below</span>
-        </div>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "8px 10px", borderRadius: 8,
-          background: "rgba(176, 84, 47, 0.05)",
-          border: `1px solid ${theme.terra}`,
-          marginBottom: 14,
-        }}>
-          <Pencil size={14} c={theme.terra} />
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && canSave) onSaveAndBrew(trimmed); }}
-            autoFocus
-            onFocus={(e) => e.target.select()}
-            maxLength={48}
-            placeholder="name your blend"
-            style={{
-              flex: 1, minWidth: 0,
-              fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-              background: "transparent", border: "none",
-              padding: "2px 0", outline: "none",
-            }}
-          />
-          {name && (
-            <button
-              onClick={() => setName("")}
-              aria-label="clear name"
-              title="clear"
-              style={{
-                background: "transparent", border: "none",
-                color: theme.ash, fontSize: 14, lineHeight: 1,
-                padding: "2px 4px", cursor: "pointer",
-              }}
-            >×</button>
-          )}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <button
-            onClick={() => canSave && onSaveAndBrew(trimmed)}
-            disabled={!canSave}
-            style={{
-              fontFamily: ff.serif, fontSize: 14,
-              padding: "10px 14px", borderRadius: 999,
-              background: canSave ? theme.ink : theme.rule,
-              color: theme.cream, border: "none",
-              cursor: canSave ? "pointer" : "not-allowed",
-            }}
-          >save & brew</button>
-          <button
-            onClick={onJustBrew}
-            style={{
-              fontFamily: ff.serif, fontSize: 14,
-              padding: "10px 14px", borderRadius: 999,
-              background: "transparent", color: theme.terra,
-              border: `1px solid ${theme.terra}`, cursor: "pointer",
-            }}
-          >brew without saving</button>
-          <button
-            onClick={onCancel}
-            style={{
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.06em",
-              background: "transparent", border: "none",
-              color: theme.ash, cursor: "pointer", padding: "6px 10px",
-            }}
-          >cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const RestoreDeletedPanel = ({ hiddenBlendIds, unhideBlend }) => {
   const [open, setOpen] = useState(false);

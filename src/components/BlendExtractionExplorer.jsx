@@ -558,14 +558,21 @@ export const BlendExtractionExplorer = ({
             })}
           </span>
         </div>
-        <FlavorMap
-          ingredients={ingredients}
-          tempC={tempC}
-          timeS={timeS}
-          tempCRange={tempCRange}
-          showAxis={false}
-          familyMode={shownFamilyMode}
-        />
+        {/* Hooked on its own because the Simple/Detailed steps light
+            THIS and not the palate below it. The toggle only drives
+            FlavorMap — PalateMap takes no familyMode and its rows are
+            identical in both modes — so lighting the whole graph
+            promised a change in a strip that never changes. */}
+        <div data-tour="blend-flavors">
+          <FlavorMap
+            ingredients={ingredients}
+            tempC={tempC}
+            timeS={timeS}
+            tempCRange={tempCRange}
+            showAxis={false}
+            familyMode={shownFamilyMode}
+          />
+        </div>
         {/* The mood strip is pinned to family mode and ignores the
             toggle. Every mood family is single-leaf since `warm` split
             into comfort and heat — twelve families, twelve tokens, 1:1

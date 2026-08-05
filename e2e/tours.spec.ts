@@ -301,7 +301,11 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
     const callout = page.getByTestId("tour-callout");
-    const graph = page.locator('[data-tour="blend-graph"]');
+    // The FLAVOUR strip, not the whole graph. The toggle drives
+    // FlavorMap alone — the palate below it takes no familyMode and
+    // reads identically in both modes — so the steps light this and the
+    // measurements follow.
+    const graph = page.locator('[data-tour="blend-flavors"]');
 
     await advanceTo(page, "Simple reads the taste by family");
     const simpleH = (await graph.boundingBox())!.height;

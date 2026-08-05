@@ -423,16 +423,23 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
               onClick={alreadySaved ? undefined : onSaveRecipe}
               disabled={alreadySaved}
               data-testid="steep-save"
+              // Terra, not a quiet outline. This is the ONLY way to keep
+              // a recipe now — the save-or-brew prompt that used to fire
+              // on Brew is gone — so it has to look like an offer rather
+              // than a footnote, or a blend gets brewed, enjoyed and
+              // lost. Falls back to the quiet outline once it's saved,
+              // when it's a status rather than an action.
               style={{
-                background: "transparent",
-                border: `1px solid ${alreadySaved ? theme.ruleSoft : theme.rule}`,
+                background: alreadySaved ? "transparent" : theme.terra,
+                border: `1px solid ${alreadySaved ? theme.ruleSoft : theme.terra}`,
                 borderRadius: 999,
-                padding: "6px 16px",
+                padding: "7px 18px",
                 fontFamily: ff.sans, fontSize: 11.5, letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: alreadySaved ? theme.ash : theme.inkSoft,
+                fontWeight: alreadySaved ? 400 : 600,
+                color: alreadySaved ? theme.ash : theme.cream,
                 cursor: alreadySaved ? "default" : "pointer",
-                transition: "color 0.2s ease, border-color 0.2s ease",
+                transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
               }}
             >
               {alreadySaved ? "saved" : "save this recipe"}

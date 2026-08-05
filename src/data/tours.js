@@ -57,14 +57,19 @@ export const SCREEN_TOURS = {
     // (see blendTourFamilyMode in App.jsx); both steps light the bars
     // alongside the toggle, because what the toggle DOES is the lesson.
     //
+    // The FLAVOUR strip only, not the whole graph. The toggle drives
+    // FlavorMap alone — PalateMap takes no familyMode, and its rows read
+    // the same in both modes — so lighting the palate too promised a
+    // change in a strip that never changes.
+    //
     // Neither says "watch the bars change" any more. That phrase belongs
     // to the slider step, which is the one actually asking you to watch
     // something move; here the change is a re-read of the same cup.
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
-      spotlight: ["blend-graph"], familyMode: true,
+      spotlight: ["blend-flavors"], familyMode: true,
       body: "Simple reads the taste by family \u2014 floral, fruity, smoky. One bar each. Tap Next for the other way." },
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
-      spotlight: ["blend-graph"], familyMode: false,
+      spotlight: ["blend-flavors"], familyMode: false,
       body: "Detailed opens every family into the notes underneath it \u2014 apple and pear inside fruity, not just \u201cfruity.\u201d Same cup, finer read. We'll leave it on Simple." },
     // Now the cup MOVES. keepClear holds the bars on screen while the
     // callout sits off them, because the whole instruction is to watch
@@ -122,15 +127,21 @@ export const SCREEN_TOURS = {
     { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
       familyMode: true,
       body: "The shaded band under the track is where these leaves agree \u2014 brew inside it and every ingredient is working. Tap it for the reasoning." },
-    // No openControls. Brew sits in the row's HEADER, left of the
-    // readout, so it's there whether the panel is open or folded — the
-    // whole reason it moved out from under the slider. The step points
-    // at it in either state.
+    // Lights the WHOLE brew window and pulses the button inside it —
+    // the same shape as the pills step. The window is what you've been
+    // setting up across the last four steps; Brew is what you do with
+    // it, so showing the button alone would cut it loose from everything
+    // it commits.
+    //
+    // openControls for that reason only. Brew itself sits in the row's
+    // header and survives folding — but the window can't be shown whole
+    // while it's folded.
     //
     // Saving isn't mentioned: it moved to the steep screen, and naming
     // it here would send the user hunting for a button that isn't on
     // this screen.
-    { target: "blend-brew", title: "Brew it", pad: 6,
+    { target: "blend-brew", title: "Brew it", pad: 6, openControls: true,
+      spotlight: ["blend-controls", "blend-sliders"],
       body: "Happy with it? Start the timer — the cup you've dialled in is the one you'll get." },
   ],
   herbanium: [
