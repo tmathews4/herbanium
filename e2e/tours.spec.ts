@@ -100,7 +100,19 @@ async function walkTour(page: Page, tourName: string) {
   await expect(callout, `${tourName}: tour should close after Done`).toBeHidden();
 }
 
+// WALKING A TOUR IS SLOW WORK, and legitimately so: every step scrolls,
+// settles for 160ms, and waits for the cutout to ease into place. The
+// blend tour is twelve of those. On WebKit with two device projects
+// competing for cores that measured 34.0s against the config's 30s
+// budget — a real timeout, not a hang, and not an assertion that
+// disagreed. tour-visibility.spec.ts raised its own ceiling for exactly
+// this reason; test.slow() is the same decision spelled with the
+// built-in (30s -> 90s) so the number doesn't have to be maintained by
+// hand.
+const slowBecauseItWalksATour = () => test.beforeEach(() => test.slow());
+
 test.describe("guided tours stay on-screen, end to end", () => {
+  slowBecauseItWalksATour();
   test("Home tour", async ({ page }) => {
     await armTour(page, "home");
     // Home is the default tab — its tour fires on load.
@@ -153,6 +165,7 @@ test.describe("guided tours stay on-screen, end to end", () => {
    the graph tall enough that something gets pushed off or covered.
    ────────────────────────────────────────────────────────────── */
 test.describe("Blend tour — bars and sliders visible together", () => {
+  slowBecauseItWalksATour();
   // Click Next until the callout shows `title`, so the walk is keyed to
   // the step's content rather than a step index that shifts if the tour
   // gains or loses a step.
@@ -694,6 +707,8 @@ test.describe("Blend tour — bars and sliders visible together", () => {
    isn't.
    ────────────────────────────────────────────────────────────── */
 test.describe("the tour callout holds its position", () => {
+  slowBecauseItWalksATour();
+
   async function advanceTo(page: Page, text: string) {
     const callout = page.getByTestId("tour-callout");
     await expect(callout, "blend tour should start").toBeVisible();

@@ -72,6 +72,14 @@ const armOnly = (target: string): Seed =>
 const openTab = (page: Page, name: string) =>
   page.getByRole("button", { name, exact: true }).click();
 
+// Most tests here walk deep into the blend tour, and each step scrolls,
+// settles for 160ms and waits for the cutout to ease. Twelve of those
+// plus the 4.4s arrival outgrows the config's 30s budget on WebKit once
+// device projects compete for cores — measured at 34.0s on iPhone 15,
+// a timeout rather than a disagreement. Same call tours.spec.ts and
+// tour-visibility.spec.ts already make.
+const slowBecauseItWalksATour = () => test.beforeEach(() => test.slow());
+
 const callout = (page: Page) => page.getByTestId("tour-callout");
 const btn = (page: Page, name: string) =>
   callout(page).getByRole("button", { name, exact: true });
@@ -153,6 +161,7 @@ test.describe("the tour is offered before it runs", () => {
    Getting out, and going back.
    ────────────────────────────────────────────────────────────── */
 test.describe("leaving a tour", () => {
+  slowBecauseItWalksATour();
   test("Skip ends it, and it stays ended", async ({ page }) => {
     await boot(page, armOnly("blend"));
     await openTab(page, "Apothecary");
@@ -220,6 +229,7 @@ test.describe("leaving a tour", () => {
    overruling it.
    ────────────────────────────────────────────────────────────── */
 test.describe("the tour hands the screen back when it ends", () => {
+  slowBecauseItWalksATour();
   test("after Done the brew row answers taps again", async ({ page }) => {
     await boot(page, armOnly("blend"));
     await openTab(page, "Apothecary");
@@ -326,6 +336,7 @@ test.describe("the tour hands the screen back when it ends", () => {
    Once, and on request.
    ────────────────────────────────────────────────────────────── */
 test.describe("a tour fires once", () => {
+  slowBecauseItWalksATour();
   test("a completed tour doesn't run again on the next launch", async ({ page }) => {
     await boot(page, armOnly("home"));
     await finishTour(page);
