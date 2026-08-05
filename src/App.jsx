@@ -1339,6 +1339,17 @@ export default function App() {
     setToursSeen(prev => ({ ...(prev || {}), [activeTour]: true }));
     setActiveTour(null);
     setActiveTourStep(null);
+    // HAND THE DEMO STATE BACK. These three override the user's own
+    // choices while a step is up, and onStep only ever writes them —
+    // nothing cleared them when the tour ended. The blend tour's last
+    // step pins the brew row open, so finishing the tour left the panel
+    // forced open for the rest of the session and the fold button did
+    // nothing. Reported as "after the tutorial I can't minimize the brew
+    // window", and it would have outlived a reload only because the
+    // override sits above the persisted preference rather than in it.
+    setBlendTourFamilyMode(null);
+    setBlendTourControlsOpen(null);
+    setBlendTourAxis(null);
   };
 
   // Tab navigation history. Every tab change pushes the previous

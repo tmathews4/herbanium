@@ -922,7 +922,7 @@ export const BlendExtractionExplorer = ({
                 for the split is that these are two different actions. */}
             <div style={{
               padding: "8px 12px 0",
-              display: "flex", alignItems: "stretch", gap: 8,
+              display: "flex", alignItems: "center", gap: 8,
               borderBottom: shownControlsOpen
                 ? `2px solid ${theme.terra}`
                 : "2px solid transparent",
@@ -930,8 +930,15 @@ export const BlendExtractionExplorer = ({
               transition: "border-color 0.2s ease",
             }}>
               {brewAction && (
+                // display:flex so the wrapper hugs the button exactly —
+                // a block wrapper picks up line-height slack under it,
+                // and the pulse is a box-shadow on THIS box, so any
+                // slack shows as the glow hanging off the bottom.
+                // Vertical placement is the row's job (alignItems),
+                // not padding here, for the same reason.
                 <div data-tour="blend-brew" style={{
-                  flexShrink: 0, paddingBottom: 6,
+                  flexShrink: 0,
+                  display: "flex",
                   borderRadius: 999,
                   animation: tourStep === "blend-brew"
                     ? "tourTogglePulse 1.9s ease-in-out infinite"
