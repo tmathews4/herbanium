@@ -30,8 +30,25 @@ export const SCREEN_TOURS = {
     { target: "blend-search", title: "Add ingredients", pad: 6,
       body: "Search or filter the apothecary, then tap an ingredient to drop it in your pot." },
     { target: "blend-quantity", title: "Set the parts", pad: 8,
-      body: "We've dropped in an example blend. Use − / + to set each ingredient's “parts” — its share of the cup. The most parts leads; the others accent it." },
-    // The toggle gets demonstrated rather than described — one step per
+      body: "We've dropped in an example blend. Use \u2212 / + to set each ingredient's \u201cparts\u201d \u2014 its share of the cup. The most parts leads; the others accent it." },
+    // ORDER: what you built, what it predicts, how to read that, how to
+    // change it, how to keep it.
+    //
+    // The prediction comes before the controls now. Showing the brew row
+    // first meant explaining a control before the user had seen the
+    // thing it changes — and the tour then had to say "watch the bars"
+    // twice, once to introduce them and again to make them move.
+    //
+    // These two steps introduce the four windows. Held on Simple: family
+    // rows are short enough to take in at a glance, and the next two
+    // steps are what explain the other mode.
+    { target: "blend-graph", title: "The prediction", pad: 6,
+      familyMode: true,
+      body: "What the cup tastes like \u2014 its flavours, and the palate underneath them." },
+    { target: "blend-effects", title: "What it does", pad: 8,
+      familyMode: true,
+      body: "And what it does to you. Mind is what you'd notice \u2014 calm, focus, a lift. Body is what it works on \u2014 the throat, the gut, warmth." },
+    // The toggle gets demonstrated rather than described \u2014 one step per
     // mode, so the strips change when the USER taps Next instead of on
     // a timer. A timed flip meant a quick reader moved on before the
     // shift happened and never saw the thing the step is about.
@@ -39,103 +56,51 @@ export const SCREEN_TOURS = {
     // `familyMode` on a step forces what the strips show while it's up
     // (see blendTourFamilyMode in App.jsx); both steps light the bars
     // alongside the toggle, because what the toggle DOES is the lesson.
+    //
+    // Neither says "watch the bars change" any more. That phrase belongs
+    // to the slider step, which is the one actually asking you to watch
+    // something move; here the change is a re-read of the same cup.
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-graph"], familyMode: true,
-      body: "Simple reads the taste by family — floral, fruity, smoky. One bar each. Tap Next and watch the bars change." },
+      body: "Simple reads the taste by family \u2014 floral, fruity, smoky. One bar each. Tap Next for the other way." },
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-graph"], familyMode: false,
-      body: "Detailed opens every family into the notes underneath it — apple and pear inside fruity, not just “fruity.” Same cup, finer read. We'll leave it on Simple." },
-    // Brew is a row in the tab dock, above Blend / Herbanium, and it
-    // arrives OPEN. This step has to show it SHUT anyway — a step
-    // explaining that the row folds while showing it unfolded explains
-    // nothing — which is what `openControls: false` is for.
+      body: "Detailed opens every family into the notes underneath it \u2014 apple and pear inside fruity, not just \u201cfruity.\u201d Same cup, finer read. We'll leave it on Simple." },
+    // Now the cup MOVES. keepClear holds the bars on screen while the
+    // callout sits off them, because the whole instruction is to watch
+    // one thing while dragging another. `compact` shrinks the callout
+    // for the same reason: this step is competing with its own subject
+    // for room, so it gives some up. Copy is short to match.
     //
-    // `openControls` on a step forces the row open or shut while it's up
-    // (see blendTourControlsOpen in App.jsx), the same demo-state
-    // mechanism as familyMode. `false` rather than null: null hands the
-    // row back to the user's own state, which is open, and the step
-    // would be describing something they aren't looking at.
-    //
-    // Copy says what the row DOES, not where it sits — the spotlight is
-    // already pointing at it, so describing its position spends the
-    // reader's attention on something they can see.
+    // openControls because the sliders must be there to drag; the two
+    // steps after this one are what explain the row they live in.
+    { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
+      familyMode: true, compact: true, openControls: true,
+      body: "Drag the slider \u2014 watch the bars move." },
+    // Only now the mechanics of the row itself, once the user has seen
+    // what it's for. Shown SHUT \u2014 a step explaining that the row folds
+    // while showing it unfolded explains nothing \u2014 which is what
+    // `openControls: false` is for. `false` rather than null: null hands
+    // the row back to the user's own state, which is open.
     { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
-      body: "Tap this row to show or hide the brew sliders. While they're hidden, the row still shows the time and temperature you've set." },
-    // The axis pills. They get their own step for the same reason the
-    // Simple/Detailed toggle does: a control that REPLACES what's on
-    // screen rather than adding to it is invisible until someone says
-    // it's there. Mentioning it in the slider step's copy wasn't enough
-    // — that step is `compact` and the user's eye is on the bars.
+      body: "The sliders live in this row. Tap it to fold them away \u2014 folded, it still reads the time and temperature you've set." },
+    // The axis pills. A control that REPLACES what's on screen rather
+    // than adding to it is invisible until someone says it's there.
     //
-    // openControls: true because the pills only exist while the row is
-    // open, and the step before this one deliberately shut it.
-    //
-    // Lights the whole brew window, not just the pills — the same shape
-    // as the Simple/Detailed step above. What the pills DO is swap what
-    // that window contains, so the window is the lesson and the pills
-    // are the control; spotlighting the pills alone would show the
-    // control without the thing it changes. The pills then take a terra
-    // outline and pulse of their own to say which part to look at (see
-    // tourTogglePulse in BlendExtractionExplorer).
+    // Lights the whole brew window, not just the pills: what the pills
+    // DO is swap what that window contains, so the window is the lesson
+    // and the pills are the control. They take a terra outline and pulse
+    // of their own to say which part to look at (tourTogglePulse in
+    // BlendExtractionExplorer).
     { target: "blend-axis", title: "Time or temperature", pad: 8, openControls: true,
       spotlight: ["blend-controls", "blend-sliders"],
-      body: "Two sliders share this space: one sets how long the tea steeps, the other how hot the water is. Tap Time or Temp to switch between them." },
-    // These two steps teach one thing between them — the sliders drive
-    // the bars — so each keeps the other's element on screen and out
-    // from under the callout. See GuidedTour's keepClear handling.
-    // They hold familyMode too: the short family rows are the only way
-    // the bars and the sliders both fit on a phone screen.
-    // `compact` shrinks the callout for these two: they're asking the
-    // user to watch the bars and the sliders at the same time, so the
-    // callout has to give up room rather than take it. Copy is kept
-    // short for the same reason.
-    //
-    // Both hold the row OPEN. The pair is one lesson, and keeping the
-    // sliders mounted across both is what lets each keepClear the
-    // other. Living in the dock is what makes the pairing cheap now:
-    // only the bars have to be scrolled to, the sliders can't leave the
-    // screen.
-    // THE TWO READOUT STEPS RUN BACK TO BACK. What the cup tastes like
-    // and what it does to you are one idea in two halves — the app
-    // predicts a cup, and that prediction has a flavour side and an
-    // effect side. The slider step used to sit between them, which read
-    // as a detour into the controls in the middle of a sentence. Taste
-    // first, effect second, then the control that moves both.
-    { target: "blend-graph", title: "The prediction", pad: 6, keepClear: ["blend-sliders"],
-      familyMode: true, compact: true, openControls: true,
-      body: "What the cup tastes like — its flavours, and the palate underneath them." },
-    // The other half. Without a step here the user has no reason to
-    // scroll past the flavour strips, and the two windows saying what
-    // the cup actually DOES — the app's whole claim — sit unseen under
-    // the fold.
-    //
-    // No openControls: the row falls back to whatever the user left it
-    // at, which is open. The step after this one pins it again.
-    { target: "blend-effects", title: "What it does", pad: 8,
-      body: "And what the cup does to you. Mind is what you'd notice — calm, focus, a lift. Body is what it works on — the throat, the gut, warmth." },
-    // Now the control, once both readouts have been named — so "the
-    // bars" means all four windows rather than just the flavour ones.
-    //
-    // It keepClears blend-graph, so reaching this step scrolls back up
-    // to the flavour strips. That's the step doing its job rather than
-    // a stray jump: an instruction to watch the bars move is worthless
-    // if the bars aren't on screen.
-    //
-    // `softlight` on the graph, not `spotlight`. The sliders are the
-    // subject here, so folding the bars into the cutout would say they
-    // are equally the point; leaving them at full dim says the opposite,
-    // that they're switched off — which is absurd on the one step whose
-    // whole instruction is "watch the bars move". Soft light is the
-    // third tier: lifted out of the dim, plainly present, plainly
-    // secondary.
-    { target: "blend-sliders", title: "Dial in the brew", pad: 6, keepClear: ["blend-graph"],
-      softlight: ["blend-graph"],
-      familyMode: true, compact: true, openControls: true,
-      body: "Drag the slider — watch the bars move." },
+      body: "One slider at a time. Tap Time or Temp to choose which \u2014 how long it steeps, or how hot the water is." },
+    // Past here the tour stops steering the row and hands it back to
+    // whatever the user left it at.
     { target: "blend-brew", title: "Brew or save", pad: 6,
       body: "Happy with it? Brew it now, or save the recipe to keep it in your journal." },
     { target: "subtabs", title: "Two sides", pad: 4,
-      body: "The Apothecary has two sides — Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
+      body: "The Apothecary has two sides \u2014 Blend (where you are) and the Herbanium, a glossary of every tea and herb. Switch between them here." },
   ],
   herbanium: [
     { target: "herb-search", title: "The compendium", pad: 6,

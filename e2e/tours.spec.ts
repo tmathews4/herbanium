@@ -367,7 +367,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // land on the persisted preference the toggle steps left behind,
     // which is the thing being checked.
     await callout.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(callout).toContainText("The brew row");
+    await expect(callout).toContainText("Dial in the brew");
     await expect(toggle, "and stop once the tour moves past them")
       .not.toHaveCSS("animation-name", "tourTogglePulse");
     // Tolerance in pixels, not toBeCloseTo. WebKit re-lays this SVG out
@@ -391,6 +391,16 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     const callout = page.getByTestId("tour-callout");
     const sliders = page.locator('[data-tour="blend-sliders"]');
 
+    // The tour walks: prediction, effect, how to read them, then the
+    // sliders in use, THEN the mechanics of the row they live in.
+    await advanceTo(page, "Dial in the brew");
+    await expect(sliders, "the slider step must actually have sliders to drag")
+      .toBeVisible();
+
+    // Only now the row itself, and this step shows it SHUT — explaining
+    // that it folds while showing it unfolded explains nothing. The tour
+    // can't hand the user the tap (the overlay swallows clicks), so the
+    // step drives it.
     await advanceTo(page, "The brew row");
     await expect(sliders, "the brew-row step should show the row folded away").toBeHidden();
     await expect(page.locator('[data-tour="blend-controls"]'),
@@ -402,63 +412,15 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expect(page.locator('[data-tour="blend-axis"]'),
       "the pills step must actually have pills to point at").toBeVisible();
 
-    await callout.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(callout).toContainText("The prediction");
-    await expect(sliders, "the prediction step keepClears the sliders, so they must exist")
-      .toBeVisible();
-
-    // The two readout steps run back to back now — taste, then effect —
-    // with the slider step after them, so this walks that order.
-    await advanceTo(page, "What it does");
-    await advanceTo(page, "Dial in the brew");
-    await expect(sliders, "and the slider step targets them directly").toBeVisible();
-
-    // Past the slider step the tour stops steering: no openControls on
-    // the remaining steps, so the row falls back to whatever the USER
-    // left it at. That's open here, because open is the persisted
-    // default — the claim is "the tour hands control back", not "the
-    // tour ends with the row shut". Those read the same until the
-    // default flips, which is exactly when this needs to catch it.
+    // Past the mechanics the tour stops steering: no openControls on the
+    // remaining steps, so the row falls back to whatever the USER left
+    // it at. That's open here, because open is the persisted default —
+    // the claim is "the tour hands control back", not "the tour ends
+    // with the row shut". Those read the same until the default flips,
+    // which is exactly when this needs to catch it.
     await advanceTo(page, "Brew or save");
-    await expect(sliders, "the tour should stop driving the row after the slider step")
+    await expect(sliders, "the tour should stop driving the row after the mechanics steps")
       .toBeVisible();
-  });
-
-  test("the slider step lifts the bars without cutting them out", async ({ page }) => {
-    // Three tiers on one screen: the sliders cut out fully (the
-    // subject), the bars lifted out of the dim (present but secondary),
-    // everything else dark. Asserted as the RELATIONSHIP — a soft light
-    // that covered the cutout, or one that never appeared, would both
-    // pass a simple existence check.
-    await armTour(page, "blend");
-    await openTab(page, "Apothecary");
-    await advanceTo(page, "Dial in the brew");
-
-    const soft = page.getByTestId("tour-softlight");
-    await expect(soft, "the slider step should soft-light the bars").toBeVisible();
-
-    await expect.poll(async () => {
-      const s = await soft.boundingBox();
-      const bars = await page.locator('[data-tour="blend-graph"]').boundingBox();
-      if (!s || !bars) return null;
-      // Covers the bars, give or take the few px of padding it adds.
-      return s.y <= bars.y + 2 && s.y + s.height >= bars.y + bars.height - 2;
-    }, {
-      message: "the soft light should settle over the whole bars block",
-      timeout: 8_000,
-    }).toBe(true);
-
-    // And it's a different treatment from the cutout, not a second one.
-    const cut = await page.getByTestId("tour-spotlight").boundingBox();
-    const lift = await soft.boundingBox();
-    expect(Math.abs(cut!.y - lift!.y),
-      "the cutout and the soft light should be on different elements")
-      .toBeGreaterThan(20);
-
-    // Gone once the step is, so it reads as this step's emphasis rather
-    // than as part of the furniture.
-    await advanceTo(page, "Brew or save");
-    await expect(soft, "soft light shouldn't linger past its step").toHaveCount(0);
   });
 
   test("the pills step lights the brew window and pulses the pills", async ({ page }) => {
@@ -542,13 +504,23 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     expect(onPage.dim!.bottom, "and reach the bottom, over the dock")
       .toBeGreaterThanOrEqual(onPage.vh - 1);
 
-    // Dock step FIRST — the brew row comes before the prediction in the
-    // tour, and advanceTo only walks forwards. Asking for them in
-    // reading order instead of tour order clicked Next past the last
-    // step and hung on a button that was no longer there.
-    //
-    // A chrome step's cutout is left alone; clamping it would leave the
-    // four blend steps that point at the dock highlighting nothing.
+    // Page step FIRST — the prediction now precedes the brew row in the
+    // tour, and advanceTo only walks forwards. Asking for them in the
+    // wrong order clicks Next past the last step and hangs on a button
+    // that is no longer there, so this follows tour order rather than
+    // reading order.
+    await advanceTo(page, "The prediction");
+    const pageStep = await geom();
+    expect(pageStep.spot!.bottom,
+      `a page cutout must stop at the dock (hole ends ${Math.round(pageStep.spot!.bottom)}, `
+      + `dock starts ${Math.round(pageStep.barTop!)})`)
+      .toBeLessThanOrEqual(pageStep.barTop! + 1);
+    expect(pageStep.spot!.height, "and still be a real cutout, not clamped to nothing")
+      .toBeGreaterThan(20);
+
+    // Then the chrome step, whose cutout is left alone — clamping it
+    // would leave the blend steps that point at the dock highlighting
+    // nothing.
     await advanceTo(page, "The brew row");
     // Polled. This step shuts the brew row, which MOVES the target
     // without resizing it — and the tour's ResizeObserver only fires on
@@ -565,22 +537,6 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
     // A page step's cutout stops at the dock rather than punching
     // through the menu.
-    // Polled, like the step above. This step OPENS the brew row, so the
-    // dock grows ~200px and the clamp line moves while the cutout is
-    // still easing into place — a single sample catches the hole
-    // mid-flight, overshooting by whatever the dock has left to grow.
-    // The claim is about where it comes to rest.
-    await advanceTo(page, "The prediction");
-    await expect.poll(async () => {
-      const g = await geom();
-      return {
-        stopsAtDock: g.spot!.bottom <= g.barTop! + 1,
-        isARealHole: g.spot!.height > 20,
-      };
-    }, {
-      message: "a page cutout should settle stopping at the dock, without collapsing to nothing",
-      timeout: 8_000,
-    }).toEqual({ stopsAtDock: true, isARealHole: true });
   });
 
   test("the spotlight tracks the strip when it resizes mid-step", async ({ page }) => {
@@ -693,13 +649,17 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       + `padding held at ${before.pad.toFixed(1)}→${after.pad.toFixed(1)}px`);
   });
 
-  test("both the prediction bars and the brew sliders stay clear", async ({ page }) => {
+  test("the bars and the brew sliders stay clear together", async ({ page }) => {
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
 
-    await advanceTo(page, "The prediction");
-    await expectBothClear(page, "prediction step");
-
+    // The slider step alone now. This guarantee was always about the
+    // one step that asks the user to watch the bars WHILE dragging —
+    // both on screen, neither under the callout. The prediction step
+    // used to be its other half, back when the two ran adjacently and
+    // each kept the other in frame; it introduces the bars on their own
+    // now, several steps earlier, and asserting the sliders are clear
+    // there would be asserting a pairing the tour no longer has.
     await advanceTo(page, "Dial in the brew");
     await expectBothClear(page, "slider step");
   });

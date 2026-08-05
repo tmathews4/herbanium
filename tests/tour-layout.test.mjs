@@ -292,20 +292,30 @@ test("every tour step names a target and a title", () => {
   }
 });
 
-test("the Simple/Detailed steps run BEFORE the prediction and slider steps", () => {
-  // Order is load-bearing, not cosmetic: the user should meet the
-  // toggle before the steps whose layout depends on where it's left.
+test("the tour introduces the windows, then how to read them, then how to change them", () => {
+  // The whole shape of the blend tour, asserted as one order because
+  // each part only makes sense after the one before it: here is what
+  // the app predicts (taste, then effect), here is how to read those
+  // bars (simple vs detailed), here is what moves them.
+  //
+  // Explaining a control before its consequence was the old order, and
+  // it forced the tour to introduce the bars twice.
   const lastMode = blend.map(s => s.target).lastIndexOf("blend-mode");
   assert(lastMode !== -1, "blend tour lost its Simple/Detailed steps");
-  assert(lastMode < stepIndex("blend-graph"), "toggle steps must precede the prediction step");
-  assert(lastMode < stepIndex("blend-sliders"), "toggle steps must precede the slider step");
+  assert(stepIndex("blend-graph") < stepIndex("blend-effects"),
+    "taste should be introduced before effect");
+  assert(stepIndex("blend-effects") < lastMode,
+    "both readouts should be introduced before the toggle that re-reads them");
+  assert(lastMode < stepIndex("blend-sliders"),
+    "the toggle steps must precede the slider step, whose layout depends on where they leave it");
 });
 
-test("the prediction and slider steps each keep the other on screen", () => {
-  const graph = blend[stepIndex("blend-graph")];
+test("the slider step keeps the bars on screen", () => {
+  // The one step that asks the user to watch one thing while dragging
+  // another. It's the only step that needs the pairing now: the
+  // prediction step introduces the bars on their own, several steps
+  // earlier, and doesn't need the sliders in frame to do it.
   const sliders = blend[stepIndex("blend-sliders")];
-  assert(graph.keepClear?.includes("blend-sliders"),
-    "prediction step must keep the sliders visible — that's the lesson");
   assert(sliders.keepClear?.includes("blend-graph"),
     "slider step must keep the bars visible — that's the lesson");
 });
@@ -382,14 +392,16 @@ test("every step after the toggle walkthrough holds the strips on Simple", () =>
 
 // ── 8. The brew row in the dock ───────────────────────────────────────
 
-test("the tour teaches the tap before it teaches the sliders", () => {
-  // The bar is collapsed by default, so blend-sliders doesn't exist
-  // until something opens it. A user who never learns the tap can't
-  // reach the control the next two steps are about.
+test("the tour demonstrates the sliders before explaining the row they sit in", () => {
+  // Deliberately this way round. The row is mechanics — it folds, it
+  // holds two sliders behind two pills — and mechanics land better once
+  // you've seen what the thing does. The slider step opens the row
+  // itself (openControls), so nothing depends on the user having been
+  // taught the tap first.
   const controls = stepIndex("blend-controls");
   assert(controls !== -1, "blend tour has no step for the brew row");
-  assert(controls < stepIndex("blend-sliders"),
-    "the brew-bar step must come before the slider step");
+  assert(controls > stepIndex("blend-sliders"),
+    "the brew-row step should follow the step that actually uses the sliders");
 });
 
 test("the brew-bar step forces the bar SHUT", () => {
@@ -409,38 +421,11 @@ test("the axis pills get a step of their own, after the row opens", () => {
   assert(pills !== -1, "blend tour never explains the Time/Temp pills");
   assert(pills > stepIndex("blend-controls"),
     "the pills step must come after the row is introduced");
-  assert(pills < stepIndex("blend-sliders"),
-    "and before the slider step, which assumes you know what you're dragging");
+  assert(pills > stepIndex("blend-sliders"),
+    "and after the slider step — the mechanics steps run together, once the "
+    + "user has seen what the sliders are for");
   assert(blend[pills].openControls === true,
     "the pills step must open the row — the pills don't render while it's shut");
-});
-
-test("the slider step soft-lights the bars it tells you to watch", () => {
-  // Not `spotlight` — folding the bars into the cutout would say they're
-  // equally the subject, and the subject here is the control. But full
-  // dim says they're switched off, on the one step whose entire
-  // instruction is "watch the bars move". Soft light is the third tier.
-  const step = blend[stepIndex("blend-sliders")];
-  assert(Array.isArray(step.softlight) && step.softlight.includes("blend-graph"),
-    `the slider step should soft-light the bars, got ${JSON.stringify(step.softlight)}`);
-  assert(!(step.spotlight || []).includes("blend-graph"),
-    "the bars should be soft-lit, not folded into the cutout as an equal subject");
-});
-
-test("soft light is only used where something must stay watchable", () => {
-  // A cheap guard against it becoming decoration. Anything soft-lit has
-  // to be a real tour target somewhere, or it's a typo that silently
-  // lights nothing.
-  const targets = new Set(
-    Object.values(SCREEN_TOURS).flat().map(s => s.target));
-  for (const [screen, steps] of Object.entries(SCREEN_TOURS)) {
-    for (const s of steps) {
-      for (const id of s.softlight || []) {
-        assert(targets.has(id),
-          `${screen} step "${s.target}" soft-lights "${id}", which is no step's target`);
-      }
-    }
-  }
 });
 
 test("the pills step lights the whole brew window, not just the pills", () => {
@@ -456,21 +441,22 @@ test("the pills step lights the whole brew window, not just the pills", () => {
   }
 });
 
-test("the prediction and slider steps both force the bar OPEN", () => {
-  // blend-sliders only exists while the bar is open, and the pair
-  // keepClear each other — so if the prediction step left it shut, its
-  // own keepClear target would be missing from the DOM.
-  for (const target of ["blend-graph", "blend-sliders"]) {
+test("every step that points into the brew row forces it OPEN", () => {
+  // blend-sliders and blend-axis only exist while the row is open, so a
+  // step targeting either without pinning it would point at nothing on
+  // a user who had folded the row away.
+  for (const target of ["blend-sliders", "blend-axis"]) {
     assert(blend[stepIndex(target)].openControls === true,
-      `${target} step must hold the brew bar open`);
+      `${target} step must hold the brew row open`);
   }
 });
 
-test("the steps after the slider step release the bar", () => {
-  // Releasing means falling back to the user's own state, which is
-  // collapsed — the effects step needs that screen back.
-  const after = blend.slice(stepIndex("blend-sliders") + 1);
-  assert(after.length > 0, "the slider step shouldn't be last");
+test("the steps after the brew mechanics release the row", () => {
+  // Releasing means falling back to the user's own state. The mechanics
+  // steps (sliders, row, pills) are the last ones that steer it; from
+  // Brew-or-save onward the row is the user's again.
+  const after = blend.slice(stepIndex("blend-axis") + 1);
+  assert(after.length > 0, "the pills step shouldn't be last");
   for (const s of after) {
     assert(s.openControls === undefined,
       `step "${s.target}" still pins the brew bar (${s.openControls})`);
