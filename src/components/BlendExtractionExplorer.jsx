@@ -239,7 +239,6 @@ export const BlendExtractionExplorer = ({
   setTempC: setTempCProp,   // optional controlled
   timeS: timeSProp,         // optional controlled
   setTimeS: setTimeSProp,   // optional controlled
-  compact = false,          // smaller layout for Compose context
   curated = false,          // curator-chosen recipe — suppresses outsider
                             // warnings when sitting on the curator's defaults
   experimental = false,     // user-built blend — every warning fires
@@ -465,7 +464,10 @@ export const BlendExtractionExplorer = ({
 
   return (
     <div style={{
-      padding: compact ? "14px 14px 16px" : "16px 16px 18px",
+      // One padding for every brew window. `compact` used to shave
+      // 2px here for Compose alone, which is the whole reason the
+      // panels read as three different components.
+      padding: "14px 14px 16px",
       borderRadius: 12,
       background: theme.cream,
       border: `1px solid ${theme.ruleSoft}`,

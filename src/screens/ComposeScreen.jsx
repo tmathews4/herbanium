@@ -2034,7 +2034,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             setTempC={setBrewTempC}
             timeS={brewTimeS}
             setTimeS={setBrewTimeS}
-            compact
             experimental
             tourStep={blendTourStep}
             familyModeOverride={blendTourFamilyMode}

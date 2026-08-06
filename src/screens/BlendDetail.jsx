@@ -42,6 +42,19 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   // view still shows everything; the user can collapse to focus.
   const [recipeOpen, setRecipeOpen] = React.useState(true);
   const [brewingOpen, setBrewingOpen] = React.useState(true);
+  /* THE PANEL IS CONTROLLED, like every other brew window.
+     It wasn't, and that was a bug rather than a style difference: the
+     sliders moved, the strips responded, and Brew started the recipe's
+     SAVED temperature and time regardless. You could dial a cup here
+     and get a different one. */
+  const [brewTempC, setBrewTempC] = React.useState(b?.tempC);
+  const [brewTimeS, setBrewTimeS] = React.useState(b?.timeS);
+  // Walking to another recipe swaps `blendId` without remounting.
+  React.useEffect(() => {
+    setBrewTempC(b?.tempC);
+    setBrewTimeS(b?.timeS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blendId]);
   // Signal-tag overflow toggle. Cap visible at 6 (3 per row × 2
   // rows); anything beyond hides behind "+N more" until expanded.
   const [tagsExpanded, setTagsExpanded] = React.useState(false);
@@ -88,7 +101,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
 
   const handleBrewTap = () => {
     if (twists.length === 0) {
-      onBrew();
+      // The cup as dialled, not as saved. clearTwistState early-returns
+      // when there's no twist state, so passing a blend here is safe.
+      onBrew({ ...b, tempC: brewTempC, timeS: brewTimeS });
       return;
     }
     // Default name uses the curated blend name as the lineage anchor.
@@ -98,6 +113,8 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
 
   const buildModifiedBlend = () => ({
     ...b,
+    tempC: brewTempC,
+    timeS: brewTimeS,
     ingredients: mergedIngredients,
     // Drop the tradition/house flags on a twist — it's no longer the
     // canonical recipe, it's a user variation.
@@ -882,6 +899,10 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               ingredients={mergedIngredients}
               defaultTempC={b.tempC}
               defaultTimeS={b.timeS}
+              tempC={brewTempC}
+              setTempC={setBrewTempC}
+              timeS={brewTimeS}
+              setTimeS={setBrewTimeS}
               curated
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}
