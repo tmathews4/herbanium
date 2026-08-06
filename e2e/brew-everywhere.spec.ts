@@ -437,13 +437,20 @@ test.describe("a folded brew row says it opens", () => {
     await expect(row).toBeVisible({ timeout: 30_000 });
     const hint = page.getByTestId("brew-adjust-hint");
 
-    // Open by default — nothing to invite yet.
+    // Open by default. The slot isn't empty here — it names the other
+    // move, MINIMIZE, because a bare chevron was the smallest target in
+    // the dock and the only one whose meaning you had to infer from
+    // which way it pointed.
     if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
     await expect(hint, "an open panel doesn't need telling it opens").toHaveCount(0);
+    await expect(page.getByTestId("brew-minimize-hint"),
+      "and the same slot should say how to put it away").toBeVisible();
 
     await row.click();
     await expect(row).toHaveAttribute("aria-expanded", "false");
     await expect(hint, "a folded row should say what tapping it does").toBeVisible();
+    await expect(page.getByTestId("brew-minimize-hint"),
+      "one slot, one word — they must never both be up").toHaveCount(0);
 
     // And it still opens, which is the claim the word is making.
     await row.click();

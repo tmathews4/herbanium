@@ -33,6 +33,8 @@
 import { INGREDIENTS } from "../src/data/ingredients.js";
 
 import { readFileSync } from "node:fs";
+import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS, SYNERGY_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
+import { EFFECT_SYNERGIES } from "../src/algo/perception.js";
 
 let pass = 0, fail = 0;
 const failures = [];
@@ -434,6 +436,124 @@ test("but it still signals that a strong cup is strong", () => {
   const body = caffeineBarSource().toLowerCase();
   assert(/\bhigh\b|bracing|strong|assertive|bold/.test(body),
     "the caffeine gauge no longer has a word for a strong cup — softened into silence");
+});
+
+/* ── 8. A DESCRIPTOR DESCRIBES THE TEA ──────────────────────────────
+
+   These cards answer "what does this word mean in a cup?" — a poetic
+   line, then the chemistry where it's known. What they are not is a
+   place to explain the app to itself.
+
+   `berry` had drifted into a changelog: "This used to be two words...
+   so Detailed mode drew two bars for one thing. Folded into one — a
+   cup can taste of red fruit without the app claiming that's two
+   findings." True, and a note for us, not for someone wondering what
+   berry tastes like. `orchid` justified its place in our taxonomy;
+   `sweet aroma` pointed at which strip the neighbouring word is drawn
+   on. All three were reasoning about the product, printed where the
+   tea should be.
+
+   The banned list is deliberately about the APP's own furniture — its
+   modes, its bars, its strips, its history. Superlatives about the
+   ingredients ("the strongest in the catalog") stay: those tell the
+   drinker which leaf leads, which is the drinker's question. */
+
+const APP_TALK = [
+  "the app", "detailed mode", "simple mode", "used to be", "folded into",
+  "name of its own", "two findings", "this file", "the vocabulary",
+  "palate strip", "flavor strip", "flavour strip",
+];
+
+test("no descriptor explains the app instead of the tea", () => {
+  const all = { ...EFFECT_DESCRIPTIONS, ...FLAVOR_DESCRIPTIONS };
+  const guilty = [];
+  for (const [word, entry] of Object.entries(all)) {
+    const text = [entry?.summary, entry?.body].filter(Boolean).join(" ").toLowerCase();
+    const found = APP_TALK.filter(p => text.includes(p));
+    if (found.length) guilty.push(`${word}: ${found.map(f => `"${f}"`).join(", ")}`);
+  }
+  assert(guilty.length === 0,
+    `${guilty.length} descriptor(s) describe the product rather than the cup:\n  ${guilty.join("\n  ")}`);
+});
+
+test("every descriptor still says something, poetically first", () => {
+  // The failure mode of the rule above is deleting until nothing's
+  // left. A summary is the poetic half and is not optional; a body is
+  // the science and is allowed to be absent when there isn't any.
+  const all = { ...EFFECT_DESCRIPTIONS, ...FLAVOR_DESCRIPTIONS };
+  const thin = [];
+  for (const [word, entry] of Object.entries(all)) {
+    if (!entry?.summary || entry.summary.trim().length < 12) thin.push(word);
+  }
+  assert(thin.length === 0,
+    `${thin.length} descriptor(s) have no summary worth reading: ${thin.join(", ")}`);
+});
+
+/* ── 9. EVERY SYNERGY ANSWERS FOR ITSELF ────────────────────────────
+
+   The synergy table modelled thirteen pairings and cited nothing. That
+   is the exact failure `CLAUDE.md` names — an unsourced claim wearing a
+   sourced one's authority, where the reader can't tell which is which —
+   and it was invisible because the pills only ever showed a label.
+
+   Now each pill opens onto a description graded by what backs it:
+   measured (a trial tested the COMBINATION), traditional (a documented
+   preparation, named as tradition), or descriptive (no mechanism
+   claimed at all). docs/research/synergies.md holds the workings; the
+   descriptions are transcribed from it.
+
+   These tests hold the two ends together. A new synergy rule with no
+   description would show a pill that opens onto nothing, and a
+   description that quietly drops its hedging would let a pattern read
+   as a finding. */
+
+test("every synergy the engine can fire has something to say when tapped", () => {
+  const labels = [...new Set(EFFECT_SYNERGIES.map(r => r.label))];
+  const undescribed = labels.filter(l => !SYNERGY_DESCRIPTIONS[l]?.summary);
+  assert(undescribed.length === 0,
+    `${undescribed.length} synergy pill(s) would open onto nothing: ${undescribed.join(", ")}`);
+});
+
+test("no description sits in the table for a synergy that can't fire", () => {
+  // The other direction: a stale entry is a description of something
+  // the app no longer models, which nobody will notice is dead.
+  const labels = new Set(EFFECT_SYNERGIES.map(r => r.label));
+  const orphans = Object.keys(SYNERGY_DESCRIPTIONS).filter(l => !labels.has(l));
+  assert(orphans.length === 0,
+    `${orphans.length} description(s) describe synergies that no longer exist: ${orphans.join(", ")}`);
+});
+
+test("an unmeasured synergy says so rather than sounding measured", () => {
+  /* The load-bearing one. Four pairings have trials; the rest are
+     tradition or plain description, and those must not borrow the
+     voice of the sourced ones. Each unsourced entry has to carry an
+     explicit hedge — "no mechanism is claimed", "tradition rather than
+     trial" — because without it the prose reads identically to the
+     Haskell citation sitting two pills away. */
+  const SOURCED = new Set([
+    "alert calm", "calm focus", "deepens sedation", "deep settle",
+    "Maghrebi refresh", "warming digestive",
+  ]);
+  const HEDGES = ["no mechanism is claimed", "tradition rather than trial",
+                  "hasn't been tested", "the only evidence"];
+  const overclaiming = [];
+  for (const [label, entry] of Object.entries(SYNERGY_DESCRIPTIONS)) {
+    if (SOURCED.has(label)) continue;
+    const body = (entry.body || "").toLowerCase();
+    if (!HEDGES.some(h => body.includes(h))) overclaiming.push(label);
+  }
+  assert(overclaiming.length === 0,
+    `${overclaiming.length} unsourced synergy(s) read as findings: ${overclaiming.join(", ")}`);
+});
+
+test("the sourced ones actually name their source", () => {
+  // And the converse: a pairing claimed as measured has to point at
+  // something. A citation-shaped string is a weak check, but it fails
+  // loudly if someone rewrites a body into vibes.
+  const CITED = ["alert calm", "calm focus", "deepens sedation", "deep settle", "Maghrebi refresh"];
+  const vague = CITED.filter(l => !/\b(19|20)\d{2}\b|et al/i.test(SYNERGY_DESCRIPTIONS[l]?.body || ""));
+  assert(vague.length === 0,
+    `${vague.length} synergy(s) claim evidence without naming any: ${vague.join(", ")}`);
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

@@ -80,6 +80,75 @@ const PALATE_AND_LEGACY = {
 
 export const EFFECT_DESCRIPTIONS = { ...PALATE_AND_LEGACY, ...MOOD_DESCRIPTIONS };
 
+/* ── Synergies — what a pairing does, and on whose authority ───────
+
+   Transcribed from docs/research/synergies.md, which grades all
+   thirteen pairings by what actually backs them. The grades are the
+   ingredient docs' own: MEASURED (a trial tested the combination, not
+   just the parts), TRADITIONAL (a real documented preparation, named
+   as tradition), DESCRIPTIVE (no mechanism claimed).
+
+   An audit found the table had been written from pattern and carried
+   no sources at all. Four pairings turned out to have real literature
+   once anyone looked — the point of looking. The rest say plainly
+   what they are, because an unsourced claim wearing a sourced one's
+   authority is the thing the reader can't see through.
+
+   Not transcribed: the bonus magnitudes. No study says an interaction
+   is worth +0.4 rather than +0.2 on a 0-5 scale; those are a
+   modelling choice and no description claims otherwise.
+   ────────────────────────────────────────────────────────────── */
+export const SYNERGY_DESCRIPTIONS = {
+  "alert calm": {
+    summary: "Awake without the edge \u2014 the cup that sharpens instead of jangling.",
+    body: "The best-evidenced pairing in the app. L-theanine with caffeine improved reaction time, working memory and alertness ratings where neither did alone (Haskell et al. 2008) \u2014 a combination doing what its parts couldn't, which is what a synergy has to show.",
+  },
+  "calm focus": {
+    summary: "Attention that doesn't feel like effort.",
+    body: "The same L-theanine-and-caffeine chemistry as `alert calm`, read from the focus side: the amino acid smooths the stimulant's edge rather than opposing it. The combination improved attention where neither part did alone (Haskell et al. 2008).",
+  },
+  "deepens sedation": {
+    summary: "Quiet mind, heavy eyes.",
+    body: "Valerian with lemon balm is studied as a combination, not just as two sedatives \u2014 a double-blind placebo-controlled trial (Cerny & Schmid 1999) and later a triple-blind randomised trial where sleep quality improved for 36% on the pairing against 8% on placebo.",
+  },
+  "deep settle": {
+    summary: "The body unwinding rather than the mind going quiet.",
+    body: "The same valerian-and-lemon-balm evidence as `deepens sedation` (Cerny & Schmid 1999), read from the body's side. The trials don't separate the two registers; the cup does \u2014 this is the let-go one rather than the get-tired one.",
+  },
+  "Maghrebi refresh": {
+    summary: "Cool and clear at once \u2014 the mint-and-gunpowder register.",
+    body: "Menthol activates the cold receptor TRPM8 and acts on cholinergic signalling, so the cooling and the alerting share a compound. Peppermint aroma measurably improved memory, processing speed and alertness in a randomised trial of 144 people (Moss et al. 2008) \u2014 ylang-ylang, tested alongside, did the opposite.",
+  },
+  "warming digestive": {
+    summary: "Heat that helps the meal along.",
+    body: "Peppermint relaxes intestinal smooth muscle by blocking calcium channels, fennel's volatile oils work the same register, and ginger speeds gastric emptying by around a quarter. Warm liquid aids motility on its own \u2014 which is why these are drunk hot. The halves are measured; the combination hasn't been tested as one.",
+  },
+  "after-meal lift": {
+    summary: "Bright and settling together \u2014 the end of a long meal.",
+    body: "Tradition rather than trial. Italian canarino, Mexican agua de jamaica with lime, the French after-dinner tisane: cultures that eat late converge on a cup that lifts and settles at once. The convergence is the evidence, and it's the only evidence.",
+  },
+  "winter root": {
+    summary: "Anchored and warmed \u2014 the cold-weather cup.",
+    body: "Tradition rather than trial. The Yunnan-Tibetan decoction register, where fermented tea meets warming root. Documented as a practice; never measured as an interaction.",
+  },
+  "the holding cup": {
+    summary: "Quieted and warmed at once \u2014 the feeling of being tucked in.",
+    body: "No mechanism is claimed. Soothing is the body's ease and comfort is warmth of spirit; a cup carrying both reads as held rather than merely calm. A description of the register, not a finding about it.",
+  },
+  settled: {
+    summary: "Calm with something warm underneath it.",
+    body: "No mechanism is claimed. Calm alone can read thin; alongside comfort or soothing it reads settled instead. A note on how the two sit together, nothing more.",
+  },
+  rooted: {
+    summary: "Steady rather than merely relaxed.",
+    body: "No mechanism is claimed. Grounding gives calm a floor to rest on \u2014 the difference between a cup that loosens you and one that plants you.",
+  },
+  "morning lift": {
+    summary: "Warmth arriving with the wake-up.",
+    body: "No mechanism is claimed. Energy with warmth behind it reads gentler than energy alone \u2014 the chai register rather than the espresso one.",
+  },
+};
+
 export const FLAVOR_DESCRIPTIONS = {
   // ── Floral family ──
   floral: {
@@ -138,11 +207,11 @@ export const FLAVOR_DESCRIPTIONS = {
   },
   berry: {
     summary: "Red-fruit tartness — hibiscus and cranberry's defining note.",
-    body: "Bright sourness rounded by anthocyanins, the same red pigments that give the cup its colour. This used to be two words: `berry` and `cranberry` sat on the same two ingredients, always together, so Detailed mode drew two bars for one thing. Folded into one — a cup can taste of red fruit without the app claiming that's two findings.",
+    body: "Bright sourness rounded by anthocyanins, the same red pigments that give the cup its colour.",
   },
   orchid: {
     summary: "Oolong's signature floral — creamy rather than perfumed.",
-    body: "The Tieguanyin register. Softer and rounder than rose or jasmine; it reads as floral without the sharp top note, which is why it carries a name of its own rather than sitting under `floral`.",
+    body: "The Tieguanyin register. Softer and rounder than rose or jasmine — floral without the sharp top note.",
   },
   tingling: {
     summary: "A faint prickle on the tongue — sensation, not taste.",
@@ -232,7 +301,7 @@ export const FLAVOR_DESCRIPTIONS = {
   // the rename is that they are different claims.
   "sweet aroma": {
     summary: "Smells sweet — honey, vanilla, caramel — whether or not it tastes it.",
-    body: "Aromatic sweetness rather than the tongue's. Vanillin has essentially no sweet taste; the brain reads the odour as sweetness and the cup seems sweeter than its sugars. Descriptive sensory analysis calls this cluster \"sweet aromatics\" precisely to hold it apart from the basic taste, which lives on the palate strip as `sweetness`.",
+    body: "Aromatic sweetness rather than the tongue's. Vanillin has essentially no sweet taste; the brain reads the odour as sweetness and the cup seems sweeter than its sugars. Descriptive sensory analysis calls this cluster \"sweet aromatics\" precisely to hold it apart from the basic taste.",
   },
   honey: {
     summary: "Soft amber sweetness — flower and dried-grass.",

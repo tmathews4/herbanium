@@ -379,12 +379,13 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
 
     // And advancing out of the walkthrough returns to the short layout
-    // the prediction/slider steps depend on. The brew-bar step is what
+    // the prediction/slider steps depend on. The brew-row step is what
     // comes next — it carries no familyMode of its own, so the strips
     // land on the persisted preference the toggle steps left behind,
-    // which is the thing being checked.
+    // which is the thing being checked. (It used to be the slider step
+    // here; the row is now introduced folded before its contents.)
     await callout.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(callout).toContainText("Dial in the brew");
+    await expect(callout).toContainText("The brew row");
     await expect(toggle, "and stop once the tour moves past them")
       .not.toHaveCSS("animation-name", "tourTogglePulse");
     // Tolerance in pixels, not toBeCloseTo. WebKit re-lays this SVG out
@@ -398,33 +399,33 @@ test.describe("Blend tour — bars and sliders visible together", () => {
   });
 
   test("the tour drives the brew row, then hands it back", async ({ page }) => {
-    // The row arrives OPEN, and the tour has to fold it to explain that
-    // it folds — a step describing a tap while showing the opposite
-    // state describes nothing. The tour can't hand the user the tap
-    // itself (the overlay swallows clicks), so the steps drive it, and
-    // release it once they're done teaching it.
+    // SHUT, THEN OPEN, THEN INSIDE — and it never folds again.
+    //
+    // This used to run the other way: sliders first with the row driven
+    // open, then a fold to explain the row, then re-open for the pills.
+    // The panel visibly collapsed in the middle of the lesson, which
+    // read as the app undoing itself. The row is introduced folded now,
+    // which is the only state in which "this folds away" is a
+    // demonstration rather than a claim. The tour can't hand the user
+    // the tap itself — the overlay swallows clicks — so the steps drive
+    // it, and release it once they're done teaching it.
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
     const callout = page.getByTestId("tour-callout");
     const sliders = page.locator('[data-tour="blend-sliders"]');
 
-    // The tour walks: prediction, effect, how to read them, then the
-    // sliders in use, THEN the mechanics of the row they live in.
-    await advanceTo(page, "Dial in the brew");
-    await expect(sliders, "the slider step must actually have sliders to drag")
-      .toBeVisible();
-
-    // Only now the row itself, and this step shows it SHUT — explaining
-    // that it folds while showing it unfolded explains nothing. The tour
-    // can't hand the user the tap (the overlay swallows clicks), so the
-    // step drives it.
+    // The row first, folded, with its contents put away.
     await advanceTo(page, "The brew row");
     await expect(sliders, "the brew-row step should show the row folded away").toBeHidden();
     await expect(page.locator('[data-tour="blend-controls"]'),
       "and the collapsed row is what's being pointed at").toBeVisible();
 
-    // The pills only exist while the row is open, so their step has to
-    // re-open it — the step before deliberately shut it.
+    // Then opened, with something to drag.
+    await advanceTo(page, "Dial in the brew");
+    await expect(sliders, "the slider step must actually have sliders to drag")
+      .toBeVisible();
+
+    // And it stays open from here — the pills live inside it.
     await advanceTo(page, "Time or temperature");
     await expect(page.locator('[data-tour="blend-axis"]'),
       "the pills step must actually have pills to point at").toBeVisible();

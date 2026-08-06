@@ -71,25 +71,32 @@ export const SCREEN_TOURS = {
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-flavors"], familyMode: false,
       body: "Detailed opens every family into the notes underneath it \u2014 apple and pear inside fruity, not just \u201cfruity.\u201d Same cup, finer read. We'll leave it on Simple." },
-    // Now the cup MOVES. keepClear holds the bars on screen while the
-    // callout sits off them, because the whole instruction is to watch
-    // one thing while dragging another. `compact` shrinks the callout
-    // for the same reason: this step is competing with its own subject
-    // for room, so it gives some up. Copy is short to match.
-    //
-    // openControls because the sliders must be there to drag; the two
-    // steps after this one are what explain the row they live in.
+    /* THE ROW BEFORE ITS CONTENTS — shut, then open, then the parts.
+
+       These two steps used to run the other way round: the sliders were
+       shown first with the row forced OPEN, and the next step folded it
+       shut to explain the row itself. So the tour opened a panel, taught
+       inside it, then closed the panel mid-lesson and opened it again
+       for the three steps after. Reported as "it toggles it to condense
+       in the middle and it's not clear what it's showing" — which is
+       exactly right: a thing that collapses while you're being taught
+       about it reads as the app undoing itself, not as a demonstration.
+
+       Introduce the container, then open it, then go inside. The fold
+       is now the FIRST thing said about the row, while it is folded,
+       which is the only state in which "this folds away" is a
+       demonstration rather than a claim. */
+    { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
+      body: "Your brew lives down here. Folded like this it still reads the time and temperature, and Brew stays where it is \u2014 tap the row to open it." },
+    // Opened, and now the cup MOVES. keepClear holds the bars on screen
+    // while the callout sits off them, because the whole instruction is
+    // to watch one thing while dragging another. `compact` shrinks the
+    // callout for the same reason: this step competes with its own
+    // subject for room, so it gives some up. Copy is short to match.
     { target: "blend-sliders", title: "Dial in the brew", pad: 6,
       keepClear: ["blend-graph", "blend-effects"],
       familyMode: true, compact: true, openControls: true,
-      body: "Drag the slider \u2014 watch all four windows move." },
-    // Only now the mechanics of the row itself, once the user has seen
-    // what it's for. Shown SHUT \u2014 a step explaining that the row folds
-    // while showing it unfolded explains nothing \u2014 which is what
-    // `openControls: false` is for. `false` rather than null: null hands
-    // the row back to the user's own state, which is open.
-    { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
-      body: "The sliders live in this row. Tap here to fold them away \u2014 folded, it still reads your time and temperature, and Brew stays where it is." },
+      body: "Open. Drag the slider \u2014 watch all four windows move." },
     // The axis pills. A control that REPLACES what's on screen rather
     // than adding to it is invisible until someone says it's there.
     //

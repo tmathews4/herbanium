@@ -400,16 +400,42 @@ test("every step after the toggle walkthrough holds the strips on Simple", () =>
 
 // ── 8. The brew row in the dock ───────────────────────────────────────
 
-test("the tour demonstrates the sliders before explaining the row they sit in", () => {
-  // Deliberately this way round. The row is mechanics — it folds, it
-  // holds two sliders behind two pills — and mechanics land better once
-  // you've seen what the thing does. The slider step opens the row
-  // itself (openControls), so nothing depends on the user having been
-  // taught the tap first.
+test("the tour shows the row shut, then open, then what's inside it", () => {
+  /* REVERSED, on purpose, and this comment is the record of why.
+
+     It used to run the other way: sliders first with the row forced
+     OPEN, then a step that folded it shut to explain the row itself,
+     then three more steps that opened it again. The old note argued
+     that mechanics land better once you've seen what the thing does,
+     which is a fair principle and the wrong call here — because the
+     cost wasn't abstraction, it was a panel visibly collapsing in the
+     middle of being taught about. Reported as "it toggles it to
+     condense in the middle and it's not clear what it's showing".
+
+     A fold can only be DEMONSTRATED from the folded state. Shown while
+     open, "this folds away" is a claim about something the user can't
+     see; shown folded, it's the thing in front of them. So: here is the
+     row, folded, still reading your brew — then open, and here is what
+     was inside. */
   const controls = stepIndex("blend-controls");
+  const sliders = stepIndex("blend-sliders");
   assert(controls !== -1, "blend tour has no step for the brew row");
-  assert(controls > stepIndex("blend-sliders"),
-    "the brew-row step should follow the step that actually uses the sliders");
+  assert(sliders !== -1, "blend tour lost its slider step");
+  assert(controls < sliders,
+    "the row should be introduced folded before the tour opens it and teaches inside");
+});
+
+test("the row is never re-folded after the tour has opened it", () => {
+  // The actual defect behind the reversal above: once the tour opens
+  // the row it must stay open to the end, or the user watches the panel
+  // they're being taught about collapse and reappear. Anything that
+  // shuts it after the first `openControls: true` is that bug returning.
+  const firstOpen = blend.findIndex(s => s.openControls === true);
+  assert(firstOpen !== -1, "no step opens the brew row");
+  blend.slice(firstOpen).forEach((s, i) => {
+    assert(s.openControls !== false,
+      `step ${firstOpen + i} "${s.target}" folds the row shut again after it was opened`);
+  });
 });
 
 test("the brew-bar step forces the bar SHUT", () => {
@@ -500,8 +526,11 @@ test("only the brew-mechanics steps steer the row", () => {
   // tour now ends on Brew — so the claim is stated from the other side:
   // nothing BEFORE the mechanics touches the row, and the mechanics are
   // the last thing in the tour, so it's handed back when the tour ends.
-  const firstMechanic = stepIndex("blend-sliders");
-  assert(firstMechanic !== -1, "blend tour lost its slider step");
+  // The boundary is wherever the mechanics BLOCK starts, not one named
+  // step — the row's own introduction moved to the front of that block
+  // and anchoring to blend-sliders made this fire on the correct order.
+  const firstMechanic = blend.findIndex(s => s.openControls !== undefined);
+  assert(firstMechanic !== -1, "no step steers the brew row at all");
   blend.slice(0, firstMechanic).forEach((s, i) => {
     assert(s.openControls === undefined,
       `step ${i} "${s.target}" pins the brew row before the tour teaches it`);

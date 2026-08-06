@@ -210,7 +210,7 @@ export const MOOD_VOCABULARY = [
       counterpart: "immunomodulant / immunostimulant — established Western herbal "
         + "actions; modulate innate and adaptive response rather than stimulate blindly",
       summary: "Steadying the body's defences — the cold-and-flu-season cup.",
-      body: "Echinacea's alkylamides and polysaccharides, elderflower's flavonoids (which bind influenza neuraminidase and haemagglutinin, and carry German Commission E approval for cold and flu), and reishi's beta-glucans binding Dectin-1 and TLR2. Distinct from soothing, which acts on irritated tissue — this acts on the immune response itself, and is slower and less felt than anything else in the vocabulary.",
+      body: "Echinacea's alkylamides and polysaccharides, elderflower's flavonoids (which bind influenza neuraminidase and haemagglutinin, and carry German Commission E approval for cold and flu), and reishi's beta-glucans binding Dectin-1 and TLR2. Distinct from soothing, which acts on irritated tissue — this acts on the immune response itself, and is slower and less felt than any other effect here.",
     }],
   },
   {
@@ -220,7 +220,7 @@ export const MOOD_VOCABULARY = [
       label: "sleep",
       counterpart: "sedative / hypnotic — a separate materia medica category from nervine",
       summary: "Sedating, drowsiness-adjacent.",
-      body: "Valerian's valerenic acid is the strongest in the catalog, with passionflower and reishi's triterpenes behind it. Distinct from calm on paper — nervine and sedative are different actions — though no ingredient here yet carries one without the other.",
+      body: "Valerian's valerenic acid is the strongest in the catalog, with passionflower and reishi's triterpenes behind it. Distinct from calm on paper — nervine and sedative are different actions.",
     }],
   },
 ];

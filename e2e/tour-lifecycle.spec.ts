@@ -209,10 +209,13 @@ test.describe("leaving a tour", () => {
     await expect(row, "the brew-row step shows the row folded")
       .toHaveAttribute("aria-expanded", "false");
 
-    await advanceTo(page, "Time or temperature");
-    await expect(row, "the pills step re-opens it — the pills don't exist while it's shut")
+    await advanceTo(page, "Dial in the brew");
+    await expect(row, "the slider step opens it — there's nothing to drag while it's shut")
       .toHaveAttribute("aria-expanded", "true");
 
+    // Backwards over the open/shut boundary is the case that matters:
+    // the earlier step's override has to be re-applied, or the user
+    // reads "tap the row to open it" over a row that's already open.
     await btn(page, "Back").click();
     await expect(callout(page)).toContainText("The brew row");
     await expect(row, "stepping Back should bring that step's state back with it")

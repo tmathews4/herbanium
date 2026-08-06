@@ -40,6 +40,8 @@ import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { Arrival } from "./Arrival";
+import { EFFECT_SYNERGIES } from "../algo/perception";
+import { SYNERGY_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 
 // Caffeine load thresholds (mg). The "high" tick lines up with
 // where perception.js's high-caffeine warning fires (130mg — past a
@@ -385,6 +387,8 @@ export const BlendExtractionExplorer = ({
   // never appear. It re-reads the same node and React bails on the
   // identical value.
   const [brewDock, setBrewDock] = useState(() => document.getElementById(dockId));
+  // Which synergy pill is explaining itself. One at a time.
+  const [synergyOpen, setSynergyOpen] = useState(null);
   // Grows the row into place the first time it lands in the dock.
   const dockArrivalRef = useDockArrival(!!brewDock);
   // Re-reads on mount, and again if the host changes which dock it
@@ -1164,12 +1168,24 @@ export const BlendExtractionExplorer = ({
                     answer should be there every time too. Terra so it
                     reads as an invitation rather than another label. */}
                 <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                {!shownControlsOpen && (
-                  <span data-testid="brew-adjust-hint" style={{
+                {/* THE SAME SLOT SAYS BOTH THINGS. Folded it reads
+                    ADJUST; open it reads MINIMIZE. The word was only
+                    ever there while folded, so an open panel had a bare
+                    chevron doing the closing on its own — the smallest
+                    target in the dock, and the one control whose meaning
+                    a reader has to infer from which way it points.
+
+                    One slot, because it's one control: this row's tap
+                    toggles, and the word is just that toggle naming its
+                    next move. Ash rather than terra when open — closing
+                    is the quieter of the two actions and shouldn't
+                    beckon the way "adjust" does. */}
+                <span data-testid={shownControlsOpen ? "brew-minimize-hint" : "brew-adjust-hint"}
+                  style={{
                     fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.16em",
-                    textTransform: "uppercase", color: theme.terra,
-                  }}>adjust</span>
-                )}
+                    textTransform: "uppercase",
+                    color: shownControlsOpen ? theme.ash : theme.terra,
+                  }}>{shownControlsOpen ? "minimize" : "adjust"}</span>
                 {/* Same chevron as the "more filters" toggle on Compose.
                     Rotation is inverted because this panel opens UPWARD
                     out of the dock: up means expand, down means close. */}
@@ -1625,22 +1641,88 @@ export const BlendExtractionExplorer = ({
           carries the merged-profile view (under "moods" and
           "flavors" labels in its detail card). */}
 
-      {/* Synergy tags — multi-effect bonuses the cup actually carries. */}
-      {brew.synergyTags && brew.synergyTags.length > 0 && (
-        <div style={{ marginTop: 8 }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {brew.synergyTags.map(tag => (
-              <span key={tag} style={{
-                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
-                textTransform: "uppercase", color: theme.sageDeep,
-                padding: "3px 9px",
-                background: "rgba(98, 124, 92, 0.10)",
-                border: `1px solid ${theme.sageDeep}`, borderRadius: 999,
-              }}>{tag}</span>
-            ))}
+      {/* SYNERGY PILLS — at most three, and each one answers for itself.
+
+          They came out for a while because they were labels and nothing
+          more: a reader who could already see calm and focus sitting
+          high learned nothing from being told the pairing is called
+          alert calm, and on a four-leaf cup several stacked into a row
+          of jargon competing with the readouts underneath.
+
+          What earned them back was research. An audit of all thirteen
+          rules (docs/research/synergies.md) found four with real
+          literature — L-theanine with caffeine, valerian with lemon
+          balm, menthol's cooling and alerting sharing a compound, the
+          carminatives — where before there were no sources at all. A
+          pill that opens onto a trial is worth its space; one that only
+          names a pattern isn't.
+
+          THREE AT MOST, strongest first. The cap is the fix for the
+          stacking: a cup can legitimately trigger five or six, and past
+          about three the row stops reading as findings and starts
+          reading as decoration. Ranked by how strongly the cup carries
+          the two effects the rule is about, so the three shown are the
+          three most true of this cup rather than the first three in the
+          table. */}
+      {(() => {
+        const tags = brew?.synergyTags || [];
+        if (!tags.length) return null;
+        const effectStrength = Object.fromEntries(brew.effects || []);
+        const ranked = [...new Set(tags)]
+          .map(tag => {
+            const rule = EFFECT_SYNERGIES.find(r => r.label === tag);
+            const carried = rule
+              ? rule.when.reduce((sum, e) => sum + (effectStrength[e] || 0), 0)
+              : 0;
+            return { tag, carried };
+          })
+          .sort((a, b) => b.carried - a.carried)
+          .slice(0, 3);
+        return (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {ranked.map(({ tag }) => {
+                const open = synergyOpen === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    data-testid={`synergy-${tag.replace(/\s+/g, "-")}`}
+                    aria-expanded={open}
+                    onClick={() => setSynergyOpen(open ? null : tag)}
+                    style={{
+                      fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
+                      textTransform: "uppercase", color: theme.sageDeep,
+                      padding: "3px 9px", cursor: "pointer",
+                      background: open ? "rgba(98, 124, 92, 0.20)" : "rgba(98, 124, 92, 0.10)",
+                      border: `1px solid ${theme.sageDeep}`, borderRadius: 999,
+                      transition: "background 0.18s ease",
+                    }}
+                  >{tag}</button>
+                );
+              })}
+            </div>
+            {synergyOpen && SYNERGY_DESCRIPTIONS[synergyOpen] && (
+              <Arrival duration={220} data-testid="synergy-detail" style={{
+                marginTop: 8,
+                padding: "8px 10px 8px 12px",
+                borderLeft: `2px solid ${theme.sageDeep}`,
+                background: "rgba(98, 124, 92, 0.08)",
+                borderRadius: "0 6px 6px 0",
+              }}>
+                <div style={{
+                  fontFamily: ff.serif, fontSize: 12.5, color: theme.ink,
+                  lineHeight: 1.45, marginBottom: 4,
+                }}>{SYNERGY_DESCRIPTIONS[synergyOpen].summary}</div>
+                <div style={{
+                  fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
+                  lineHeight: 1.5, fontStyle: "italic",
+                }}>{SYNERGY_DESCRIPTIONS[synergyOpen].body}</div>
+              </Arrival>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Adaptogen caveat — fires when adaptogen-flagged ingredients
           (tulsi, ashwagandha, reishi, lion's mane, licorice) make up
