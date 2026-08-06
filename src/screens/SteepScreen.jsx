@@ -33,6 +33,22 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   const total = blend.timeS || 360;
   const [remaining, setRemaining] = useState(total);
   const [paused, setPaused] = useState(false);
+  /* One cell of the steep dock. Square, transparent, divided by the
+     same ruleSoft hairline the tab dock and the brew row use — the
+     affordance is a face of the surface, not an object resting on it. */
+  const steepCell = ({ divider = false, accent = null } = {}) => ({
+    flex: 1,
+    background: "transparent",
+    border: "none",
+    borderRight: divider ? `1px solid ${theme.ruleSoft}` : "none",
+    borderRadius: 0,
+    padding: "15px 10px",
+    cursor: "pointer",
+    fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.04em",
+    fontWeight: accent ? 600 : 500,
+    color: accent || theme.inkSoft,
+    transition: "color 0.3s ease",
+  });
   const [activeIngredient, setActiveIngredient] = useState(null);
   // Over-steep counter — increments by 1 each second after remaining
   // hits zero, until the user pours (resets) or logs the cup. Drives
@@ -732,28 +748,54 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           primary CTA flips from ink "done early" to a terra-filled,
           softly pulsing "log this cup" so the arrival moment carries
           its own visual weight. */}
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      {/* A DOCK, like the brew row — not three buttons on the page.
+          They were a pill, a pill and a filled slab floating in the
+          scroll flow, which is the treatment every other surface has
+          moved away from. Now one menu pinned to the bottom of the
+          screen, taking the same glass as the tab dock and the brew
+          row: rgba(ivory,0.58) over a 9px blur, so the page reads
+          through it as it scrolls underneath.
+
+          Equal cells divided by hairlines, square, transparent — the
+          language the brew corner and the confirm prompt's footer both
+          speak. `done early` carries its primacy in colour rather than
+          in a fill, so the row stays a row.
+
+          Sticky rather than a layout change: the steep page is one
+          scrolling column and this is the least invasive way to make
+          the controls stop scrolling with it. Negative margins cancel
+          the page's padding so the bar reaches the edges. */}
+      <div style={{
+        position: "sticky", bottom: -26,
+        marginTop: 18, marginBottom: -26,
+        marginLeft: -22, marginRight: -22,
+        display: "flex", alignItems: "stretch",
+        background: "rgba(var(--ivory-rgb),0.58)",
+        backdropFilter: "blur(9px) saturate(1.1)",
+        WebkitBackdropFilter: "blur(9px) saturate(1.1)",
+        borderTop: `1px solid ${theme.rule}`,
+      }}>
         {remaining > 0 && (
-          <button onClick={() => setPaused(!paused)} style={iconBtn()}>
+          <button
+            data-testid="steep-pause"
+            onClick={() => setPaused(!paused)}
+            style={steepCell({ divider: true })}
+          >
             {paused ? "▶ resume" : "❚❚ pause"}
           </button>
         )}
         <button
+          data-testid="steep-reset"
           onClick={() => { setRemaining(total); setOverSteepS(0); }}
-          style={iconBtn()}
+          style={steepCell({ divider: true })}
         >
           {remaining === 0 ? "↺ steep again" : "↺ reset"}
         </button>
         <button
+          data-testid="steep-done"
           onClick={() => onDone(blend, intent, targetMoods)}
           className={remaining === 0 ? "steep-cta-arrived" : ""}
-          style={{
-            flex: 1, fontFamily: ff.serif, fontSize: 15,
-            padding: "12px 14px", borderRadius: 10,
-            background: remaining === 0 ? theme.terra : theme.ink,
-            color: theme.cream, border: "none", cursor: "pointer",
-            transition: "background 0.4s ease, box-shadow 0.4s ease",
-          }}
+          style={steepCell({ accent: remaining === 0 ? theme.terra : theme.ink })}
         >
           {remaining === 0 ? "log this cup →" : "done early →"}
         </button>

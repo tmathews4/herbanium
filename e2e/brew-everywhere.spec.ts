@@ -14,6 +14,7 @@
 // brew panel appears and asserts the button is in it.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+import { brewFromDetail } from "./helpers/brew";
 
 // Opening a detail overlay pulls a lazy-loaded screen chunk and then
 // waits for the explorer to mount and settle. Under four workers that
@@ -301,5 +302,47 @@ test.describe("an empty dock slot draws nothing", () => {
     expect(slot!.children, "nothing should be portalled in").toBe(0);
     expect(slot!.height, "an empty slot must take no space").toBeLessThanOrEqual(1);
     expect(parseFloat(slot!.borderTop), "and draw no rule line").toBe(0);
+  });
+});
+
+test.describe("the steep controls are a dock", () => {
+  test("pause, reset and done sit in one bottom menu", async ({ page }) => {
+    // They were a pill, a pill and a filled slab floating in the scroll
+    // flow. Now one menu pinned to the bottom, in the same language as
+    // the brew row and the tab dock: equal cells, hairline dividers,
+    // square, transparent.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+    await brewFromDetail(page);
+
+    const done = page.getByTestId("steep-done");
+    await expect(done, "the steep screen should be up").toBeVisible({ timeout: 30_000 });
+
+    const shape = await page.evaluate(() => {
+      const cells = ["steep-pause", "steep-reset", "steep-done"]
+        .map(id => document.querySelector(`[data-testid="${id}"]`))
+        .filter(Boolean) as HTMLElement[];
+      const bar = cells[0]?.parentElement;
+      const cs = bar ? getComputedStyle(bar) : null;
+      return {
+        cells: cells.length,
+        radii: cells.map(c => getComputedStyle(c).borderRadius),
+        // Same row, so same top edge.
+        tops: cells.map(c => Math.round(c.getBoundingClientRect().top)),
+        sticky: cs?.position,
+        translucent: cs?.backgroundColor ?? "",
+      };
+    });
+
+    expect(shape.cells, "pause, reset and done should all be present while steeping").toBe(3);
+    expect(new Set(shape.tops).size, "they should share one row").toBe(1);
+    expect(shape.radii.every(r => r === "0px"), `square cells, got ${shape.radii}`).toBe(true);
+    expect(shape.sticky, "the menu should stay at the bottom rather than scroll away")
+      .toBe("sticky");
+    // rgba with an alpha below 1 — the page reads through it, like the
+    // brew row and the tab dock.
+    expect(shape.translucent, `expected a translucent surface, got ${shape.translucent}`)
+      .toMatch(/rgba\(.*0\.\d+\)/);
   });
 });
