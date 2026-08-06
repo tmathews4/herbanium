@@ -1518,7 +1518,12 @@ export default function App() {
     setOverlay("entry");
   };
 
-  const startBrew = (blend, intent, targetMoods) => {
+  /* `opts.minimized` starts the cup already folded into the banner.
+     Quick brew on a recipe row uses it: you tapped a cup you already
+     trust, so the timer runs and the app stays where you were rather
+     than throwing a full-screen steep at you. Everything else opens the
+     steep screen as before. */
+  const startBrew = (blend, intent, targetMoods, opts) => {
     // Already steeping? Confirm before discarding the in-progress
     // brew. Matches the rest of the app's confirm pattern (other
     // delete-style flows use window.confirm too) so we don't grow
@@ -1546,6 +1551,18 @@ export default function App() {
     // which is indistinguishable from losing it.
     clearOverlayHistory();
     setOverlay("steep");
+    // After setOverlay, not before: the branch above clears the banner
+    // when swapping an in-progress steep, and this has to win.
+    setSteepMinimized(!!opts?.minimized);
+  };
+
+  /* Start a saved cup on the spot — no prompt, no navigation. The
+     deliberate exception to "brewing asks first": the confirmation
+     exists to catch an accidental commit while you're dialling
+     something in, and this is a recipe you already keep. */
+  const quickBrew = (blend) => {
+    if (!blend) return;
+    startBrew(blend, "", blend.moods || ["calm"], { minimized: true });
   };
 
   // One-time legacy migration. The previous model evaluated `earned`
@@ -2301,8 +2318,8 @@ export default function App() {
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} lodestoneCharge={lodestoneCharge} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} lodestoneCharge={lodestoneCharge} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first

@@ -159,7 +159,7 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon }) => {
+export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   const [journalComposerOpen, setJournalComposerOpen] = useState(false);
@@ -910,6 +910,86 @@ export const ComposeScreen = ({ section = "apothecary", go, startBrew, savedBlen
                         startBrew={startBrew}
                         openBlend={openBlend}
                       />
+                      {/* QUICK BREW — the one brew that doesn't ask.
+                          A saved recipe is a cup you already trust, so
+                          this starts the timer where you stand and
+                          folds it straight into the banner: no prompt,
+                          no navigation, no full-screen steep. The
+                          confirmation everywhere else exists to catch
+                          an accidental commit while you're dialling
+                          something in; there's nothing being dialled
+                          here.
+
+                          A SIBLING of the row, not a child — the row is
+                          itself a <button> and nesting one inside it is
+                          invalid markup. Same absolute placement the
+                          delete affordance already uses. */}
+                      {quickBrew && (
+                        <button
+                          data-testid={`quick-brew-${b.id}`}
+                          onClick={(e) => { e.stopPropagation(); quickBrew(b); }}
+                          title={`Brew ${b.name} now`}
+                          aria-label={`Brew ${b.name} now`}
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75"; }}
+                          style={{
+                            // ITS OWN COLUMN of the row's bottom line,
+                            // centred between the caffeine badge and the
+                            // temp/time readout. Pinned right it landed
+                            // under the temperature and read as part of
+                            // it; the middle of that line is empty on
+                            // every row, so the control gets a lane of
+                            // its own and sits in the same place every
+                            // time — which is what makes a one-tap
+                            // action findable without looking.
+                            //
+                            // NO BOX. Two vertical rules flank it and
+                            // stop short of the line's full height, so
+                            // the column reads as lifted out of the row
+                            // rather than boxed into it — the gap at top
+                            // and bottom is what gives it the raise. A
+                            // full border made it a chip sitting on the
+                            // text; these are the same hairlines the
+                            // dock divides its cells with.
+                            // Bounded to the meta line's own band, NOT
+                            // the row's full height. A full-height
+                            // column sits under the centre of the row —
+                            // which is precisely where a tap meant to
+                            // OPEN the recipe lands, so it would eat
+                            // that tap and brew instead. The row's own
+                            // comment already warns about this: a
+                            // missing prop once routed rows to startBrew
+                            // and the wrong behaviour shipped.
+                            position: "absolute", bottom: 6, height: 30,
+                            left: "50%", transform: "translateX(-50%)",
+                            display: "flex", alignItems: "center",
+                            justifyContent: "center", gap: 5,
+                            background: "transparent",
+                            border: "none", borderRadius: 0,
+                            padding: "0 18px",
+                            cursor: "pointer",
+                            opacity: 0.75,
+                            transition: "opacity 0.18s ease",
+                            fontFamily: ff.sans, fontSize: 10,
+                            letterSpacing: "0.1em", textTransform: "uppercase",
+                            color: theme.bark,
+                          }}
+                        >
+                          {/* The flanking rules. Inset from the ends on
+                              purpose — reaching the full height would
+                              close the column into a box again. */}
+                          <span aria-hidden style={{
+                            position: "absolute", left: 0, top: "26%", bottom: "26%",
+                            width: 1, background: theme.ruleSoft,
+                          }} />
+                          <span aria-hidden style={{
+                            position: "absolute", right: 0, top: "26%", bottom: "26%",
+                            width: 1, background: theme.ruleSoft,
+                          }} />
+                          <Kettle size={11} c={theme.bark} />
+                          brew
+                        </button>
+                      )}
                       {canDelete && (
                         <button
                           onClick={(e) => {

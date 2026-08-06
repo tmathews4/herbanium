@@ -182,6 +182,18 @@ export const FLAVOR_DESCRIPTIONS = {
     summary: "Natural sugar-without-sugar, from amino acids and polysaccharides.",
     body: "Licorice's glycyrrhizin sets the ceiling at 5 (50× sucrose by weight); rooibos' aspalathin, vanilla's vanillin, and white tea's L-theanine hold the gentler middle.",
   },
+  // The FAMILY, keyed by its display label. The flavour strip looks a
+  // family up by what it shows, and this one shows "sweet aroma" — so
+  // relabelling it away from the palate axis left the family bar with
+  // no description at all until this entry existed.
+  //
+  // Deliberately not the same text as `sweet` above. That one is the
+  // tongue register; this is the aromatic one, and the whole reason for
+  // the rename is that they are different claims.
+  "sweet aroma": {
+    summary: "Smells sweet — honey, vanilla, caramel — whether or not it tastes it.",
+    body: "Aromatic sweetness rather than the tongue's. Vanillin has essentially no sweet taste; the brain reads the odour as sweetness and the cup seems sweeter than its sugars. Descriptive sensory analysis calls this cluster \"sweet aromatics\" precisely to hold it apart from the basic taste, which lives on the palate strip as `sweetness`.",
+  },
   honey: {
     summary: "Soft amber sweetness — flower and dried-grass.",
     body: "White tea, chamomile, linden, rooibos. Sits between floral and pure sugar; aromatic compounds soften the sweetness.",

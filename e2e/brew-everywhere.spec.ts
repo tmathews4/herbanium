@@ -15,6 +15,13 @@
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
+// Opening a detail overlay pulls a lazy-loaded screen chunk and then
+// waits for the explorer to mount and settle. Under four workers that
+// outruns the config's 30s budget — measured as "element(s) not found"
+// after a 15s wait, not a pointer interception. Same call the tour specs
+// already make, for the same reason.
+test.beforeEach(() => test.slow());
+
 async function boot(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript((schema) => {
@@ -178,5 +185,48 @@ test.describe("a named cup isn't asked to be renamed", () => {
       "a saved recipe should still confirm — it starts a timer").toBeVisible();
     await expect(page.getByTestId("brew-confirm-name"),
       "but the recipe already has a name").toHaveCount(0);
+  });
+});
+
+test.describe("quick brew — the deliberate exception", () => {
+  test("a recipe row brews on the spot, minimized, without asking", async ({ page }) => {
+    // Everything else confirms. This doesn't, and that IS the feature:
+    // the prompt exists to catch an accidental commit while you're
+    // dialling something in, and a saved recipe is a cup you already
+    // keep. It also stays out of your way — the timer folds into the
+    // banner instead of taking the screen.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+
+    const quick = page.locator('[data-testid^="quick-brew-"]').first();
+    await expect(quick, "a saved recipe should offer a one-tap brew").toBeVisible();
+    await quick.click();
+
+    await expect(page.getByTestId("brew-confirm"),
+      "quick brew must not ask — that's the whole point of it").toHaveCount(0);
+
+    // AND IT ACTUALLY BREWED. Asserting only that nothing was asked
+    // would pass just as happily for a button wired to nothing.
+    await expect(page.getByRole("button", { name: /return to your steeping brew/i }),
+      "the cup should be running, folded into the banner")
+      .toBeVisible({ timeout: 15_000 });
+
+    // Still on the list rather than staring at a full-screen timer.
+    await expect(page.locator('[data-tour="recipes-row"]').first(),
+      "quick brew should leave you where you were").toBeVisible();
+  });
+
+  test("tapping the row itself still opens the recipe, not a brew", async ({ page }) => {
+    // The quick-brew control sits ON the row, and the row's own tap
+    // opens the detail page. A stray tap must not start a cup — this is
+    // the "traditional-rows-auto-brewing incident" the row's own comment
+    // warns about, now with a control that really does brew sitting
+    // inside it.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+
+    await expect(page.getByRole("button", { name: /Brewing/i }).first(),
+      "the row should open the recipe").toBeVisible({ timeout: 15_000 });
   });
 });
