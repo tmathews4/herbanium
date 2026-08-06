@@ -132,6 +132,50 @@ export const FLAVOR_DESCRIPTIONS = {
     summary: "General fruit register — most often stone fruit or berry.",
     body: "Oolong's peach edge (fruity esters from partial oxidation), Darjeeling's grape (muscatel terpenes), white tea's melon.",
   },
+  peach: {
+    summary: "Oolong's stone-fruit edge — soft, slightly creamy.",
+    body: "Partial oxidation builds the lactones and fruity esters that read as peach; it sits alongside the orchid note in the same cup rather than replacing it.",
+  },
+  apricot: {
+    summary: "White tea's dried stone fruit — quieter than peach, more sun-dried.",
+    body: "Carotenoid breakdown during withering leaves the dried-fruit register; gentle because white tea is barely processed and never fired hard.",
+  },
+  berry: {
+    summary: "Dark red-fruit body underneath the tartness.",
+    body: "The rounder half of the hibiscus/cranberry register — anthocyanin-driven depth where `cranberry` carries the sharp edge. Both currently ride on the same two cups, so in Detailed mode they sit together rather than distinguishing one cup from another.",
+  },
+  orchid: {
+    summary: "Oolong's signature floral — creamy rather than perfumed.",
+    body: "The Tieguanyin register. Softer and rounder than rose or jasmine; it reads as floral without the sharp top note, which is why it carries a name of its own rather than sitting under `floral`.",
+  },
+  tingling: {
+    summary: "A faint prickle on the tongue — sensation, not taste.",
+    body: "Echinacea's alkylamides act on the trigeminal nerve, the same channel as pepper's pungency, so the cup is felt as much as tasted. Distinct from `menthol`, which cools rather than prickles.",
+  },
+  bergamot: {
+    summary: "Earl Grey's perfumed citrus — floral where lemon is sharp.",
+    body: "Bergamot peel oil, carried by linalyl acetate and linalool. Rounder and more floral than the lemon register, which is why it reads as a scent rather than a fruit.",
+  },
+  lemon: {
+    summary: "Sharp citrus peel — the top of the bright register.",
+    body: "Peel oils rather than juice: limonene with citral behind it. Lifting and volatile, so it arrives first and leaves first.",
+  },
+  orange: {
+    summary: "Rounder, sweeter citrus than lemon.",
+    body: "The same limonene backbone with less citral sharpness, so it reads warm where lemon reads bright — closer to peel than to juice either way.",
+  },
+  herbal: {
+    summary: "Green-medicinal middle — the herb itself rather than a fruit or flower.",
+    body: "Spearmint's softer carvone register and echinacea's root-and-flower character both land here. A catch-all for cups that taste of the plant they came from.",
+  },
+  rice: {
+    summary: "Genmaicha's toasted grain — popcorn-adjacent, warm and dry.",
+    body: "Roasted brown rice through Maillard browning. It's the one flavour in the catalogue that comes from something other than the leaf.",
+  },
+  sage: {
+    summary: "Camphor-edged and savoury — a kitchen herb, not a tea note.",
+    body: "Thujone and camphor give the drying, faintly medicinal lift that keeps sage from reading as simply green.",
+  },
 
   // ── Vegetal family ──
   vegetal: {
