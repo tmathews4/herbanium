@@ -11,6 +11,7 @@
 // the state where a stray pointer-events or z-index change would break
 // everything at once while every screen still LOOKS fine.
 import { test, expect, type Page } from "@playwright/test";
+import { brewFromDetail, detailBrewControl } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 const openTab = (page: Page, name: string) =>
@@ -36,7 +37,7 @@ async function boot(page: Page) {
 async function brewAndMinimize(page: Page) {
   await openTab(page, "Journal");
   await page.locator('[data-tour="recipes-row"]').first().click();
-  await page.getByRole("button", { name: /Brew this cup/i }).click();
+  await brewFromDetail(page);
   await page.getByRole("button", { name: /minimize/i }).click();
   await expect(page.getByTestId("brew-banner")).toBeVisible();
 }
@@ -385,7 +386,7 @@ for (const withBrew of [false, true]) {
       await openTab(page, "Journal");
       await openSubTab(page, "Recipes");
       await page.locator('[data-tour="recipes-row"]').first().click();
-      await page.getByRole("button", { name: /Brew this cup/i }).click();
+      await brewFromDetail(page);
 
       const save = page.getByTestId("steep-save");
       await expect(save, "the steep screen should offer Save").toBeVisible();
@@ -402,7 +403,7 @@ for (const withBrew of [false, true]) {
       await openTab(page, "Journal");
       await openSubTab(page, "Recipes");
       await page.locator('[data-tour="recipes-row"]').first().click();
-      await page.getByRole("button", { name: /Brew this cup/i }).click();
+      await brewFromDetail(page);
 
       await page.getByTestId("steep-rename").click();
       const input = page.getByTestId("steep-name-input");
@@ -436,7 +437,7 @@ for (const withBrew of [false, true]) {
       await openTab(page, "Journal");
       await openSubTab(page, "Recipes");
       await page.locator('[data-tour="recipes-row"]').first().click();
-      await expect(page.getByRole("button", { name: /Brew this cup/i }),
+      await expect(detailBrewControl(page),
         "a recipe should open somewhere you can brew from").toBeVisible();
       await page.getByRole("button", { name: "← back", exact: true }).click();
       await expect(page.locator('[data-tour="recipes-filter"]'),

@@ -231,6 +231,38 @@ test.describe("quick brew — the deliberate exception", () => {
   });
 });
 
+test.describe("a recipe page offers exactly one brew", () => {
+  test("the full-width CTA stands down while the panel is open", async ({ page }) => {
+    // The page used to carry both, and they didn't agree: the panel's
+    // corner asks for confirmation, the CTA didn't. One page, two
+    // brews, two behaviours.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+    await ensureBrewPanel(page);
+
+    await expect(brewButton(page), "the panel's corner Brew is the control")
+      .toBeVisible();
+    await expect(page.getByRole("button", { name: /Brew this cup|Brew your twist/i }),
+      "and the full-width CTA should stand down while it's there")
+      .toHaveCount(0);
+  });
+
+  test("folding the section brings the CTA back", async ({ page }) => {
+    // Why it isn't simply deleted: fold the section and the panel goes
+    // with it, which would leave a recipe page with no way to brew.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+    await ensureBrewPanel(page);
+
+    await page.getByRole("button", { name: /Brewing/i }).first().click();
+    await expect(page.getByRole("button", { name: /Brew this cup|Brew your twist/i }),
+      "a folded recipe page must still be brewable")
+      .toBeVisible({ timeout: 15_000 });
+  });
+});
+
 test.describe("an empty dock slot draws nothing", () => {
   test("folding the panel leaves no band behind", async ({ page }) => {
     // The slot carries the dock's chrome — a rule line and a strip of

@@ -7,6 +7,7 @@
 // to "how did it land?" would be "later", and a prompt whose right
 // answer is fixed teaches people to dismiss it.
 import { test, expect, type Page } from "@playwright/test";
+import { brewFromDetail } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 const notice = (page: Page) => page.getByTestId("check-in-notice");
@@ -24,7 +25,7 @@ async function brewACup(page: Page) {
   await page.goto("/?dev");
   await page.getByRole("button", { name: "Journal", exact: true }).click();
   await page.locator('[data-tour="recipes-row"]').first().click();
-  await page.getByRole("button", { name: /Brew this cup/i }).click();
+  await brewFromDetail(page);
   // "done early" finishes the steep without waiting out a real timer.
   await page.getByRole("button", { name: /done early|log this cup/i }).first().click();
 }

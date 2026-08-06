@@ -909,13 +909,23 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
           </>
         )}
 
-        {/* Brew CTA — primary terra button, full width.
-            STILL HERE, and it is a duplicate of the panel's corner Brew
-            while that panel is open. Hiding it was tried and reverted:
-            eleven specs across four files start a brew by clicking this
-            button, so removing it takes ~20 tests down at once. The
-            de-duplication is real work with a coordinated spec
-            migration, not a one-line conditional. */}
+        {/* ONE BREW ON THIS PAGE.
+            The panel above carries the corner Brew every brew window
+            has, so while it's open this full-width CTA was a second
+            button doing the same job — and doing it differently, with
+            no confirmation where the corner asks first. One page, two
+            brews, two behaviours.
+
+            Not deleted outright: the Brewing section folds, taking the
+            panel and its corner with it, and a folded recipe page still
+            has to be brewable. So this stands in exactly when the panel
+            isn't there.
+
+            Hiding it took ~20 specs down on the first attempt, because
+            eleven call sites across four files each knew how to brew by
+            clicking it. That knowledge now lives in
+            e2e/helpers/brew.ts. */}
+        {!brewingOpen && (
         <Button
           variant="primary" fullWidth
           onClick={handleBrewTap}
@@ -924,6 +934,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         >
           {twists.length > 0 ? "Brew your twist →" : "Brew this cup →"}
         </Button>
+        )}
 
         {/* Your log with this blend — aggregates + recent sessions */}
         <div style={{ margin: "22px 0 10px" }}>

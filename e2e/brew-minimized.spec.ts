@@ -9,6 +9,7 @@
 // So: start a real brew, minimize it, then walk every tab and sub-tab
 // checking both that the screen works AND that the brew survived.
 import { test, expect, type Page } from "@playwright/test";
+import { brewFromDetail } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 const banner = (page: Page) => page.getByTestId("brew-banner");
@@ -35,7 +36,7 @@ test.describe("a minimized brew survives the whole app", () => {
     // state — the point is that the actual flow leaves the app usable.
     await openTab(page, "Journal");
     await page.locator('[data-tour="recipes-row"]').first().click();
-    await page.getByRole("button", { name: /Brew this cup/i }).click();
+    await brewFromDetail(page);
 
     const minimize = page.getByRole("button", { name: /minimize/i });
     await expect(minimize, "the steep screen should be up").toBeVisible();

@@ -18,6 +18,7 @@
 // question is "can the user get somewhere the menu is gone", and the
 // only honest way to answer it is to go there the way they would.
 import { test, expect, type Page } from "@playwright/test";
+import { brewFromDetail, detailBrewControl } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 const openTab = (page: Page, name: string) =>
@@ -119,7 +120,7 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
     await openTab(page, "Journal");
     await openSubTab(page, "Recipes");
     await page.locator('[data-tour="recipes-row"]').first().click();
-    await expect(page.getByRole("button", { name: /Brew this cup/i })).toBeVisible();
+    await expect(detailBrewControl(page), "the recipe offers its brew").toBeVisible();
     await expectMenu(page, "a recipe detail");
 
     // Overlay-on-overlay: tapping an ingredient inside the recipe swaps
@@ -151,7 +152,7 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
     await openTab(page, "Journal");
     await openSubTab(page, "Recipes");
     await page.locator('[data-tour="recipes-row"]').first().click();
-    await page.getByRole("button", { name: /Brew this cup/i }).click();
+    await brewFromDetail(page);
 
     // The full steep screen. This is the one that was most defensible as
     // an exception — it's immersive and has its own minimize — but the
@@ -221,7 +222,7 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
     await openTab(page, "Journal");
     await openSubTab(page, "Recipes");
     await page.locator('[data-tour="recipes-row"]').first().click();
-    await page.getByRole("button", { name: /Brew this cup/i }).click();
+    await brewFromDetail(page);
     await page.getByRole("button", { name: /minimize/i }).click();
 
     // The menu is what makes this possible at all — with the steep
