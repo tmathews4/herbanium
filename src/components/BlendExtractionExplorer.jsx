@@ -998,32 +998,51 @@ export const BlendExtractionExplorer = ({
                        consolation for an affordance that isn't obvious,
                        and the affordance is obvious now — the label says
                        what it is and tapping it does the thing. */
-                    /* A PILL, in the app's own language for a small
-                       control — the axis toggle, the synergy row, the
-                       parts/weight switch all wear this shape. The
-                       flanking hairlines were an improvement on bare
-                       text and still didn't read as pressable: two
-                       rules either side of a word is a decorative
-                       treatment, and readers took it for one.
+                    /* RAISED BETWEEN ITS OWN RULES.
 
-                       Tinted rather than outlined-only so it has a
-                       surface to press, and in the band's own colour so
-                       it still says which KIND of window it names —
-                       sage for a real agreement, ochre for a
-                       compromise. */
+                       A pill was tried and was the wrong idea — it
+                       turned the word into another chip in a screen
+                       already full of them, and lost the two hairlines
+                       that make this read as part of the rail rather
+                       than an object sitting on it.
+
+                       So the rules stay and the face between them
+                       lifts: a soft top-down gradient for the curve of
+                       a raised surface, a light inset edge along the
+                       top and a darker one along the bottom, and a
+                       shadow underneath to sit it above the row. The
+                       hairlines become the sides of something bubbling
+                       up rather than two marks either side of text. */
                     position: "relative",
                     background: band.kind === "compromise"
-                      ? "rgba(189,148,76,0.14)"
-                      : "rgba(98,124,92,0.14)",
-                    border: `1px solid ${band.kind === "compromise" ? theme.ochre : theme.sageDeep}`,
-                    borderRadius: 999, padding: "2px 12px",
+                      ? "linear-gradient(180deg, rgba(189,148,76,0.20) 0%, rgba(189,148,76,0.06) 100%)"
+                      : "linear-gradient(180deg, rgba(98,124,92,0.20) 0%, rgba(98,124,92,0.06) 100%)",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "2px 14px",
+                    boxShadow: [
+                      "inset 0 1px 0 rgba(255,255,255,0.55)",     // catches the light
+                      "inset 0 -1px 0 rgba(var(--shadow-rgb),0.14)", // and turns away from it
+                      "0 1px 2px rgba(var(--shadow-rgb),0.16)",   // lifted off the row
+                    ].join(", "),
                     cursor: onSnap ? "pointer" : "default",
                     fontFamily: ff.sans, fontSize: 8.5,
                     letterSpacing: "0.16em", textTransform: "uppercase",
                     color: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
-                    transition: "background 0.18s ease",
+                    transition: "box-shadow 0.15s ease, background 0.15s ease",
                   }}
                 >
+                  {/* The rules are the sides of the raised face — full
+                      height now, not inset, so they read as its edges
+                      rather than as decoration flanking a word. */}
+                  {["left", "right"].map(side => (
+                    <span key={side} aria-hidden style={{
+                      position: "absolute", [side]: 0, top: 0, bottom: 0,
+                      width: 1,
+                      background: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
+                      opacity: 0.7,
+                    }} />
+                  ))}
                   {word}
                 </button>
               )}
