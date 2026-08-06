@@ -874,9 +874,19 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
             volume tag so the user can read just the recipe and
             preparations. The Brew CTA stays outside the collapse
             so the action is always one tap away. */}
+        {/* aria-expanded because this is a disclosure, and it had no
+            way of saying so. A role="button" that folds a section owes
+            assistive tech its state — and the E2E helper was inferring
+            that state from whether the panel inside had rendered yet,
+            which races the lazy chunk: read too early, it decides the
+            section is shut and clicks it CLOSED. That is the flake the
+            helper's own comment warns about, and it can't be fixed in
+            the spec, because the information wasn't in the markup. */}
         <div
           role="button"
           tabIndex={0}
+          data-testid="brewing-section"
+          aria-expanded={brewingOpen}
           onClick={() => setBrewingOpen(o => !o)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {

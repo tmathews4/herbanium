@@ -32,6 +32,8 @@
 
 import { INGREDIENTS } from "../src/data/ingredients.js";
 
+import { readFileSync } from "node:fs";
+
 let pass = 0, fail = 0;
 const failures = [];
 
@@ -362,7 +364,79 @@ import("../src/data/blends.js").then(({ BLENDS }) => {
 
   // ── Final report ──────────────────────────────────────────
   setTimeout(() => {
-    console.log(`\n\n  ${pass} passed, ${fail} failed`);
+    /* ── 7. THE APP DOESN'T GRADE THE DRINKER ──────────────────────────
+
+   Everything above audits CATALOGUE copy. This one reaches into two
+   components, and deliberately: they're where the app stopped
+   describing a cup and started marking it.
+
+   The caffeine gauge's upper tick read "too much" and its advisory
+   read "over the line". Neither is chemistry — plenty of people clear
+   130mg daily and happily, and the number was never the app's to
+   judge. Reported as "caution is fine but too much is more of a
+   judgement than it should be".
+
+   What replaced it still has to land: a cup that strong reads as
+   aggressive to anyone not used to it, so the copy says what it will
+   DO and to whom ("bracing ... wired or jittery if you're sensitive
+   to it") and lets the reader decide whether that's a problem.
+
+   Scoped to the caffeine copy on purpose. "Over the line" is still
+   the right phrase for an over-extracted cup — that IS a verdict
+   about brewing, which is the thing the app is qualified to judge. */
+
+const VERDICT_WORDS = [
+  "too much", "over the line", "excessive", "unhealthy",
+  "dangerous", "too strong", "shouldn't drink",
+];
+
+function sourceOf(relPath) {
+  return readFileSync(new URL(relPath, import.meta.url), "utf8");
+}
+
+// The CaffeineBar component's own body, brace-matched from its
+// declaration so the slice can't quietly drift onto other code.
+function caffeineBarSource() {
+  const src = sourceOf("../src/components/BlendExtractionExplorer.jsx");
+  const start = src.indexOf("const CaffeineBar");
+  assert(start !== -1, "CaffeineBar component not found — this test is looking at the wrong file");
+  const end = src.indexOf("\n};", start);
+  assert(end !== -1, "couldn't find the end of CaffeineBar");
+  return stripComments(src.slice(start, end));
+}
+
+/* Comments are not copy. The note above the advisory band quotes the
+   very phrases it replaced — explaining why they went — and a check
+   that can't tell the explanation from the offence would forbid ever
+   writing down what was fixed. */
+function stripComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+}
+
+test("the caffeine gauge describes the cup rather than judging the drinker", () => {
+  const body = caffeineBarSource();
+  const found = VERDICT_WORDS.filter(w => body.toLowerCase().includes(w));
+  assert(found.length === 0,
+    `the caffeine gauge passes verdict: ${found.map(f => `"${f}"`).join(", ")}`);
+});
+
+test("the caffeine warning says what it does, not whether it's allowed", () => {
+  const src = sourceOf("../src/algo/perception.js");
+  const line = src.split("\n").find(l => l.includes("caffeine load") && l.includes("${Math.round(caffeineMg)}"));
+  assert(line, "the caffeine-load warning text moved — update this test with it");
+  const found = VERDICT_WORDS.filter(w => stripComments(line).toLowerCase().includes(w));
+  assert(found.length === 0, `the caffeine warning passes verdict: ${found.join(", ")}`);
+});
+
+test("but it still signals that a strong cup is strong", () => {
+  // The failure mode of softening copy is copy that says nothing. The
+  // gauge has to keep a word for the top of the scale.
+  const body = caffeineBarSource().toLowerCase();
+  assert(/\bhigh\b|bracing|strong|assertive|bold/.test(body),
+    "the caffeine gauge no longer has a word for a strong cup — softened into silence");
+});
+
+console.log(`\n\n  ${pass} passed, ${fail} failed`);
     if (fail > 0) {
       console.log("\nFailures:");
       for (const f of failures) {

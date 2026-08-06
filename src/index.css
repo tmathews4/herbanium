@@ -440,6 +440,32 @@ textarea::placeholder {
   transform-origin: center;
 }
 
+/* Brew dock arrival — the controls grow into place instead of
+   appearing there.
+
+   Adding the first ingredient made a whole row of chrome pop into
+   existence under the page, and the eye read it as the layout
+   breaking rather than a control arriving. The row is a real change
+   in the shape of the screen, so it should be shown happening.
+
+   The travel itself is driven from JS (see useDockArrival in
+   BlendExtractionExplorer) because the height isn't knowable in CSS:
+   the dock is taller with the panel open than folded, and taller
+   again on the time axis than the temp one. A CSS keyframe has to
+   guess — max-height guesses too high and the row finishes early,
+   and grid-template-rows 0fr->1fr was tried and snaps rather than
+   interpolating here (measured: 1px to 124px in a single frame).
+   Measuring the real height and animating to it is the only version
+   that travels the actual distance.
+
+   This class only supplies what the animation needs to clip against.
+   The reduced-motion case never gets it — the effect is skipped
+   entirely rather than styled away, so the row simply is where it
+   belongs. */
+.brew-dock-arriving {
+  overflow: hidden;
+}
+
 #root {
   width: 1126px;
   max-width: 100%;

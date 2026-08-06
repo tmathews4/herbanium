@@ -29,6 +29,7 @@ import {
   GAP, MARGIN,
 } from "../src/helpers/tourLayout.js";
 import { SCREEN_TOURS } from "../src/data/tours.js";
+import { readdirSync, readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
 const failures = [];
@@ -530,6 +531,74 @@ test("no step outside the Blend tour carries familyMode", () => {
       assert(s.familyMode === undefined, `${screen} step "${s.target}" sets familyMode`);
     }
   }
+});
+
+// ── 9. Every id the tour points at still exists in the markup ────
+
+/* THE FAILURE THIS EXISTS FOR: a step that keeps pointing after the
+   thing it pointed at is gone.
+
+   The E2E tour-visibility spec already fails when a target is missing
+   from the DOM, and it is the stronger check — it judges the real rect
+   against the real chrome. It also needs a browser, a build and a
+   couple of minutes, so it finds this on the way to a merge rather
+   than in the two seconds after the delete.
+
+   This is the cheap half: a census of the tour ids named anywhere in
+   src/ OTHER than the tour data itself. Deliberately a string search
+   rather than a `data-tour="..."` match — half the hooks are handed to
+   the attribute through an expression (`data-tour={i === 0 ?
+   "recipes-row" : undefined}`, `data-tour={cta.tour}` fed from a table
+   of ids) and an attribute-shaped regex quietly missed six real hooks
+   when this was written. The looser search can be fooled by an id that
+   survives only in a comment; it cannot be fooled by the component
+   being deleted, which is the failure it is for.
+
+   What NEITHER check catches is a step whose copy goes stale while its
+   anchor survives — the range step spent a release telling people to
+   tap a word "for the reasoning" after the reasoning panel was
+   removed. Prose is read by people, not by asserts. */
+
+const SRC = new URL("../src/", import.meta.url);
+
+const sourceOutsideTourData = (() => {
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const child = new URL(entry.name + (entry.isDirectory() ? "/" : ""), dir);
+      if (entry.isDirectory()) { walk(child); continue; }
+      if (!/\.(jsx?|tsx?)$/.test(entry.name)) continue;
+      if (child.href.endsWith("/data/tours.js")) continue;   // the source of the claim
+      out.push(readFileSync(child, "utf8"));
+    }
+  };
+  walk(SRC);
+  return out.join("\n");
+})();
+
+const namedInMarkup = (id) =>
+  sourceOutsideTourData.includes(`"${id}"`) || sourceOutsideTourData.includes(`\`${id}\``);
+
+test("every id the tour points at is still named by a component", () => {
+  const missing = [];
+  for (const [screen, steps] of Object.entries(SCREEN_TOURS)) {
+    for (const s of steps) {
+      for (const id of [s.target, ...(s.spotlight || []), ...(s.keepClear || [])]) {
+        if (!namedInMarkup(id)) missing.push(`${screen}: "${id}" (step "${s.title}")`);
+      }
+    }
+  }
+  assert(missing.length === 0,
+    `the tour points at ${missing.length} id(s) nothing in src/ renders:\n  ${missing.join("\n  ")}`);
+});
+
+test("the census is reading real files", () => {
+  // A scan that silently found nothing would make the test above pass
+  // by having nothing to check. Guard the guard.
+  assert(sourceOutsideTourData.length > 50_000,
+    `only ${sourceOutsideTourData.length} chars of source scanned — the walk is broken, not the app`);
+  assert(!namedInMarkup("blend-ranges-that-never-existed"),
+    "the census claims an invented id is present, so it can never fail");
 });
 
 // ── Report ───────────────────────────────────────────────────────

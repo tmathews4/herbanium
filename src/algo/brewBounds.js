@@ -331,3 +331,166 @@ export function coupledBand({ ingredients, profiles, axis, otherValue, within, m
   if (hi <= lo) return [wLo, wHi];
   return [lo, hi];
 }
+
+/* ──────────────────────────────────────────────────────────────
+   THE COMPROMISE ZONE.
+
+   Lived inline in BlendExtractionExplorer, which meant the rail could
+   draw it and computeBrewProfile could not reach it — so a blend with
+   no full intersection opened at a grams-weighted centroid that had no
+   relationship to the band on screen. assam + matcha + chamomile
+   started at 30s under a band sitting at 4-7 minutes: the app
+   recommended one thing and put you somewhere else.
+
+   Same knowledge, two callers, one definition.
+
+   It is also, exactly, "the most condensed spot with the outliers
+   removed": clip every ingredient's window to the primary lead's,
+   sweep the endpoints, and return the longest run where the most
+   ingredients overlap. Nothing is averaged, so a lone outlier can't
+   drag the answer — it just fails to be counted in the busiest
+   segment.
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * @param ranges  [{ id?, [axis]: [lo, hi] }] — non-catalyst ingredients
+ * @param primary the heaviest lead; its window bounds the search
+ * @param axis    "tempC" | "timeS"
+ * @returns { range: [lo, hi], coverage, total } or null when there is
+ *          no zone worth naming — fewer than two windows overlap, or
+ *          the primary stands alone.
+ */
+export function bestCoverageZone(items, primary, axis) {
+  if (!primary) return null;
+  const [pMin, pMax] = primary[axis] || [];
+  if (pMin == null || pMax == null) return null;
+
+  const ranges = [];
+  for (const ing of items || []) {
+    const [iMin, iMax] = (ing && ing[axis]) || [];
+    if (iMin == null || iMax == null) continue;
+    const lo = Math.max(iMin, pMin);
+    const hi = Math.min(iMax, pMax);
+    if (hi > lo) ranges.push([lo, hi]);
+  }
+  if (ranges.length < 2) return null;   // primary plus at least one other
+
+  const points = new Set([pMin, pMax]);
+  for (const [a, b] of ranges) { points.add(a); points.add(b); }
+  const sorted = [...points].sort((a, b) => a - b);
+
+  const segments = [];
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i], b = sorted[i + 1];
+    if (b <= a) continue;
+    const mid = (a + b) / 2;
+    let count = 0;
+    for (const [rA, rB] of ranges) if (mid >= rA && mid <= rB) count++;
+    segments.push({ a, b, count });
+  }
+  if (segments.length === 0) return null;
+
+  const maxCount = Math.max(...segments.map(s => s.count));
+  if (maxCount < 2) return null;        // the primary alone isn't a zone
+
+  let best = null, run = null;
+  for (const seg of segments) {
+    if (seg.count === maxCount) {
+      if (run && run.b === seg.a) run.b = seg.b;
+      else run = { a: seg.a, b: seg.b };
+      if (!best || (run.b - run.a) > (best.b - best.a)) best = { a: run.a, b: run.b };
+    } else {
+      run = null;
+    }
+  }
+  if (!best) return null;
+  return { range: [best.a, best.b], coverage: maxCount, total: (items || []).length };
+}
+
+/* ──────────────────────────────────────────────────────────────
+   WHICH BAND IS RECOMMENDED, and where inside it a tap should land.
+
+   Both of these lived inside BlendExtractionExplorer, which is fine
+   right up until something else has to agree with the rail. The
+   opening brew point had to, and didn't — see bestCoverageZone above,
+   which came out of the same component for the same reason.
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * The band the rail paints for one axis, in priority order:
+ *
+ *   1. the COUPLED band — where the profiles actually sampled this
+ *      pairing at the value the other slider is holding,
+ *   2. the full INTERSECTION of the declared windows,
+ *   3. the COMPROMISE zone, when there is no intersection at all.
+ *
+ * Returns { lo, hi, kind: "sweet" | "compromise", coverage?, total? }
+ * or null when the leaves have no common ground worth drawing. Copy
+ * stays with the caller: this answers where, not what to call it.
+ */
+export function recommendedBand({ items, primary, profiles, axis, otherValue }) {
+  const pool = items || [];
+  const within = (() => {
+    let lo = -Infinity, hi = Infinity;
+    for (const ing of pool) {
+      const [iMin, iMax] = (ing && ing[axis]) || [];
+      if (iMin == null || iMax == null) continue;
+      lo = Math.max(lo, iMin);
+      hi = Math.min(hi, iMax);
+    }
+    return isFinite(lo) && isFinite(hi) && hi > lo ? [lo, hi] : null;
+  })();
+
+  const coupled = coupledBand({
+    ingredients: pool, profiles, axis, otherValue,
+    // Only ever narrows what the leaves already agree on. No agreement,
+    // no coupled band — the compromise path below handles that case and
+    // says so honestly.
+    within,
+    minSpan: axis === "timeS" ? 60 : 4,
+  });
+  if (coupled) {
+    const lo = Math.round(coupled[0]), hi = Math.round(coupled[1]);
+    if (hi > lo) return { lo, hi, kind: "sweet" };
+  }
+  if (within) return { lo: within[0], hi: within[1], kind: "sweet" };
+
+  const zone = bestCoverageZone(pool, primary, axis);
+  if (zone) {
+    return {
+      lo: zone.range[0], hi: zone.range[1], kind: "compromise",
+      coverage: zone.coverage, total: zone.total,
+    };
+  }
+  return null;
+}
+
+/**
+ * Where inside a band a "put me on the recommendation" tap should land:
+ * the centre of it.
+ *
+ * NO CLAMP HERE, and that is the point. This used to stop short of the
+ * earliest-closing window on the time axis, borrowing the rule
+ * computeBrewProfile opens on — never hand someone a cup that arrives
+ * already over-pulled, because over-pulling warns while under-steeping
+ * is silent.
+ *
+ * That rule belongs to OPENING a cup and not to tapping a control. The
+ * two were computed by the same clamp, so on any blend where a leaf
+ * closes early the tap landed exactly where the slider already sat and
+ * the word did nothing at all — 238 of 400 sampled three-leaf blends
+ * whose time band is a compromise zone. Reported as "temp was fine but
+ * time won't move".
+ *
+ * An opening brew is a default the user didn't ask for; a tap is a
+ * request they did. Answering a request by refusing to move, silently,
+ * teaches nothing. Going where the word says — and letting the
+ * over-pull warning fire if it fires — is the honest answer, and the
+ * warning is the lesson rather than the accident.
+ *
+ * computeBrewProfile still clamps. That is where the rule lives.
+ */
+export function bandTarget({ band }) {
+  if (!band) return null;
+  return (band.lo + band.hi) / 2;
+}

@@ -25,25 +25,31 @@
    and the per-ingredient range indicator.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { theme, ff } from "../theme";
 import { useBrewDockId } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
-import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
-import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor, coupledBand } from "../algo/brewBounds";
+import { resolveBlendAtBrew, computeBrewProfile, recommendedBrewTarget,
+         TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
+import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor,
+         recommendedBand } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
 import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
 
-// Caffeine load thresholds (mg). The "too much" tick lines up with
+// Caffeine load thresholds (mg). The "high" tick lines up with
 // where perception.js's high-caffeine warning fires (130mg — past a
 // normal cup of coffee, into doubled-up / strong-second-cup
 // territory). Caution at 80mg marks "this is a real cup of caffeine
 // now" — about where a regular black tea / mid-coffee lands. The
 // 250mg ceiling holds for stacked caffeine-bearing leaves.
+//
+// The upper tick used to read "too much", which is a judgement the
+// chemistry doesn't support — plenty of people drink past it happily
+// and daily. The number is unchanged; only the claim about it is.
 const CAFFEINE_MAX_MG = 250;
 const CAFFEINE_GENTLE_MAX_MG = 40;
 const CAFFEINE_CAUTION_MG = 80;
@@ -107,7 +113,10 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           display: "flex", alignItems: "center", gap: 6,
           fontFamily: ff.mono, fontSize: 11, color: labelColor,
         }}>
-          {past && <span style={{ color: "#B0542F" }}>⚠</span>}
+          {/* No ⚠. The number and the band below already say where the
+              cup sits, and an alarm glyph on a strong tea told the
+              drinker they'd done something wrong — which is a verdict,
+              not a reading. */}
           <span>{mg} mg</span>
         </div>
       </div>
@@ -147,13 +156,13 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           position: "absolute",
           left: `${(CAFFEINE_CAUTION_MG / CAFFEINE_MAX_MG) * 100}%`,
           transform: "translateX(-50%)",
-        }}>caution</span>
+        }}>moderate</span>
         <span style={{
           position: "absolute",
           left: `${(CAFFEINE_WARN_MG / CAFFEINE_MAX_MG) * 100}%`,
           transform: "translateX(-50%)",
           color: past ? "#B0542F" : (atEdge ? "#A57836" : theme.ash),
-        }}>too much</span>
+        }}>high</span>
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
       {/* State-aware advisory band. Three flavors share one shape:
@@ -167,19 +176,31 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           gold-star sticker for drinking tea. */}
       {(() => {
         const gentle = mg > 0 && mg < CAFFEINE_GENTLE_MAX_MG;
+        /* DESCRIBE THE CUP, don't grade the drinker. "Too much" and
+           "over the line" are verdicts, and they're the app's opinion
+           rather than its chemistry — plenty of people drink well past
+           this line on purpose and are fine. What's worth saying is
+           what the cup will DO, and to whom: that's information, and
+           the reader can decide whether it's a problem.
+
+           The signal still has to land, though. A cup this strong
+           reads as aggressive to most people who aren't used to it,
+           so the register stays firm — "bracing", not "gentle pour
+           with a caveat". */
         const advisory = past
           ? {
               accent: "#B0542F",
               bg: "rgba(176, 84, 47, 0.07)",
-              tag: "over the line",
-              body: "likely to read wired or jittery for caffeine-sensitive bodies.",
+              tag: "high",
+              body: "more caffeine than most cups carry — bracing if that's what you came for, "
+                  + "wired or jittery if you're sensitive to it.",
             }
           : atEdge
           ? {
               accent: "#A57836",
               bg: "rgba(165, 120, 54, 0.07)",
-              tag: "at the edge",
-              body: "a deliberate strong cup — one more part and it tips over.",
+              tag: "strong cup",
+              body: "a deliberate strong cup — one more part and it climbs.",
             }
           : gentle
           ? {
@@ -230,6 +251,60 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
  * different suggestion), the slider ranges recompute via useMemo,
  * and a safety useEffect clamps any current values into the new range.
  */
+/* THE BREW DOCK ARRIVES, it doesn't appear.
+
+   Adding a first ingredient conjured a whole row of chrome under the
+   page in one frame, which reads as the layout breaking rather than a
+   control showing up. This grows it to its own height instead.
+
+   Measured, not guessed: the row is one height folded, another with
+   the panel open, another again on the time axis. CSS can't know any
+   of them — a max-height big enough for the tallest state makes the
+   shortest one finish its travel in the first third and sit still for
+   the rest, and grid-template-rows 0fr->1fr snapped instead of
+   interpolating when it was tried (1px to 124px in a single frame).
+
+   ONCE, on the element's first appearance. It runs off a ref rather
+   than state so a re-render can't retrigger it — the dock re-renders
+   on every slider frame, and a row that re-grew each time you dragged
+   the temperature would be a nightmare rather than a flourish.
+
+   Reduced motion skips it entirely rather than styling it away. This
+   is chrome the user needs; the honest fallback is for it to be
+   there, immediately. */
+const useDockArrival = (enabled) => {
+  const ref = useRef(null);
+  const played = useRef(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el || played.current) return;
+    played.current = true;
+    if (typeof window === "undefined" || !el.animate) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+    const height = el.scrollHeight;
+    if (!height) return;
+    el.classList.add("brew-dock-arriving");
+    const anim = el.animate(
+      [
+        { height: "0px", opacity: 0 },
+        { height: `${height}px`, opacity: 1 },
+      ],
+      /* A GENTLE S, not an ease-out-expo. The first attempt used
+         cubic-bezier(0.16, 1, 0.3, 1), which spends 64% of the travel
+         in the first 15% of the time — measured, not guessed — and
+         the row still read as popping. The eye only registers motion
+         it can follow, so the distance is spread across the duration
+         instead of being front-loaded onto it. */
+      { duration: 380, easing: "cubic-bezier(0.33, 0, 0.2, 1)" },
+    );
+    // Hand the height back to the layout the moment it's arrived —
+    // holding a pixel height would freeze the row at whatever size it
+    // happened to be when it landed, and the panel folds and unfolds.
+    anim.finished.catch(() => {}).then(() => el.classList.remove("brew-dock-arriving"));
+  }, [enabled]);
+  return ref;
+};
+
 export const BlendExtractionExplorer = ({
   ingredients,              // [{id, g}, ...]
   hideTraditionNote = false,  // suppress the inline note (caller renders elsewhere)
@@ -320,6 +395,8 @@ export const BlendExtractionExplorer = ({
   // never appear. It re-reads the same node and React bails on the
   // identical value.
   const [brewDock, setBrewDock] = useState(() => document.getElementById(dockId));
+  // Grows the row into place the first time it lands in the dock.
+  const dockArrivalRef = useDockArrival(!!brewDock);
   // Re-reads on mount, and again if the host changes which dock it
   // wants. Normally lands on the identical node, so React bails rather
   // than cascading. This trips react-hooks/set-state-in-effect, which
@@ -382,12 +459,11 @@ export const BlendExtractionExplorer = ({
   const tourAxis = (tourStep === "blend-graph" || tourStep === "blend-sliders") ? "timeS" : null;
   const shownAxis = axisOverride ?? tourAxis ?? axis;
 
-  // Range-band selection. Each axis ("tempC" / "timeS") gets its
-  // own slot — tapping a band toggles a description panel below
-  // that slider. null means "nothing selected for this axis."
-  const [bandSelected, setBandSelected] = useState({ tempC: null, timeS: null });
-  const selectBand = (axis, kind) =>
-    setBandSelected(prev => ({ ...prev, [axis]: kind }));
+  /* No band-selection state any more. Tapping the word under a slider
+     used to open a description panel under that slider; now it sets the
+     brew to what the word names and that is the whole of it. A control
+     that both acts and lectures asks the user to work out which of the
+     two they just triggered. */
 
   const tempCRange = useMemo(() => unionAndPadTempRange(ingredients, INGREDIENTS), [ingredients]);
   const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS), [ingredients]);
@@ -536,7 +612,7 @@ export const BlendExtractionExplorer = ({
               read as a pulse travelling outward where one reads as an
               edge that brightens, which is the part that was getting
               lost. */}
-          {["blend-mode", "blend-axis", "blend-brew", "blend-ranges"].includes(tourStep) && (
+          {["blend-mode", "blend-axis", "blend-brew"].includes(tourStep) && (
             <style>{`
               @keyframes tourTogglePulse {
                 0%, 100% {
@@ -678,134 +754,67 @@ export const BlendExtractionExplorer = ({
           .slice()
           .sort((a, b) => b.g - a.g)[0];
 
-        // Full intersection across all non-catalyst windows.
-        const intersect = (axis) => {
-          let lo = -Infinity, hi = Infinity;
-          for (const ing of bandData) {
-            const [iMin, iMax] = ing[axis] || [];
-            if (iMin == null || iMax == null) continue;
-            lo = Math.max(lo, iMin);
-            hi = Math.min(hi, iMax);
-          }
-          if (!isFinite(lo) || !isFinite(hi) || hi <= lo) return null;
-          return [lo, hi];
-        };
+        /* WHICH RANGE IS RECOMMENDED — resolved once, used three
+           times: the rail paints it, the word names it, and tapping
+           the word lands in it. The geometry lives in algo/brewBounds
+           so the opening brew point can reach the same answer; only
+           the copy is ours.
 
-        // Best-coverage band within primary lead's window. Sweep
-        // events at each ingredient's range endpoints (clipped to
-        // primary), count overlapping ranges per segment, return
-        // the longest contiguous segment at peak coverage.
-        const bestCoverageZone = (axis) => {
-          if (!primary) return null;
-          const [pMin, pMax] = primary[axis] || [];
-          if (pMin == null || pMax == null) return null;
-          // Build clipped ranges from every non-catalyst ingredient.
-          const ranges = [];
-          for (const ing of bandData) {
-            const [iMin, iMax] = ing[axis] || [];
-            if (iMin == null || iMax == null) continue;
-            const lo = Math.max(iMin, pMin);
-            const hi = Math.min(iMax, pMax);
-            if (hi > lo) ranges.push([lo, hi]);
-          }
-          if (ranges.length < 2) return null;  // need primary + at least one other
-          // Sweep: collect unique boundary points within [pMin, pMax].
-          const points = new Set([pMin, pMax]);
-          for (const [a, b] of ranges) { points.add(a); points.add(b); }
-          const sorted = [...points].sort((a, b) => a - b);
-          // Walk segments, count coverage. Track max-coverage segments.
-          const segments = [];
-          for (let i = 0; i < sorted.length - 1; i++) {
-            const a = sorted[i], b = sorted[i + 1];
-            if (b <= a) continue;
-            const mid = (a + b) / 2;
-            let count = 0;
-            for (const [rA, rB] of ranges) {
-              if (mid >= rA && mid <= rB) count++;
-            }
-            segments.push({ a, b, count });
-          }
-          if (segments.length === 0) return null;
-          const maxCount = Math.max(...segments.map(s => s.count));
-          if (maxCount < 2) return null;  // primary alone isn't a "zone"
-          // Merge contiguous segments at maxCount; return the longest run.
-          let best = null, run = null;
-          for (const seg of segments) {
-            if (seg.count === maxCount) {
-              if (run && run.b === seg.a) {
-                run.b = seg.b;
-              } else {
-                run = { a: seg.a, b: seg.b };
-              }
-              if (!best || (run.b - run.a) > (best.b - best.a)) {
-                best = { a: run.a, b: run.b };
-              }
-            } else {
-              run = null;
-            }
-          }
-          if (!best) return null;
-          return { range: [best.a, best.b], coverage: maxCount, total: bandData.length };
-        };
-
-        /* WHICH RANGE IS RECOMMENDED — resolved once, used twice.
-           The ramp is painted by the slider's own track (the parent
-           sets --brew-ramp) while the tap-for-reasoning lives on the
-           labels beneath it, so both need this and neither owns it. */
-        const resolveBand = (axis, rangeMin, rangeMax) => {
-          /* WHERE THE OTHER SLIDER IS SET CHANGES THE ANSWER.
-             Read off each profile's own diagonal, so dragging the
-             temperature slides the recommended steep and vice versa —
-             the tradeoff the two controls were hiding. Falls through to
-             the declared ranges when nothing has a profile to read. */
-          const coupled = coupledBand({
-            ingredients: bandData,
+           WHERE THE OTHER SLIDER IS SET CHANGES THE ANSWER. The band
+           is read off each profile's own diagonal, so dragging the
+           temperature slides the recommended steep and vice versa —
+           the tradeoff the two controls were hiding. */
+        const resolveBand = (axis) => {
+          const band = recommendedBand({
+            items: bandData,
+            primary,
             profiles: EXTRACTION_PROFILES,
             axis,
             otherValue: axis === "timeS" ? tempC : timeS,
-            // Only ever narrows what the leaves already agree on. No
-            // agreement, no band — the compromise path below handles
-            // that case and says so honestly.
-            within: intersect(axis),
-            minSpan: axis === "timeS" ? 60 : 4,
           });
-          if (coupled) {
-            const [lo, hi] = coupled.map(v => (axis === "timeS" ? Math.round(v) : Math.round(v)));
-            if (hi > lo) {
-              return {
-                lo, hi, kind: "sweet",
-                /* "RESEARCHED AT", not "ideal". The band is where the
-                   docs actually sampled this pairing — it follows the
-                   profiles' own diagonal — and calling that ideal would
-                   claim a compensation model the research doesn't
-                   contain. Nothing here knows what hot-and-short tastes
-                   like, because nobody brewed it. */
-                hint: axis === "tempC"
-                  ? `Researched at ${Math.round(timeS / 60)} min: ${lo}–${hi}°C — tap for details`
-                  : `Researched at ${unit === "F" ? cToF(tempC) : tempC}°: ${Math.round(lo / 60)}–${Math.round(hi / 60)} min — tap for details`,
-              };
-            }
-          }
-          const ix = intersect(axis);
-          const fallback = ix ? null : bestCoverageZone(axis);
-          if (ix) {
-            return {
-              lo: ix[0], hi: ix[1], kind: "sweet",
-              hint: axis === "tempC"
-                ? `Sweet spot: ${ix[0]}–${ix[1]}°C — tap for details`
-                : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min — tap for details`,
-            };
-          }
-          if (fallback) {
-            const [a, b] = fallback.range;
-            return {
-              lo: a, hi: b, kind: "compromise",
-              hint: axis === "tempC"
-                ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`
-                : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`,
-            };
-          }
-          return null;
+          if (!band) return null;
+          const { lo, hi, kind, coverage, total } = band;
+          /* "RESEARCHED AT", not "ideal", for the coupled band: it is
+             where the docs actually sampled this pairing, and calling
+             that ideal would claim a compensation model the research
+             doesn't contain. Nothing here knows what hot-and-short
+             tastes like, because nobody brewed it. */
+          const label = kind === "compromise"
+            ? `Compromise zone: ${axis === "tempC"
+                ? `${lo}–${hi}°C`
+                : `${Math.round(lo / 60)}–${Math.round(hi / 60)} min`}`
+              + ` (${coverage}/${total} ingredients in range)`
+            : axis === "tempC"
+              ? `Sweet spot: ${lo}–${hi}°C`
+              : `Sweet spot: ${Math.round(lo / 60)}–${Math.round(hi / 60)} min`;
+          return { lo, hi, kind, hint: `${label} — tap to brew here` };
+        };
+
+        /* ONLY A BAND YOU CAN ACTUALLY GET TO.
+
+           A blend's slider range is the INTERSECTION of its leaves'
+           windows, while the compromise zone is drawn from the primary
+           lead's — so the two can miss each other entirely. assam +
+           matcha + chamomile reaches 15-39s, because matcha shuts at
+           30, and its compromise zone sits at 240-300s.
+
+           The rail already handled that honestly: nothing overlaps, so
+           it paints no coloured stretch. The WORD didn't — it appeared
+           over a plain rail, naming a recommendation that wasn't drawn
+           anywhere and couldn't be reached, and tapping it moved the
+           slider by nothing anyone could see. Reported as "I hit
+           compromise on temp then went to time and hit it, but it
+           didn't update."
+
+           So the word follows the paint: no visible band, no claim.
+           What's wrong with that blend is said properly by the
+           no-overlap warning further down the page, which is prose and
+           has room to explain. */
+        const bandWithin = (axis, rangeMin, rangeMax) => {
+          const band = resolveBand(axis);
+          if (!band) return null;
+          if (band.hi < rangeMin || band.lo > rangeMax) return null;
+          return band;
         };
 
         /* THE TRACK IS THE INFORMATION.
@@ -849,7 +858,7 @@ export const BlendExtractionExplorer = ({
           const SWEET = "rgba(109,126,85,0.92)";    // sage — full agreement
           const COMP  = "rgba(189,148,76,0.88)";    // ochre — partial
           const span = rangeMax - rangeMin;
-          const band = span > 0 ? resolveBand(axis, rangeMin, rangeMax) : null;
+          const band = span > 0 ? bandWithin(axis, rangeMin, rangeMax) : null;
           if (!band) return BASE;
 
           const pct = (v) => Math.max(0, Math.min(100,
@@ -895,59 +904,47 @@ export const BlendExtractionExplorer = ({
           return `${HATCH} ${p}% 0 / ${w}% 100% no-repeat, ${ramp}`;
         };
 
-        /* A GHOST OVER THE WINDOW, so the tour has something to point
-           at. The recommendation is painted into the track's own
-           gradient now, and a gradient stop can't be spotlit — the tour
-           needs a box. This is that box: exactly the window's span,
-           pointer-events:none so it never touches a drag, invisible
-           until the tour pulses it.
-
-           It carries data-tour="blend-ranges" because the tour step is
-           about WHERE the recommendation is, and pointing at the labels
-           underneath would highlight two numbers instead of the region
-           they bracket. */
-        const RangeGhost = ({ rangeMin, rangeMax, axis }) => {
-          const span = rangeMax - rangeMin;
-          if (span <= 0) return null;
-          const band = resolveBand(axis, rangeMin, rangeMax);
-          if (!band) return null;
-          const THUMB = 16;
-          const pct = (v) => Math.max(0, Math.min(100,
-            ((Math.max(rangeMin, Math.min(rangeMax, v)) - rangeMin) / span) * 100));
-          const lo = pct(band.lo), hi = pct(band.hi);
-          if (hi <= lo) return null;
-          return (
-            <div aria-hidden style={{
-              position: "absolute", left: THUMB / 2, right: THUMB / 2,
-              top: 0, height: 20, pointerEvents: "none",
-            }}>
-              <div
-                data-tour="blend-ranges"
-                style={{
-                  position: "absolute", left: `${lo}%`, width: `${hi - lo}%`,
-                  top: "50%", height: 12, transform: "translateY(-50%)",
-                  borderRadius: 3,
-                  boxShadow: tourStep === "blend-ranges"
-                    ? `0 0 0 1.5px ${theme.terra}`
-                    : "none",
-                  animation: tourStep === "blend-ranges"
-                    ? "tourTogglePulse 1.9s ease-in-out infinite"
-                    : undefined,
-                  transition: "box-shadow 0.15s ease",
-                }}
-              />
-            </div>
-          );
-        };
-
         /* The ends of the track, labelled at the ends of the track —
            and, in the empty middle nobody was using, what the coloured
-           window MEANS plus the tap that explains it. One row still. */
-        const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
+           window MEANS and the tap that puts you in it. One row still. */
+        const RangeBands = ({ rangeMin, rangeMax, axis, step, onSnap }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
-          const band = resolveBand(axis, rangeMin, rangeMax);
+          const band = bandWithin(axis, rangeMin, rangeMax);
           const tapHint = band?.hint || "the ends of the adjustable range";
+          /* WHAT THE WORD DOES: it sets the slider to the spot it names.
+             That is the whole of it.
+
+             It used to open a panel explaining the band instead, which
+             made the one control on the row a button that talked. If the
+             word says RECOMMENDED, tapping it should recommend — pairing
+             the action with a lecture meant every tap had to be read
+             before you knew which thing you'd got.
+
+             ONE AXIS. The word under the temperature slider moves the
+             temperature and nothing else — the two controls are coupled
+             (where you set one moves the other's band), so a tap that
+             set both would answer a question you didn't ask and destroy
+             a steep time you'd already chosen. Only one slider is on
+             screen at a time anyway; the word belongs to it.
+
+             ALWAYS the centre, including when you're already inside the
+             band. An earlier version left a value alone if it already
+             counted as recommended, which is defensible and reads as a
+             dead button: same tap, sometimes nothing.
+
+             NEVER INTO A WARNING, though, when the band offers anywhere
+             quieter — recommendedBrewTarget walks the band and asks the
+             perception model what the cup would say at each point. It
+             also holds the never-past-the-earliest-closing-window line
+             the opening brew point is built on. A tap that answered
+             "where should I brew?" by handing back a cup already being
+             told off would be worse than no answer at all. */
+          const snapTarget = () => recommendedBrewTarget({
+            ingredients, items: bandData, band, axis,
+            otherValue: axis === "tempC" ? timeS : tempC,
+            step, rangeMin, rangeMax,
+          });
           const endLabel = (text) => (
             <span aria-hidden style={{
               fontFamily: ff.mono, fontSize: 9, color: theme.ash,
@@ -964,8 +961,8 @@ export const BlendExtractionExplorer = ({
              legible but says nothing about ITSELF — a green stretch is
              only obviously a recommendation once you already know. The
              middle of this row was empty on every blend, so the word
-             goes there: no new row, and it doubles as the tap that opens
-             the reasoning the old band's tooltip used to carry. */
+             goes there: no new row, and it doubles as the control that
+             sets the brew to what it names. */
           const word = !band ? null
             : band.kind === "compromise" ? "compromise" : "recommended";
           return (
@@ -978,83 +975,47 @@ export const BlendExtractionExplorer = ({
                 <button
                   type="button"
                   data-testid="range-word"
-                  title={tapHint}
                   aria-label={tapHint}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    onSelect && onSelect(selected ? null : band.kind);
+                    const to = snapTarget();
+                    if (to != null && onSnap) onSnap(to);
                   }}
                   style={{
+                    /* FLANKED, so it reads as a control. As bare text it
+                       was a caption that happened to be tappable — the
+                       same problem the folded brew row had, and the same
+                       fix: two short rules either side, stopping clear of
+                       the text, so the gap lifts it off the row instead
+                       of boxing it in. The language the quick-brew column
+                       already speaks.
+
+                       No `title`. A native tooltip is a desktop-only
+                       consolation for an affordance that isn't obvious,
+                       and the affordance is obvious now — the label says
+                       what it is and tapping it does the thing. */
+                    position: "relative",
                     background: "transparent", border: "none",
-                    borderRadius: 3, padding: "0 6px",
-                    cursor: onSelect ? "pointer" : "default",
+                    borderRadius: 0, padding: "1px 14px",
+                    cursor: onSnap ? "pointer" : "default",
                     fontFamily: ff.sans, fontSize: 8.5,
                     letterSpacing: "0.16em", textTransform: "uppercase",
                     color: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
-                    boxShadow: selected ? `0 0 0 1.5px ${theme.terra}` : "none",
-                    transition: "box-shadow 0.15s ease",
                   }}
-                >{word}</button>
+                >
+                  {["left", "right"].map(side => (
+                    <span key={side} aria-hidden style={{
+                      position: "absolute", [side]: 0, top: "22%", bottom: "22%",
+                      width: 1,
+                      background: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
+                      opacity: 0.55,
+                    }} />
+                  ))}
+                  {word}
+                </button>
               )}
               {endLabel(ends[1])}
-            </div>
-          );
-        };
-
-        // Description panel shown below a slider when a band is
-        // tapped. Answers the literal question "what does this
-        // colored bar represent?" — the engine math behind it has
-        // gotten more nuanced as the slider bounds and warning
-        // layers evolved, so users deserve a precise read.
-        const BandDescription = ({ axis, kind }) => {
-          if (!kind) return null;
-          const totalIngs = bandData.length;
-          let title, body, sub;
-          if (kind === "sweet") {
-            const ix = intersect(axis);
-            if (!ix) return null;
-            const fmt = axis === "tempC"
-              ? `${ix[0]}–${ix[1]}°C`
-              : `${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min`;
-            title = "Sweet spot";
-            body  = `Every non-catalyst ingredient (${totalIngs}) is inside its own authored steep range somewhere in this band. Brewing here means no leaf is being stretched out of its preferred extraction window.`;
-            sub   = fmt;
-          } else {
-            const fallback = bestCoverageZone(axis);
-            if (!fallback) return null;
-            const [a, b] = fallback.range;
-            const fmt = axis === "tempC"
-              ? `${a}–${b}°C`
-              : `${Math.round(a / 60)}–${Math.round(b / 60)} min`;
-            title = "Compromise zone";
-            body  = `No single ${axis === "tempC" ? "temperature" : "time"} satisfies all the leaves at once. This band is the longest run where the most ingredients (${fallback.coverage} of ${fallback.total}) overlap inside the primary lead's window. The remaining ${fallback.total - fallback.coverage} sit outside their authored range — slightly under- or over-extracted but not broken.`;
-            sub   = fmt;
-          }
-          return (
-            <div style={{
-              marginTop: 8,
-              padding: "8px 10px",
-              borderLeft: `2px solid ${kind === "sweet" ? theme.sage : theme.ochre}`,
-              background: kind === "sweet"
-                ? "rgba(109,126,85,0.08)"
-                : "rgba(189,148,76,0.10)",
-              borderRadius: "2px 6px 6px 2px",
-            }}>
-              <div style={{
-                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: kind === "sweet" ? theme.sageDeep : theme.ochre,
-                marginBottom: 3,
-              }}>
-                {title} · {sub}
-              </div>
-              <div style={{
-                fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
-                lineHeight: 1.5, fontStyle: "italic",
-              }}>
-                {body}
-              </div>
             </div>
           );
         };
@@ -1103,6 +1064,11 @@ export const BlendExtractionExplorer = ({
           // backdrop-blur is vestigial for the same reason.) Anything
           // done here is flat colour, so the honest choice is the
           // quieter one.
+          // className carries the arrival animation (see index.css).
+          // The border stays on the inner element so the hairline
+          // travels with the row rather than sitting at full width
+          // above an empty space while the row grows into it.
+          <div ref={dockArrivalRef}>
           <div style={{ borderBottom: `1px solid ${theme.ruleSoft}` }}>
             {/* THE HEADER IS TWO TARGETS, not one.
                 BREW ON THE LEFT, where the word "Brew" already sat — so
@@ -1337,7 +1303,24 @@ export const BlendExtractionExplorer = ({
                   <div style={{ marginBottom: 6, padding: "0 12px" }}>
                     {shownAxis === "tempC" ? (
                       <>
-                        <div style={{ position: "relative" }}>
+                        {/* THE TOUR POINTS HERE — the rail and the word
+                            beneath it, together.
+
+                            It used to point at an invisible box laid over
+                            the coloured span, because a gradient stop
+                            can't be spotlit and the tour needs something
+                            with a rect. What that drew was a small
+                            outlined capsule floating on the track: the
+                            exact shape of the band widget this design
+                            replaced, still being highlighted long after
+                            the band itself was painted into the rail.
+                            People read it as a control.
+
+                            The rail plus its label is a real thing, has a
+                            real box, and is what the step is actually
+                            about — where the recommendation is and how to
+                            go there. */}
+                        <div data-tour="blend-ranges" style={{ position: "relative" }}>
                         <input
                           type="range"
                           className="brew-slider"
@@ -1361,20 +1344,17 @@ export const BlendExtractionExplorer = ({
                           onChange={(e) => setTempC(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("tempC", tempCRange[0], tempCRange[1]) }}
                         />
-                        <RangeGhost
-                          rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
-                        />
                         <RangeBands
                           rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
-                          selected={bandSelected.tempC}
-                          onSelect={(k) => selectBand("tempC", k)}
+                          step={1}
+                          onSnap={setTempC}
                         />
                         </div>
-                        <BandDescription axis="tempC" kind={bandSelected.tempC} />
                       </>
                     ) : (
                       <>
-                        <div style={{ position: "relative" }}>
+                        {/* Same anchor on the time axis — see above. */}
+                        <div data-tour="blend-ranges" style={{ position: "relative" }}>
                         <input
                           type="range"
                           className="brew-slider"
@@ -1386,22 +1366,19 @@ export const BlendExtractionExplorer = ({
                           onChange={(e) => setTimeS(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("timeS", timeSRange[0], timeSRange[1]) }}
                         />
-                        <RangeGhost
-                          rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
-                        />
                         <RangeBands
                           rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
-                          selected={bandSelected.timeS}
-                          onSelect={(k) => selectBand("timeS", k)}
+                          step={timeStepFor(timeSRange)}
+                          onSnap={setTimeS}
                         />
                         </div>
-                        <BandDescription axis="timeS" kind={bandSelected.timeS} />
                       </>
                     )}
                   </div>
                 </div>
               </div>
             )}
+          </div>
           </div>,
           brewDock,
         );
@@ -1601,7 +1578,11 @@ export const BlendExtractionExplorer = ({
               const advisory = sev === "over"
                 ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling" : (w.kind === "aromatic" ? "aromatic" : "over the line") }
                 : sev === "edge"
-                ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)", tag: w.kind === "masking" ? "masking" : "heads up" }
+                ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)",
+                    // Same word the caffeine bar uses, so the band and the
+                    // gauge aren't describing one cup two ways.
+                    tag: w.kind === "masking" ? "masking"
+                       : w.kind === "caffeine" ? "high" : "heads up" }
                 : { accent: "#627C5C", bg: "rgba(98, 124, 92, 0.08)", tag: w.kind === "paradox" ? "paradox" : "note" };
               return (
                 <div key={i} style={{

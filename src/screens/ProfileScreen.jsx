@@ -332,7 +332,8 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
               ["tsp", "tsp"],
               ["g",   "g"  ],
             ].map(([val, label]) => (
-              <button key={val} onClick={() => setWeightUnit(val)} style={{
+              <button key={val} data-testid={`weight-unit-${val}`}
+                onClick={() => setWeightUnit(val)} style={{
                 fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
                 padding: "4px 12px", borderRadius: 999, border: "none",
                 background: weightUnit === val ? theme.ink : "transparent",

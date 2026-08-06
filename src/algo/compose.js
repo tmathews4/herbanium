@@ -9,6 +9,8 @@ import {
   MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
+import { TSP_BY_CATEGORY } from "../units/units.js";
+import { bestCoverageZone, bandTarget } from "./brewBounds.js";
 import { wouldCreateUnsafeCombination } from "../data/safety.js";
 
 // How much steep-time slack counts as the same brew. Used by the
@@ -121,14 +123,36 @@ export function computeBrewProfile(ingredients, opts = {}) {
     return s + ((s1 + s2) / 2) * (g / totalG);
   }, 0);
 
+  /* The heaviest lead anchors the compromise search, the same way the
+     rail's does. Falls back to the heaviest of anything when nothing is
+     explicitly a lead. */
+  const zonePool = pool.map(({ id, g, role }) => ({
+    id, g, role, tempC: INGREDIENTS[id].tempC, timeS: INGREDIENTS[id].timeS,
+  }));
+  const zoneLeads = zonePool.filter(i => !i.role || i.role === "lead");
+  const zonePrimary = (zoneLeads.length ? zoneLeads : zonePool)
+    .slice().sort((a, b) => b.g - a.g)[0];
+
   let tempC;
   if (tempIntersects) {
     // Round to 1°C precision (matches the slider step). Earlier code
     // snapped to 5°C; integer rounding lands recommendations cleanly
     // inside tight ranges like [95, 100] without nudging to the edge.
+    //
+    // NOT the midpoint, deliberately: with four ingredients near 85°C
+    // and one at 95°C the intersection's middle sits closer to the lone
+    // outlier than the cup wants. The weighted centroid already does
+    // what "ignore the outliers" is asking for.
     tempC = Math.round(Math.max(tIntMin, Math.min(tIntMax, wTempCentroid)));
   } else {
-    tempC = Math.round(wTempCentroid);
+    /* No window everyone shares — open in the middle of the COMPROMISE
+       ZONE the rail actually draws, rather than at a centroid with no
+       relationship to it. The app was recommending one region and
+       starting you somewhere else. */
+    const zone = bestCoverageZone(zonePool, zonePrimary, "tempC");
+    tempC = zone
+      ? Math.round((zone.range[0] + zone.range[1]) / 2)
+      : Math.round(wTempCentroid);
   }
 
   // Time fallback differs from temp because the warning model is
@@ -144,7 +168,18 @@ export function computeBrewProfile(ingredients, opts = {}) {
     const clamped = Math.max(sIntMin, Math.min(sIntMax, wTimeCentroid));
     timeS = Math.round(clamped / 30) * 30;
   } else {
-    timeS = Math.round(sIntMax / 30) * 30;
+    /* Toward the compromise zone, but NEVER past the lowest max.
+       Both rules matter and they pull against each other: opening
+       inside the band the rail draws is what makes the two agree,
+       while `sIntMax` is what stops a blend opening already in a
+       warning state. assam + matcha + chamomile shows why — its
+       compromise zone is 4-7 minutes and matcha's window ends at 30
+       seconds, so centring on the band would over-pull matcha on
+       arrival. The clamp wins, and the cup opens at 30s: outside the
+       band, but not shouting. */
+    const zone = bestCoverageZone(zonePool, zonePrimary, "timeS");
+    const target = zone ? (zone.range[0] + zone.range[1]) / 2 : sIntMax;
+    timeS = Math.round(Math.min(target, sIntMax) / 30) * 30;
   }
 
   // Outsiders: ingredients whose temp range doesn't include the chosen
@@ -165,6 +200,145 @@ export function computeBrewProfile(ingredients, opts = {}) {
     compatible: tempIntersects && timeIntersects,
     outsiders,
   };
+}
+
+/* ──────────────────────────────────────────────────────────────
+   WHERE "BREW ME THE RECOMMENDATION" ACTUALLY PUTS YOU.
+
+   The band is geometry — brewBounds knows where the leaves agree. It
+   does not know how the cup READS there, and those are not the same
+   question. Sweeping the catalogue turned up 61 ingredient pairs whose
+   band centre fires a per-ingredient over-pull warning one or two
+   degrees above a point in the same band that doesn't: rose + vanilla
+   is quiet at 92°C and warns at 93°C. A control labelled RECOMMENDED
+   that answers with a cup already being told off is worse than one
+   that doesn't move.
+
+   So: geometry proposes, the perception model disposes. Walk the
+   band on the slider's own grid, ask what the cup would say at each
+   point, and take the quietest — nearest the centre when several tie,
+   which is nearly always.
+
+   IT ONLY CHOOSES WITHIN THE BAND. If every point in the band warns,
+   the centre is still the answer: the band is where the research says
+   to brew, and this must not talk the user out of the recommendation
+   just because the model is grumpy across the whole of it. That case
+   is a data problem — an ingredient whose researched window reads as
+   over-pulled throughout — and quietly steering away from it would
+   hide exactly the thing worth fixing.
+
+   The scan is bounded by the band's width over the slider's step: at
+   most a couple of dozen evaluations, on a tap, never during a render.
+   ────────────────────────────────────────────────────────────── */
+
+// Per-ingredient over-pull warnings carry a `role`; cup-level ones
+// don't. The individual ones are the ones that name a leaf and say it
+// is being abused, so they're weighted an order heavier than the
+// cup-level reading of the same axis.
+export function overPullScore(ingredients, tempC, timeS) {
+  // No baseline on purpose: an experimental blend gets no suppression
+  // in the app either, so scoring with it would pick points that only
+  // look quiet on a curated recipe.
+  const { warnings } = resolveBlendAtBrew(ingredients, tempC, timeS);
+  let individual = 0, cup = 0;
+  for (const w of warnings) {
+    if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
+    if (w.role) individual++; else cup++;
+  }
+  return individual * 10 + cup;
+}
+
+/**
+ * @param ingredients the pot, as passed to resolveBlendAtBrew
+ * @param items       non-catalyst entries carrying tempC/timeS windows
+ * @param band        { lo, hi } from recommendedBand
+ * @param axis        "tempC" | "timeS"
+ * @param otherValue  where the OTHER slider is sitting
+ * @param step        the slider's step, so the answer is reachable
+ * @param rangeMin/rangeMax the slider's own bounds
+ * @returns a value on the slider's grid, or null when there's no band
+ */
+export function recommendedBrewTarget({
+  ingredients, items, band, axis, otherValue, step = 1, rangeMin, rangeMax,
+}) {
+  if (!band) return null;
+  const s = step || 1;
+  const base = rangeMin != null ? rangeMin : band.lo;
+  /* THE BAND CAN SIT OFF THE END OF THE SLIDER. A blend's range is the
+     INTERSECTION of its leaves' — assam + matcha + chamomile can only
+     reach 15-39s, because matcha shuts at 30 — while the compromise
+     zone, which is drawn from the primary lead's window, sits at
+     240-300s. Intersecting the two gives an empty interval.
+
+     This used to return null there, and the tap silently did nothing:
+     a control that answered "put me on the recommendation" by doing
+     nothing at all. Aim at the closest reachable point instead. The
+     answer is honest — it really is as near the recommendation as this
+     blend's slider goes — and it's the same place the clamp would have
+     put you anyway, since a band above the slider's ceiling is exactly
+     the case where some leaf closes early. */
+  const lo = Math.max(base, band.lo);
+  const hi = Math.min(rangeMax != null ? rangeMax : band.hi, band.hi);
+  if (hi < lo) {
+    /* AND HERE THE CLAMP DOES APPLY. Honouring the request is what
+       makes the tap worth having when the band is reachable — you
+       asked for the band, you get the band, warning and all. When it
+       ISN'T reachable there is no request to honour: the user can't
+       see that band, can't drag to it, and the word isn't even drawn
+       (see bandWithin in the explorer). Steeping past a leaf's window
+       to get closer to something nobody can reach buys nothing and
+       costs a ruined leaf. */
+    let ceiling = rangeMax != null ? rangeMax : band.hi;
+    if (axis === "timeS") {
+      for (const ing of items || []) {
+        const iMax = (ing && ing[axis] || [])[1];
+        if (iMax != null) ceiling = Math.min(ceiling, iMax);
+      }
+    }
+    const aimAt = Math.max(base, Math.min(ceiling, bandTarget({ band })));
+    const k = (aimAt - base) / s;
+    return base + (axis === "timeS" ? Math.floor(k) : Math.round(k)) * s;
+  }
+
+  // Round time DOWN — a 15- or 30-second grid rounded up can step past
+  // the top of a narrow band.
+  const onGrid = (v) => {
+    const k = (v - base) / s;
+    const snapped = base + (axis === "timeS" ? Math.floor(k) : Math.round(k)) * s;
+    return Math.max(rangeMin != null ? rangeMin : snapped,
+      Math.min(rangeMax != null ? rangeMax : snapped, snapped));
+  };
+
+  // The geometric answer, including the never-past-the-earliest-close
+  // clamp on time. When that clamp lands OUTSIDE the band there is
+  // nothing to choose between — a quieter point inside the band would
+  // be an over-pull, which is the thing the clamp exists to prevent.
+  const aim = bandTarget({ band: { lo, hi } });
+  if (aim == null) return null;
+  if (aim < lo) return onGrid(aim);
+
+  // The whole band is fair game on both axes. Time used to be capped
+  // at the earliest-closing window here, which is the opening-brew rule
+  // and made the tap a no-op wherever a leaf closes early — see
+  // bandTarget.
+  const ceiling = hi;
+  const candidates = [];
+  for (let v = lo; v <= ceiling + 1e-9; v += s) candidates.push(onGrid(v));
+  const aimed = onGrid(aim);
+  if (!candidates.includes(aimed)) candidates.push(aimed);
+  if (!candidates.length) return aimed;
+
+  let best = aimed, bestScore = Infinity, bestDist = Infinity;
+  for (const v of candidates) {
+    const score = axis === "tempC"
+      ? overPullScore(ingredients, v, otherValue)
+      : overPullScore(ingredients, otherValue, v);
+    const dist = Math.abs(v - aim);
+    if (score < bestScore || (score === bestScore && dist < bestDist)) {
+      best = v; bestScore = score; bestDist = dist;
+    }
+  }
+  return best;
 }
 
 // The base resolver. Deterministic — same moods + flavor always → same blend.
@@ -1173,7 +1347,20 @@ function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
   return out;
 }
 
+/* The baseline pass must not build warnings — it would need a baseline
+   of ITS own and recur forever. A module-scoped depth counter rather
+   than an extra parameter, and deliberately so: this function is
+   called positionally in several places and at least one call site
+   already passes a stale 8th argument (a blend's `effects`, left over
+   from an older signature). A new trailing parameter would have
+   silently picked that up and run the real call in baseline mode —
+   which is exactly what happened when this was written that way, and
+   the only thing that caught it was one integration test. Synchronous
+   and single-threaded, so a counter is safe; one level deep. */
+let _readingDepth = 0;
+
 export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false) {
+  const _readingOnly = _readingDepth > 0;
   if (!ingredients || !ingredients.length) {
     return {
       effects: [],
@@ -1252,9 +1439,51 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     && tempC === baselineTempC && timeS === baselineTimeS;
   const _suppressAtBaseline = _atCuratedBaseline && isTraditional;
 
-  const contributions = ingredients.map(({ id, g, role }) => {
+    /* DOSE, NOT JUST SHARE.
+
+     `weight` below is g / totalG — what fraction of the pot this leaf
+     is. That answers "what is this blend made of" and the app was
+     using it to answer "what is in my cup", which are different
+     questions and only agree for a single-ingredient pot.
+
+     Two things fell out of that. A cup of 1g of chamomile and a cup of
+     16g read IDENTICALLY, because absolute grams never entered the
+     maths at all. And a leaf's contribution collapsed when unrelated
+     leaves joined it — 2g of chamomile read calm 4.0 alone and calm
+     0.8 with six other herbs beside it, though the cup still contained
+     the same 2g of chamomile. Adding peppermint doesn't remove
+     chamomile's apigenin; it adds cooling on top of it.
+
+     So contributions are scaled by how much of the leaf is actually in
+     the pot, measured in CUP-DOSES: one teaspoon per cup is the app's
+     own convention (chamomile's dose reads "1 tsp · 200ml"), and
+     TSP_BY_CATEGORY already knows what a teaspoon of each category
+     weighs. x = 1 means "a cup's worth of this leaf".
+
+     The curve is Michaelis–Menten, normalised so one cup-dose scores
+     exactly 1.0 — which keeps every single-leaf calibration in the
+     catalogue where it was:
+
+         dose(x) = x · (S + 1) / (x + S)
+
+     Near-linear while the pot is light (a 0.05g pinch of pepper scores
+     0.03, not the 0.16 a power curve would have given it), saturating
+     as it gets heavy, and asymptotic at S + 1 — so piling in leaf
+     makes a stronger cup with diminishing returns and never an
+     infinite one. Share is still share, and still does the jobs that
+     are honestly about proportion: masking, dominance, what the cup
+     tastes mostly of. */
+  const DOSE_SATURATION = 3;      // in cup-doses; also fixes the 4× ceiling
+  const doseFactor = (grams, meta) => {
+    const perCup = TSP_BY_CATEGORY[meta?.category] || 1.5;
+    const x = Math.max(0, (grams || 0) / perCup);
+    return (x * (DOSE_SATURATION + 1)) / (x + DOSE_SATURATION);
+  };
+
+const contributions = ingredients.map(({ id, g, role }) => {
     const meta = INGREDIENTS[id];
-    const weight = g / totalG;
+    const weight = g / totalG;      // share — masking, dominance, "mostly"
+    const dose = doseFactor(g, meta); // cup-doses — how much is actually in there
     const ingRole = role || "lead";
 
     // Whisked ingredients (matcha) don't follow steep-time chemistry —
@@ -1453,7 +1682,7 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     }
 
     return {
-      id, name: meta.name, weight, profile, inRange, inTempRange, inTimeRange,
+      id, name: meta.name, weight, dose, profile, inRange, inTempRange, inTimeRange,
       tempDir, timeDir, role: ingRole,
       activeZone, tempZone, timeZone, registerZone, combination,
       isOverPulled, standaloneOverPull,
@@ -1471,44 +1700,24 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   //   - Everything else: dose-weighted × loudness (the saturating
   //     behavior — two citrus at 50/50 still reads as one citrus).
   //
-  // Effects use the same sub-linear stacking model as additive
-  // flavors — but applied to ALL effects, not a curated subset.
-  // When 2+ LEAD ingredients each contribute to the same effect
-  // at strength ≥ STACKING_MIN_STRENGTH, those leads accumulate
-  // via weight^STACK_EXPONENT instead of plain dose-weighted sum.
-  // Lifts the cup's calm / focus / energy reading when multiple
-  // ingredients honestly contribute, so a chamomile + lemon balm
-  // combo reads more calming than chamomile alone — without
-  // running away to the cap. Single-source blends are unchanged
-  // (any weight^k = same when weight = 1, so curated 1-leaf
-  // catalog entries keep their existing calibration).
+  // Effects accumulate by DOSE — see doseFactor above. Each leaf
+  // contributes what it actually brings to the pot, so a second herb
+  // adds its calm on top rather than halving the first one's.
+  //
+  // THE STACKING SPECIAL-CASE IS GONE, and this is why: it raised the
+  // exponent on `weight` when 2+ leads expressed the same tag, which
+  // was a patch over share-dilution — it lifted the cases where
+  // dilution was most obviously wrong (chamomile + lemon balm reading
+  // less calm than chamomile alone) and left the single-source cases,
+  // where it was just as wrong and nobody had a rule for it. Dose
+  // makes the patch unnecessary: co-present sources add because they
+  // are both in the pot, which is the reason they should.
   const rawFlavors = combineFlavors(contributions);
   const rawEffects = {};
-  // First pass — count strong LEAD contributors per effect tag.
-  // An effect only switches to stacking when 2+ leads independently
-  // express it at meaningful strength.
-  const effectStrongCount = {};
-  for (const { profile, role } of contributions) {
-    if ((role || "lead") !== "lead") continue;
+  for (const { dose, profile } of contributions) {
     if (!profile?.effects) continue;
     for (const [tag, strength] of profile.effects) {
-      if (strength >= STACKING_MIN_STRENGTH) {
-        effectStrongCount[tag] = (effectStrongCount[tag] || 0) + 1;
-      }
-    }
-  }
-  // Second pass — accumulate. Lead contributions to effects with
-  // ≥2 strong leads use the stacking path; everything else uses
-  // dose-weighted (today's behavior).
-  for (const { weight, profile, role } of contributions) {
-    if (!profile?.effects) continue;
-    const isLead = (role || "lead") === "lead";
-    for (const [tag, strength] of profile.effects) {
-      const stack = isLead && (effectStrongCount[tag] || 0) >= 2;
-      const w = stack
-        ? Math.pow(Math.max(0, weight), STACK_EXPONENT)
-        : weight;
-      rawEffects[tag] = (rawEffects[tag] || 0) + strength * w;
+      rawEffects[tag] = (rawEffects[tag] || 0) + strength * dose;
     }
   }
   // Cap stacked effects at 5 so a chai-style stack of warming
@@ -1706,8 +1915,59 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     ? rawOutsiders.filter(o => o.recipeStretch)
     : rawOutsiders;
 
+  /* WHAT THE CUP READS AT ITS OWN RECOMMENDED BREW — the number the
+     warnings are measured AGAINST, rather than an absolute line.
+
+     A threshold that only knows a level has to answer "is 2.6 bitter
+     too bitter?" without knowing what the drink is. For reishi the
+     answer is no — reishi is bitter, proverbially so, and its own
+     correct brew reads at the top of the scale. The app was telling
+     the user to shave the steep on a cup brewed exactly as its
+     research prescribes, which is the app disagreeing with itself in
+     front of the person it's teaching.
+
+     So the question becomes "is this cup MORE bitter than the same
+     leaves at the brew we recommend?" — which is answerable, is the
+     thing the user can actually act on, and makes "your own
+     recommended brew is clean" true by construction instead of by
+     tuning numbers against it.
+
+     The baseline is the curator's brew when there is one and the
+     algorithm's recommendation otherwise, so an experimental blend
+     the user assembled gets the same treatment as a shipped one.
+
+     KNOWN LIMIT, and it is the reason the ingredient audit matters:
+     four leaves (turmeric, valerian, reishi, ashwagandha) sit pegged
+     at the cap for bitterness from the centre of their researched
+     window onward. Their reading doesn't RISE when over-steeped
+     because it has nowhere left to go, so this check will keep quiet
+     where it should speak. Re-gridding those four profiles is what
+     restores the signal; until then the failure is silence, not a
+     false alarm. */
+  const _baseline = (() => {
+    if (_readingOnly) return null;
+    const rec = (baselineTempC != null && baselineTimeS != null)
+      ? { tempC: baselineTempC, timeS: baselineTimeS }
+      : computeBrewProfile(ingredients);
+    if (rec.tempC === tempC && rec.timeS === timeS) {
+      return { flavors: perceivedFlavorMap, effects: perceivedEffectMap };
+    }
+    _readingDepth++;
+    try {
+      const at = resolveBlendAtBrew(
+        ingredients, rec.tempC, rec.timeS,
+        baselineTempC, baselineTimeS, curated, isTraditional,
+      );
+      return { flavors: at.perceivedFlavors, effects: at.perceivedEffects };
+    } finally {
+      _readingDepth--;
+    }
+  })();
+
   // (5a) Cup-level warnings — what the average reads.
-  const rawCupWarnings = buildWarnings({
+  const rawCupWarnings = _readingOnly ? [] : buildWarnings({
+    baselineFlavors: _baseline?.flavors,
+    baselineEffects: _baseline?.effects,
     outsiders,
     maskingNotes,
     perceivedEffects: perceivedEffectMap,
@@ -1745,13 +2005,54 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // stricter rules on leads.
   const allIndividualWarnings = [];
   const seenIndividual = new Set();
-  for (const { name, profile, role } of contributions) {
+  /* THE LEAF'S OWN BASELINE — its own brew, not the blend's.
+
+     The cup-level checks became differential above; this one stayed
+     absolute, and it is the one that names a leaf and says it is being
+     abused. A bitter-by-nature root got told off at the brew its own
+     research prescribes, which is the complaint that started this.
+
+     The reference is the leaf brewed as the app would brew it ALONE.
+     Keying it to the blend's baseline instead was the first attempt
+     and it went too far the other way: a cup steeped a minute past a
+     baseline that already sat at the top of some leaf's window showed
+     no rise worth the name, so the warning went silent exactly where
+     it was most deserved. A leaf's own window is a fixed thing and
+     doesn't move when a recipe drags it somewhere; measuring against
+     that says "this is more than YOU want", which is what the warning
+     claims in words.
+
+     Resolved straight from the extraction profile rather than through
+     the cup, because what's judged here is the leaf, not the blend
+     around it. Cached — a blend re-resolves on every slider frame. */
+  const leafBaselineCache = new Map();
+  const leafBaseline = (id) => {
+    if (leafBaselineCache.has(id)) return leafBaselineCache.get(id);
+    const meta = INGREDIENTS[id];
+    let out = null;
+    if (meta) {
+      const own = computeBrewProfile([{ id, g: 1, role: "lead" }]);
+      const at = resolveExtractionProfile(
+        id,
+        own.tempC,
+        meta.whisked && meta.timeS ? Math.min(own.timeS, meta.timeS[1]) : own.timeS,
+      );
+      if (at) out = { flavors: Object.fromEntries(at.flavors), effects: Object.fromEntries(at.effects) };
+    }
+    leafBaselineCache.set(id, out);
+    return out;
+  };
+
+  for (const { id, name, profile, role } of contributions) {
     if (role === "catalyst") continue;
     const fMap = Object.fromEntries(profile.flavors);
     const eMap = Object.fromEntries(profile.effects);
+    const base = leafBaseline(id);
     const ingWarnings = buildWarnings({
       perceivedFlavors: fMap,
       perceivedEffects: eMap,
+      baselineFlavors: base?.flavors,
+      baselineEffects: base?.effects,
     });
     for (const w of ingWarnings) {
       if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
@@ -1795,7 +2096,22 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
   // Use the unfiltered set so the tradition note still fires when the
   // baseline genuinely had something to suppress (otherwise the note
   // would never appear, since cupWarnings is empty after suppression).
-  const baselineWarningFires = (rawCupWarnings || []).length > 0;
+  /* THE LEVEL, not the rise. Warnings are differential now — measured
+     against what these leaves read at the brew we recommend — which
+     makes the baseline clean by construction and would have killed
+     this note silently: it fires when the baseline "has something to
+     suppress", and under a rise test a baseline never does.
+     
+     The note is a statement about the LEVEL anyway ("this cup is
+     strong, and the practice means it to be"), so it asks for the
+     level directly: the same reading, judged with no baseline, which
+     is buildWarnings' absolute behaviour. */
+  const baselineWarningFires = _baseline
+    ? buildWarnings({
+        perceivedFlavors: _baseline.flavors,
+        perceivedEffects: _baseline.effects,
+      }).some(w => w.kind === "tannin" || w.kind === "aromatic")
+    : (rawCupWarnings || []).length > 0;
   // Tradition-over-literature note only makes sense for actual traditional
   // preparations. Experimental and synthetic blends are still "curated" (we
   // pass a baseline for warning suppression) but they don't carry centuries
@@ -1827,6 +2143,11 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     warnings,
     outsiders,
     perIngredient: contributions,
+    // The perceived maps, so a caller (or this function, one level
+    // down) can read what the cup SAYS rather than re-deriving it.
+    // Used by the baseline comparison below.
+    perceivedFlavors: perceivedFlavorMap,
+    perceivedEffects: perceivedEffectMap,
     traditionNote,
     moodSummary,
     flavorSummary,

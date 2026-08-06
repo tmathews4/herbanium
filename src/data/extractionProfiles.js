@@ -690,13 +690,47 @@ export const EXTRACTION_PROFILES = {
     // cup, so the ingredient page promised a stress-buffering, warming
     // root and the brew view showed neither. Grounding at the gentle
     // point and the standard cup's temperature were also off.
-    { tempC: 95,  timeS: 600,  flavors: ["earthy", "musty"],
+    /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
+       formula couldn't express it. Diagnostic flavours (bitter,
+       astringent, tannic...) get their strength from ROW INDEX,
+       capped at 3 — so any profile carrying `bitter` in its top two
+       rows reads identically in both, and this ingredient's whole
+       researched window came out flat at the cap. The over-pull
+       warning then had nothing to measure: brewed correctly and
+       brewed to the end of its window scored the same, so it could
+       neither stop firing nor start.
+
+       Four profiles in the catalogue hit that, all of them long
+       decoctions whose bitter appears late: turmeric, valerian,
+       reishi, ashwagandha. Pre-declared flavorStrengths are the
+       format's own way out (see annotateFlavorStrengths), so the
+       numbers come from the doc's "Basic tastes" instead of from an
+       array position.
+
+       The doc gives a RANGE where the taste varies with extraction;
+       it's read across the window — low end at the gentle brew, high
+       end at the long one. The slider is bounded by this window, so
+       a climb across it is exactly the signal the warning needs, and
+       no invented over-pull row is required to produce one.
+
+       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       the doc's "Basic tastes" describe the cup you drink and this
+       field stores what goes in before the engine amplifies it —
+       bitter carries a loudness of 1.8, so a stored 3 arrives as a
+       5.4 and clips against the additive cap. Writing the doc's
+       numbers in raw was the first attempt and it pinned every one of
+       these leaves at the ceiling, which is the bug wearing different
+       clothes. Stored ≈ perceived / loudness. */
+    { tempC: 95,  timeS: 600,
+      flavorStrengths: [["earthy", 5], ["musty", 3], ["bitter", 1.2], ["astringent", 1.0]],
       effects: [["grounding", 3], ["calm", 2], ["soothing", 2]],
       character: "Light ashwagandha — gentle root warmth, faint musk." },
-    { tempC: 100, timeS: 900,  flavors: ["earthy", "musty", "bitter", "woody"],
+    { tempC: 100, timeS: 900,
+      flavorStrengths: [["earthy", 5], ["musty", 3], ["bitter", 1.5], ["astringent", 1.4], ["woody", 1.5]],
       effects: [["grounding", 4], ["calm", 3], ["sleepy", 3], ["soothing", 3], ["warming", 2]],
       character: "The standard kshir-style cup. Full root depth, the classic adaptogenic digestive." },
-    { tempC: 100, timeS: 1200, flavors: ["earthy", "musty", "bitter", "woody"],
+    { tempC: 100, timeS: 1200,
+      flavorStrengths: [["earthy", 5], ["musty", 3], ["bitter", 1.8], ["astringent", 1.9], ["woody", 2]],
       effects: [["grounding", 4], ["calm", 3], ["sleepy", 4], ["soothing", 3], ["bitterness", 2]],
       character: "Long decoction. Maximum withanolide pull — deep grounding, distinctly bitter." },
   ],
@@ -706,13 +740,47 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [["earthy", 0.5], ["musky", 0.3]],
       effects: [["warming", 0.4]],
       character: "Cold-pour turmeric — pale yellow water, curcumin still locked in the rhizome's fat-soluble fraction." },
-    { tempC: 95,  timeS: 600, flavors: ["earthy", "musky"],
+    /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
+       formula couldn't express it. Diagnostic flavours (bitter,
+       astringent, tannic...) get their strength from ROW INDEX,
+       capped at 3 — so any profile carrying `bitter` in its top two
+       rows reads identically in both, and this ingredient's whole
+       researched window came out flat at the cap. The over-pull
+       warning then had nothing to measure: brewed correctly and
+       brewed to the end of its window scored the same, so it could
+       neither stop firing nor start.
+
+       Four profiles in the catalogue hit that, all of them long
+       decoctions whose bitter appears late: turmeric, valerian,
+       reishi, ashwagandha. Pre-declared flavorStrengths are the
+       format's own way out (see annotateFlavorStrengths), so the
+       numbers come from the doc's "Basic tastes" instead of from an
+       array position.
+
+       The doc gives a RANGE where the taste varies with extraction;
+       it's read across the window — low end at the gentle brew, high
+       end at the long one. The slider is bounded by this window, so
+       a climb across it is exactly the signal the warning needs, and
+       no invented over-pull row is required to produce one.
+
+       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       the doc's "Basic tastes" describe the cup you drink and this
+       field stores what goes in before the engine amplifies it —
+       bitter carries a loudness of 1.8, so a stored 3 arrives as a
+       5.4 and clips against the additive cap. Writing the doc's
+       numbers in raw was the first attempt and it pinned every one of
+       these leaves at the ceiling, which is the bug wearing different
+       clothes. Stored ≈ perceived / loudness. */
+    { tempC: 95,  timeS: 600,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 1.6], ["astringent", 1.1]],
       effects: [["warming", 2], ["grounding", 1]],
       character: "Light turmeric — golden color, gentle warmth, mild musk." },
-    { tempC: 98,  timeS: 750, flavors: ["earthy", "bitter", "musky", "woody"],
+    { tempC: 98,  timeS: 750,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 1.9], ["astringent", 1.5], ["woody", 1.8]],
       effects: [["warming", 3], ["digestive", 2], ["soothing", 2], ["grounding", 3]],
       character: "The standard cup. Full curcumin extraction — pair with fat and pepper for absorption." },
-    { tempC: 100, timeS: 900, flavors: ["earthy", "bitter", "musky", "woody"],
+    { tempC: 100, timeS: 900,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 2.2], ["astringent", 1.9], ["woody", 2], ["pungent", 1.2]],
       effects: [["warming", 3], ["digestive", 2], ["bitterness", 2], ["soothing", 2], ["grounding", 2]],
       character: "Long simmer. Color deepens; the bitter side surfaces." },
   ],
@@ -821,13 +889,47 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [["earthy", 0.5], ["musky", 0.4]],
       effects: [["calm", 0.6]],
       character: "Cold-pour valerian — barely any funk, the valerenic acid waiting for heat." },
-    { tempC: 85, timeS: 600, flavors: ["earthy", "musky"],
+    /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
+       formula couldn't express it. Diagnostic flavours (bitter,
+       astringent, tannic...) get their strength from ROW INDEX,
+       capped at 3 — so any profile carrying `bitter` in its top two
+       rows reads identically in both, and this ingredient's whole
+       researched window came out flat at the cap. The over-pull
+       warning then had nothing to measure: brewed correctly and
+       brewed to the end of its window scored the same, so it could
+       neither stop firing nor start.
+
+       Four profiles in the catalogue hit that, all of them long
+       decoctions whose bitter appears late: turmeric, valerian,
+       reishi, ashwagandha. Pre-declared flavorStrengths are the
+       format's own way out (see annotateFlavorStrengths), so the
+       numbers come from the doc's "Basic tastes" instead of from an
+       array position.
+
+       The doc gives a RANGE where the taste varies with extraction;
+       it's read across the window — low end at the gentle brew, high
+       end at the long one. The slider is bounded by this window, so
+       a climb across it is exactly the signal the warning needs, and
+       no invented over-pull row is required to produce one.
+
+       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       the doc's "Basic tastes" describe the cup you drink and this
+       field stores what goes in before the engine amplifies it —
+       bitter carries a loudness of 1.8, so a stored 3 arrives as a
+       5.4 and clips against the additive cap. Writing the doc's
+       numbers in raw was the first attempt and it pinned every one of
+       these leaves at the ceiling, which is the bug wearing different
+       clothes. Stored ≈ perceived / loudness. */
+    { tempC: 85, timeS: 600,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 1.6], ["pungent", 2.5], ["astringent", 1.1]],
       effects: [["calm", 3], ["sleepy", 2], ["soothing", 2]],
       character: "Light valerian — the funk shows but stays gentle." },
-    { tempC: 90, timeS: 750, flavors: ["earthy", "musky", "pungent", "bitter"],
+    { tempC: 90, timeS: 750,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 1.9], ["pungent", 3], ["astringent", 1.5]],
       effects: [["calm", 4], ["sleepy", 4], ["soothing", 3], ["grounding", 2]],
       character: "The standard cup. Full valerenic acid — the deep sedation register." },
-    { tempC: 95, timeS: 900, flavors: ["earthy", "musky", "pungent", "bitter", "woody"],
+    { tempC: 95, timeS: 900,
+      flavorStrengths: [["earthy", 4], ["musky", 3], ["bitter", 2.2], ["pungent", 3], ["astringent", 1.9], ["woody", 1.5]],
       effects: [["calm", 4], ["sleepy", 5], ["bitterness", 2], ["soothing", 3]],
       character: "Maximum extraction. The cheese-funk register — do not drive." },
   ],
@@ -916,13 +1018,24 @@ export const EXTRACTION_PROFILES = {
       flavorStrengths: [["woody", 0.4], ["earthy", 0.3]],
       effects: [["calm", 0.4]],
       character: "Cold-pour reishi — water with a wisp of wood; triterpenes need a real decoction to surrender." },
-    { tempC: 95,  timeS: 1800, flavors: ["earthy", "woody"],
+    /* Reishi's doc doesn't give a Basic-tastes number; it gives
+       something better — three brew points, each naming its own
+       bitterness. 6a "mild bitter ... bitter present but manageable",
+       6b "full bitter, full body", 6c "maximum extraction, hard to
+       drink without sweetener". The climb was already researched and
+       written down; the profile just couldn't say it, because the
+       index-derived strength pinned 6b and 6c to the same number.
+       See the note on turmeric for the mechanism. */
+    { tempC: 95,  timeS: 1800,
+      flavorStrengths: [["woody", 4], ["earthy", 3], ["bitter", 0.8], ["mushroomy", 1.5]],
       effects: [["calm", 2], ["sleepy", 1], ["grounding", 2], ["immune", 2]],
       character: "Short reishi — woody-earthy infusion, the bitter held back." },
-    { tempC: 98,  timeS: 3600, flavors: ["earthy", "woody", "bitter", "mushroomy"],
+    { tempC: 98,  timeS: 3600,
+      flavorStrengths: [["woody", 4], ["earthy", 3.5], ["bitter", 1.7], ["mushroomy", 2.5]],
       effects: [["calm", 3], ["sleepy", 3], ["comfort", 2], ["grounding", 4], ["immune", 3]],
       character: "The standard decoction. Full Lingzhi — the An Shen tradition." },
-    { tempC: 100, timeS: 7200, flavors: ["earthy", "woody", "bitter", "mushroomy"],
+    { tempC: 100, timeS: 7200,
+      flavorStrengths: [["woody", 4], ["earthy", 4], ["bitter", 2.4], ["mushroomy", 2.5]],
       effects: [["calm", 4], ["sleepy", 4], ["comfort", 3], ["bitterness", 3], ["grounding", 4], ["immune", 4]],
       character: "Two-hour decoction. Maximum triterpene pull — deeply bitter and grounding." },
   ],

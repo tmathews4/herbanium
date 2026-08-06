@@ -233,9 +233,11 @@ export function combineFlavors(contributions) {
       const stack = stackable
         && ADDITIVE_FLAVORS.has(name)
         && (strongCount[name] || 0) >= 2;
-      const w = stack
-        ? Math.pow(Math.max(0, c.weight), STACK_EXPONENT)
-        : c.weight;
+      // DOSE, not share — a leaf brings what's in the pot, and doesn't
+      // shrink because something unrelated joined it. Falls back to
+      // weight for callers that don't compute a dose.
+      const d = c.dose != null ? c.dose : c.weight;
+      const w = stack ? Math.pow(Math.max(0, d), STACK_EXPONENT) : d;
       out[name] = (out[name] || 0) + strength * w * loud;
     }
   }
@@ -475,6 +477,12 @@ export function buildWarnings({
   maskingNotes = [],
   perceivedEffects = {},
   perceivedFlavors = {},
+  // What the SAME leaves read at the brew we recommend. When absent
+  // (a caller judging one leaf on its own, with no recommendation to
+  // compare to) the checks fall back to absolute levels, which is the
+  // old behaviour.
+  baselineFlavors = null,
+  baselineEffects = null,
   paradoxTags = [],
   caffeineMg = 0,
 } = {}) {
@@ -547,17 +555,37 @@ export function buildWarnings({
   const astringencyBar = (perceivedFlavors.astringent || 0)
                        + (perceivedFlavors.tannic || 0);
 
-  if (bitterBar >= 4) {
+  /* LEVEL AND RISE, both. The level says the cup is genuinely bitter;
+     the rise says the brewing is what made it so. A drink can be
+     bitter by nature — reishi, valerian, a strong mate — and telling
+     someone to shave the steep on a cup made exactly as prescribed
+     teaches them the app doesn't know what it recommended.
+     RISE_MARGIN is a tenth of a bar: enough to ignore rounding,
+     small enough that a real push still speaks. */
+  const RISE_MARGIN = 0.1;
+
+  const baseBitter = baselineFlavors
+    ? (baselineFlavors.bitter || 0)
+      + (baselineFlavors.bitterness || 0)
+      + (baselineFlavors.astringent || 0)
+      + ((baselineEffects || {}).bitterness || 0)
+    : null;
+  const baseAstringency = baselineFlavors
+    ? (baselineFlavors.astringent || 0) + (baselineFlavors.tannic || 0)
+    : null;
+  const rose = (now, base) => base == null || now > base + RISE_MARGIN;
+
+  if (bitterBar >= 4 && rose(bitterBar, baseBitter)) {
     warnings.push({
       kind: "tannin",
       text: "Tannins are taking over — drop a few degrees or shave the steep.",
     });
-  } else if (astringencyBar >= 2) {
+  } else if (astringencyBar >= 2 && rose(astringencyBar, baseAstringency)) {
     warnings.push({
       kind: "tannin",
       text: "Astringent edge climbing — gentler heat or a shorter steep would soften it.",
     });
-  } else if (bitterBar >= 2.5) {
+  } else if (bitterBar >= 2.5 && rose(bitterBar, baseBitter)) {
     warnings.push({
       kind: "tannin",
       text: "The bitter side is starting to dominate — pull back the steep or drop a few degrees.",
@@ -578,7 +606,9 @@ export function buildWarnings({
     { name: "burnt",     threshold: 1,   text: "The cup is heading burnt — drop the temperature." },
   ];
   for (const off of offNotes) {
-    if ((perceivedFlavors[off.name] || 0) >= off.threshold) {
+    const here = perceivedFlavors[off.name] || 0;
+    const base = baselineFlavors ? (baselineFlavors[off.name] || 0) : null;
+    if (here >= off.threshold && rose(here, base)) {
       warnings.push({ kind: "aromatic", text: off.text });
       break; // one aromatic note is enough; the user gets the message
     }
@@ -603,7 +633,9 @@ export function buildWarnings({
   if (caffeineMg >= 130 && (energyHigh || focusHigh)) {
     warnings.push({
       kind: "caffeine",
-      text: `High caffeine load (~${Math.round(caffeineMg)}mg) — may read wired or jittery for caffeine-sensitive bodies.`,
+      // Says what it does and to whom, rather than whether it's too
+      // much. Habitual drinkers clear this line without noticing.
+      text: `High caffeine load (~${Math.round(caffeineMg)}mg) — reads wired or jittery if you're sensitive to it.`,
     });
   }
 

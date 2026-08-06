@@ -669,7 +669,7 @@ const BLENDS = [
       { id: "vanilla",     g: 0.2, role: "accent" },
       { id: "cardamom",    g: 0.2, role: "accent" },
     ],
-    tempC: 97, timeS: 360, ml: 250,
+    tempC: 95, timeS: 360, ml: 250,
     mood: "calm", flavor: "sweet",
     public: true, experimental: true, house: true,
     effects: [["calm", 4], ["comfort", 4], ["soothing", 3]],
@@ -859,7 +859,7 @@ const BLENDS = [
       { id: "ceylon",   g: 0.8, role: "accent" },
       { id: "bergamot", g: 0.2, role: "accent" },
     ],
-    tempC: 95, timeS: 240, ml: 250,
+    tempC: 97, timeS: 210, ml: 250,
     mood: "energy", flavor: "smoky",
     public: true, experimental: true, house: true,
     twist: true,
@@ -980,7 +980,7 @@ const MOOD_BLENDS = {
       { id: "lemonbalm", g: 0.8, role: "accent" },
       { id: "lavender",  g: 0.2, role: "accent" },
     ],
-    temp: 95, time: 300,
+    temp: 95, time: 240,
     effects: [["calm", 4], ["sleepy", 2]],
   },
   focus: {
@@ -1015,7 +1015,7 @@ const MOOD_BLENDS = {
       { id: "chamomile", g: 2.0 },
       { id: "lavender",  g: 0.3, role: "accent" },
     ],
-    temp: 95, time: 330,
+    temp: 95, time: 240,
     effects: [["sleepy", 4], ["calm", 4]],
   },
 
@@ -1057,7 +1057,7 @@ const MOOD_BLENDS = {
       { id: "lemonbalm",  g: 0.4, role: "accent" },
       { id: "rose",       g: 0.2, role: "accent" },
     ],
-    temp: 95, time: 300,
+    temp: 94, time: 300,
     effects: [["uplifting", 4], ["calm", 3], ["cooling", 2]],
   },
 };
@@ -1147,7 +1147,7 @@ const PAIR_BLENDS = {
       { id: "peppermint", g: 0.4, role: "accent" },
       { id: "sencha",     g: 0.3, role: "accent" },
     ],
-    temp: 100, time: 300,
+    temp: 96, time: 120,
     effects: [["focus", 3], ["soothing", 3]],
   },
   "comfort+sleepy": {
@@ -1159,7 +1159,7 @@ const PAIR_BLENDS = {
       { id: "vanilla",   g: 0.2, role: "accent" },
       { id: "lavender",  g: 0.2, role: "accent" },
     ],
-    temp: 100, time: 360,
+    temp: 97, time: 240,
     effects: [["sleepy", 3], ["soothing", 4], ["warming", 2]],
   },
   "focus+digestive": {
@@ -1170,7 +1170,7 @@ const PAIR_BLENDS = {
       { id: "lemonbalm", g: 1.0 },
       { id: "sencha",    g: 0.3, role: "accent" },
     ],
-    temp: 90, time: 240,
+    temp: 93, time: 120,
     effects: [["focus", 3], ["digestive", 3], ["uplifting", 3]],
   },
   "digestive+sleepy": {
@@ -1182,7 +1182,7 @@ const PAIR_BLENDS = {
       { id: "lemonbalm", g: 0.5, role: "accent" },
       { id: "lavender",  g: 0.2, role: "accent" },
     ],
-    temp: 95, time: 330,
+    temp: 95, time: 240,
     effects: [["sleepy", 3], ["digestive", 4], ["calm", 3]],
   },
   "comfort+digestive": {
@@ -1514,7 +1514,16 @@ const BLEND_DIRECTIONS = {
     "Heat water to 80°C — let a boiled kettle rest about 2 minutes.",
     "Pour over the gunpowder, spearmint, and tulsi.",
     "Steep 2½ minutes — short, the leaves are pellets and unfurl fast.",
-    "Pour completely; re-steep with slightly hotter water for 60 seconds.",
+    "Pour completely — the leaves shouldn't sit in what's left.",
+    // OPTIONAL, and said so. This read as a fourth instruction, which
+    // made the cup look unfinished until you'd done it — and most
+    // people simply don't re-steep. Gunpowder genuinely has a second
+    // cup in it, so the information is worth keeping; what it needed
+    // was to stop being a step and start being an offer, with the
+    // trade named. A second steep pulls more out of the SAME leaf,
+    // which is why the cup that comes off it is lighter, not another
+    // of the first.
+    "Optional: the leaves have a second cup in them — hotter water, 60 seconds. It pulls what the first steep left behind, so expect a lighter, thinner cup than the one before it.",
   ],
   "exp-quiet-apple": [
     "Heat water just under boiling (~95°C).",

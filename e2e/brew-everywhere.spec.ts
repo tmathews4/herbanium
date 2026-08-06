@@ -46,6 +46,9 @@ const brewButton = (page: Page) => page.locator('[data-tour="blend-brew"]');
 // if it's actually closed — an unconditional click on the section header
 // SHUTS an already-open one, which is what the first version of this
 // spec did while reporting "the brew panel should be on screen".
+//
+// Both are asked directly now, via aria-expanded. Inferring "shut" from
+// "its contents aren't here yet" is the same bug wearing a condition.
 async function ensureBrewPanel(page: Page) {
   // Say WHICH stage is missing. "no brew panel" covered three different
   // failures — the detail overlay never opened, its lazy chunk never
@@ -55,12 +58,24 @@ async function ensureBrewPanel(page: Page) {
   if (await detail.count()) {
     await expect(detail, "the detail overlay should be open").toBeVisible({ timeout: 30_000 });
   }
-  const row = page.locator('[data-tour="blend-controls"]').first();
-  if (!(await row.count())) {
-    const section = page.getByRole("button", { name: /Brewing/i }).first();
-    if (await section.count()) await section.click();
+  // ASK THE SECTION, don't guess from its contents. This used to read
+  // "if the brew row isn't in the DOM, the section must be shut" — and
+  // on a cold lazy chunk the row simply hasn't rendered yet, so the
+  // click SHUT a section that was already open and the panel never
+  // came back. It failed two or three tests a run, never the same
+  // ones, which is what sent this looking like load rather than logic.
+  const section = page.getByTestId("brewing-section");
+  if (await section.count()) {
+    await expect(section, "the Brewing section should say whether it's open")
+      .toHaveAttribute("aria-expanded", /true|false/, { timeout: 30_000 });
+    if ((await section.getAttribute("aria-expanded")) !== "true") await section.click();
   }
-  await expect(row, "the brew panel should be on screen").toBeVisible({ timeout: 30_000 });
+  const row = page.locator('[data-tour="blend-controls"]').first();
+  // 45s. This waits on a lazy screen chunk, an explorer mount and a
+  // portal into the host's dock; under four workers it has measured
+  // past 30s. It is a load-tolerance number, not a correctness one —
+  // the same walk takes ~2s run alone.
+  await expect(row, "the brew panel should be on screen").toBeVisible({ timeout: 45_000 });
   if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
   await expect(page.locator('[data-tour="blend-sliders"]').first()).toBeVisible();
 }
@@ -344,6 +359,65 @@ test.describe("the steep controls are a dock", () => {
     // brew row and the tab dock.
     expect(shape.translucent, `expected a translucent surface, got ${shape.translucent}`)
       .toMatch(/rgba\(.*0\.\d+\)/);
+  });
+});
+
+test.describe("the recommended word puts you in it", () => {
+  test("tapping it moves that slider, and only that slider", async ({ page }) => {
+    // The word was a caption that opened prose. Once it was flanked to
+    // read as a control, the obvious next question was why tapping the
+    // thing labelled RECOMMENDED didn't take you there — reported as
+    // "when I hit recommended it's still showing tooltip, not placing
+    // on recommended spot." The explanation panel is gone entirely:
+    // one tap, one thing, and the thing is the one the word names.
+    //
+    // The second half of the assertion is the load-bearing one. The two
+    // sliders are coupled, so a tap that helpfully fixed both would
+    // silently throw away a steep time you'd already dialled in.
+    await boot(page);
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+    const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+    await search.fill("chamomile");
+    await page.getByRole("button", { name: /chamomile/i }).first().click();
+
+    await ensureBrewPanel(page);
+
+    // Note the steep time before touching temperature at all.
+    await page.getByTestId("brew-axis-timeS").click();
+    const timeSlider = page.getByLabel("Steep time");
+    await expect(timeSlider).toBeVisible();
+    const timeBefore = await timeSlider.inputValue();
+
+    // Park the temperature at the cold end, well outside any band.
+    await page.getByTestId("brew-axis-tempC").click();
+    const tempSlider = page.getByLabel("Water temperature");
+    await expect(tempSlider).toBeVisible();
+    const coldest = await tempSlider.getAttribute("min");
+    await tempSlider.fill(coldest!);
+
+    const word = page.getByTestId("range-word");
+    await expect(word, "a single leaf still has a recommendation").toBeVisible();
+    await word.click();
+
+    expect(await tempSlider.inputValue(),
+      "tapping the recommendation should move the temperature off the cold end")
+      .not.toBe(coldest);
+
+    // And nothing else happened: no panel opened under the slider.
+    const placed = await tempSlider.inputValue();
+    await expect(page.getByText(/Sweet spot|Compromise zone/),
+      "the explanation panel should be gone, not merely quiet").toHaveCount(0);
+
+    // Tapping it again is idempotent — same tap, same answer, so a
+    // second press can't nudge the brew somewhere new.
+    await word.click();
+    expect(await tempSlider.inputValue(), "a second tap should land on the same spot")
+      .toBe(placed);
+
+    await page.getByTestId("brew-axis-timeS").click();
+    expect(await page.getByLabel("Steep time").inputValue(),
+      "the temperature's recommendation must not rewrite the steep")
+      .toBe(timeBefore);
   });
 });
 

@@ -126,12 +126,18 @@ export const SCREEN_TOURS = {
     // step is describing.
     // The recommendation is painted INTO the track now — a coloured
     // stretch of the rail rather than a band beneath it — so the copy
-    // points at the rail and the highlight traces the coloured span
-    // (see RangeGhost). "Tap it" moved to the word underneath, because
-    // the rail itself has to stay draggable.
+    // points at the rail. The step lights the slider and the word under
+    // it together: the highlight used to trace an invisible box laid
+    // over the coloured span, which drew the outline of the band widget
+    // this design had already removed. It read as a control, because
+    // that is what it used to be.
+    //
+    // "Tap it" belongs to the word, not the rail — the rail has to stay
+    // draggable — and the word MOVES the brew now rather than
+    // explaining itself, which is what this copy has to say.
     { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
       familyMode: true,
-      body: "The coloured stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath for the reasoning." },
+      body: "The coloured stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath to go straight there." },
     // Lights the WHOLE brew window and pulses the button inside it —
     // the same shape as the pills step. The window is what you've been
     // setting up across the last four steps; Brew is what you do with

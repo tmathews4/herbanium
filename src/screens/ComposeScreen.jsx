@@ -27,7 +27,9 @@ import {
 } from "../theme";
 import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
+  formatTsp, gramsToTsp, TSP_BY_CATEGORY,
 } from "../units/units";
+import { usePersistedState } from "../hooks/usePersistedState";
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
 import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
@@ -1246,6 +1248,36 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
       return changed ? next : prev;
     });
   }, [reverseIngs]);
+  /* PARTS OR WEIGHT — one number, two ways of saying it.
+
+     A part has always been a gram (see ingsForProfile below), so the
+     two modes are not two stores: they're two step sizes and two
+     labels over the same value. Keeping a second `weightById` would
+     have let the two drift, and then switching modes would silently
+     change the cup — the one thing a display toggle must never do.
+
+     Parts move in whole grams and clamp 1..9, which is the ratio
+     language the steppers were built for. Weight moves in the unit
+     the user chose in settings — half a gram, or a quarter teaspoon
+     of THIS leaf, since a teaspoon of chamomile and a teaspoon of
+     ginger are not the same mass. */
+  const [amountMode, setAmountMode] = usePersistedState("amountMode", "parts");
+  const gramsPerTspFor = (id) =>
+    TSP_BY_CATEGORY[INGREDIENTS[id]?.category] || 1.5;
+  // One step of the stepper, in grams, for the mode and unit in play.
+  const stepFor = (id) => {
+    if (amountMode === "parts") return 1;
+    return weightUnit === "g" ? 0.5 : gramsPerTspFor(id) * 0.25;
+  };
+  const clampAmount = (id, g) => {
+    if (amountMode === "parts") return Math.max(1, Math.min(9, Math.round(g)));
+    // Weight mode reaches further down and further up than the ratio
+    // language allows: a 0.05g pinch of pepper is a real dose, and so
+    // is 12g of rooibos in a big pot.
+    const step = stepFor(id);
+    const snapped = Math.round(g / step) * step;
+    return Math.max(step, Math.min(20, Math.round(snapped * 100) / 100));
+  };
   const partsFor = (id) => {
     if (partsById[id] != null) return partsById[id];
     // First-added is the default lead at 2 parts; the rest start
@@ -1257,8 +1289,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     return id === reverseIngs[0] ? 2 : 1;
   };
   const setParts = (id, n) => {
-    const clamped = Math.max(1, Math.min(9, Math.round(n)));
-    setPartsById(prev => ({ ...prev, [id]: clamped }));
+    setPartsById(prev => ({ ...prev, [id]: clampAmount(id, n) }));
   };
   // Primary highlight = whichever row has the highest parts (when
   // it stands clearly above 1). Rows tied at the max all get the
@@ -1809,7 +1840,51 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}><SectionLabel n="ii">What's in the pot?</SectionLabel></div>
+      {/* PARTS / WEIGHT, beside the heading it governs. Recipes are
+          written both ways in the world — "two parts chamomile, one
+          part lavender" and "3g chamomile, 1.5g lavender" — and the
+          app only spoke the first. The unit follows the mass
+          preference in settings, so someone who thinks in teaspoons
+          isn't handed grams here and grams nowhere else.
+
+          Same pill language as the brew row's Time/Temp toggle. It's
+          the same kind of control: two ways of looking at one thing,
+          not two things. */}
+      <div style={{
+        marginTop: 20, display: "flex", alignItems: "baseline",
+        justifyContent: "space-between", gap: 10,
+      }}>
+        <SectionLabel n="ii">What's in the pot?</SectionLabel>
+        {reverseIngs.length > 0 && (
+          <div data-testid="amount-mode" style={{
+            display: "inline-flex", flexShrink: 0,
+            border: `1px solid ${theme.ruleSoft}`, borderRadius: 999,
+            overflow: "hidden",
+          }}>
+            {[["parts", "Parts"], ["weight", weightUnit === "g" ? "Grams" : "Tsp"]]
+              .map(([key, label]) => {
+                const on = amountMode === key;
+                return (
+                  <button
+                    key={key}
+                    data-testid={`amount-mode-${key}`}
+                    onClick={() => setAmountMode(key)}
+                    aria-pressed={on}
+                    style={{
+                      padding: "3px 11px", border: "none", cursor: "pointer",
+                      background: on ? theme.terra : "transparent",
+                      color: on ? theme.cream : theme.inkSoft,
+                      fontFamily: ff.sans, fontSize: 10,
+                      letterSpacing: "0.08em", textTransform: "uppercase",
+                      fontWeight: on ? 600 : 500,
+                      transition: "background 0.18s ease, color 0.18s ease",
+                    }}
+                  >{label}</button>
+                );
+              })}
+          </div>
+        )}
+      </div>
       <div style={{
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
@@ -1832,14 +1907,21 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             textTransform: "uppercase", color: theme.ash,
             marginBottom: 8, lineHeight: 1.5,
           }}>
-            {weightUnit === "g"
-              ? "1 part ≈ 1 g of dry leaf"
-              : "1 part ≈ ½ tsp of dry leaf"}
+            {/* In weight mode the numbers ARE the measurement, so the
+                line that translates parts into one would be telling
+                the user what they can already read. */}
+            {amountMode === "weight"
+              ? "per 250 ml cup"
+              : weightUnit === "g"
+                ? "1 part ≈ 1 g of dry leaf"
+                : "1 part ≈ ½ tsp of dry leaf"}
           </div>
         )}
         {reverseIngs.map((id, idx) => {
           const primary = isPrimary(id);
           const parts = partsFor(id);
+          // 9 parts is the ratio language's ceiling; 20g is the pot's.
+          const atCeiling = amountMode === "parts" ? parts >= 9 : parts >= 20;
           return (
             <div
               key={id}
@@ -1893,41 +1975,60 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 marginRight: 4,
               }}>
                 <button
-                  onClick={() => setParts(id, parts - 1)}
-                  disabled={parts <= 1}
-                  aria-label={`decrease ${INGREDIENTS[id].name} parts`}
+                  onClick={() => setParts(id, parts - stepFor(id))}
+                  disabled={parts <= stepFor(id)}
+                  aria-label={`decrease ${INGREDIENTS[id].name} ${amountMode === "parts" ? "parts" : "amount"}`}
                   style={{
                     width: 22, height: 22, borderRadius: "50%",
                     background: "transparent",
                     border: `1px solid ${theme.ruleSoft}`,
-                    color: parts <= 1 ? theme.rule : theme.inkSoft,
+                    color: parts <= stepFor(id) ? theme.rule : theme.inkSoft,
                     fontFamily: ff.sans, fontSize: 13, lineHeight: 1,
-                    cursor: parts <= 1 ? "default" : "pointer",
-                    padding: 0, opacity: parts <= 1 ? 0.5 : 1,
+                    cursor: parts <= stepFor(id) ? "default" : "pointer",
+                    padding: 0, opacity: parts <= stepFor(id) ? 0.5 : 1,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
                   }}
                 >−</button>
+                {/* The same stored number, read out in the language of
+                    the mode. Grams get one decimal only when they need
+                    one — "2 g" beats "2.0 g" — and teaspoons hand off
+                    to formatTsp so this matches the ¼/½/pinch ladder
+                    the rest of the app speaks. */}
                 <span
-                  title={parts === 1 ? "1 part" : `${parts} parts`}
+                  data-testid={`amount-${id}`}
+                  title={amountMode === "parts"
+                    ? (parts === 1 ? "1 part" : `${parts} parts`)
+                    : `${Math.round(parts * 100) / 100} g`}
                   style={{
-                    minWidth: 14, textAlign: "center",
+                    minWidth: 40,
+                    textAlign: "center",
                     fontFamily: ff.mono, fontSize: 12,
                     color: primary ? theme.terra : theme.inkSoft,
                     fontWeight: primary ? 600 : 500,
                   }}
-                >{parts}</span>
+                >{amountMode === "parts"
+                  /* Not rounded for display. Weight mode can leave 2.5
+                     behind, and showing that as "3" while the engine
+                     brews 2.5 would be the toggle quietly lying about
+                     the pot. 2.5 parts is a legible ratio anyway — the
+                     stepper moves in whole ones, it doesn't demand
+                     them. */
+                  ? Number(parts.toFixed(1))
+                  : weightUnit === "g"
+                    ? `${Number((Math.round(parts * 10) / 10).toFixed(1))} g`
+                    : formatTsp(gramsToTsp(parts, INGREDIENTS[id].category))}</span>
                 <button
-                  onClick={() => setParts(id, parts + 1)}
-                  disabled={parts >= 9}
-                  aria-label={`increase ${INGREDIENTS[id].name} parts`}
+                  onClick={() => setParts(id, parts + stepFor(id))}
+                  disabled={atCeiling}
+                  aria-label={`increase ${INGREDIENTS[id].name} ${amountMode === "parts" ? "parts" : "amount"}`}
                   style={{
                     width: 22, height: 22, borderRadius: "50%",
                     background: "transparent",
                     border: `1px solid ${theme.ruleSoft}`,
-                    color: parts >= 9 ? theme.rule : theme.inkSoft,
+                    color: atCeiling ? theme.rule : theme.inkSoft,
                     fontFamily: ff.sans, fontSize: 13, lineHeight: 1,
-                    cursor: parts >= 9 ? "default" : "pointer",
-                    padding: 0, opacity: parts >= 9 ? 0.5 : 1,
+                    cursor: atCeiling ? "default" : "pointer",
+                    padding: 0, opacity: atCeiling ? 0.5 : 1,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
                   }}
                 >+</button>

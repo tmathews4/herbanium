@@ -23,6 +23,9 @@
    ────────────────────────────────────────────────────────────── */
 
 import { INGREDIENTS } from "../src/data/ingredients.js";
+import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
+import { computeBrewProfile, resolveBlendAtBrew } from "../src/algo/compose.js";
+import { TSP_BY_CATEGORY } from "../src/units/units.js";
 import {
   EFFECT_ANCHORS, FLAVOR_ANCHORS, KNOWN_FLAVORS,
   validateCatalogAnchors, findEffectSaturation,
@@ -101,6 +104,95 @@ for (const [flavor, anchorId] of Object.entries(FLAVOR_ANCHORS)) {
       `${anchorId} no longer lists "${flavor}" — restore it or pick a new anchor`);
   });
 }
+
+/* ── A LEAF IS NOT OVER-PULLED AT ITS OWN BREW ─────────────────────
+
+   Reported as "why are we warning in literature-supported extraction
+   ranges — how are they the better spots if they're also indicating
+   over extraction?"
+
+   Six leaves fired an over-pull warning brewed exactly as their own
+   research prescribes, alone in the pot with nothing else to blame:
+   turmeric, valerian, reishi, ashwagandha, lapsang, yerba-mate. Two
+   causes, both now fixed and both guarded below.
+
+   The warning judged an absolute level, so a leaf that is bitter BY
+   NATURE — reishi is proverbially so — read as a leaf being abused.
+   And the profile data couldn't have told them apart anyway: strength
+   for bitter/astringent came from the row's INDEX, capped at 3, so any
+   profile carrying bitter in its top two rows read identically in
+   both. Brewed right and brewed to the end of the window scored the
+   same number. */
+
+test("no ingredient is called over-pulled at the brew its own research prescribes", () => {
+  const guilty = [];
+  for (const [id, meta] of Object.entries(INGREDIENTS)) {
+    if (!meta.tempC || !meta.timeS) continue;
+    const g = TSP_BY_CATEGORY[meta.category] || 1.5;   // one cup-dose
+    const rec = computeBrewProfile([{ id, g, role: "lead" }]);
+    const fired = resolveBlendAtBrew([{ id, g, role: "lead" }], rec.tempC, rec.timeS)
+      .warnings.filter(w => w.kind === "tannin" || w.kind === "aromatic");
+    if (fired.length) guilty.push(`${id} @ ${rec.tempC}°C/${rec.timeS}s — ${fired[0].text}`);
+  }
+  assert(guilty.length === 0,
+    `${guilty.length} ingredient(s) are told off for being brewed correctly:\n  ${guilty.join("\n  ")}`);
+});
+
+test("a leaf that HAS a bitter register speaks up when pushed past its window", () => {
+  /* The other half. A check that never fires is as useless as one that
+     always does, and suppressing everything is the easy way to pass
+     the test above.
+
+     Scoped by the DATA, not by a list of exceptions: the leaves that
+     stay quiet here are the ones whose profiles declare no bitter,
+     astringent or tannic note anywhere — rooibos, vanilla, hojicha,
+     marshmallow-root, passionflower, dried apple. Rooibos genuinely
+     cannot be over-steeped, which is why it's the tea people leave in
+     the pot; a warning would be the app inventing a fault. Asking
+     "does anything rise?" of a leaf with nothing to rise is the wrong
+     question, and answering it from the profile means a new forgiving
+     ingredient needs no edit here. */
+  const DIAGNOSTIC = new Set(["bitter", "bitterness", "astringent", "tannic"]);
+  const silent = [];
+  for (const [id, meta] of Object.entries(INGREDIENTS)) {
+    if (!meta.tempC || !meta.timeS) continue;
+    const rows = EXTRACTION_PROFILES[id];
+    if (!Array.isArray(rows)) continue;
+    const declaresBitterness = rows.some(r =>
+      (r.flavorStrengths || []).some(([name]) => DIAGNOSTIC.has(name)));
+    if (!declaresBitterness) continue;
+    const g = TSP_BY_CATEGORY[meta.category] || 1.5;
+    const fired = resolveBlendAtBrew([{ id, g, role: "lead" }], meta.tempC[1], meta.timeS[1] * 2)
+      .warnings.filter(w => w.kind === "tannin" || w.kind === "aromatic");
+    if (!fired.length) silent.push(id);
+  }
+  assert(silent.length === 0,
+    `${silent.length} ingredient(s) declare a bitter register but stay silent at twice ` +
+    `their longest steep:\n  ${silent.join(", ")}`);
+});
+
+test("no profile's bitterness is flat across its top two rows", () => {
+  /* The data half, checked at the source rather than through the cup.
+     The index-derived strength caps diagnostic flavours at 3, so a
+     profile carrying one in both of its last two rows has no curve
+     left to read — which is what pinned these four. Pre-declared
+     flavorStrengths are the way out; this fails if anyone adds a
+     profile that falls back into the flat case. */
+  const DIAGNOSTIC = ["bitter", "bitterness", "astringent", "tannic"];
+  const flat = [];
+  for (const [id, rows] of Object.entries(EXTRACTION_PROFILES)) {
+    if (!Array.isArray(rows) || rows.length < 3) continue;
+    const top = Object.fromEntries(rows[rows.length - 1].flavorStrengths || []);
+    const below = Object.fromEntries(rows[rows.length - 2].flavorStrengths || []);
+    for (const d of DIAGNOSTIC) {
+      if (top[d] != null && below[d] != null && top[d] === below[d]) {
+        flat.push(`${id}: ${d} is ${top[d]} at both of its top two brew points`);
+      }
+    }
+  }
+  assert(flat.length === 0,
+    `${flat.length} profile(s) have no bitterness curve to read:\n  ${flat.join("\n  ")}`);
+});
 
 console.log(`\n\n${pass} passed, ${fail} failed`);
 if (failures.length > 0) {
