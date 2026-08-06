@@ -3,8 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
-import { BrewCornerButton } from "../components/BrewButton";
-import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
+import { BrewSurface } from "../components/BrewSurface";
 import { BrewDockProvider, BLEND_DETAIL_DOCK_ID } from "../helpers/dock";
 import {
   Flower, Kettle, MOOD_ICONS,
@@ -895,28 +894,21 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         </div>
         {brewingOpen && (
           <>
-            <BlendExtractionExplorer
-              ingredients={mergedIngredients}
-              defaultTempC={b.tempC}
-              defaultTimeS={b.timeS}
+            <BrewSurface
+              load={{
+                ingredients: mergedIngredients,
+                name: b.name,
+                tempC: b.tempC,
+                timeS: b.timeS,
+                kind: "recipe",
+              }}
               tempC={brewTempC}
               setTempC={setBrewTempC}
               timeS={brewTimeS}
               setTimeS={setBrewTimeS}
-              curated
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}
-              // The page's brew control while the panel is open. Runs
-              // handleBrewTap — the same action, twist flow and all,
-              // that the collapsed-state CTA below uses.
-              brewAction={(
-                <BrewCornerButton
-                  // Asks first — it starts a timer. No name field: this
-                  // recipe already has a name.
-                  confirm askName={false}
-                  onConfirm={handleBrewTap}
-                />
-              )}
+              onBrew={handleBrewTap}
             />
             {b.ml && (
               <div style={{
@@ -1130,7 +1122,16 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         id={BLEND_DETAIL_DOCK_ID}
         style={brewingOpen ? {
           flexShrink: 0,
-          background: theme.ivory,
+          // THE SAME GLASS AS THE MAIN DOCK. These slots painted solid
+          // ivory while the tab dock's brew row is rgba(ivory,0.58) over
+          // a blur — so the identical panel read as a different surface
+          // depending on which screen you opened it from. Same numbers,
+          // settled on a handset (see the TabBar comment): 9px/0.58
+          // keeps the sense of something behind the row without
+          // resolving it.
+          background: "rgba(var(--ivory-rgb),0.58)",
+          backdropFilter: "blur(9px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.1)",
           borderTop: `1px solid ${theme.rule}`,
         } : { flexShrink: 0 }}
       />

@@ -6,8 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   computeBrewProfile, resolveBlendAtBrew,
 } from "../algo/compose";
-import { BrewCornerButton } from "../components/BrewButton";
-import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
+import { BrewSurface } from "../components/BrewSurface";
 import {
   Kettle, Ornament,
 } from "../components/icons";
@@ -2026,65 +2025,42 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
       ) : (
         <div style={{ marginTop: 10 }}>
-          <BlendExtractionExplorer
-            ingredients={ingsForProfile}
-            defaultTempC={profile.tempC}
-            defaultTimeS={profile.timeS}
+          <BrewSurface
+            // The same page every other path opens — just with nothing
+            // loaded into it yet. The composer keeps hold of temp/time
+            // because its save flow and its "at 94°" prose read them.
+            load={{ ingredients: ingsForProfile, kind: "blend" }}
             tempC={brewTempC}
             setTempC={setBrewTempC}
             timeS={brewTimeS}
             setTimeS={setBrewTimeS}
-            experimental
-            tourStep={blendTourStep}
-            familyModeOverride={blendTourFamilyMode}
-            controlsOpenOverride={blendTourControlsOpen}
-            axisOverride={blendTourAxis}
-            // Brew lives in the dock's brew panel now, not at the foot
-            // of the page. It was the one action you had to leave the
-            // controls to reach — scroll past every graph to commit the
-            // cup you'd just been dialling in. Save moved to the steep
-            // screen rather than doubling up here: one button keeps the
-            // panel readable, and saving is the occasional act.
-            // One definition, in components/BrewButton.jsx — the styling
-            // used to live here, which is why two other brew panels
-            // shipped without a button at all.
-            brewAction={(
-              <BrewCornerButton
-                disabled={reverseIngs.length === 0}
-                pulsing={blendTourStep === "blend-brew"}
-                // Asks first, and takes the name while it's asking. This
-                // is the composed-blend case, so there's nothing to
-                // prefill — the pot has no name until you give it one.
-                confirm
-                defaultName="Untitled blend"
-                onConfirm={(name) => {
-                  if (reverseIngs.length === 0) return;
-                  const candidate = {
-                    name,
-                    ingredients: ingsForProfile,
-                    tempC: brewTempC,
-                    timeS: brewTimeS,
-                  };
-                  const allCatalogue = [
-                    ...BLENDS,
-                    ...((generatedBlends || []).filter(b => !BLENDS.find(x => x.id === b.id))),
-                  ];
-                  // Straight to the timer. Brew used to open a
-                  // save-or-just-brew prompt first, which put a naming
-                  // decision between the user and the thing they asked
-                  // for — and asked it at the worst moment, before
-                  // they'd tasted anything. Saving lives on the steep
-                  // screen now, where the cup is already going.
-                  const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
-                  startBrew(
-                    dup
-                      ? { ...dup, tempC: candidate.tempC, timeS: candidate.timeS }
-                      : candidate,
-                    "", ["calm"],
-                  );
-                }}
-              />
-            )}
+            tour={{
+              step: blendTourStep,
+              familyMode: blendTourFamilyMode,
+              controlsOpen: blendTourControlsOpen,
+              axis: blendTourAxis,
+            }}
+            onBrew={(cup) => {
+              if (reverseIngs.length === 0) return;
+              const candidate = {
+                name: cup.name,
+                ingredients: ingsForProfile,
+                tempC: cup.tempC,
+                timeS: cup.timeS,
+              };
+              const allCatalogue = [
+                ...BLENDS,
+                ...((generatedBlends || []).filter(x => !BLENDS.find(y => y.id === x.id))),
+              ];
+              // Straight to the timer — saving lives on the steep screen.
+              const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+              startBrew(
+                dup
+                  ? { ...dup, tempC: candidate.tempC, timeS: candidate.timeS }
+                  : candidate,
+                "", ["calm"],
+              );
+            }}
           />
         </div>
       )}

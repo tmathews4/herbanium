@@ -46,12 +46,20 @@ const brewButton = (page: Page) => page.locator('[data-tour="blend-brew"]');
 // SHUTS an already-open one, which is what the first version of this
 // spec did while reporting "the brew panel should be on screen".
 async function ensureBrewPanel(page: Page) {
+  // Say WHICH stage is missing. "no brew panel" covered three different
+  // failures — the detail overlay never opened, its lazy chunk never
+  // arrived, or the panel never portalled into the slot — and under
+  // contention they are not the same bug.
+  const detail = page.locator('[data-testid="blend-detail"]');
+  if (await detail.count()) {
+    await expect(detail, "the detail overlay should be open").toBeVisible({ timeout: 30_000 });
+  }
   const row = page.locator('[data-tour="blend-controls"]').first();
   if (!(await row.count())) {
     const section = page.getByRole("button", { name: /Brewing/i }).first();
     if (await section.count()) await section.click();
   }
-  await expect(row, "the brew panel should be on screen").toBeVisible({ timeout: 15_000 });
+  await expect(row, "the brew panel should be on screen").toBeVisible({ timeout: 30_000 });
   if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
   await expect(page.locator('[data-tour="blend-sliders"]').first()).toBeVisible();
 }

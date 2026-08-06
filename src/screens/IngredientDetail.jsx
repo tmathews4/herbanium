@@ -5,8 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
-import { BrewCornerButton } from "../components/BrewButton";
-import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
+import { BrewSurface } from "../components/BrewSurface";
 import { hasExtractionProfile } from "../components/ExtractionExplorer";
 import { BrewDockProvider, INGREDIENT_DETAIL_DOCK_ID } from "../helpers/dock";
 import {
@@ -440,30 +439,19 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
                 with extraction profiles; otherwise the strips would
                 be empty. */}
             {hasExtractionProfile(id) && (
-              <BlendExtractionExplorer
-                ingredients={[{ id, g: 1.0 }]}
-                defaultTempC={midTemp}
-                defaultTimeS={midTime}
+              <BrewSurface
+                load={{
+                  ingredients: [{ id, g: 1.0 }],
+                  name: ing.name,
+                  tempC: midTemp,
+                  timeS: midTime,
+                  kind: "ingredient",
+                }}
                 tempC={brewTempC}
                 setTempC={setBrewTempC}
                 timeS={brewTimeS}
                 setTimeS={setBrewTimeS}
-                // A single leaf is a perfectly good cup, and the panel
-                // showing you its temperature is where you'd expect to
-                // commit to it.
-                brewAction={onBrew ? (
-                  <BrewCornerButton
-                    // Same prompt as everywhere else; the leaf is
-                    // already named.
-                    confirm askName={false}
-                    onConfirm={() => onBrew({
-                      name: ing.name,
-                      ingredients: [{ id, g: 1.0 }],
-                      tempC: brewTempC,
-                      timeS: brewTimeS,
-                    })}
-                  />
-                ) : null}
+                onBrew={onBrew}
               />
             )}
 
@@ -619,7 +607,16 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
         id={INGREDIENT_DETAIL_DOCK_ID}
         style={tab === "brewing" && hasExtractionProfile(id) ? {
           flexShrink: 0,
-          background: theme.ivory,
+          // THE SAME GLASS AS THE MAIN DOCK. These slots painted solid
+          // ivory while the tab dock's brew row is rgba(ivory,0.58) over
+          // a blur — so the identical panel read as a different surface
+          // depending on which screen you opened it from. Same numbers,
+          // settled on a handset (see the TabBar comment): 9px/0.58
+          // keeps the sense of something behind the row without
+          // resolving it.
+          background: "rgba(var(--ivory-rgb),0.58)",
+          backdropFilter: "blur(9px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.1)",
           borderTop: `1px solid ${theme.rule}`,
         } : { flexShrink: 0 }}
       />

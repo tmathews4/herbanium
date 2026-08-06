@@ -27,7 +27,12 @@ import { expect, type Page } from "@playwright/test";
  */
 export async function brewFromDetail(page: Page) {
   const row = page.locator('[data-tour="blend-controls"]').first();
-  await expect(row, "the detail screen should have a brew panel").toBeVisible({ timeout: 15_000 });
+  // 30s, not 15. A detail overlay pulls a lazy screen chunk, mounts the
+  // explorer and portals it into the host's dock slot; under four
+  // workers that chain has measured past 15s. This is the helper's OWN
+  // wait, so test.slow() doesn't cover it — raising the test budget
+  // never touched this number.
+  await expect(row, "the detail screen should have a brew panel").toBeVisible({ timeout: 30_000 });
   // The panel folds; the corner only exists while it's open.
   if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
 
