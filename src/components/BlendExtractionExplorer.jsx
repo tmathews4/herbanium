@@ -612,7 +612,7 @@ export const BlendExtractionExplorer = ({
               read as a pulse travelling outward where one reads as an
               edge that brightens, which is the part that was getting
               lost. */}
-          {["blend-mode", "blend-axis", "blend-brew"].includes(tourStep) && (
+          {["blend-mode", "blend-axis", "blend-brew", "blend-ranges"].includes(tourStep) && (
             <style>{`
               @keyframes tourTogglePulse {
                 0%, 100% {
@@ -998,23 +998,32 @@ export const BlendExtractionExplorer = ({
                        consolation for an affordance that isn't obvious,
                        and the affordance is obvious now — the label says
                        what it is and tapping it does the thing. */
+                    /* A PILL, in the app's own language for a small
+                       control — the axis toggle, the synergy row, the
+                       parts/weight switch all wear this shape. The
+                       flanking hairlines were an improvement on bare
+                       text and still didn't read as pressable: two
+                       rules either side of a word is a decorative
+                       treatment, and readers took it for one.
+
+                       Tinted rather than outlined-only so it has a
+                       surface to press, and in the band's own colour so
+                       it still says which KIND of window it names —
+                       sage for a real agreement, ochre for a
+                       compromise. */
                     position: "relative",
-                    background: "transparent", border: "none",
-                    borderRadius: 0, padding: "1px 14px",
+                    background: band.kind === "compromise"
+                      ? "rgba(189,148,76,0.14)"
+                      : "rgba(98,124,92,0.14)",
+                    border: `1px solid ${band.kind === "compromise" ? theme.ochre : theme.sageDeep}`,
+                    borderRadius: 999, padding: "2px 12px",
                     cursor: onSnap ? "pointer" : "default",
                     fontFamily: ff.sans, fontSize: 8.5,
                     letterSpacing: "0.16em", textTransform: "uppercase",
                     color: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
+                    transition: "background 0.18s ease",
                   }}
                 >
-                  {["left", "right"].map(side => (
-                    <span key={side} aria-hidden style={{
-                      position: "absolute", [side]: 0, top: "22%", bottom: "22%",
-                      width: 1,
-                      background: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
-                      opacity: 0.55,
-                    }} />
-                  ))}
                   {word}
                 </button>
               )}
@@ -1335,7 +1344,25 @@ export const BlendExtractionExplorer = ({
                             real box, and is what the step is actually
                             about — where the recommendation is and how to
                             go there. */}
-                        <div data-tour="blend-ranges" style={{ position: "relative" }}>
+                        {/* THE PULSE IS BACK. It used to live on an
+                            invisible box laid over the coloured span;
+                            that box went when the step was retargeted
+                            to the rail and its word, and the pulse went
+                            with it. The spotlight outline alone was
+                            judged enough at the time and wasn't —
+                            reported as "there's no red pulse highlight
+                            of the recommended section any more".
+
+                            On the anchor rather than a ghost, so it
+                            traces the thing the step actually points
+                            at: the rail plus the word beneath it. */}
+                        <div data-tour="blend-ranges" style={{
+                          position: "relative",
+                          borderRadius: 6,
+                          animation: tourStep === "blend-ranges"
+                            ? "tourTogglePulse 1.9s ease-in-out infinite"
+                            : undefined,
+                        }}>
                         <input
                           type="range"
                           className="brew-slider"
@@ -1369,7 +1396,26 @@ export const BlendExtractionExplorer = ({
                     ) : (
                       <>
                         {/* Same anchor on the time axis — see above. */}
-                        <div data-tour="blend-ranges" style={{ position: "relative" }}>
+                        {/* Same pulse on the time axis — see above.
+                            THE PULSE IS BACK. It used to live on an
+                            invisible box laid over the coloured span;
+                            that box went when the step was retargeted
+                            to the rail and its word, and the pulse went
+                            with it. The spotlight outline alone was
+                            judged enough at the time and wasn't —
+                            reported as "there's no red pulse highlight
+                            of the recommended section any more".
+
+                            On the anchor rather than a ghost, so it
+                            traces the thing the step actually points
+                            at: the rail plus the word beneath it. */}
+                        <div data-tour="blend-ranges" style={{
+                          position: "relative",
+                          borderRadius: 6,
+                          animation: tourStep === "blend-ranges"
+                            ? "tourTogglePulse 1.9s ease-in-out infinite"
+                            : undefined,
+                        }}>
                         <input
                           type="range"
                           className="brew-slider"
