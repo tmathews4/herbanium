@@ -346,3 +346,34 @@ test.describe("the steep controls are a dock", () => {
       .toMatch(/rgba\(.*0\.\d+\)/);
   });
 });
+
+test.describe("a folded brew row says it opens", () => {
+  test("the adjust affordance appears only while folded", async ({ page }) => {
+    // The tour teaches the tap. Anyone who skipped or forgot it had a
+    // temperature readout that happened to be a button — and folded is
+    // exactly when the row was quietest. Not a first-run problem, so
+    // not a first-run fix: the word is there whenever the panel is.
+    await boot(page);
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+    const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+    await search.fill("chamomile");
+    await page.getByRole("button", { name: /chamomile/i }).first().click();
+
+    const row = page.locator('[data-tour="blend-controls"]').first();
+    await expect(row).toBeVisible({ timeout: 30_000 });
+    const hint = page.getByTestId("brew-adjust-hint");
+
+    // Open by default — nothing to invite yet.
+    if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+    await expect(hint, "an open panel doesn't need telling it opens").toHaveCount(0);
+
+    await row.click();
+    await expect(row).toHaveAttribute("aria-expanded", "false");
+    await expect(hint, "a folded row should say what tapping it does").toBeVisible();
+
+    // And it still opens, which is the claim the word is making.
+    await row.click();
+    await expect(row).toHaveAttribute("aria-expanded", "true");
+    await expect(hint).toHaveCount(0);
+  });
+});

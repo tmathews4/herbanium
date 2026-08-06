@@ -1028,6 +1028,25 @@ export const BlendExtractionExplorer = ({
                       finer step the moment anyone used it. */}
                   {displayTemp} · {displayTime}
                 </span>
+                {/* SAYS WHAT THE ROW DOES, while it's folded.
+                    Collapsed, this row was the quietest thing in the
+                    dock — ash text, a 9px chevron — which is backwards:
+                    folded is exactly when a reader needs telling that
+                    it opens. The tour teaches the tap, and anyone who
+                    skipped or forgot it had a temperature readout that
+                    happened to be a button.
+
+                    A word rather than a nudge card or a first-run
+                    animation, because this isn't a first-run problem —
+                    it's true every time the panel is folded, so the
+                    answer should be there every time too. Terra so it
+                    reads as an invitation rather than another label. */}
+                {!shownControlsOpen && (
+                  <span data-testid="brew-adjust-hint" style={{
+                    fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.16em",
+                    textTransform: "uppercase", color: theme.terra,
+                  }}>adjust</span>
+                )}
                 {/* Same chevron as the "more filters" toggle on Compose.
                     Rotation is inverted because this panel opens UPWARD
                     out of the dock: up means expand, down means close. */}
