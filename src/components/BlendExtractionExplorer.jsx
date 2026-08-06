@@ -821,38 +821,128 @@ export const BlendExtractionExplorer = ({
            points of blend either side of each boundary says "around
            here" instead of drawing a border the chemistry hasn't got. */
         const rampFor = (axis, rangeMin, rangeMax) => {
-          const UNDER = "rgba(127,154,160,0.55)";   // sky — cool / brief
-          const GOOD  = "rgba(109,126,85,0.90)";    // sage — the recommendation
-          const WARM  = "rgba(189,148,76,0.85)";    // ochre — starting to pull
-          const HOT   = "rgba(176,84,47,0.90)";     // terra — over-pulled
+          /* BLUE, WITH A WINDOW. Every colour on this rail now
+             corresponds to something the research actually knows.
+
+             The first version ramped blue -> green -> ochre -> terra,
+             reading "under-extracted, ideal, pulling, ruined". Only the
+             green was earned. The profiles sample a diagonal, so
+             nothing in the data describes what happens off it — the
+             warm end was answering "how bad is it out here?", which is
+             precisely the question a diagonal cannot answer. It looked
+             informative and was inventing.
+
+             So: blue is the range, and a coloured window is what the
+             leaves agree on.
+
+               GREEN     every leaf's window contains it — a real sweet
+                         spot, narrowed to where the profiles put it at
+                         the temperature (or time) you've actually set.
+               OCHRE     no full agreement, but the primary lead
+                         overlaps some of the others — the compromise
+                         zone, which is a weaker claim and says so in a
+                         weaker colour.
+               NOTHING   the leaves have no common ground. Blue all the
+                         way across: the app has no recommendation and
+                         doesn't pretend to. */
+          const BASE  = "rgba(127,154,160,0.55)";   // sky — the range itself
+          const SWEET = "rgba(109,126,85,0.92)";    // sage — full agreement
+          const COMP  = "rgba(189,148,76,0.88)";    // ochre — partial
           const span = rangeMax - rangeMin;
           const band = span > 0 ? resolveBand(axis, rangeMin, rangeMax) : null;
-          if (!band) {
-            /* NO CLAIM. When there's nothing to recommend, a ramp
-               running into terra would say "you're over-pulling" about
-               a position the app has no opinion on. Solid blue instead:
-               the base colour of the scale, saying "this is the range"
-               and nothing more. */
-            return UNDER;
-          }
+          if (!band) return BASE;
+
           const pct = (v) => Math.max(0, Math.min(100,
             ((Math.max(rangeMin, Math.min(rangeMax, v)) - rangeMin) / span) * 100));
           const lo = pct(band.lo);
           const hi = pct(band.hi);
-          const blend = 4;
-          return `linear-gradient(90deg,`
-            + ` ${UNDER} 0%,`
-            + ` ${UNDER} ${Math.max(0, lo - blend)}%,`
-            + ` ${GOOD} ${lo}%,`
-            + ` ${GOOD} ${hi}%,`
-            + ` ${WARM} ${Math.min(100, hi + blend)}%,`
-            + ` ${HOT} 100%)`;
+          if (hi <= lo) return BASE;
+          const win = band.kind === "compromise" ? COMP : SWEET;
+          // A couple of points of blend at each edge. The window has a
+          // definite start and end in the data, but the cup either side
+          // of it isn't suddenly wrong, and a hard stop would say it is.
+          const soft = 2;
+          const ramp = `linear-gradient(90deg,`
+            + ` ${BASE} 0%,`
+            + ` ${BASE} ${Math.max(0, lo - soft)}%,`
+            + ` ${win} ${lo}%,`
+            + ` ${win} ${hi}%,`
+            + ` ${BASE} ${Math.min(100, hi + soft)}%,`
+            + ` ${BASE} 100%)`;
+          if (band.kind !== "compromise") return ramp;
+
+          /* THE COMPROMISE WINDOW IS HATCHED, so "provisional" survives
+             without relying on hue.
+
+             Sage and ochre happen to hold up under simulated colour
+             deficiency — they differ in LIGHTNESS as much as hue, so
+             protanopia still separates them by dE 21 — but that was
+             luck, not design, and it left the difference between "every
+             leaf agrees" and "this is the best compromise available"
+             resting on colour alone. Stripes say provisional in a
+             channel nobody can lose.
+
+             THE PERCENTAGE-POSITION GOTCHA: with a sized background,
+             `background-position: p%` aligns the image's p% point with
+             the CONTAINER's p% point, so p is measured against the free
+             space (container − image), not the container. Feeding `lo`
+             straight in would drift the hatch off the window by more
+             the wider the window got. Hence the rescale. */
+          const w = Math.max(0.001, Math.min(100, hi - lo));
+          const p = w >= 100 ? 0 : (lo / (100 - w)) * 100;
+          const HATCH = "repeating-linear-gradient(45deg,"
+            + " rgba(90,62,26,0.30) 0 3px, rgba(90,62,26,0) 3px 7px)";
+          return `${HATCH} ${p}% 0 / ${w}% 100% no-repeat, ${ramp}`;
         };
 
-        /* The ends of the track, labelled at the ends of the track, and
-           carrying the tap the tour promises ("tap it for the
-           reasoning"). One row, directly under the slider — the band
-           that used to need its own row is painted into the track now. */
+        /* A GHOST OVER THE WINDOW, so the tour has something to point
+           at. The recommendation is painted into the track's own
+           gradient now, and a gradient stop can't be spotlit — the tour
+           needs a box. This is that box: exactly the window's span,
+           pointer-events:none so it never touches a drag, invisible
+           until the tour pulses it.
+
+           It carries data-tour="blend-ranges" because the tour step is
+           about WHERE the recommendation is, and pointing at the labels
+           underneath would highlight two numbers instead of the region
+           they bracket. */
+        const RangeGhost = ({ rangeMin, rangeMax, axis }) => {
+          const span = rangeMax - rangeMin;
+          if (span <= 0) return null;
+          const band = resolveBand(axis, rangeMin, rangeMax);
+          if (!band) return null;
+          const THUMB = 16;
+          const pct = (v) => Math.max(0, Math.min(100,
+            ((Math.max(rangeMin, Math.min(rangeMax, v)) - rangeMin) / span) * 100));
+          const lo = pct(band.lo), hi = pct(band.hi);
+          if (hi <= lo) return null;
+          return (
+            <div aria-hidden style={{
+              position: "absolute", left: THUMB / 2, right: THUMB / 2,
+              top: 0, height: 20, pointerEvents: "none",
+            }}>
+              <div
+                data-tour="blend-ranges"
+                style={{
+                  position: "absolute", left: `${lo}%`, width: `${hi - lo}%`,
+                  top: "50%", height: 12, transform: "translateY(-50%)",
+                  borderRadius: 3,
+                  boxShadow: tourStep === "blend-ranges"
+                    ? `0 0 0 1.5px ${theme.terra}`
+                    : "none",
+                  animation: tourStep === "blend-ranges"
+                    ? "tourTogglePulse 1.9s ease-in-out infinite"
+                    : undefined,
+                  transition: "box-shadow 0.15s ease",
+                }}
+              />
+            </div>
+          );
+        };
+
+        /* The ends of the track, labelled at the ends of the track —
+           and, in the empty middle nobody was using, what the coloured
+           window MEANS plus the tap that explains it. One row still. */
         const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
@@ -869,35 +959,46 @@ export const BlendExtractionExplorer = ({
             ? [`${unit === "F" ? cToF(rangeMin) : rangeMin}°`,
                `${unit === "F" ? cToF(rangeMax) : rangeMax}°`]
             : [`${Math.round(rangeMin / 60)}m`, `${Math.round(rangeMax / 60)}m`];
+          /* WHAT THE COLOUR MEANS, in the space between the ends.
+             The window is painted into the track now, which is quiet and
+             legible but says nothing about ITSELF — a green stretch is
+             only obviously a recommendation once you already know. The
+             middle of this row was empty on every blend, so the word
+             goes there: no new row, and it doubles as the tap that opens
+             the reasoning the old band's tooltip used to carry. */
+          const word = !band ? null
+            : band.kind === "compromise" ? "compromise" : "recommended";
           return (
-            <button
-              type="button"
-              data-tour="blend-ranges"
-              title={tapHint}
-              aria-label={tapHint}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onSelect && onSelect(selected ? null : band?.kind || null);
-              }}
-              style={{
-                display: "flex", justifyContent: "space-between",
-                width: "100%", padding: "1px 0 2px",
-                background: "transparent", border: "none",
-                borderRadius: 3,
-                cursor: onSelect && band ? "pointer" : "default",
-                boxShadow: tourStep === "blend-ranges" || selected
-                  ? `0 0 0 1.5px ${theme.terra}`
-                  : "none",
-                animation: tourStep === "blend-ranges"
-                  ? "tourTogglePulse 1.9s ease-in-out infinite"
-                  : undefined,
-                transition: "box-shadow 0.15s ease",
-              }}
-            >
+            <div style={{
+              display: "flex", justifyContent: "space-between",
+              alignItems: "center", width: "100%", padding: "1px 0 2px",
+            }}>
               {endLabel(ends[0])}
+              {word && (
+                <button
+                  type="button"
+                  data-testid="range-word"
+                  title={tapHint}
+                  aria-label={tapHint}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelect && onSelect(selected ? null : band.kind);
+                  }}
+                  style={{
+                    background: "transparent", border: "none",
+                    borderRadius: 3, padding: "0 6px",
+                    cursor: onSelect ? "pointer" : "default",
+                    fontFamily: ff.sans, fontSize: 8.5,
+                    letterSpacing: "0.16em", textTransform: "uppercase",
+                    color: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
+                    boxShadow: selected ? `0 0 0 1.5px ${theme.terra}` : "none",
+                    transition: "box-shadow 0.15s ease",
+                  }}
+                >{word}</button>
+              )}
               {endLabel(ends[1])}
-            </button>
+            </div>
           );
         };
 
@@ -1260,6 +1361,9 @@ export const BlendExtractionExplorer = ({
                           onChange={(e) => setTempC(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("tempC", tempCRange[0], tempCRange[1]) }}
                         />
+                        <RangeGhost
+                          rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
+                        />
                         <RangeBands
                           rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
                           selected={bandSelected.tempC}
@@ -1281,6 +1385,9 @@ export const BlendExtractionExplorer = ({
                           value={timeS}
                           onChange={(e) => setTimeS(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("timeS", timeSRange[0], timeSRange[1]) }}
+                        />
+                        <RangeGhost
+                          rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
                         />
                         <RangeBands
                           rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"

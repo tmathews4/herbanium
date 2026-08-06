@@ -17,6 +17,7 @@
    the recipe view, but the default landing is the journal entry.
    ────────────────────────────────────────────────────────────── */
 
+import { useDockHeight } from "../helpers/dock";
 import React, { useState } from "react";
 import { Flower, Kettle } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
@@ -33,6 +34,11 @@ const formatBrewTime = (s) => {
 };
 
 export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain, patchSessionMoods, dismissSessionMoods }) => {
+  /* The action floats over the page rather than scrolling with it, so
+     the scroll area is padded by however tall the bar measures. Same
+     arrangement the recipe and ingredient docks use. */
+  const barRef = React.useRef(null);
+  const barH = useDockHeight(barRef);
   const { unit } = useUnit();
   const blend = session ? getBlend(session.blendId) : null;
   // Append-a-note state — collapsed by default. Opens to a dashed
@@ -137,15 +143,21 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
   const [scrolled, setScrolled] = useState(false);
 
   return (
+    <div style={{
+      position: "absolute", top: 0, left: 0, right: 0,
+      // Stops at the dock instead of covering it — the main menu is
+      // never not on screen. Falls back to 0px so the screen still
+      // fills its container if rendered outside the app shell.
+      bottom: "var(--app-dock-h, 0px)", zIndex: 30,
+      background: theme.ivory,
+    }}>
     <div
       onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
       style={{
-        position: "absolute", top: 0, left: 0, right: 0,
-        // Stops at the dock instead of covering it — the main menu is
-        // never not on screen. Falls back to 0px so the screen still
-        // fills its container if rendered outside the app shell.
-        bottom: "var(--app-dock-h, 0px)", zIndex: 30,
-        background: theme.ivory, overflowY: "auto",
+        position: "absolute", inset: 0,
+        overflowY: "auto",
+        // Room for the floating action, measured rather than assumed.
+        paddingBottom: barH,
       }}
     >
       {/* Sticky header — back button + eyebrow stay pinned to the
@@ -408,25 +420,56 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
         </div>
       )}
 
-      {/* Brew again — primary CTA tucked at the bottom so the
-          journal-y read of the cup comes first and the action lives
-          where the user lands when they finish reading. Hands the
-          blend straight to startBrew with the original target moods
-          carried forward as a sensible default; the user can still
-          adjust intent on the steep page. */}
+      </div>
+      </div>
+
+      {/* Brew again — a DOCK, like every other committing action in the
+          app. It was a filled terra slab in the scroll flow, so it
+          scrolled away with the page: on a long cup with notes you had
+          to scroll back down to reach the one thing you came to do.
+
+          Same language as the brew row, the steep controls and the
+          confirm prompt's footer — square, transparent, over the same
+          glass, with the page reading through it as it scrolls
+          underneath. Terra carries the primacy rather than a fill.
+
+          NO CONFIRMATION, deliberately. This is the quick-brew case —
+          a cup you've already drunk and are choosing again — and the
+          prompt exists to catch an accidental commit while dialling
+          something in. There's nothing being dialled here. */}
       {onBrewAgain && (
-        <div style={{ marginTop: 22 }}>
-          <Button
-            variant="primary" tone="terra" fullWidth
+        <div ref={barRef} style={{
+          /* ABSOLUTE, NOT STICKY. Sticky is confined to its parent's
+             box, and this was the last child of the padded content
+             div — so it had no travel and only reached the bar's
+             position once you'd scrolled all the way down, which is
+             precisely when you no longer needed it pinned. Out of the
+             scroll flow entirely now, with the page running underneath
+             so the glass has something to show. */
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          display: "flex", alignItems: "stretch",
+          background: "rgba(var(--ivory-rgb),0.58)",
+          backdropFilter: "blur(9px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.1)",
+          borderTop: `1px solid ${theme.rule}`,
+        }}>
+          <button
+            data-testid="cup-brew-again"
             onClick={onBrewAgain}
-            icon={<Kettle size={18} c={theme.cream} />}
-            style={{ fontSize: 16, padding: "13px 16px", gap: 10 }}
+            style={{
+              flex: 1,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              background: "transparent", border: "none", borderRadius: 0,
+              padding: "15px 12px", cursor: "pointer",
+              fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+              fontWeight: 600, color: theme.terra,
+            }}
           >
-            Brew again →
-          </Button>
+            <Kettle size={14} c={theme.terra} />
+            brew again →
+          </button>
         </div>
       )}
-      </div>
     </div>
   );
 };

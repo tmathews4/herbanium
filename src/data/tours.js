@@ -124,9 +124,14 @@ export const SCREEN_TOURS = {
     // whole slider block in made the union tall enough that the callout
     // had nowhere to sit but on top of it — covering the very thing the
     // step is describing.
+    // The recommendation is painted INTO the track now — a coloured
+    // stretch of the rail rather than a band beneath it — so the copy
+    // points at the rail and the highlight traces the coloured span
+    // (see RangeGhost). "Tap it" moved to the word underneath, because
+    // the rail itself has to stay draggable.
     { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
       familyMode: true,
-      body: "The shaded band under the track is where these leaves agree \u2014 brew inside it and every ingredient is working. Tap it for the reasoning." },
+      body: "The coloured stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath for the reasoning." },
     // Lights the WHOLE brew window and pulses the button inside it —
     // the same shape as the pills step. The window is what you've been
     // setting up across the last four steps; Brew is what you do with
