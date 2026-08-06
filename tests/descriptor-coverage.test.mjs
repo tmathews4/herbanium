@@ -128,10 +128,20 @@ test("every palate axis explains itself", () => {
   assert(missing.length === 0, `palate axes with no description: ${missing.join(", ")}`);
 });
 
-test("every mood explains itself", () => {
-  const missing = MOOD_VOCABULARY.map(f => f.label)
-    .filter(l => !EFFECT_DESCRIPTIONS[l]?.summary);
-  assert(missing.length === 0, `mood bars with no description: ${missing.join(", ")}`);
+test("every mood explains itself — by label, token AND family key", () => {
+  // ALL THREE, because the strips don't agree on which they draw. The
+  // Mind and Body strips render family KEYS (`heat`, `cool`, `sleep`),
+  // the flavour strip renders labels, and Detailed rows render tokens.
+  // Checking labels alone is what let `heat` go mute: the key had no
+  // entry, the label did, and the guard was looking at the label.
+  const missing = [];
+  for (const f of MOOD_VOCABULARY) {
+    for (const key of [f.label, f.family, ...f.leaves.map(l => l.token)]) {
+      if (!EFFECT_DESCRIPTIONS[key]?.summary) missing.push(`${f.family} -> "${key}"`);
+    }
+  }
+  assert(missing.length === 0,
+    `these render somewhere and open nothing:\n  ${missing.join("\n  ")}`);
 });
 
 test("every recorded gap is still a real, reachable word", () => {

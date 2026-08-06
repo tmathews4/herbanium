@@ -268,6 +268,17 @@ export const MOOD_LEAF_LABEL = Object.fromEntries(
 
 /** Definition for a leaf token or a family key — whichever is asked for. */
 export const MOOD_DESCRIPTIONS = Object.fromEntries([
+  // BY FAMILY KEY FIRST. The Mind and Body strips draw their rows from
+  // family keys, not labels and not tokens — `heat`, `cool`, `sleep` —
+  // so a family whose key differs from its leaf's token had nothing to
+  // find. `heat` went mute exactly that way: it used to be rescued by
+  // the warming leaf carrying `label: "heat"`, and aligning leaf labels
+  // to their families removed the rescue without removing the need.
+  //
+  // Keyed off the family's first leaf, which is every family here. Laid
+  // down first so anything more specific below overwrites it.
+  ...MOOD_VOCABULARY.filter(f => f.leaves.length)
+    .map(f => [f.family, { summary: f.leaves[0].summary, body: f.leaves[0].body }]),
   ...MOOD_VOCABULARY.flatMap(f => f.leaves.map(l =>
     [l.token, { summary: l.summary, body: l.body }])),
   // Family-level entries, keyed by the family's LABEL, which is what

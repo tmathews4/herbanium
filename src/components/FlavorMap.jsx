@@ -1127,10 +1127,24 @@ const TrackMap = ({
             const warn = warningFor(name);
             const here = isWarningHere(warn);
             const isSelected = selectedTrack === name;
-            const hasDescription = !!descriptionFor(name);
+            // A SUMMARY, not merely an entry. descriptionFor returns an
+            // object, so `{summary: ""}` is truthy — which made a row
+            // clickable that opens a panel with nothing in it, and made
+            // every guard that trusts this flag report the row as fine.
+            const hasDescription = !!descriptionFor(name)?.summary;
             return (
               <div
                 key={name}
+                // Enumerable from a test, and self-reporting about the
+                // thing that silently breaks: a row with no description
+                // gets no click handler and no tooltip, so it looks
+                // identical to one that explains itself and simply does
+                // nothing when tapped. e2e/bar-descriptors.spec.ts walks
+                // every rendered row, in both modes, and fails on any
+                // that says 0 here.
+                data-testid="bar-row"
+                data-bar={name}
+                data-describable={hasDescription ? "1" : "0"}
                 onClick={hasDescription ? () => toggleSelected(name) : undefined}
                 title={hasDescription ? "tap for definition" : undefined}
                 style={{
@@ -1209,7 +1223,11 @@ const TrackMap = ({
             const { name } = item;
             const warn = warningFor(name);
             const isSelected = selectedTrack === name;
-            const hasDescription = !!descriptionFor(name);
+            // A SUMMARY, not merely an entry. descriptionFor returns an
+            // object, so `{summary: ""}` is truthy — which made a row
+            // clickable that opens a panel with nothing in it, and made
+            // every guard that trusts this flag report the row as fine.
+            const hasDescription = !!descriptionFor(name)?.summary;
             return (
               <div
                 key={name}
