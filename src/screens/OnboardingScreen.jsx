@@ -125,7 +125,15 @@ export const OnboardingScreen = ({ onComplete }) => {
         maxWidth: 520, width: "100%", alignSelf: "center",
       }}>
         {step === 0 && <StepWelcome />}
-        {step === 1 && <StepName name={name} setName={setName} />}
+        {step === 1 && (
+          <StepName
+            name={name}
+            setName={setName}
+            // Guarded by the same condition that greys out Next, so
+            // Return can't skip a step the button wouldn't.
+            onSubmit={() => { if (canAdvance) advance(); }}
+          />
+        )}
         {step === 2 && <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />}
         {step === 3 && <StepDraw value={draw} setValue={setDraw} />}
         {step === 4 && <StepFlavors value={flavors} setValue={setFlavors} />}
@@ -271,7 +279,10 @@ const WelcomeBullet = ({ title, body }) => (
    Step 1: Name
    ────────────────────────────────────────────────────────────── */
 
-const StepName = ({ name, setName }) => (
+// `onSubmit` is the same advance the Next button runs, not a parallel
+// path — Enter must be subject to the same guard, or it would walk past
+// the empty-name check that greys the button out.
+const StepName = ({ name, setName, onSubmit }) => (
   <div style={{ textAlign: "center" }}>
     <div style={{
       fontFamily: ff.serif, fontSize: 32, color: theme.ink,
@@ -285,29 +296,47 @@ const StepName = ({ name, setName }) => (
     }}>
       A name, a handle, anything. We'll use it in greetings.
     </div>
-    <input
-      type="text"
-      value={name}
-      onChange={e => setName(e.target.value)}
-      placeholder="your name"
-      maxLength={30}
-      autoFocus
-      size={1}
-      style={{
-        display: "block",
-        width: "100%",
-        maxWidth: 280,
-        margin: "0 auto",
-        boxSizing: "border-box",
-        fontFamily: ff.serif, fontSize: 22, color: theme.ink,
-        background: "transparent",
-        border: "none",
-        borderBottom: `1px solid ${theme.rule}`,
-        padding: "8px 4px",
-        outline: "none",
-        textAlign: "center",
-      }}
-    />
+    {/* A REAL FORM, for the Return key.
+        Typing your name and reaching for Return is the obvious move,
+        and it did nothing — you had to dismiss the keyboard, find Next
+        underneath where the keyboard had been, and tap it. Three
+        actions for the one the user already made.
+
+        A form rather than an onKeyDown: a form with a single text input
+        submits implicitly on Return in every engine, and — the part
+        that matters on a phone — it tells the on-screen keyboard this
+        field completes something, so the key relabels itself instead of
+        offering a newline the input can't take. `enterKeyHint` names
+        what it should say. */}
+    <form
+      onSubmit={(e) => { e.preventDefault(); onSubmit?.(); }}
+      style={{ margin: 0 }}
+    >
+      <input
+        type="text"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="your name"
+        maxLength={30}
+        autoFocus
+        size={1}
+        enterKeyHint="next"
+        style={{
+          display: "block",
+          width: "100%",
+          maxWidth: 280,
+          margin: "0 auto",
+          boxSizing: "border-box",
+          fontFamily: ff.serif, fontSize: 22, color: theme.ink,
+          background: "transparent",
+          border: "none",
+          borderBottom: `1px solid ${theme.rule}`,
+          padding: "8px 4px",
+          outline: "none",
+          textAlign: "center",
+        }}
+      />
+    </form>
     <div style={{
       marginTop: 10,
       fontFamily: ff.sans, fontSize: 11, color: theme.ash,

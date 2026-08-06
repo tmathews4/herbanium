@@ -2643,13 +2643,6 @@ export default function App() {
           // position:absolute and would ignore it. The status-bar
           // buffer lives inside OnboardingScreen itself.
         }}>
-          {/* Google Fonts */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-          />
           <OnboardingScreen onComplete={handleOnboardingComplete} />
         </div>
       </UnitContext.Provider>
@@ -2687,13 +2680,6 @@ export default function App() {
           boxSizing: "border-box",
           paddingTop: isNativeApp() ? 48 : 12,
         }}>
-          {/* Google Fonts */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-          />
           {appContent}
         </div>
       </UnitContext.Provider>
@@ -2712,13 +2698,6 @@ export default function App() {
       padding: "40px 20px",
       fontFamily: ff.sans,
     }}>
-      {/* Google Fonts */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet"
-      />
 
       {/* Masthead */}
       <div style={{ maxWidth: 1400, margin: "0 auto 32px", textAlign: "center" }}>

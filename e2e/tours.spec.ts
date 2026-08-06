@@ -689,6 +689,144 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 });
 
 /* ──────────────────────────────────────────────────────────────
+   THE PULSE TRACES THE CONTROL, EXACTLY.
+
+   Two different highlights run during a tour and both are shape-
+   sensitive:
+
+     the white breathing border — GuidedTour's spotlight, which reads
+     the target's own computed border-radius so the glow follows a
+     button's corners rather than drawing a generic box round it;
+
+     the terra pulse — tourTogglePulse, painted on the controls a step
+     is teaching (the Simple/Detailed toggle, the axis pills, Brew).
+
+   The terra one is the fragile one, because on Brew it lives on a
+   WRAPPER around the button rather than on the button itself. A
+   wrapper's box and radius are maintained by hand, so they drift from
+   what they're wrapping the moment the control's shape changes — and
+   the drift is invisible until a tour runs. It has happened: the
+   wrapper carried paddingBottom for layout and the glow traced a box
+   ~6px taller than the button, hanging below it.
+
+   The failure this now also covers: change a pill button to a square
+   one and forget the wrapper, and a rounded glow floats around a
+   square control. Any radius or box mismatch fails here.
+   ────────────────────────────────────────────────────────────── */
+test.describe("the tour's pulse traces the control it points at", () => {
+  slowBecauseItWalksATour();
+
+  async function advanceTo(page: Page, text: string) {
+    const callout = page.getByTestId("tour-callout");
+    await expect(callout, "blend tour should start").toBeVisible();
+    for (let guard = 0; guard < 20; guard++) {
+      if ((await callout.innerText()).includes(text)) return;
+      await callout.getByRole("button", { name: "Next", exact: true }).click();
+    }
+    throw new Error(`Blend tour never reached the "${text}" step`);
+  }
+
+  // THE RULE IS STRUCTURAL, not geometric, and that's the whole point.
+  //
+  // A spread box-shadow is drawn against its own element's border box
+  // and border-radius, by CSS, always. So there is no shape logic to get
+  // right and nothing to keep in sync — provided the shadow is on the
+  // control. Every version of this bug has been the same mistake: the
+  // pulse painted on a WRAPPER whose box and radius were then maintained
+  // by hand against the thing inside it.
+  //
+  // So the check is "is this element the control?", answered as: a real
+  // <button>, or an element carrying its own visible border (the
+  // segmented toggles are spans that draw their own outline). A bare
+  // wrapper div satisfies neither, which is exactly the shape that used
+  // to hold Brew's pulse.
+  //
+  // Measuring geometry instead was the first attempt and it doesn't
+  // work: it needs to know which child is "the control", and once the
+  // pulse is correctly on the button its only element child is the
+  // kettle icon — so a box comparison reports a 10.5px mismatch against
+  // a perfectly correct layout.
+  const pulseHost = (page: Page, tourId: string) => page.evaluate((id) => {
+    const el = document.querySelector(`[data-tour="${id}"]`) as HTMLElement | null;
+    if (!el) return { error: `no [data-tour="${id}"] on screen` };
+    const cs = getComputedStyle(el);
+    if (!/tourTogglePulse/.test(cs.animationName)) {
+      return { error: `[data-tour="${id}"] isn't pulsing (animation-name: ${cs.animationName})` };
+    }
+    return {
+      tag: el.tagName.toLowerCase(),
+      role: el.getAttribute("role"),
+      borderWidth: parseFloat(cs.borderTopWidth) || 0,
+      radius: cs.borderRadius,
+      childTags: [...el.children].map(c => c.tagName.toLowerCase()),
+    };
+  }, tourId);
+
+  async function expectPulseOnTheControl(page: Page, tourId: string) {
+    const f = await pulseHost(page, tourId) as any;
+    expect(f.error, `${tourId}: ${f.error}`).toBeUndefined();
+
+    const isControl = f.tag === "button" || f.role === "button" || f.borderWidth > 0;
+    expect(isControl,
+      `${tourId}: the pulse is on a <${f.tag}> with no border of its own, wrapping `
+      + `[${f.childTags.join(", ")}]. That's a wrapper, and its box and radius have to be `
+      + `kept in step with the control by hand — which is how the glow ended up 6px below `
+      + `Brew, and how it would have stayed a pill around a square button. Put the pulse on `
+      + `the control and CSS traces it for free.`)
+      .toBe(true);
+  }
+
+  test("Brew's pulse matches Brew's own shape", async ({ page }) => {
+    // The one that sits on a wrapper, so the only one that can drift.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "Brew it");
+    await expectPulseOnTheControl(page, "blend-brew");
+  });
+
+  test("the toggle and pill pulses trace their own borders", async ({ page }) => {
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+
+    await advanceTo(page, "Simple reads the taste by family");
+    await expectPulseOnTheControl(page, "blend-mode");
+
+    await advanceTo(page, "This is Time");
+    await expectPulseOnTheControl(page, "blend-axis");
+  });
+
+  test("the spotlight's white border takes the target's corners", async ({ page }) => {
+    // The other highlight. GuidedTour reads the target's computed radius
+    // into the cutout so the hole hugs the shape; a square control must
+    // get a square hole.
+    //
+    // A SINGLE-TARGET step, necessarily. Steps that light several
+    // elements at once — "Brew it" spotlights blend-brew, blend-controls
+    // and blend-sliders together — have no one shape to trace, and
+    // GuidedTour deliberately takes the last element's corners for the
+    // group. Asserting the target's own radius there fails against
+    // correct behaviour: the first draft of this test did exactly that
+    // and reported "the cutout is 0px around a 999px target", which was
+    // the union's radius doing its job.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "The brew row");
+
+    const radii = await page.evaluate(() => {
+      const t = document.querySelector('[data-tour="blend-controls"]') as HTMLElement;
+      const spot = document.querySelector('[data-testid="tour-spotlight"]') as HTMLElement;
+      return {
+        target: getComputedStyle(t).borderRadius,
+        spotlight: getComputedStyle(spot).borderRadius,
+      };
+    });
+    expect(radii.spotlight,
+      `the cutout is ${radii.spotlight} around a ${radii.target} target`)
+      .toBe(radii.target);
+  });
+});
+
+/* ──────────────────────────────────────────────────────────────
    THE CALLOUT HOLDS STILL.
 
    The spotlight tracks its target and the callout does not, and the

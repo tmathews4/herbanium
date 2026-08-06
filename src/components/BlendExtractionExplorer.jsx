@@ -922,42 +922,52 @@ export const BlendExtractionExplorer = ({
                 Sibling buttons rather than one nested inside the other:
                 a button inside a button is invalid, and the whole reason
                 for the split is that these are two different actions. */}
+            {/* BREW IS THE CORNER, not a button placed near it.
+                It was a pill floating inside 12px of padding, which left
+                it reading as an object dropped into the row rather than
+                part of it — and sitting visibly low, because the row's
+                padding was 8px at the top and 0 at the bottom while the
+                pill centred itself against the readout beside it.
+
+                Now the row has no padding of its own and stretches its
+                children, so Brew fills the header's full height and runs
+                flush into the top-left corner of the panel. The padding
+                moved onto the toggle, which is the only child that still
+                wants breathing room. Square corners follow from being a
+                corner: a radius here would leave a sliver of dock
+                showing through the angle.
+
+                NO WRAPPER. The tour's terra pulse is a spread box-shadow,
+                and a spread shadow traces its own element's border-radius
+                for free — so the only way it can mis-trace is by being
+                painted on a box that ISN'T the control. It used to be:
+                a wrapper div held the radius and the animation, and the
+                two were maintained by hand against the button inside it.
+                That drifted once already (padding on the wrapper hung the
+                glow ~6px below the button) and would have drifted again
+                the moment this shape went square. The pulse lives on the
+                button now, where CSS keeps it honest. */}
             <div style={{
-              padding: "8px 12px 0",
-              display: "flex", alignItems: "center", gap: 8,
+              display: "flex", alignItems: "stretch", gap: 0,
               borderBottom: shownControlsOpen
                 ? `2px solid ${theme.terra}`
                 : "2px solid transparent",
               marginBottom: -1,
               transition: "border-color 0.2s ease",
             }}>
-              {brewAction && (
-                // display:flex so the wrapper hugs the button exactly —
-                // a block wrapper picks up line-height slack under it,
-                // and the pulse is a box-shadow on THIS box, so any
-                // slack shows as the glow hanging off the bottom.
-                // Vertical placement is the row's job (alignItems),
-                // not padding here, for the same reason.
-                <div data-tour="blend-brew" style={{
-                  flexShrink: 0,
-                  display: "flex",
-                  borderRadius: 999,
-                  animation: tourStep === "blend-brew"
-                    ? "tourTogglePulse 1.9s ease-in-out infinite"
-                    : undefined,
-                }}>
-                  {brewAction}
-                </div>
-              )}
+              {brewAction}
               <button
                 data-tour="blend-controls"
                 onClick={() => setControlsOpen(v => !v)}
                 aria-expanded={shownControlsOpen}
                 aria-label={shownControlsOpen ? "hide the brew sliders" : "show the brew sliders"}
                 style={{
+                  // Carries the row's horizontal breathing room now that
+                  // the row itself has none — Brew needs to reach the
+                  // edge, this doesn't.
                   flex: 1, background: "transparent", border: "none",
-                  cursor: "pointer", padding: "6px 4px 8px",
-                  display: "flex", alignItems: "baseline",
+                  cursor: "pointer", padding: "10px 12px 10px 10px",
+                  display: "flex", alignItems: "center",
                   justifyContent: brewAction ? "flex-end" : "center", gap: 8,
                   fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
                   fontWeight: shownControlsOpen ? 600 : 500,

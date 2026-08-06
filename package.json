@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node tests/literature.test.mjs && node tests/curated-blends.test.mjs && node tests/ingredient-fit.test.mjs && node tests/blend-perception.test.mjs && node tests/calibration.test.mjs && node tests/perception-extras.test.mjs && node tests/profile-keys.test.mjs && node tests/tone-guardrails.test.mjs && node tests/summoning-text.test.mjs && node tests/tour-layout.test.mjs && node tests/viewport-units.test.mjs && node tests/register-collision.test.mjs && node tests/vocabulary-grammar.test.mjs && node tests/lodestone.test.mjs && node tests/follow-up.test.mjs && node tests/research-parity.test.mjs && node tests/home-poem.test.mjs",
+    "test": "node tests/literature.test.mjs && node tests/curated-blends.test.mjs && node tests/ingredient-fit.test.mjs && node tests/blend-perception.test.mjs && node tests/calibration.test.mjs && node tests/perception-extras.test.mjs && node tests/profile-keys.test.mjs && node tests/tone-guardrails.test.mjs && node tests/summoning-text.test.mjs && node tests/tour-layout.test.mjs && node tests/viewport-units.test.mjs && node tests/register-collision.test.mjs && node tests/fonts-bundled.test.mjs && node tests/vocabulary-grammar.test.mjs && node tests/lodestone.test.mjs && node tests/follow-up.test.mjs && node tests/research-parity.test.mjs && node tests/home-poem.test.mjs",
     "preview-ingredient": "node tools/preview-ingredient.mjs",
     "check-ingredient": "node tools/check-ingredient.mjs",
     "suggest-blends": "node tools/suggest-blends.mjs",

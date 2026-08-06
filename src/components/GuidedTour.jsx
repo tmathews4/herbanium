@@ -531,6 +531,20 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         if (!targetInDock && box.top + box.height > dockTop) {
           box.height = Math.max(0, dockTop - box.top);
         }
+        // AND THE SAME RULE FROM THE OTHER SIDE. A dock target's own
+        // padding can push its hole up past the dock's top edge, which
+        // spills a bright halo onto the page above — the mirror of the
+        // bug the clamp above exists for, and it stayed hidden only
+        // because the brew row used to carry 8px of top padding that
+        // absorbed it. Making Brew flush to the corner spent that
+        // padding, and the halo appeared.
+        //
+        // The rule was always "the cutout stays on one side of the
+        // line". It just wasn't written down for both sides.
+        if (targetInDock && box.top < dockTop) {
+          box.height = Math.max(0, box.height - (dockTop - box.top));
+          box.top = dockTop;
+        }
         return box;
       })()
     : null;

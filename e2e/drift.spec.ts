@@ -88,6 +88,11 @@ const survey = (page: Page) => page.evaluate(() => {
   const fonts = {
     sans: document.fonts.check('16px "Instrument Sans"'),
     serif: document.fonts.check('16px "Fraunces"'),
+    // Added when the fonts were bundled. Mono was the family that
+    // proved the point: it was only ever requested by <link> tags on
+    // branches that unmount, so every monospace readout in the running
+    // app fell back to ui-monospace and nothing noticed.
+    mono: document.fonts.check('16px "JetBrains Mono"'),
   };
 
   // Anything poking out sideways. Horizontal scroll on a phone is the
@@ -130,7 +135,7 @@ function report(label: string, s: Awaited<ReturnType<typeof survey>>) {
     + `  flavours ${pct(s.flavoursPct)}`
     + `  graph ${pct(s.graphPct)}`
     + `  sliders ${pct(s.slidersPct)}`
-    + `  fonts ${s.fonts.sans ? "sans✓" : "sans✗"}/${s.fonts.serif ? "serif✓" : "serif✗"}`,
+    + `  fonts ${s.fonts.sans ? "sans✓" : "sans✗"}/${s.fonts.serif ? "serif✓" : "serif✗"}/${s.fonts.mono ? "mono✓" : "mono✗"}`,
   );
 }
 
@@ -236,11 +241,11 @@ test("proportions, for reading across the matrix", async ({ page }) => {
   //
   // Soft on purpose — a runner with no network isn't a product bug, and
   // failing the build for it would train everyone to ignore this file.
-  if (!s.fonts.sans || !s.fonts.serif) {
+  if (!s.fonts.sans || !s.fonts.serif || !s.fonts.mono) {
     // eslint-disable-next-line no-console
     console.log(`  [${test.info().project.name}] WARNING: webfonts did not load `
-      + `(sans=${s.fonts.sans}, serif=${s.fonts.serif}) — proportions above describe fallback faces. `
-      + `The app loads fonts from the Google Fonts CDN at runtime; see index.html.`);
+      + `(sans=${s.fonts.sans}, serif=${s.fonts.serif}, mono=${s.fonts.mono}) — proportions above describe fallback faces. `
+      + `The fonts are bundled now (see the @font-face block in src/index.css), so this should not happen.`);
   }
   expect(s.vh, "a viewport height is the basis of every number here").toBeGreaterThan(0);
 });

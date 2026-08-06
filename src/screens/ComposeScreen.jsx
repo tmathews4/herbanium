@@ -1734,26 +1734,27 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,
       }}>
-        {/* Helper eyebrow — anchors "parts" to a physical
-            measurement so the caffeine and balance numbers
-            downstream don't read as arbitrary. The implicit
-            message: each tap on the stepper adds roughly a
-            gram of dry leaf, and the bars below scale from the
-            total dose. Single uppercase line keeps the at-rest
-            visual weight light while the steppers themselves
-            carry the interaction. */}
+        {/* Helper eyebrow — anchors "parts" to a physical measurement,
+            so a stepper tap reads as roughly a gram of dry leaf rather
+            than an abstract unit.
+            ONE LINE. It used to carry a second, "caffeine + balance
+            scale from total", explaining that the bars below are
+            computed off the whole dose. True, but it was answering a
+            question nobody had yet — the eyebrow sits above the
+            steppers, several sections before those bars — and a
+            two-line uppercase block at 9.5px is a wall at the exact
+            moment the user is trying to get on with adding leaves. The
+            bars scaling with the total is legible from watching them
+            move, which is the better teacher. */}
         {reverseIngs.length > 0 && (
           <div style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
             textTransform: "uppercase", color: theme.ash,
             marginBottom: 8, lineHeight: 1.5,
           }}>
-            <div>
-              {weightUnit === "g"
-                ? "1 part ≈ 1 g of dry leaf"
-                : "1 part ≈ ½ tsp of dry leaf"}
-            </div>
-            <div>caffeine + balance scale from total</div>
+            {weightUnit === "g"
+              ? "1 part ≈ 1 g of dry leaf"
+              : "1 part ≈ ½ tsp of dry leaf"}
           </div>
         )}
         {reverseIngs.map((id, idx) => {
@@ -1966,7 +1967,16 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             // panel readable, and saving is the occasional act.
             brewAction={(
               <Button
-                variant="primary"
+                // SECONDARY, not primary, and not for emphasis reasons.
+                // A filled block read as an object sitting ON the dock;
+                // the corner should read as part of the surface. Primary
+                // also can't be made transparent — its hover handlers
+                // repaint the background to the accent on every enter and
+                // leave, so a transparent primary flashes solid on the
+                // first mouse-over. Secondary is transparent at rest by
+                // construction.
+                variant="secondary"
+                tone="bark"
                 disabled={reverseIngs.length === 0}
                 onClick={() => {
                   if (reverseIngs.length === 0) return;
@@ -1994,14 +2004,53 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                     "", ["calm"],
                   );
                 }}
-                icon={<Kettle size={14} c={theme.cream} />}
-                // Compact pill, sized to sit in the dock's header row
-                // beside the readout rather than as a band under the
-                // slider. Short label for the same reason: "Start
-                // brewing" needs a full-width button, "Brew" doesn't.
+                icon={<Kettle size={14} c={theme.bark} />}
+                // THE CORNER OF THE PANEL, not a pill inside it. Square,
+                // flush left, stretched to the header's full height, so
+                // it reads as part of the dock rather than an object
+                // resting on it — and the vertical centring question
+                // disappears with the free space it was floating in.
+                //
+                // It takes the dock's own surface rather than a fill of
+                // its own: the corner is a REGION of the bar, marked off
+                // by a single rule down its right edge, not a slab laid
+                // on top of it. A filled block was tried first and read
+                // as exactly that slab — heavy, and louder than the
+                // readout it shares the row with.
+                //
+                // No elevation, for the same reason: a shadow is what a
+                // raised object casts, and this is a face of the surface
+                // itself.
+                //
+                // The tour's pulse is applied HERE rather than by a
+                // wrapper in the explorer. It's a spread box-shadow, so
+                // it traces whatever radius this button has, for free
+                // and forever — a wrapper would have to be told the
+                // shape, and would have been wrong the moment this went
+                // square. data-tour rides along because Button spreads
+                // ...rest onto the real element.
+                data-tour="blend-brew"
                 style={{
-                  fontSize: 12, padding: "5px 14px", gap: 6,
-                  borderRadius: 999, letterSpacing: "0.04em",
+                  fontSize: 12, padding: "0 16px", gap: 6,
+                  borderRadius: 0, letterSpacing: "0.04em",
+                  alignSelf: "stretch", boxShadow: "none",
+                  background: "transparent",
+                  color: theme.bark,
+                  // Secondary draws a full outline; the corner wants only
+                  // the edge that divides it from the readout.
+                  //
+                  // The dock's own hairline, not a brown one. Every
+                  // divider in this bar is `ruleSoft` — the tab strip's
+                  // vertical rule, the panel's bottom edge — so a bark
+                  // line here would have been the single darkest stroke
+                  // in the dock, drawing more attention than the button
+                  // it separates. Same token means it reads as the same
+                  // kind of edge, and the cell reads as a cell.
+                  border: "none",
+                  borderRight: `1px solid ${theme.ruleSoft}`,
+                  animation: blendTourStep === "blend-brew"
+                    ? "tourTogglePulse 1.9s ease-in-out infinite"
+                    : undefined,
                 }}
               >Brew</Button>
             )}
