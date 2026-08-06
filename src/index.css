@@ -114,6 +114,89 @@
 }
 
 /* ──────────────────────────────────────────────────────────────
+   THE BREW SLIDER'S TRACK IS THE INFORMATION.
+
+   The recommended range used to be a separate object — a band under
+   the track, then ticks over it — and it kept colliding with whatever
+   shared its row. It also claimed a cliff edge the chemistry doesn't
+   have: extraction quality varies CONTINUOUSLY across the range, which
+   is exactly what the profiles encode with their over-pull rows. A
+   binary band says "good here, bad there"; a ramp says what's true.
+
+   So the track carries it. Under-extracted at the cool/short end,
+   the sweet spot in sage, over-pulled climbing through ochre to terra.
+   Zero extra rows, nothing to collide with, and the thumb's position
+   against the ramp answers "is this cup pushing too hard?" without a
+   word of prose.
+
+   CUSTOM TRACK MEANS BOTH ENGINES, BY HAND. `accentColor` — what this
+   input used before — paints a fill and nothing else, so it can't do
+   this. Blink/WebKit want ::-webkit-slider-runnable-track and
+   ::-webkit-slider-thumb; Gecko wants ::-moz-range-track and
+   ::-moz-range-thumb, plus ::-moz-range-progress explicitly cleared or
+   Firefox draws its own fill over the ramp. They cannot be combined
+   into one rule: an unknown pseudo-element invalidates the whole
+   selector list, so each engine gets its own block.
+
+   --brew-ramp is set inline per axis, since the stops depend on where
+   that blend's recommended range actually falls.
+   ────────────────────────────────────────────────────────────── */
+.brew-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
+  display: block;
+  margin: 0;
+  height: 20px;
+  cursor: pointer;
+}
+.brew-slider:focus { outline: none; }
+.brew-slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(var(--terra-rgb), 0.45); }
+.brew-slider:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(var(--terra-rgb), 0.45); }
+
+.brew-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--brew-ramp, var(--rule));
+  border: 1px solid rgba(var(--shadow-rgb), 0.08);
+}
+.brew-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--brew-ramp, var(--rule));
+  border: 1px solid rgba(var(--shadow-rgb), 0.08);
+}
+/* Firefox fills the track to the thumb by default, which would paint
+   over the ramp the fill is supposed to be read against. */
+.brew-slider::-moz-range-progress { background: transparent; }
+
+/* The knob reads as a physical marker ON the ramp rather than the end
+   of a fill — ivory with an ink ring, so it stays legible over green,
+   amber and terra alike. margin-top centres it against the 8px track
+   (Blink measures thumb offset from the track's top edge; Gecko
+   centres for you, hence no equivalent there). */
+.brew-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--ink-soft);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.28);
+  margin-top: -6px;
+}
+.brew-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--ink-soft);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────
    Herbanium palette — CSS variables driven by prefers-color-scheme.
 
    Light theme (default) is the warm cream/ink register the app was

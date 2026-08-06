@@ -226,7 +226,7 @@ for (const withBrew of [false, true]) {
       // slider on screen spans the full row, so assert that rather than
       // just that the pills toggle something.
       //
-      // It opens on TIME: seconds against temperature's 5°C notches, so
+      // It opens on TIME: its own step rule against temperature's, so
       // a first drag moves the prediction bars as a gradient instead of
       // in six jumps. Asserted, not assumed — "which slider you meet
       // first" is a deliberate choice and silently flipping it would
@@ -245,21 +245,31 @@ for (const withBrew of [false, true]) {
       // can be re-tuned in brewBounds without a test that only ever
       // restated the constant back to itself.
       //
-      // Temperature is on 5°C notches for an unrelated reason worth not
-      // conflating: it's a value the user has to REPRODUCE at a kettle
-      // that probably has no thermostat, and the rest-time advice the
-      // app gives ("off the boil ~2 min") is only sayable against round
-      // numbers. Time's notches are about the slider; temp's are about
-      // the kettle. Checked as a pair because the asymmetry is the
-      // decision — either alone reads as an arbitrary constant.
+      // TEMPERATURE IS CONTINUOUS NOW, and this comment used to argue
+      // the opposite: 5°C notches because it's a value you have to
+      // REPRODUCE at a kettle with no thermostat, and because the
+      // rest-time advice was "only sayable against round numbers".
+      //
+      // The second half was simply wrong — restHintForCelsius bands on
+      // `>=`, so 97°C answers "about 20 seconds off the boil" exactly
+      // as 95°C does. There were never gaps to avoid.
+      //
+      // The first half is true and is the reason the notches were
+      // right for a long time, but it argues for imprecision in the
+      // INSTRUCTION, not in the control. Cinnamon settled it: its
+      // recommended window is 95-100°C, which at a 5°C step contained
+      // exactly two reachable values — a sweet spot with no interior,
+      // reported as "you can only move to the beginning and end, so it
+      // feels pointless". The hint carries the vagueness a kettle
+      // imposes; the slider doesn't have to.
       const timeStep = await slider.getAttribute("step");
       expect(["1", "5"], `time step should be range-appropriate, got ${timeStep}`)
         .toContain(timeStep);
 
       await page.getByTestId("brew-axis-tempC").click();
       await expect(slider, "still exactly one after swapping").toHaveCount(1);
-      await expect(slider, "temperature should stay on 5°C notches")
-        .toHaveAttribute("step", "5");
+      await expect(slider, "temperature should be continuous, not notched")
+        .toHaveAttribute("step", "1");
       expect(await slider.getAttribute("max"),
         "the pills should swap which axis is bound").not.toBe(timeMax);
       expect((await slider.boundingBox())!.width,
@@ -308,8 +318,10 @@ for (const withBrew of [false, true]) {
       await page.getByTestId("brew-axis-tempC").click();
       expect(await slider.getAttribute("max"),
         "the pills should swap the bound axis here too").not.toBe(timeMax);
-      await expect(slider, "and temperature keeps its 5°C notches")
-        .toHaveAttribute("step", "5");
+      // Continuous here too — see the note on the compose screen's
+      // slider above for why the notches went.
+      await expect(slider, "and temperature is continuous here too")
+        .toHaveAttribute("step", "1");
 
       // And it folds, same as the dock version.
       await controls.click();

@@ -31,8 +31,9 @@ import { theme, ff } from "../theme";
 import { useBrewDockId } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
-import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor } from "../algo/brewBounds";
+import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor, coupledBand } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
+import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
@@ -747,22 +748,116 @@ export const BlendExtractionExplorer = ({
           return { range: [best.a, best.b], coverage: maxCount, total: bandData.length };
         };
 
+        /* WHICH RANGE IS RECOMMENDED — resolved once, used twice.
+           The ramp is painted by the slider's own track (the parent
+           sets --brew-ramp) while the tap-for-reasoning lives on the
+           labels beneath it, so both need this and neither owns it. */
+        const resolveBand = (axis, rangeMin, rangeMax) => {
+          /* WHERE THE OTHER SLIDER IS SET CHANGES THE ANSWER.
+             Read off each profile's own diagonal, so dragging the
+             temperature slides the recommended steep and vice versa —
+             the tradeoff the two controls were hiding. Falls through to
+             the declared ranges when nothing has a profile to read. */
+          const coupled = coupledBand({
+            ingredients: bandData,
+            profiles: EXTRACTION_PROFILES,
+            axis,
+            otherValue: axis === "timeS" ? tempC : timeS,
+            // Only ever narrows what the leaves already agree on. No
+            // agreement, no band — the compromise path below handles
+            // that case and says so honestly.
+            within: intersect(axis),
+            minSpan: axis === "timeS" ? 60 : 4,
+          });
+          if (coupled) {
+            const [lo, hi] = coupled.map(v => (axis === "timeS" ? Math.round(v) : Math.round(v)));
+            if (hi > lo) {
+              return {
+                lo, hi, kind: "sweet",
+                /* "RESEARCHED AT", not "ideal". The band is where the
+                   docs actually sampled this pairing — it follows the
+                   profiles' own diagonal — and calling that ideal would
+                   claim a compensation model the research doesn't
+                   contain. Nothing here knows what hot-and-short tastes
+                   like, because nobody brewed it. */
+                hint: axis === "tempC"
+                  ? `Researched at ${Math.round(timeS / 60)} min: ${lo}–${hi}°C — tap for details`
+                  : `Researched at ${unit === "F" ? cToF(tempC) : tempC}°: ${Math.round(lo / 60)}–${Math.round(hi / 60)} min — tap for details`,
+              };
+            }
+          }
+          const ix = intersect(axis);
+          const fallback = ix ? null : bestCoverageZone(axis);
+          if (ix) {
+            return {
+              lo: ix[0], hi: ix[1], kind: "sweet",
+              hint: axis === "tempC"
+                ? `Sweet spot: ${ix[0]}–${ix[1]}°C — tap for details`
+                : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min — tap for details`,
+            };
+          }
+          if (fallback) {
+            const [a, b] = fallback.range;
+            return {
+              lo: a, hi: b, kind: "compromise",
+              hint: axis === "tempC"
+                ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`
+                : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`,
+            };
+          }
+          return null;
+        };
+
+        /* THE TRACK IS THE INFORMATION.
+           Read left to right it says what the cup is doing: under-
+           extracted at the cool/short end, the recommendation in sage,
+           then over-pull climbing through ochre into terra. That is
+           truer than the band it replaces — extraction quality varies
+           continuously, which is exactly what the profiles encode with
+           their over-pull rows, and a band drew a cliff where there is
+           a slope.
+
+           Soft edges rather than hard stops, for the same reason: a few
+           points of blend either side of each boundary says "around
+           here" instead of drawing a border the chemistry hasn't got. */
+        const rampFor = (axis, rangeMin, rangeMax) => {
+          const UNDER = "rgba(127,154,160,0.55)";   // sky — cool / brief
+          const GOOD  = "rgba(109,126,85,0.90)";    // sage — the recommendation
+          const WARM  = "rgba(189,148,76,0.85)";    // ochre — starting to pull
+          const HOT   = "rgba(176,84,47,0.90)";     // terra — over-pulled
+          const span = rangeMax - rangeMin;
+          const band = span > 0 ? resolveBand(axis, rangeMin, rangeMax) : null;
+          if (!band) {
+            /* NO CLAIM. When there's nothing to recommend, a ramp
+               running into terra would say "you're over-pulling" about
+               a position the app has no opinion on. Solid blue instead:
+               the base colour of the scale, saying "this is the range"
+               and nothing more. */
+            return UNDER;
+          }
+          const pct = (v) => Math.max(0, Math.min(100,
+            ((Math.max(rangeMin, Math.min(rangeMax, v)) - rangeMin) / span) * 100));
+          const lo = pct(band.lo);
+          const hi = pct(band.hi);
+          const blend = 4;
+          return `linear-gradient(90deg,`
+            + ` ${UNDER} 0%,`
+            + ` ${UNDER} ${Math.max(0, lo - blend)}%,`
+            + ` ${GOOD} ${lo}%,`
+            + ` ${GOOD} ${hi}%,`
+            + ` ${WARM} ${Math.min(100, hi + blend)}%,`
+            + ` ${HOT} 100%)`;
+        };
+
+        /* The ends of the track, labelled at the ends of the track, and
+           carrying the tap the tour promises ("tap it for the
+           reasoning"). One row, directly under the slider — the band
+           that used to need its own row is painted into the track now. */
         const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
-          /* THE ENDS OF THE TRACK, labelled at the ends of the track.
-             The range used to read as "0–20 min" tucked beside the
-             current value, so three numbers shared one corner and none
-             of them said which was which. Split to the extremes of the
-             row under the slider — the space the band already occupies
-             and mostly doesn't fill — each number now sits under the
-             end of the track it describes.
-
-             Behind the band rather than in front: the band is the
-             interactive thing here (tap it for the reasoning) and it
-             wins any overlap, which only happens when the recommended
-             range runs the full width — a cup with nothing to warn
-             about. */
+          const band = resolveBand(axis, rangeMin, rangeMax);
+          const tapHint = band?.hint || "the ends of the adjustable range";
           const endLabel = (text) => (
             <span aria-hidden style={{
               fontFamily: ff.mono, fontSize: 9, color: theme.ash,
@@ -770,122 +865,40 @@ export const BlendExtractionExplorer = ({
             }}>{text}</span>
           );
           // cToF + unit, the same conversion the readouts above use.
-          // `formatTemp` isn't a thing in this file — reaching for it
-          // threw on every temp render, which is a crash the time axis
-          // never saw because it never took that branch.
           const ends = axis === "tempC"
             ? [`${unit === "F" ? cToF(rangeMin) : rangeMin}°`,
                `${unit === "F" ? cToF(rangeMax) : rangeMax}°`]
             : [`${Math.round(rangeMin / 60)}m`, `${Math.round(rangeMax / 60)}m`];
-          // A ROW OF THEIR OWN, under the band rather than across it.
-          // Laid over the band they collided the moment the recommended
-          // range reached an end of the track — which is common, not an
-          // edge case: a blend whose sweet spot runs hot puts the band
-          // right where the max label sits. Predicted and then seen.
-          const withEnds = (inner) => (
-            <>
-              {inner}
-              <div style={{
+          return (
+            <button
+              type="button"
+              data-tour="blend-ranges"
+              title={tapHint}
+              aria-label={tapHint}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelect && onSelect(selected ? null : band?.kind || null);
+              }}
+              style={{
                 display: "flex", justifyContent: "space-between",
-                marginTop: -1, paddingBottom: 2,
-              }}>
-                {endLabel(ends[0])}
-                {endLabel(ends[1])}
-              </div>
-            </>
+                width: "100%", padding: "1px 0 2px",
+                background: "transparent", border: "none",
+                borderRadius: 3,
+                cursor: onSelect && band ? "pointer" : "default",
+                boxShadow: tourStep === "blend-ranges" || selected
+                  ? `0 0 0 1.5px ${theme.terra}`
+                  : "none",
+                animation: tourStep === "blend-ranges"
+                  ? "tourTogglePulse 1.9s ease-in-out infinite"
+                  : undefined,
+                transition: "box-shadow 0.15s ease",
+              }}
+            >
+              {endLabel(ends[0])}
+              {endLabel(ends[1])}
+            </button>
           );
-          const empty = <div style={{ height: 16, marginTop: 2, marginBottom: 2 }} />;
-          const renderBand = (lo, hi, color, tooltip, kind, isSelected) => {
-            const cLo = Math.max(lo, rangeMin);
-            const cHi = Math.min(hi, rangeMax);
-            if (cHi <= cLo) return empty;
-            const left = ((cLo - rangeMin) / span) * 100;
-            const width = ((cHi - cLo) / span) * 100;
-            // Wrapper is 16px tall (a comfortable tap target) but
-            // only 6px in the middle is the visible band — the rest
-            // is transparent click area so finger / mouse can land
-            // on it reliably.
-            return (
-              <div style={{
-                position: "relative",
-                height: 16,
-                marginTop: 2, marginBottom: 2,
-              }}>
-                {/* The tour hook and pulse sit on the BAND, not on the
-                    track wrapper around it. The wrapper spans the full
-                    width; the band is the coloured span inside it — 122px
-                    of 364 on a two-ingredient blend — so outlining the
-                    wrapper drew a box around the whole track and said
-                    nothing about where the recommendation actually is. */}
-                <button
-                  type="button"
-                  data-tour="blend-ranges"
-                  title={tooltip}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSelect && onSelect(isSelected ? null : kind);
-                  }}
-                  aria-label={tooltip}
-                  style={{
-                    position: "absolute",
-                    left: `${left}%`,
-                    width: `${width}%`,
-                    top: 0, bottom: 0,
-                    background: "transparent",
-                    border: "none",
-                    padding: 0,
-                    cursor: onSelect ? "pointer" : "default",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "stretch",
-                  }}
-                >
-                  <div style={{
-                    width: "100%",
-                    height: 6,
-                    background: color,
-                    borderRadius: 2,
-                    // The tour's terra pulse traces the band's own span,
-                    // so it says WHERE the recommendation is rather than
-                    // just that a band exists. Falls back to the
-                    // selected-state ring when no tour is running.
-                    boxShadow: tourStep === "blend-ranges"
-                      ? `0 0 0 1.5px ${theme.terra}`
-                      : (isSelected ? `0 0 0 1.5px ${theme.terra}` : "none"),
-                    animation: tourStep === "blend-ranges"
-                      ? "tourTogglePulse 1.9s ease-in-out infinite"
-                      : undefined,
-                    transition: "box-shadow 0.15s ease",
-                    pointerEvents: "none",
-                  }} />
-                </button>
-              </div>
-            );
-          };
-
-          const ix = intersect(axis);
-          if (ix) {
-            const tooltip = axis === "tempC"
-              ? `Sweet spot: ${ix[0]}–${ix[1]}°C — tap for details`
-              : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min — tap for details`;
-            return withEnds(renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip, "sweet", selected === "sweet"));
-          }
-
-          const fallback = bestCoverageZone(axis);
-          if (fallback) {
-            const [a, b] = fallback.range;
-            const tooltip = axis === "tempC"
-              ? `Compromise zone: ${a}–${b}°C (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`
-              : `Compromise zone: ${Math.round(a / 60)}–${Math.round(b / 60)} min (${fallback.coverage}/${fallback.total} ingredients in range) — tap for details`;
-            // Soft amber — calls attention without alarming. Using
-            // theme.ochre family at ~30% opacity to match the green
-            // band's visual weight while reading distinctly.
-            return withEnds(renderBand(a, b, "rgba(189,148,76,0.32)", tooltip, "compromise", selected === "compromise"));
-          }
-
-          // No band to show, but the ends still describe the track.
-          return withEnds(empty);
         };
 
         // Description panel shown below a slider when a band is
@@ -1223,46 +1236,58 @@ export const BlendExtractionExplorer = ({
                   <div style={{ marginBottom: 6, padding: "0 12px" }}>
                     {shownAxis === "tempC" ? (
                       <>
+                        <div style={{ position: "relative" }}>
                         <input
                           type="range"
+                          className="brew-slider"
                           aria-label="Water temperature"
                           min={tempCRange[0]}
                           max={tempCRange[1]}
-                          step={5}
+                          /* CONTINUOUS AGAIN. A flat 5°C step left
+                             cinnamon's recommended window — 95-100°C —
+                             with exactly two reachable values, so the
+                             band you're told to brew inside had no
+                             interior. The counter-argument was that no
+                             kettle hits 97°C reliably; the answer is
+                             that the instruction was never a number.
+                             "About 20 seconds off the boil" is a
+                             qualitative take that already spans a
+                             range, and every kettle cools differently,
+                             so the hint carries the imprecision and the
+                             slider doesn't have to. */
+                          step={1}
                           value={tempC}
                           onChange={(e) => setTempC(Number(e.target.value))}
-                          style={{
-                            width: "100%", display: "block", margin: 0,
-                            accentColor: theme.terra,
-                          }}
+                          style={{ "--brew-ramp": rampFor("tempC", tempCRange[0], tempCRange[1]) }}
                         />
                         <RangeBands
                           rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
                           selected={bandSelected.tempC}
                           onSelect={(k) => selectBand("tempC", k)}
                         />
+                        </div>
                         <BandDescription axis="tempC" kind={bandSelected.tempC} />
                       </>
                     ) : (
                       <>
+                        <div style={{ position: "relative" }}>
                         <input
                           type="range"
+                          className="brew-slider"
                           aria-label="Steep time"
                           min={timeSRange[0]}
                           max={timeSRange[1]}
                           step={timeStepFor(timeSRange)}
                           value={timeS}
                           onChange={(e) => setTimeS(Number(e.target.value))}
-                          style={{
-                            width: "100%", display: "block", margin: 0,
-                            accentColor: theme.sage,
-                          }}
+                          style={{ "--brew-ramp": rampFor("timeS", timeSRange[0], timeSRange[1]) }}
                         />
                         <RangeBands
                           rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
                           selected={bandSelected.timeS}
                           onSelect={(k) => selectBand("timeS", k)}
                         />
+                        </div>
                         <BandDescription axis="timeS" kind={bandSelected.timeS} />
                       </>
                     )}
