@@ -7,7 +7,7 @@ import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
 import { BrewSurface } from "../components/BrewSurface";
 import { hasExtractionProfile } from "../components/ExtractionExplorer";
-import { BrewDockProvider, INGREDIENT_DETAIL_DOCK_ID } from "../helpers/dock";
+import { BrewDockProvider, INGREDIENT_DETAIL_DOCK_ID, useDockHeight } from "../helpers/dock";
 import {
   FAMILY_BY_FLAVOR, FAMILY_COLORS,
   FAMILY_BY_EFFECT, EFFECT_FAMILY_COLORS,
@@ -139,6 +139,12 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
   // the ingredient's midpoint. Same arrangement ComposeScreen uses.
   const midTemp = Math.round((ing.tempC[0] + ing.tempC[1]) / 2);
   const midTime = Math.round((ing.timeS[0] + ing.timeS[1]) / 2);
+  // The page runs UNDER this screen's dock so its glass has something
+  // to show, exactly as the app shell's does. The scroll area is padded
+  // by the slot's measured height so nothing is permanently hidden.
+  const dockRef = React.useRef(null);
+  const dockH = useDockHeight(dockRef);
+
   const [brewTempC, setBrewTempC] = useState(midTemp);
   const [brewTimeS, setBrewTimeS] = useState(midTime);
   // Walking to a paired ingredient swaps `id` without remounting, and
@@ -177,7 +183,7 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
       onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
       // minHeight:0 so the scroll area can shrink rather than shoving
       // the dock off the bottom.
-      style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}
+      style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", paddingBottom: dockH }}
     >
       {/* Sticky header row — back button + eyebrow stay pinned at
           the top of the scroll viewport so they're always reachable
@@ -604,16 +610,16 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
           is actually in it, so Overview and Pairings don't pay for an
           empty rule line. */}
       <div
+        ref={dockRef}
         id={INGREDIENT_DETAIL_DOCK_ID}
         style={tab === "brewing" && hasExtractionProfile(id) ? {
-          flexShrink: 0,
-          // THE SAME GLASS AS THE MAIN DOCK. These slots painted solid
-          // ivory while the tab dock's brew row is rgba(ivory,0.58) over
-          // a blur — so the identical panel read as a different surface
-          // depending on which screen you opened it from. Same numbers,
-          // settled on a handset (see the TabBar comment): 9px/0.58
-          // keeps the sense of something behind the row without
-          // resolving it.
+          // OVERLAYS the page rather than sitting beside it. As a flex
+          // sibling nothing passed behind this, so its glass had
+          // nothing to show and it read as a solid block — the app
+          // shell's dock looks like glass because the page scrolls
+          // under it. Absolute here, with the scroll area padded by the
+          // measured height so nothing is permanently hidden.
+          position: "absolute", left: 0, right: 0, bottom: 0,
           background: "rgba(var(--ivory-rgb),0.58)",
           backdropFilter: "blur(9px) saturate(1.1)",
           WebkitBackdropFilter: "blur(9px) saturate(1.1)",

@@ -26,7 +26,7 @@
    dock in two different places instead of stacking in one.
    ────────────────────────────────────────────────────────────── */
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState, useLayoutEffect } from "react";
 
 // The tab dock, in the bottom bar above the sub-tabs. Default because
 // it's where the controls belong whenever nothing has covered it.
@@ -42,3 +42,32 @@ const BrewDockContext = createContext(BREW_DOCK_ID);
 
 export const BrewDockProvider = BrewDockContext.Provider;
 export const useBrewDockId = () => useContext(BrewDockContext);
+
+/**
+ * The live height of a dock slot.
+ *
+ * A detail screen's dock is a flex SIBLING of its scroll area, so
+ * nothing passes behind it — which means its glass has nothing to show
+ * and it reads as a solid block, unlike the app shell's dock where the
+ * page scrolls underneath. Matching the shell means letting content run
+ * under the slot and padding the scroll area by exactly as much as the
+ * slot takes, so nothing ends up permanently hidden.
+ *
+ * That padding has to track a height that changes — the brew panel
+ * folds and unfolds — hence a measurement rather than a constant. Same
+ * idea as --app-dock-h one level down.
+ */
+export const useDockHeight = (ref) => {
+  const [height, setHeight] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const read = () => setHeight(el.getBoundingClientRect().height);
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return height;
+};
