@@ -1126,7 +1126,7 @@ const BALANCE_AXES = [
   { name: "bitterness",  flavors: ["bitter", "bitterness", "astringent"], effects: ["bitterness"] },
   { name: "sweetness",   flavors: ["sweet", "honey", "honeyed", "honey-sweet"] },
   { name: "astringency", flavors: ["astringent", "tannic"] },
-  { name: "tartness",    flavors: ["tart", "bright", "cranberry"] },
+  { name: "tartness",    flavors: ["tart", "bright", "berry"] },
   { name: "menthol",     flavors: ["cool", "cooling", "minty", "mint"] },
 ];
 

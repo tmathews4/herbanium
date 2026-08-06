@@ -124,10 +124,6 @@ export const FLAVOR_DESCRIPTIONS = {
     summary: "Lively, refreshing acidity.",
     body: "Tea-community preference over 'acidic'. Ceylon and Darjeeling carry this through their oxidation profile; lemongrass and lemon balm through citral.",
   },
-  cranberry: {
-    summary: "Hibiscus's defining fruit-tartness.",
-    body: "Bright sourness rounded by anthocyanins (the same red pigments that give the cup its color).",
-  },
   fruit: {
     summary: "General fruit register — most often stone fruit or berry.",
     body: "Oolong's peach edge (fruity esters from partial oxidation), Darjeeling's grape (muscatel terpenes), white tea's melon.",
@@ -141,8 +137,8 @@ export const FLAVOR_DESCRIPTIONS = {
     body: "Carotenoid breakdown during withering leaves the dried-fruit register; gentle because white tea is barely processed and never fired hard.",
   },
   berry: {
-    summary: "Dark red-fruit body underneath the tartness.",
-    body: "The rounder half of the hibiscus/cranberry register — anthocyanin-driven depth where `cranberry` carries the sharp edge. Both currently ride on the same two cups, so in Detailed mode they sit together rather than distinguishing one cup from another.",
+    summary: "Red-fruit tartness — hibiscus and cranberry's defining note.",
+    body: "Bright sourness rounded by anthocyanins, the same red pigments that give the cup its colour. This used to be two words: `berry` and `cranberry` sat on the same two ingredients, always together, so Detailed mode drew two bars for one thing. Folded into one — a cup can taste of red fruit without the app claiming that's two findings.",
   },
   orchid: {
     summary: "Oolong's signature floral — creamy rather than perfumed.",

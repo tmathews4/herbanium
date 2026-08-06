@@ -11,7 +11,7 @@
 export const FAMILY_BY_FLAVOR = {
   // fruit
   muscatel: "fruit", fruit: "fruit", fruity: "fruit", peach: "fruit",
-  apricot: "fruit", berry: "fruit", tart: "fruit", cranberry: "fruit",
+  apricot: "fruit", berry: "fruit", tart: "fruit",
   bright: "fruit", melon: "fruit",
   apple: "fruit", "dried-apple": "fruit", lychee: "fruit",
   // floral

@@ -589,7 +589,7 @@ const INGREDIENTS = {
     ],
     overPull: { timeS: 720, reason: "tartness turns into astringent grip" },
     effects: [["cooling", 4], ["digestive", 2]],
-    flavors: ["tart", "fruity", "cranberry"],
+    flavors: ["tart", "fruity", "berry"],
     pairs: ["rose", "rooibos", "ginger", "lemongrass"],
     dose: "1 tsp · 200ml",
     headsUp: "May lower blood pressure — sip modestly if relevant.",
@@ -3101,7 +3101,7 @@ const INGREDIENTS = {
     // extract together, full cranberry character takes 5-7.
     caffeine: 0, tempC: [90, 100], timeS: [240, 420],
     effects: [["uplifting", 1], ["cooling", 1]],
-    flavors: ["tart", "fruity", "cranberry", "bright"],
+    flavors: ["tart", "fruity", "berry", "bright"],
     pairs: ["hibiscus", "rose", "ginger", "rooibos", "dried-apple", "orange-peel"],
     dose: "1 tsp · 200ml",
     headsUp: "Talk to your doctor if you take warfarin so your dose stays consistent. Tea-level use is generally fine. People with a history of kidney stones should drink in moderation.",
