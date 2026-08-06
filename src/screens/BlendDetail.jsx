@@ -890,7 +890,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               // action the full-width CTA below uses, twist flow and
               // all — rather than a second path that could drift from
               // it. Two entry points, one behaviour.
-              brewAction={<BrewCornerButton onClick={handleBrewTap} />}
+              brewAction={(
+                <BrewCornerButton
+                  // Asks first — it starts a timer. No name field: this
+                  // recipe already has a name.
+                  confirm askName={false}
+                  onConfirm={handleBrewTap}
+                />
+              )}
             />
             {b.ml && (
               <div style={{

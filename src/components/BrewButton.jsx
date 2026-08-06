@@ -27,18 +27,58 @@
    pulse never moves back onto a wrapper.
    ────────────────────────────────────────────────────────────── */
 
-import React from "react";
-import { theme } from "../theme";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import { theme, ff, radius, shadow } from "../theme";
 import { Button } from "./layout";
 import { Kettle } from "./icons";
 
+/* THE CONFIRMATION LIVES HERE, not at the call site.
+   Brewing is the one irreversible thing this screen does — it starts a
+   timer and commits the cup you dialled in — so it asks first, and it
+   asks with the name field, because the moment you've decided to brew
+   something is the moment you know what to call it.
+
+   Inside the shared component on purpose. Every panel that shows a corner
+   Brew gets the identical prompt without wiring one, which is the same
+   reasoning that put the button here after two panels shipped without
+   any button at all. A call site can still opt out with `confirm={false}`
+   — quick brew on a recipe row does, deliberately: its whole point is
+   that you already trust the cup.
+
+   Portalled to document.body: the button lives in the dock, which is a
+   short flex row with its own stacking context, and a dialog rendered
+   inside it would be clipped by the thing it's asking about. */
 export const BrewCornerButton = ({
   onClick,
   disabled = false,
   // True while the guided tour is pointing at this button.
   pulsing = false,
   label = "Brew",
-}) => (
+  // Ask before brewing. Receives the name the user settled on.
+  confirm = false,
+  onConfirm,
+  defaultName = "",
+  // Whether the prompt also asks what to call it. True for a composed
+  // pot, which has no name yet. False when brewing something already
+  // named — a saved recipe or a single leaf — where a rename field is
+  // a question nobody asked.
+  askName = true,
+}) => {
+  const [asking, setAsking] = useState(false);
+  const [name, setName] = useState(defaultName);
+
+  // Re-seed each time it opens rather than once at mount — the pot can
+  // change between asks, and a stale name is worse than a blank one.
+  const open = () => { setName(defaultName); setAsking(true); };
+
+  const commit = () => {
+    setAsking(false);
+    onConfirm?.(name.trim() || defaultName || "Untitled blend");
+  };
+
+  return (
+  <>
   <Button
     // SECONDARY, not primary, and not for emphasis reasons. A filled
     // block read as an object sitting ON the dock; the corner should
@@ -49,7 +89,7 @@ export const BrewCornerButton = ({
     variant="secondary"
     tone="bark"
     disabled={disabled}
-    onClick={onClick}
+    onClick={confirm ? open : onClick}
     icon={<Kettle size={14} c={theme.bark} />}
     // Rides along because Button spreads ...rest onto the real element,
     // which is also why the tour can pulse the control itself.
@@ -69,4 +109,79 @@ export const BrewCornerButton = ({
       animation: pulsing ? "tourTogglePulse 1.9s ease-in-out infinite" : undefined,
     }}
   >{label}</Button>
-);
+
+  {asking && createPortal(
+    <div
+      data-testid="brew-confirm"
+      onClick={() => setAsking(false)}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1200,
+        background: "rgba(20,16,10,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      {/* Stop the backdrop's dismiss from firing on taps inside. */}
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: "100%", maxWidth: 340,
+        background: theme.cream,
+        border: `1px solid ${theme.ruleSoft}`,
+        borderRadius: radius.md,
+        boxShadow: shadow.card,
+        padding: "18px 18px 14px",
+      }}>
+        <div style={{
+          fontFamily: ff.serif, fontSize: 19, color: theme.ink, marginBottom: 4,
+        }}>Brew this cup?</div>
+        <div style={{
+          fontFamily: ff.sans, fontSize: 12.5, color: theme.inkSoft,
+          lineHeight: 1.5, marginBottom: 14,
+        }}>
+          {askName
+            ? "The timer starts now, at the temperature and time you've set. Give it a name while you're here."
+            : "The timer starts now, at the temperature and time you've set."}
+        </div>
+
+        {/* A form, so Return commits — the same reasoning as the
+            onboarding name step: a single text input submits implicitly
+            and the on-screen keyboard offers a Go key instead of a
+            newline this field can't use. */}
+        <form onSubmit={(e) => { e.preventDefault(); commit(); }} style={{ margin: 0 }}>
+          {askName && (
+          <input
+            data-testid="brew-confirm-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="name this blend"
+            maxLength={40}
+            autoFocus
+            enterKeyHint="go"
+            style={{
+              display: "block", width: "100%", boxSizing: "border-box",
+              fontFamily: ff.serif, fontSize: 16, color: theme.ink,
+              background: "transparent", border: "none",
+              borderBottom: `1px solid ${theme.rule}`,
+              padding: "6px 2px", outline: "none", marginBottom: 16,
+            }}
+          />
+          )}
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <Button
+              variant="ghost"
+              onClick={() => setAsking(false)}
+              data-testid="brew-confirm-cancel"
+            >not yet</Button>
+            <Button
+              variant="primary" tone="terra" type="submit"
+              data-testid="brew-confirm-go"
+              style={{ fontSize: 13, padding: "9px 18px" }}
+            >brew it →</Button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body,
+  )}
+  </>
+  );
+};

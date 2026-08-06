@@ -453,7 +453,10 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
                 // commit to it.
                 brewAction={onBrew ? (
                   <BrewCornerButton
-                    onClick={() => onBrew({
+                    // Same prompt as everywhere else; the leaf is
+                    // already named.
+                    confirm askName={false}
+                    onConfirm={() => onBrew({
                       name: ing.name,
                       ingredients: [{ id, g: 1.0 }],
                       tempC: brewTempC,

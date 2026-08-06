@@ -1973,10 +1973,15 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
               <BrewCornerButton
                 disabled={reverseIngs.length === 0}
                 pulsing={blendTourStep === "blend-brew"}
-                onClick={() => {
+                // Asks first, and takes the name while it's asking. This
+                // is the composed-blend case, so there's nothing to
+                // prefill — the pot has no name until you give it one.
+                confirm
+                defaultName="Untitled blend"
+                onConfirm={(name) => {
                   if (reverseIngs.length === 0) return;
                   const candidate = {
-                    name: "Untitled blend",
+                    name,
                     ingredients: ingsForProfile,
                     tempC: brewTempC,
                     timeS: brewTimeS,

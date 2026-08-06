@@ -111,8 +111,72 @@ test.describe("every brew window has a Brew button", () => {
 
     await ensureBrewPanel(page);
     await brewButton(page).click();
+    // Every corner Brew asks first now. A leaf is already named, so this
+    // prompt carries no name field.
+    await expect(page.getByTestId("brew-confirm")).toBeVisible();
+    await expect(page.getByTestId("brew-confirm-name"),
+      "an already-named thing shouldn't ask for a rename").toHaveCount(0);
+    await page.getByTestId("brew-confirm-go").click();
 
     await expect(page.getByTestId("steep-screen").or(page.getByText(/steep/i).first()),
       "brewing a single ingredient should open the timer").toBeVisible({ timeout: 15_000 });
+  });
+});
+
+test.describe("brewing asks first", () => {
+  test("the composer's Brew confirms, and takes the name", async ({ page }) => {
+    // Brewing starts a timer and commits the cup — the one irreversible
+    // thing this screen does. The name is asked for here because this is
+    // the moment you know what to call it.
+    await boot(page);
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+    const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+    await search.fill("chamomile");
+    await page.getByRole("button", { name: /chamomile/i }).first().click();
+
+    await ensureBrewPanel(page);
+    await brewButton(page).click();
+
+    const dialog = page.getByTestId("brew-confirm");
+    await expect(dialog, "Brew should ask before starting a timer").toBeVisible();
+    await page.getByTestId("brew-confirm-name").fill("Evening Chamomile");
+    await page.getByTestId("brew-confirm-go").click();
+
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText("Evening Chamomile").first(),
+      "the name given at the prompt should follow the cup").toBeVisible({ timeout: 15_000 });
+  });
+
+  test("backing out of the prompt brews nothing", async ({ page }) => {
+    await boot(page);
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+    const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+    await search.fill("chamomile");
+    await page.getByRole("button", { name: /chamomile/i }).first().click();
+
+    await ensureBrewPanel(page);
+    await brewButton(page).click();
+    await page.getByTestId("brew-confirm-cancel").click();
+
+    await expect(page.getByTestId("brew-confirm")).toBeHidden();
+    // Still on the composer, still holding the pot — nothing committed.
+    await expect(page.locator('[data-tour="blend-quantity"]'),
+      "cancelling should leave the pot exactly as it was").toBeVisible();
+  });
+});
+
+test.describe("a named cup isn't asked to be renamed", () => {
+  test("a saved recipe's corner Brew asks, without a name field", async ({ page }) => {
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+
+    await ensureBrewPanel(page);
+    await brewButton(page).click();
+
+    await expect(page.getByTestId("brew-confirm"),
+      "a saved recipe should still confirm — it starts a timer").toBeVisible();
+    await expect(page.getByTestId("brew-confirm-name"),
+      "but the recipe already has a name").toHaveCount(0);
   });
 });
