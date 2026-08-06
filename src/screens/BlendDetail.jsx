@@ -3,6 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
+import { BrewCornerButton } from "../components/BrewButton";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import { BrewDockProvider, BLEND_DETAIL_DOCK_ID } from "../helpers/dock";
 import {
@@ -884,6 +885,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               curated
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}
+              // The panel gets its own Brew, the same as every other
+              // brew window. It runs handleBrewTap — the identical
+              // action the full-width CTA below uses, twist flow and
+              // all — rather than a second path that could drift from
+              // it. Two entry points, one behaviour.
+              brewAction={<BrewCornerButton onClick={handleBrewTap} />}
             />
             {b.ml && (
               <div style={{

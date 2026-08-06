@@ -169,10 +169,9 @@ export const MOOD_VOCABULARY = [
     // research docs and persisted in journal entries — and displays as
     // "heat", which is what it means and doesn't collide with `warm`
     // one category over.
-    family: "heat", label: "heat", category: "body", color: "var(--effect-heat)",
+    family: "heat", label: "warming", category: "body", color: "var(--effect-heat)",
     leaves: [{
       token: "warming",
-      label: "heat",
       counterpart: "thermogenic; TCM warm-natured, Ayurvedic ushna virya",
       summary: "Generates internal heat — pantry-warm spice that reads as physical warmth.",
       body: "Black teas, roasted oolongs, and ripe pu-erh hold a steady warmth; the spice cabinet ramps it. Cinnamon and cardamom ride a calmer line, while ginger's gingerol triggers a real thermogenic response — the loudest warmer in the catalog. Cloves add eugenol's woody heat in support.",
@@ -188,9 +187,10 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "digestive", label: "digestive", category: "body", color: "var(--effect-digestive)",
+    family: "digestive", label: "digestion", category: "body", color: "var(--effect-digestive)",
     leaves: [{
       token: "digestive",
+      label: "digestion",
       counterpart: "carminative — relieves gas and gastrointestinal spasm",
       summary: "Settles the stomach. The post-meal cup across cultures.",
       body: "Peppermint's menthol is the most studied for easing the gut; fennel's anethole, ginger's gingerol, and dandelion root's bitter compounds all pull in the same direction. Pu-erh rounds the after-meal cup through its fermented character.",
@@ -203,9 +203,10 @@ export const MOOD_VOCABULARY = [
     // soothing as the "best vocabulary mapping for immune support".
     // Turmeric flagged the same gap for anti-inflammatory; that one is
     // a single ingredient and hasn't earned an axis yet.
-    family: "immune", label: "immune", category: "body", color: "var(--effect-immune)",
+    family: "immune", label: "immunity", category: "body", color: "var(--effect-immune)",
     leaves: [{
       token: "immune",
+      label: "immunity",
       counterpart: "immunomodulant / immunostimulant — established Western herbal "
         + "actions; modulate innate and adaptive response rather than stimulate blindly",
       summary: "Steadying the body's defences — the cold-and-flu-season cup.",
@@ -213,9 +214,10 @@ export const MOOD_VOCABULARY = [
     }],
   },
   {
-    family: "sleep", label: "sleepy", category: "mind", color: "var(--effect-sleep)",
+    family: "sleep", label: "sleep", category: "mind", color: "var(--effect-sleep)",
     leaves: [{
       token: "sleepy",
+      label: "sleep",
       counterpart: "sedative / hypnotic — a separate materia medica category from nervine",
       summary: "Sedating, drowsiness-adjacent.",
       body: "Valerian's valerenic acid is the strongest in the catalog, with passionflower and reishi's triterpenes behind it. Distinct from calm on paper — nervine and sedative are different actions — though no ingredient here yet carries one without the other.",

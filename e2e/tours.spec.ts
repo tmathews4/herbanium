@@ -795,6 +795,47 @@ test.describe("the tour's pulse traces the control it points at", () => {
     await expectPulseOnTheControl(page, "blend-axis");
   });
 
+  test("the pulse is themed, so it survives dark mode", async ({ page }) => {
+    // It used to hardcode rgba(176,84,47) — the LIGHT terra — which put a
+    // dull dark terracotta on a dark ground and made the highlight hard
+    // to find. The app carries a themed --terra-rgb; the pulse now uses
+    // it. Asserted as "the colour actually changes with the scheme",
+    // which is the property that was missing, rather than pinning either
+    // value.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "This is Time");
+
+    // ?dev pins the light theme — App adds `force-light` to :root so dev
+    // screenshots don't flip with the OS, and the dark block is written
+    // `:root:not(.force-light)`. Every tour spec boots through ?dev, so
+    // without dropping the class here the scheme simply never changes and
+    // this test reports light and dark as identical while proving nothing.
+    await page.evaluate(() => document.documentElement.classList.remove("force-light"));
+
+    const ringColour = () => page.evaluate(() => {
+      const el = document.querySelector('[data-tour="blend-axis"]') as HTMLElement;
+      // The animated shadow resolves through the keyframes, so read the
+      // custom property the pulse composes from instead.
+      return getComputedStyle(el).getPropertyValue("--terra-rgb").trim();
+    });
+
+    // BOTH options on every call. emulateMedia REPLACES the emulated
+    // media state rather than merging into it, and armTour sets
+    // reducedMotion — so passing colorScheme alone silently drops the
+    // motion setting, and passing it before armTour drops the scheme.
+    // That's why the first draft reported light and dark as identical.
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    const light = await ringColour();
+
+    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+    const dark = await ringColour();
+
+    expect(light, "light mode should resolve a terra triplet").toMatch(/\d+, *\d+, *\d+/);
+    expect(dark, `the pulse colour should change with the theme (light ${light}, dark ${dark})`)
+      .not.toBe(light);
+  });
+
   test("the spotlight's white border takes the target's corners", async ({ page }) => {
     // The other highlight. GuidedTour reads the target's computed radius
     // into the cutout so the hole hugs the shape; a square control must

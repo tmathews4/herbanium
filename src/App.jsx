@@ -2513,6 +2513,10 @@ export default function App() {
           }}
           ingredientHintShown={ingredientHintShown}
           dismissIngredientHint={() => setIngredientHintShown(true)}
+          // Brewing a single leaf. The screen builds the one-ingredient
+          // blend (it has the name and the live slider values); App just
+          // starts it, the same as any other brew.
+          onBrew={(blend) => startBrew(blend, "", ["calm"])}
         />
       )}
       {overlay === "blend" && blendOverlayId && (

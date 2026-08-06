@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   computeBrewProfile, resolveBlendAtBrew,
 } from "../algo/compose";
+import { BrewCornerButton } from "../components/BrewButton";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import {
   Kettle, Ornament,
@@ -1965,19 +1966,13 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             // cup you'd just been dialling in. Save moved to the steep
             // screen rather than doubling up here: one button keeps the
             // panel readable, and saving is the occasional act.
+            // One definition, in components/BrewButton.jsx — the styling
+            // used to live here, which is why two other brew panels
+            // shipped without a button at all.
             brewAction={(
-              <Button
-                // SECONDARY, not primary, and not for emphasis reasons.
-                // A filled block read as an object sitting ON the dock;
-                // the corner should read as part of the surface. Primary
-                // also can't be made transparent — its hover handlers
-                // repaint the background to the accent on every enter and
-                // leave, so a transparent primary flashes solid on the
-                // first mouse-over. Secondary is transparent at rest by
-                // construction.
-                variant="secondary"
-                tone="bark"
+              <BrewCornerButton
                 disabled={reverseIngs.length === 0}
+                pulsing={blendTourStep === "blend-brew"}
                 onClick={() => {
                   if (reverseIngs.length === 0) return;
                   const candidate = {
@@ -2004,55 +1999,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                     "", ["calm"],
                   );
                 }}
-                icon={<Kettle size={14} c={theme.bark} />}
-                // THE CORNER OF THE PANEL, not a pill inside it. Square,
-                // flush left, stretched to the header's full height, so
-                // it reads as part of the dock rather than an object
-                // resting on it — and the vertical centring question
-                // disappears with the free space it was floating in.
-                //
-                // It takes the dock's own surface rather than a fill of
-                // its own: the corner is a REGION of the bar, marked off
-                // by a single rule down its right edge, not a slab laid
-                // on top of it. A filled block was tried first and read
-                // as exactly that slab — heavy, and louder than the
-                // readout it shares the row with.
-                //
-                // No elevation, for the same reason: a shadow is what a
-                // raised object casts, and this is a face of the surface
-                // itself.
-                //
-                // The tour's pulse is applied HERE rather than by a
-                // wrapper in the explorer. It's a spread box-shadow, so
-                // it traces whatever radius this button has, for free
-                // and forever — a wrapper would have to be told the
-                // shape, and would have been wrong the moment this went
-                // square. data-tour rides along because Button spreads
-                // ...rest onto the real element.
-                data-tour="blend-brew"
-                style={{
-                  fontSize: 12, padding: "0 16px", gap: 6,
-                  borderRadius: 0, letterSpacing: "0.04em",
-                  alignSelf: "stretch", boxShadow: "none",
-                  background: "transparent",
-                  color: theme.bark,
-                  // Secondary draws a full outline; the corner wants only
-                  // the edge that divides it from the readout.
-                  //
-                  // The dock's own hairline, not a brown one. Every
-                  // divider in this bar is `ruleSoft` — the tab strip's
-                  // vertical rule, the panel's bottom edge — so a bark
-                  // line here would have been the single darkest stroke
-                  // in the dock, drawing more attention than the button
-                  // it separates. Same token means it reads as the same
-                  // kind of edge, and the cell reads as a cell.
-                  border: "none",
-                  borderRight: `1px solid ${theme.ruleSoft}`,
-                  animation: blendTourStep === "blend-brew"
-                    ? "tourTogglePulse 1.9s ease-in-out infinite"
-                    : undefined,
-                }}
-              >Brew</Button>
+              />
             )}
           />
         </div>

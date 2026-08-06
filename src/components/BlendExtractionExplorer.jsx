@@ -503,16 +503,41 @@ export const BlendExtractionExplorer = ({
               dock, several hundred lines away in a portal, but the
               keyframes are global once mounted and this block always
               renders — so one definition serves both rather than two
-              copies drifting apart. */}
+              copies drifting apart.
+
+              TWO RINGS, AND A THEMED COLOUR. The old pulse was a single
+              ring reaching 6px and fading to 0.02 alpha — close to
+              invisible by the end of its own travel — and it hardcoded
+              rgba(176,84,47), which is the LIGHT terra. In dark mode that
+              put a dull, dark terracotta against a dark ground: the app
+              already carries a themed --terra-rgb (194,102,66 in dark)
+              and the pulse simply wasn't using it.
+
+              Now it echoes — an inner ring at the control's edge and an
+              outer one trailing it, out to 17px rather than 6. Two rings
+              read as a pulse travelling outward where one reads as an
+              edge that brightens, which is the part that was getting
+              lost. */}
           {["blend-mode", "blend-axis", "blend-brew", "blend-ranges"].includes(tourStep) && (
             <style>{`
               @keyframes tourTogglePulse {
-                0%, 100% { box-shadow: 0 0 0 0 rgba(176,84,47,0.55); }
-                50%      { box-shadow: 0 0 0 6px rgba(176,84,47,0.02); }
+                0%, 100% {
+                  box-shadow: 0 0 0 0   rgba(var(--terra-rgb), 0.75),
+                              0 0 0 5px rgba(var(--terra-rgb), 0.22);
+                }
+                50% {
+                  box-shadow: 0 0 0 9px  rgba(var(--terra-rgb), 0.14),
+                              0 0 0 17px rgba(var(--terra-rgb), 0.05);
+                }
               }
               @media (prefers-reduced-motion: reduce) {
+                /* No travel, so the rings have to carry it on contrast
+                   alone — held brighter than a moving pulse would need. */
                 @keyframes tourTogglePulse {
-                  0%, 100% { box-shadow: 0 0 0 3px rgba(176,84,47,0.32); }
+                  0%, 100% {
+                    box-shadow: 0 0 0 3px rgba(var(--terra-rgb), 0.45),
+                                0 0 0 8px rgba(var(--terra-rgb), 0.18);
+                  }
                 }
               }
             `}</style>

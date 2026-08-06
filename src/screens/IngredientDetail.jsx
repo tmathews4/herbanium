@@ -2,9 +2,10 @@
    screens/IngredientDetail.jsx — full-screen ingredient detail (Overview/Brewing/Pairings tabs).
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EffectBar } from "../components/EffectBar";
 import { FactsCard } from "../components/FactsCard";
+import { BrewCornerButton } from "../components/BrewButton";
 import { BlendExtractionExplorer } from "../components/BlendExtractionExplorer";
 import { hasExtractionProfile } from "../components/ExtractionExplorer";
 import { BrewDockProvider, INGREDIENT_DETAIL_DOCK_ID } from "../helpers/dock";
@@ -132,8 +133,19 @@ const SpecRow = ({ label, value }) => (
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHintShown, dismissIngredientHint }) => {
+export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHintShown, dismissIngredientHint, onBrew }) => {
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
+  // The brew panel here is CONTROLLED, so its Brew button commits the
+  // temperature and time the user is actually looking at rather than
+  // the ingredient's midpoint. Same arrangement ComposeScreen uses.
+  const midTemp = Math.round((ing.tempC[0] + ing.tempC[1]) / 2);
+  const midTime = Math.round((ing.timeS[0] + ing.timeS[1]) / 2);
+  const [brewTempC, setBrewTempC] = useState(midTemp);
+  const [brewTimeS, setBrewTimeS] = useState(midTime);
+  // Walking to a paired ingredient swaps `id` without remounting, and
+  // a useState initialiser only runs once — without this the new leaf
+  // would inherit the previous one's brew.
+  useEffect(() => { setBrewTempC(midTemp); setBrewTimeS(midTime); }, [id]);
   const [tab, setTab] = useState("overview");
   // Click-to-expand description cards. null = closed; clicking the same
   // term again closes; clicking a different term swaps the card.
@@ -430,8 +442,25 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
             {hasExtractionProfile(id) && (
               <BlendExtractionExplorer
                 ingredients={[{ id, g: 1.0 }]}
-                defaultTempC={Math.round((ing.tempC[0] + ing.tempC[1]) / 2)}
-                defaultTimeS={Math.round((ing.timeS[0] + ing.timeS[1]) / 2)}
+                defaultTempC={midTemp}
+                defaultTimeS={midTime}
+                tempC={brewTempC}
+                setTempC={setBrewTempC}
+                timeS={brewTimeS}
+                setTimeS={setBrewTimeS}
+                // A single leaf is a perfectly good cup, and the panel
+                // showing you its temperature is where you'd expect to
+                // commit to it.
+                brewAction={onBrew ? (
+                  <BrewCornerButton
+                    onClick={() => onBrew({
+                      name: ing.name,
+                      ingredients: [{ id, g: 1.0 }],
+                      tempC: brewTempC,
+                      timeS: brewTimeS,
+                    })}
+                  />
+                ) : null}
               />
             )}
 
