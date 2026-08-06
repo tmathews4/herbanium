@@ -750,6 +750,50 @@ export const BlendExtractionExplorer = ({
         const RangeBands = ({ rangeMin, rangeMax, axis, selected, onSelect }) => {
           const span = rangeMax - rangeMin;
           if (span <= 0) return null;
+          /* THE ENDS OF THE TRACK, labelled at the ends of the track.
+             The range used to read as "0–20 min" tucked beside the
+             current value, so three numbers shared one corner and none
+             of them said which was which. Split to the extremes of the
+             row under the slider — the space the band already occupies
+             and mostly doesn't fill — each number now sits under the
+             end of the track it describes.
+
+             Behind the band rather than in front: the band is the
+             interactive thing here (tap it for the reasoning) and it
+             wins any overlap, which only happens when the recommended
+             range runs the full width — a cup with nothing to warn
+             about. */
+          const endLabel = (text) => (
+            <span aria-hidden style={{
+              fontFamily: ff.mono, fontSize: 9, color: theme.ash,
+              whiteSpace: "nowrap", pointerEvents: "none",
+            }}>{text}</span>
+          );
+          // cToF + unit, the same conversion the readouts above use.
+          // `formatTemp` isn't a thing in this file — reaching for it
+          // threw on every temp render, which is a crash the time axis
+          // never saw because it never took that branch.
+          const ends = axis === "tempC"
+            ? [`${unit === "F" ? cToF(rangeMin) : rangeMin}°`,
+               `${unit === "F" ? cToF(rangeMax) : rangeMax}°`]
+            : [`${Math.round(rangeMin / 60)}m`, `${Math.round(rangeMax / 60)}m`];
+          // A ROW OF THEIR OWN, under the band rather than across it.
+          // Laid over the band they collided the moment the recommended
+          // range reached an end of the track — which is common, not an
+          // edge case: a blend whose sweet spot runs hot puts the band
+          // right where the max label sits. Predicted and then seen.
+          const withEnds = (inner) => (
+            <>
+              {inner}
+              <div style={{
+                display: "flex", justifyContent: "space-between",
+                marginTop: -1, paddingBottom: 2,
+              }}>
+                {endLabel(ends[0])}
+                {endLabel(ends[1])}
+              </div>
+            </>
+          );
           const empty = <div style={{ height: 16, marginTop: 2, marginBottom: 2 }} />;
           const renderBand = (lo, hi, color, tooltip, kind, isSelected) => {
             const cLo = Math.max(lo, rangeMin);
@@ -825,7 +869,7 @@ export const BlendExtractionExplorer = ({
             const tooltip = axis === "tempC"
               ? `Sweet spot: ${ix[0]}–${ix[1]}°C — tap for details`
               : `Sweet spot: ${Math.round(ix[0] / 60)}–${Math.round(ix[1] / 60)} min — tap for details`;
-            return renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip, "sweet", selected === "sweet");
+            return withEnds(renderBand(ix[0], ix[1], "rgba(109,126,85,0.30)", tooltip, "sweet", selected === "sweet"));
           }
 
           const fallback = bestCoverageZone(axis);
@@ -837,10 +881,11 @@ export const BlendExtractionExplorer = ({
             // Soft amber — calls attention without alarming. Using
             // theme.ochre family at ~30% opacity to match the green
             // band's visual weight while reading distinctly.
-            return renderBand(a, b, "rgba(189,148,76,0.32)", tooltip, "compromise", selected === "compromise");
+            return withEnds(renderBand(a, b, "rgba(189,148,76,0.32)", tooltip, "compromise", selected === "compromise"));
           }
 
-          return empty;
+          // No band to show, but the ends still describe the track.
+          return withEnds(empty);
         };
 
         // Description panel shown below a slider when a band is
@@ -1009,8 +1054,14 @@ export const BlendExtractionExplorer = ({
                   // edge, this doesn't.
                   flex: 1, background: "transparent", border: "none",
                   cursor: "pointer", padding: "10px 12px 10px 10px",
+                  // THE READOUT SITS BESIDE BREW, left-aligned, and
+                  // `adjust` gets the far end to itself. Bunched at the
+                  // right they read as one blob — a temperature, a time
+                  // and an instruction competing for the same corner.
+                  // Split, each end says one thing: what the cup is set
+                  // to, and what this row does.
                   display: "flex", alignItems: "center",
-                  justifyContent: brewAction ? "flex-end" : "center", gap: 8,
+                  justifyContent: brewAction ? "space-between" : "center", gap: 8,
                   fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
                   fontWeight: shownControlsOpen ? 600 : 500,
                   color: shownControlsOpen ? theme.terra : theme.inkSoft,
@@ -1041,6 +1092,7 @@ export const BlendExtractionExplorer = ({
                     it's true every time the panel is folded, so the
                     answer should be there every time too. Terra so it
                     reads as an invitation rather than another label. */}
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 {!shownControlsOpen && (
                   <span data-testid="brew-adjust-hint" style={{
                     fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.16em",
@@ -1059,6 +1111,7 @@ export const BlendExtractionExplorer = ({
                         stroke={shownControlsOpen ? theme.terra : theme.inkSoft}
                         strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                 </svg>
+                </span>
               </button>
             </div>
             {shownControlsOpen && (
@@ -1137,14 +1190,9 @@ export const BlendExtractionExplorer = ({
                     <div style={{
                       display: "flex", alignItems: "baseline", gap: 6, minWidth: 0,
                     }}>
-                      <span style={{
-                        fontFamily: ff.mono, fontSize: 10, color: theme.ash,
-                        whiteSpace: "nowrap",
-                      }}>
-                        {shownAxis === "tempC"
-                          ? `${tempMinDisplay}–${tempMaxDisplay}°`
-                          : `${Math.round(timeSRange[0] / 60)}–${Math.round(timeSRange[1] / 60)} min`}
-                      </span>
+                      {/* The range moved to the ends of the track it
+                          describes — see RangeBands. Three numbers in
+                          one corner said which was which to nobody. */}
                       {shownAxis === "tempC" && (() => {
                         const hint = restHintForCelsius(tempC);
                         if (!hint) return null;
