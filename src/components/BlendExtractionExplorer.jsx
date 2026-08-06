@@ -39,6 +39,7 @@ import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
+import { Arrival } from "./Arrival";
 
 // Caffeine load thresholds (mg). The "high" tick lines up with
 // where perception.js's high-caffeine warning fires (130mg — past a
@@ -65,16 +66,6 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
   const mg = Math.max(0, Math.round(caffeineMg));
   const grams = Math.max(0, Number(totalG) || 0);
   const tsp = Math.max(0, Number(totalTsp) || 0);
-  // Respect the user's weight-unit preference rather than always
-  // showing grams. Grams: round to half-gram for a tidy hint.
-  // Teaspoons: hand off to formatTsp so the rendering matches the
-  // rest of the app's tsp/tbsp/pinch ladder. Suppress when the
-  // caller hasn't wired the total through.
-  const gramsLabel = grams > 0
-    ? (weightUnit === "g"
-        ? `${(Math.round(grams * 2) / 2).toFixed(1)} g leaf`
-        : `${formatTsp(tsp)} leaf`)
-    : null;
   const pct = Math.min(100, (mg / CAFFEINE_MAX_MG) * 100);
   // Three-tier read at the warning line: exactly AT the threshold
   // is "right on the edge" — softer rose tone, no ⚠, small note —
@@ -103,11 +94,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
             textTransform: "uppercase", color: theme.ash,
           }}>caffeine load</div>
-          {gramsLabel && (
-            <div style={{
-              fontFamily: ff.mono, fontSize: 9.5, color: theme.ash,
-            }}>· {gramsLabel} · 250 ml cup</div>
-          )}
+
         </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 6,
@@ -212,7 +199,10 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
           : null;
         if (!advisory) return null;
         return (
-          <div style={{
+          // Grows in. This band is the app noticing something — a cup
+          // crossing into strong — and a notice that was simply always
+          // there by the time you looked reads as a label, not a change.
+          <Arrival duration={240} style={{
             marginTop: 8,
             padding: "8px 10px 8px 12px",
             borderLeft: `2px solid ${advisory.accent}`,
@@ -227,7 +217,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
               marginRight: 8, fontWeight: 600,
             }}>{advisory.tag}</span>
             {advisory.body}
-          </div>
+          </Arrival>
         );
       })()}
     </div>
@@ -706,6 +696,7 @@ export const BlendExtractionExplorer = ({
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
         <PalateMap
+          warnings={brew?.warnings || []}
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
@@ -1484,13 +1475,6 @@ export const BlendExtractionExplorer = ({
         <div style={{ marginBottom: 12 }}>
           <CaffeineBar
             caffeineMg={brew.caffeineMg}
-            totalG={(ingredients || []).reduce((s, it) => s + (Number(it?.g) || 0), 0)}
-            totalTsp={(ingredients || []).reduce((s, it) => {
-              const meta = INGREDIENTS[it?.id];
-              if (!meta) return s;
-              return s + gramsToTsp(Number(it?.g) || 0, meta.category);
-            }, 0)}
-            weightUnit={weightUnit}
           />
         </div>
       )}
@@ -1516,9 +1500,25 @@ export const BlendExtractionExplorer = ({
         // bar's own advisory band (gentle / at-edge / over-the-line)
         // above this list now carries the caffeine signal in a more
         // structured form, so the prose warning here would duplicate it.
+        /* Anything the palate strip already flags is dropped here.
+
+           A tannin warning carries an `axis` naming the palate track it
+           belongs to, and that track is showing a ⚠ at the very same
+           threshold — 2.5 for bitterness, 2.0 for astringency, the same
+           numbers computed twice. Printing the sentence as well meant
+           the cup said one thing in two places, and on a blend pushing
+           both axes the near-identical bands stacked up and buried the
+           leaf-specific line worth reading. Tapping the ⚠ opens the
+           sentence now.
+
+           Aromatic off-notes (soapy, camphor, acrid...) have no palate
+           track and therefore no symbol, so they stay. So do the
+           per-ingredient over-pull lines: those name a leaf, which no
+           ⚠ can tell you. */
         const filtered = (brew.warnings || []).filter(w =>
           w.kind !== "outsider"
           && w.kind !== "caffeine"
+          && !w.axis
           && !/is being over-pulled/.test(w.text || "")
         );
         if (filtered.length === 0) return null;
@@ -1585,7 +1585,12 @@ export const BlendExtractionExplorer = ({
                        : w.kind === "caffeine" ? "high" : "heads up" }
                 : { accent: "#627C5C", bg: "rgba(98, 124, 92, 0.08)", tag: w.kind === "paradox" ? "paradox" : "note" };
               return (
-                <div key={i} style={{
+                // Keyed by what it SAYS, not by position. Index keys
+                // would let a band that just fired inherit the identity
+                // of one already on screen, and inherit its "already
+                // arrived" state with it — the new warning would slide
+                // in silently while an unrelated one re-animated.
+                <Arrival key={`${w.kind}:${w.text}`} duration={240} style={{
                   padding: "8px 10px 8px 12px",
                   borderLeft: `2px solid ${advisory.accent}`,
                   background: advisory.bg,
@@ -1599,7 +1604,7 @@ export const BlendExtractionExplorer = ({
                     marginRight: 8, fontWeight: 600,
                   }}>{advisory.tag}</span>
                   {renderText(w.text)}
-                </div>
+                </Arrival>
               );
             })}
           </div>

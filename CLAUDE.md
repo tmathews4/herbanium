@@ -107,6 +107,17 @@ Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true local
 
 Assert on stable hooks added to our own markup — `data-tour="..."` for tour anchors, `data-testid="..."` for test-only handles. No brittle absolute paths, no text matching where a hook would do. Add the hook at generation time rather than retrofitting it.
 
+## Pushing is deploying
+
+**`git push origin main` publishes to herbanium.app.** Vercel builds
+from the GitHub integration, so there is no deploy workflow in
+`.github/workflows` — that directory holds `ci.yml` and nothing else,
+and reading its absence as "pushing is safe" is wrong. It has been
+read that way once already.
+
+There is no staging step in between. A push to main is the release, so
+both suites pass BEFORE the push, not after.
+
 ## Native builds
 
 `npm run cap:sync` (build + `npx cap sync`) before any native build, or

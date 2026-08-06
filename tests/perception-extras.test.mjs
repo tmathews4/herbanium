@@ -306,11 +306,73 @@ test("integration: hojicha overpull stays low-bitter", () => {
   }
 });
 
+/* ── THE CONTRACT BEHIND THE ⚠ ────────────────────────────────────
+
+   A palate overload used to be announced twice: a ⚠ on the palate row,
+   and a prose band below repeating it. The band is gone and the mark
+   carries the sentence, which only works while the two agree about
+   which warnings are which.
+
+   The UI filters on `axis`: a warning that names a palate track is
+   assumed to have a ⚠ showing it, and is dropped from the prose list.
+   If a tannin warning ever ships without an axis it goes silent in
+   both places — no band, no symbol to open. If an aromatic one ever
+   gains one, it vanishes behind a mark that doesn't exist. Neither
+   failure is visible by reading either file alone. */
+
+test("every tannin warning names the palate axis that carries it", () => {
+  const cups = [
+    [[{ id: "assam", g: 2, role: "lead" }], 100, 900],
+    [[{ id: "sencha", g: 2, role: "lead" }], 80, 300],
+    [[{ id: "puerh", g: 2, role: "lead" }], 100, 600],
+    [[{ id: "gunpowder", g: 2, role: "lead" }], 95, 400],
+  ];
+  const orphans = [];
+  for (const [ings, t, s] of cups) {
+    for (const w of resolveBlendAtBrew(ings, t, s).warnings) {
+      // Per-ingredient lines name a leaf and belong to no track.
+      if (w.kind !== "tannin" || w.role) continue;
+      if (!w.axis) orphans.push(`${ings[0].id} @ ${t}/${s}: "${w.text}"`);
+    }
+  }
+  assert(orphans.length === 0,
+    `${orphans.length} cup-level tannin warning(s) name no axis, so nothing shows them:\n  ${orphans.join("\n  ")}`);
+});
+
+test("the axes named are ones the palate strip actually draws", () => {
+  // PALATE_WARNINGS in FlavorMap keys off these exact names. A typo
+  // here would drop the band and light no mark.
+  const DRAWN = new Set(["bitterness", "astringency", "tartness", "menthol"]);
+  const bad = [];
+  for (const [t, s] of [[100, 900], [95, 600], [85, 240]]) {
+    for (const w of resolveBlendAtBrew([{ id: "assam", g: 2, role: "lead" }], t, s).warnings) {
+      if (w.axis && !DRAWN.has(w.axis)) bad.push(`${w.axis} (${w.text})`);
+    }
+  }
+  assert(bad.length === 0, `warnings point at palate tracks that don't exist: ${bad.join(", ")}`);
+});
+
+test("aromatic off-notes claim no axis, so they keep their prose", () => {
+  // Soapy, camphor, acrid and the rest have no palate track and no ⚠.
+  // If one ever gained an axis it would be filtered out of the band
+  // list and disappear entirely.
+  const mislabelled = [];
+  for (const [t, s] of [[100, 900], [100, 1800]]) {
+    for (const w of resolveBlendAtBrew(
+      [{ id: "lavender", g: 2, role: "lead" }, { id: "chamomile", g: 1, role: "lead" }], t, s,
+    ).warnings) {
+      if (w.kind === "aromatic" && w.axis) mislabelled.push(w.text);
+    }
+  }
+  assert(mislabelled.length === 0,
+    `aromatic warnings with an axis would vanish behind a mark that isn't drawn:\n  ${mislabelled.join("\n  ")}`);
+});
+
 console.log(`\n\n${pass} passed, ${fail} failed`);
 if (failures.length > 0) {
   console.log("\nFailures:");
   for (const { desc, message } of failures) {
-    console.log(`  ✗ ${desc}\n      ${message}`);
+console.log(`  ✗ ${desc}\n      ${message}`);
   }
   process.exit(1);
 }

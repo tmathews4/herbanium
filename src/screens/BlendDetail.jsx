@@ -4,6 +4,7 @@
 
 import React from "react";
 import { BrewSurface } from "../components/BrewSurface";
+import { Arrival } from "../components/Arrival";
 import { BrewDockProvider, BLEND_DETAIL_DOCK_ID, useDockHeight } from "../helpers/dock";
 import {
   Flower, Kettle, MOOD_ICONS,
@@ -169,7 +170,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
     // it and nothing is hidden underneath them. Same arrangement as the
     // app shell, one level down.
     <BrewDockProvider value={BLEND_DETAIL_DOCK_ID}>
-    <div data-testid="blend-detail" style={{
+    {/* OPENS FROM THE MIDDLE OUTWARD. This layer covers the screen
+        rather than pushing it, so growing its height would be a lie
+        about the layout — everything underneath stays exactly where it
+        was. clip-path uncovers it instead: the content sits at its
+        final position for the whole travel and is simply revealed,
+        which is why nothing reflows and no text moves while it opens. */}
+    <Arrival mode="reveal" duration={280} data-testid="blend-detail" style={{
       position: "absolute", top: 0, left: 0, right: 0,
       // Stops at the dock instead of covering it — the main menu is
       // never not on screen. Falls back to 0px so the screen still
@@ -1151,7 +1158,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
           borderTop: `1px solid ${theme.rule}`,
         } : { flexShrink: 0 }}
       />
-    </div>
+    </Arrival>
     </BrewDockProvider>
   );
 };

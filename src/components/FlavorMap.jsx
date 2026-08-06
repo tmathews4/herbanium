@@ -209,6 +209,11 @@ const hexToRgb = (color) => {
 const TrackMap = ({
   kind, ingredients, tempC, timeS, tempCRange,
   showAxis = true, title,
+  /* The cup's own warnings, so the ⚠ on a palate row can say what the
+     prose band used to say instead of a second copy of it being
+     written here. Only the ones tagged with an `axis` are ours — see
+     the note on the symbol below. */
+  warnings = [],
   // Scopes a mood strip to one category, so Mind and Body can be their
   // own windows the way Flavors and Palate are. Null shows everything.
   category = null,
@@ -512,6 +517,11 @@ const TrackMap = ({
   // same row again closes it. Single panel per strip keeps layout
   // predictable instead of accordion-jumping each row.
   const [selectedTrack, setSelectedTrack] = useState(null);
+  // Which row's ⚠ is open. Separate from selectedTrack: the row's own
+  // tap explains what the AXIS is, the symbol explains what the CUP is
+  // doing to it right now, and conflating them would make one tap
+  // answer a question the user didn't ask.
+  const [warnOpen, setWarnOpen] = useState(null);
   // Clear selection when familyMode flips — track names differ
   // between Simple and Detailed views (family ids vs leaf tokens),
   // so the previously-selected name might not exist in the new view.
@@ -1194,11 +1204,38 @@ const TrackMap = ({
                       bad region IS, so the user gets a region preview
                       without a false 'your cup is bitter' alarm when
                       the current brew is fine. */}
+                  {/* THE SYMBOL IS THE CONTROL NOW.
+
+                      The cup used to say this twice: a ⚠ here, and a
+                      prose band below repeating it in a sentence. Same
+                      thresholds, same event, two places — and on a
+                      blend pushing several axes at once the bands
+                      stacked into a wall of near-identical warnings
+                      that buried the one leaf-specific line worth
+                      reading.
+
+                      So the mark stays where the evidence is, on the
+                      row whose bar you can see crossing, and tapping it
+                      opens the sentence. It carries the SAME text the
+                      band did, handed down from the cup, rather than a
+                      paraphrase written here that would drift. */}
                   {here && (
-                    <span
-                      title={`this brew is in ${warn.label} territory`}
-                      style={{ color: theme.terra, fontSize: 10, lineHeight: 1 }}
-                    >⚠</span>
+                    <button
+                      type="button"
+                      data-testid={`palate-warn-${name}`}
+                      aria-label={`${labelFor(name)}: this brew is in ${warn.label} territory`}
+                      aria-expanded={warnOpen === name}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setWarnOpen(warnOpen === name ? null : name);
+                      }}
+                      style={{
+                        background: "transparent", border: "none", padding: 0,
+                        margin: 0, cursor: "pointer",
+                        color: theme.terra, fontSize: 10, lineHeight: 1,
+                        flexShrink: 0,
+                      }}
+                    >⚠</button>
                   )}
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {labelFor(name)}
@@ -1279,6 +1316,26 @@ const TrackMap = ({
           user always knows where the explanation lands when they
           tap a row. Stays out of the way until something is selected;
           renders inline (no popup, no accordion-jump per row). */}
+      {warnOpen && (() => {
+        const w = (warnings || []).find(x => x.axis === warnOpen);
+        if (!w) return null;
+        return (
+          <div
+            data-testid="palate-warn-detail"
+            style={{
+              marginTop: 8,
+              padding: "8px 10px 8px 12px",
+              borderLeft: `2px solid ${theme.terra}`,
+              background: "rgba(176, 84, 47, 0.07)",
+              borderRadius: "0 6px 6px 0",
+              fontFamily: ff.serif, fontSize: 12.5,
+              color: theme.ink, lineHeight: 1.45,
+            }}
+          >
+            {w.text}
+          </div>
+        );
+      })()}
       {selectedTrack && descriptionFor(selectedTrack) && (
         <div style={{
           marginTop: 10,

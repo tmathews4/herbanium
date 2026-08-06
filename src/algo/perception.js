@@ -575,19 +575,26 @@ export function buildWarnings({
     : null;
   const rose = (now, base) => base == null || now > base + RISE_MARGIN;
 
+  /* `axis` names the palate track this warning belongs to. The palate
+     strip already flags exactly these two axes with a ⚠ at exactly
+     these thresholds — bitterness at 2.5, astringency at 2.0, the same
+     numbers, computed twice — so the strip can carry the explanation
+     and the prose band underneath doesn't have to repeat it. Matching
+     on the axis rather than on the sentence keeps the two ends from
+     drifting apart the next time someone edits the copy. */
   if (bitterBar >= 4 && rose(bitterBar, baseBitter)) {
     warnings.push({
-      kind: "tannin",
+      kind: "tannin", axis: "bitterness",
       text: "Tannins are taking over — drop a few degrees or shave the steep.",
     });
   } else if (astringencyBar >= 2 && rose(astringencyBar, baseAstringency)) {
     warnings.push({
-      kind: "tannin",
+      kind: "tannin", axis: "astringency",
       text: "Astringent edge climbing — gentler heat or a shorter steep would soften it.",
     });
   } else if (bitterBar >= 2.5 && rose(bitterBar, baseBitter)) {
     warnings.push({
-      kind: "tannin",
+      kind: "tannin", axis: "bitterness",
       text: "The bitter side is starting to dominate — pull back the steep or drop a few degrees.",
     });
   }

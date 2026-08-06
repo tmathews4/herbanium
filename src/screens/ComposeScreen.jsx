@@ -35,6 +35,7 @@ import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { ElementalsView } from "../components/ElementalsView";
 import { Sprig, Pencil } from "../components/icons";
+import { Arrival } from "../components/Arrival";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -1907,14 +1908,21 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             textTransform: "uppercase", color: theme.ash,
             marginBottom: 8, lineHeight: 1.5,
           }}>
-            {/* In weight mode the numbers ARE the measurement, so the
-                line that translates parts into one would be telling
-                the user what they can already read. */}
-            {amountMode === "weight"
-              ? "per 250 ml cup"
-              : weightUnit === "g"
-                ? "1 part ≈ 1 g of dry leaf"
-                : "1 part ≈ ½ tsp of dry leaf"}
+            {/* WHAT A PART IS, and nothing else.
+
+                In weight mode the numbers already ARE the measurement,
+                so a translation line would tell the user what they can
+                read. And the volume this once claimed — "per 250 ml
+                cup" — was asserted rather than known; nobody's mug was
+                consulted.
+
+                The tsp variant went too. "1 part ≈ ½ tsp" is only true
+                for a leaf of average density: a teaspoon runs 1.0g of
+                chamomile to 3.0g of powdered adaptogen, so the same
+                sentence was out by threefold across the catalogue. The
+                gram figure is exact by construction — a part IS a gram
+                to the engine — so that's the one worth printing. */}
+            {amountMode === "weight" ? null : "1 part ≈ 1 g of dry leaf"}
           </div>
         )}
         {reverseIngs.map((id, idx) => {
@@ -1923,8 +1931,13 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           // 9 parts is the ratio language's ceiling; 20g is the pot's.
           const atCeiling = amountMode === "parts" ? parts >= 9 : parts >= 20;
           return (
-            <div
+            // Grows into the list instead of appearing in it. Adding a
+            // leaf shoves everything below down by a row height, and
+            // that displacement happening in one frame is what made the
+            // card look like it glitched rather than gained a row.
+            <Arrival
               key={id}
+              duration={260}
               style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
                 padding: "8px 14px",
@@ -2041,7 +2054,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   fontSize: 14, cursor: "pointer", padding: "0 4px",
                 }}
               >×</button>
-            </div>
+            </Arrival>
           );
         })}
 
