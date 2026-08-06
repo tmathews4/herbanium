@@ -128,14 +128,18 @@ export const BrewCornerButton = ({
         border: `1px solid ${theme.ruleSoft}`,
         borderRadius: radius.md,
         boxShadow: shadow.card,
-        padding: "18px 18px 14px",
+        // The footer runs edge to edge, so the card clips rather than
+        // pads at the bottom — otherwise the row's corners would float
+        // inside the card's radius instead of taking it.
+        overflow: "hidden",
       }}>
+      <div style={{ padding: "18px 18px 4px" }}>
         <div style={{
           fontFamily: ff.serif, fontSize: 19, color: theme.ink, marginBottom: 4,
         }}>Brew this cup?</div>
         <div style={{
           fontFamily: ff.sans, fontSize: 12.5, color: theme.inkSoft,
-          lineHeight: 1.5, marginBottom: 14,
+          lineHeight: 1.5, marginBottom: 0,
         }}>
           {askName
             ? "The timer starts now, at the temperature and time you've set. Give it a name while you're here."
@@ -146,6 +150,8 @@ export const BrewCornerButton = ({
             onboarding name step: a single text input submits implicitly
             and the on-screen keyboard offers a Go key instead of a
             newline this field can't use. */}
+      </div>
+
         <form onSubmit={(e) => { e.preventDefault(); commit(); }} style={{ margin: 0 }}>
           {askName && (
           <input
@@ -161,20 +167,45 @@ export const BrewCornerButton = ({
               fontFamily: ff.serif, fontSize: 16, color: theme.ink,
               background: "transparent", border: "none",
               borderBottom: `1px solid ${theme.rule}`,
-              padding: "6px 2px", outline: "none", marginBottom: 16,
+              padding: "6px 2px", outline: "none",
+              margin: "0 18px 18px", width: "calc(100% - 36px)",
             }}
           />
           )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          {/* A FOOTER, not two floating buttons. Square, flush to the
+              card's edges, split by the same hairline the dock uses —
+              the same treatment as the Brew corner it was opened from,
+              so the prompt reads as part of the surface rather than a
+              tray of controls resting on it. Equal halves: neither
+              answer is the one being nudged. */}
+          <div style={{
+            display: "flex", alignItems: "stretch",
+            borderTop: `1px solid ${theme.ruleSoft}`,
+          }}>
             <Button
-              variant="ghost"
+              variant="secondary" tone="ink"
               onClick={() => setAsking(false)}
               data-testid="brew-confirm-cancel"
+              style={{
+                flex: 1, borderRadius: 0, border: "none",
+                borderRight: `1px solid ${theme.ruleSoft}`,
+                background: "transparent", boxShadow: "none",
+                color: theme.ash,
+                fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+                padding: "14px 10px",
+              }}
             >not yet</Button>
             <Button
-              variant="primary" tone="terra" type="submit"
+              variant="secondary" tone="terra" type="submit"
               data-testid="brew-confirm-go"
-              style={{ fontSize: 13, padding: "9px 18px" }}
+              style={{
+                flex: 1, borderRadius: 0, border: "none",
+                background: "transparent", boxShadow: "none",
+                color: theme.terra,
+                fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+                fontWeight: 600,
+                padding: "14px 10px",
+              }}
             >brew it →</Button>
           </div>
         </form>
