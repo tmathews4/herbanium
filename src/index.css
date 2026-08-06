@@ -80,6 +80,40 @@
 }
 
 /* ──────────────────────────────────────────────────────────────
+   AN EMPTY DOCK SLOT DRAWS NOTHING.
+
+   The brew controls are portalled into a slot each host renders, and
+   the slot carries the chrome — a rule line and a strip of ivory —
+   because the controls themselves are transparent so the dock reads as
+   one surface.
+
+   That chrome is applied whenever the host thinks the panel should be
+   there, which is not the same as the panel actually having arrived.
+   Reported from a saved recipe: a bare band above the sub-tabs where
+   the brew row belonged, drawn by a slot with nothing in it.
+
+   `:empty` makes the slot answer for itself rather than the host having
+   to predict every reason a portal might not land — a blend whose
+   explorer bailed, a mount ordering where the slot appeared after the
+   component looked for it, anything later. If there is nothing inside,
+   there is nothing to see.
+
+   Not a fix for whatever kept the panel away; a guarantee that its
+   absence never leaves a smear on the page. */
+/* THE DETAIL SLOTS ONLY. The main #brew-dock is deliberately left
+   alone: it is empty on most screens by design, the app MEASURES the
+   bar that contains it to publish --app-dock-h, and the tour clamps
+   its cutout against that line. Collapsing it took ~20 specs down at
+   once — every minimized-brew, main-menu and smoke test that depends
+   on the dock having a height. The reported band was on a detail
+   screen; the rule belongs there. */
+#brew-dock-blend-detail:empty,
+#brew-dock-ingredient-detail:empty {
+  border-top: none !important;
+  background: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
    Herbanium palette — CSS variables driven by prefers-color-scheme.
 
    Light theme (default) is the warm cream/ink register the app was

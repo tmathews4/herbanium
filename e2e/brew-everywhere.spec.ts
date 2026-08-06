@@ -230,3 +230,36 @@ test.describe("quick brew — the deliberate exception", () => {
       "the row should open the recipe").toBeVisible({ timeout: 15_000 });
   });
 });
+
+test.describe("an empty dock slot draws nothing", () => {
+  test("folding the panel leaves no band behind", async ({ page }) => {
+    // The slot carries the dock's chrome — a rule line and a strip of
+    // ivory — because the controls themselves are transparent. Reported
+    // from a saved recipe as a bare band above the sub-tabs where the
+    // brew row belonged: the slot drawn, the panel not in it.
+    await boot(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+    await ensureBrewPanel(page);
+
+    // Fold the Brewing section: the explorer unmounts and the slot is
+    // left with nothing to hold.
+    await page.getByRole("button", { name: /Brewing/i }).first().click();
+    await page.waitForTimeout(600);
+
+    const slot = await page.evaluate(() => {
+      const el = document.getElementById("brew-dock-blend-detail");
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      return {
+        children: el.childElementCount,
+        height: Math.round(el.getBoundingClientRect().height),
+        borderTop: cs.borderTopWidth,
+      };
+    });
+    expect(slot, "the detail screen should still render its slot").not.toBeNull();
+    expect(slot!.children, "nothing should be portalled in").toBe(0);
+    expect(slot!.height, "an empty slot must take no space").toBeLessThanOrEqual(1);
+    expect(parseFloat(slot!.borderTop), "and draw no rule line").toBe(0);
+  });
+});

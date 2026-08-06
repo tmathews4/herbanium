@@ -885,11 +885,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               curated
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}
-              // The panel gets its own Brew, the same as every other
-              // brew window. It runs handleBrewTap — the identical
-              // action the full-width CTA below uses, twist flow and
-              // all — rather than a second path that could drift from
-              // it. Two entry points, one behaviour.
+              // The page's brew control while the panel is open. Runs
+              // handleBrewTap — the same action, twist flow and all,
+              // that the collapsed-state CTA below uses.
               brewAction={(
                 <BrewCornerButton
                   // Asks first — it starts a timer. No name field: this
@@ -911,10 +909,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
           </>
         )}
 
-        {/* Brew CTA — primary terra button, full width. Style overrides
-            push the size up one tier (17px serif, 15px vertical pad) so
-            the page's headline action reads slightly bigger than the
-            standard Button defaults. */}
+        {/* Brew CTA — primary terra button, full width.
+            STILL HERE, and it is a duplicate of the panel's corner Brew
+            while that panel is open. Hiding it was tried and reverted:
+            eleven specs across four files start a brew by clicking this
+            button, so removing it takes ~20 tests down at once. The
+            de-duplication is real work with a coordinated spec
+            migration, not a one-line conditional. */}
         <Button
           variant="primary" fullWidth
           onClick={handleBrewTap}

@@ -623,6 +623,114 @@ export const BlendExtractionExplorer = ({
         />
       </div>
 
+      {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
+          DIRECTLY UNDER THE PALATE STRIP, because that strip is what
+          measures them. `bitterness` and `astringency` are the bars a
+          tannin warning is about, and PALATE_WARNINGS is already
+          threshold-aligned with the cup-level ladder so a bar's ⚠ and
+          the prose below fire together — the same finding stated twice,
+          once as a number and once in words.
+          They used to sit below the sliders in the consequence cluster
+          with the caffeine gauge, which put a paragraph of explanation a
+          strip away from its own evidence. Outsiders are shown inline
+          above with the per-ingredient pills; filtered here to avoid
+          duplication. */}
+      {(() => {
+        // Cup-level warnings only — per-ingredient outsider and
+        // over-pull warnings now surface in the selected-pill detail
+        // box. Cup-level tannin/aromatic (no ingredient-name prefix)
+        // and masking/paradox/ceiling stay here.
+        //
+        // Caffeine-kind warnings are also filtered out — the caffeine
+        // bar's own advisory band (gentle / at-edge / over-the-line)
+        // above this list now carries the caffeine signal in a more
+        // structured form, so the prose warning here would duplicate it.
+        const filtered = (brew.warnings || []).filter(w =>
+          w.kind !== "outsider"
+          && w.kind !== "caffeine"
+          && !/is being over-pulled/.test(w.text || "")
+        );
+        if (filtered.length === 0) return null;
+        // Per-ingredient over-pull warnings always start with the
+        // ingredient name and " is being over-pulled — ". Split on
+        // that pattern to color the name in sage green so a glance
+        // links the warning to which ingredient triggered it.
+        const renderText = (text) => {
+          const m = text.match(/^(.+?)\s+(is being over-pulled — .+)$/);
+          if (!m) return text;
+          return (
+            <>
+              <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
+                {m[1]}
+              </span>
+              {" "}{m[2]}
+            </>
+          );
+        };
+        // Tradition / house preface — when warnings fire on a curated
+        // traditional or a Herbanium house signature, prepend a short
+        // italic note reframing them as character notes the recipe
+        // expects. The model's bitter/tannic ladder is tuned for a
+        // generic palate; in chai or yancha the push is the point,
+        // and the user shouldn't read the warning band as "this cup
+        // is broken." The warnings still render so the user sees
+        // WHY the tradition stretches the leaf.
+        const showTraditionPreface = isTraditional || isHouse;
+        const prefaceText = isTraditional
+          ? "The stretch is the tradition — read these as character notes the cup expects, not flaws to fix."
+          : "This house recipe is tuned with the stretch baked in — these are the trade-offs that make it work.";
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4, marginBottom: 14 }}>
+            {showTraditionPreface && (
+              <div style={{
+                fontFamily: ff.serif, fontSize: 12.5,
+                color: theme.inkSoft, lineHeight: 1.5,
+                paddingBottom: 6,
+                borderBottom: `1px dashed ${theme.ruleSoft}`,
+              }}>
+                {prefaceText}
+              </div>
+            )}
+            {filtered.map((w, i) => {
+              // Warning severity → matching advisory-band styling from
+              // the caffeine bar, so all the "this cup is pushing too
+              // hard" signals share one visual language.
+              //   red (terra)  — over the line: tannin, aromatic, ceiling
+              //   yellow (ochre) — heads-up: edge cases (e.g. masking,
+              //                    where one note is starting to bury
+              //                    another but the cup isn't broken)
+              //   sage         — paradox / informational: notable, not a
+              //                    flaw — the cup walks both sides
+              const sev = (w.kind === "tannin" || w.kind === "aromatic" || w.kind === "ceiling")
+                ? "over"
+                : (w.kind === "paradox") ? "info" : "edge";
+              const advisory = sev === "over"
+                ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling" : (w.kind === "aromatic" ? "aromatic" : "over the line") }
+                : sev === "edge"
+                ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)", tag: w.kind === "masking" ? "masking" : "heads up" }
+                : { accent: "#627C5C", bg: "rgba(98, 124, 92, 0.08)", tag: w.kind === "paradox" ? "paradox" : "note" };
+              return (
+                <div key={i} style={{
+                  padding: "8px 10px 8px 12px",
+                  borderLeft: `2px solid ${advisory.accent}`,
+                  background: advisory.bg,
+                  borderRadius: "0 6px 6px 0",
+                  fontFamily: ff.serif, fontSize: 12.5,
+                  color: theme.ink, lineHeight: 1.45,
+                }}>
+                  <span style={{
+                    fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
+                    textTransform: "uppercase", color: advisory.accent,
+                    marginRight: 8, fontWeight: 600,
+                  }}>{advisory.tag}</span>
+                  {renderText(w.text)}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       {/* Range bands — three states:
           1. Full intersection (every non-catalyst in range): GREEN.
              The blend's natural sweet spot.
@@ -1302,107 +1410,6 @@ export const BlendExtractionExplorer = ({
         </div>
       )}
 
-      {/* Warnings — masking, ceiling, paradox, tannin, aromatic.
-          Sit between the slider levers and the profile bars so the user
-          can adjust steep/temp and immediately see whether the cup is
-          pulling tannins or hitting another ceiling. Outsiders are
-          shown inline above with the per-ingredient pills; filter here
-          to avoid duplication. */}
-      {(() => {
-        // Cup-level warnings only — per-ingredient outsider and
-        // over-pull warnings now surface in the selected-pill detail
-        // box. Cup-level tannin/aromatic (no ingredient-name prefix)
-        // and masking/paradox/ceiling stay here.
-        //
-        // Caffeine-kind warnings are also filtered out — the caffeine
-        // bar's own advisory band (gentle / at-edge / over-the-line)
-        // above this list now carries the caffeine signal in a more
-        // structured form, so the prose warning here would duplicate it.
-        const filtered = (brew.warnings || []).filter(w =>
-          w.kind !== "outsider"
-          && w.kind !== "caffeine"
-          && !/is being over-pulled/.test(w.text || "")
-        );
-        if (filtered.length === 0) return null;
-        // Per-ingredient over-pull warnings always start with the
-        // ingredient name and " is being over-pulled — ". Split on
-        // that pattern to color the name in sage green so a glance
-        // links the warning to which ingredient triggered it.
-        const renderText = (text) => {
-          const m = text.match(/^(.+?)\s+(is being over-pulled — .+)$/);
-          if (!m) return text;
-          return (
-            <>
-              <span style={{ color: theme.sageDeep, fontStyle: "normal", fontWeight: 500 }}>
-                {m[1]}
-              </span>
-              {" "}{m[2]}
-            </>
-          );
-        };
-        // Tradition / house preface — when warnings fire on a curated
-        // traditional or a Herbanium house signature, prepend a short
-        // italic note reframing them as character notes the recipe
-        // expects. The model's bitter/tannic ladder is tuned for a
-        // generic palate; in chai or yancha the push is the point,
-        // and the user shouldn't read the warning band as "this cup
-        // is broken." The warnings still render so the user sees
-        // WHY the tradition stretches the leaf.
-        const showTraditionPreface = isTraditional || isHouse;
-        const prefaceText = isTraditional
-          ? "The stretch is the tradition — read these as character notes the cup expects, not flaws to fix."
-          : "This house recipe is tuned with the stretch baked in — these are the trade-offs that make it work.";
-        return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4, marginBottom: 14 }}>
-            {showTraditionPreface && (
-              <div style={{
-                fontFamily: ff.serif, fontSize: 12.5,
-                color: theme.inkSoft, lineHeight: 1.5,
-                paddingBottom: 6,
-                borderBottom: `1px dashed ${theme.ruleSoft}`,
-              }}>
-                {prefaceText}
-              </div>
-            )}
-            {filtered.map((w, i) => {
-              // Warning severity → matching advisory-band styling from
-              // the caffeine bar, so all the "this cup is pushing too
-              // hard" signals share one visual language.
-              //   red (terra)  — over the line: tannin, aromatic, ceiling
-              //   yellow (ochre) — heads-up: edge cases (e.g. masking,
-              //                    where one note is starting to bury
-              //                    another but the cup isn't broken)
-              //   sage         — paradox / informational: notable, not a
-              //                    flaw — the cup walks both sides
-              const sev = (w.kind === "tannin" || w.kind === "aromatic" || w.kind === "ceiling")
-                ? "over"
-                : (w.kind === "paradox") ? "info" : "edge";
-              const advisory = sev === "over"
-                ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling" : (w.kind === "aromatic" ? "aromatic" : "over the line") }
-                : sev === "edge"
-                ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)", tag: w.kind === "masking" ? "masking" : "heads up" }
-                : { accent: "#627C5C", bg: "rgba(98, 124, 92, 0.08)", tag: w.kind === "paradox" ? "paradox" : "note" };
-              return (
-                <div key={i} style={{
-                  padding: "8px 10px 8px 12px",
-                  borderLeft: `2px solid ${advisory.accent}`,
-                  background: advisory.bg,
-                  borderRadius: "0 6px 6px 0",
-                  fontFamily: ff.serif, fontSize: 12.5,
-                  color: theme.ink, lineHeight: 1.45,
-                }}>
-                  <span style={{
-                    fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
-                    textTransform: "uppercase", color: advisory.accent,
-                    marginRight: 8, fontWeight: 600,
-                  }}>{advisory.tag}</span>
-                  {renderText(w.text)}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
 
       {/* Cup summary — dominant 1–2 effects and flavors as small
           pills matching the predicted-taste row's exact dimensions.
