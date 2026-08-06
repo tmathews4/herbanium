@@ -18,18 +18,13 @@
 // crystal name (data/moodCrystal.js) gets the same "sounds good"
 // treatment as the unique creation title.
 import { orderModifiers, euphonyOK } from "./titleEuphony";
+// Uses the shared deterministic hash — see helpers/misc. Four copies
+// of this existed; the values are identical, verified sample-by-sample.
+import { hashString } from "../helpers/misc.js";
 
 // Cheap deterministic hash — stable across reloads and platforms.
-function hash(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
 
-const pick = (arr, seed) => arr[hash(seed) % arr.length];
+const pick = (arr, seed) => arr[hashString(seed) % arr.length];
 
 // Element pools by 3-hour windows of the day. Strictly elemental /
 // nature words — sky, water, light, soil, fire, time-of-day phenomena.
@@ -134,7 +129,7 @@ const MYTHICAL_BY_FLAVOR = {
 // the exception, not the default.
 const MYTHICAL_RATE = 15;
 function pickCreature(commonPool, mythicalPool, seed) {
-  const roll = hash(seed + "|tier") % 100;
+  const roll = hashString(seed + "|tier") % 100;
   if (roll < MYTHICAL_RATE && mythicalPool && mythicalPool.length > 0) {
     return pick(mythicalPool, seed + "|mythical");
   }
@@ -153,7 +148,7 @@ export function generateCreationTitle(profile) {
 
   const gemPool = (() => {
     if (flavors.length === 0) return GEMS_BY_FLAVOR._none;
-    const f = flavors[hash(seedBase + "|flavorPick") % flavors.length];
+    const f = flavors[hashString(seedBase + "|flavorPick") % flavors.length];
     return GEMS_BY_FLAVOR[f] || GEMS_BY_FLAVOR._none;
   })();
 
@@ -163,14 +158,14 @@ export function generateCreationTitle(profile) {
   // (which the user reads as identity) stays stable.
   let creature;
   if (moods.length > 0) {
-    const m = moods[hash(seedBase + "|moodPick") % moods.length];
+    const m = moods[hashString(seedBase + "|moodPick") % moods.length];
     creature = pickCreature(
       COMMON_BY_MOOD[m] || COMMON_BY_FLAVOR._none,
       MYTHICAL_BY_MOOD[m] || MYTHICAL_BY_FLAVOR._none,
       seedBase + "|creature",
     );
   } else if (flavors.length > 0) {
-    const f = flavors[hash(seedBase + "|creatureFlavorPick") % flavors.length];
+    const f = flavors[hashString(seedBase + "|creatureFlavorPick") % flavors.length];
     creature = pickCreature(
       COMMON_BY_FLAVOR[f] || COMMON_BY_FLAVOR._none,
       MYTHICAL_BY_FLAVOR[f] || MYTHICAL_BY_FLAVOR._none,

@@ -37,6 +37,9 @@ import {
   FAMILY_BY_EFFECT,
 } from "../components/FlavorMap";
 import { orderModifiers, euphonyOK } from "./titleEuphony";
+// Uses the shared deterministic hash — see helpers/misc. Four copies
+// of this existed; the values are identical, verified sample-by-sample.
+import { hashString, tallyBy } from "../helpers/misc.js";
 
 // Window: 30 days. Anything older drops out — the crystal is meant
 // to read as "lately," not as a permanent record.
@@ -161,15 +164,6 @@ const CRYSTAL_PATTERNS = [
   ["Cloudy",   "clouded with",  "the color hangs in a soft suspension"],
 ];
 
-function hashStr(s) {
-  let h = 0;
-  const str = s || "";
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
 
 function patternForProfile(profile) {
   // Deterministic per profile — same user keeps the same pattern
@@ -177,7 +171,7 @@ function patternForProfile(profile) {
   // Falls back to Threaded for the no-profile case (e.g. previews).
   if (!profile) return CRYSTAL_PATTERNS[0];
   const seed = `${profile.name || "anon"}|${profile.createdAt || 0}|crystalPattern`;
-  return CRYSTAL_PATTERNS[hashStr(seed) % CRYSTAL_PATTERNS.length];
+  return CRYSTAL_PATTERNS[hashString(seed) % CRYSTAL_PATTERNS.length];
 }
 
 function withinWindow(ts, now) {
@@ -185,14 +179,6 @@ function withinWindow(ts, now) {
   return now - ts <= WINDOW_MS;
 }
 
-function tally(items) {
-  const out = {};
-  for (const x of items || []) {
-    if (!x) continue;
-    out[x] = (out[x] || 0) + 1;
-  }
-  return out;
-}
 
 // Map a raw mood word ("calm", "uplifting", "anxious") to an effect
 // family ("calm", "energy"). Anxious / stressed / restless / tired
@@ -303,8 +289,8 @@ export function computeMoodCrystal({
   profile = null,
   now = Date.now(),
 } = {}) {
-  const moodTally = tally(collectRecentMoods(sessions, journalEntries, now));
-  const flavorTally = tally(collectRecentFlavors(sessions, getBlend, now));
+  const moodTally = tallyBy(collectRecentMoods(sessions, journalEntries, now));
+  const flavorTally = tallyBy(collectRecentFlavors(sessions, getBlend, now));
 
   const effectFams = topFamily(moodTally, moodToEffectFamily, CRYSTAL_EFFECT_COLORS);
   const flavorFams = topFamily(flavorTally, flavorToFlavorFamily, CRYSTAL_FLAVOR_COLORS);

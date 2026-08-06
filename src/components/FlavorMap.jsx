@@ -27,7 +27,7 @@
    recompute — only the indicator moves.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { resolveBlendAtBrew } from "../algo/compose";
 import {
   EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
@@ -214,6 +214,13 @@ const TrackMap = ({
      written here. Only the ones tagged with an `axis` are ours — see
      the note on the symbol below. */
   warnings = [],
+  /* Bumped by whoever MOVED the brew without the user dragging it —
+     tapping RECOMMENDED, at present. See the marker further down: a
+     drag has to track the finger exactly and a jump has to be
+     followable, and those want opposite things from a transition.
+     This is how the marker tells them apart, because the value alone
+     cannot say which happened. */
+  jumpNonce = 0,
   // Scopes a mood strip to one category, so Mind and Body can be their
   // own windows the way Flavors and Palate are. Null shows everything.
   category = null,
@@ -522,6 +529,23 @@ const TrackMap = ({
   // doing to it right now, and conflating them would make one tap
   // answer a question the user didn't ask.
   const [warnOpen, setWarnOpen] = useState(null);
+
+  /* Eased for exactly one move. The nonce changes when something other
+     than a drag set the brew; the flag goes up, the marker travels, and
+     it comes back down so the next drag is instant again. Keyed off the
+     nonce rather than the value because two jumps can land on the same
+     temperature and both deserve the travel. */
+  const [easingJump, setEasingJump] = useState(false);
+  const lastJump = useRef(jumpNonce);
+  useEffect(() => {
+    if (jumpNonce === lastJump.current) return;
+    lastJump.current = jumpNonce;
+    if (typeof window !== "undefined"
+        && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+    setEasingJump(true);
+    const t = setTimeout(() => setEasingJump(false), 460);   // just past the travel
+    return () => clearTimeout(t);
+  }, [jumpNonce]);
   // Clear selection when familyMode flips — track names differ
   // between Simple and Detailed views (family ids vs leaf tokens),
   // so the previously-selected name might not exist in the new view.
@@ -1298,6 +1322,24 @@ const TrackMap = ({
               </div>
             );
           })}
+          {/* WHERE YOUR BREW SITS on this strip's temperature span.
+
+              Instant under a drag — a marker lagging your finger reads
+              as the app struggling, and the whole point of the strip is
+              that it answers while you move. But tapping RECOMMENDED
+              moves the brew in one step and this used to teleport:
+              measured on assam, 70°C to 98°C sent it 165px to 301px in
+              a single frame, with nothing connecting where it was to
+              where it went.
+
+              So the transition is on only for the frame after a jump —
+              and it overshoots. The curve carries the marker past the
+              target, slows, and rubber-bands back onto it, which reads
+              as the cup being PUT somewhere rather than teleported.
+              Overshoot is also the one thing a drag could never
+              produce, so the two motions stay tellable apart.
+
+              Reduced motion never gets it. */}
           <div style={{
             position: "absolute",
             top: -2, bottom: -2,
@@ -1308,6 +1350,7 @@ const TrackMap = ({
             borderRadius: 1,
             pointerEvents: "none",
             boxShadow: "0 0 0 1px rgba(var(--hi-rgb),0.55)",
+            transition: easingJump ? "left 420ms cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
           }} />
         </div>
       </div>
@@ -1329,7 +1372,7 @@ const TrackMap = ({
               background: "rgba(176, 84, 47, 0.07)",
               borderRadius: "0 6px 6px 0",
               fontFamily: ff.serif, fontSize: 12.5,
-              color: theme.ink, lineHeight: 1.45,
+              color: theme.ink, lineHeight: 1.45, textAlign: "left",
             }}
           >
             {w.text}

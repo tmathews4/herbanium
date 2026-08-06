@@ -33,8 +33,10 @@
 import { INGREDIENTS } from "../src/data/ingredients.js";
 
 import { readFileSync } from "node:fs";
-import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS, SYNERGY_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
-import { EFFECT_SYNERGIES } from "../src/algo/perception.js";
+import {
+  EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS, SYNERGY_DESCRIPTIONS, PARADOX_DESCRIPTIONS,
+} from "../src/data/vocabularyDescriptions.js";
+import { EFFECT_SYNERGIES, ALLOWED_PARADOXES } from "../src/algo/perception.js";
 
 let pass = 0, fail = 0;
 const failures = [];
@@ -554,6 +556,69 @@ test("the sourced ones actually name their source", () => {
   const vague = CITED.filter(l => !/\b(19|20)\d{2}\b|et al/i.test(SYNERGY_DESCRIPTIONS[l]?.body || ""));
   assert(vague.length === 0,
     `${vague.length} synergy(s) claim evidence without naming any: ${vague.join(", ")}`);
+});
+
+/* ── EVIDENCE IS NOT A LIST OF CONTENTS ─────────────────────────────
+
+   Reported: `deepens sedation` fired on tulsi, spearmint, chamomile and
+   gunpowder, and its description talked about valerian and lemon balm —
+   reading as though those were in the cup.
+
+   They weren't. They're the leaves the TRIAL used, and the pill fires
+   on the effect pairing rather than on any particular ingredient, so a
+   description that names its evidence has to say which it's doing. The
+   same trap caught `deep settle` (valerian), `Maghrebi refresh`
+   (peppermint) and `warming digestive` (peppermint, fennel, ginger).
+
+   Extrapolating from a studied pair to the register it describes is
+   fine — it's how the app can say anything at all about combinations
+   nobody has trialled. What's not fine is letting the citation read as
+   an ingredient list. */
+
+test("a description naming ingredients says they're the evidence, not the cup", () => {
+  const NAMED = /valerian|lemon balm|peppermint|fennel|ginger|chamomile|matcha|gunpowder|spearmint|tulsi/i;
+  // Phrases that mark the named leaves as the study rather than the pot.
+  const DISCLAIMS = [
+    "aren't necessarily the leaves in your cup",
+    "whatever leaves your cup uses",
+    "your cup may reach the same register",
+    "where the evidence comes from rather than a list",
+    "the trial that measured it used",
+  ];
+  const guilty = [];
+  for (const [label, entry] of Object.entries(SYNERGY_DESCRIPTIONS)) {
+    const body = entry.body || "";
+    if (!NAMED.test(body)) continue;
+    if (!DISCLAIMS.some(d => body.toLowerCase().includes(d))) guilty.push(label);
+  }
+  assert(guilty.length === 0,
+    `${guilty.length} synergy description(s) name ingredients as if they were in the cup: ${guilty.join(", ")}`);
+});
+
+test("every paradox the engine can fire has a description to open", () => {
+  /* Paradoxes are pills now, not prose bands, which means one with no
+     entry here is a pill that opens onto nothing — or worse, a
+     combination the engine detects and never mentions at all, since
+     the band it used to print is gone.
+
+     `warming + cooling` fires on real cups: two shipped blends, plus
+     any cup led by fennel or cardamom, which carry both registers by
+     themselves. It is not hypothetical. */
+  const missing = ALLOWED_PARADOXES
+    .map(([a, b]) => [a, b].slice().sort().join("|"))
+    .filter(k => !PARADOX_DESCRIPTIONS[k]?.summary);
+  assert(missing.length === 0,
+    `${missing.length} paradox(es) fire with nothing to say: ${missing.join(", ")}`);
+});
+
+test("a paradox description names the receptors, not just a feeling", () => {
+  // The whole reason warming+cooling survived the audit that removed
+  // energy+sleepy is that two independent channels carry it. If the
+  // description ever stops saying so, the claim is back to intuition.
+  for (const [key, entry] of Object.entries(PARADOX_DESCRIPTIONS)) {
+    assert(/TRP|receptor|channel/i.test(entry.body || ""),
+      `${key} claims two effects co-exist without naming what carries them`);
+  }
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

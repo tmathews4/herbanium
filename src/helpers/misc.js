@@ -98,3 +98,44 @@ export function suggestBlendName(ingredients) {
   if (named.length === 2) return `${named[0]} & ${named[1]}`;
   return `${named[0]} & ${named[1]} + accents`;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Two things that were written out four times and twice.
+
+   The redundancy audit found the same string hash — the classic
+   `h = (h << 5) - h + charCodeAt(i)` — copied into ElementalSigil,
+   moodCrystal, creationTitle and elementalAdjectives, two of them
+   byte-identical. And `tally` written twice, identically.
+
+   Harmless until someone fixes a bug in one copy, which is the whole
+   problem with harmless duplication: nothing goes wrong, and then one
+   day the four answers stop agreeing and there is no test that could
+   have noticed.
+
+   Both are deterministic on purpose. The hash seeds daily poems,
+   sigil geometry and creature names — anything keyed off it must give
+   the same answer for the same string on every device and every
+   reload, so this must never be "improved" into something seeded or
+   randomised.
+   ────────────────────────────────────────────────────────────── */
+
+// Deterministic 32-bit string hash, always non-negative.
+export function hashString(str) {
+  let h = 0;
+  const s = str || "";
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;                 // force 32-bit wrap, matching the originals
+  }
+  return Math.abs(h);
+}
+
+// Count occurrences into a plain object. Skips falsy entries.
+export function tallyBy(items) {
+  const out = {};
+  for (const x of items || []) {
+    if (!x) continue;
+    out[x] = (out[x] || 0) + 1;
+  }
+  return out;
+}

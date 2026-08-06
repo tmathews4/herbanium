@@ -150,6 +150,79 @@ honest as long as it doesn't dress as a finding.
 
 ---
 
+## Paradoxes — and the one that isn't
+
+`ALLOWED_PARADOXES` marked two pairs as legitimately co-existing rather
+than cancelling, and surfaced both with the same line: *"X and Y will
+both register — the cup walks both sides."* They are not the same kind
+of pair.
+
+### `warming` + `cooling` — a real paradox. KEEP, and now sourced.
+
+It fires on real cups, which is why it earned research rather than a
+shrug: Throat Coat and Holunder Care both trigger it, and **fennel and
+cardamom each carry both registers on their own**.
+
+The mechanism is two separate ion channels, neither inhibiting the
+other — which is exactly what `energy + sleepy` turned out not to be.
+
+- **Cooling — TRPM8.** The cold-and-menthol receptor. Menthol activates
+  TRPM8 (and TRPA1) directly, and **1,8-cineole is a TRPM8 agonist** —
+  the compound cardamom is rich in, and the reason a cardamom pod reads
+  cool at the front of the mouth.
+- **Warming — TRPV1.** The heat receptor, classically activated by
+  painful heat and by capsaicin. **Gingerols and shogaols are TRPV1
+  agonists**, structurally similar to capsaicin and raising intracellular
+  calcium through the same channel; shogaols are the more potent, which
+  is why dried ginger bites harder than fresh. Their lower potency
+  against capsaicin is why ginger reads as *warming and transient*
+  rather than sharply burning.
+
+Two channels, two compound families, no antagonism between them. A cup
+carrying both really does deliver both, and a drinker really does feel
+both — often in different parts of the mouth and at different moments.
+"Walks both sides" is accurate here in a way it never was for caffeine
+and a sedative.
+
+Sources: TRPM8 as the cold/menthol receptor (McKemy et al., *A TRP
+Channel that Senses Cold Stimuli and Menthol*); 1,8-cineole as a TRPM8
+agonist (Modulation of thermoreceptor TRPM8 by cooling compounds, PMID
+22860192); gingerols/shogaols at TRPV1 (Yin et al. 2019, *Structural
+mechanisms underlying activation of TRPV1 channels by pungent compounds
+in gingers*, Br J Pharmacol; PMID 17176640).
+
+### `energy` + `sleepy` — an ANTAGONISM, not a paradox. CORRECTED.
+
+Caffeine does not sit alongside a sedative; it opposes it, and partly
+through the same receptor.
+
+- Caffeine exerts most of its effect by antagonising adenosine
+  receptors (A1, A2A, A2B, A3) — and **at higher concentrations acts as
+  a GABA-A antagonist**, which is the pathway valerian's valerenic acid
+  and chamomile's apigenin work through.
+- Caffeine given with diazepam produces a dose-dependent **decrease in
+  sleep duration** in animal models.
+- Chronic caffeine or theophylline exposure **reduces GABA's ability to
+  potentiate benzodiazepine binding** at the GABA/benzodiazepine
+  receptor (Pharmacology, 1988).
+- Methylxanthines and benzodiazepines are characterised in the
+  literature as producing behaviourally **opposite** effects.
+
+So the honest reading is not "both register". It is: the caffeine wins,
+and the sedative leaves are working uphill against it. A drinker who
+stacked chamomile onto a black tea to wind down has bought a cup that
+will most likely read alert, with the calming half spent opposing the
+stimulant rather than reaching them.
+
+That is more useful to know than "the cup walks both sides", and it is
+the difference between the app describing a curiosity and warning about
+a mistake.
+
+Sources: caffeine/adenosine and GABA-A antagonism (Caffeine and
+Adenosine, PMID 20164566); caffeine reducing GABA/benzodiazepine site
+interaction (PMID 2835648); caffeine against diazepam-induced sedation
+(Global Scientific Journal).
+
 ## What this audit did not settle
 
 The **bonus magnitudes** are unsourced across the board. Even where the

@@ -16,6 +16,7 @@ import {
   loudnessOf, attenuateFragileEffects, FRAGILE_EFFECTS,
 } from "../src/algo/perception.js";
 import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
+import { ALLOWED_PARADOXES } from "../src/algo/perception.js";
 import {
   padTempRange, padTimeRange,
   TEMP_HARD_MIN, TEMP_HARD_MAX, TIME_HARD_MIN, TIME_HARD_MAX,
@@ -366,6 +367,82 @@ test("aromatic off-notes claim no axis, so they keep their prose", () => {
   }
   assert(mislabelled.length === 0,
     `aromatic warnings with an axis would vanish behind a mark that isn't drawn:\n  ${mislabelled.join("\n  ")}`);
+});
+
+/* ── AN ANTAGONISM IS NOT A PARADOX ────────────────────────────────
+
+   `energy + sleepy` sat in ALLOWED_PARADOXES and surfaced as "energy
+   and sleepy will both register — the cup walks both sides." Asked
+   whether that was actually true, the receptor evidence says no:
+   caffeine antagonises adenosine and, at higher concentrations, GABA-A
+   — the pathway valerian's valerenic acid and chamomile's apigenin
+   work through. Caffeine cuts diazepam's sedation dose-dependently and
+   chronic caffeine reduces GABA's potentiation of benzodiazepine
+   binding. The two don't co-exist; one suppresses the other.
+
+   So it moved to ANTAGONISMS, which is the opposite claim: not "both
+   will land" but "one is cancelling the other, and you should know
+   because you probably stacked them on purpose".
+
+   `warming + cooling` stays a paradox — TRPM8 cooling and thermogenic
+   warming are separate systems, neither inhibiting the other, which is
+   why cardamom genuinely reads as both.
+
+   See docs/research/synergies.md. */
+
+test("a caffeinated cup with sedative herbs is told they're fighting", () => {
+  const cup = [{ id: "assam", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }];
+  const warnings = resolveBlendAtBrew(cup, 95, 240).warnings;
+  const fired = warnings.filter(w => w.kind === "antagonism");
+  assert(fired.length === 1,
+    `expected the antagonism warning on black tea + chamomile, got ${fired.length}`);
+  assert(/works against|uphill/i.test(fired[0].text),
+    `the warning should say they oppose each other, got: ${fired[0].text}`);
+});
+
+test("the antagonism needs actual caffeine, not the word energy", () => {
+  /* The mechanism is a molecule, not a register. Cardamom carries
+     `energy` by tradition and holds no caffeine at all, so a cardamom
+     and chamomile cup has nothing antagonising anything — firing there
+     would be the app inventing chemistry from a label. */
+  const caffeinated = resolveBlendAtBrew(
+    [{ id: "assam", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }], 95, 240);
+  const herbal = resolveBlendAtBrew(
+    [{ id: "cardamom", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }], 95, 240);
+
+  assert(caffeinated.warnings.some(w => w.kind === "antagonism"),
+    "black tea with chamomile really is fighting itself and should say so");
+  assert(!herbal.warnings.some(w => w.kind === "antagonism"),
+    "a caffeine-free cup must not be told its caffeine is fighting anything");
+});
+
+test("a theanine cup is not mistaken for an antagonism", () => {
+  // The opposite error. Matcha is caffeine AND calm, which is the
+  // app's best-evidenced SYNERGY — warning about it would contradict
+  // the research two files over. The check keys on `sleepy`, the
+  // benzodiazepine-site register the suppression evidence is about,
+  // not on calm.
+  const matcha = resolveBlendAtBrew([{ id: "matcha", g: 2, role: "lead" }], 80, 60);
+  assert(!matcha.warnings.some(w => w.kind === "antagonism"),
+    "matcha's caffeine and calm are a documented synergy, not a fight");
+});
+
+test("energy and sleepy are no longer sold as co-existing", () => {
+  // The specific regression: if this pair ever returns to
+  // ALLOWED_PARADOXES the app goes back to telling people a cup that
+  // fights itself "walks both sides".
+  const asParadox = ALLOWED_PARADOXES.some(([a, b]) =>
+    (a === "energy" && b === "sleepy") || (a === "sleepy" && b === "energy"));
+  assert(!asParadox,
+    "energy+sleepy is listed as a paradox again — caffeine suppresses the sedative, it doesn't sit beside it");
+});
+
+test("warming and cooling are still allowed to co-exist", () => {
+  // The other half. Over-correcting into "nothing can hold two
+  // opposites" would lose cardamom, which really does read both ways.
+  const kept = ALLOWED_PARADOXES.some(([a, b]) =>
+    (a === "warming" && b === "cooling") || (a === "cooling" && b === "warming"));
+  assert(kept, "warming+cooling is a real paradox — separate receptor systems, no suppression");
 });
 
 console.log(`\n\n${pass} passed, ${fail} failed`);

@@ -15,6 +15,8 @@ import {
   scheduleFollowUp, snoozeFollowUp, isFollowUpDue, nextFollowUp,
 } from "../src/data/followUp.js";
 
+import { readdirSync, readFileSync } from "node:fs";
+
 let pass = 0, fail = 0;
 const failures = [];
 function test(desc, fn) {
@@ -162,6 +164,38 @@ test("the snooze cap keeps the ask inside its own window", () => {
   // it would vanish mid-conversation instead of being answered.
   assert(MAX_SNOOZES * SNOOZE_MS + DEFAULT_FOLLOWUP_MS < FOLLOWUP_WINDOW_MS,
     `${MAX_SNOOZES} snoozes of ${SNOOZE_MS / MIN} min can outlive the window`);
+});
+
+/* ── ONE RELATIVE TIME, EVERYWHERE ──────────────────────────────────
+
+   Three screens had each written their own "X ago" formatter, and they
+   disagreed in three ways at once: the separator ("5m ago" against "5
+   min ago"), the rounding (round against floor, so a 90-second-old cup
+   was two minutes on one screen and one on another), and the fallback
+   for old items ("Aug 6" against "8/6/2026").
+
+   Not a maintenance smell — the only finding in the redundancy audit a
+   user could actually see, since the same entry read differently
+   depending on which screen you opened it from. They all use
+   helpers/misc now, and this test is what stops the fourth copy. */
+
+test("no screen writes its own relative-time formatter", () => {
+  const OWN_FORMATTER = /\bmin ago\b|`\$\{[^}]*\}m ago`/;
+  const offenders = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const child = new URL(entry.name + (entry.isDirectory() ? "/" : ""), dir);
+      if (entry.isDirectory()) { walk(child); continue; }
+      if (!/\.(jsx?|tsx?)$/.test(entry.name)) continue;
+      if (child.href.endsWith("/helpers/misc.js")) continue;   // the one that may
+      const src = readFileSync(child, "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+      if (OWN_FORMATTER.test(src)) offenders.push(entry.name);
+    }
+  };
+  walk(new URL("../src/", import.meta.url));
+  assert(offenders.length === 0,
+    `${offenders.length} file(s) format relative time themselves instead of using formatAgo: ${offenders.join(", ")}`);
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

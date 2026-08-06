@@ -23,19 +23,11 @@ import { Pencil } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
 import { JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS } from "../data/canon";
 import { ff, theme } from "../theme";
+// One relative-time format for the whole app — this screen used to
+// carry its own, which said "5 min ago" where every other surface
+// said "5m ago" and printed 8/6/2026 where they printed Aug 6.
+import { formatAgo } from "../helpers/misc";
 
-const formatAgo = (date) => {
-  if (!date) return "";
-  const ms = Date.now() - date.getTime();
-  const min = Math.floor(ms / 60000);
-  if (min < 1)   return "just now";
-  if (min < 60)  return `${min} min ago`;
-  const h = Math.floor(min / 60);
-  if (h < 24)    return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  if (d < 7)     return `${d}d ago`;
-  return date.toLocaleDateString();
-};
 
 // Inline chip picker — same visual register as JournalComposer's
 // MoodChipRow but kept local so EntryDetail doesn't pull in the

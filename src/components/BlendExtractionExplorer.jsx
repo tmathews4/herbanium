@@ -41,7 +41,7 @@ import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { Arrival } from "./Arrival";
 import { EFFECT_SYNERGIES } from "../algo/perception";
-import { SYNERGY_DESCRIPTIONS } from "../data/vocabularyDescriptions";
+import { SYNERGY_DESCRIPTIONS, PARADOX_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 
 // Caffeine load thresholds (mg). The "high" tick lines up with
 // where perception.js's high-caffeine warning fires (130mg — past a
@@ -211,7 +211,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
             background: advisory.bg,
             borderRadius: "0 6px 6px 0",
             fontFamily: ff.serif, fontSize: 12.5,
-            color: theme.ink, lineHeight: 1.45,
+            color: theme.ink, lineHeight: 1.45, textAlign: "left",
           }}>
             <span style={{
               fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
@@ -389,6 +389,12 @@ export const BlendExtractionExplorer = ({
   const [brewDock, setBrewDock] = useState(() => document.getElementById(dockId));
   // Which synergy pill is explaining itself. One at a time.
   const [synergyOpen, setSynergyOpen] = useState(null);
+  /* Bumped whenever the app moves the brew rather than the user
+     dragging it. The strips' temperature marker reads this to tell a
+     jump from a drag — it has to be instant under a finger and
+     followable under a tap, and the value alone can't say which. */
+  const [brewJump, setBrewJump] = useState(0);
+  const jumpTo = (setter) => (value) => { setter(value); setBrewJump(n => n + 1); };
   // Grows the row into place the first time it lands in the dock.
   const dockArrivalRef = useDockArrival(!!brewDock);
   // Re-reads on mount, and again if the host changes which dock it
@@ -680,6 +686,7 @@ export const BlendExtractionExplorer = ({
             promised a change in a strip that never changes. */}
         <div data-tour="blend-flavors">
           <FlavorMap
+          jumpNonce={brewJump}
             ingredients={ingredients}
             tempC={tempC}
             timeS={timeS}
@@ -700,6 +707,7 @@ export const BlendExtractionExplorer = ({
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
         <PalateMap
+          jumpNonce={brewJump}
           warnings={brew?.warnings || []}
           ingredients={ingredients}
           tempC={tempC}
@@ -1354,7 +1362,7 @@ export const BlendExtractionExplorer = ({
                         <RangeBands
                           rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
                           step={1}
-                          onSnap={setTempC}
+                          onSnap={jumpTo(setTempC)}
                         />
                         </div>
                       </>
@@ -1376,7 +1384,7 @@ export const BlendExtractionExplorer = ({
                         <RangeBands
                           rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
                           step={timeStepFor(timeSRange)}
-                          onSnap={setTimeS}
+                          onSnap={jumpTo(setTimeS)}
                         />
                         </div>
                       </>
@@ -1388,59 +1396,6 @@ export const BlendExtractionExplorer = ({
           </div>
           </div>,
           brewDock,
-        );
-      })()}
-
-      {/* No-overlap warning — fires when the blend has 2+ lead
-          ingredients whose timeS ranges don't share a single window. A
-          matcha (15-30s) + chamomile (300-420s) blend has no steep where
-          both extract correctly; whatever the slider lands on, one lead
-          is wrong. Only fires on lead vs lead — accents and catalysts
-          are intentionally stretched.
-
-          It sat with the steep slider until the controls moved into the
-          tab dock. It's prose about the BLEND, not about where the
-          slider is, and putting conditional prose in the dock made the
-          dock's height jump by ~60px the moment a user added a second
-          lead. Controls in the chrome, explanation on the page. */}
-      {ingredients.length >= 2 && (() => {
-        const leads = ingredients
-          .filter(({ role }) => (role || "lead") === "lead")
-          .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
-          .filter(({ meta }) => meta?.timeS);
-        if (leads.length < 2) return null;
-        const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
-        const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
-        if (intersectLo <= intersectHi) return null;
-        // Identify the two leads with the most extreme tension — one
-        // with the highest min, one with the lowest max.
-        const earliestEnder = leads.reduce((a, b) =>
-          a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
-        const latestStarter = leads.reduce((a, b) =>
-          a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
-        return (
-          <div style={{
-            marginBottom: 12,
-            padding: "8px 10px",
-            borderLeft: `2px solid ${theme.terra}`,
-            background: "rgba(176,84,47,0.08)",
-            borderRadius: "2px 6px 6px 2px",
-            fontFamily: ff.serif, fontSize: 12.5,
-            color: theme.ink, lineHeight: 1.5,
-          }}>
-            <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-              No shared steep window.
-            </span>{" "}
-            <span style={{ color: theme.terra, fontStyle: "normal" }}>
-              {earliestEnder.meta.name}
-            </span>{" "}
-            finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
-            <span style={{ color: theme.terra, fontStyle: "normal" }}>
-              {latestStarter.meta.name}
-            </span>{" "}
-            needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
-            lands, one lead won't extract right. Best to brew these separately.
-          </div>
         );
       })()}
 
@@ -1462,6 +1417,7 @@ export const BlendExtractionExplorer = ({
           sliders stay clear" test in e2e/tours.spec.ts still pins it. */}
       <div data-tour="blend-effects" style={{ marginBottom: 12 }}>
         <MindMap
+          jumpNonce={brewJump}
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
@@ -1470,6 +1426,7 @@ export const BlendExtractionExplorer = ({
           familyMode
         />
         <BodyMap
+          jumpNonce={brewJump}
           ingredients={ingredients}
           tempC={tempC}
           timeS={timeS}
@@ -1535,6 +1492,7 @@ export const BlendExtractionExplorer = ({
           w.kind !== "outsider"
           && w.kind !== "caffeine"
           && !w.axis
+          && w.kind !== "paradox"     // now a pill in the row above, with a description
           && !/is being over-pulled/.test(w.text || "")
         );
         if (filtered.length === 0) return null;
@@ -1588,11 +1546,20 @@ export const BlendExtractionExplorer = ({
               //                    another but the cup isn't broken)
               //   sage         — paradox / informational: notable, not a
               //                    flaw — the cup walks both sides
-              const sev = (w.kind === "tannin" || w.kind === "aromatic" || w.kind === "ceiling")
+              /* An ANTAGONISM reads as an alert, not a note. Paradox is
+                 sage/informational — "the cup walks both sides", a
+                 curiosity. Antagonism is one ingredient cancelling
+                 another, which is a fault in the blend and wants the
+                 same weight as an over-pull. */
+              const sev = (w.kind === "tannin" || w.kind === "aromatic"
+                        || w.kind === "ceiling" || w.kind === "antagonism")
                 ? "over"
                 : (w.kind === "paradox") ? "info" : "edge";
               const advisory = sev === "over"
-                ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling" : (w.kind === "aromatic" ? "aromatic" : "over the line") }
+                ? { accent: "#B0542F", bg: "rgba(176, 84, 47, 0.07)", tag: w.kind === "ceiling" ? "ceiling"
+                       : w.kind === "aromatic" ? "aromatic"
+                       : w.kind === "antagonism" ? "working against"
+                       : "over the line" }
                 : sev === "edge"
                 ? { accent: "#A57836", bg: "rgba(165, 120, 54, 0.07)",
                     // Same word the caffeine bar uses, so the band and the
@@ -1610,9 +1577,15 @@ export const BlendExtractionExplorer = ({
                   padding: "8px 10px 8px 12px",
                   borderLeft: `2px solid ${advisory.accent}`,
                   background: advisory.bg,
+                    /* LEFT. #root sets text-align: center, so every
+                       band inherited it — which put the inline tag
+                       (GENTLE POUR, PARADOX) in the middle of a
+                       centred sentence rather than at the head of a
+                       line, and made a two-line body pivot around its
+                       own centre. A label leads; it doesn't float. */
                   borderRadius: "0 6px 6px 0",
                   fontFamily: ff.serif, fontSize: 12.5,
-                  color: theme.ink, lineHeight: 1.45,
+                  color: theme.ink, lineHeight: 1.45, textAlign: "left",
                 }}>
                   <span style={{
                     fontFamily: ff.sans, fontSize: 9, letterSpacing: "0.16em",
@@ -1665,31 +1638,63 @@ export const BlendExtractionExplorer = ({
           three most true of this cup rather than the first three in the
           table. */}
       {(() => {
-        const tags = brew?.synergyTags || [];
-        if (!tags.length) return null;
-        const effectStrength = Object.fromEntries(brew.effects || []);
-        const ranked = [...new Set(tags)]
-          .map(tag => {
-            const rule = EFFECT_SYNERGIES.find(r => r.label === tag);
-            const carried = rule
-              ? rule.when.reduce((sum, e) => sum + (effectStrength[e] || 0), 0)
-              : 0;
-            return { tag, carried };
-          })
-          .sort((a, b) => b.carried - a.carried)
-          .slice(0, 3);
+        const effectStrength = Object.fromEntries(brew?.effects || []);
+        /* SYNERGIES AND PARADOXES IN ONE ROW. They're the same kind of
+           thing to a reader — a named combination this cup carries —
+           and both now have researched descriptions, so both belong in
+           the row that opens onto them. The paradox used to be a prose
+           band lower down saying "the cup walks both sides" with
+           nothing to tap; it fires on real cups (Throat Coat, Holunder
+           Care, and any cup led by fennel or cardamom, which carry both
+           registers alone), so it earned the same treatment. */
+        const items = [
+          ...new Set(brew?.synergyTags || []),
+        ].map(tag => {
+          const rule = EFFECT_SYNERGIES.find(r => r.label === tag);
+          return {
+            key: tag,
+            label: tag,
+            desc: SYNERGY_DESCRIPTIONS[tag],
+            carried: rule ? rule.when.reduce((n, e) => n + (effectStrength[e] || 0), 0) : 0,
+          };
+        }).concat((brew?.paradoxTags || []).map(([a, b]) => {
+          const key = [a, b].slice().sort().join("|");
+          const d = PARADOX_DESCRIPTIONS[key];
+          return d && {
+            key,
+            label: d.label,
+            desc: d,
+            carried: (effectStrength[a] || 0) + (effectStrength[b] || 0),
+          };
+        }).filter(Boolean));
+        if (!items.length) return null;
+        const ranked = items.sort((a, b) => b.carried - a.carried).slice(0, 3);
         return (
-          <div style={{ marginTop: 8 }}>
+          <div style={{ marginTop: 14 }}>
+            {/* An eyebrow, in the same register as CAFFEINE LOAD above.
+                Unlabelled, the pills read as loose chips someone left
+                on the page — the row said nothing about what kind of
+                thing it was, so the eye filed it with the alerts it
+                sits between. */}
+            <div style={{
+              fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: theme.ash, marginBottom: 6,
+              // Left, like CAFFEINE LOAD above it. The region centres
+              // its prose, so an eyebrow that inherits lands centred
+              // over a left-aligned row of pills and reads as a caption
+              // for something else.
+              textAlign: "left",
+            }}>in combination</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {ranked.map(({ tag }) => {
-                const open = synergyOpen === tag;
+              {ranked.map(({ key, label }) => {
+                const open = synergyOpen === key;
                 return (
                   <button
-                    key={tag}
+                    key={key}
                     type="button"
-                    data-testid={`synergy-${tag.replace(/\s+/g, "-")}`}
+                    data-testid={`synergy-${label.replace(/\s+/g, "-")}`}
                     aria-expanded={open}
-                    onClick={() => setSynergyOpen(open ? null : tag)}
+                    onClick={() => setSynergyOpen(open ? null : key)}
                     style={{
                       fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.08em",
                       textTransform: "uppercase", color: theme.sageDeep,
@@ -1698,28 +1703,31 @@ export const BlendExtractionExplorer = ({
                       border: `1px solid ${theme.sageDeep}`, borderRadius: 999,
                       transition: "background 0.18s ease",
                     }}
-                  >{tag}</button>
+                  >{label}</button>
                 );
               })}
             </div>
-            {synergyOpen && SYNERGY_DESCRIPTIONS[synergyOpen] && (
+            {(() => {
+              const shown = ranked.find(r => r.key === synergyOpen)?.desc;
+              return shown && (
               <Arrival duration={220} data-testid="synergy-detail" style={{
                 marginTop: 8,
                 padding: "8px 10px 8px 12px",
                 borderLeft: `2px solid ${theme.sageDeep}`,
                 background: "rgba(98, 124, 92, 0.08)",
-                borderRadius: "0 6px 6px 0",
+                borderRadius: "0 6px 6px 0", textAlign: "left",
               }}>
                 <div style={{
                   fontFamily: ff.serif, fontSize: 12.5, color: theme.ink,
                   lineHeight: 1.45, marginBottom: 4,
-                }}>{SYNERGY_DESCRIPTIONS[synergyOpen].summary}</div>
+                }}>{shown.summary}</div>
                 <div style={{
                   fontFamily: ff.serif, fontSize: 12, color: theme.inkSoft,
                   lineHeight: 1.5, fontStyle: "italic",
-                }}>{SYNERGY_DESCRIPTIONS[synergyOpen].body}</div>
+                }}>{shown.body}</div>
               </Arrival>
-            )}
+              );
+            })()}
           </div>
         );
       })()}
@@ -1732,15 +1740,92 @@ export const BlendExtractionExplorer = ({
           chemistry that's extracted, but they overstate what one cup
           can shift. Surfaced only when ≥20% adaptogen by weight so
           the caveat tracks with cups that are actually adaptogen-led. */}
-      {brew?.adaptogenShare >= 0.2 && (
+      {/* MOVED DOWN, out from between the strips.
+
+         This is prose about the BLEND — that two leads want steeps
+         that don't overlap — and it sat between the flavour strips and
+         the mind/body ones, where it split the four windows into two
+         pairs with a paragraph wedged in the gap. The strips read as
+         one instrument; a conditional block appearing mid-instrument
+         pushed the lower half down the page the moment a second lead
+         was added, and buried the comparison it was interrupting.
+
+         It belongs with the other alerts: things that became true and
+         want reading, above the standing notes and below the strips
+         they describe. */}
+      {/* No-overlap warning — fires when the blend has 2+ lead
+          ingredients whose timeS ranges don't share a single window. A
+          matcha (15-30s) + chamomile (300-420s) blend has no steep where
+          both extract correctly; whatever the slider lands on, one lead
+          is wrong. Only fires on lead vs lead — accents and catalysts
+          are intentionally stretched.
+
+          It sat with the steep slider until the controls moved into the
+          tab dock. It's prose about the BLEND, not about where the
+          slider is, and putting conditional prose in the dock made the
+          dock's height jump by ~60px the moment a user added a second
+          lead. Controls in the chrome, explanation on the page. */}
+      {ingredients.length >= 2 && (() => {
+        const leads = ingredients
+          .filter(({ role }) => (role || "lead") === "lead")
+          .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
+          .filter(({ meta }) => meta?.timeS);
+        if (leads.length < 2) return null;
+        const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
+        const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
+        if (intersectLo <= intersectHi) return null;
+        // Identify the two leads with the most extreme tension — one
+        // with the highest min, one with the lowest max.
+        const earliestEnder = leads.reduce((a, b) =>
+          a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
+        const latestStarter = leads.reduce((a, b) =>
+          a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
+        return (
+          <div style={{
+            marginBottom: 12,
+            padding: "8px 10px",
+            borderLeft: `2px solid ${theme.terra}`,
+            background: "rgba(176,84,47,0.08)",
+            borderRadius: "2px 6px 6px 2px",
+            fontFamily: ff.serif, fontSize: 12.5,
+            color: theme.ink, lineHeight: 1.5,
+          }}>
+            <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+              No shared steep window.
+            </span>{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {earliestEnder.meta.name}
+            </span>{" "}
+            finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {latestStarter.meta.name}
+            </span>{" "}
+            needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
+            lands, one lead won't extract right. Best to brew these separately.
+          </div>
+        );
+      })()}
+
+      {/* STANDING NOTES — things that are true of this cup whatever the
+          sliders are doing, kept together and kept quiet.
+
+          The adaptogen caveat used to be a tinted band with a terra-
+          weight left rule, which is the shape this screen uses for
+          ALERTS: something just became true, look at it. That made a
+          permanent piece of context shout once per render and gave the
+          region four near-identical bands in a row — caffeine advisory,
+          warnings, synergy detail, and this — with nothing saying which
+          were events and which were furniture.
+
+          Now it sits with the honesty footer under a hairline, in the
+          quiet italic both of them deserve. Same words, correct volume,
+          and the bands above get their meaning back. */}
+      {(brew?.adaptogenShare >= 0.2) && (
         <div style={{
-          marginTop: 14,
-          padding: "8px 12px",
-          borderLeft: `2px solid ${theme.sageDeep}`,
-          background: "rgba(98, 124, 92, 0.06)",
-          borderRadius: "0 6px 6px 0",
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-          color: theme.inkSoft, lineHeight: 1.5,
+          marginTop: 16, paddingTop: 12,
+          borderTop: `1px solid ${theme.ruleSoft}`,
+          fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
+          color: theme.ash, lineHeight: 1.55, textAlign: "center",
         }}>
           Adaptogens in this mix contribute to the calm and grounding reads — their full effect builds over weeks of daily use, not within one cup.
         </div>
@@ -1753,7 +1838,13 @@ export const BlendExtractionExplorer = ({
           ComposeScreen) so the disclaimer is tied to the chart, not
           buried in a separate About page. */}
       <div style={{
-        marginTop: 16,
+        // The rule belongs to the notes GROUP, so it's drawn by
+        // whichever note comes first. When the adaptogen line is
+        // present it has already drawn one; a second would box this
+        // line off from the note it belongs with.
+        marginTop: brew?.adaptogenShare >= 0.2 ? 6 : 16,
+        paddingTop: brew?.adaptogenShare >= 0.2 ? 0 : 12,
+        borderTop: brew?.adaptogenShare >= 0.2 ? "none" : `1px solid ${theme.ruleSoft}`,
         fontFamily: ff.serif, fontStyle: "italic", fontSize: 11,
         color: theme.ash, lineHeight: 1.5, textAlign: "center",
       }}>

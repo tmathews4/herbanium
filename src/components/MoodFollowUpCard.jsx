@@ -26,7 +26,7 @@ import React from "react";
 import { Button } from "./layout";
 import { ThumbUp, ThumbDown } from "./icons";
 import { PARENT_MOODS, CURRENT_FEEL_EXTRAS } from "../data/canon";
-import { getBlend } from "../helpers/misc";
+import { formatAgo, getBlend } from "../helpers/misc";
 import { ff, theme } from "../theme";
 
 export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => {
@@ -53,10 +53,12 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => 
 
   if (!blend) return null;
 
-  const minutesAgo = Math.max(1, Math.round((Date.now() - (session.brewedAt || 0)) / 60000));
-  const timeLabel = minutesAgo < 60
-    ? `${minutesAgo} min ago`
-    : `${Math.round(minutesAgo / 60)}h ago`;
+  /* One relative-time format for the whole app. This card carried its
+     own, which read "5 min ago" where every other surface read "5m
+     ago", and clamped to a minimum of one minute — a guard against
+     rendering "0 min ago" on a fresh cup. formatAgo answers that case
+     properly with "just now", so the clamp goes with the copy. */
+  const timeLabel = formatAgo(new Date(session.brewedAt || Date.now()));
   const reachedFor = targets.length === 0 ? null
     : targets.length === 1
       ? targets[0]

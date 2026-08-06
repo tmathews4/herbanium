@@ -27,17 +27,11 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
+// Uses the shared deterministic hash — see helpers/misc. Four copies
+// of this existed; the values are identical, verified sample-by-sample.
+import { hashString } from "../helpers/misc";
 
 // Cheap deterministic hash. Same string → same number, every run.
-function hashStr(s) {
-  let h = 0;
-  const str = s || "";
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
 
 // Elder Futhark runes — each defined as an array of polylines
 // inside a 4-wide × 6-tall coordinate box centered at (2, 3).
@@ -331,7 +325,7 @@ export const ElementalSigil = ({
   color = "#796E5B",
 }) => {
   const seed = `${elemental?.id || elemental?.displayName || "anon"}|sigil`;
-  let h = hashStr(seed);
+  let h = hashString(seed);
 
   // Hexagon vertices — start at top point, walk clockwise.
   const cx = size / 2;

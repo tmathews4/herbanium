@@ -17,6 +17,9 @@ import {
   RARE_TIER_ADJECTIVES, MYTHIC_TIER_ADJECTIVES,
   RARE_TIER_CREATURES, LEGENDARY_TIER_CREATURES, MYTHIC_TIER_CREATURES,
 } from "./elementalAdjectives";
+// Shared with moodCrystal — see helpers/misc. Was written out twice,
+// identically.
+import { tallyBy } from "../helpers/misc.js";
 
 // Wild rarity tiers: 75% rare, 20% legendary, 5% mythic. Mythic
 // rolls reach into the cosmic-adjective pool and the great-beast
@@ -128,14 +131,6 @@ const MOOD_CREATURES = {
   uplifting: ["Lark", "Robin", "Hummingbird", "Phoenix", "Magpie", "Dove"],
 };
 
-function tally(arr) {
-  const out = {};
-  for (const x of arr || []) {
-    if (!x) continue;
-    out[x] = (out[x] || 0) + 1;
-  }
-  return out;
-}
 
 function topKeys(counts, n = 3) {
   return Object.entries(counts || {})
@@ -174,7 +169,7 @@ function extractMoodTrends(sessions, journalEntries) {
     if (Array.isArray(e.currentMoods)) moods.push(...e.currentMoods);
     if (Array.isArray(e.landedMoods))  moods.push(...e.landedMoods);
   }
-  return tally(moods);
+  return tallyBy(moods);
 }
 
 function extractFlavorTrends(sessions, getBlend) {
@@ -185,7 +180,7 @@ function extractFlavorTrends(sessions, getBlend) {
     if (typeof blend.flavor === "string") flavors.push(blend.flavor);
     if (Array.isArray(blend.flavors))    flavors.push(...blend.flavors);
   }
-  return tally(flavors);
+  return tallyBy(flavors);
 }
 
 /**

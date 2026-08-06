@@ -1,3 +1,4 @@
+import { hashString } from "../helpers/misc.js";
 /* ──────────────────────────────────────────────────────────────
    data/elementalAdjectives.js — random qualifier for earned elementals.
 
@@ -53,14 +54,6 @@ const POOLS = {
   gem: GEM_ADJECTIVES,
 };
 
-function hash(str) {
-  let h = 0;
-  for (let i = 0; i < (str || "").length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
 
 // Per-attribute creature override. Only listed where the existing
 // attribute name was a deity, an abstract concept, or otherwise not
@@ -386,7 +379,7 @@ export function poolFor(attr) {
 // Pick an adjective from a named pool by hashing the seed.
 export function pickAdjective(seed, poolKey = "element") {
   const pool = POOLS[poolKey] || ELEMENT_ADJECTIVES;
-  return pool[hash(String(seed)) % pool.length];
+  return pool[hashString(String(seed)) % pool.length];
 }
 
 // Picks a random creature from the wild pool for a fully-random
@@ -394,7 +387,7 @@ export function pickAdjective(seed, poolKey = "element") {
 // user always sees the same rolled creature for the same trigger.
 export function pickRandomCreature(attr, profileSeed) {
   const seed = `${profileSeed || "anon"}|creature|${attr?.id || ""}`;
-  return RANDOM_CREATURE_POOL[hash(String(seed)) % RANDOM_CREATURE_POOL.length];
+  return RANDOM_CREATURE_POOL[hashString(String(seed)) % RANDOM_CREATURE_POOL.length];
 }
 
 // Per-attribute fixed adjective. When set, the creature is rolled
@@ -428,7 +421,7 @@ export const ADJECTIVE_OVERRIDES = {
 // congruential RNG). Returns a fresh array; input is not mutated.
 function shuffleSeeded(arr, seed) {
   const out = [...arr];
-  let h = hash(String(seed)) | 0;
+  let h = hashString(String(seed)) | 0;
   for (let i = out.length - 1; i > 0; i--) {
     h = (h * 1664525 + 1013904223) | 0;
     const j = Math.abs(h) % (i + 1);
@@ -550,7 +543,7 @@ export function getElementalDisplayName(attr, profileSeed) {
     : creatureFor(attr);
   const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
   const adj = attr.random
-    ? ALL_ADJECTIVES[hash(seed) % ALL_ADJECTIVES.length]
+    ? ALL_ADJECTIVES[hashString(seed) % ALL_ADJECTIVES.length]
     : pickAdjective(seed, poolFor(attr));
   return `The ${adj} ${creature}`;
 }
@@ -561,7 +554,7 @@ export function getElementalDisplayName(attr, profileSeed) {
 export function getElementalAdjective(attr, profileSeed) {
   if (!attr) return "";
   const seed = `${profileSeed || "anon"}|${attr.id || ""}`;
-  if (attr.random) return ALL_ADJECTIVES[hash(seed) % ALL_ADJECTIVES.length];
+  if (attr.random) return ALL_ADJECTIVES[hashString(seed) % ALL_ADJECTIVES.length];
   return pickAdjective(seed, poolFor(attr));
 }
 

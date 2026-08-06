@@ -933,11 +933,18 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               isHouse={!!b.house && twists.length === 0}
               onBrew={handleBrewTap}
             />
+            {/* The cup this recipe is written for. Centred and tucked
+                under the panel rather than right-aligned below it:
+                hanging off the bottom-right corner it read as a stray
+                tag with nothing to attach to, in a third typographic
+                register after the panel's own closing notes. It's the
+                last fact about the brew, so it sits where the panel
+                ends and looks like it belongs to it. */}
             {b.ml && (
               <div style={{
-                marginTop: 8,
-                fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.1em",
-                textTransform: "uppercase", color: theme.ash, textAlign: "right",
+                marginTop: 10,
+                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
+                textTransform: "uppercase", color: theme.ash, textAlign: "center",
               }}>
                 Volume · {b.ml} ml
               </div>

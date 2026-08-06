@@ -338,18 +338,62 @@ export const EFFECT_SYNERGIES = [
   { when: ["soothing", "comfort"],  bonus: { soothing: 0.3, comfort: 0.2 }, label: "the holding cup" },
 ];
 
-// Effect pairs that co-exist legitimately rather than canceling.
-// When both are present at meaningful strength, surface a paradox tag.
-// 'energy + sleepy' covers cups where the user has stacked a
-// caffeinated tea with a sedative herb (valerian, passionflower,
-// chamomile-heavy) — the cup honestly pushes both directions and
-// the user deserves to know rather than have the engine quietly
-// average it out.
-// Exported so tools/lib/opposition.mjs can derive what the engine has
-// language for, rather than keeping a hand-copied list that goes stale.
+/* Effect pairs that co-exist legitimately rather than cancelling.
+   Both present at meaningful strength surfaces a paradox tag.
+
+   ONE PAIR LEFT. `energy + sleepy` used to sit here and it was wrong —
+   see ANTAGONISMS below and docs/research/synergies.md. Caffeine
+   doesn't co-exist with a sedative, it opposes it, and partly through
+   the same receptor.
+
+   `warming + cooling` is the real thing. Cardamom is the case: cooling
+   runs through TRPM8, a cold receptor, and warming through thermogenic
+   and trigeminal channels. Separate systems, neither inhibiting the
+   other, so the cup genuinely delivers both and the drinker genuinely
+   feels both.
+
+   Exported so tools/lib/opposition.mjs can derive what the engine has
+   language for, rather than keeping a hand-copied list that goes stale. */
 export const ALLOWED_PARADOXES = [
   ["warming", "cooling"],
-  ["energy", "sleepy"],
+];
+
+/* Pairs where one effect actively SUPPRESSES the other. Not a curiosity
+   to point out — a mistake to warn about.
+
+   Caffeine antagonises adenosine receptors and, at higher
+   concentrations, GABA-A: the pathway valerian's valerenic acid and
+   chamomile's apigenin work through. Caffeine given with diazepam cuts
+   sleep duration dose-dependently, and chronic caffeine reduces GABA's
+   ability to potentiate benzodiazepine binding. Methylxanthines and
+   benzodiazepines are characterised as behaviourally opposite.
+
+   So a chamomile-into-black-tea cup does not "walk both sides". The
+   caffeine wins and the calming leaves are spent opposing it, which is
+   worth telling someone who stacked them to wind down. */
+export const ANTAGONISMS = [
+  {
+    when: ["energy", "sleepy"],
+    /* GATED ON ACTUAL CAFFEINE, not on the word "energy".
+
+       The evidence is about a molecule, not a register. Cardamom
+       carries `energy` traditionally and holds no caffeine at all — a
+       cardamom-and-chamomile cup has nothing to antagonise anything,
+       and telling its drinker the caffeine is fighting the chamomile
+       would be the app inventing a mechanism from a label.
+
+       80mg is the app's own "this is a real cup of caffeine now" line,
+       the same threshold the caffeine gauge marks as moderate.
+
+       SLEEPY, not calm or soothing. The suppression evidence is
+       caffeine against benzodiazepine-site sedatives — valerenic acid,
+       apigenin — which is the `sleepy` register. `calm` alongside
+       caffeine is the OPPOSITE case: L-theanine, the app's best-
+       evidenced synergy. Firing this on calm would contradict the
+       research two files over. */
+    minCaffeineMg: 80,
+    text: "Caffeine here works against the sedative herbs — it blocks adenosine and, at higher doses, the same GABA pathway valerian and chamomile act on. Expect the cup to read awake; the calming leaves are working uphill.",
+  },
 ];
 
 /**
@@ -644,6 +688,19 @@ export function buildWarnings({
       // much. Habitual drinkers clear this line without noticing.
       text: `High caffeine load (~${Math.round(caffeineMg)}mg) — reads wired or jittery if you're sensitive to it.`,
     });
+  }
+
+  /* An antagonism is a warning, not a note. The paradox line says "both
+     will register"; this one says one is cancelling the other, which is
+     the opposite claim and the more useful one. Keyed off the same
+     perceived map, so it fires exactly when the cup really carries
+     both. */
+  for (const { when: [a, b], text, minCaffeineMg = 0 } of ANTAGONISMS) {
+    if ((perceivedEffects[a] || 0) >= 1.5
+        && (perceivedEffects[b] || 0) >= 1.5
+        && caffeineMg >= minCaffeineMg) {
+      warnings.push({ kind: "antagonism", text });
+    }
   }
 
   for (const [a, b] of paradoxTags) {

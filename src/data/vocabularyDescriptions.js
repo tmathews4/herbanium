@@ -109,19 +109,19 @@ export const SYNERGY_DESCRIPTIONS = {
   },
   "deepens sedation": {
     summary: "Quiet mind, heavy eyes.",
-    body: "Valerian with lemon balm is studied as a combination, not just as two sedatives \u2014 a double-blind placebo-controlled trial (Cerny & Schmid 1999) and later a triple-blind randomised trial where sleep quality improved for 36% on the pairing against 8% on placebo.",
+    body: "The evidence for pairing a sedative with a calming herb comes from valerian and lemon balm, which have been trialled together rather than separately \u2014 double-blind and placebo-controlled (Cerny & Schmid 1999), and later a triple-blind trial where sleep quality improved for 36% against 8% on placebo. Those aren't necessarily the leaves in your cup; they're the pairing the register was measured on.",
   },
   "deep settle": {
     summary: "The body unwinding rather than the mind going quiet.",
-    body: "The same valerian-and-lemon-balm evidence as `deepens sedation` (Cerny & Schmid 1999), read from the body's side. The trials don't separate the two registers; the cup does \u2014 this is the let-go one rather than the get-tired one.",
+    body: "Rests on the same trials as `deepens sedation` \u2014 valerian with lemon balm, measured as a pair (Cerny & Schmid 1999) \u2014 read from the body's side rather than the mind's. Whatever leaves your cup uses, this is the let-go register rather than the get-tired one.",
   },
   "Maghrebi refresh": {
     summary: "Cool and clear at once \u2014 the mint-and-gunpowder register.",
-    body: "Menthol activates the cold receptor TRPM8 and acts on cholinergic signalling, so the cooling and the alerting share a compound. Peppermint aroma measurably improved memory, processing speed and alertness in a randomised trial of 144 people (Moss et al. 2008) \u2014 ylang-ylang, tested alongside, did the opposite.",
+    body: "Menthol activates the cold receptor TRPM8 and acts on cholinergic signalling, so in a mint the cooling and the alerting share a compound. The trial that measured it used peppermint aroma \u2014 144 people, improved memory, processing speed and alertness, with ylang-ylang tested alongside doing the opposite (Moss et al. 2008). Your cup may reach the same register by another route.",
   },
   "warming digestive": {
     summary: "Heat that helps the meal along.",
-    body: "Peppermint relaxes intestinal smooth muscle by blocking calcium channels, fennel's volatile oils work the same register, and ginger speeds gastric emptying by around a quarter. Warm liquid aids motility on its own \u2014 which is why these are drunk hot. The halves are measured; the combination hasn't been tested as one.",
+    body: "The carminatives are individually well studied \u2014 peppermint relaxing intestinal smooth muscle by blocking calcium channels, fennel's volatile oils working the same register, ginger speeding gastric emptying by around a quarter \u2014 and warm liquid aids motility on its own, which is why such cups are drunk hot. Those are where the evidence comes from rather than a list of what's in the pot. The halves are measured; the combination hasn't been tested as one.",
   },
   "after-meal lift": {
     summary: "Bright and settling together \u2014 the end of a long meal.",
@@ -146,6 +146,23 @@ export const SYNERGY_DESCRIPTIONS = {
   "morning lift": {
     summary: "Warmth arriving with the wake-up.",
     body: "No mechanism is claimed. Energy with warmth behind it reads gentler than energy alone \u2014 the chai register rather than the espresso one.",
+  },
+};
+
+/* ── Paradoxes — combinations that really do hold both ─────────────
+
+   Keyed by the sorted effect pair, because that's what the engine
+   emits. Same poetic-then-science shape as the synergies, and held to
+   the same standard: `energy + sleepy` used to be in this table and
+   was removed when the receptor evidence showed one suppresses the
+   other. What's left is here because two independent channels carry
+   it. See docs/research/synergies.md.
+   ────────────────────────────────────────────────────────────── */
+export const PARADOX_DESCRIPTIONS = {
+  "cooling|warming": {
+    label: "warm and cool at once",
+    summary: "Both, honestly \u2014 a cup that cools the front of the mouth and warms behind it.",
+    body: "Two separate receptors, neither blocking the other. Cooling runs through TRPM8, the cold-and-menthol channel that 1,8-cineole also opens \u2014 the compound cardamom is rich in. Warming runs through TRPV1, the heat channel capsaicin uses, which gingerols and shogaols activate too; they're weaker than capsaicin, which is why the effect reads warming rather than burning. Different channels, so the cup delivers both rather than averaging them out.",
   },
 };
 
