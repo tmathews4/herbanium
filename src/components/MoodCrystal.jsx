@@ -140,6 +140,21 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
   return (
     <svg width={72} height={84} viewBox="0 0 72 84" aria-hidden>
       <defs>
+        {/* The travelling highlight. Soft-edged and narrow — a catch of
+            light crossing a facet, not a stripe. */}
+        <linearGradient id={`${gradId}-sweep`} x1="0" y1="0" x2="1" y2="0.35">
+          <stop offset="0%"   stopColor={theme.cream} stopOpacity="0" />
+          <stop offset="45%"  stopColor={theme.cream} stopOpacity="0.30" />
+          <stop offset="55%"  stopColor={theme.cream} stopOpacity="0.30" />
+          <stop offset="100%" stopColor={theme.cream} stopOpacity="0" />
+        </linearGradient>
+        {/* Luminance under the waterline — brightest at the surface,
+            gone within a few units, so the charge reads as something
+            with a top rather than a region that stops. */}
+        <linearGradient id={`${gradId}-surface`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={c1} stopOpacity="0.55" />
+          <stop offset="100%" stopColor={c1} stopOpacity="0" />
+        </linearGradient>
         {config.type === "linear" ? (
           <linearGradient id={gradId} {...config.coords}>
             {config.stops.map((s, i) => (
@@ -207,6 +222,19 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
               transition: "transform 0.9s cubic-bezier(0.33, 0, 0.2, 1)",
             }}
           />
+          {/* Glow beneath the surface. Same transform as the waterline
+              so it travels with it, drawn first so the line itself
+              stays the crisp edge on top of it. */}
+          {level > 0 && (
+            <rect
+              x="0" y={CHARGE_BOTTOM} width="72" height="9"
+              fill={`url(#${gradId}-surface)`}
+              style={{
+                transform: `translateY(${-level * chargeH}px)`,
+                transition: "transform 0.9s cubic-bezier(0.33, 0, 0.2, 1)",
+              }}
+            />
+          )}
           {/* Waterline. Sits at the bottom edge of the wash, in the
               crystal's own primary at full strength — against the
               washed-out region above it, this is the bit that makes
@@ -223,6 +251,19 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
           )}
         </g>
       )}
+
+      {/* The sweep. Clipped to the silhouette so the light stays inside
+          the stone, and screened so it brightens what's under it
+          instead of painting over it. Sits below the emit overlay —
+          the core glow is the crystal's own light and should read as
+          deeper than a reflection crossing its face. */}
+      <g clipPath={`url(#${clipId})`}>
+        <rect
+          className="crystal-sweep"
+          x="-30" y="0" width="46" height="84"
+          fill={`url(#${gradId}-sweep)`}
+        />
+      </g>
 
       {/* Inner emit overlay — adds a luminous core glow on top of
           the gradient body. */}

@@ -440,6 +440,37 @@ textarea::placeholder {
   transform-origin: center;
 }
 
+/* Crystal gleam — a slow sweep of light across the stone, and a soft
+   luminance just under the waterline.
+
+   The charge level was legible but inert: a wash, a hard line, and a
+   coloured body that never moved. A stone that holds something ought
+   to look like it holds something.
+
+   Two separate ideas, deliberately. The SWEEP travels the whole
+   silhouette on a long cycle — long enough to read as an occasional
+   catch of light rather than a spinner, which is the difference
+   between a jewel and a loading state. The SURFACE glow sits just
+   below the waterline and doesn't animate at all; it makes the top of
+   the charge look like the top of a liquid, which is where the eye
+   already goes to read the level.
+
+   8s and offset, so several crystals on one screen don't flash in
+   unison like a row of notifications. */
+@keyframes crystal-sweep {
+  0%   { transform: translateX(-90px); }
+  55%  { transform: translateX(90px); }
+  100% { transform: translateX(90px); }
+}
+.crystal-sweep {
+  animation: crystal-sweep 8s cubic-bezier(0.4, 0, 0.3, 1) infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .crystal-sweep { animation: none; opacity: 0; }
+}
+
 /* Brew dock arrival — the controls grow into place instead of
    appearing there.
 
