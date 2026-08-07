@@ -17,7 +17,13 @@ import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 
 test.beforeEach(() => test.slow());
 
-async function boot(page: Page, seed: (w: Window) => void = () => {}) {
+/* The seed takes no argument. Typing it `(w: Window) => void` looked
+   harmless and doesn't match what addInitScript accepts — Playwright's
+   PageFunction<Window> resolves to a structural Window that TS won't
+   unify with the lib.dom one, and the error unfolds into forty lines
+   about ClipboardItem. Caught by CI's typecheck, which is a command
+   this repo has and I hadn't been running. */
+async function boot(page: Page, seed: () => void = () => {}) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript((schema) => {
     localStorage.setItem("herbanium.schemaVersion", schema as string);

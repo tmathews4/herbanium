@@ -92,12 +92,22 @@ same register twice.
 
 ## Before merging
 
-Run **both** suites locally and report the actual pass/fail counts:
+Run **all three** locally and report the actual pass/fail counts:
 
 ```
+npm run typecheck                           # tsc over the E2E harness
 npm test                                    # node suite
 npx playwright test --project=pixel-9 ...   # E2E (Chromium only locally)
 ```
+
+**Typecheck is not optional and is easy to forget** — it only covers the
+TypeScript E2E specs, so a change to `src/` can't break it and it feels
+skippable. One mistyped helper parameter in a new spec failed CI three
+pushes running: the error was in `e2e/`, every browser passed, and
+nothing local complained. `tsc --noEmit` takes seconds.
+
+Check CI after pushing (`gh run list`). A red run that nobody looks at
+stays red, and the next push inherits it.
 
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
