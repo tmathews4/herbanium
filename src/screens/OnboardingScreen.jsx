@@ -382,7 +382,7 @@ const StepTimeOfDay = ({ value, setValue }) => {
    only here.
    ────────────────────────────────────────────────────────────── */
 
-import { PARENT_MOODS, PARENT_FLAVORS } from "../data/canon";
+import { DRAW_PARENT_MOODS, PARENT_FLAVORS } from "../data/canon";
 
 // First-run copy — slightly more evocative than the canon's terse
 // engine-side notes. Keeps key/family/label aligned to canon so the
@@ -394,12 +394,62 @@ const DRAW_NOTES = {
   comfort:   "warmth, the familiar cup",
   cooling:   "a felt-temperature breath",
   digestive: "fennel, after-supper ease",
-  sleepy:    "the drift toward rest",
+  sleepy:    "the slow slide toward evening",
+  soothing:  "bodily ease, gentle support",
+  grounding: "steadying, settled in yourself",
+  uplifting: "brightening, without the buzz",
 };
-const DRAW_OPTIONS = PARENT_MOODS.map(m => ({
-  ...m,
-  note: DRAW_NOTES[m.key] || m.note,
-}));
+/* THE LABELS ANSWER THE QUESTION, which the canon's don't have to.
+
+   The step asks "What pulls you to a cup?", so every chip should
+   complete "I want ___". Five of the canon's labels don't, because the
+   canon serves a second role the journal needs — the "where it left
+   me" row, where the same value is an OUTCOME. "Grounded" is right for
+   what a cup did to you and wrong for what you're reaching for;
+   "Sleepy" is worse, because it names the state you're in rather than
+   the one you want, so it reads as the opposite of the intent.
+
+   Overridden here rather than renamed in the canon, because both
+   registers are correct in their own place, and this file already
+   overrides the notes for exactly that reason. Keys are untouched —
+   they're persisted in journal targetMoods and there is no migration
+   path (a schema bump wipes rather than migrates). */
+const DRAW_LABELS = {
+  soothing:  "Ease",       // canon "Soothing" — "I want soothing" doesn't parse
+  grounding: "Grounding",  // canon "Grounded" — outcome, not pull
+  uplifting: "Brightness", // canon "Uplifting" — same
+  digestive: "Digestion",  // canon "Digestive" — an adjective with no noun
+  sleepy:    "Sleep",      // canon "Sleepy" — names your state, not your goal
+};
+
+/* IMMUNE IS NOT OFFERED HERE, and the reason is in our own research.
+
+   families.js describes the immune family as "slower and LESS FELT than
+   any other effect here". Every other option on this step names
+   something you notice; this one names something you can't. Asked
+   "what pulls you to a cup?", a first-run user is being invited to
+   report a sensation that by our own account isn't available.
+
+   It also lands as a health claim on the first screen someone sees,
+   one word wide, with the qualifying note hidden in a tooltip no phone
+   will show.
+
+   THE COUNTER-ARGUMENT, kept because it's a good one and this is
+   reversible: reaching for echinacea or elder in cold season is a real
+   brewing goal, which is why the family was added to the target canon
+   in the first place (see canon.js). That remains true — immune stays
+   a family, stays in the strip, stays on the ingredients. It is only
+   withdrawn from the one surface that asks what you FEEL drawn to.
+
+   The exclusion is declared on the family itself (perceptible: false)
+   and derived in canon.DRAW_PARENT_MOODS, not filtered by name here —
+   see the note there for why a hand-kept list was the wrong shape. */
+const DRAW_OPTIONS = DRAW_PARENT_MOODS
+  .map(m => ({
+    ...m,
+    label: DRAW_LABELS[m.key] || m.label,
+    note: DRAW_NOTES[m.key] || m.note,
+  }));
 
 const StepDraw = ({ value, setValue }) => {
   const toggle = (key) => {

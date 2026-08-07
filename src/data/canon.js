@@ -30,7 +30,7 @@
 // rising in the middle, drifting to rest at the end). Order matches
 // the TrackMap mood strip's left-to-right family layout so the chip
 // row and the graph below it scan the same direction.
-import { CATEGORY_OF_EFFECT } from "./families.js";
+import { CATEGORY_OF_EFFECT, PERCEPTIBLE_EFFECT } from "./families.js";
 
 export const PARENT_MOODS = [
   { key: "calm",      family: "calm",   label: "Calm",      note: "settling, mind-quieting" },
@@ -106,6 +106,27 @@ const isBodily = (m) => CATEGORY_OF_EFFECT[m.key] === "body";
 const NON_MIND_EXTRAS = new Set(["nauseous"]);
 
 export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !isBodily(m));
+
+/* What onboarding may ask you to want.
+ *
+ * A DIFFERENT CUT FROM THE JOURNAL'S, and the difference is the point.
+ * The journal drops every body register, because "where it left me:
+ * digestive" isn't a sentence. Onboarding asks what pulls you TO a cup,
+ * and wanting something cooling, or something settling after a meal, is
+ * an ordinary reason to put the kettle on — those stay.
+ *
+ * What can't stay is a word for something you are unable to notice.
+ * families.js says of immunity that it is "slower and less felt than
+ * any other effect here", and canon.js says of the same word that "you
+ * cannot notice your own immune response over a cup at all". Offering
+ * it as an answer to a felt question invites a report nobody can make,
+ * and lands as a health claim one word wide on the first screen of the
+ * app.
+ *
+ * Derived, not filtered by name, so the next unfelt family is excluded
+ * the day it is added. */
+export const DRAW_PARENT_MOODS = PARENT_MOODS
+  .filter(m => PERCEPTIBLE_EFFECT[m.key] !== false);
 export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS
   .filter(m => !isBodily(m) && !NON_MIND_EXTRAS.has(m.key));
 

@@ -203,7 +203,19 @@ export const MOOD_VOCABULARY = [
     // soothing as the "best vocabulary mapping for immune support".
     // Turmeric flagged the same gap for anti-inflammatory; that one is
     // a single ingredient and hasn't earned an axis yet.
-    family: "immune", label: "immunity", category: "body", color: "var(--effect-immune)",
+    /* NOT PERCEPTIBLE IN THE CUP, which the leaf body below has always
+       said in prose — "slower and less felt than any other effect
+       here" — and which nothing could read. Now it can.
+
+       This is the only family carrying the flag, and the flag exists
+       rather than a hand-kept exclusion list because canon.js learned
+       that lesson already: its mind/body split used to be a set grown
+       an entry at a time as each new body word was noticed reading
+       strangely in a picker. A surface that asks what you can FEEL
+       should exclude the next unfelt family the day it is added, not
+       the day someone spots it. */
+    family: "immune", label: "immunity", category: "body", perceptible: false,
+    color: "var(--effect-immune)",
     leaves: [{
       token: "immune",
       label: "immunity",
@@ -314,6 +326,12 @@ export const CATEGORY_OF_FAMILY = Object.fromEntries(
 
 export const CATEGORY_OF_EFFECT = Object.fromEntries(
   MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, f.category]))
+);
+
+/** Whether a word names something a drinker can notice in the cup.
+ *  Defaults true — the exception is the thing worth declaring. */
+export const PERCEPTIBLE_EFFECT = Object.fromEntries(
+  MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, f.perceptible !== false]))
 );
 
 /** The established action a word answers to, or null. */
