@@ -15,6 +15,8 @@ import {
   dayKey, emptyLedger, applyCharge, isCharged, spendCharge, maxDailyCharge,
 } from "../src/data/lodestone.js";
 
+import { readFileSync } from "node:fs";
+
 let pass = 0, fail = 0;
 const failures = [];
 function test(desc, fn) {
@@ -204,6 +206,44 @@ test("spending returns to zero, not to a leftover remainder", () => {
   // Overshoot is already trimmed on the way in, so a spent stone is
   // always exactly empty — no invisible head start on the next one.
   assert(spendCharge(CHARGE_FULL) === 0, "should be exactly empty");
+});
+
+/* ── ONE DOOR FOR EVERY SPAWN ───────────────────────────────────────
+
+   An elemental becoming yours writes three parallel stores — the id
+   set, the when, the how — and four places used to do it by hand with
+   subtly different guards. Nothing kept them in step.
+
+   The banner vanishing was the same disease a level up: the
+   announcement was wired to one CALLER rather than to the event, so
+   when the lodestone added a new path it announced nothing.
+
+   This is a source check rather than a behavioural one, because the
+   thing being prevented is a future edit, not a current bug: a fifth
+   caller writing the stores directly would work perfectly and diverge
+   quietly, which is exactly how the first four got out of step. */
+
+test("nothing writes the elemental stores except the wrapper", () => {
+  const src = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+  /* Count CALLS — `setX(` — and nothing else. The destructuring that
+     creates the setter reads `const [x, setX] = ...` with no paren, so
+     it never matched in the first place; an earlier version subtracted
+     it anyway and that double-discount swallowed exactly the extra call
+     this test exists to catch. Verified by mutation: routing one spawn
+     back to a hand-written setter now fails here. */
+  const writes = (name) => (src.match(new RegExp(`${name}\\(`, "g")) || []).length;
+  const offenders = [];
+  for (const [setter, allowed] of [
+    ["setRolledElementalIds", 1],
+    ["setRolledElementalAt", 1],
+    ["setRolledElementalAction", 1],
+  ]) {
+    const n = writes(setter);
+    if (n > allowed) offenders.push(`${setter} called ${n}× (only grantElementals should)`);
+  }
+  assert(offenders.length === 0,
+    `elemental stores are being written outside the wrapper:\n  ${offenders.join("\n  ")}`);
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

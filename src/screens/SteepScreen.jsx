@@ -219,31 +219,37 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
   // progress ring in the card's corner. Resets to CARD_CYCLE_S on advance.
   const [cardRemaining, setCardRemaining] = useState(CARD_CYCLE_S);
 
-  const advanceWaitCard = React.useCallback(() => {
+  /* ONE STEP, EITHER DIRECTION.
+
+     These were two functions differing by a single character — `i + 1`
+     against `i - 1` — around four setters that have to move together:
+     fade out, change card, fade back, reset both the timestamp and the
+     countdown so the auto-cycle doesn't fire on top of a manual tap.
+
+     Four writes in two copies is the same shape as the elemental
+     spawns and the overlay opens: each copy correct, nothing keeping
+     them so. Forget `setCardRemaining` in one and the progress ring
+     runs down from wherever it happened to be, which looks like a
+     glitch rather than a bug and would never fail a test.
+
+     A reducer would be the by-the-book answer for four values that
+     always change together, and it isn't worth it here — the four are
+     read independently all over this screen, so folding them into one
+     object would touch far more than it fixes. A parameter is enough. */
+  const stepWaitCard = React.useCallback((delta) => {
     if (waitCards.length <= 1) return;
     setWaitFading(true);
     setTimeout(() => {
-      setWaitIdx(i => (i + 1) % waitCards.length);
+      setWaitIdx(i => (i + delta + waitCards.length) % waitCards.length);
       setWaitFading(false);
       setLastAdvance(Date.now());
       setCardRemaining(CARD_CYCLE_S);
     }, 400);
   }, [waitCards.length]);
 
-  const reverseWaitCard = React.useCallback(() => {
-    if (waitCards.length <= 1) return;
-    setWaitFading(true);
-    setTimeout(() => {
-      setWaitIdx(i => (i - 1 + waitCards.length) % waitCards.length);
-      setWaitFading(false);
-      setLastAdvance(Date.now());
-      setCardRemaining(CARD_CYCLE_S);
-    }, 400);
-  }, [waitCards.length]);
+  const advanceWaitCard = React.useCallback(() => stepWaitCard(1), [stepWaitCard]);
+  const reverseWaitCard = React.useCallback(() => stepWaitCard(-1), [stepWaitCard]);
 
-  // Auto-cycle every CARD_CYCLE_S seconds. Clicking a card triggers
-  // advanceWaitCard which updates lastAdvance, which re-runs this effect
-  // with a fresh timer (so you never get a manual-then-auto double advance).
   // Auto-cycle every CARD_CYCLE_S seconds. Clicking a card triggers
   // advanceWaitCard which updates lastAdvance, which re-runs this effect
   // with a fresh timer (so you never get a manual-then-auto double advance).

@@ -388,7 +388,18 @@ const PhoneFrame = ({ children }) => {
    so the screen doesn't flash a half-disappeared banner mid-route.
    ────────────────────────────────────────────────────────────── */
 
-const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
+/* Two things use this ribbon now, so the copy is a prop rather than
+   baked in: an elemental arriving, and the lodestone reaching full
+   charge. They're the same shape of event — something happened while
+   you were looking elsewhere, here's where to go — and giving the
+   second its own component would have been one divergence away from
+   two ribbons that don't quite match. */
+const ElementalGlimpseBanner = ({
+  onLogIt, onLater,
+  title = "your lodestone is pulsing",
+  body = "Something stirs in the stone",
+  actionLabel = "tap to visit",
+}) => {
   const [dismissing, setDismissing] = React.useState(false);
   const handle = (cb) => {
     if (dismissing) return;
@@ -473,13 +484,13 @@ const ElementalGlimpseBanner = ({ onLogIt, onLater }) => {
             textTransform: "uppercase", color: theme.terra,
             fontWeight: 600, marginBottom: 1,
           }}>
-            your lodestone is pulsing
+            {title}
           </div>
           <div style={{
             fontFamily: ff.serif, fontSize: 13.5, color: theme.ink,
             lineHeight: 1.35,
           }}>
-            Something stirs in the stone — <em style={{ color: theme.terra, fontStyle: "normal" }}>tap to visit</em>
+            {body} — <em style={{ color: theme.terra, fontStyle: "normal" }}>{actionLabel}</em>
           </div>
         </div>
         <button
@@ -802,13 +813,9 @@ export default function App() {
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate
   // to the elementals to log the find. We track two pieces of state:
-  //   - glimpsePendingBefore: the set of earned-elemental ids captured
-  //     just before the new session was added, so the post-update
-  //     useEffect can compute the diff
-  //   - glimpseElemental: when set, the glimpse overlay renders. Holds
+  //   - glimpseElemental: when set, the glimpse banner renders. Holds
   //     the first newly-earned elemental (others queue naturally on
   //     the elementals's pendingArrivals path)
-  const [glimpsePendingBefore, setGlimpsePendingBefore] = useState(null);
   const [glimpseElemental, setGlimpseElemental] = useState(null);
   // When the user taps "Log it" on the glimpse card, we auto-open
   // that elemental's arrival card on the elementals so the moment of
@@ -1451,9 +1458,7 @@ export default function App() {
 
   const go = (to, arg) => {
     if (to === "ingredient") {
-      if (arg) setIngredientId(arg);
-      pushOverlayHistory("ingredient", { ingredientId: arg || ingredientId });
-      setOverlay("ingredient");
+      openOverlay("ingredient", arg || ingredientId);
       return;
     }
     if ((to === "apothecary" || to === "shelf") && arg && typeof arg === "object") {
@@ -1491,32 +1496,82 @@ export default function App() {
     });
   };
 
-  const openBlend = (blendId) => {
-    setBlendOverlayId(blendId);
-    pushOverlayHistory("blend", { blendId });
-    setOverlay("blend");
+  /* ONE DOOR FOR EVERY OVERLAY.
+
+     Opening one is three writes that have to agree — remember the id,
+     push a history entry so Back lands somewhere sensible, then show
+     it. Four kinds did that dance in four near-identical functions,
+     and three more call sites hand-rolled it inline rather than call
+     them. One of those inline copies (the recipe opened from a cup)
+     was a verbatim reimplementation of openBlend.
+
+     The failure mode isn't a crash: miss the history push and the
+     overlay opens fine, then Back goes somewhere the user didn't come
+     from. Every copy works until one of them doesn't, and no test
+     fails because each one is individually correct.
+
+     Same shape as grantElementals. The history payload key differs per
+     kind, which is the only reason these were ever separate functions,
+     so the map holds that difference and nothing else has to know it. */
+  const OVERLAY_KINDS = {
+    ingredient: { setId: setIngredientId, key: "ingredientId" },
+    blend:      { setId: setBlendOverlayId, key: "blendId" },
+    cup:        { setId: setCupOverlayId, key: "sessionId" },
+    entry:      { setId: setEntryOverlayId, key: "entryId" },
   };
+
+  const openOverlay = (kind, id) => {
+    const spec = OVERLAY_KINDS[kind];
+    if (!spec || !id) return;
+    spec.setId(id);
+    pushOverlayHistory(kind, { [spec.key]: id });
+    setOverlay(kind);
+  };
+
+  /* Swapping the SUBJECT of an overlay already on screen — tapping a
+     leaf inside an ingredient page. Deliberately not openOverlay: the
+     overlay is already showing, so setOverlay would be a no-op, and
+     the history push is the point rather than an afterthought. Kept as
+     its own named thing so the difference is legible instead of
+     looking like a copy that forgot a line. */
+  const swapOverlaySubject = (kind, id) => {
+    const spec = OVERLAY_KINDS[kind];
+    if (!spec || !id) return;
+    pushOverlayHistory(kind, { [spec.key]: id });
+    spec.setId(id);
+  };
+
+  /* PUTTING THE STEEP AWAY is four writes that have to agree: unfold
+     the banner, drop the overlay, clear its history so Back doesn't
+     walk into a screen that no longer exists, and let go of the
+     session. Written out twice around the steep screen — once for
+     finishing a cup, once for cancelling — with the finish path also
+     doing its own logging around it.
+
+     Miss `clearOverlayHistory` and nothing breaks on the way out; the
+     next Back press walks into a dead overlay. That's the shape of
+     failure this whole audit keeps turning up: every copy correct,
+     nothing keeping them so, and the symptom arriving somewhere else
+     entirely. */
+  const closeSteep = () => {
+    setSteepMinimized(false);
+    setOverlay(null);
+    clearOverlayHistory();
+    setSession(null);
+  };
+
+  const openBlend = (blendId) => openOverlay("blend", blendId);
 
   // Open the journal entry for a single brewed cup. Replaces the
   // previous "tap a cup row → recipe" jump; the cup detail screen
   // shows mood/flavor results, ratings, and notes, with the blend
   // name in its header acting as the link to the recipe view.
-  const openCup = (sessionId) => {
-    if (!sessionId) return;
-    setCupOverlayId(sessionId);
-    pushOverlayHistory("cup", { sessionId });
-    setOverlay("cup");
-  };
+  const openCup = (sessionId) => openOverlay("cup", sessionId);
 
   // Open a free-form journal entry (entry / haiku / limerick) in
   // its own detail screen. Replaces the inline-expand row pattern
   // so all journal rows behave the same way: tap → dedicated page.
-  const openEntry = (entryId) => {
-    if (!entryId) return;
-    setEntryOverlayId(entryId);
-    pushOverlayHistory("entry", { entryId });
-    setOverlay("entry");
-  };
+  const openEntry = (entryId) => openOverlay("entry", entryId);
 
   /* `opts.minimized` starts the cup already folded into the banner.
      Quick brew on a recipe row uses it: you tapped a cup you already
@@ -1585,24 +1640,59 @@ export default function App() {
     });
     const seeded = legacyEarnedIds(ATTRIBUTES, ctx);
     if (seeded.size > 0) {
-      setRolledElementalIds(prev => {
-        const next = new Set(prev || []);
-        seeded.forEach(id => next.add(id));
-        return next;
-      });
-      // Stamp legacy migrations as "long ago" so the arrival
-      // timeline keeps them at the bottom — they were earned
-      // pre-feature so we don't have a real first-noted moment.
-      // Using a sentinel of 0 lets the renderer show "earlier" in
-      // place of a date instead of midnight 1970.
-      setRolledElementalAt(prev => {
-        const next = { ...(prev || {}) };
-        seeded.forEach(id => { if (next[id] == null) next[id] = 0; });
-        return next;
-      });
+      // `at: 0` is the sentinel for "earned before we were counting" —
+      // the timeline shows "earlier" rather than a date. No action,
+      // because there wasn't one we recorded.
+      grantElementals([...seeded], { at: 0 });
     }
     setLegacyMigrated(true);
   }, [legacyMigrated, sessions, savedBlendIds, profile, journalEntries, tabVisits, elementalsDisabled, setLegacyMigrated, setRolledElementalIds]);
+
+  /* ONE DOOR FOR EVERY ELEMENTAL.
+
+     An elemental becoming yours means writing three parallel stores —
+     the id set, the when, and the how — and every caller was doing it
+     by hand. Three copies of the same triple-write, with subtly
+     different guards: the milestone path stamped only when unset, the
+     roll path overwrote, the legacy migration wrote a 0 sentinel and
+     skipped the action map entirely. Nothing kept them in step, and
+     nothing would have noticed if they drifted further.
+
+     The banner's disappearance was the same disease one level up: the
+     announcement was wired at one caller instead of to the event, so a
+     new path arrived and announced nothing. That's fixed by watching
+     the set — this fixes the writes underneath it.
+
+     `at: 0` is a real value, not a missing one: the legacy migration
+     uses it to mean "earned before we were counting", which the
+     timeline renders as "earlier" rather than as midnight 1970. So the
+     default is applied when the caller omits `at`, not when it's zero. */
+  const grantElementals = (ids, { action = null, at } = {}) => {
+    const list = [...new Set(ids || [])].filter(Boolean);
+    if (list.length === 0) return [];
+    const stamp = at === undefined ? Date.now() : at;
+    setRolledElementalIds(prev => {
+      const next = new Set(prev || []);
+      list.forEach(id => next.add(id));
+      return next;
+    });
+    // First-noted wins on both maps. An elemental can be re-granted by
+    // a later path — a milestone the roll already gave you — and the
+    // moment that matters is the first one.
+    setRolledElementalAt(prev => {
+      const next = { ...(prev || {}) };
+      list.forEach(id => { if (next[id] == null) next[id] = stamp; });
+      return next;
+    });
+    if (action) {
+      setRolledElementalAction(prev => {
+        const next = { ...(prev || {}) };
+        list.forEach(id => { if (next[id] == null) next[id] = action; });
+        return next;
+      });
+    }
+    return list;
+  };
 
   // Try a chance-based elemental roll on a user action. Called by
   // every action site (tab visit, brew, journal, favorite,
@@ -1643,22 +1733,7 @@ export default function App() {
       }
     }
     if (justEarned.length === 0) return;
-    setRolledElementalIds(prev => {
-      const next = new Set(prev || []);
-      justEarned.forEach(id => next.add(id));
-      return next;
-    });
-    setRolledElementalAt(prev => {
-      const next = { ...(prev || {}) };
-      const ts = Date.now();
-      justEarned.forEach(id => { if (next[id] == null) next[id] = ts; });
-      return next;
-    });
-    setRolledElementalAction(prev => {
-      const next = { ...(prev || {}) };
-      justEarned.forEach(id => { if (next[id] == null) next[id] = "milestone"; });
-      return next;
-    });
+    grantElementals(justEarned, { action: "milestone" });
     earnCharge("milestone");
   };
 
@@ -1681,13 +1756,7 @@ export default function App() {
       }
       return;
     }
-    setRolledElementalIds(prev => {
-      const next = new Set(prev || []);
-      next.add(result.id);
-      return next;
-    });
-    setRolledElementalAt(prev => ({ ...(prev || {}), [result.id]: result.ts }));
-    setRolledElementalAction(prev => ({ ...(prev || {}), [result.id]: result.action }));
+    grantElementals([result.id], { action: result.action, at: result.ts });
     setLastElementalRollAt(result.ts);
     setElementalDryStreak(0);
   };
@@ -1714,14 +1783,61 @@ export default function App() {
   // if anything new became earned, we set glimpseElemental so the
   // overlay renders. Otherwise we just clear the pending flag and the
   // home navigation already queued by the brew onDone takes over.
+  /* WATCHES THE SET, rather than being armed at a call site.
+
+     This used to snapshot `earnedElementalIds` in the steep flow's
+     onDone and diff afterwards — which worked while a brew was the only
+     way an elemental could arrive. The lodestone changed that: a
+     charged summon appends to `wildElementals` from a different screen
+     entirely, and never armed the snapshot, so the banner silently
+     stopped firing for the path that had become the main one.
+
+     There are five places that add to the earned set now (the legacy
+     migration, two attribute rolls, the wild roll, and the dev forcer).
+     Arming each of them is the same fragility that just failed, one
+     call site at a time. So the effect watches the set itself: anything
+     that grows it announces itself, including whatever gets added next.
+
+     SEEDED AFTER THE MIGRATION, not on the first render. The one-time
+     legacy pass populates rolledElementalIds in an effect of its own,
+     which lands a beat after mount — so a ref seeded immediately saw
+     that arrive as growth and announced a pile of elementals the user
+     earned months ago. Caught by the test that opens the app on an
+     already-collected profile and expects silence.
+
+     Waiting on `legacyMigrated` is exact rather than a timer: the flag
+     is set by the migration itself, including on the path where there
+     is nothing to migrate. */
+  const announcedEarnedRef = useRef(null);
   useEffect(() => {
-    if (!glimpsePendingBefore) return;
-    const newOnes = [...earnedElementalIds].filter(id => !glimpsePendingBefore.has(id));
-    if (newOnes.length > 0) {
+    if (!legacyMigrated) return;
+    const current = earnedElementalIds;
+    if (announcedEarnedRef.current === null) {
+      announcedEarnedRef.current = new Set(current);
+      return;
+    }
+    const newOnes = [...current].filter(id => !announcedEarnedRef.current.has(id));
+    announcedEarnedRef.current = new Set(current);
+    if (newOnes.length > 0 && !elementalsDisabled) {
       setGlimpseElemental({ ids: newOnes });
     }
-    setGlimpsePendingBefore(null);
-  }, [glimpsePendingBefore, earnedElementalIds]);
+  }, [earnedElementalIds, elementalsDisabled, legacyMigrated]);
+
+  /* THE LODESTONE FILLING is the other thing that happens while nobody
+     is looking. Brewing, reviewing and writing charge it silently, and
+     until now nothing said when it was ready — the user had to go and
+     check the stone. Same transition-watch shape as above, and seeded
+     the same way so opening the app on an already-full stone doesn't
+     greet you with a notice about something you did yesterday. */
+  const chargedRef = useRef(null);
+  const [chargeReady, setChargeReady] = useState(false);
+  useEffect(() => {
+    const full = isCharged(lodestoneCharge);
+    if (chargedRef.current === null) { chargedRef.current = full; return; }
+    const justFilled = full && !chargedRef.current;
+    chargedRef.current = full;
+    if (justFilled && !elementalsDisabled) setChargeReady(true);
+  }, [lodestoneCharge, elementalsDisabled]);
 
   // Append a newly-logged cup to the sessions list. Called when the user
   // completes a brew+log cycle. This is what makes newly-brewed cups show
@@ -2335,14 +2451,10 @@ export default function App() {
             || ATTRIBUTES.find(a => !seen.has(a.id))
             || ATTRIBUTES[0];
           if (!next) return;
-          // Add to rolledElementalIds so the elementals actually has the
-          // arrival in earnedAttrs.
-          setRolledElementalIds(prev => {
-            const n = new Set(prev || []);
-            n.add(next.id);
-            return n;
-          });
-          setRolledElementalAt(prev => ({ ...(prev || {}), [next.id]: Date.now() }));
+          // Through the same door as every real spawn — a dev shortcut
+          // that writes the stores by hand is a fifth copy waiting to
+          // drift from the other four.
+          grantElementals([next.id], { action: "dev" });
           // Critical for the dev path on seed-loaded profiles where
           // some ids are pre-marked seen: clear the chosen id from
           // seenElementalIds so pendingArrivals includes it. Without
@@ -2476,7 +2588,6 @@ export default function App() {
             // immediately with default flavor/taste (the unified
             // follow-up card on Home captures rating, flavor, and
             // mood once the cup has had a few minutes to settle).
-            setGlimpsePendingBefore(new Set(earnedElementalIds));
             addSession({
               blend: session.blend,
               intent: session.intent,
@@ -2490,14 +2601,11 @@ export default function App() {
               save: true,
               rename: "",
             });
-            setSteepMinimized(false);
-            setOverlay(null);
-            clearOverlayHistory();
             setCheckInNotice({ blendName: session.blend?.name || null, choice: "default" });
-            setSession(null);
+            closeSteep();
             setTab("home");
           }}
-          onCancel={() => { setSteepMinimized(false); setOverlay(null); clearOverlayHistory(); setSession(null); }}
+          onCancel={closeSteep}
         />
       )}
       {/* Brew-timer banner — surfaces at the top of the viewport
@@ -2524,10 +2632,7 @@ export default function App() {
         <IngredientDetail
           id={ingredientId}
           onClose={popOverlayHistory}
-          onOpenIngredient={(newId) => {
-            pushOverlayHistory("ingredient", { ingredientId: newId });
-            setIngredientId(newId);
-          }}
+          onOpenIngredient={(newId) => swapOverlaySubject("ingredient", newId)}
           ingredientHintShown={ingredientHintShown}
           dismissIngredientHint={() => setIngredientHintShown(true)}
           // Brewing a single leaf. The screen builds the one-ingredient
@@ -2544,11 +2649,7 @@ export default function App() {
           sessions={sessions}
           go={go}
           onClose={popOverlayHistory}
-          onOpenIngredient={(ingId) => {
-            pushOverlayHistory("ingredient", { ingredientId: ingId });
-            setIngredientId(ingId);
-            setOverlay("ingredient");
-          }}
+          onOpenIngredient={(ingId) => openOverlay("ingredient", ingId)}
           onBrew={(modified) => {
             const b = modified || getBlend(blendOverlayId);
             if (!b) return;
@@ -2583,14 +2684,10 @@ export default function App() {
           session={sessions.find(s => s.id === cupOverlayId)}
           onClose={popOverlayHistory}
           appendSessionNote={appendSessionNote}
-          openBlend={(id) => {
-            // Stack the recipe overlay on top of the cup detail so
-            // back from the recipe lands the user back on the cup,
-            // not on Home. Mirrors the ingredient-from-blend flow.
-            pushOverlayHistory("blend", { blendId: id });
-            setBlendOverlayId(id);
-            setOverlay("blend");
-          }}
+          // Stacks on top of the cup detail, so Back from the recipe
+          // lands on the cup rather than Home — which is what the
+          // history push in openOverlay is for.
+          openBlend={openBlend}
           onBrewAgain={() => {
             const cupSession = sessions.find(s => s.id === cupOverlayId);
             const b = cupSession ? getBlend(cupSession.blendId) : null;
@@ -2642,6 +2739,32 @@ export default function App() {
             navigateTab("shelf");
           }}
           onLater={() => setGlimpseElemental(null)}
+        />
+      )}
+
+      {/* THE STONE IS READY. The other half of the same problem: an
+          elemental arriving announces itself above, but the lodestone
+          FILLING never did — and under the charge model that's the
+          event the user can't see. It fills from brewing, reviewing and
+          writing, on screens that say nothing about it, and then waits
+          silently for someone to think of checking.
+
+          Suppressed while a glimpse is up. Two ribbons stacked at the
+          top of the screen is a notification tray, and the arrival is
+          the more immediate of the two — the charge keeps until it's
+          spent, so it can wait its turn. */}
+      {chargeReady && !glimpseElemental && (
+        <ElementalGlimpseBanner
+          title="your lodestone is charged"
+          body="Enough brewing, reviewing and writing to draw something out"
+          actionLabel="tap to summon"
+          onLogIt={() => {
+            setComposeView({ section: "shelf", mode: "visitors", at: Date.now() });
+            setShelfMode("visitors");
+            setChargeReady(false);
+            navigateTab("shelf");
+          }}
+          onLater={() => setChargeReady(false)}
         />
       )}
     </div>

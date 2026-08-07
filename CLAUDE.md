@@ -107,6 +107,45 @@ Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true local
 
 Assert on stable hooks added to our own markup — `data-tour="..."` for tour anchors, `data-testid="..."` for test-only handles. No brittle absolute paths, no text matching where a hook would do. Add the hook at generation time rather than retrofitting it.
 
+## State that changes together changes through one path
+
+Follow React's own organisational guidance rather than inventing local
+conventions: **if two or more pieces of state always change together,
+they change through one function** — merged into a single value, moved
+behind a reducer, or at minimum owned by one named operation that every
+caller goes through.
+
+This is not a style preference. An audit found four instances, all the
+same shape and all of them latent bugs:
+
+- `grantElementals` — an elemental becoming yours wrote three parallel
+  stores, hand-rolled at four sites with four different guards.
+- `openOverlay` — opening an overlay is set-id + push-history + show,
+  hand-rolled at seven sites; one was a verbatim reimplementation of
+  `openBlend`.
+- `closeSteep` — putting the steep away is four writes, written twice.
+- `stepWaitCard` — two functions differing by one character around four
+  setters.
+
+**The failure shape is always the same: every copy is correct, nothing
+keeps them so, and the symptom surfaces somewhere else.** Miss
+`clearOverlayHistory` on one exit path and the exit works fine — the
+next Back press walks into a dead overlay. No test fails, because each
+individual path is right.
+
+Prefer the lightest form that removes the divergence. A reducer is the
+by-the-book answer for a cluster of values, and it is the wrong call
+when those values are read independently across a large component —
+folding them into one object then touches far more than it fixes. Say
+which you chose and why, in a comment.
+
+**Finding them:** grepping for duplicate NAMES only finds duplicated
+definitions. This class is duplicated OPERATIONS — no shared name, often
+inside one file. Look instead for setters that repeatedly appear within
+a few lines of each other across several call sites. Read the results:
+`setTab` + `setTabHistory` clusters too, and is correct — push and pop
+are inverse operations, not copies.
+
 ## Pushing is deploying
 
 **`git push origin main` publishes to herbanium.app.** Vercel builds
