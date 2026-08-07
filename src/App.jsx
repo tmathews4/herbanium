@@ -841,6 +841,9 @@ export default function App() {
   const [lodestoneLedger, setLodestoneLedger] = usePersistedState("lodestoneLedger", null);
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
   const [overlay, setOverlay] = useState(null); // null | "steep" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
+  // True while a brew owns the screen, open or minimized. Read by the
+  // top-of-screen notices, which must not land on the steep's controls.
+  const steepUp = () => overlay === "steep";
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate
@@ -1046,9 +1049,6 @@ export default function App() {
     setOmenShown(!!mode.omenShown);
     setElementalsDisabled(!!mode.elementalsDisabled);
     const hints = mode.hints || {};
-    setJournalHintShown(!!hints.journalHintShown);
-    setProfileHintShown(!!hints.profileHintShown);
-    setElementalsHintShown(!!hints.elementalsHintShown);
     setIngredientHintShown(!!hints.ingredientHintShown);
     if (mode.profile) {
       setProfile(prev => {
@@ -1108,24 +1108,33 @@ export default function App() {
     setFavoritesMigrated(true);
   }, [profile, favoritesMigrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // (The old first-visit tutorial cards — FirstCupHintCard on Home and
-  // the Apothecary/Shelf ComposeTutorialOverlay strips — are retired
-  // in favor of the per-screen guided tours above. Their persisted
-  // flags [firstCupHintShown / composeHintShown / shelfHintShown] are
-  // simply no longer read.)
-  const [journalHintShown, setJournalHintShown] = usePersistedState("journalHintShown", false);
-  const [profileHintShown, setProfileHintShown] = usePersistedState("profileHintShown", false);
-  // First-visit hint for Shelf > Elementals. Lives on its own flag
-  // because the elementals is an opt-in side surface — users only
-  // see this hint after they tap into the tab.
-  const [elementalsHintShown, setElementalsHintShown] = usePersistedState("elementalsHintShown", false);
+  /* ONE FIRST-VISIT HINT, not six.
+
+     The retired tutorial cards left three persisted flags behind
+     (firstCupHintShown / composeHintShown / shelfHintShown) with a note
+     saying they were no longer read. Four more had joined them since,
+     the same way and without the note: journal, profile, elementals and
+     seededFavorites were each still a localStorage key, a seed field,
+     a state pair and two props threaded to a screen — and every one of
+     those screens destructured them and rendered nothing. ProfileScreen
+     still imported HintCard without using it.
+
+     Dead state is worse than duplicated state, because it reads as a
+     working feature. Someone adding a hint would have found four
+     plausible examples to copy, none of which do anything.
+
+     I came at this meaning to fold them into one keyed map like
+     `toursSeen`, which is the right shape for six live flags. It isn't
+     the right shape for one: a map with a single key is a container
+     built for members it doesn't have. So the four go and the one that
+     works stays exactly as it is.
+
+     The orphaned localStorage keys are left alone deliberately. Nothing
+     reads them, they cost a few bytes, and clearing them means either a
+     migration or a schema bump — and a schema bump wipes journals. */
   // First-visit hint for the IngredientDetail screen — explains
   // its three tabs (Overview / Brewing / Pairings).
   const [ingredientHintShown, setIngredientHintShown] = usePersistedState("ingredientHintShown", false);
-  // Home seeded-favorites notice — appears once on Home after onboarding
-  // to flag that the starter blends in Recipes were added by us, not
-  // brewed/saved by the user. Dismissed for good once acknowledged.
-  const [seededFavoritesNoticeShown, setSeededFavoritesNoticeShown] = usePersistedState("seededFavoritesNoticeShown", false);
   // Unique creation elemental popup — now fires on first Profile visit
   // rather than on Home, so it doesn't hit users right at app entry.
   const [omenShown, setOmenShown] = usePersistedState("omenShown", false);
@@ -1266,8 +1275,6 @@ export default function App() {
     // doesn't visually wipe the preloaded ones out from under the user.
     setFavoriteBlendIds(new Set(seedBlendIds));
     setOmenShown(false); // unique elemental popup plays on first Profile visit
-    setJournalHintShown(false); // first-visit Journal tutorial
-    setProfileHintShown(false); // first-visit Profile tutorial
     setSeenElementalIds(new Set()); // arrival popups start fresh
   };
 
@@ -1870,12 +1877,40 @@ export default function App() {
       announcedEarnedRef.current = new Set(current);
       return;
     }
-    const newOnes = [...current].filter(id => !announcedEarnedRef.current.has(id));
+    /* WHAT COUNTS AS NEWS, said in the data rather than in timing.
+
+       The ref-seeding above is an approximation of "don't announce what
+       the user already had", and it only holds if the whole legacy pile
+       lands in one commit. It doesn't always: usePersistedState
+       rehydrates on mount, and in dev the seed applies in an effect of
+       its own, so the migration can run against data that arrives
+       afterwards. Seed on the first pass, take the rest as growth, and
+       the app greets a returning user with a notice about elementals
+       they earned months ago.
+
+       That misfire is not cosmetic. The banner is position:fixed at the
+       top of the screen with an interactive card in it, and the steep
+       screen's minimize sits in exactly that band — so a spurious
+       ribbon covers the control. In the app that means a user tapping
+       minimize and nothing happening; in the suite it meant a click
+       waiting on "receives pointer events" for the whole test budget,
+       which is the one-failure-per-run that three different theories
+       (contention, slow machine, budget) failed to explain. Traced to
+       this.
+
+       `at: 0` is already the sentinel the migration stamps on anything
+       earned before we were counting. Reading it here makes the rule
+       explicit instead of timing-dependent: a thing you already had is
+       never an arrival, whichever commit it lands in. */
+    const newOnes = [...current].filter(id => {
+      if (announcedEarnedRef.current.has(id)) return false;
+      return rolledElementalAt?.[id] !== 0;
+    });
     announcedEarnedRef.current = new Set(current);
     if (newOnes.length > 0 && !elementalsDisabled) {
       setGlimpseElemental({ ids: newOnes });
     }
-  }, [earnedElementalIds, elementalsDisabled, legacyMigrated]);
+  }, [earnedElementalIds, elementalsDisabled, legacyMigrated, rolledElementalAt]);
 
   /* AND IT HAS TO BE ABLE TO TAKE IT BACK.
 
@@ -2515,10 +2550,10 @@ export default function App() {
         paddingBottom: "var(--app-dock-h, 0px)",
       }}>
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
-        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} seededFavoritesNoticeShown={seededFavoritesNoticeShown} dismissSeededFavoritesNotice={() => setSeededFavoritesNoticeShown(true)} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
+        {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} lodestoneCharge={lodestoneCharge} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} elementalsHintShown={elementalsHintShown} dismissElementalsHint={() => setElementalsHintShown(true)} journalHintShown={journalHintShown} dismissJournalHint={() => setJournalHintShown(true)} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
-        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} profileHintShown={profileHintShown} dismissProfileHint={() => setProfileHintShown(true)} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
+        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
+        {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first
           // arrival. Falls back to "any unseen" then "any" so the
@@ -2798,7 +2833,29 @@ export default function App() {
           Log/summon button there picks it up later). Less
           interrupting than the previous modal card; the user can
           keep doing whatever they were doing. */}
-      {glimpseElemental && (
+      {/* NOT OVER THE STEEP. Both ribbons below are position:fixed at
+          the top of the screen, and the steep screen's own header —
+          cancel on the left, minimize on the right — sits in that exact
+          band: measured at y=35, fifteen pixels tall, under a card
+          about seventy. A notice arriving mid-brew doesn't sit beside
+          those controls, it sits on them.
+
+          Which is not hypothetical here, it is caused by the brew.
+          Brewing earns lodestone charge, so a cup that tips the stone
+          full raises the charged banner over the timer you started —
+          and the user taps minimize and nothing happens. It surfaced as
+          a test hanging on "receives pointer events", intermittently,
+          in whichever spec happened to brew when the charge crossed.
+
+          Deferred rather than dropped: both flags persist, so the
+          notice arrives when the steep is over. That is the same
+          argument the charge banner already makes for waiting behind a
+          glimpse — "the charge keeps until it's spent, so it can wait
+          its turn" — applied to the one thing that was still allowed to
+          interrupt. Minimized counts too: the minimized brew has its
+          own banner at the top of the column, and stacking a fixed
+          ribbon over that is the same mistake one layer down. */}
+      {!steepUp() && glimpseElemental && (
         <ElementalGlimpseBanner
           onLogIt={() => {
             // Visitors lives under Notebook (Recipes / Journal /
@@ -2831,7 +2888,7 @@ export default function App() {
           top of the screen is a notification tray, and the arrival is
           the more immediate of the two — the charge keeps until it's
           spent, so it can wait its turn. */}
-      {chargeReady && !glimpseElemental && (
+      {!steepUp() && chargeReady && !glimpseElemental && (
         <ElementalGlimpseBanner
           title="your lodestone is charged"
           body="Enough brewing, reviewing and writing to draw something out"

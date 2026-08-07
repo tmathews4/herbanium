@@ -51,6 +51,47 @@ test.describe("a minimized brew survives the whole app", () => {
     await expect(banner(page), "minimizing should leave a banner").toBeVisible();
   });
 
+  test("a notice never lands on the steep's own controls", async ({ page }) => {
+    /* THE BUG THIS FILE KEPT HITTING WITHOUT NAMING.
+
+       Both top-of-screen notices are position:fixed at top:12px. The
+       steep header's minimize sits at y=35 and is fifteen pixels tall,
+       so a notice card lands on it rather than beside it. And the brew
+       CAUSES one: brewing earns lodestone charge, so a cup that tips
+       the stone full raises the charged banner over the timer it just
+       started. Tap minimize, nothing happens.
+
+       Drives the collision deliberately — fill the stone, then brew —
+       rather than waiting for the seed to drift across the threshold,
+       which is what made it an intermittent hang instead of a bug
+       report. Asserts reachability, not absence: what matters is that
+       the control can be tapped, however the notices are laid out. */
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByRole("button", { name: "full", exact: true }).click();
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="recipes-row"]').first().click();
+    await brewFromDetail(page);
+
+    const minimize = page.getByRole("button", { name: /minimize/i });
+    await expect(minimize).toBeVisible();
+
+    const blocker = await page.evaluate(() => {
+      const el = [...document.querySelectorAll("button")]
+        .find(b => /minimize/i.test(b.textContent || b.getAttribute("aria-label") || ""));
+      if (!el) return "no minimize button";
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(
+        Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
+      if (!top) return "nothing at its centre";
+      return (el.contains(top) || top === el) ? null : (top.textContent || top.tagName).slice(0, 60);
+    });
+    expect(blocker, `minimize was covered by "${blocker}"`).toBeNull();
+
+    // And it actually works, which is the whole point.
+    await minimize.click({ timeout: 15_000 });
+    await expect(page.getByTestId("brew-banner")).toBeVisible();
+  });
+
   test("every tab works with a brew running, and the brew survives", async ({ page }) => {
     // Landmark per destination: something that only exists when that
     // screen has actually rendered, so a silently blank tab fails.

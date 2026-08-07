@@ -421,6 +421,47 @@ test.describe("the recommended word puts you in it", () => {
   });
 });
 
+test.describe("the steep slider reaches past the recommendation", () => {
+  test("a stretched cup is draggable, not just describable", async ({ page }) => {
+    /* The card's timeS is what we RECOMMEND; the profile is measured
+       past it, and those over-pull rows are what the warnings read. The
+       slider used to stop at the recommendation, so the rows describing
+       a stretched cup were unreachable by the person stretching it.
+
+       The rule itself is covered in tests/brew-reach.test.mjs, where it
+       can be checked against all 52 profiles. What that test cannot say
+       is whether a finger can get there — the bound could be computed
+       correctly and never reach the input. So this asserts the one
+       thing only a browser can: the control the user drags actually
+       carries the wider maximum.
+
+       Lavender: recommended to 240s, measured to 360s. The number below
+       is deliberately well under its new bound and well over its old
+       one, so it survives a change to the padding constants and still
+       fails if the reach is dropped. */
+    await boot(page);
+    await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+    const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+    await search.fill("lavender");
+    await page.getByRole("button", { name: /lavender/i }).first().click();
+
+    const row = page.locator('[data-tour="blend-controls"]').first();
+    await expect(row).toBeVisible({ timeout: 30_000 });
+    if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+
+    await page.getByTestId("brew-axis-timeS").click();
+    const timeSlider = page.getByLabel("Steep time");
+    await expect(timeSlider).toBeVisible();
+
+    const max = Number(await timeSlider.getAttribute("max"));
+    expect(max, `the steep slider stopped at ${max}s`).toBeGreaterThan(300);
+
+    // And it is genuinely landable, not just a larger attribute.
+    await timeSlider.fill(String(max));
+    await expect(timeSlider).toHaveValue(String(max));
+  });
+});
+
 test.describe("the folded brew row is a readout and a chevron", () => {
   test("no instruction words, and the reading sits with the arrow", async ({ page }) => {
     /* ADJUST and MINIMIZE used to occupy a slot here. They were added

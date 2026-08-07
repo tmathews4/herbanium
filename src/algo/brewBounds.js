@@ -174,7 +174,7 @@ export function unionAndPadTempRange(ingredients, INGREDIENTS) {
  * curator) don't shape the upper bound. Only leads count. If no roles
  * are declared (legacy data), every ingredient is treated as a lead.
  */
-export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
+export function unionAndPadTimeRange(ingredients, INGREDIENTS, timeReach = null) {
   if (!ingredients?.length) {
     const padded = 600 * (1 + TIME_PAD_RATIO);
     // Round the SPAN, not the value, so the labeled max is landable: an
@@ -195,7 +195,35 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS) {
     const range = INGREDIENTS[id]?.timeS;
     if (!range) continue;
     anyLead = true;
-    if (range[1] < leadHi) leadHi = range[1];
+    /* AS FAR AS THE EVIDENCE GOES, not as far as we'd recommend.
+
+       The card's timeS is what we RECOMMEND; the profile has usually
+       been measured past it, and those over-pull rows are kept
+       precisely so the curve and the warnings know what a stretched cup
+       does. The slider stopped at the recommendation, which put the
+       rows out of reach of the person they describe — chamomile's 420s
+       row says the tannins follow after the apigenin maxes out, and no
+       finger could get there.
+
+       So the reach is the further of the two. Nothing about the
+       recommendation moves: the band, the RECOMMENDED target and the
+       warnings all still read the card range. Only how far you may drag
+       past it changes.
+
+       NO GLOBAL FLOOR, deliberately. Sending every slider to a fixed 8
+       minutes would run 29 of 52 ingredients past their last measured
+       row, where the prediction stops moving AND — because the warning
+       thresholds live in those rows — no warning fires. A slider that
+       travels past the point the app stopped evaluating is worse than a
+       short slider: it reports a stretched cup as a fine one. The way
+       to lengthen those is to write the research and add the row.
+
+       Still the MINIMUM across leads. A blend can only be stretched as
+       far as its most delicate lead tolerates; widening that would drag
+       the control out of proportion the moment a short-steep herb
+       shares a pot with a long one. */
+    const reach = Math.max(range[1], timeReach?.[id] || 0);
+    if (reach < leadHi) leadHi = reach;
   }
   // Defensive fallback: if every ingredient was an accent/catalyst
   // (rare/unlikely), fall back to the union max of those so the

@@ -238,15 +238,14 @@ export const SEED_MODES = {
     omenShown: true,
     elementalsDisabled: false,
     favoritesMigrated: true,
-    hints: {
-      firstCupHintShown: true,
-      composeHintShown:  true,
-      shelfHintShown:    true,
-      journalHintShown:  true,
-      profileHintShown:  true,
-      elementalsHintShown: true,
-      ingredientHintShown: true,
-    },
+    /* ONE HINT LEFT. This block used to carry seven flags. Three
+       (firstCup / compose / shelf) named tutorial cards the guided
+       tours replaced and had not been read for some time; three more
+       (journal / profile / elementals) were still being persisted,
+       seeded and threaded to screens that never rendered anything with
+       them. A seed describing state nothing reads is a quiet lie about
+       what the fixture sets up. */
+    hints: { ingredientHintShown: true },
     // User-composed blends — make Composer + Self-Repeater fire and
     // give the Catalogue a couple of "your composition" entries.
     generatedBlends: [
@@ -414,15 +413,14 @@ export const SEED_MODES = {
     omenShown: true,
     elementalsDisabled: false,
     favoritesMigrated: true,
-    hints: {
-      firstCupHintShown: true,
-      composeHintShown:  true,
-      shelfHintShown:    true,
-      journalHintShown:  true,
-      profileHintShown:  false,
-      elementalsHintShown: false,
-      ingredientHintShown: false,
-    },
+    /* ONE HINT LEFT. This block used to carry seven flags. Three
+       (firstCup / compose / shelf) named tutorial cards the guided
+       tours replaced and had not been read for some time; three more
+       (journal / profile / elementals) were still being persisted,
+       seeded and threaded to screens that never rendered anything with
+       them. A seed describing state nothing reads is a quiet lie about
+       what the fixture sets up. */
+    hints: { ingredientHintShown: false },
   },
 
   new: {
@@ -447,14 +445,13 @@ export const SEED_MODES = {
     generatedBlends: [],
     omenShown: false,
     elementalsDisabled: false,
-    hints: {
-      firstCupHintShown: false,
-      composeHintShown:  false,
-      shelfHintShown:    false,
-      journalHintShown:  false,
-      profileHintShown:  false,
-      elementalsHintShown: false,
-      ingredientHintShown: false,
-    },
+    /* ONE HINT LEFT. This block used to carry seven flags. Three
+       (firstCup / compose / shelf) named tutorial cards the guided
+       tours replaced and had not been read for some time; three more
+       (journal / profile / elementals) were still being persisted,
+       seeded and threaded to screens that never rendered anything with
+       them. A seed describing state nothing reads is a quiet lie about
+       what the fixture sets up. */
+    hints: { ingredientHintShown: false },
   },
 };

@@ -18,7 +18,6 @@ import {
 } from "../hooks/usePersistedState";
 import { isNativeApp } from "../helpers/platform";
 import { FeedbackModal } from "./FeedbackModal";
-import { HintCard } from "../components/HintCard";
 import {
   ff, radius, theme,
 } from "../theme";
@@ -28,7 +27,7 @@ import { useUnit } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, profileHintShown, dismissProfileHint, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
 
   // Name edit mode

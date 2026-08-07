@@ -38,7 +38,24 @@ async function brewAndMinimize(page: Page) {
   await openTab(page, "Journal");
   await page.locator('[data-tour="recipes-row"]').first().click();
   await brewFromDetail(page);
-  await page.getByRole("button", { name: /minimize/i }).click();
+  /* ASSERT BEFORE CLICKING, so a missing control says so.
+
+     This was a bare .click(), and a bare click has no timeout of its
+     own — it waits out the whole test budget and then reports "timeout
+     while running beforeEach hook", which names the hook and not the
+     thing that never turned up. Traced: the click was waiting on
+     getByRole(minimize) matching ZERO elements, meaning the steep
+     screen hadn't opened. Raising the budget from 90s to 180s just made
+     the same wait longer, which is how we learned it wasn't slowness.
+
+     An explicit visibility assertion fails in 10s naming the locator,
+     and the intermittent cause — why the steep occasionally doesn't
+     open after a confirmed brew — is still open. This does not fix it;
+     it makes the next occurrence say what it is. */
+  const minimize = page.getByRole("button", { name: /minimize/i });
+  await expect(minimize,
+    "the steep screen should be up after a confirmed brew").toBeVisible();
+  await minimize.click();
   await expect(page.getByTestId("brew-banner")).toBeVisible();
 }
 

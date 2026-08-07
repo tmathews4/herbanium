@@ -1441,6 +1441,32 @@ function scaleEffects(effects, scale) {
   return effects.map(([tag, v]) => [tag, Math.round(v * scale * 10) / 10]);
 }
 
+/* HOW FAR EACH PROFILE HAS ACTUALLY BEEN MEASURED, in seconds.
+
+   The over-pull rows are deliberately kept — a row past where a cup
+   starts going wrong anchors the top of the interpolated curve and the
+   warning thresholds read from it. Until now nothing let a user REACH
+   them: the brew slider stopped at the card's recommended max, so
+   chamomile's 420s row, the one whose own note reads "apigenin maxes
+   out but tannins follow", sat in the model where no finger could get
+   to it.
+
+   This is the reach, not a recommendation. The recommended band, the
+   RECOMMENDED button and the blend intersection all still read the
+   card's tempC/timeS. All this says is how far the evidence goes, so
+   the slider can stop there instead of sooner.
+
+   Derived rather than declared, because a hand-kept copy of "how long
+   is this profile" would drift the first time a row was added. */
+export const PROFILE_TIME_REACH = Object.fromEntries(
+  Object.entries(EXTRACTION_PROFILES).map(([id, rows]) => {
+    const times = (Array.isArray(rows) ? rows : [])
+      .map(r => r?.timeS)
+      .filter(t => Number.isFinite(t));
+    return [id, times.length ? Math.max(...times) : 0];
+  }),
+);
+
 export function resolveExtractionProfile(ingredientId, tempC, timeS) {
   const profiles = EXTRACTION_PROFILES[ingredientId];
   if (!profiles || profiles.length === 0) return null;

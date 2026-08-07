@@ -44,7 +44,7 @@ let homeArrived = false;
 // matching public-domain poem. The poem replaces the older
 // hand-written one-liner.
 
-export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, seededFavoritesNoticeShown, dismissSeededFavoritesNotice, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods, addJournalEntry, journalEntries = [] }) => {
+export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods, addJournalEntry, journalEntries = [] }) => {
   const [arriving] = React.useState(() => {
     if (homeArrived) return false;
     homeArrived = true;

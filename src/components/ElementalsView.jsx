@@ -138,8 +138,6 @@ export const ElementalsView = ({
   // snapshot until the user unlocks it.
   lockedCrystal,
   setLockedCrystal,
-  elementalsHintShown,
-  dismissElementalsHint,
 }) => {
   const cupCount = (sessions || []).filter(s => s.who === "you").length;
 
@@ -520,7 +518,7 @@ export const ElementalsView = ({
         elementals your lodestone draws in. A lodestone is a stone that
         has learned which way is north; this one learns from you,
         leaning a little with every mood you log and flavour you brew,
-        until its colour and its name are your last thirty days.
+        until its colour and its name reflect your last thirty days.
       </div>
       <div data-testid="lodestone-gloss" style={{
         margin: "0 2px 14px",

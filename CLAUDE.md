@@ -214,24 +214,49 @@ live in `docs/capacitor-config.md`.
 
 ## Architecture decisions — settled, don't re-litigate
 
-- **An ingredient's `tempC` / `timeS` range is what we RECOMMEND, not
-  what you can explore.** The brew sliders are bounded by it, so a
-  profile's over-pull rows — vanilla's 1200s, dragonwell's 95°C — exist
-  in the model and are deliberately out of the slider's reach.
+- **An ingredient's `tempC` / `timeS` range is what we RECOMMEND. How
+  far the slider goes is a different question, answered by the DATA.**
 
-  This came up because re-gridding profiles onto their researched brew
-  points moved several card ranges inside the point where a cup starts
-  going wrong, which raised the question of whether the sliders should
-  reach a deliberately bad cup for its teaching value. They shouldn't:
-  a blend's range is the INTERSECTION of its ingredients', so widening
-  every ingredient to cover over-pull territory drags the control out
-  of usable proportion the moment a short-steep herb shares a pot with
-  a long one. The teaching happens through the warnings and the
-  extraction explorer, not by letting the slider run to ruin.
+  The steep slider now runs to the further of the card's max and the
+  profile's last measured row (`PROFILE_TIME_REACH`), so the over-pull
+  rows are reachable by the person they describe — chamomile's 420s row
+  says "apigenin maxes out but tannins follow", and until this change
+  no finger could get there. Fifteen ingredients gained real stretch;
+  lavender went 5:15 -> 7:50, hojicha 1:18 -> 2:40.
 
-  Keep over-pull rows in the profiles — they still anchor the top of
-  the interpolated curve and the warning thresholds read from them.
-  Don't widen a card range to make one reachable.
+  **Nothing about the recommendation moved.** The band, the RECOMMENDED
+  target and the warnings all still read the card range. Only how far
+  you may drag past it changed.
+
+  **No global floor, and this is the part worth not re-deciding.** "Let
+  every steep reach 8 minutes" is the obvious version and it is wrong:
+  30 of 52 cards cap under 8 minutes and exactly one of those has data
+  out that far. Past the last row the prediction stops moving AND no
+  warning fires, because the thresholds live in the rows that don't
+  exist — so the slider would travel into territory the app has stopped
+  evaluating and report a stretched cup as a fine one. Lengthening
+  those means writing the research and adding the row, not widening the
+  control. `tests/brew-reach.test.mjs` fails on a blanket floor by
+  design.
+
+  The earlier form of this decision said the over-pull rows were
+  deliberately out of reach. That was the right call against the
+  proposal on the table at the time — widening the CARD RANGES to cover
+  over-pull territory — and it still is: a blend's range is the
+  INTERSECTION of its ingredients', so widening every ingredient drags
+  the control out of usable proportion the moment a short-steep herb
+  shares a pot with a long one. That intersection is untouched, and
+  `tests/brew-reach.test.mjs` holds it: a blend is still capped by its
+  most delicate lead.
+
+  What changed is that reach and recommendation stopped being the same
+  number. Widening the slider alone doesn't widen anything a blend
+  intersects, so the objection doesn't reach it.
+
+  Keep over-pull rows in the profiles — they anchor the top of the
+  interpolated curve, the warning thresholds read from them, and now
+  the slider reaches them. Don't widen a card range to make one
+  reachable; add the row instead.
 
 
 - **No backend.** Catalogue and extraction profiles ship bundled. Read-mostly reference data; bundling avoids network dependency, latency and hosting cost.

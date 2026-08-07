@@ -35,7 +35,7 @@ import { resolveBlendAtBrew, computeBrewProfile, recommendedBrewTarget,
 import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor,
          recommendedBand } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
-import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
+import { PROFILE_TIME_REACH, EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
@@ -466,7 +466,7 @@ export const BlendExtractionExplorer = ({
      two they just triggered. */
 
   const tempCRange = useMemo(() => unionAndPadTempRange(ingredients, INGREDIENTS), [ingredients]);
-  const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS), [ingredients]);
+  const timeSRange = useMemo(() => unionAndPadTimeRange(ingredients, INGREDIENTS, PROFILE_TIME_REACH), [ingredients]);
 
   // Master union of every flavor and effect that any constituent
   // ingredient can ever produce — pulls from EXTRACTION_PROFILES first,

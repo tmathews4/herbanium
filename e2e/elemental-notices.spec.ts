@@ -104,6 +104,41 @@ test.describe("notices for what happened while you looked away", () => {
     await expect(page.getByText(/brewing, reviewing and writing/i)).toBeVisible();
   });
 
+  test("elementals you already had are never announced as arrivals", async ({ page }) => {
+    /* THE MISFIRE THAT COST A CONTROL, not just a notice.
+
+       The dev profile earns 26 attribute elementals through the legacy
+       migration, which stamps them `at: 0` — the sentinel for "earned
+       before we were counting". They must never be announced. The
+       watcher used to rely on seeding a ref on its first pass, which
+       only holds if the whole pile lands in one commit; it doesn't
+       always, because usePersistedState rehydrates on mount and the dev
+       seed applies in an effect of its own. When the timing slipped,
+       the app greeted a returning user with a notice about elementals
+       they earned months ago.
+
+       And the notice is position:fixed at the top of the screen with an
+       interactive card in it, which is exactly where the steep screen's
+       minimize sits — so the spurious ribbon COVERED the control. That
+       is the user-facing half: tap minimize, nothing happens.
+
+       Boots and then moves around, because the misfire was
+       timing-dependent and a single assertion at t=0 was what let it
+       through. */
+    await boot(page);
+    await page.waitForTimeout(2500);
+    await expect(banner(page),
+      "a profile that already had them has nothing to announce").toHaveCount(0);
+
+    for (const tab of ["Apothecary", "Journal", "Profile", "Home"]) {
+      await page.getByRole("button", { name: tab, exact: true }).click();
+      await page.waitForTimeout(700);
+      await expect(banner(page),
+        `moving to ${tab} should not surface a notice about old elementals`)
+        .toHaveCount(0);
+    }
+  });
+
   test("a glimpse doesn't outlive the thing it points at", async ({ page }) => {
     /* REPORTED: released every elemental, changed tab, and was told
        something was waiting.

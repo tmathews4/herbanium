@@ -13,6 +13,18 @@ export default defineConfig({
 
   // Each test gets this long before it's marked failed. Generous
   // because cold Vite dev-server compiles on WSL can be slow.
+  /* 30s. It was briefly raised to 60 on the theory that the local
+     one-failure-per-run was a slow machine, and the raise disproved
+     itself: the next failure was the same hook timing out at 180s
+     (60 x test.slow()) instead of 90. A budget a failure scales with
+     is not a budget problem.
+
+     What actually happens is a click waiting on a locator that never
+     matches — see the note on brewAndMinimize in smoke.spec.ts. A bare
+     .click() has no timeout of its own, so it consumes whatever the
+     test has and reports "timeout in beforeEach", which names the hook
+     and not the thing that was missing. The fix is to make that
+     failure legible, not to make the wait longer. */
   timeout: 30_000,
 
   // `expect(...)` polls until the assertion passes or this elapses.
@@ -28,8 +40,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
 
-  // Leave worker count to Playwright locally (≈ half your cores); pin
-  // to a stable number in CI so runs are reproducible across machines.
+  /* WORKERS STAY AT PLAYWRIGHT'S DEFAULT LOCALLY — measured, not
+     assumed. The local suite fails about one test per full run, a
+     different one each time and every one passing alone, which looks
+     exactly like worker contention. Capping the workers is the obvious
+     fix and it does not work: at 3 workers the run failed TWO tests in
+     11.7 minutes where 4 workers failed one in 10.2. Slower and no
+     steadier.
+
+     Contention was the wrong theory anyway — the failures are a click
+     hanging on a locator that never appears, not tests going slowly.
+     Left at the default because nothing measured says otherwise, and
+     the CI pin below stays for reproducibility across machines. */
   workers: process.env.CI ? 2 : undefined,
 
   // "html" writes an interactive report to playwright-report/ —
