@@ -490,6 +490,14 @@ for (const withBrew of [false, true]) {
       await openSubTab(page, "Field Notes");
       const stone = page.locator('[data-tour="fieldnotes-lodestone"]');
       await expect(stone).toBeVisible();
+      /* Before the details are opened, deliberately. The crystal always
+         reported what it was computed FROM and never what it was, and
+         the explanation that existed was behind a toggle — so the check
+         that matters is that a reader who never taps anything is told. */
+      await expect(page.getByTestId("lodestone-lede"),
+        "the lodestone should say what it is without being asked").toBeVisible();
+      await expect(page.getByTestId("lodestone-gloss"),
+        "and give the plain-language version beside it").toBeVisible();
       await page.locator('[data-tour="lodestone-details"]').click();
       await expect(page.locator('[data-tour="lodestone-lock"]'),
         "details should expose the lock control").toBeVisible();

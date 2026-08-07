@@ -1877,6 +1877,34 @@ export default function App() {
     }
   }, [earnedElementalIds, elementalsDisabled, legacyMigrated]);
 
+  /* AND IT HAS TO BE ABLE TO TAKE IT BACK.
+
+     The effect above announces growth and nothing ever retracted the
+     announcement, so the banner outlived the thing it pointed at. The
+     path is ordinary: a charged summon appends a wild elemental, the
+     watcher arms the banner, and the user meets that elemental right
+     there on the lodestone screen — which marks it seen. Pending is now
+     zero and the banner is still armed, so it surfaces on the next tab
+     change saying something is waiting when nothing is. Reported
+     exactly that way: released them all, changed tab, got told to go
+     look.
+
+     Worse than noise, because a non-null glimpse also suppresses the
+     charged-stone banner below (two ribbons stacked at the top is a
+     notification tray). A stale glimpse therefore silences the notice
+     the user would actually have wanted, indefinitely.
+
+     Derived from the same subtraction the elementals view uses —
+     earned minus seen — rather than a second counter kept in step with
+     it. Adjusted during render, which is React's documented answer for
+     "a prop or computed value invalidates existing state": the
+     alternative effect would paint the wrong banner for a frame first. */
+  const unseenEarnedCount = useMemo(() => {
+    const seen = seenElementalIds || new Set();
+    return [...earnedElementalIds].filter(id => !seen.has(id)).length;
+  }, [earnedElementalIds, seenElementalIds]);
+  if (glimpseElemental && unseenEarnedCount === 0) setGlimpseElemental(null);
+
   /* THE LODESTONE FILLING is the other thing that happens while nobody
      is looking. Brewing, reviewing and writing charge it silently, and
      until now nothing said when it was ready — the user had to go and

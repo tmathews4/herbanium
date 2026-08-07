@@ -115,6 +115,7 @@ export const OmenCard = ({ title, onDismiss }) => {
 
         <button
           onClick={beginExit}
+          data-testid="omen-dismiss"
           style={{
             fontFamily: ff.serif, fontSize: 14,
             padding: "8px 22px", borderRadius: 999,

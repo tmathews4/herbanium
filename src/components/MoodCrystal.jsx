@@ -461,6 +461,10 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
       <div
         onClick={summonReady ? (e) => { e.stopPropagation(); if (onSummon) onSummon(); } : undefined}
         role={summonReady ? "button" : undefined}
+        // Stable handle for the arrival flow — the summon is the tap
+        // that turns "waiting" into "met", and there was no way to
+        // reach it in a spec but by geometry.
+        data-testid={summonReady ? "lodestone-summon" : undefined}
         title={summonReady ? "tap the lodestone to observe what's pulsing" : undefined}
         style={{
           flexShrink: 0,

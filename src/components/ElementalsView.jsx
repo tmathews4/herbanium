@@ -460,6 +460,77 @@ export const ElementalsView = ({
       />
       </div>
 
+      {/* WHAT THE THING IS, said once, on the screen it lives on.
+
+          The crystal reports its name, its colour and — behind the
+          details toggle — the family ranks and onboarding intent driving
+          both. All of that explains how the lodestone is CALCULATED and
+          none of it says what it IS, so a reader who never opened the
+          details had a coloured stone that changed for reasons.
+
+          The alternative was renaming Field Notes to Lodestone, which
+          would have named the screen after one thing on it. A paragraph
+          costs three lines and answers the actual question.
+
+          Every clause is a real mechanic, not atmosphere: the thirty
+          days are the window MoodCrystal reads over, the two inputs are
+          exactly the ones it reads (its own header says "moods and
+          flavors"), the colour and name come from that signal, and the
+          lean is the same bias maybeRollWild uses to pick what turns up
+          (see data/wildElementals.js). The last sentence names the
+          elementals outright rather than saying "what gathers here" —
+          the coy version made the reader infer the subject of the one
+          sentence that connects the stone to everything below it. Writing it as prose is a register
+          choice; nothing in it is invented, which is the same rule the
+          ingredient copy is held to.
+
+          THE SCREEN GETS NAMED FIRST, the stone second. The paragraph
+          opened on the lodestone, which explained the object at the top
+          of the page and left the page itself unexplained — a reader
+          arriving at Field Notes learned what the crystal was and still
+          didn't know what they were looking at or why it was called
+          that. Leading with the notes answers the question the screen's
+          own name raises, and the stone becomes the reason there is
+          anything to take notes ON.
+
+          The trade is one clause: "worn down into mineral" went. It was
+          the best phrase in the paragraph and it was decoration, where
+          everything it sat beside was load-bearing.
+
+          NAMING THE TWO INPUTS is the difference between poetry and an
+          explanation. "Every cup you brew and every entry you keep" was
+          true and told you nothing you could act on — it reads as all
+          use counting equally. Moods logged and flavours brewed are the
+          two signals that actually move it, so a reader who wants a
+          different stone knows which dials exist.
+
+          And then the plain gloss, in plain type. The paragraph above
+          is doing a register the app earns elsewhere, but register is
+          not comprehension: someone who has never met a lodestone still
+          needs the one-line answer to "what IS this, mechanically". The
+          familiar comparison does that in a sentence, and putting it in
+          sans rather than italic serif marks it as the aside it is —
+          the app explaining itself, not the app in voice. */}
+      <div data-testid="lodestone-lede" style={{
+        margin: "10px 2px 4px",
+        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+        lineHeight: 1.62, color: theme.ash, textAlign: "center",
+      }}>
+        These are your field notes — what you have observed of the
+        elementals your lodestone draws in. A lodestone is a stone that
+        has learned which way is north; this one learns from you,
+        leaning a little with every mood you log and flavour you brew,
+        until its colour and its name are your last thirty days.
+      </div>
+      <div data-testid="lodestone-gloss" style={{
+        margin: "0 2px 14px",
+        fontFamily: ff.sans, fontSize: 11, lineHeight: 1.5,
+        color: theme.ash, opacity: 0.85, textAlign: "center",
+      }}>
+        Think of it like badges in other apps — elementals are what you
+        collect for using this one.
+      </div>
+
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "flex-end",
         gap: 10, marginBottom: 12,
