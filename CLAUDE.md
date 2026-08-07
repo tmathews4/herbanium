@@ -107,6 +107,29 @@ Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true local
 
 Assert on stable hooks added to our own markup — `data-tour="..."` for tour anchors, `data-testid="..."` for test-only handles. No brittle absolute paths, no text matching where a hook would do. Add the hook at generation time rather than retrofitting it.
 
+## Lint the files you touched
+
+`npm run lint` reports ~200 findings across `src/`, almost all style, so
+a real defect sits invisibly among them. Three undefined references
+reached the running app in one session — `jumpNonce`, `useState`,
+`revealedSorted` — and **every one was already in eslint's output**.
+esbuild does not help: it bundles undefined globals happily, because
+resolving them isn't its job. The app crashed; the build was clean.
+
+So: **`npx eslint <the files you changed>` before calling anything
+done.** It takes seconds on a handful of files and about two minutes
+across `src/`, which is why it isn't in `npm test`.
+
+`npm run lint:crashers` is the enforceable subset — the rules where a
+hit throws or silently drops data (`no-undef`, `no-dupe-keys`,
+`no-dupe-args`, `no-const-assign`, `no-unreachable`...). Their baseline
+is **zero**, so any finding is new and real. It runs in CI beside
+typecheck. It found two duplicate object keys the moment it existed,
+one of them a width silently overwritten by a later declaration.
+
+Style rules are deliberately excluded from that check. Mixing them back
+in is precisely what made the crashes invisible.
+
 ## State that changes together changes through one path
 
 Follow React's own organisational guidance rather than inventing local

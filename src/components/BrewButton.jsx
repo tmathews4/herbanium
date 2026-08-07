@@ -163,7 +163,11 @@ export const BrewCornerButton = ({
             autoFocus
             enterKeyHint="go"
             style={{
-              display: "block", width: "100%", boxSizing: "border-box",
+              // `width` was declared twice in this object — 100% here and
+              // calc(100% - 36px) below, which silently won. The margin
+              // and the calc are the pair that were meant, so the
+              // stray 100% goes.
+              display: "block", boxSizing: "border-box",
               fontFamily: ff.serif, fontSize: 16, color: theme.ink,
               background: "transparent", border: "none",
               borderBottom: `1px solid ${theme.rule}`,

@@ -18,7 +18,8 @@
     "cap:assets": "npx capacitor-assets generate --iconBackgroundColor #f3ecdc --splashBackgroundColor #f3ecdc",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:crashers": "node tools/lint-crashers.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.2",

@@ -16,7 +16,7 @@
    screen only has to wire the persisted props through.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ff, theme } from "../theme";
 import { OmenCard } from "./OmenCard";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
@@ -207,7 +207,32 @@ export const ElementalsView = ({
   const chargeReady = !elementalsDisabled && lodestoneCharge >= 100;
   const summonExhausted = !elementalsDisabled && omenShown
     && pendingArrivals.length === 0 && !chargeReady;
+  /* THE PULSE WAITS ITS TURN.
+
+     A tour step and a pulsing stone are both the app pointing at
+     something, and on this page they landed together: the callout said
+     look here while the lodestone glowed for attention two inches
+     away. Whichever the user followed, the other was still asking.
+
+     So the pulse holds while a tour is running on this page, and for a
+     beat after it ends. The delay is the more important half — the
+     moment a tour finishes is exactly when someone is deciding what to
+     do next, and a glow arriving in that same frame reads as the tour
+     handing off to another instruction rather than letting go.
+
+     `tourStep` is null when nothing is running, which covers finishing,
+     skipping and never starting. Someone who skipped has made the same
+     decision as someone who finished — they want the screen back. */
+  const PULSE_HOLD_MS = 2200;
+  const [pulseAllowed, setPulseAllowed] = useState(false);
+  useEffect(() => {
+    if (tourStep) { setPulseAllowed(false); return; }
+    const t = setTimeout(() => setPulseAllowed(true), PULSE_HOLD_MS);
+    return () => clearTimeout(t);
+  }, [tourStep]);
+
   const summonReady     = !elementalsDisabled
+    && pulseAllowed
     && (!omenShown || pendingArrivals.length > 0 || chargeReady);
   const onSummonClick = () => {
     if (!summonReady || summonTarget) return;
@@ -673,8 +698,23 @@ const AttributeShelf = ({
   // button on the reserve's detail card) AND the featured tile to
   // replace (via tapping it after arming).
   const [incomingId, setIncomingId] = useState(null);
+  /* LOOKED UP IN WHAT THIS COMPONENT ACTUALLY HAS.
+
+     This read `revealedSorted`, which lives in ElementalsView and was
+     never passed down — so the reference resolved to nothing and threw
+     the moment `incomingId` was set. The path is live: tapping "choose
+     a tile to swap with" on a reserve elemental while the featured row
+     is full sets it (see armReverseSwap below), and the next render
+     crashed the view.
+
+     Found by lint, not by a test — `no-undef` had been reporting it,
+     buried among this file's pre-existing warnings.
+
+     The shelf holds `featured` and `reserve`, and the incoming id
+     always comes from a tile in one of them, so those are both the
+     correct and the only available source. */
   const incomingAttr = incomingId
-    ? (revealedSorted.find(a => a.id === incomingId) || null)
+    ? ([...(featured || []), ...(reserve || [])].find(a => a.id === incomingId) || null)
     : null;
 
   const hasEmptySlot = featured.length < featuredLimit;

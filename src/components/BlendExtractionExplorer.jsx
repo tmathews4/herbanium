@@ -39,7 +39,7 @@ import { EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
 import { restHintForCelsius } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
-import { Arrival } from "./Arrival";
+import { Arrival, Collapse } from "./Arrival";
 import { EFFECT_SYNERGIES } from "../algo/perception";
 import { SYNERGY_DESCRIPTIONS, PARADOX_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 
@@ -1087,7 +1087,6 @@ export const BlendExtractionExplorer = ({
 
                        The recipe list has been making this exact case
                        work with nothing but two rules for a while. */
-                    position: "relative",
                     background: "transparent",
                     border: "none", borderRadius: 2,
                     padding: "4px 22px",
@@ -1307,8 +1306,13 @@ export const BlendExtractionExplorer = ({
                 </span>
               </button>
             </div>
-            {shownControlsOpen && (
-              <div style={{ padding: "0 12px 4px" }}>
+            {/* Folds and unfolds visibly. `{open && <panel/>}` removed
+                the subject before it could leave, so a third of the
+                screen appeared and vanished between two frames with
+                nothing connecting the states — the same gap the dock's
+                arrival closed, in both directions this time. */}
+            <Collapse open={shownControlsOpen} duration={280}
+              style={{ padding: "0 12px 4px" }}>
                 <div data-tour="blend-sliders">
                   {/* ONE AXIS AT A TIME, chosen by the pill above it.
                       The two sliders read as a symmetric pair and are
@@ -1495,8 +1499,7 @@ export const BlendExtractionExplorer = ({
                     )}
                   </div>
                 </div>
-              </div>
-            )}
+            </Collapse>
           </div>
           </div>,
           brewDock,

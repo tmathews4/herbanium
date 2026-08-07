@@ -41,7 +41,7 @@
    chrome the user needs; the honest fallback is for it to be there.
    ────────────────────────────────────────────────────────────── */
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 // Slow out of the gate, soft landing. The brew dock's first attempt
 // used cubic-bezier(0.16, 1, 0.3, 1) and still read as a pop: measured,
@@ -49,10 +49,46 @@ import { useLayoutEffect, useRef } from "react";
 // only registers motion it can follow.
 const EASING = "cubic-bezier(0.33, 0, 0.2, 1)";
 
+/* THE MEASUREMENT, shared.
+
+   Both the one-way arrival and the two-way disclosure below need the
+   same three awkward facts, and a second copy of them is exactly the
+   duplication the state audit spent its time removing:
+
+     - the RENDERED height, not scrollHeight, and border-box borrowed
+       for the duration — this app has no global border-box reset, so
+       `height` excludes padding while scrollHeight includes it, and
+       mixing them ends a padded row a padding too tall with a snap on
+       the last frame;
+     - padding collapses too, because in border-box `height: 0` still
+       renders at the padding's height (measured: 16px of ledge
+       appearing in one frame on the pot's rows);
+     - overflow and box-sizing are borrowed, not kept.
+
+   Returns a cleanup that puts the element back exactly as found. */
+const measureAndClip = (el) => {
+  const cs = window.getComputedStyle(el);
+  const state = {
+    height: el.getBoundingClientRect().height,
+    paddingTop: cs.paddingTop,
+    paddingBottom: cs.paddingBottom,
+    priorOverflow: el.style.overflow,
+    priorBoxSizing: el.style.boxSizing,
+  };
+  el.style.overflow = "hidden";
+  el.style.boxSizing = "border-box";
+  return {
+    ...state,
+    restore: () => {
+      el.style.overflow = state.priorOverflow;
+      el.style.boxSizing = state.priorBoxSizing;
+    },
+  };
+};
+
 export const Arrival = ({
   mode = "grow",
   duration = 320,
-  as: Tag = "div",
   children,
   ...rest
 }) => {
@@ -77,50 +113,101 @@ export const Arrival = ({
       return;
     }
 
-    /* THE RENDERED HEIGHT, and border-box while we animate to it.
-
-       This app has no global `* { box-sizing: border-box }` — only
-       #root sets it — so most elements are content-box, where `height`
-       excludes padding. scrollHeight includes it. Animating a padded
-       row to its scrollHeight in content-box therefore ends a padding's
-       worth too tall and snaps back on the last frame. Borrowing
-       border-box for the duration makes the number mean the same thing
-       at both ends. */
-    const height = el.getBoundingClientRect().height;
-    if (!height) return;
-    // Both restored on landing. Leaving overflow hidden behind would
-    // quietly cut off anything that later overhangs the box, and a
-    // borrowed box model is not ours to keep.
-    const priorOverflow = el.style.overflow;
-    const priorBoxSizing = el.style.boxSizing;
-    el.style.overflow = "hidden";
-    el.style.boxSizing = "border-box";
-    /* PADDING COLLAPSES TOO, or the element never reaches zero.
-
-       In border-box, `height: 0` on a padded box still renders at the
-       padding's height — padding lives inside the box and can't be
-       squeezed out of it. A row with 8px top and bottom therefore began
-       its "growth" 16px tall, which is a visible ledge appearing in one
-       frame before anything animates. Measured at 16px on the pot's
-       rows, which is what caught it. */
-    const cs = window.getComputedStyle(el);
-    const padTop = cs.paddingTop;
-    const padBottom = cs.paddingBottom;
+    const m = measureAndClip(el);
+    if (!m.height) { m.restore(); return; }
     const anim = el.animate(
       [
         { height: "0px", paddingTop: "0px", paddingBottom: "0px", opacity: 0 },
-        { height: `${height}px`, paddingTop: padTop, paddingBottom: padBottom, opacity: 1 },
+        { height: `${m.height}px`, paddingTop: m.paddingTop, paddingBottom: m.paddingBottom, opacity: 1 },
       ],
       { duration, easing: EASING },
     );
     // Hand the height back to the layout the moment it lands — holding
     // a pixel height would freeze the element at whatever size it
     // happened to be, and these things fold, unfold and reflow.
-    anim.finished.catch(() => {}).then(() => {
-      el.style.overflow = priorOverflow;
-      el.style.boxSizing = priorBoxSizing;
-    });
+    anim.finished.catch(() => {}).then(m.restore);
   }, [mode, duration]);
 
-  return <Tag ref={ref} {...rest}>{children}</Tag>;
+  return <div ref={ref} {...rest}>{children}</div>;
+};
+
+
+/* ── Collapse — a disclosure that shows itself opening and closing ──
+
+   The brew row already knew how to fold; it just did it between two
+   frames, so a third of the screen appeared and vanished with nothing
+   connecting the two states. Same gap the dock's arrival closed, in
+   both directions this time.
+
+   NOT a variant of Arrival, deliberately, though they share the
+   measuring above. Arrival animates a mount and is done — it runs once
+   and never again, which is why it keeps a `played` ref. A disclosure
+   runs every time the user asks, has to interrupt itself when they
+   change their mind mid-travel, and must keep its children mounted
+   through the closing animation or there is nothing left to animate.
+   Folding those into one component would mean a flag selecting between
+   two behaviours that share four lines.
+
+   CHILDREN STAY MOUNTED while closing, then unmount. That's the whole
+   reason this can't be CSS: `{open && <panel/>}` removes the subject
+   before it can leave. */
+export const Collapse = ({ open, duration = 280, children, ...rest }) => {
+  const ref = useRef(null);
+  const animRef = useRef(null);
+  const first = useRef(true);
+
+  /* ADJUSTED DURING RENDER, not in an effect.
+
+     Opening needs no state at all — `open` says so. The only thing
+     this component has to remember is that it is still CLOSING, so the
+     children survive long enough to animate out; `{open && <panel/>}`
+     removes the subject before it can leave, which is why this can't
+     be CSS.
+
+     Setting that flag from an effect is what React's own
+     `react-hooks/set-state-in-effect` rule objects to, and the rule is
+     right: it means a render, then an effect, then a second render, to
+     express something already knowable from the props. The documented
+     alternative is to adjust state during render when a prop changes —
+     compare against the previous value and correct immediately, which
+     React handles without a wasted pass. */
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [closing, setClosing] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (!open) setClosing(true);
+  }
+
+  useLayoutEffect(() => {
+    // Whatever it was doing, it isn't any more — a user who taps twice
+    // quickly should get the second answer, not a queue of them.
+    animRef.current?.cancel();
+    const el = ref.current;
+    if (!el) return;
+
+    // No animation on the very first paint: an element that starts open
+    // should simply be open, not perform its own arrival.
+    if (first.current) { first.current = false; return; }
+
+    const reduced = typeof window !== "undefined"
+      && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (!el.animate || reduced) { setClosing(false); return; }
+
+    const m = measureAndClip(el);
+    const shut = { height: "0px", paddingTop: "0px", paddingBottom: "0px", opacity: 0 };
+    const full = {
+      height: `${m.height}px`,
+      paddingTop: m.paddingTop, paddingBottom: m.paddingBottom, opacity: 1,
+    };
+    const anim = el.animate(open ? [shut, full] : [full, shut], { duration, easing: EASING });
+    animRef.current = anim;
+    // Both branches restore the borrowed styles. The catch is the
+    // cancel path — a second tap mid-travel — not an error.
+    anim.finished
+      .then(() => { m.restore(); setClosing(false); })
+      .catch(() => { m.restore(); });
+  }, [open, duration]);
+
+  if (!open && !closing) return null;
+  return <div ref={ref} {...rest}>{children}</div>;
 };

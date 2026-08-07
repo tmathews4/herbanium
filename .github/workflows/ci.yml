@@ -26,6 +26,13 @@ jobs:
       - run: npm ci
       - name: Typecheck (E2E harness)
         run: npm run typecheck
+      # The lint rules that mean "this throws", separated from the ~200
+      # style findings that would otherwise bury them. Three undefined
+      # references and two silently-overwritten object keys reached the
+      # app before this existed; every one was already in eslint output.
+      - name: Crash-class lint
+        run: npm run lint:crashers
+
       - name: Unit / data-integrity suite
         run: npm test
 
