@@ -199,12 +199,36 @@ export const Collapse = ({ open, duration = 280, children, ...rest }) => {
       height: `${m.height}px`,
       paddingTop: m.paddingTop, paddingBottom: m.paddingBottom, opacity: 1,
     };
-    const anim = el.animate(open ? [shut, full] : [full, shut], { duration, easing: EASING });
+    /* `fill` IS LOAD-BEARING ON THE WAY OUT, AND ITS DEFAULT IS WRONG HERE.
+
+       A web animation with the default `fill: "none"` stops applying
+       its own values the instant it finishes. The closing run therefore
+       animated the panel down to 0 and then, on the very next frame,
+       handed the element back its natural height — while React had not
+       yet re-rendered to unmount it, because that unmount is a state
+       update a frame or more behind.
+
+       Measured: 83 83 … 27 3 then 91 91. The rebound is TALLER than the
+       resting 83, because the borrowed border-box sizing re-admits the
+       padding the keyframes had collapsed. So the menu didn't just
+       reappear on collapse, it reappeared bigger than it ever sits,
+       which is exactly what a flicker looks like.
+
+       Holding the last frame until the element is actually gone is the
+       whole fix. Opening keeps the default and restores on finish — a
+       forwards fill there would pin the height of an element that has
+       to stay live and reflow with its content. */
+    const anim = el.animate(open ? [shut, full] : [full, shut],
+      { duration, easing: EASING, fill: open ? "none" : "forwards" });
     animRef.current = anim;
-    // Both branches restore the borrowed styles. The catch is the
-    // cancel path — a second tap mid-travel — not an error.
+    /* ORDER MATTERS TOO: this restored the borrowed overflow and
+       box-sizing before setting state to unmount, and restoring drops
+       the clip a render early. Closing hands nothing back — the element
+       is about to be removed. The catch is the cancel path, a second tap
+       mid-travel, where the element survives and its styles must return
+       (cancel also discards the forwards fill, which is what we want). */
     anim.finished
-      .then(() => { m.restore(); setClosing(false); })
+      .then(() => { if (open) m.restore(); else setClosing(false); })
       .catch(() => { m.restore(); });
   }, [open, duration]);
 
