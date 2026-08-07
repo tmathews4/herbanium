@@ -19,12 +19,17 @@ const openTab = (page: Page, name: string) =>
 const openSubTab = (page: Page, name: string) =>
   page.locator('[data-tour="subtabs"]').getByRole("button", { name, exact: true }).click();
 
-/* The heaviest setup in the suite: every test here boots the app AND
-   starts a brew before its first assertion. Under four workers that
-   outruns the config's 30s budget — measured as "Test timeout exceeded
-   while running beforeEach hook", which is a machine under load rather
-   than anything about the app, and the same failure brew-everywhere
-   already documents for the same reason. test.slow() triples it. */
+/* The setup here brews before its first assertion, and carries
+   test.slow() for it — but not for the reason it once claimed. The old
+   note blamed a loaded machine; the truth was a notice card covering
+   the steep's minimize button, which is fixed and has a test of its own
+   below.
+
+   The allowance stays because removing it failed twice in two full
+   runs. helpers/brew.ts waits up to 30s for the explorer to mount,
+   which IS the config budget, so one helper call can consume a whole
+   test. A hook that brews needs more than the default regardless of
+   load. */
 test.describe("a minimized brew survives the whole app", () => {
   test.slow();
   test.beforeEach(async ({ page }) => {

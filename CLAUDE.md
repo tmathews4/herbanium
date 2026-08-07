@@ -231,13 +231,22 @@ live in `docs/capacitor-config.md`.
   **No global floor, and this is the part worth not re-deciding.** "Let
   every steep reach 8 minutes" is the obvious version and it is wrong:
   30 of 52 cards cap under 8 minutes and exactly one of those has data
-  out that far. Past the last row the prediction stops moving AND no
-  warning fires, because the thresholds live in the rows that don't
-  exist — so the slider would travel into territory the app has stopped
-  evaluating and report a stretched cup as a fine one. Lengthening
-  those means writing the research and adding the row, not widening the
-  control. `tests/brew-reach.test.mjs` fails on a blanket floor by
-  design.
+  out that far. Past the last measured row the interpolated curve holds
+  its last value, so the FLAVOUR prediction stops moving: the slider
+  travels and the bars don't. Measured on eight short-capped
+  ingredients — seven returned an identical flavour profile at their
+  last row and at 8 minutes.
+
+  (Warnings are the exception, and an earlier version of this note had
+  it wrong. They keep responding past the data — lavender 2 -> 3, rose
+  4 -> 5, lemon balm 2 -> 3 — because they read dose and time, not only
+  the profile rows. So a stretched cup is not un-evaluated; it is
+  un-described. Bad enough: the whole point of the stretch is watching
+  the cup change.)
+
+  Lengthening those means writing the research and adding the row, not
+  widening the control. `tests/brew-reach.test.mjs` fails on a blanket
+  floor by design.
 
   The earlier form of this decision said the over-pull rows were
   deliberately out of reach. That was the right call against the

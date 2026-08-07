@@ -152,7 +152,58 @@
 | character | A strong cup — often what's made for workers' tea, chai base, or anywhere milk and sugar will mask potential over-extraction. The tannins assert themselves; without milk this can read harsh. |
 | sources | traditional |
 
-### 6d. Time-axis behavior
+### 6d. OVER-PULL (100°C, 480s / 8 min)
+
+| Field | Value |
+|-------|-------|
+| tempC | 100 |
+| timeS | 480 |
+| flavors | [malty, woody, deep, tannic, astringent] |
+| effects | [["energy", 5], ["warming", 5], ["focus", 3], ["bitterness", 3]] |
+| character | Past the point the cup improves. The caffeine finished arriving minutes ago, so this is no stronger in the way people mean it — only harsher. Tannin dominates, the cocoa top-note is buried, and the finish grips. This is the cup milk was invented for. |
+| sources | ref-alam-2015, ref-nakagawa-astringency |
+
+> **Why these numbers, and why an over-pull point exists at all:**
+>
+> The app's steep slider reaches the end of a profile's MEASURED data,
+> not the end of what we recommend — so an ingredient with no row past
+> its recommended max simply can't be stretched. Assam's recommended
+> max was 5 min, which meant the single most common brewing mistake in
+> the world could not be shown in a cup that teaches extraction.
+>
+> The shape of this row is the divergence, and the divergence is the
+> whole lesson. Alam 2015 tracked CTC black tea across ten time points
+> to 20 minutes and found the compounds separate rather than rise
+> together: caffeine has the FASTEST extraction rate constant of any
+> component measured (4.1 x 10-3) and is essentially finished in the
+> first two minutes, while total polyphenols and flavonoids peak at 6-8
+> minutes, and individual catechins and gallic acid keep climbing
+> slowly all the way to 20.
+>
+> So `energy` stays at 5 rather than rising — the caffeine stopped
+> arriving long before this point, and a stronger-tasting cup that is
+> not a stronger cup is exactly the misconception worth correcting.
+> `bitterness` goes to 3 and `astringent` joins the flavours because
+> the compounds still extracting at 8 minutes are the astringent ones:
+> gallate-type catechins are the most astringent class (ECG > EGCG >
+> GCG > CG > EGC > EC), with EGCG detectable at 0.086 mg/mL, and
+> phenolic acids including gallic acid contribute a sour-astringent
+> taste that rises with concentration.
+>
+> `cocoa` is dropped rather than reduced. The malty and cocoa notes are
+> volatile aromatics; they don't survive eight minutes at a rolling
+> boil, and what remains is read through a tannin load that has roughly
+> doubled since the recommended point.
+>
+> **Honest limit:** Alam's kinetics are chemistry, not sensory — that
+> paper records no tasting panel. The step from "gallate catechins and
+> gallic acid are still extracting" to "the cup tastes astringent" is
+> carried by the astringency literature cited separately, not by Alam.
+> The specific intensities (3 rather than 2 or 4) are a judgement about
+> where this sits against the other profiles in the app, not a measured
+> quantity.
+
+### 6e. Time-axis behavior
 
 > Assam is genuinely sensitive to time. Black tea polyphenols
 > continue extracting across the full brewing window, and unlike
@@ -296,6 +347,29 @@
 ---
 
 ## 9. Sources
+
+- `ref-alam-2015` — Alam M et al. 2015. *Extraction Kinetics of
+  phytochemicals and antioxidant activity during black tea (Camellia
+  sinensis L.) brewing*. Nutrition Journal 14:32.
+  https://pmc.ncbi.nlm.nih.gov/articles/PMC4520228/
+  — CTC black tea, boiling water, ten time points to 20 min. Caffeine
+  fastest extraction rate constant (4.1 x 10-3), essentially complete
+  in ~2 min; total polyphenols and flavonoids peak 6-8 min then
+  plateau; individual catechins and gallic acid continue rising to 20
+  min. No sensory panel — chemistry only.
+- `ref-nakagawa-astringency` — Astringency of tea catechins and
+  phenolic acids, collected evidence:
+  Yu Z et al. 2022, *Effects of phenolic acids and
+  quercetin-3-O-rutinoside on the bitterness and astringency of green
+  tea infusion*, npj Science of Food 6:1
+  https://www.nature.com/articles/s41538-022-00124-8 — phenolic acids
+  including gallic acid impart sour/astringent taste rising with
+  concentration; and
+  Exploring the Relative Astringency of Tea Catechins, PMC9457659
+  https://pmc.ncbi.nlm.nih.gov/articles/PMC9457659/ — gallate-type
+  catechins more astringent than non-gallate, ordered
+  ECG > EGCG > GCG > CG > EGC > EC > GC > C; EGCG astringency
+  threshold 0.086 mg/mL, EGC 0.16 mg/mL.
 
 - `ref-greyling-2014` — Greyling A et al. 2014. *The Effect of Black
   Tea on Blood Pressure: A Systematic Review with Meta-Analysis of

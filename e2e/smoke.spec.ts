@@ -63,19 +63,20 @@ for (const withBrew of [false, true]) {
   const suffix = withBrew ? " (brew minimized)" : "";
 
   test.describe(`core functionality${suffix}`, () => {
-    /* The brew-minimized pass boots the app AND starts a brew before
-       every test, then asserts the brew survived in afterEach. That is
-       the heaviest setup in the suite, and under four workers it
-       outruns the config's 30s budget — measured as "Test timeout
-       exceeded while running beforeEach hook", which is a loaded
-       machine rather than anything about the app. Same call, same
-       reason, as brew-everywhere and brew-minimized.
+    /* test.slow(), and NOT for the reason it used to say.
 
-       BOTH passes, not just the brew one. Every test here boots the app
-       in beforeEach; the brew pass is merely the worst of them, and
-       scoping the allowance to it just moved which test timed out
-       under load. Nothing here is slow because the app is slow — the
-       walks take seconds run alone. */
+       The old note blamed a loaded machine, which was wrong — the hook
+       was hanging on a notice card covering the minimize button, and a
+       hang eats whatever budget it is given. That bug is fixed and has
+       its own test.
+
+       Removing test.slow() afterwards was the obvious follow-up and it
+       failed twice in two full runs, so the allowance is doing real
+       work. The structural reason is visible in helpers/brew.ts: its
+       wait for the explorer to mount is itself 30s, exactly the config
+       budget, so a single helper call can exhaust a whole test before
+       the helper's own timeout fires. Any hook that brews needs more
+       than the default, whatever the machine is doing. */
     test.slow();
     test.beforeEach(async ({ page }) => {
       await boot(page);

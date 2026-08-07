@@ -126,6 +126,14 @@ test.describe("notices for what happened while you looked away", () => {
        timing-dependent and a single assertion at t=0 was what let it
        through. */
     await boot(page);
+    /* Wait on the app rather than on the clock. Asserting "no banner"
+       after a fixed sleep races the thing it is testing: too early and
+       the migration hasn't run, so the absence is meaningless. Waiting
+       for a rendered tab first means the app has mounted and settled
+       before the question is asked — this test failed once in two runs
+       on a bare 2.5s sleep. */
+    await expect(page.getByRole("button", { name: "Home", exact: true }))
+      .toBeVisible({ timeout: 30_000 });
     await page.waitForTimeout(2500);
     await expect(banner(page),
       "a profile that already had them has nothing to announce").toHaveCount(0);

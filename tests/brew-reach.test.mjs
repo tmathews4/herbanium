@@ -20,12 +20,17 @@
    (3) is the one worth stating twice. A flat global floor — "every
    steep reaches 8 minutes" — was the obvious implementation and is the
    wrong one: 30 of 52 cards cap under 8 minutes and only one of those
-   has data out that far, so the slider would travel into territory
-   where the prediction stops moving AND no warning fires, because the
-   thresholds live in the rows that don't exist. A slider that runs past
-   the point the app stopped evaluating reports a stretched cup as a
-   fine one. Lengthening those means writing the research and adding the
-   row, not widening the control.
+   has data out that far. Past the last measured row the interpolated
+   curve holds its last value, so the slider would travel while the
+   flavour prediction stood still — measured on eight short-capped
+   ingredients, seven identical at their last row and at 8 minutes.
+
+   Warnings are the exception and an earlier version of this comment
+   claimed the opposite. They keep responding out there (lavender 2->3,
+   rose 4->5, lemon balm 2->3) because they read dose and time rather
+   than only the rows. So the cup is not un-evaluated, it is
+   un-described — which is still the wrong trade, because watching the
+   cup change is the entire reason to stretch it.
    ────────────────────────────────────────────────────────────── */
 
 import { INGREDIENTS } from "../src/data/ingredients.js";

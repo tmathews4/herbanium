@@ -212,11 +212,12 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS, timeReach = null)
 
        NO GLOBAL FLOOR, deliberately. Sending every slider to a fixed 8
        minutes would run 29 of 52 ingredients past their last measured
-       row, where the prediction stops moving AND — because the warning
-       thresholds live in those rows — no warning fires. A slider that
-       travels past the point the app stopped evaluating is worse than a
-       short slider: it reports a stretched cup as a fine one. The way
-       to lengthen those is to write the research and add the row.
+       row, where the interpolated curve holds its last value — the
+       slider travels and the flavour bars stand still. The warnings do
+       keep responding out there, so the cup is not un-evaluated; it is
+       un-described, which is still the wrong trade when watching the
+       cup change is the point. The way to lengthen those is to write
+       the research and add the row.
 
        Still the MINIMUM across leads. A blend can only be stretched as
        far as its most delicate lead tolerates; widening that would drag

@@ -581,9 +581,36 @@ export const EXTRACTION_PROFILES = {
     { tempC: 98,  timeS: 240, flavors: ["malty", "bold", "robust", "brisk", "cocoa", "woody"],
       effects: [["energy", 5], ["focus", 3], ["warming", 4]],
       character: "The classic cup. Bold and robust — full malt, cocoa depth, brisk tannic body that takes milk." },
-    { tempC: 100, timeS: 300, flavors: ["malty", "bold", "robust", "brisk", "cocoa", "woody", "astringent"],
+    // Declared too, so the pair reads as a rise rather than as two
+    // capped values that happen to match.
+    { tempC: 100, timeS: 300,
+      flavorStrengths: [
+        ["malty", 3.5], ["bold", 3.0], ["robust", 3.0], ["brisk", 2.5],
+        ["cocoa", 2.0], ["woody", 2.0], ["astringent", 2.5],
+      ],
       effects: [["energy", 5], ["focus", 3], ["bitterness", 2], ["warming", 5]],
       character: "Strong assam — maximum caffeine, brisk tannic backbone." },
+    // OVER-PULL. Transcribed from docs/research/ingredients/assam.md 6d.
+    // Energy stays at 5 on purpose: caffeine has the fastest extraction
+    // rate of anything measured and is finished in about two minutes,
+    // so this cup is harsher without being stronger — which is the
+    // misconception the row exists to show. What is still arriving at
+    // eight minutes is the astringent fraction (gallate catechins,
+    // gallic acid), so bitterness climbs and cocoa, a volatile
+    // top-note, is gone rather than merely reduced.
+    // EXPLICIT STRENGTHS, because the curve IS the lesson. Index-derived
+    // strengths cap a diagnostic flavour at 3, which would put
+    // astringency at 3 here AND at 3 in the row below — a flat top,
+    // nothing to read, and an over-pull point that teaches nothing.
+    // tests/calibration.test.mjs fails exactly that shape, and caught
+    // this row when it was first written.
+    { tempC: 100, timeS: 480,
+      flavorStrengths: [
+        ["astringent", 4.5], ["tannic", 4.0], ["malty", 2.0],
+        ["robust", 2.0], ["woody", 1.5],
+      ],
+      effects: [["energy", 5], ["focus", 3], ["bitterness", 3], ["warming", 5]],
+      character: "Over-pulled. No stronger than five minutes — the caffeine finished long ago — just harsher. Tannin buries the cocoa and the finish grips. The cup milk was invented for." },
   ],
 
   darjeeling: [
