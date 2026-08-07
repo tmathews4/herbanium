@@ -61,7 +61,11 @@ async function openFieldNotes(page: Page, charge: number, moods: string[] | null
 // the whole crystal is washed (empty); 74 would be fully lifted.
 const washLift = (page: Page) => page.evaluate(() => {
   const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
-  const rect = stone.querySelector("svg g[clip-path] rect") as SVGRectElement | null;
+  // BY NAME, not by shape. This used to take the first clipped rect in
+  // the svg, which stopped meaning "the wash" once the gleam added a
+  // clipped rect of its own — and the test started reporting a full
+  // stone as washed.
+  const rect = stone.querySelector('[data-crystal-layer="charge-wash"] rect') as SVGRectElement | null;
   if (!rect) return null;
   const m = /translateY\((-?[\d.]+)px\)/.exec(rect.style.transform || "");
   return m ? Math.abs(parseFloat(m[1])) : 0;
@@ -156,8 +160,14 @@ test.describe("lodestone colour follows the mood profile", () => {
     await openFieldNotes(page, 50, ["calm"]);
     const layers = await page.evaluate(() => {
       const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
-      const wash = stone.querySelector("svg g[clip-path] rect") as SVGRectElement;
-      const stops = Array.from(stone.querySelectorAll("svg defs stop"))
+      const wash = stone.querySelector('[data-crystal-layer="charge-wash"] rect') as SVGRectElement;
+      // The crystal's OWN gradients — the body and its emit core. The
+      // sweep's gradient is decoration painted in the surface colour on
+      // purpose, so including it would make this assert the opposite of
+      // what it means.
+      const stops = Array.from(
+        stone.querySelectorAll("svg defs linearGradient:not([data-crystal-layer]), svg defs radialGradient:not([data-crystal-layer])"),
+      ).flatMap(g => Array.from(g.querySelectorAll("stop")))
         .map(s => (s.getAttribute("stop-color") || "").toLowerCase());
       return { washFill: wash?.getAttribute("fill") || null, stops };
     });

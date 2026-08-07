@@ -425,17 +425,31 @@ test("the tour shows the row shut, then open, then what's inside it", () => {
     "the row should be introduced folded before the tour opens it and teaches inside");
 });
 
-test("the row is never re-folded after the tour has opened it", () => {
-  // The actual defect behind the reversal above: once the tour opens
-  // the row it must stay open to the end, or the user watches the panel
-  // they're being taught about collapse and reappear. Anything that
-  // shuts it after the first `openControls: true` is that bug returning.
+test("the row folds only at the very end, never mid-lesson", () => {
+  /* The original defect: the tour opened the row, taught inside it,
+     folded it shut to explain the fold, then opened it again. The panel
+     collapsed in the middle of its own lesson and read as the app
+     undoing itself.
+
+     The LAST step folding it is the opposite thing, and deliberate —
+     it demonstrates putting the row away at the moment the user wants
+     that, and hands the screen back the way they'll actually leave it.
+     What must never return is a fold with more steps after it. */
   const firstOpen = blend.findIndex(s => s.openControls === true);
   assert(firstOpen !== -1, "no step opens the brew row");
-  blend.slice(firstOpen).forEach((s, i) => {
+  blend.slice(firstOpen, -1).forEach((s, i) => {
     assert(s.openControls !== false,
-      `step ${firstOpen + i} "${s.target}" folds the row shut again after it was opened`);
+      `step ${firstOpen + i} "${s.target}" folds the row mid-tour, with steps still to come`);
   });
+});
+
+test("the tour puts the row away on its last step", () => {
+  // The other half — without this the rule above is satisfied by never
+  // folding at all, which is where the tour was: it opened the panel
+  // and left the user staring at it.
+  const last = blend[blend.length - 1];
+  assert(last.openControls === false,
+    `the tour ends on "${last.target}" without folding the row back down`);
 });
 
 test("the brew-bar step forces the bar SHUT", () => {
@@ -521,22 +535,18 @@ test("axisMode is only used inside the Blend tour", () => {
 });
 
 test("only the brew-mechanics steps steer the row", () => {
-  // The tour used to end on a sub-tab step, so "release" could be
-  // checked as "the steps after it don't pin". That step is gone — the
-  // tour now ends on Brew — so the claim is stated from the other side:
-  // nothing BEFORE the mechanics touches the row, and the mechanics are
-  // the last thing in the tour, so it's handed back when the tour ends.
-  // The boundary is wherever the mechanics BLOCK starts, not one named
-  // step — the row's own introduction moved to the front of that block
-  // and anchoring to blend-sliders made this fire on the correct order.
+  // Nothing before the mechanics block touches the row, and the block
+  // runs to the end of the tour — so the row is released when the tour
+  // is. The tour used to end on Brew; it now ends one step later, on
+  // the fold that puts the row away, which is still inside the block.
   const firstMechanic = blend.findIndex(s => s.openControls !== undefined);
   assert(firstMechanic !== -1, "no step steers the brew row at all");
   blend.slice(0, firstMechanic).forEach((s, i) => {
     assert(s.openControls === undefined,
       `step ${i} "${s.target}" pins the brew row before the tour teaches it`);
   });
-  assert(blend[blend.length - 1].target === "blend-brew",
-    "the tour should end on the brew step, so the row is released by the tour ending");
+  assert(blend[blend.length - 1].openControls !== undefined,
+    "the mechanics block should run to the end, so the row is handed back when the tour ends");
 });
 
 test("no step outside the Blend tour carries openControls", () => {

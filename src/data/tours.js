@@ -86,7 +86,12 @@ export const SCREEN_TOURS = {
        is now the FIRST thing said about the row, while it is folded,
        which is the only state in which "this folds away" is a
        demonstration rather than a claim. */
+    /* Brew is lit WITH the row. It sits in the row's header and does
+       not fold with it, so a spotlight on `blend-controls` alone cut it
+       out of a highlight it visually belongs to — the window looked
+       cropped at the very step introducing it. */
     { target: "blend-controls", title: "The brew row", pad: 6, openControls: false,
+      spotlight: ["blend-brew"],
       body: "Your brew lives down here. Folded like this it still reads the time and temperature, and Brew stays where it is \u2014 tap the row to open it." },
     // Opened, and now the cup MOVES. keepClear holds the bars on screen
     // while the callout sits off them, because the whole instruction is
@@ -161,6 +166,21 @@ export const SCREEN_TOURS = {
     { target: "blend-brew", title: "Brew it", pad: 6, openControls: true,
       spotlight: ["blend-controls", "blend-sliders"],
       body: "Happy with it? Start the timer — the cup you've dialled in is the one you'll get." },
+    /* PUT IT AWAY AGAIN, and say so.
+
+       The tour opens the row at the slider step and leaves it open for
+       five more, so the last thing anyone saw was a panel taking a
+       third of the screen with no demonstration that it goes back. The
+       fold IS taught, at step 7 — but that step runs before the panel
+       has ever been open, so nobody has yet felt the want of closing
+       it, and a fold explained before you want one is a fact rather
+       than a skill.
+
+       Ending here closes the loop: the row folds on the final step,
+       which demonstrates the tap at the moment it's wanted and hands
+       the screen back the way the user will actually leave it. */
+    { target: "blend-controls", title: "And away", pad: 6, openControls: false,
+      body: "Tap the row to fold it back down — your brew stays set, and the graphs get the screen. It's there whenever you want it." },
   ],
   herbanium: [
     { target: "herb-search", title: "The compendium", pad: 6,

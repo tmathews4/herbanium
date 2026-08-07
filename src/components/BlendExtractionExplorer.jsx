@@ -793,6 +793,54 @@ export const BlendExtractionExplorer = ({
           return { lo, hi, kind, hint: `${label} — tap to brew here` };
         };
 
+        /* THE TOUR'S ANCHOR, back on the coloured span itself.
+
+           This was moved to the whole rail-and-word wrapper to kill an
+           outlined capsule that looked like a leftover widget. That
+           fixed the relic and lost the point: the step is called "the
+           recommended range", and highlighting the entire toggle bar
+           says "this is the slider", which the user can see.
+
+           So the box is back, tracing exactly the coloured stretch —
+           and this time it draws NOTHING of its own. No border, no
+           fill. The spotlight cutout and the pulse are the highlight;
+           the ghost only says where to put them. That was the actual
+           bug the first time round: a 1.5px terra outline on an
+           invisible box, which is a capsule.
+
+           FULL WIDTH, no thumb inset. The old version inset itself by
+           half a thumb while the track's gradient runs edge to edge, so
+           the highlight sat a few pixels off the colour it was meant to
+           be tracing — measured at 1.6px left and 3.4px right. */
+        const RangeGhost = ({ rangeMin, rangeMax, axis }) => {
+          const span = rangeMax - rangeMin;
+          if (span <= 0) return null;
+          const band = bandWithin(axis, rangeMin, rangeMax);
+          if (!band) return null;
+          const pct = (v) => Math.max(0, Math.min(100,
+            ((Math.max(rangeMin, Math.min(rangeMax, v)) - rangeMin) / span) * 100));
+          const lo = pct(band.lo), hi = pct(band.hi);
+          if (hi <= lo) return null;
+          return (
+            <div aria-hidden style={{
+              position: "absolute", left: 0, right: 0, top: 0, height: 20,
+              pointerEvents: "none",
+            }}>
+              <div
+                data-tour="blend-ranges"
+                style={{
+                  position: "absolute", left: `${lo}%`, width: `${hi - lo}%`,
+                  top: "50%", height: 12, transform: "translateY(-50%)",
+                  borderRadius: 3,
+                  animation: tourStep === "blend-ranges"
+                    ? "tourTogglePulse 1.9s ease-in-out infinite"
+                    : undefined,
+                }}
+              />
+            </div>
+          );
+        };
+
         /* ONLY A BAND YOU CAN ACTUALLY GET TO.
 
            A blend's slider range is the INTERSECTION of its leaves'
@@ -998,49 +1046,71 @@ export const BlendExtractionExplorer = ({
                        consolation for an affordance that isn't obvious,
                        and the affordance is obvious now — the label says
                        what it is and tapping it does the thing. */
-                    /* RAISED BETWEEN ITS OWN RULES.
+                    /* THE QUICK-BREW TREATMENT, from the recipe rows.
 
-                       A pill was tried and was the wrong idea — it
-                       turned the word into another chip in a screen
-                       already full of them, and lost the two hairlines
-                       that make this read as part of the rail rather
-                       than an object sitting on it.
+                       That control is the app's existing answer to
+                       exactly this problem: a word that has to read as
+                       pressable without becoming a chip. Two hairlines
+                       flanking it, inset from the ends so the gap at
+                       top and bottom does the lifting, no box, no fill,
+                       bark text at 0.75 opacity that comes up to full
+                       under a cursor.
 
-                       So the rules stay and the face between them
-                       lifts: a soft top-down gradient for the curve of
-                       a raised surface, a light inset edge along the
-                       top and a darker one along the bottom, and a
-                       shadow underneath to sit it above the row. The
-                       hairlines become the sides of something bubbling
-                       up rather than two marks either side of text. */
+                       Copied rather than reinvented — three attempts
+                       here (a pill, a coloured emboss, a bark-filled
+                       button) all missed by inventing a treatment when
+                       the app already had one.
+
+                       NEUTRAL. The rules are `ruleSoft` and the label
+                       is bark, not the band's sage or ochre. A control
+                       that changes colour by meaning reads as a status
+                       light; the rail underneath is already painted in
+                       those colours and is the honest place for it, and
+                       the WORD still names which kind of window it is.
+
+                       The only departure: a whisper of top-down
+                       gradient, which is the "bubbling up" the flat
+                       version was missing. Neutral, so it reads as
+                       light on a surface rather than a colour. */
                     position: "relative",
-                    background: band.kind === "compromise"
-                      ? "linear-gradient(180deg, rgba(189,148,76,0.20) 0%, rgba(189,148,76,0.06) 100%)"
-                      : "linear-gradient(180deg, rgba(98,124,92,0.20) 0%, rgba(98,124,92,0.06) 100%)",
-                    border: "none",
-                    borderRadius: 4,
-                    padding: "2px 14px",
-                    boxShadow: [
-                      "inset 0 1px 0 rgba(255,255,255,0.55)",     // catches the light
-                      "inset 0 -1px 0 rgba(var(--shadow-rgb),0.14)", // and turns away from it
-                      "0 1px 2px rgba(var(--shadow-rgb),0.16)",   // lifted off the row
-                    ].join(", "),
+                    display: "inline-flex", alignItems: "center",
+                    justifyContent: "center",
+                    /* FLAT, like the quick-brew column it copies.
+
+                       Four treatments were tried here — a pill, a
+                       coloured emboss, a bark-filled button, and edge
+                       shading — and each added weight to a control that
+                       sits on a row of hairlines and open space. The
+                       two rules and the gap above and below them are
+                       the whole affordance; anything more made it an
+                       object ON the row rather than part of it.
+
+                       The recipe list has been making this exact case
+                       work with nothing but two rules for a while. */
+                    position: "relative",
+                    background: "transparent",
+                    border: "none", borderRadius: 2,
+                    padding: "4px 22px",
                     cursor: onSnap ? "pointer" : "default",
+                    opacity: 0.75,
+                    transition: "opacity 0.18s ease",
                     fontFamily: ff.sans, fontSize: 8.5,
                     letterSpacing: "0.16em", textTransform: "uppercase",
-                    color: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
-                    transition: "box-shadow 0.15s ease, background 0.15s ease",
+                    color: theme.bark,
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75"; }}
                 >
-                  {/* The rules are the sides of the raised face — full
-                      height now, not inset, so they read as its edges
-                      rather than as decoration flanking a word. */}
+                  {/* Longer than the recipe row's — they run nearly the
+                      full height here so they read as the sides of the
+                      raised face rather than two short ticks. Still
+                      inset a little top and bottom: reaching the ends
+                      would close the column into a box again, which is
+                      the thing the gap is there to prevent. */}
                   {["left", "right"].map(side => (
                     <span key={side} aria-hidden style={{
-                      position: "absolute", [side]: 0, top: 0, bottom: 0,
-                      width: 1,
-                      background: band.kind === "compromise" ? theme.ochre : theme.sageDeep,
-                      opacity: 0.7,
+                      position: "absolute", [side]: 0, top: "10%", bottom: "10%",
+                      width: 1, background: theme.ruleSoft,
                     }} />
                   ))}
                   {word}
@@ -1363,25 +1433,7 @@ export const BlendExtractionExplorer = ({
                             real box, and is what the step is actually
                             about — where the recommendation is and how to
                             go there. */}
-                        {/* THE PULSE IS BACK. It used to live on an
-                            invisible box laid over the coloured span;
-                            that box went when the step was retargeted
-                            to the rail and its word, and the pulse went
-                            with it. The spotlight outline alone was
-                            judged enough at the time and wasn't —
-                            reported as "there's no red pulse highlight
-                            of the recommended section any more".
-
-                            On the anchor rather than a ghost, so it
-                            traces the thing the step actually points
-                            at: the rail plus the word beneath it. */}
-                        <div data-tour="blend-ranges" style={{
-                          position: "relative",
-                          borderRadius: 6,
-                          animation: tourStep === "blend-ranges"
-                            ? "tourTogglePulse 1.9s ease-in-out infinite"
-                            : undefined,
-                        }}>
+                                                <div style={{ position: "relative" }}>
                         <input
                           type="range"
                           className="brew-slider"
@@ -1405,6 +1457,9 @@ export const BlendExtractionExplorer = ({
                           onChange={(e) => setTempC(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("tempC", tempCRange[0], tempCRange[1]) }}
                         />
+                        <RangeGhost
+                          rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
+                        />
                         <RangeBands
                           rangeMin={tempCRange[0]} rangeMax={tempCRange[1]} axis="tempC"
                           step={1}
@@ -1415,26 +1470,7 @@ export const BlendExtractionExplorer = ({
                     ) : (
                       <>
                         {/* Same anchor on the time axis — see above. */}
-                        {/* Same pulse on the time axis — see above.
-                            THE PULSE IS BACK. It used to live on an
-                            invisible box laid over the coloured span;
-                            that box went when the step was retargeted
-                            to the rail and its word, and the pulse went
-                            with it. The spotlight outline alone was
-                            judged enough at the time and wasn't —
-                            reported as "there's no red pulse highlight
-                            of the recommended section any more".
-
-                            On the anchor rather than a ghost, so it
-                            traces the thing the step actually points
-                            at: the rail plus the word beneath it. */}
-                        <div data-tour="blend-ranges" style={{
-                          position: "relative",
-                          borderRadius: 6,
-                          animation: tourStep === "blend-ranges"
-                            ? "tourTogglePulse 1.9s ease-in-out infinite"
-                            : undefined,
-                        }}>
+                                                <div style={{ position: "relative" }}>
                         <input
                           type="range"
                           className="brew-slider"
@@ -1445,6 +1481,9 @@ export const BlendExtractionExplorer = ({
                           value={timeS}
                           onChange={(e) => setTimeS(Number(e.target.value))}
                           style={{ "--brew-ramp": rampFor("timeS", timeSRange[0], timeSRange[1]) }}
+                        />
+                        <RangeGhost
+                          rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"
                         />
                         <RangeBands
                           rangeMin={timeSRange[0]} rangeMax={timeSRange[1]} axis="timeS"

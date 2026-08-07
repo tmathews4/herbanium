@@ -142,7 +142,7 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
       <defs>
         {/* The travelling highlight. Soft-edged and narrow — a catch of
             light crossing a facet, not a stripe. */}
-        <linearGradient id={`${gradId}-sweep`} x1="0" y1="0" x2="1" y2="0.35">
+        <linearGradient data-crystal-layer="sweep" id={`${gradId}-sweep`} x1="0" y1="0" x2="1" y2="0.35">
           <stop offset="0%"   stopColor={theme.cream} stopOpacity="0" />
           <stop offset="45%"  stopColor={theme.cream} stopOpacity="0.30" />
           <stop offset="55%"  stopColor={theme.cream} stopOpacity="0.30" />
@@ -213,7 +213,10 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
           clipped to the silhouette. Transform animates reliably
           everywhere; animated `y`/`height` on SVG does not. */}
       {level < 1 && (
-        <g clipPath={`url(#${clipId})`}>
+        // Named, because "the first clipped rect in the svg" stopped
+        // being a unique description of the wash the moment the sweep
+        // arrived — and two tests were identifying it that way.
+        <g data-crystal-layer="charge-wash" clipPath={`url(#${clipId})`}>
           <rect
             x="0" y={CHARGE_TOP} width="72" height={chargeH}
             fill={theme.cream} fillOpacity="0.5"
@@ -257,7 +260,7 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
           instead of painting over it. Sits below the emit overlay —
           the core glow is the crystal's own light and should read as
           deeper than a reflection crossing its face. */}
-      <g clipPath={`url(#${clipId})`}>
+      <g data-crystal-layer="sweep" clipPath={`url(#${clipId})`}>
         <rect
           className="crystal-sweep"
           x="-30" y="0" width="46" height="84"
