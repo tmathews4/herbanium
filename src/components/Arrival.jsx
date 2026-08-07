@@ -151,10 +151,14 @@ export const Arrival = ({
    CHILDREN STAY MOUNTED while closing, then unmount. That's the whole
    reason this can't be CSS: `{open && <panel/>}` removes the subject
    before it can leave. */
-export const Collapse = ({ open, duration = 280, children, ...rest }) => {
+export const Collapse = ({ open, duration = 280, keepMounted = false, children, ...rest }) => {
   const ref = useRef(null);
   const animRef = useRef(null);
   const first = useRef(true);
+  /* Styles borrowed by the closing animation, waiting to be handed back
+     once the element is out of sight. See the two notes in the effect
+     below for why this can't happen where it's convenient. */
+  const pendingRestore = useRef(null);
 
   /* ADJUSTED DURING RENDER, not in an effect.
 
@@ -228,10 +232,57 @@ export const Collapse = ({ open, duration = 280, children, ...rest }) => {
        mid-travel, where the element survives and its styles must return
        (cancel also discards the forwards fill, which is what we want). */
     anim.finished
-      .then(() => { if (open) m.restore(); else setClosing(false); })
+      .then(() => {
+        if (open) { m.restore(); return; }
+        // Closing hands nothing back YET — see below.
+        pendingRestore.current = m.restore;
+        setClosing(false);
+      })
       .catch(() => { m.restore(); });
   }, [open, duration]);
 
-  if (!open && !closing) return null;
+  /* THE HAND-BACK HAPPENS AFTER THE ELEMENT IS GONE FROM VIEW.
+
+     Restoring at the end of the closing animation is what caused the
+     reported flicker, and hiding rather than unmounting doesn't fix it:
+     either way the restore lands a render before the element actually
+     disappears, and that render paints it back at full height.
+
+     So the closing path only records what it owes, and this effect pays
+     it on the next render — the one where the element is either gone
+     (nothing to pay, ref is null) or hidden (safe to pay, nobody can
+     see it). Without this a keepMounted panel accumulates the borrowed
+     overflow and box-sizing across every open/close cycle, because the
+     next measurement captures the borrowed values as if they were the
+     originals. */
+  useLayoutEffect(() => {
+    if (open || closing) return;
+    const owed = pendingRestore.current;
+    pendingRestore.current = null;
+    if (owed && ref.current) owed();
+  });
+
+  /* keepMounted: closed means HIDDEN, not gone.
+
+     Unmounting is the right default — a closed panel costs nothing and
+     its state is usually derivable again. It is the wrong answer when
+     the panel holds something only the user has: the writing dock's
+     composer keeps a draft in local state, and folding the dock to
+     glance at the timeline threw it away. There is no Cancel there any
+     more precisely because the chevron is meant to be safe.
+
+     display:none rather than height 0 or visibility:hidden — the
+     element must take no space and no tab stops while it's away, and
+     the React state inside it must survive, which is exactly what a
+     hidden-but-mounted subtree gives. */
+  if (!open && !closing) {
+    if (!keepMounted) return null;
+    const { style, ...others } = rest;
+    return (
+      <div ref={ref} aria-hidden {...others} style={{ ...style, display: "none" }}>
+        {children}
+      </div>
+    );
+  }
   return <div ref={ref} {...rest}>{children}</div>;
 };

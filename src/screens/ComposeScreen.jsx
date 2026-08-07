@@ -35,7 +35,9 @@ import { SessionRow } from "./HomeScreen";
 import { JournalComposer } from "../components/JournalComposer";
 import { ElementalsView } from "../components/ElementalsView";
 import { Sprig, Pencil } from "../components/icons";
-import { Arrival } from "../components/Arrival";
+import { Arrival, Collapse } from "../components/Arrival";
+import { createPortal } from "react-dom";
+import { WRITE_DOCK_ID, WRITE_SAVE_SLOT_ID } from "../helpers/dock";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -164,7 +166,20 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
 export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, journalHintShown, dismissJournalHint, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, elementalsHintShown, dismissElementalsHint, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
-  const [journalComposerOpen, setJournalComposerOpen] = useState(false);
+  /* ONE FLAG, because there is one thing. The writing dock's panel
+     being open and the composer being mounted were two booleans that
+     could only ever be set together — every call site flipped both, in
+     the same breath, and the only way they could diverge was a bug.
+     Merged rather than reduced: it's a single value read in a handful
+     of places, so a reducer would be ceremony around a boolean. */
+  const [writeOpen, setWriteOpen] = useState(false);
+  /* Which verse form the Poem group returns to. The group's tab has to
+     select SOMETHING, and sending everyone to Open each time would take
+     a haiku writer out of the form they were in the moment they glanced
+     at Free and came back. Paired with journalMode through one setter
+     below rather than written at each call site — the two always move
+     together, and this file has been bitten by that shape before. */
+  const [lastPoemForm, setLastPoemForm] = useState("poem");
   // Active form-style mode for the journal composer. Lifted out of
   // JournalComposer so the chooser can live in the parent and the
   // four entry-points (free / haiku / limerick / poem) double as
@@ -175,7 +190,21 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
   // form choices (free / haiku / limerick / poem) used to occupy a
   // four-card grid in the page; folding them behind a dropdown keeps
   // the journal timeline as the page's center of gravity.
-  const [writeMenuOpen, setWriteMenuOpen] = useState(false);
+
+  /* The writing control lives in the bottom dock, so it needs the slot
+     node to portal into. Re-read every render with no dependency array,
+     which is the shape BlendExtractionExplorer arrived at the hard way:
+     keyed on a constant it caches the node, and a cached node is the
+     precondition for the bug — if the host re-creates its slot the
+     portal renders into a DETACHED div and the control silently never
+     appears. One getElementById per render, and setState only when it
+     actually differs, so React bails in the normal case. */
+  const [writeDock, setWriteDock] = useState(() => document.getElementById(WRITE_DOCK_ID));
+  useEffect(() => {
+    const el = document.getElementById(WRITE_DOCK_ID);
+    if (el !== writeDock) setWriteDock(el);
+  });
+
   // Close the composer whenever the user navigates away from the
   // journal sub-view — switching apothecary/shelf mode, switching
   // section, or moving to a different journal sub-tab. Without this
@@ -183,8 +212,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
   // surfaced it; the next time the user landed back on the journal
   // tab it could re-render an unintended writing surface.
   React.useEffect(() => {
-    setJournalComposerOpen(false);
-    setWriteMenuOpen(false);
+    setWriteOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, mode]);
   // Section-aware mode clamp. Each section has a fixed set of valid
@@ -411,110 +439,281 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
               })}
             </div>
 
-            {/* Write trigger — folds the four form choices behind a
-                single dropdown so the timeline below stays the page's
-                center of gravity. Closed: "Write something ▾". Open:
-                a small menu of free / haiku / limerick / poem with
-                a one-line hint each. Picking a form collapses the
-                menu and opens the composer locked to that mode. */}
-            {(() => {
-              const choices = [
-                ["free",     "Free",     "open page"],
-                ["haiku",    "Haiku",    "5 / 7 / 5"],
-                ["limerick", "Limerick", "5 lines, A-A-B-B-A"],
-                ["poem",     "Poem",     "any short form"],
-              ];
-              const activeChoice = choices.find(c => c[0] === journalMode) || choices[0];
-              const triggerLabel = journalComposerOpen
-                ? `Writing — ${activeChoice[1].toLowerCase()}`
-                : "Write something";
-              return (
-                <div data-tour="reflections-write" style={{ marginBottom: 12, position: "relative" }}>
-                  <button
-                    onClick={() => setWriteMenuOpen(o => !o)}
-                    aria-haspopup="listbox"
-                    aria-expanded={writeMenuOpen}
-                    style={{
-                      width: "100%",
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      gap: 8, padding: "10px 14px",
-                      background: theme.cream,
-                      border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
-                      cursor: "pointer",
-                      fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.14em",
-                      textTransform: "uppercase", color: theme.inkSoft,
-                      transition: "background 0.18s ease",
-                    }}
-                  >
-                    <span>{triggerLabel}</span>
-                    <span style={{
-                      display: "inline-block",
-                      transform: writeMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.18s ease",
-                      color: theme.ash, fontSize: 12,
-                    }}>▾</span>
-                  </button>
-                  {writeMenuOpen && (
-                    <div
-                      role="listbox"
+            {/* THE WRITING CONTROL DOCKS, like the brew controls do.
+
+                It was a full-width button and a drop-down at the top of
+                the page, which put the least-used thing on the screen
+                above the thing the screen is for. The journal is a
+                timeline; the timeline should open at the top of it.
+
+                Only the CONTROL moves. The composer is a textarea, two
+                mood rows, a flavour picker and a title — chrome it is
+                not, and the dock is explicitly not allowed to scroll,
+                because the guided tour finds the pane it scrolls by
+                looking for a scroll parent and would try to fit the
+                journal inside the writing row. So the dock carries the
+                corner action, the current form and the chooser, and the
+                writing surface stays in the page.
+
+                Same three parts as the brew row, in the same order, so
+                the two docks teach each other: a corner button that
+                does the thing, a readout of what it's set to, and a
+                chevron that opens the settings. */}
+            {writeDock && createPortal(
+              (() => {
+                const choices = [
+                  ["free",     "Free",     "open page"],
+                  ["haiku",    "Haiku",    "5 / 7 / 5"],
+                  ["limerick", "Limerick", "5 lines, A-A-B-B-A"],
+                  ["poem",     "Poem",     "any short form"],
+                ];
+                /* TWO LEVELS, because there are two decisions and they
+                   aren't the same size.
+
+                   Four peers said prose and three verse forms were
+                   alternatives of one kind. They aren't: Free is a
+                   different thing to do, and haiku / limerick / open are
+                   three ways of doing the other one. Flattened, the
+                   commonest choice sat as one quarter of a row of
+                   jargon.
+
+                   The sub-row only exists while the poem group is
+                   active, and lowers into place rather than appearing,
+                   so it reads as belonging to the tab above it. */
+                const POEM_FORMS = [
+                  ["haiku",    "Haiku",    "5 / 7 / 5"],
+                  ["limerick", "Limerick", "5 lines, A-A-B-B-A"],
+                  // OPEN, not "Free". The tab beside Poem is already
+                  // called Free and means something else — prose. Using
+                  // the word twice would make the two Frees look like
+                  // the same choice reached two ways.
+                  ["poem",     "Open",     "any short form"],
+                ];
+                const inPoem = journalMode !== "free";
+                // One setter for both, because they always move together.
+                const chooseForm = (key) => {
+                  setJournalMode(key);
+                  if (key !== "free") setLastPoemForm(key);
+                  setWriteOpen(true);
+                };
+                return (
+                  <div data-tour="reflections-write"
+                       style={{ borderTop: `1px solid ${theme.ruleSoft}`,
+                                borderBottom: `1px solid ${theme.ruleSoft}` }}>
+                    {/* ONE CONTROL, NOT THREE. This row carried a corner
+                        Write button, a readout of the current form, and
+                        a word naming the toggle — the brew row's exact
+                        anatomy, borrowed before it was earned.
+
+                        The brew row needs all three because its three
+                        parts do different things: Brew commits and is
+                        irreversible, the readout is the only place the
+                        temperature is legible while the panel is folded,
+                        and the toggle opens the sliders. None of that
+                        holds here. Writing commits nothing, so a
+                        separate action button was a second way to do the
+                        one thing the row already did. The form is chosen
+                        inside the panel and changed freely while you
+                        write, so reporting it on the folded row was
+                        stating a setting nobody had made yet.
+
+                        So: the whole bar is the button, it says Write,
+                        and the chevron says which way. Nothing else. */}
+                    {/* SAVE OVERLAYS, IT DOESN'T SHARE THE ROW.
+
+                        As a flex sibling it stole width from the toggle,
+                        so "Write" centred itself in whatever was left and
+                        drifted off the bar's true centre the moment Save
+                        appeared — the label moving sideways as a side
+                        effect of starting to write.
+
+                        Absolutely positioned at the left instead: the
+                        toggle spans the full width and centres against
+                        the whole dock, and Save sits over its left end
+                        with a higher stacking order so the tap lands on
+                        Save rather than the fold underneath. Left,
+                        because that is where the brew dock puts its
+                        commit action, and the chevron's end of the row
+                        stays the fold's. */}
+                    <div style={{
+                      position: "relative",
+                      display: "flex", alignItems: "stretch", gap: 0,
+                      borderBottom: writeOpen
+                        ? `2px solid ${theme.terra}`
+                        : "2px solid transparent",
+                      marginBottom: -1,
+                      transition: "border-color 0.2s ease",
+                    }}>
+                    <button
+                      data-testid="write-dock-toggle"
+                      onClick={() => setWriteOpen(o => !o)}
+                      aria-expanded={writeOpen}
+                      aria-label={writeOpen ? "put the writing away" : "write something"}
                       style={{
-                        marginTop: 6,
-                        background: theme.ivory,
-                        border: `1px solid ${theme.ruleSoft}`, borderRadius: 10,
-                        overflow: "hidden",
-                        boxShadow: "0 6px 18px -8px rgba(30,24,18,0.18)",
+                        flex: 1, background: "transparent",
+                        border: "none", cursor: "pointer",
+                        padding: "11px 12px",
+                        // Centred, because it is now the only thing in
+                        // the row and a lone label pinned left would read
+                        // as one end of a pair whose other half is
+                        // missing.
+                        display: "flex", alignItems: "center",
+                        justifyContent: "center", gap: 8,
+                        fontFamily: ff.sans, fontSize: 12.5,
+                        letterSpacing: "0.04em",
+                        fontWeight: writeOpen ? 600 : 500,
+                        color: writeOpen ? theme.terra : theme.bark,
+                        transition: "color 0.2s ease, border-color 0.2s ease",
                       }}
                     >
-                      {choices.map(([key, label, hint], i) => {
-                        const active = journalComposerOpen && journalMode === key;
-                        return (
-                          <button
-                            key={key}
-                            role="option"
-                            aria-selected={active}
-                            onClick={() => {
-                              setJournalMode(key);
-                              setJournalComposerOpen(true);
-                              setWriteMenuOpen(false);
-                            }}
-                            style={{
-                              width: "100%", textAlign: "left",
-                              display: "flex", alignItems: "baseline", justifyContent: "space-between",
-                              gap: 10, padding: "10px 14px",
-                              background: active ? "rgba(176, 84, 47, 0.06)" : "transparent",
-                              border: "none",
-                              borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                              cursor: "pointer",
-                            }}
-                          >
-                            <span style={{
-                              fontFamily: ff.serif, fontSize: 15,
-                              color: active ? theme.terra : theme.ink,
-                            }}>{label}</span>
-                            <span style={{
-                              fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
-                              color: theme.ash,
-                            }}>{hint}</span>
-                          </button>
-                        );
-                      })}
+                      <Pencil size={13} c={writeOpen ? theme.terra : theme.bark} />
+                      <span>Write</span>
+                      {/* Inverted like the brew chevron, and for the same
+                          reason: this panel opens UPWARD out of the dock,
+                          so up means expand. It is the only thing left
+                          saying which way the row goes, which is why it
+                          keeps the label's colour rather than fading to
+                          ash the way a second-rank glyph would. */}
+                      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
+                           style={{
+                             transition: "transform 0.18s ease",
+                             transform: writeOpen ? "rotate(0deg)" : "rotate(180deg)",
+                           }}>
+                        <path d="M1.5 3 L4.5 6 L7.5 3"
+                              stroke={writeOpen ? theme.terra : theme.bark}
+                              strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      </svg>
+                    </button>
+                    {/* WHERE SAVE LANDS. Rendered always, not only while
+                        the panel is open, so the node is in the document
+                        before the composer's first render looks for it —
+                        a slot created in the same commit would be found
+                        one frame late and the button would flicker in.
+                        Empty it costs nothing: no padding, no border, and
+                        a flex child with no content measures zero. */}
+                    <div id={WRITE_SAVE_SLOT_ID} style={{
+                      position: "absolute", left: 0, top: 0, bottom: 0, zIndex: 1,
+                      display: "flex", alignItems: "stretch",
+                    }} />
                     </div>
-                  )}
-                </div>
-              );
-            })()}
+                    {/* THE WHOLE WRITING SURFACE IS IN HERE, not just a
+                        way to reach it. It is much taller than chrome
+                        and it covers the timeline while it's open,
+                        which is the intended trade: you are either
+                        reading the journal or adding to it, and the
+                        minimize that puts it away is the same control
+                        that opened it.
 
-            {journalComposerOpen && (
-              <JournalComposer
-                mode={journalMode}
-                setMode={setJournalMode}
-                onCancel={() => setJournalComposerOpen(false)}
-                onSave={(text, kind, note, currentMoods, landedMoods, flavors, title) => {
-                  if (addJournalEntry) addJournalEntry(text, kind, note, currentMoods, landedMoods, flavors, title);
-                  setJournalComposerOpen(false);
-                }}
-              />
+                        Capped and scrolled internally, because the
+                        composer's own height is not knowable — the mood
+                        rows wrap differently per device and the haiku
+                        form grows as you fill it. Without the cap a
+                        long form would push the dock past the viewport
+                        and take the Save button with it. 68vh leaves
+                        the timeline legible behind the top edge, so the
+                        panel reads as covering the page rather than
+                        being the page. */}
+                    <Collapse open={writeOpen} duration={280} keepMounted>
+                      <div data-testid="write-dock-panel" style={{
+                        maxHeight: "68vh", overflowY: "auto",
+                        // Momentum scrolling inside a dock that sits on
+                        // a fixed shell; without it iOS drags the shell.
+                        WebkitOverflowScrolling: "touch",
+                      }}>
+                        {/* The forms as a strip rather than a
+                            drop-down. A menu made sense when picking a
+                            form was how you got in; now the surface is
+                            already open and the form is a property of
+                            what you're writing, so it reads as a
+                            setting sitting above its own field. */}
+                        <div data-testid="write-dock-forms" style={{
+                          display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
+                          gap: 4, padding: "8px 12px 0",
+                          borderBottom: inPoem ? "none" : `1px solid ${theme.ruleSoft}`,
+                        }}>
+                          {[["free", "Free", false], ["poem", "Poem", true]]
+                            .map(([key, label, isGroup]) => {
+                            const active = isGroup ? inPoem : journalMode === "free";
+                            return (
+                              <button
+                                key={key}
+                                data-testid={isGroup ? "write-form-group-poem" : "write-form-free"}
+                                aria-pressed={active}
+                                onClick={() => chooseForm(isGroup ? lastPoemForm : "free")}
+                                style={{
+                                  background: "transparent", border: "none",
+                                  cursor: "pointer", padding: "6px 4px 8px",
+                                  fontFamily: ff.sans, fontSize: 12.5,
+                                  letterSpacing: "0.01em",
+                                  fontWeight: active ? 600 : 500,
+                                  color: active ? theme.terra : theme.inkSoft,
+                                  borderBottom: active
+                                    ? `2px solid ${theme.terra}`
+                                    : "2px solid transparent",
+                                  marginBottom: -1,
+                                  transition: "color 0.2s ease, border-color 0.2s ease",
+                                }}
+                              >{label}</button>
+                            );
+                          })}
+                        </div>
+                        <Collapse open={inPoem} duration={200}>
+                          <div data-testid="write-dock-poem-forms" style={{
+                            display: "grid",
+                            gridTemplateColumns: `repeat(${POEM_FORMS.length}, 1fr)`,
+                            gap: 4, padding: "6px 12px 0",
+                            borderBottom: `1px solid ${theme.ruleSoft}`,
+                            // Set back from the tabs above so the row
+                            // reads as nested under Poem rather than as a
+                            // second rank of peers.
+                            background: "rgba(176, 84, 47, 0.04)",
+                          }}>
+                            {POEM_FORMS.map(([key, label, hint]) => {
+                              const active = journalMode === key;
+                              return (
+                                <button
+                                  key={key}
+                                  data-testid={`write-form-${key}`}
+                                  aria-pressed={active}
+                                  title={hint}
+                                  onClick={() => chooseForm(key)}
+                                  style={{
+                                    background: "transparent", border: "none",
+                                    cursor: "pointer", padding: "5px 4px 7px",
+                                    fontFamily: ff.sans, fontSize: 11.5,
+                                    fontWeight: active ? 600 : 500,
+                                    color: active ? theme.terra : theme.inkSoft,
+                                    borderBottom: active
+                                      ? `2px solid ${theme.terra}`
+                                      : "2px solid transparent",
+                                    marginBottom: -1,
+                                    transition: "color 0.2s ease, border-color 0.2s ease",
+                                  }}
+                                >{label}</button>
+                              );
+                            })}
+                          </div>
+                        </Collapse>
+                        <div style={{ padding: "10px 12px 12px" }}>
+                          <JournalComposer
+                            actionSlotId={WRITE_SAVE_SLOT_ID}
+                            mode={journalMode}
+                            setMode={setJournalMode}
+                            onSave={(text, kind, note, currentMoods, landedMoods, flavors, title) => {
+                              if (addJournalEntry) addJournalEntry(text, kind, note, currentMoods, landedMoods, flavors, title);
+                              setWriteOpen(false);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </Collapse>
+                  </div>
+                );
+              })(),
+              writeDock,
             )}
+
+
 
             {/* Stats strip — surfaces only once the journal has any
                 weight to it. A blank line with three zeros on day one

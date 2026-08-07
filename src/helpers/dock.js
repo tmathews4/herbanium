@@ -38,6 +38,25 @@ export const BREW_DOCK_ID = "brew-dock";
 export const BLEND_DETAIL_DOCK_ID = "brew-dock-blend-detail";
 export const INGREDIENT_DETAIL_DOCK_ID = "brew-dock-ingredient-detail";
 
+/* The journal's writing control, on the reflections view.
+   Its own slot rather than a share of the brew one: the two can be
+   wanted at the same moment — a recipe opened over the journal leaves
+   Compose mounted, and getElementById would hand both portals the same
+   node and stack them. Same reasoning that split the two detail slots.
+
+   Only the CONTROL docks. The composer itself is a textarea, two mood
+   rows, a flavour picker and a title — far taller than chrome, and the
+   dock is explicitly not allowed to scroll (the tour picks the pane it
+   scrolls by finding a scroll parent). So the dock carries the corner
+   action, the current form and the chooser; the writing surface stays
+   in the page, which is what the page is for. */
+export const WRITE_DOCK_ID = "write-dock";
+/* And where the composer puts its Save. The button belongs to the
+   form — only the form knows whether there is anything worth
+   saving — but it has to sit in the dock header, because the
+   writing surface scrolls and the header does not. */
+export const WRITE_SAVE_SLOT_ID = "write-save-slot";
+
 const BrewDockContext = createContext(BREW_DOCK_ID);
 
 export const BrewDockProvider = BrewDockContext.Provider;

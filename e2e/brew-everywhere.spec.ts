@@ -421,12 +421,18 @@ test.describe("the recommended word puts you in it", () => {
   });
 });
 
-test.describe("a folded brew row says it opens", () => {
-  test("the adjust affordance appears only while folded", async ({ page }) => {
-    // The tour teaches the tap. Anyone who skipped or forgot it had a
-    // temperature readout that happened to be a button — and folded is
-    // exactly when the row was quietest. Not a first-run problem, so
-    // not a first-run fix: the word is there whenever the panel is.
+test.describe("the folded brew row is a readout and a chevron", () => {
+  test("no instruction words, and the reading sits with the arrow", async ({ page }) => {
+    /* ADJUST and MINIMIZE used to occupy a slot here. They were added
+       because a folded row was quiet — a temperature readout that
+       happened to be a button — and they said the same thing the
+       chevron says, permanently, to a reader who learned it on their
+       first cup.
+
+       Removing them is a decision to trust the chevron, so this test
+       enforces the decision rather than mourning it: the words must
+       stay gone, and the two things left must read as one control at
+       one end of the row instead of two ends of an empty gap. */
     await boot(page);
     await page.getByRole("button", { name: "Apothecary", exact: true }).click();
     const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
@@ -435,26 +441,37 @@ test.describe("a folded brew row says it opens", () => {
 
     const row = page.locator('[data-tour="blend-controls"]').first();
     await expect(row).toBeVisible({ timeout: 30_000 });
-    const hint = page.getByTestId("brew-adjust-hint");
-
-    // Open by default. The slot isn't empty here — it names the other
-    // move, MINIMIZE, because a bare chevron was the smallest target in
-    // the dock and the only one whose meaning you had to infer from
-    // which way it pointed.
-    if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
-    await expect(hint, "an open panel doesn't need telling it opens").toHaveCount(0);
-    await expect(page.getByTestId("brew-minimize-hint"),
-      "and the same slot should say how to put it away").toBeVisible();
-
-    await row.click();
+    if ((await row.getAttribute("aria-expanded")) === "true") await row.click();
     await expect(row).toHaveAttribute("aria-expanded", "false");
-    await expect(hint, "a folded row should say what tapping it does").toBeVisible();
-    await expect(page.getByTestId("brew-minimize-hint"),
-      "one slot, one word — they must never both be up").toHaveCount(0);
 
-    // And it still opens, which is the claim the word is making.
+    await expect(page.getByTestId("brew-adjust-hint"),
+      "the folded row should carry no instruction word").toHaveCount(0);
+    await expect(page.getByTestId("brew-minimize-hint"),
+      "and neither should the open one").toHaveCount(0);
+
+    // The reading is still there — that's the half of the row that was
+    // never in question, and the reason a bare chevron is enough.
+    const reading = row.locator("span").filter({ hasText: /·/ }).first();
+    await expect(reading).toBeVisible();
+
+    /* CENTRED ON THE WHOLE BAR, not on what the Brew corner left over.
+       Brew is absolutely positioned so the toggle spans the full width,
+       which is what makes this row and the writing dock the same shape.
+       If Brew ever goes back to being a flex sibling the reading slides
+       right by half its width and this fails — which is the point. */
+    const rowBox = (await row.boundingBox())!;
+    const readBox = (await reading.boundingBox())!;
+    const rowMid = rowBox.x + rowBox.width / 2;
+    const readMid = readBox.x + readBox.width / 2;
+    expect(Math.abs(readMid - rowMid),
+      `the reading centred at ${Math.round(readMid)} against a row centre of ` +
+      `${Math.round(rowMid)} — it should centre on the bar, not beside Brew`)
+      .toBeLessThan(rowBox.width * 0.06);
+
+    // And it still does the one thing it's for.
     await row.click();
     await expect(row).toHaveAttribute("aria-expanded", "true");
-    await expect(hint).toHaveCount(0);
+    await row.click();
+    await expect(row).toHaveAttribute("aria-expanded", "false");
   });
 });

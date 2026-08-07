@@ -1214,7 +1214,24 @@ export const BlendExtractionExplorer = ({
                 glow ~6px below the button) and would have drifted again
                 the moment this shape went square. The pulse lives on the
                 button now, where CSS keeps it honest. */}
+            {/* THE SAME SHAPE AS THE WRITING DOCK, and settled by the
+                same argument in reverse.
+
+                Brew as a flex sibling took width from the toggle, so the
+                reading centred itself in whatever was left. Pinned
+                instead, the toggle spans the whole bar and the reading
+                centres against the dock — which is what the writing dock
+                does with Save and "Write", so the two rows now read as
+                one component the app uses twice.
+
+                Centring also moves the text less than the right edge
+                did, which is not obvious. Beside the chevron, 5:30
+                becoming 10:00 pushes the reading's left edge a full
+                character; centred, the pair shifts half of one. A
+                readout that changes under a dragging finger should
+                travel as little as it can. */}
             <div style={{
+              position: "relative",
               display: "flex", alignItems: "stretch", gap: 0,
               borderBottom: shownControlsOpen
                 ? `2px solid ${theme.terra}`
@@ -1222,7 +1239,16 @@ export const BlendExtractionExplorer = ({
               marginBottom: -1,
               transition: "border-color 0.2s ease",
             }}>
-              {brewAction}
+              {/* A WRAPPER FOR POSITION ONLY. The tour's terra pulse
+                  stays on the button inside — it is a spread box-shadow
+                  and traces its own element's radius, so moving it out
+                  here would be the drift tours.spec.ts exists to catch. */}
+              {brewAction && (
+                <div style={{
+                  position: "absolute", left: 0, top: 0, bottom: 0, zIndex: 1,
+                  display: "flex", alignItems: "stretch",
+                }}>{brewAction}</div>
+              )}
               <button
                 data-tour="blend-controls"
                 onClick={() => setControlsOpen(v => !v)}
@@ -1232,16 +1258,18 @@ export const BlendExtractionExplorer = ({
                   // Carries the row's horizontal breathing room now that
                   // the row itself has none — Brew needs to reach the
                   // edge, this doesn't.
-                  flex: 1, background: "transparent", border: "none",
-                  cursor: "pointer", padding: "10px 12px 10px 10px",
+                  width: "100%", background: "transparent", border: "none",
+                  cursor: "pointer", padding: "10px 12px",
                   // THE READOUT SITS BESIDE BREW, left-aligned, and
                   // `adjust` gets the far end to itself. Bunched at the
                   // right they read as one blob — a temperature, a time
                   // and an instruction competing for the same corner.
                   // Split, each end says one thing: what the cup is set
                   // to, and what this row does.
+                  // Spans the whole bar so the reading centres against
+                  // the dock rather than against what Brew left over.
                   display: "flex", alignItems: "center",
-                  justifyContent: brewAction ? "space-between" : "center", gap: 8,
+                  justifyContent: "center", gap: 8,
                   fontFamily: ff.sans, fontSize: 12, letterSpacing: "0.01em",
                   fontWeight: shownControlsOpen ? 600 : 500,
                   color: shownControlsOpen ? theme.terra : theme.inkSoft,
@@ -1249,6 +1277,22 @@ export const BlendExtractionExplorer = ({
                 }}
               >
                 {!brewAction && <span>Brew</span>}
+                {/* THE WORDS ARE GONE, and the readout moved to meet the
+                    chevron.
+
+                    ADJUST and MINIMIZE were added because a folded row
+                    was quiet — a temperature readout that happened to be
+                    a button — and they did work at the time. They also
+                    said the same thing the chevron says, permanently, to
+                    a reader who learned it on their first cup. A label
+                    that only helps once is a label that nags forever.
+
+                    Trusting the chevron leaves the row with one thing on
+                    each side: what the cup is set to, and the arrow that
+                    opens the means of changing it. The readout sits
+                    beside the arrow now rather than across the row from
+                    it, so the pair reads as one control instead of two
+                    ends of an empty gap. */}
                 <span style={{
                   fontFamily: ff.mono, fontSize: 11.5,
                   color: shownControlsOpen ? theme.terra : theme.ash,
@@ -1259,38 +1303,6 @@ export const BlendExtractionExplorer = ({
                       finer step the moment anyone used it. */}
                   {displayTemp} · {displayTime}
                 </span>
-                {/* SAYS WHAT THE ROW DOES, while it's folded.
-                    Collapsed, this row was the quietest thing in the
-                    dock — ash text, a 9px chevron — which is backwards:
-                    folded is exactly when a reader needs telling that
-                    it opens. The tour teaches the tap, and anyone who
-                    skipped or forgot it had a temperature readout that
-                    happened to be a button.
-
-                    A word rather than a nudge card or a first-run
-                    animation, because this isn't a first-run problem —
-                    it's true every time the panel is folded, so the
-                    answer should be there every time too. Terra so it
-                    reads as an invitation rather than another label. */}
-                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                {/* THE SAME SLOT SAYS BOTH THINGS. Folded it reads
-                    ADJUST; open it reads MINIMIZE. The word was only
-                    ever there while folded, so an open panel had a bare
-                    chevron doing the closing on its own — the smallest
-                    target in the dock, and the one control whose meaning
-                    a reader has to infer from which way it points.
-
-                    One slot, because it's one control: this row's tap
-                    toggles, and the word is just that toggle naming its
-                    next move. Ash rather than terra when open — closing
-                    is the quieter of the two actions and shouldn't
-                    beckon the way "adjust" does. */}
-                <span data-testid={shownControlsOpen ? "brew-minimize-hint" : "brew-adjust-hint"}
-                  style={{
-                    fontFamily: ff.sans, fontSize: 8.5, letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: shownControlsOpen ? theme.ash : theme.terra,
-                  }}>{shownControlsOpen ? "minimize" : "adjust"}</span>
                 {/* Same chevron as the "more filters" toggle on Compose.
                     Rotation is inverted because this panel opens UPWARD
                     out of the dock: up means expand, down means close. */}
@@ -1303,7 +1315,6 @@ export const BlendExtractionExplorer = ({
                         stroke={shownControlsOpen ? theme.terra : theme.inkSoft}
                         strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                 </svg>
-                </span>
               </button>
             </div>
             {/* Folds and unfolds visibly. `{open && <panel/>}` removed

@@ -13,9 +13,11 @@
    landedMoods).
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { theme, ff } from "../theme";
 import { Button } from "./layout";
+import { Pencil } from "./icons";
 import {
   HAIKU_PROMPTS, assembleHaiku, HAIKU_TEMPLATE_COUNT,
 } from "../data/haikuAdlibs";
@@ -111,7 +113,9 @@ const autoTitle = (body) => {
   return (onWordBoundary || sliced).trim() + "…";
 };
 
-export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) => {
+// No onCancel: the dock chevron is the way out, and it is always
+// on screen. See the note where the footer used to be.
+export const JournalComposer = ({ onSave, mode = "free", setMode, actionSlotId = null }) => {
   const [text, setText] = useState("");
   const [slots, setSlots] = useState({ thing: "", sound: "", color: "", feeling: "" });
   const [haikuSeed, setHaikuSeed] = useState(() => Math.floor(Math.random() * HAIKU_TEMPLATE_COUNT));
@@ -139,7 +143,10 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
   // entry and pick the before/after mood arc. Keeps the writing
   // screen itself a clean blank page until they're ready to ship it.
   const [saveOpen, setSaveOpen] = useState(false);
-  const [pendingTitle, setPendingTitle] = useState("");
+  /* ONE TITLE. Lives here, shown at the head of the writing
+   surface and read again by the save step — which used to keep
+   its own copy seeded from an auto-derived guess. */
+  const [title, setTitle] = useState("");
 
   const slotsFilled = Object.values(slots).every(v => v.trim());
   const haikuPreview = slotsFilled ? assembleHaiku(slots, haikuSeed) : null;
@@ -168,7 +175,7 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
     setCurrentMoods([]);
     setLandedMoods([]);
     setSaveOpen(false);
-    setPendingTitle("");
+    setTitle("");
     // Mode is parent-controlled — don't reset it here so saving
     // an entry leaves the user in the same mode they chose if
     // they want to keep going.
@@ -190,22 +197,34 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
   const openSavePopup = () => {
     const body = resolveBody();
     if (!body) return;
-    setPendingTitle(autoTitle(body));
     setSaveOpen(true);
   };
+
+  /* The host's action slot, re-read every render with no dependency
+     array. Same shape as the dock lookups elsewhere: a cached node is
+     the precondition for the bug, because a slot re-created by the host
+     leaves this portal rendering into a DETACHED div and the Save
+     button silently never appears. setState only fires when the node
+     actually differs, so React bails in the normal case. */
+  const [slot, setSlot] = useState(() =>
+    (actionSlotId ? document.getElementById(actionSlotId) : null));
+  useEffect(() => {
+    const el = actionSlotId ? document.getElementById(actionSlotId) : null;
+    if (el !== slot) setSlot(el);
+  });
 
   const commitSave = () => {
     const body = resolveBody();
     if (!body) return;
-    const title = pendingTitle.trim() || autoTitle(body);
+    const entryTitle = title.trim() || autoTitle(body);
     if (mode === "haiku") {
-      onSave(body, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], title);
+      onSave(body, "haiku", haikuNote.trim(), currentMoods, landedMoods, [], entryTitle);
     } else if (mode === "limerick") {
-      onSave(body, "limerick", limNote.trim(), currentMoods, landedMoods, [], title);
+      onSave(body, "limerick", limNote.trim(), currentMoods, landedMoods, [], entryTitle);
     } else if (mode === "poem") {
-      onSave(body, "poem", "", currentMoods, landedMoods, [], title);
+      onSave(body, "poem", "", currentMoods, landedMoods, [], entryTitle);
     } else {
-      onSave(body, "entry", "", currentMoods, landedMoods, [], title);
+      onSave(body, "entry", "", currentMoods, landedMoods, [], entryTitle);
     }
     resetForm();
   };
@@ -238,6 +257,57 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
     </div>
   );
 
+  /* One definition, placed in one of two ways. The slot is the normal
+     case — the writing dock's header, on screen whatever the form is
+     doing. Inline is the fallback for a host that offers no slot, so
+     the composer is never left without a way to commit. */
+  const saveAction = (
+    <Button
+      /* SECONDARY, NOT PRIMARY, and not a styling preference — a filled
+         block read as an object sitting ON the dock, where the corner
+         should read as part of the surface. Primary also cannot be made
+         transparent: its hover handlers repaint the background to the
+         accent on every enter and leave, so a transparent primary
+         flashes solid the first time a pointer crosses it. The Brew
+         corner learned this first; the note is in BrewButton.jsx. */
+      variant="secondary" tone="bark"
+      onClick={openSavePopup}
+      disabled={!ready}
+      data-testid="journal-save"
+      style={slot
+        // In the dock header: a square corner taking the row's full
+        // height, divided from the label by the dock's own hairline —
+        // the Brew corner's shape and the Brew corner's side.
+        ? {
+            fontSize: 12, padding: "0 16px",
+            borderRadius: 0, letterSpacing: "0.04em",
+            alignSelf: "stretch", boxShadow: "none",
+            background: "transparent",
+            /* RED WHEN THERE IS SOMETHING TO SAVE. The dock's other
+               states are bark and ash, so terra here is the one place
+               in the row that means "this will do something now" —
+               which is exactly the question a disabled-until-ready
+               button is answering. Ash while it waits, rather than a
+               dimmed terra: a faded accent reads as the same control
+               greyed out, and this is a control that hasn't switched on
+               yet. */
+            color: ready ? theme.terra : theme.ash,
+            border: "none", borderRight: `1px solid ${theme.ruleSoft}`,
+          }
+        // The fallback keeps secondary's own outline: standing alone at
+        // the foot of a form, a transparent button with no edge reads as
+        // a label.
+        : { fontSize: 14, padding: "10px 22px" }}
+    >Save</Button>
+  );
+  const saveButton = slot
+    ? createPortal(saveAction, slot)
+    : (
+      <div style={{
+        marginTop: 16, display: "flex", justifyContent: "flex-end",
+      }}>{saveAction}</div>
+    );
+
   return (
     <div style={{
       marginBottom: 14, padding: "12px 14px", borderRadius: 10,
@@ -247,27 +317,47 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
           they've moved into the save popup so the writing screen
           stays a clean page until you're ready to commit. */}
 
-      {/* Mode label — the chooser lives in the parent now, but we
-          echo the active mode here as a small eyebrow so the writing
-          surface is unmistakably tagged. Keeps the composer's content
-          oriented when the form switches under the user's hand. */}
-      {(() => {
-        const modeLabels = {
-          free: "writing freely",
-          haiku: "writing a haiku",
-          limerick: "writing a limerick",
-          poem: "writing a poem",
-        };
-        return (
-          <div style={{
-            fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: theme.terra,
-            marginBottom: 10,
-          }}>
-            {modeLabels[mode] || modeLabels.free}
-          </div>
-        );
-      })()}
+      {/* THE TITLE, WHERE THE MODE LABEL WAS.
+
+          That slot used to read WRITING A LIMERICK, which the form
+          strip directly above it already says — in larger type, with
+          the active one underlined. Two labels for one fact, and the
+          quieter one was the redundant one.
+
+          A title is the thing the slot was actually missing. It was
+          only ever asked for in the save step, so you named the entry
+          after writing it, from a field you met once; now it sits at
+          the head of the page you're writing, which is where a title
+          goes. Same state either way — the save step reads this value
+          rather than keeping its own, because two fields writing one
+          title is the divergence this codebase keeps finding.
+
+          Placeholder rather than a pre-filled value: an auto-derived
+          title in the box would have to be cleared before you could
+          type your own, and would silently become the title of anyone
+          who didn't notice it. Shown as a suggestion, committed only
+          if you leave the field alone. */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        marginBottom: 10, paddingBottom: 6,
+        borderBottom: `1px solid ${theme.ruleSoft}`,
+      }}>
+        <Pencil size={13} c={theme.ash} />
+        <input
+          data-testid="journal-title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={autoTitle(resolveBody() || "") || "Untitled"}
+          maxLength={80}
+          aria-label="title for this entry"
+          style={{
+            flex: 1, minWidth: 0, boxSizing: "border-box",
+            fontFamily: ff.serif, fontSize: 17, color: theme.ink,
+            background: "transparent", border: "none",
+            padding: "2px 0", outline: "none",
+          }}
+        />
+      </div>
 
       {mode === "free" && (
         <textarea
@@ -546,18 +636,26 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
         </>
       )}
 
-      <div style={{
-        marginTop: 16, display: "flex", gap: 8, justifyContent: "flex-end",
-        alignItems: "center",
-      }}>
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button
-          variant="primary" tone="ink"
-          onClick={openSavePopup}
-          disabled={!ready}
-          style={{ fontSize: 14, padding: "10px 22px" }}
-        >Save…</Button>
-      </div>
+      {/* NO FOOTER. Save used to sit at the bottom of the writing
+          surface with a Cancel beside it, which was fine while the
+          surface was the page and stopped being fine when it became a
+          dock panel: the haiku form is taller than the panel, so the
+          one control that ends the task scrolled off the bottom of the
+          one thing you were doing.
+
+          Cancel went rather than moving. The panel's own chevron puts
+          the writing away and is on screen at all times, so Cancel was
+          a second control for that, sited where you couldn't reach it —
+          and a button labelled Cancel next to a button labelled Save
+          invites the reading that one of them discards your work, which
+          neither does.
+
+          Save renders into whatever slot the host hands us. Portalled
+          rather than lifted: `ready` is derived from four modes' worth
+          of local field state, and hoisting that to the parent just to
+          site a button would drag the whole form's validity up with
+          it. */}
+      {saveButton}
 
       {saveOpen && (
         <>
@@ -595,32 +693,18 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
               fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.18em",
               textTransform: "uppercase", color: theme.terra,
             }}>
-              Name it & log the arc
+              Log the arc
             </div>
-
-            <div>
-              <div style={{
-                fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
-                textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-              }}>
-                title
-              </div>
-              <input
-                value={pendingTitle}
-                onChange={(e) => setPendingTitle(e.target.value)}
-                placeholder={autoTitle(resolveBody() || "") || "Untitled"}
-                maxLength={80}
-                autoFocus
-                style={{
-                  width: "100%", boxSizing: "border-box",
-                  fontFamily: ff.serif, fontSize: 18, color: theme.ink,
-                  background: "transparent", border: "none",
-                  borderBottom: `1px solid ${theme.ruleSoft}`,
-                  padding: "6px 2px 8px",
-                  outline: "none",
-                }}
-              />
-            </div>
+            {/* NO TITLE FIELD HERE ANY MORE. It moved to the head of the
+                writing surface, where a title belongs and where you can
+                see it while you write. Leaving a second one here would
+                have been two inputs bound to one value — or, worse, two
+                values — for no gain: this step is about the moods now,
+                and it says so. */}
+            <div style={{
+              fontFamily: ff.serif, fontSize: 17, color: theme.ink,
+              paddingBottom: 2,
+            }}>{title.trim() || autoTitle(resolveBody() || "") || "Untitled"}</div>
 
             <MoodChipRow
               label="Coming in"
@@ -637,14 +721,43 @@ export const JournalComposer = ({ onSave, onCancel, mode = "free", setMode }) =>
               setValue={setLandedMoods}
             />
 
-            <div style={{
+            {/* THE ANSWER RIDES ALONG. This card scrolls — it has a
+                title field and two mood rows whose chips wrap to three
+                or four lines on a narrow phone — and both buttons sat
+                at the bottom of that scroll, so the two things you
+                opened the card to do went off the bottom of it exactly
+                when the moods took the most room.
+
+                Sticky rather than fixed: fixed would position against
+                the viewport and leave the bar hanging under the card on
+                a short popup that doesn't scroll at all. Sticky sits in
+                the flow, so it only starts holding position once there
+                is something to scroll past.
+
+                Negative margins pull it out to the card's edges and
+                past its bottom padding, so it spans the full width and
+                sits flush rather than floating in a 20px gutter. The
+                card's overflow clips it to the rounded corners for
+                free.
+
+                Translucent, like the docks: you can see the mood chips
+                move underneath, which is what says the content is still
+                there rather than ended. */}
+            <div data-testid="journal-save-bar" style={{
+              position: "sticky", bottom: -20, zIndex: 1,
+              margin: "0 -20px -20px",
+              padding: "12px 20px",
               display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center",
-              marginTop: 4,
+              background: "rgba(var(--ivory-rgb),0.82)",
+              backdropFilter: "blur(10px) saturate(1.1)",
+              WebkitBackdropFilter: "blur(10px) saturate(1.1)",
+              borderTop: `1px solid ${theme.ruleSoft}`,
             }}>
               <Button variant="ghost" onClick={() => setSaveOpen(false)}>Back</Button>
               <Button
                 variant="primary" tone="ink"
                 onClick={commitSave}
+                data-testid="journal-save-commit"
                 style={{ fontSize: 14, padding: "10px 22px" }}
               >Save entry</Button>
             </div>

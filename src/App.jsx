@@ -9,7 +9,7 @@ import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/ico
 import { Button } from "./components/layout";
 import { DemoHint } from "./components/DemoHint";
 import { GuidedTour } from "./components/GuidedTour";
-import { BREW_DOCK_ID } from "./helpers/dock";
+import { BREW_DOCK_ID, WRITE_DOCK_ID } from "./helpers/dock";
 // Screens — first-paint surfaces are eager so there's no chunk-load
 // flash on cold start. Everything reached by navigation or overlay
 // is React.lazy so it ships in its own chunk and only downloads when
@@ -238,6 +238,38 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
           // band. Settled on a handset rather than a desktop capture;
           // the layers separate differently in motion than they do in a
           // screenshot.
+          background: "rgba(var(--ivory-rgb),0.58)",
+          backdropFilter: "blur(9px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.1)",
+        }}
+      />
+      {/* Slot for the journal's writing control (see WRITE_DOCK_ID),
+          portaled in from ComposeScreen on the reflections view.
+
+          Same deal as the brew slot above it and for the same reason:
+          the control belongs to the chrome, the state it drives lives
+          deep in Compose. No padding or border of its own so it
+          measures 0px on every screen that doesn't fill it — the bar's
+          height is published as --app-dock-h and every detail screen
+          insets against it, so a slot that cost a few pixels while
+          empty would push every overlay up on every screen in the app.
+
+          THE SAME GLASS AS THE BREW SLOT, and settled by looking at
+          it. The first pass reasoned its way to opaque — the brew row
+          adjusts the cup behind it, so showing the cup through it is
+          honest, whereas this row only opens a writing surface. Sound
+          enough on paper, and wrong on a screen: side by side with the
+          brew dock it read as a heavier bar, and the two docks sit in
+          the same place doing the same kind of job. A rule that makes
+          the app look inconsistent is a rule that was serving itself.
+
+          Both slots therefore take the identical treatment, which also
+          means neither drifts when the other is tuned. See the brew
+          slot above for why the blur radius rather than the alpha is
+          the knob worth turning. */}
+      <div
+        id={WRITE_DOCK_ID}
+        style={overlayOpen ? { display: "none" } : {
           background: "rgba(var(--ivory-rgb),0.58)",
           backdropFilter: "blur(9px) saturate(1.1)",
           WebkitBackdropFilter: "blur(9px) saturate(1.1)",

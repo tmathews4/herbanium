@@ -473,15 +473,16 @@ for (const withBrew of [false, true]) {
     test("Reflections — the composer takes an entry", async ({ page }) => {
       await openTab(page, "Journal");
       await openSubTab(page, "Reflections");
-      // The composer opens with a kind picker (free-form / haiku /
-      // limerick / poem) rather than a bare textarea, so the core
-      // interaction to smoke is that the picker opens.
-      const composer = page.locator('[data-tour="reflections-write"]');
-      await expect(composer).toBeVisible();
-      const picker = composer.getByRole("button").first();
-      await expect(picker).toHaveAttribute("aria-expanded", "false");
-      await picker.click();
-      await expect(picker, "the entry-kind picker should open").toHaveAttribute("aria-expanded", "true");
+      // The writing control is a dock row now, not a drop-down at the
+      // top of the page, so the core interaction to smoke is that the
+      // dock opens onto a writing surface.
+      const write = page.getByTestId("write-dock-toggle");
+      await expect(write).toBeVisible();
+      await expect(write).toHaveAttribute("aria-expanded", "false");
+      await write.click();
+      await expect(write, "the writing dock should open").toHaveAttribute("aria-expanded", "true");
+      await expect(page.getByTestId("write-dock-panel"),
+        "and the writing surface should be in it").toBeVisible();
     });
 
     test("Field Notes — the lodestone is there and expands", async ({ page }) => {
