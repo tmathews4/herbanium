@@ -195,22 +195,43 @@ test.describe("notices for what happened while you looked away", () => {
 
     const empty = page.getByText(/no specimen waiting/i);
     const stone = page.getByTestId("lodestone-summon");
-    for (let i = 0; i < 6 && !(await empty.isVisible()); i++) {
-      /* Wait for the stone to become tappable rather than sleeping at
-         it. The pulse — and with it the summon — is deliberately held
-         for a beat after any tour on the page ends, so a glow doesn't
-         arrive in the same frame the callout leaves. A fixed wait here
-         would encode that delay in two places.
+    for (let i = 0; i < 12; i++) {
+      if (await empty.isVisible()) break;
+      /* NOTHING IS ASSERTED INSIDE THIS LOOP, deliberately.
+
+         An earlier version waited for the stone to be attached on every
+         pass and failed in CI on two device profiles, all retries, at
+         that wait — while passing everywhere locally. The window is
+         real: dismissing a card fades it for 320ms BEFORE onDismiss
+         fires, so between the click and the commit there is a moment
+         with the arrival gone from view, the pending count not yet
+         decremented, and the stone briefly unrendered. A slower runner
+         lands in that moment more often.
+
+         So a missing stone is treated as "not yet", not as a failure.
+         The only thing that decides this test is the assertion after
+         the loop, which is the behaviour under test; everything in here
+         is just getting to that state.
 
          force, because the crystal pulses for as long as something is
          waiting — that glow IS the affordance — and Playwright waits
          for a bounding box that stops moving, which this one never
-         does. Safe: the effect is asserted after the loop. */
-      await expect(stone).toBeAttached({ timeout: 15_000 });
-      await stone.click({ force: true, timeout: 15_000 });
+         does. */
+      /* Put away whatever is open before reaching for the stone. The
+         stone's summon is suppressed while a card is up
+         (`summonReady && !summonTarget`), so "card open" and "stone
+         missing" are the same state — clearing the card is what brings
+         the stone back, and treating them as one step is why this can't
+         deadlock on a card that outlived its click. */
       const card = page.getByTestId("omen-dismiss").or(page.getByTestId("arrival-dismiss"));
-      await card.first().click({ timeout: 15_000 });
-      await page.waitForTimeout(250);
+      if (await card.count() > 0) {
+        await card.first().click({ timeout: 15_000 });
+        await page.waitForTimeout(500);
+        continue;
+      }
+      if (await stone.count() === 0) { await page.waitForTimeout(500); continue; }
+      await stone.click({ force: true, timeout: 15_000 });
+      await page.waitForTimeout(400);
     }
 
     await expect(empty, "nothing should be left pending").toBeVisible({ timeout: 15_000 });
