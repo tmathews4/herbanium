@@ -1366,7 +1366,29 @@ export default function App() {
   // jumps). Stack stores at most the last few tabs to avoid
   // unbounded growth.
   const [tabHistory, setTabHistory] = useState([]);
+  /* NAVIGATING TO A TAB LEAVES WHATEVER IS ON TOP.
+
+     Detail screens are absolute overlays above the tab content, so a
+     tab switch that doesn't dismiss them changes the page underneath
+     and shows the user the same overlay. Reported from the elemental
+     banner: tapping it navigated to the lodestone and left the user
+     looking at the check-in screen, which sits over everything.
+
+     The tab bar already knew this and did it itself, which is exactly
+     the shape this codebase keeps getting caught by — a rule living at
+     one caller instead of in the operation. Both banners called
+     navigateTab directly and got the bug.
+
+     The minimized steep is the deliberate exception: its whole purpose
+     is to follow you around while you do something else. */
+  const clearOverlaysForNav = () => {
+    if (overlay === "steep" && steepMinimized) return;
+    setOverlay(null);
+    clearOverlayHistory();
+  };
+
   const navigateTab = (next) => {
+    clearOverlaysForNav();
     if (next === tab) return;
     // Home is the root of the navigation tree. Arriving at it clears
     // any prior tab history so the back button never offers a path
@@ -2480,14 +2502,10 @@ export default function App() {
         tab={tab}
         setTab={(k) => {
           // Preserve a minimized steep across tab changes so the
-          // BrewTimerBanner stays visible while the user navigates.
-          // Clearing the overlay here is what dropped the banner.
-          // Other overlays (ingredient/blend/cup detail) still get
-          // cleared since those aren't meant to follow you around.
-          if (!(overlay === "steep" && steepMinimized)) {
-            setOverlay(null);
-            clearOverlayHistory();
-          }
+          // The overlay clearing that used to live here moved into
+          // navigateTab — see clearOverlaysForNav. A minimized brew
+          // still follows you around; everything else gets out of the
+          // way of the tab you asked for.
           navigateTab(k);
         }}
         apothecaryMode={apothecaryMode}

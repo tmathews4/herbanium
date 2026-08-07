@@ -441,6 +441,84 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
+  test("the ranges step pulses the coloured stretch, not the whole rail", async ({ page }) => {
+    /* TWO REGRESSIONS IN ONE STEP, both shipped and both reported.
+
+       First the pulse vanished: retargeting the step deleted the
+       element that carried it, and the spotlight outline was judged
+       enough on its own. It wasn't — "there's no red pulse highlight of
+       the recommended section any more".
+
+       Then, restoring it on the new anchor, the highlight covered the
+       entire toggle bar — which says "this is the slider", something
+       the user can already see. The step is called "the recommended
+       range" and has to point at the range.
+
+       So: the pulsing element must be narrower than the track it sits
+       on. That's the difference between marking a span and marking the
+       whole control, and it's the assertion neither regression would
+       have survived. */
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "The recommended range");
+
+    const geom = await page.evaluate(() => {
+      const el = document.querySelector('[data-tour="blend-ranges"]');
+      if (!el) return null;
+      const track = document.querySelector(".brew-slider");
+      return {
+        pulse: getComputedStyle(el).animationName,
+        markW: Math.round(el.getBoundingClientRect().width),
+        trackW: track ? Math.round(track.getBoundingClientRect().width) : 0,
+      };
+    });
+
+    expect(geom, "the ranges step should have something to point at").not.toBeNull();
+    expect(geom!.pulse, "the recommended range should pulse").toBe("tourTogglePulse");
+    expect(geom!.markW, "and mark the coloured stretch, not the whole rail")
+      .toBeLessThan(geom!.trackW * 0.9);
+    expect(geom!.markW, "while still being a real span").toBeGreaterThan(4);
+  });
+
+  test("the folded-row step lights Brew along with the row", async ({ page }) => {
+    // Brew sits in the row's header and doesn't fold with it, so a
+    // spotlight on `blend-controls` alone cropped it out of a highlight
+    // it visually belongs to — at the very step introducing the window.
+    await armTour(page, "blend");
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "The brew row");
+
+    /* The cutout itself, waited for AND settled. Two drafts of this got
+       it wrong in different ways: the first fell back to the row when
+       the spotlight hadn't rendered, and the second measured while it
+       was still travelling — the cutout eases between targets over
+       0.25s, so a reading taken on arrival describes the PREVIOUS
+       step's element. Poll until it stops moving. */
+    const hole = page.locator('[data-testid="tour-spotlight"]');
+    await hole.waitFor({ timeout: 15_000 });
+    let last = -1;
+    for (let i = 0; i < 30; i++) {
+      const x = Math.round((await hole.boundingBox())!.x);
+      if (x === last) break;
+      last = x;
+      await page.waitForTimeout(100);
+    }
+    const covered = await page.evaluate(() => {
+      const hole = document.querySelector('[data-testid="tour-spotlight"]');
+      const brew = document.querySelector('[data-tour="blend-brew"]');
+      if (!hole || !brew) return null;
+      const h = hole.getBoundingClientRect(), b = brew.getBoundingClientRect();
+      // The lit region has to reach across Brew, not stop before it.
+      return { litLeft: Math.round(h.left), brewLeft: Math.round(b.left),
+               litRight: Math.round(h.right), brewRight: Math.round(b.right) };
+    });
+    expect(covered, "both the row and Brew should be on screen").not.toBeNull();
+    expect(covered!.litLeft, "the highlight should start at or before Brew")
+      .toBeLessThanOrEqual(covered!.brewLeft + 1);
+    expect(covered!.litRight, "and reach past its far edge")
+      .toBeGreaterThanOrEqual(covered!.brewRight - 1);
+  });
+
   test("the pills step lights the brew window and pulses the pills", async ({ page }) => {
     // Mirrors the Simple/Detailed step: the spotlight covers the thing
     // the control CHANGES, and the control takes a terra pulse of its

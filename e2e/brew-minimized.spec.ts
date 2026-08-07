@@ -19,7 +19,14 @@ const openTab = (page: Page, name: string) =>
 const openSubTab = (page: Page, name: string) =>
   page.locator('[data-tour="subtabs"]').getByRole("button", { name, exact: true }).click();
 
+/* The heaviest setup in the suite: every test here boots the app AND
+   starts a brew before its first assertion. Under four workers that
+   outruns the config's 30s budget — measured as "Test timeout exceeded
+   while running beforeEach hook", which is a machine under load rather
+   than anything about the app, and the same failure brew-everywhere
+   already documents for the same reason. test.slow() triples it. */
 test.describe("a minimized brew survives the whole app", () => {
+  test.slow();
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript((schema) => {

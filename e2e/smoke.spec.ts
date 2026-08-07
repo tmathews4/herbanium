@@ -46,6 +46,20 @@ for (const withBrew of [false, true]) {
   const suffix = withBrew ? " (brew minimized)" : "";
 
   test.describe(`core functionality${suffix}`, () => {
+    /* The brew-minimized pass boots the app AND starts a brew before
+       every test, then asserts the brew survived in afterEach. That is
+       the heaviest setup in the suite, and under four workers it
+       outruns the config's 30s budget — measured as "Test timeout
+       exceeded while running beforeEach hook", which is a loaded
+       machine rather than anything about the app. Same call, same
+       reason, as brew-everywhere and brew-minimized.
+
+       BOTH passes, not just the brew one. Every test here boots the app
+       in beforeEach; the brew pass is merely the worst of them, and
+       scoping the allowance to it just moved which test timed out
+       under load. Nothing here is slow because the app is slow — the
+       walks take seconds run alone. */
+    test.slow();
     test.beforeEach(async ({ page }) => {
       await boot(page);
       if (withBrew) await brewAndMinimize(page);

@@ -34,6 +34,29 @@ async function boot(page: Page, seed: (w: Window) => void = () => {}) {
 const banner = (page: Page) => page.getByText(/your lodestone is (pulsing|charged)/i).first();
 
 test.describe("notices for what happened while you looked away", () => {
+  test("an elemental arriving announces itself, whatever path brought it", async ({ page }) => {
+    /* THE GAP THIS CLOSES. The banner used to be armed by snapshotting
+       the earned set in the steep flow's onDone, so it only fired for
+       elementals that arrived during a brew. The lodestone moved the
+       moment of arrival to a deliberate tap on another screen, that
+       path never armed the snapshot, and the banner silently stopped
+       firing for what had become the main route.
+
+       The watcher now watches the SET, so anything that grows it
+       announces itself. This drives it through the dev forcer, which
+       adds an id the same way a real roll does — if the watcher is ever
+       rewired back to a single caller, this fails. */
+    await boot(page);
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await expect(banner(page), "nothing has arrived yet").toHaveCount(0);
+
+    await page.getByRole("button", { name: /Force glimpse banner/i }).click();
+
+    await expect(banner(page), "an elemental that just arrived should say so")
+      .toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/something stirs in the stone/i)).toBeVisible();
+  });
+
   test("an already-full lodestone doesn't greet you on every load", async ({ page }) => {
     /* The seeding behaviour, and the reason both watchers start from a
        ref rather than from zero. Without it, opening the app on a

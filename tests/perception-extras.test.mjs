@@ -445,6 +445,56 @@ test("warming and cooling are still allowed to co-exist", () => {
   assert(kept, "warming+cooling is a real paradox — separate receptor systems, no suppression");
 });
 
+/* ── THE CUP HAS A DOSE ─────────────────────────────────────────────
+
+   Contributions used to be a SHARE of the pot, so a cup of 1g of
+   chamomile and a cup of 16g read identically — the number of grams
+   never entered the maths — and a leaf's contribution collapsed when
+   unrelated leaves joined it, though the same 2g was still in the cup.
+
+   That was the largest behavioural change of the lot and it had no test
+   of its own; the calibration suites pinned the cup's values, which
+   would let dose-blindness return as long as the shipped blends landed
+   in the same place. These pin the property instead. */
+
+test("more of a leaf makes a stronger cup", () => {
+  const at = (g) => Object.fromEntries(
+    resolveBlendAtBrew([{ id: "chamomile", g, role: "lead" }], 95, 300).effects);
+  const light = at(1), heavy = at(8);
+  assert(heavy.calm > light.calm,
+    `8g should read calmer than 1g — got ${light.calm} then ${heavy.calm}. ` +
+    `Equal values mean the model is back to reading shares and ignoring dose.`);
+});
+
+test("but not proportionally — the curve saturates", () => {
+  // Michaelis-Menten, normalised so one cup-dose scores 1.0. Eight
+  // times the leaf is emphatically not eight times the cup, and a
+  // linear model would be as wrong as a share-based one.
+  const at = (g) => Object.fromEntries(
+    resolveBlendAtBrew([{ id: "chamomile", g, role: "lead" }], 95, 300).effects);
+  const one = at(1).calm, eight = at(8).calm;
+  assert(eight < one * 8,
+    `8g reads ${eight} against 1g's ${one} — dose should saturate, not scale`);
+});
+
+test("a leaf keeps its voice when unrelated leaves join it", () => {
+  /* The reported symptom: 2g of chamomile read calm 4.0 alone and calm
+     0.8 beside six other herbs, though the cup still held the same 2g.
+     Adding peppermint doesn't remove chamomile's apigenin. */
+  const alone = Object.fromEntries(
+    resolveBlendAtBrew([{ id: "chamomile", g: 2, role: "lead" }], 95, 300).effects);
+  const crowded = Object.fromEntries(resolveBlendAtBrew([
+    { id: "chamomile", g: 2, role: "lead" },
+    ...["peppermint", "ginger", "hibiscus", "rooibos", "cinnamon", "fennel"]
+      .map(id => ({ id, g: 2, role: "lead" })),
+  ], 95, 300).effects);
+  // Not "identical" — masking and the perception pipeline legitimately
+  // move it. But it must not COLLAPSE, which share-weighting did.
+  assert(crowded.calm >= alone.calm * 0.6,
+    `chamomile's calm fell from ${alone.calm} to ${crowded.calm} when six ` +
+    `unrelated leaves joined — the same 2g is still in the pot`);
+});
+
 console.log(`\n\n${pass} passed, ${fail} failed`);
 if (failures.length > 0) {
   console.log("\nFailures:");
