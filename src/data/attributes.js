@@ -107,7 +107,9 @@ export function buildAttributeContext({ sessions, savedBlendIds, favoriteBlendId
   const onboarding = {
     moods:    new Set(profile?.draw    || []),
     flavors:  new Set(profile?.flavors || []),
-    times:    new Set(profile?.timeOfDay || []),
+    // No `times` here any more. It mirrored an onboarding question that
+    // no predicate ever read, and the question itself is gone — see
+    // STEPS in OnboardingScreen.
     moodCount:   (profile?.draw    || []).length,
     flavorCount: (profile?.flavors || []).length,
   };

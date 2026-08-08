@@ -109,6 +109,46 @@ nothing local complained. `tsc --noEmit` takes seconds.
 Check CI after pushing (`gh run list`). A red run that nobody looks at
 stays red, and the next push inherits it.
 
+### A flake that repeats is a bug with a bad error message
+
+**If the suite fails more than twice on something already written off as
+flaky, stop calling it flaky and open a real investigation.** Put a note
+in this file naming the symptom, so the next session inherits the
+suspicion rather than the explanation.
+
+This is not general caution. One failure per full run — a different test
+each time, every one passing alone — ran for a whole session and was
+explained three times: worker contention, then a slow machine, then too
+small a budget. All three were wrong, and two of the three "fixes"
+would have buried the cause permanently. It was a real bug any user
+could hit: brewing earns lodestone charge, a cup that fills the stone
+raises a fixed notice at the top of the screen, and that notice covered
+the steep screen's minimize button. Tap minimize, nothing happens.
+
+What broke it open, in order, and worth copying:
+
+- **A bare `.click()` has no timeout of its own.** It waits out the
+  whole test budget and reports "timeout in beforeEach", which names the
+  hook and never the thing that was missing. Assert visibility BEFORE
+  clicking and the message changes from "the hook timed out" to "this
+  locator never appeared" — or, as here, to "it was visible and the
+  click still hung", which is a different bug entirely.
+- **A hang scales with whatever budget you give it.** Raising the
+  timeout from 30s to 60s moved the failure from 90s to 180s and
+  changed nothing else. If a budget increase doesn't fix a timeout, the
+  timeout was never the problem — and that result is evidence, so
+  revert the raise rather than keeping it.
+- **Read the trace.** `test-results/**/trace.zip` records every action;
+  the one with a `before` and no `after` is the one that hung, with the
+  spec file and line.
+- **Measure the geometry, don't reason about it.** `elementFromPoint`
+  at the target's own centre names the element actually on top. Reading
+  the CSS would not have found this — both elements were correct on
+  their own.
+
+Contention and slow machines are real, and neither is the first guess
+worth acting on, because both have fixes that hide evidence.
+
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
 Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true locally, so a leftover server silently serves an old `dist/` and makes E2E results meaningless. Check with `ss -lntp | grep 5173` if results look impossible.

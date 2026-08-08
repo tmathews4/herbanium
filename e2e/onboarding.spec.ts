@@ -41,7 +41,11 @@ test.describe("onboarding — the name step", () => {
     await nameField(page).fill("Tom");
     await nameField(page).press("Enter");
 
-    await expect(page.getByText("When do you reach for tea?"),
+    /* The step after the name used to be "When do you reach for tea?".
+       That question is gone — nothing consumed the answer, so it cost a
+       first-run screen and implied a personalisation that never
+       happened. What follows the name is the mood step now. */
+    await expect(page.getByText("What pulls you to a cup?"),
       "Return should advance to the next step")
       .toBeVisible();
     await expect(page.getByText("What should we call you?"),
@@ -67,7 +71,7 @@ test.describe("onboarding — the name step", () => {
     await nameField(page).fill("Tom");
     await expect(nextButton(page)).toBeEnabled();
     await nameField(page).press("Enter");
-    await expect(page.getByText("When do you reach for tea?")).toBeVisible();
+    await expect(page.getByText("What pulls you to a cup?")).toBeVisible();
   });
 
   test("the field asks the on-screen keyboard for a Next key", async ({ page }) => {

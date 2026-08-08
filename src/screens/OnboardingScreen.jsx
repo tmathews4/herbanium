@@ -19,12 +19,19 @@ import { Button } from "../components/layout";
 import { Flower } from "../components/icons";
 import { isNativeApp } from "../helpers/platform";
 
-const STEPS = 5;
+/* FOUR STEPS. There were five — a "When do you reach for tea?" step
+   sat between the name and the moods, and nothing consumed the answer.
+   pickSeedBlends took it and returned the same starter regardless (its
+   own comment: "the answer doesn't currently shape the seed set"), and
+   attributes.js built an `onboarding.times` Set that no predicate ever
+   read. A question with no consumer is worse than no question: it costs
+   a first-run screen, it implies the app will use it, and it quietly
+   makes the answer feel wasted the first time nothing changes. */
+const STEPS = 4;
 
 export const OnboardingScreen = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [timeOfDay, setTimeOfDay] = useState([]);
   const [draw, setDraw] = useState([]);
   const [flavors, setFlavors] = useState([]);
 
@@ -36,16 +43,17 @@ export const OnboardingScreen = ({ onComplete }) => {
     // permanently enabled at this step, which read as broken in
     // dark mode where the enabled state didn't shift on input.
     : step === 1 ? name.trim().length > 0
-    : step === 2 ? timeOfDay.length > 0
-    : step === 3 ? draw.length > 0
-    : step === 4 ? true  // flavors are optional — skip-friendly final step
+    : step === 2 ? draw.length > 0
+    : step === 3 ? true  // flavors are optional — skip-friendly final step
     : false;
 
   const finish = () => {
     onComplete({
       name: name.trim() || "friend",
-      timeOfDay,
-      draw,
+      // The cards are clusters; store the families they stand for, so
+      // the recommender sees the register the user pointed at rather
+      // than the label they tapped.
+      draw: expandDraw(draw),
       flavors,
     });
   };
@@ -134,13 +142,12 @@ export const OnboardingScreen = ({ onComplete }) => {
             onSubmit={() => { if (canAdvance) advance(); }}
           />
         )}
-        {step === 2 && <StepTimeOfDay value={timeOfDay} setValue={setTimeOfDay} />}
-        {step === 3 && <StepDraw value={draw} setValue={setDraw} />}
-        {step === 4 && <StepFlavors value={flavors} setValue={setFlavors} />}
+        {step === 2 && <StepDraw value={draw} setValue={setDraw} />}
+        {step === 3 && <StepFlavors value={flavors} setValue={setFlavors} />}
       </div>
 
       {/* Selection count hint (multi-select steps only) */}
-      {(step === 2 || step === 3 || step === 4) && (
+      {(step === 2 || step === 3) && (
         <div style={{
           padding: "0 24px 4px", textAlign: "center",
           fontFamily: ff.serif, fontStyle: "italic", fontSize: 11.5,
@@ -148,9 +155,8 @@ export const OnboardingScreen = ({ onComplete }) => {
           minHeight: 18, flexShrink: 0,
           maxWidth: 520, width: "100%", alignSelf: "center",
         }}>
-          {step === 2 && (timeOfDay.length === 0 ? "pick one or more" : `${timeOfDay.length} selected`)}
-          {step === 3 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
-          {step === 4 && (flavors.length === 0 ? "pick any that appeal — or skip" : `${flavors.length} selected`)}
+          {step === 2 && (draw.length === 0 ? "pick one or more" : `${draw.length} selected`)}
+          {step === 3 && (flavors.length === 0 ? "pick any that appeal — or skip" : `${flavors.length} selected`)}
         </div>
       )}
 
@@ -347,32 +353,6 @@ const StepName = ({ name, setName, onSubmit }) => (
 );
 
 /* ──────────────────────────────────────────────────────────────
-   Step 2: Time of day (kept as full-width option rows — only 3)
-   ────────────────────────────────────────────────────────────── */
-
-const TIME_OPTIONS = [
-  { key: "morning",   label: "Morning",   note: "waking, the first cup of the day" },
-  { key: "afternoon", label: "Afternoon", note: "midday pause, the long desk" },
-  { key: "evening",   label: "Evening",   note: "winding down, toward sleep" },
-];
-
-const StepTimeOfDay = ({ value, setValue }) => {
-  const toggle = (key) => {
-    setValue(value.includes(key) ? value.filter(k => k !== key) : [...value, key]);
-  };
-  return (
-    <>
-      <StepHeader title="When do you reach for tea?" sub="Pick any that feel right — you can change this later." />
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {TIME_OPTIONS.map(opt => (
-          <OnboardOption key={opt.key} opt={opt} selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
-        ))}
-      </div>
-    </>
-  );
-};
-
-/* ──────────────────────────────────────────────────────────────
    Step 3: What draws you — parent-mood canon (7 families).
 
    Pulls from data/canon.PARENT_MOODS so first-run onboarding picks
@@ -382,7 +362,7 @@ const StepTimeOfDay = ({ value, setValue }) => {
    only here.
    ────────────────────────────────────────────────────────────── */
 
-import { DRAW_PARENT_MOODS, PARENT_FLAVORS } from "../data/canon";
+import { DRAW_PARENT_MOODS, expandDraw, PARENT_FLAVORS } from "../data/canon";
 
 // First-run copy — slightly more evocative than the canon's terse
 // engine-side notes. Keeps key/family/label aligned to canon so the
@@ -399,57 +379,17 @@ const DRAW_NOTES = {
   grounding: "steadying, settled in yourself",
   uplifting: "brightening, without the buzz",
 };
-/* THE LABELS ANSWER THE QUESTION, which the canon's don't have to.
+/* The cards, their wording and their clustering all live in
+   canon.DRAW_CLUSTERS now — see the note there for why a stranger is
+   offered seven feelings where the canon tracks eleven families, and
+   why the labels differ from the canon's (those serve the journal's
+   "where it left me" row, where the same value is an outcome rather
+   than a pull: "Grounded" is right there and wrong here).
 
-   The step asks "What pulls you to a cup?", so every chip should
-   complete "I want ___". Five of the canon's labels don't, because the
-   canon serves a second role the journal needs — the "where it left
-   me" row, where the same value is an OUTCOME. "Grounded" is right for
-   what a cup did to you and wrong for what you're reaching for;
-   "Sleepy" is worse, because it names the state you're in rather than
-   the one you want, so it reads as the opposite of the intent.
-
-   Overridden here rather than renamed in the canon, because both
-   registers are correct in their own place, and this file already
-   overrides the notes for exactly that reason. Keys are untouched —
-   they're persisted in journal targetMoods and there is no migration
-   path (a schema bump wipes rather than migrates). */
-const DRAW_LABELS = {
-  soothing:  "Ease",       // canon "Soothing" — "I want soothing" doesn't parse
-  grounding: "Grounding",  // canon "Grounded" — outcome, not pull
-  uplifting: "Brightness", // canon "Uplifting" — same
-  digestive: "Digestion",  // canon "Digestive" — an adjective with no noun
-  sleepy:    "Sleep",      // canon "Sleepy" — names your state, not your goal
-};
-
-/* IMMUNE IS NOT OFFERED HERE, and the reason is in our own research.
-
-   families.js describes the immune family as "slower and LESS FELT than
-   any other effect here". Every other option on this step names
-   something you notice; this one names something you can't. Asked
-   "what pulls you to a cup?", a first-run user is being invited to
-   report a sensation that by our own account isn't available.
-
-   It also lands as a health claim on the first screen someone sees,
-   one word wide, with the qualifying note hidden in a tooltip no phone
-   will show.
-
-   THE COUNTER-ARGUMENT, kept because it's a good one and this is
-   reversible: reaching for echinacea or elder in cold season is a real
-   brewing goal, which is why the family was added to the target canon
-   in the first place (see canon.js). That remains true — immune stays
-   a family, stays in the strip, stays on the ingredients. It is only
-   withdrawn from the one surface that asks what you FEEL drawn to.
-
-   The exclusion is declared on the family itself (perceptible: false)
-   and derived in canon.DRAW_PARENT_MOODS, not filtered by name here —
-   see the note there for why a hand-kept list was the wrong shape. */
-const DRAW_OPTIONS = DRAW_PARENT_MOODS
-  .map(m => ({
-    ...m,
-    label: DRAW_LABELS[m.key] || m.label,
-    note: DRAW_NOTES[m.key] || m.note,
-  }));
+   Immune is absent for a different reason again — it is declared
+   `perceptible: false` in families.js, because our own research says
+   you cannot notice it. A felt question shouldn't ask for it. */
+const DRAW_OPTIONS = DRAW_PARENT_MOODS;
 
 const StepDraw = ({ value, setValue }) => {
   const toggle = (key) => {
@@ -458,7 +398,30 @@ const StepDraw = ({ value, setValue }) => {
   return (
     <>
       <StepHeader title="What pulls you to a cup?" sub="Pick any that resonate — no wrong answers." />
-      <ChipGrid options={DRAW_OPTIONS} value={value} onToggle={toggle} />
+      {/* CARDS, NOT CHIPS, so the notes are actually readable.
+
+          Every option here had a line of copy written for it — "a
+          settling, a softening", "the slow slide toward evening" — and
+          none of it had ever been seen. ChipGrid put it in a `title`
+          attribute, which is a hover tooltip: on the phone this app is
+          built for, there is no hover, so the note was addressed to
+          nobody. The single word carried the whole meaning, which is
+          exactly why the labels needed the audit that preceded this.
+
+          Step 2 already renders label-plus-note as full-width rows and
+          reads well. It has three options; this has ten, and ten
+          full-width rows do not fit a phone. So the same anatomy in two
+          columns — same component, told to be compact — which keeps the
+          two steps recognisably the same question shape without
+          scrolling the answer off the screen. */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
+      }}>
+        {DRAW_OPTIONS.map(opt => (
+          <OnboardOption key={opt.key} opt={opt} compact
+            selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
+        ))}
+      </div>
     </>
   );
 };
@@ -537,34 +500,44 @@ const ChipGrid = ({ options, value, onToggle }) => (
    Full-width option row (used by time-of-day step, 3 items)
    ────────────────────────────────────────────────────────────── */
 
-const OnboardOption = ({ opt, selected, onSelect }) => (
+/* `compact` is a density switch, not a second component. The mood step
+   needs ten of these where the time step needs three, so it wants
+   tighter padding and smaller type — but the same anatomy, because the
+   two steps are asking the same kind of question and should look like
+   it. The tick is dropped when compact: at two columns the terra border
+   and fill already carry selection, and a check mark in a 150px card
+   costs a word of the note. */
+const OnboardOption = ({ opt, selected, onSelect, compact = false }) => (
   <button
     onClick={onSelect}
     style={{
       width: "100%", textAlign: "left",
-      padding: "14px 18px", borderRadius: 10,
+      padding: compact ? "10px 12px" : "14px 18px", borderRadius: 10,
       background: selected ? theme.cream : "transparent",
       border: `1px solid ${selected ? theme.terra : theme.rule}`,
       cursor: "pointer",
       transition: "all 0.15s ease",
       display: "flex", alignItems: "baseline", gap: 12,
+      height: compact ? "100%" : undefined,
+      boxSizing: "border-box",
     }}
   >
     <div style={{ flex: 1 }}>
       <div style={{
-        fontFamily: ff.serif, fontSize: 17,
+        fontFamily: ff.serif, fontSize: compact ? 15 : 17,
         color: selected ? theme.terra : theme.ink,
         lineHeight: 1.2,
       }}>
         {opt.label}
       </div>
       <div style={{
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-        color: theme.ash, marginTop: 2, lineHeight: 1.4,
+        fontFamily: ff.serif, fontStyle: "italic",
+        fontSize: compact ? 11 : 12,
+        color: theme.ash, marginTop: 2, lineHeight: 1.35,
       }}>
         {opt.note}
       </div>
     </div>
-    {selected && <div style={{ color: theme.terra, fontSize: 18 }}>✓</div>}
+    {selected && !compact && <div style={{ color: theme.terra, fontSize: 18 }}>✓</div>}
   </button>
 );

@@ -125,8 +125,62 @@ export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !isBodily(m));
  *
  * Derived, not filtered by name, so the next unfelt family is excluded
  * the day it is added. */
-export const DRAW_PARENT_MOODS = PARENT_MOODS
+const PERCEPTIBLE_PARENT_MOODS = PARENT_MOODS
   .filter(m => PERCEPTIBLE_EFFECT[m.key] !== false);
+
+/* WHAT A STRANGER CAN TELL APART.
+ *
+ * The canon distinguishes calm from soothing from grounding, and energy
+ * from uplifting, and it is right to — they are different families with
+ * different chemistry and different ingredients behind them. But this
+ * is the third screen a person has ever seen, and to someone arriving
+ * cold those are two questions, not five. Asked to choose between Calm
+ * and Ease, a newcomer isn't making a finer distinction; they're
+ * guessing, and a guess is worse signal than a coarse answer.
+ *
+ * So the card is a cluster and the answer is the whole cluster. Picking
+ * Calm records calm AND soothing AND grounding, which is what the
+ * person meant — the recommender matches blend moods against this set,
+ * so a wider pick matches more of the register they were pointing at,
+ * not less precisely.
+ *
+ * DECLARED, NOT DERIVED, unlike the perceptibility cut above. Which
+ * families read as one feeling to a stranger is an editorial judgement
+ * about English, and there is nothing in the data to derive it from.
+ * The test holds the two properties that CAN be checked: every family
+ * appears in exactly one cluster, and no cluster smuggles in a word the
+ * perceptibility rule already excluded. */
+const DRAW_CLUSTERS = [
+  { key: "calm",      label: "Calm",      note: "settling, steadying, unwound",
+    covers: ["calm", "soothing", "grounding"] },
+  { key: "focus",     label: "Focus",     note: "attention, the clear mind",
+    covers: ["focus"] },
+  { key: "energy",    label: "Energy",    note: "lift, the spark to begin",
+    covers: ["energy", "uplifting"] },
+  { key: "comfort",   label: "Comfort",   note: "warmth, the familiar cup",
+    covers: ["comfort"] },
+  { key: "cooling",   label: "Cooling",   note: "a felt-temperature breath",
+    covers: ["cooling"] },
+  { key: "digestive", label: "Digestion", note: "fennel, after-supper ease",
+    covers: ["digestive"] },
+  { key: "sleepy",    label: "Sleep",     note: "the slow slide toward evening",
+    covers: ["sleepy"] },
+];
+
+export const DRAW_PARENT_MOODS = DRAW_CLUSTERS;
+
+/** Expand the cards a user tapped into the mood keys they meant. */
+export const expandDraw = (picked = []) => {
+  const chosen = new Set(picked);
+  const out = new Set();
+  for (const c of DRAW_CLUSTERS) {
+    if (chosen.has(c.key)) c.covers.forEach(k => out.add(k));
+  }
+  return [...out];
+};
+
+/** Every perceptible family, for the test that nothing was dropped. */
+export const PERCEPTIBLE_MOOD_KEYS = PERCEPTIBLE_PARENT_MOODS.map(m => m.key);
 export const JOURNAL_CURRENT_MOOD_CHIPS = CURRENT_MOOD_CHIPS
   .filter(m => !isBodily(m) && !NON_MIND_EXTRAS.has(m.key));
 
