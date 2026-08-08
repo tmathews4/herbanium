@@ -402,7 +402,7 @@ const StepDraw = ({ value, setValue }) => {
 
           Every option here had a line of copy written for it — "a
           settling, a softening", "the slow slide toward evening" — and
-          none of it had ever been seen. ChipGrid put it in a `title`
+          none of it had ever been seen. The chip grid put it in a `title`
           attribute, which is a hover tooltip: on the phone this app is
           built for, there is no hover, so the note was addressed to
           nobody. The single word carried the whole meaning, which is
@@ -435,7 +435,40 @@ const StepDraw = ({ value, setValue }) => {
    covers citrus + minty together at family register.
    ────────────────────────────────────────────────────────────── */
 
-const FLAVOR_OPTIONS = PARENT_FLAVORS;
+/* THE NOTES ARE THE POINT HERE, more than they were for the moods.
+
+   "Calm" needs no gloss. "Vegetal", "Marine" and "Creamy" are trade
+   words: a newcomer either knows them or is guessing, and the tooltip
+   they used to live in is addressed to nobody on a phone. With the note
+   on the card the jargon becomes teachable rather than exclusionary,
+   which is the whole register this app is trying to work in — so the
+   labels stay and the notes carry them.
+
+   Every example names something the catalogue actually ships, checked
+   against the profiles rather than written from memory: these are the
+   ingredients whose extraction rows carry the most words in each
+   family. An invented example would be the same failure as an invented
+   effect, one register down.
+
+   `creamy` gets the odd one out, and deliberately: it is the only
+   option here that isn't a taste at all. Saying so is more useful than
+   pretending it belongs. */
+const FLAVOR_NOTES = {
+  fruity:  "hibiscus, cranberry, elderflower",
+  floral:  "jasmine and linden, the perfumed cup",
+  sweet:   "honeyed, apple-sweet — nothing added",
+  spiced:  "clove, ginger, black pepper",
+  smoky:   "lapsang's pine fire",
+  earthy:  "pu-erh and roasted hojicha, forest floor",
+  fresh:   "mint and citrus peel, the bright edge",
+  vegetal: "green tea's grassy side — sencha, matcha",
+  marine:  "the sea-air note in gyokuro",
+  creamy:  "a texture, not a taste — vanilla, thick oolong",
+};
+const FLAVOR_OPTIONS = PARENT_FLAVORS.map(f => ({
+  ...f,
+  note: FLAVOR_NOTES[f.key] || f.note,
+}));
 
 const StepFlavors = ({ value, setValue }) => {
   const toggle = (key) => {
@@ -444,7 +477,17 @@ const StepFlavors = ({ value, setValue }) => {
   return (
     <>
       <StepHeader title="Flavors you reach for?" sub="Optional — pick any you tend to like, or skip ahead." />
-      <ChipGrid options={FLAVOR_OPTIONS} value={value} onToggle={toggle} />
+      {/* Same two-column cards as the mood step. Ten options either way,
+          so the shape that fit there fits here — and the two steps ask
+          the same kind of question, which they should look like. */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
+      }}>
+        {FLAVOR_OPTIONS.map(opt => (
+          <OnboardOption key={opt.key} opt={opt} compact
+            selected={value.includes(opt.key)} onSelect={() => toggle(opt.key)} />
+        ))}
+      </div>
     </>
   );
 };
@@ -466,35 +509,6 @@ const StepHeader = ({ title, sub }) => (
   </>
 );
 
-/* ──────────────────────────────────────────────────────────────
-   Chip grid — used for the longer multi-select steps (mood, flavor)
-   ────────────────────────────────────────────────────────────── */
-
-const ChipGrid = ({ options, value, onToggle }) => (
-  <div style={{
-    display: "flex", flexWrap: "wrap", gap: 8,
-    justifyContent: "center",
-  }}>
-    {options.map(opt => {
-      const selected = value.includes(opt.key);
-      return (
-        <button
-          key={opt.key}
-          onClick={() => onToggle(opt.key)}
-          title={opt.note || ""}
-          style={{
-            fontFamily: ff.serif, fontSize: 14,
-            padding: "8px 14px", borderRadius: 999,
-            background: selected ? theme.terra : "transparent",
-            color: selected ? theme.cream : theme.inkSoft,
-            border: `1px solid ${selected ? theme.terra : theme.rule}`,
-            cursor: "pointer", transition: "all 0.15s ease",
-          }}
-        >{opt.label}</button>
-      );
-    })}
-  </div>
-);
 
 /* ──────────────────────────────────────────────────────────────
    Full-width option row (used by time-of-day step, 3 items)
