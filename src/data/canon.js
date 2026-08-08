@@ -107,6 +107,28 @@ const NON_MIND_EXTRAS = new Set(["nauseous"]);
 
 export const JOURNAL_PARENT_MOODS = PARENT_MOODS.filter(m => !isBodily(m));
 
+/* WHERE A CUP CAN LEAVE YOU — including somewhere worse.
+ *
+ * The landed row used JOURNAL_PARENT_MOODS, which is positives only,
+ * on the reasoning recorded above CURRENT_FEEL_EXTRAS: "never offered
+ * as a target — no one aspires to feel anxious". That reasoning is
+ * sound and it is about TARGETS. "Where it left me" is not a target,
+ * it is an outcome, and the two got the same list.
+ *
+ * So the journal could not record the ordinary cases. You come in
+ * anxious and leave anxious. What you wrote stirred something up. The
+ * cup had more caffeine than you wanted — which is not a hypothetical
+ * here, it is a thing this app's own model predicts and warns about,
+ * and the journal had no word for the result.
+ *
+ * A mood log that only accepts improvement isn't a log, it's a
+ * scoreboard. Same mind-only cut as the coming-in row, since you don't
+ * reflect on digestion afterwards either. */
+export const JOURNAL_LANDED_MOOD_CHIPS = [
+  ...JOURNAL_PARENT_MOODS,
+  ...CURRENT_FEEL_EXTRAS.filter(m => !NON_MIND_EXTRAS.has(m.key)),
+];
+
 /* What onboarding may ask you to want.
  *
  * A DIFFERENT CUT FROM THE JOURNAL'S, and the difference is the point.
@@ -178,6 +200,44 @@ export const expandDraw = (picked = []) => {
   }
   return [...out];
 };
+
+/* HOW THE SAME WORD IS SAID WHEN IT HAPPENED TO YOU.
+ *
+ * There are three grammatical roles in this app and, until now, one
+ * label set for all of them:
+ *
+ *   the cup DOES it   — the mood filter, the effect bars. Attributive:
+ *                       an uplifting blend, a soothing herb. The labels
+ *                       in PARENT_MOODS are written for this and are
+ *                       right for it.
+ *   you WANT it       — "What pulls you to a cup?". Nouns: calm, focus,
+ *                       sleep. That's DRAW_CLUSTERS above.
+ *   you FELT it       — "Right now I feel…", "Where it left me", "How
+ *                       did it land?". Predicate adjectives, and this
+ *                       is the role that had no labels of its own.
+ *
+ * So the journal read "Right now I feel… Energy" and "Where it left me:
+ * Comfort", four of seven wrong in the landed row alone — while sitting
+ * beside Anxious, Stressed and Tired, which are adjectives and which
+ * made the mismatch louder rather than hiding it.
+ *
+ * Only the words that change are listed. Calm, Grounded and Sleepy are
+ * already predicate adjectives and pass through untouched, which is
+ * also why the old labels read fine often enough for this to survive. */
+const FELT_LABEL = {
+  focus:     "Focused",
+  energy:    "Energised",
+  uplifting: "Lifted",
+  comfort:   "Comforted",
+  soothing:  "Eased",
+  cooling:   "Cooled",
+  digestive: "Settled",
+  grounding: "Grounded",
+};
+
+/** Re-label a chip list for a question about what you felt. */
+export const feltChips = (chips = []) =>
+  chips.map(c => (FELT_LABEL[c.key] ? { ...c, label: FELT_LABEL[c.key] } : c));
 
 /** Every perceptible family, for the test that nothing was dropped. */
 export const PERCEPTIBLE_MOOD_KEYS = PERCEPTIBLE_PARENT_MOODS.map(m => m.key);

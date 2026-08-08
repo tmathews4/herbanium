@@ -34,7 +34,8 @@
 
 import {
   PARENT_MOODS, DRAW_PARENT_MOODS, JOURNAL_PARENT_MOODS,
-  PERCEPTIBLE_MOOD_KEYS, expandDraw,
+  JOURNAL_CURRENT_MOOD_CHIPS, CURRENT_MOOD_CHIPS,
+  PERCEPTIBLE_MOOD_KEYS, expandDraw, feltChips,
 } from "../src/data/canon.js";
 import { PERCEPTIBLE_EFFECT, CATEGORY_OF_EFFECT } from "../src/data/families.js";
 
@@ -123,6 +124,61 @@ test("the collapse is real, and a pick expands to what it stood for", () => {
     `Calm should stand for the settling register, got ${JSON.stringify(calm)}`);
   assert(expandDraw([]).length === 0, "an empty pick should expand to nothing");
   assert(expandDraw(["nonsense"]).length === 0, "an unknown card should expand to nothing");
+});
+
+/* ── the felt register ──────────────────────────────────────────
+   Three grammatical roles, one canon. The cup DOES it (an uplifting
+   blend — the filter and the effect bars), you WANT it (the draw
+   cards), you FELT it (every question the journal and the steep ask).
+   The third had no labels of its own, so the journal read "Right now I
+   feel… Energy" and "Where it left me: Comfort".
+   ────────────────────────────────────────────────────────────── */
+
+test("felt questions use predicate adjectives, not nouns", () => {
+  /* The test is what can follow "I feel ___" and "it left me ___".
+     These five are the nouns and attributives that were showing up
+     there; each has a felt form now. */
+  const NOT_A_FELT_STATE = new Set(["Focus", "Energy", "Uplifting", "Comfort", "Soothing"]);
+  for (const list of [JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS, CURRENT_MOOD_CHIPS]) {
+    for (const c of feltChips(list)) {
+      assert(!NOT_A_FELT_STATE.has(c.label),
+        `"${c.label}" answers "right now I feel…" — it names what a cup does, not a state`);
+    }
+  }
+});
+
+test("the felt re-label changes labels and nothing else", () => {
+  /* Keys are what get persisted in journal entries; only the wording
+     may differ. If this ever fails, a re-label has quietly become a
+     data migration. */
+  const before = JOURNAL_PARENT_MOODS;
+  const after = feltChips(before);
+  assert(after.length === before.length, "feltChips changed the number of options");
+  before.forEach((c, i) => {
+    assert(after[i].key === c.key, `feltChips moved ${c.key} to ${after[i].key}`);
+    assert(after[i].family === c.family, `feltChips changed ${c.key}'s family`);
+  });
+});
+
+test("the words already in the felt register are left alone", () => {
+  // Calm, Grounded and Sleepy are predicate adjectives already, which
+  // is why the old labels read fine often enough to survive this long.
+  const felt = new Map(feltChips(PARENT_MOODS).map(c => [c.key, c.label]));
+  for (const key of ["calm", "sleepy"]) {
+    const canon = PARENT_MOODS.find(m => m.key === key);
+    assert(felt.get(key) === canon.label,
+      `${key} was re-labelled to "${felt.get(key)}" but "${canon.label}" was already right`);
+  }
+});
+
+test("the cup's own register is untouched", () => {
+  /* The filter and the effect bars describe the BLEND — "an uplifting
+     tea" — and the canon labels are written for exactly that. If the
+     felt labels ever leak into PARENT_MOODS, the filter starts
+     offering "Lifted" as a property of a herb. */
+  const canonLabels = PARENT_MOODS.map(m => m.label);
+  assert(canonLabels.includes("Uplifting") && canonLabels.includes("Soothing"),
+    "the canon's attributive labels have been overwritten with felt ones");
 });
 
 for (const f of failures) console.log("FAIL " + f);

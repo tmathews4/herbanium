@@ -21,7 +21,7 @@
 import React, { useState } from "react";
 import { Pencil } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
-import { JOURNAL_PARENT_MOODS, JOURNAL_CURRENT_MOOD_CHIPS } from "../data/canon";
+import { JOURNAL_LANDED_MOOD_CHIPS, JOURNAL_CURRENT_MOOD_CHIPS, feltChips } from "../data/canon";
 import { ff, theme } from "../theme";
 // One relative-time format for the whole app — this screen used to
 // carry its own, which said "5 min ago" where every other surface
@@ -322,7 +322,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
                 glyph="→"
                 value={draft.currentMoods}
                 setValue={(v) => setDraft(d => ({ ...d, currentMoods: v }))}
-                chips={JOURNAL_CURRENT_MOOD_CHIPS}
+                chips={feltChips(JOURNAL_CURRENT_MOOD_CHIPS)}
               />
               <div style={{ height: 10 }} />
               <ChipPicker
@@ -330,7 +330,7 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
                 glyph="←"
                 value={draft.landedMoods}
                 setValue={(v) => setDraft(d => ({ ...d, landedMoods: v }))}
-                chips={JOURNAL_PARENT_MOODS}
+                chips={feltChips(JOURNAL_LANDED_MOOD_CHIPS)}
               />
             </div>
 

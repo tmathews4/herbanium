@@ -39,17 +39,22 @@ async function boot(page: Page) {
 async function heightsDuring(page: Page, act: () => Promise<void>) {
   await page.evaluate(() => {
     (window as any).__frames = [];
+    const t0 = performance.now();
     const tick = () => {
       const el = document.querySelector('[data-tour="blend-sliders"]')?.parentElement;
-      (window as any).__frames.push(el ? Math.round(el.getBoundingClientRect().height) : -1);
+      (window as any).__frames.push({
+        t: performance.now() - t0,
+        h: el ? Math.round(el.getBoundingClientRect().height) : -1,
+      });
       if ((window as any).__frames.length < 60) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
   await act();
   await page.waitForTimeout(1600);
-  const raw: number[] = await page.evaluate(() => (window as any).__frames);
-  return raw.filter((v) => v >= 0); // -1 means unmounted; stop caring there
+  const raw: { t: number; h: number }[] =
+    await page.evaluate(() => (window as any).__frames);
+  return raw.filter((f) => f.h >= 0); // -1 means unmounted; stop caring there
 }
 
 test.describe("closing a dock doesn't flash it back open", () => {
@@ -68,25 +73,39 @@ test.describe("closing a dock doesn't flash it back open", () => {
     await page.waitForTimeout(600); // let the opening animation settle
 
     const frames = await heightsDuring(page, () => row.click());
-    const resting = frames[0];
+    const heights = frames.map((f) => f.h);
+    const resting = heights[0];
+    const show = frames.map((f) => `${Math.round(f.t)}ms:${f.h}`).join(" ");
 
-    /* The panel must actually travel. Without this the spec would pass
-       trivially if the animation were removed and the row just vanished
-       — two frames, no rebound, nothing asserted. Requiring intermediate
-       heights is what makes the check above mean something. */
-    const midway = frames.filter((h) => h > 2 && h < resting - 2);
-    expect(midway.length,
-      `expected a visible collapse, got frames: ${frames.join(" ")}`).toBeGreaterThan(0);
+    /* THE PANEL MUST ACTUALLY TRAVEL, or this spec passes trivially on a
+       row that simply vanishes: two frames, no rebound, nothing
+       asserted.
+
+       Measured in TIME, not in sampled intermediate heights. The first
+       version required a frame somewhere between full and shut, and
+       under a loaded machine the rAF sampler drops exactly those frames
+       — a real, correct collapse logged "83 83 … 82 1 0" and failed for
+       having animated too smoothly to observe. Duration survives
+       dropped frames: an element that vanishes reaches zero on the
+       frame after it starts, and one that animates takes most of its
+       280ms however few samples land in between. */
+    const started = frames.find((f) => f.h < resting - 2);
+    const ended = frames.find((f) => f.h <= 1);
+    expect(started && ended, `never saw the collapse: ${show}`).toBeTruthy();
+    const travel = ended!.t - started!.t;
+    expect(travel,
+      `the panel went from ${resting}px to nothing in ${Math.round(travel)}ms — ` +
+      `that is a disappearance, not a collapse: ${show}`).toBeGreaterThan(60);
 
     /* THE ACTUAL BUG. The rebound measured 91 against a resting 83 —
        taller than the row ever sits, because the borrowed border-box
        sizing re-admitted the padding the keyframes had collapsed. A
        couple of px of tolerance for sub-pixel rounding; 8px of rebound
        is the flicker. */
-    const peak = Math.max(...frames.slice(3));
+    const peak = Math.max(...heights.slice(3));
     expect(peak,
       `the panel grew back to ${peak}px after starting to collapse from ${resting}px — ` +
-      `frames: ${frames.join(" ")}`).toBeLessThanOrEqual(resting + 2);
+      `frames: ${show}`).toBeLessThanOrEqual(resting + 2);
   });
 
   test("and it still opens back up to its full height", async ({ page }) => {

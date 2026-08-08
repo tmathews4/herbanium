@@ -39,7 +39,72 @@ async function boot(page: Page, seed: () => void = () => {}) {
 
 const banner = (page: Page) => page.getByText(/your lodestone is (pulsing|charged)/i).first();
 
+/* Neither notice speaks until the lodestone screen has been opened
+   once — a ribbon inviting you back somewhere you've never been had
+   nowhere coherent to land, and dropped first-run users into a tutorial
+   pointing at an inactive stone. Any test that expects a notice has to
+   go and meet the stone first, which is what a real user does before
+   any of this can happen to them. */
+async function meetTheLodestone(page: Page) {
+  await page.getByRole("button", { name: "Journal", exact: true }).click();
+  await page.locator('[data-tour="subtabs"]')
+    .getByRole("button", { name: "Field Notes", exact: true }).click();
+  await expect(page.getByTestId("lodestone-lede")).toBeVisible({ timeout: 30_000 });
+}
+
+/* Driven through the dev charge control on Profile rather than by
+   writing localStorage: usePersistedState reads its key once at mount
+   and never listens for storage events, so a write from the page
+   changes the stored value and not the running app. The first draft of
+   one of these tests did exactly that and reported the app broken when
+   the test was. */
+const fillTheStone = async (page: Page) => {
+  await page.getByRole("button", { name: "Profile", exact: true }).click();
+  await page.getByRole("button", { name: "full", exact: true }).click();
+};
+
 test.describe("notices for what happened while you looked away", () => {
+  test("nothing announces itself before the lodestone has been met", async ({ page }) => {
+    /* REPORTED: the pulse notice fired the moment the app opened, and
+       tapping it dropped the user onto the lodestone screen mid
+       first-run tutorial — a callout pointing at a stone that wasn't
+       active yet. The notice is an invitation back to a place you have
+       been; on a fresh install it invited you somewhere you'd never
+       seen, and the app had nothing coherent to show when the
+       invitation was accepted.
+
+       Deliberately does the one thing a first-run user does: opens the
+       app and moves around WITHOUT going to Field Notes. Filling the
+       stone from the dev control is included because that is the
+       loudest path to a notice — if anything can break the silence,
+       it's that. */
+    await boot(page, () => {
+      localStorage.setItem("herbanium.lodestoneCharge", JSON.stringify(0));
+    });
+    await expect(page.getByRole("button", { name: "Home", exact: true }))
+      .toBeVisible({ timeout: 30_000 });
+
+    for (const tab of ["Apothecary", "Journal", "Profile", "Home"]) {
+      await page.getByRole("button", { name: tab, exact: true }).click();
+      await page.waitForTimeout(600);
+      await expect(banner(page),
+        `${tab} shouldn't raise an elemental notice before the stone has been met`)
+        .toHaveCount(0);
+    }
+
+    await fillTheStone(page);
+    await page.waitForTimeout(1500);
+    await expect(banner(page),
+      "even a stone that just filled has nowhere to send you yet").toHaveCount(0);
+
+    // And once the stone HAS been met, the notice that was waiting arrives.
+    await meetTheLodestone(page);
+    await page.getByRole("button", { name: "Home", exact: true }).click();
+    await expect(banner(page),
+      "the charge kept — it should announce once there's somewhere to point")
+      .toBeVisible({ timeout: 15_000 });
+  });
+
   test("an elemental arriving announces itself, whatever path brought it", async ({ page }) => {
     /* THE GAP THIS CLOSES. The banner used to be armed by snapshotting
        the earned set in the steep flow's onDone, so it only fired for
@@ -52,7 +117,15 @@ test.describe("notices for what happened while you looked away", () => {
        announces itself. This drives it through the dev forcer, which
        adds an id the same way a real roll does — if the watcher is ever
        rewired back to a single caller, this fails. */
-    await boot(page);
+    /* Charge seeded empty on purpose. Meeting the lodestone unlocks BOTH
+       notices, and the dev profile's stone can already be full — so
+       without this the "nothing has arrived yet" line was asserting the
+       absence of a charge notice that had every right to be there. The
+       subject here is arrivals; the stone gets its own tests. */
+    await boot(page, () => {
+      localStorage.setItem("herbanium.lodestoneCharge", JSON.stringify(0));
+    });
+    await meetTheLodestone(page);
     await page.getByRole("button", { name: "Profile", exact: true }).click();
     await expect(banner(page), "nothing has arrived yet").toHaveCount(0);
 
@@ -76,17 +149,6 @@ test.describe("notices for what happened while you looked away", () => {
       "a charge that was already full is not news").toHaveCount(0);
   });
 
-  /* Driven through the dev charge control on Profile rather than by
-     writing localStorage: usePersistedState reads its key once at mount
-     and never listens for storage events, so a write from the page
-     changes the stored value and not the running app. The first draft
-     of this test did exactly that and reported the app broken when the
-     test was. */
-  const fillTheStone = async (page: Page) => {
-    await page.getByRole("button", { name: "Profile", exact: true }).click();
-    await page.getByRole("button", { name: "full", exact: true }).click();
-  };
-
   test("the stone filling while you're on another screen says so", async ({ page }) => {
     // The event the charge model created and nothing announced: the
     // lodestone fills from brewing, reviewing and writing, on screens
@@ -94,7 +156,8 @@ test.describe("notices for what happened while you looked away", () => {
     await boot(page, () => {
       localStorage.setItem("herbanium.lodestoneCharge", JSON.stringify(0));
     });
-    await page.waitForTimeout(2000);
+    await meetTheLodestone(page);
+    await page.waitForTimeout(1500);
     await expect(banner(page), "nothing to announce yet").toHaveCount(0);
 
     await fillTheStone(page);
@@ -125,6 +188,14 @@ test.describe("notices for what happened while you looked away", () => {
        Boots and then moves around, because the misfire was
        timing-dependent and a single assertion at t=0 was what let it
        through. */
+    /* BOTH RIBBONS, deliberately broad. I briefly narrowed this to the
+       arrival notice on the theory that a legitimately-filling stone
+       was tripping it. That was wrong, and the failure was real: no
+       elemental notice of any kind should speak before the lodestone
+       screen has been opened, and this test walks four tabs from a
+       fresh boot without going near it. The broad locator is the
+       stronger assertion and it was right the first time. */
+
     await boot(page);
     /* Wait on the app rather than on the clock. Asserting "no banner"
        after a fixed sleep races the thing it is testing: too early and
@@ -209,6 +280,7 @@ test.describe("notices for what happened while you looked away", () => {
     });
     await page.reload();
     await page.waitForTimeout(2000);
+    await meetTheLodestone(page);
     await page.getByRole("button", { name: "Profile", exact: true }).click();
 
     /* Clear the field rather than asserting it starts clear. Whether a
@@ -293,14 +365,32 @@ test.describe("notices for what happened while you looked away", () => {
       localStorage.setItem("herbanium.lodestoneCharge", JSON.stringify(0));
     });
     await page.waitForTimeout(2000);
+    await meetTheLodestone(page);
     await fillTheStone(page);
     await expect(banner(page)).toBeVisible({ timeout: 15_000 });
 
-    // exact: the ribbon itself is a role=button whose accessible name
-    // contains the word, so a loose match hits the banner instead of
-    // its ×.
+    /* Let the ribbon finish arriving before reaching for its ×. It fades
+       in over 0.42s and its dismissal waits a further 0.32s before the
+       callback fires, so a click that lands mid-arrival is asking a
+       moving target to do something it hasn't wired up yet. Visible is
+       not the same as ready here.
+
+       KNOWN LOAD-SENSITIVE — see the note in CLAUDE.md. This assertion
+       has failed under a full parallel run while passing alone and in a
+       file-only run, and a clean-path reproduction shows dismissal
+       working exactly as intended (charged=1 -> charged=0). The wait
+       below is the honest half-fix; if it fails again the next thing to
+       learn is WHICH ribbon survived, which the message now says.
+
+       exact: the ribbon itself is a role=button whose accessible name
+       contains the word, so a loose match hits the banner instead of
+       its ×. */
+    await page.waitForTimeout(600);
     await page.getByRole("button", { name: "dismiss", exact: true }).click();
-    await expect(banner(page)).toHaveCount(0);
+    await expect(banner(page),
+      "the × should put the ribbon away — if this fails, check whether the " +
+      "surviving text is 'pulsing' or 'charged', because they are different notices")
+      .toHaveCount(0);
     await page.waitForTimeout(1500);
     await expect(banner(page), "a dismissed notice must stay dismissed").toHaveCount(0);
   });

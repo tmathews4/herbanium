@@ -149,6 +149,21 @@ What broke it open, in order, and worth copying:
 Contention and slow machines are real, and neither is the first guess
 worth acting on, because both have fixes that hide evidence.
 
+**Open investigation — `e2e/elemental-notices.spec.ts` under load.** Tests
+in this file have failed in three separate full runs, a different one
+each time, always passing alone and in a file-only run. Two were
+diagnosed and fixed for real (a notice covering the steep's minimize
+button; notices firing before the lodestone had been met). The third —
+"dismissing it puts it away" — is unexplained: a clean-path
+reproduction shows the × working exactly as intended, so the failure
+only appears under parallel load.
+
+The file is inherently the most load-sensitive in the suite: nearly
+every test asserts an ABSENCE, and absence assertions race whatever
+they're waiting on. Don't add a retry. The next occurrence should
+report which ribbon survived — "pulsing" and "charged" are different
+notices with different owners, and the shared locator matches both.
+
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
 Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true locally, so a leftover server silently serves an old `dist/` and makes E2E results meaningless. Check with `ss -lntp | grep 5173` if results look impossible.

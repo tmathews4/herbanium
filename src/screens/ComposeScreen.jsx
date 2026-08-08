@@ -163,7 +163,7 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon }) => {
+export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   /* ONE FLAG, because there is one thing. The writing dock's panel
@@ -172,6 +172,20 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
      the same breath, and the only way they could diverge was a bug.
      Merged rather than reduced: it's a single value read in a handful
      of places, so a reducer would be ceremony around a boolean. */
+  /* Tell the app the lodestone has been met, the first time this view
+     is actually rendered. The elemental notices stay silent until then
+     — a ribbon inviting you back to a screen you have never opened had
+     nowhere coherent to land, and dropped first-run users into a
+     tutorial pointing at an inactive stone.
+
+     Keyed on the rendered view rather than on a tab tap: reaching
+     Field Notes by any route counts, and tapping the tab while already
+     on it doesn't need to count twice. */
+  const onLodestone = section === "shelf" && mode === "visitors";
+  useEffect(() => {
+    if (onLodestone) onLodestoneSeen?.();
+  }, [onLodestone, onLodestoneSeen]);
+
   const [writeOpen, setWriteOpen] = useState(false);
   /* Which verse form the Poem group returns to. The group's tab has to
      select SOMETHING, and sending everyone to Open each time would take

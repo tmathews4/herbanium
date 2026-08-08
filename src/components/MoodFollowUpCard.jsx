@@ -25,7 +25,7 @@
 import React from "react";
 import { Button } from "./layout";
 import { ThumbUp, ThumbDown } from "./icons";
-import { PARENT_MOODS, CURRENT_FEEL_EXTRAS } from "../data/canon";
+import { PARENT_MOODS, CURRENT_FEEL_EXTRAS, feltChips } from "../data/canon";
 import { formatAgo, getBlend } from "../helpers/misc";
 import { ff, theme } from "../theme";
 
@@ -72,7 +72,8 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => 
   // verdict above) so the picker only surfaces unexpected register.
   const extraMoodChips = React.useMemo(() => {
     const targetKeys = new Set(targets);
-    return [...PARENT_MOODS, ...CURRENT_FEEL_EXTRAS].filter(m => !targetKeys.has(m.key));
+    // "How did it land?" is a felt question — see feltChips in canon.
+    return feltChips([...PARENT_MOODS, ...CURRENT_FEEL_EXTRAS]).filter(m => !targetKeys.has(m.key));
   }, [targets]);
   const toggleExtraMood = (key) => {
     setExtraMoods(prev =>

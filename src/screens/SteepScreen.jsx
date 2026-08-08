@@ -18,16 +18,17 @@ import { warmupChime, playBrewChime } from "../helpers/chime";
 import {
   requestWebNotificationPermission, fireWebNotification,
 } from "../helpers/webNotification";
-import { PARENT_MOODS, CURRENT_MOOD_CHIPS } from "../data/canon";
+import { CURRENT_MOOD_CHIPS, feltChips } from "../data/canon";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: STEEP (takeover)
    ────────────────────────────────────────────────────────────── */
 
-// Pickers pull from the parent-mood canon: target row uses
-// PARENT_MOODS only (positive-only — no one aspires to feel
-// anxious), current-feel row concats the rough-edged extras.
-const DESIRED_MOOD_CHIPS = PARENT_MOODS;
+/* NO DESIRED-MOOD LIST HERE ANY MORE. There was one — PARENT_MOODS,
+   as the fallback for a chip row whose only call site has always passed
+   its own list — so the constant, and the positive-only reasoning above
+   it, described a picker this screen doesn't have. The steep captures
+   how you feel NOW; the target moods it reports on come in as a prop. */
 
 export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMoods, currentMoods, setCurrentMoods, sessions, onDone, onCancel, minimized = false, onMinimize, onRemainingChange, onSaveRecipe, onRenameBlend, alreadySaved = false }) => {
   const total = blend.timeS || 360;
@@ -545,7 +546,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
           label="Right now I feel…"
           value={currentMoods || []}
           setValue={setCurrentMoods}
-          chips={CURRENT_MOOD_CHIPS}
+          chips={feltChips(CURRENT_MOOD_CHIPS)}
         />
       </div>
 
@@ -917,7 +918,7 @@ const MoodChipRow = ({ label, value, setValue, chips }) => {
         </div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-start" }}>
-        {(chips || DESIRED_MOOD_CHIPS).map(c => {
+        {chips.map(c => {
           const isOn = selected.has(c.key);
           return (
             <button

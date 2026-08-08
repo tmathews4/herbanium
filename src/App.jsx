@@ -840,10 +840,17 @@ export default function App() {
   // meter can't be ground out in an evening. See data/lodestone.js.
   const [lodestoneLedger, setLodestoneLedger] = usePersistedState("lodestoneLedger", null);
   const [tabVisits, setTabVisits] = usePersistedState("tabVisits", {});
+  /* NOTHING ABOUT ELEMENTALS SPEAKS BEFORE YOU'VE MET THEM.
+     Set the first time the lodestone screen is opened; read by both
+     top-of-screen notices below. See the note where they render. */
+  const [lodestoneSeen, setLodestoneSeen] = usePersistedState("lodestoneSeen", false);
   const [overlay, setOverlay] = useState(null); // null | "steep" | "ingredient" | "blend" | "cup" | "entry" | "glimpse"
   // True while a brew owns the screen, open or minimized. Read by the
   // top-of-screen notices, which must not land on the steep's controls.
   const steepUp = () => overlay === "steep";
+  // Both notices are about elementals, so neither may speak until the
+  // user has been to the screen elementals live on.
+  const elementalNoticesAllowed = () => lodestoneSeen && !steepUp();
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate
@@ -2552,7 +2559,7 @@ export default function App() {
         <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} lodestoneCharge={lodestoneCharge} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} blendTourStep={activeTourStep} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} onLodestoneSeen={() => setLodestoneSeen(true)} blendTourStep={activeTourStep} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={() => { setToursSeen({}); setToursEnabled(true); navigateTab("home"); }} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first
@@ -2833,7 +2840,26 @@ export default function App() {
           Log/summon button there picks it up later). Less
           interrupting than the previous modal card; the user can
           keep doing whatever they were doing. */}
-      {/* NOT OVER THE STEEP. Both ribbons below are position:fixed at
+      {/* AND NOT BEFORE THE LODESTONE HAS BEEN MET.
+
+          Reported: the pulse notice fired the moment the app opened,
+          and tapping it dropped the user onto the lodestone screen mid
+          first-run tutorial — a tutorial callout pointing at a stone
+          that wasn't active yet. The notice is an invitation back to a
+          place you have been; on a fresh install it was an invitation
+          to somewhere you'd never seen, and the app had nothing
+          coherent to show when the invitation was accepted.
+
+          So neither notice speaks until the lodestone screen has been
+          opened once. Nothing is lost by waiting: the charge keeps
+          until it's spent, arrivals stay in pendingArrivals, and both
+          announce the moment there's a place for them to point at.
+
+          This also explains a test that had been failing intermittently
+          and was nearly written off — it walked four tabs from a fresh
+          boot and found a notice waiting. It was right.
+
+          NOT OVER THE STEEP. Both ribbons below are position:fixed at
           the top of the screen, and the steep screen's own header —
           cancel on the left, minimize on the right — sits in that exact
           band: measured at y=35, fifteen pixels tall, under a card
@@ -2855,7 +2881,7 @@ export default function App() {
           interrupt. Minimized counts too: the minimized brew has its
           own banner at the top of the column, and stacking a fixed
           ribbon over that is the same mistake one layer down. */}
-      {!steepUp() && glimpseElemental && (
+      {elementalNoticesAllowed() && glimpseElemental && (
         <ElementalGlimpseBanner
           onLogIt={() => {
             // Visitors lives under Notebook (Recipes / Journal /
@@ -2888,7 +2914,7 @@ export default function App() {
           top of the screen is a notification tray, and the arrival is
           the more immediate of the two — the charge keeps until it's
           spent, so it can wait its turn. */}
-      {!steepUp() && chargeReady && !glimpseElemental && (
+      {elementalNoticesAllowed() && chargeReady && !glimpseElemental && (
         <ElementalGlimpseBanner
           title="your lodestone is charged"
           body="Enough brewing, reviewing and writing to draw something out"

@@ -131,6 +131,19 @@ export const OnboardingScreen = ({ onComplete }) => {
         flex: 1, display: "flex", flexDirection: "column",
         justifyContent: "center", padding: "20px 28px 20px",
         maxWidth: 520, width: "100%", alignSelf: "center",
+        /* WITHOUT THIS THE PADDING ABOVE DOES NOTHING VISIBLE. The
+           28px gutter has always been specified here, and this element
+           was content-box, so `width: 100%` plus the padding came to
+           100% + 56px: the box overflowed its column and the cards sat
+           flush against both screen edges. Reported on a Pixel as the
+           cards being too close to the border.
+
+           The tell was in this same file — the nav row below already
+           carries boxSizing, which is why BACK and next looked properly
+           inset while the content they sat under did not. There is no
+           global border-box reset in index.css; the one rule that sets
+           it is scoped to the desktop frame. */
+        boxSizing: "border-box",
       }}>
         {step === 0 && <StepWelcome />}
         {step === 1 && (
@@ -444,26 +457,36 @@ const StepDraw = ({ value, setValue }) => {
    which is the whole register this app is trying to work in — so the
    labels stay and the notes carry them.
 
-   Every example names something the catalogue actually ships, checked
-   against the profiles rather than written from memory: these are the
-   ingredients whose extraction rows carry the most words in each
-   family. An invented example would be the same failure as an invented
-   effect, one register down.
+   NO TEA NAMES HERE. The first draft named the ingredients that
+   actually carry each family — lapsang for smoky, gyokuro for marine,
+   pu-erh for earthy — which was accurate and was the wrong move at the
+   door. Naming lapsang to someone who has never heard of lapsang
+   explains nothing; it just moves the unfamiliar word one line down and
+   adds the suggestion that they should have known it. The catalogue is
+   where those names are worth learning, and by then they arrive with a
+   cup attached.
+
+   So the notes describe the sensation instead. The accuracy work still
+   paid for itself — checking which ingredients carry each family is
+   what settled the wording, since "sea air" comes from having looked at
+   what marine actually tags. Ordinary kitchen words stay: clove and
+   ginger are things people have smelled, unlike a Chinese smoked black
+   tea.
 
    `creamy` gets the odd one out, and deliberately: it is the only
    option here that isn't a taste at all. Saying so is more useful than
    pretending it belongs. */
 const FLAVOR_NOTES = {
-  fruity:  "hibiscus, cranberry, elderflower",
-  floral:  "jasmine and linden, the perfumed cup",
-  sweet:   "honeyed, apple-sweet — nothing added",
-  spiced:  "clove, ginger, black pepper",
-  smoky:   "lapsang's pine fire",
-  earthy:  "pu-erh and roasted hojicha, forest floor",
+  fruity:  "berry and orchard fruit, tart or sweet",
+  floral:  "petals and perfume, the scented cup",
+  sweet:   "honeyed and apple-sweet — nothing added",
+  spiced:  "clove, ginger, warm pepper",
+  smoky:   "woodsmoke, a fire-cured edge",
+  earthy:  "forest floor, damp wood, roasted grain",
   fresh:   "mint and citrus peel, the bright edge",
-  vegetal: "green tea's grassy side — sencha, matcha",
-  marine:  "the sea-air note in gyokuro",
-  creamy:  "a texture, not a taste — vanilla, thick oolong",
+  vegetal: "grassy and green, like fresh leaves",
+  marine:  "sea air, a clean saline note",
+  creamy:  "a texture, not a taste — round and coating",
 };
 const FLAVOR_OPTIONS = PARENT_FLAVORS.map(f => ({
   ...f,
