@@ -221,9 +221,10 @@ export const expandDraw = (picked = []) => {
  * beside Anxious, Stressed and Tired, which are adjectives and which
  * made the mismatch louder rather than hiding it.
  *
- * Only the words that change are listed. Calm, Grounded and Sleepy are
- * already predicate adjectives and pass through untouched, which is
- * also why the old labels read fine often enough for this to survive. */
+ * Deliberately partial: only the words that change are listed. Calm,
+ * Grounded and Sleepy are already predicate adjectives and pass through
+ * untouched, which is also why the old labels read fine often enough
+ * for this to survive. */
 const FELT_LABEL = {
   focus:     "Focused",
   energy:    "Energised",

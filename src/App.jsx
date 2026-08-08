@@ -83,6 +83,82 @@ import { SCREEN_TOURS } from "./data/tours";
 import { GREETING_ARRIVAL_MS } from "./components/TeaGreeting";
 
 /* ──────────────────────────────────────────────────────────────
+   ScreenFallback — what a lazy screen shows while it arrives.
+
+   MEASURED FIRST, because the obvious fix was the wrong one. The queued
+   idea was "preload the screens so they don't pop in", and preloading
+   already exists — an idle-time import() of every route, running from
+   first paint and right through onboarding. On the production build at
+   4x CPU throttle it saves about 170ms of a 830ms wait.
+
+   The rest is not network. First entry into the Compose chunk costs
+   ~800ms whichever section you open; every navigation after that costs
+   ~250ms, and the dense blend screen measures 252ms against the Journal
+   list's 253ms. So the blend screen is not slow because it is dense —
+   it is usually just the first Compose screen anyone opens, and it pays
+   the chunk's one-time mount for the whole app. Preloading cannot help
+   with that: import() evaluates the module, but React's first render
+   can't happen until you navigate.
+
+   So this stops trying to remove the wait and makes it legible instead.
+   The old fallback was a bare ivory panel: on a fast navigation you saw
+   nothing, and on a slow one you saw a blank screen with no indication
+   the app was doing anything — which is what reads as "pop-in".
+
+   THE DELAY IS SHORT, AND THAT IS THE CORRECTION. My first pass held it
+   for 320ms to protect the fast navigations from a flash — which was
+   guarding against something that cannot happen. React only suspends
+   when the chunk isn't ready, so a warm navigation never mounts this
+   component at all; measured, the placeholder's peak opacity across a
+   warm tab switch is 0.00. The protection was already free.
+
+   And holding it that long actively hurt. Sampling what is on screen
+   through a cold entry: HOME alone to 250ms, HOME plus this fallback
+   from ~300ms, COMPOSE at 757ms. The fallback is only up for about
+   450ms, so a 320ms delay meant appearing for the final 130ms — a
+   flash, which is worse than the blank panel it replaced.
+
+   120ms instead: long enough that a momentary suspend stays invisible,
+   short enough to cover the wait it exists to explain. Pure CSS, an
+   animation with a delay and `both` fill, so there is no timer to leak
+   and no state to re-render.
+   ────────────────────────────────────────────────────────────── */
+const ScreenFallback = ({ zIndex }) => (
+  <div style={{
+    position: "absolute", inset: 0, background: theme.ivory, zIndex,
+    display: "flex", alignItems: "center", justifyContent: "center",
+  }}>
+    <img
+      src="/herbanium-logo-icon.svg"
+      alt=""
+      aria-hidden
+      width={40}
+      height={40}
+      style={{
+        display: "block",
+        // Fades in only after the wait has outlived a warm navigation,
+        // then breathes so a long wait reads as working rather than
+        // stuck. `both` holds the from-state during the delay.
+        animation: "screenFallbackIn 0.4s ease 0.12s both, screenFallbackBreathe 2.4s ease-in-out 0.52s infinite",
+      }}
+    />
+    <style>{`
+      @keyframes screenFallbackIn {
+        from { opacity: 0; transform: scale(0.94); }
+        to   { opacity: 0.5; transform: scale(1); }
+      }
+      @keyframes screenFallbackBreathe {
+        0%, 100% { opacity: 0.5; }
+        50%      { opacity: 0.28; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        @keyframes screenFallbackBreathe { 0%, 100% { opacity: 0.5; } }
+      }
+    `}</style>
+  </div>
+);
+
+/* ──────────────────────────────────────────────────────────────
    Herbanium — interactive mock
    Aesthetic: warm paper / apothecary journal
    ────────────────────────────────────────────────────────────── */
@@ -2556,7 +2632,7 @@ export default function App() {
         // permanently hidden, only temporarily passed beneath.
         paddingBottom: "var(--app-dock-h, 0px)",
       }}>
-        <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory }} />}>
+        <Suspense fallback={<ScreenFallback />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
         {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} lodestoneCharge={lodestoneCharge} />}
         {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} onLodestoneSeen={() => setLodestoneSeen(true)} blendTourStep={activeTourStep} />}
@@ -2650,7 +2726,7 @@ export default function App() {
         />
       )}
 
-      <Suspense fallback={<div style={{ position: "absolute", inset: 0, background: theme.ivory, zIndex: 50 }} />}>
+      <Suspense fallback={<ScreenFallback zIndex={50} />}>
       {overlay === "steep" && session && (
         <SteepScreen
           // Key on the blend id (or name fallback) so swapping the

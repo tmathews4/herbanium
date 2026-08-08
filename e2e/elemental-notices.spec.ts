@@ -37,7 +37,23 @@ async function boot(page: Page, seed: () => void = () => {}) {
   await page.goto("/?dev");
 }
 
+/* THREE LOCATORS, because there are two notices and they are not
+   interchangeable.
+
+   `banner` matches either ribbon and belongs only where the claim is
+   "no elemental notice of any kind" — the silence tests. Using it to
+   assert a SPECIFIC notice appeared is what made this file fragile:
+   a test would wait for `banner`, be satisfied by the pulsing ribbon,
+   and then fail on the charged one's body text. That has now caused
+   three separate failures under load, each looking like a different
+   bug.
+
+   The two notices have different owners and different lifetimes — the
+   charge keeps until it is spent, an arrival stays queued until it is
+   met — so a test that means one of them says which. */
 const banner = (page: Page) => page.getByText(/your lodestone is (pulsing|charged)/i).first();
+const arrivalBanner = (page: Page) => page.getByText(/your lodestone is pulsing/i).first();
+const chargeBanner = (page: Page) => page.getByText(/your lodestone is charged/i).first();
 
 /* Neither notice speaks until the lodestone screen has been opened
    once — a ribbon inviting you back somewhere you've never been had
@@ -60,6 +76,25 @@ async function meetTheLodestone(page: Page) {
    the test was. */
 const fillTheStone = async (page: Page) => {
   await page.getByRole("button", { name: "Profile", exact: true }).click();
+  /* EMPTY FIRST, and this is the fix for the last of the load-sensitive
+     failures in this file.
+
+     The charge notice fires on a TRANSITION to full, not on being full
+     — `chargedRef` compares against the previous value precisely so
+     that opening the app on an already-charged stone doesn't greet you
+     with old news. So clicking "full" on a stone that is already full
+     is a no-op, and no notice appears.
+
+     Which state the stone starts in depended on ordering: the test
+     seeds lodestoneCharge to 0 in localStorage, and in ?dev the seed
+     mode is re-applied in an effect that can land after the first
+     charge-watch has run. Under load that ordering shifts, and the
+     test failed for asserting a notice the app was right not to send.
+
+     Emptying first makes the transition real whatever happened before,
+     which is what the test meant all along. */
+  await page.getByRole("button", { name: "empty", exact: true }).click();
+  await page.waitForTimeout(300);
   await page.getByRole("button", { name: "full", exact: true }).click();
 };
 
@@ -131,7 +166,7 @@ test.describe("notices for what happened while you looked away", () => {
 
     await page.getByRole("button", { name: /Force glimpse banner/i }).click();
 
-    await expect(banner(page), "an elemental that just arrived should say so")
+    await expect(arrivalBanner(page), "an elemental that just arrived should say so")
       .toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/something stirs in the stone/i)).toBeVisible();
   });
@@ -162,7 +197,7 @@ test.describe("notices for what happened while you looked away", () => {
 
     await fillTheStone(page);
 
-    await expect(banner(page), "a stone that just filled should say so")
+    await expect(chargeBanner(page), "a stone that just filled should say so")
       .toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/brewing, reviewing and writing/i)).toBeVisible();
   });
@@ -300,7 +335,7 @@ test.describe("notices for what happened while you looked away", () => {
     }
 
     await page.getByRole("button", { name: /Force glimpse banner/i }).click();
-    await expect(banner(page), "one arriving should announce itself")
+    await expect(arrivalBanner(page), "one arriving should announce itself")
       .toBeVisible({ timeout: 15_000 });
 
     // Go and meet them, the way the banner is asking you to.
@@ -367,7 +402,7 @@ test.describe("notices for what happened while you looked away", () => {
     await page.waitForTimeout(2000);
     await meetTheLodestone(page);
     await fillTheStone(page);
-    await expect(banner(page)).toBeVisible({ timeout: 15_000 });
+    await expect(chargeBanner(page)).toBeVisible({ timeout: 15_000 });
 
     /* Let the ribbon finish arriving before reaching for its ×. It fades
        in over 0.42s and its dismissal waits a further 0.32s before the

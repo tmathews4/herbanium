@@ -53,17 +53,28 @@ const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 // (gem hues, not surface hues); the SVG renderer pushes them
 // further with brighter inset highlights, more saturated gradient
 // stops, and stronger glow halos so each color almost emits.
+/* THE OTHER HALF OF THE SAME DRIFT. This map had exactly the gaps
+   EFFECT_ADJECTIVES did — `warm` and `body` where the families are
+   `heat`, `comfort`, `digestive` and `immune` — and I fixed the
+   adjectives without noticing it, because the two maps sit forty lines
+   apart and look nothing alike.
+
+   tools/audit-vocabulary-coverage.mjs found it in its first useful run,
+   which is the argument for the tool: a bug of this shape is invisible
+   to a reader who is already looking at the file. */
 const CRYSTAL_EFFECT_COLORS = {
-  calm:   "#4DEB7E", // neon spring-green
+  calm:      "#4DEB7E", // neon spring-green
   soothing:  "#7CF0B4", // pale jade
   grounding: "#2FA96B", // deep viridian
   uplifting: "#FFE566", // bright citrine
-  focus:  "#3EBAFF", // electric sapphire
-  energy: "#FFC318", // saturated amber-yellow
-  warm:   "#FF7A4C", // hot coral
-  cool:   "#2EE8EC", // electric aqua
-  body:   "#C68F47", // luminous bronze
-  sleep:  "#C77FFF", // neon amethyst
+  focus:     "#3EBAFF", // electric sapphire
+  energy:    "#FFC318", // saturated amber-yellow
+  comfort:   "#FF9E6B", // warm carnelian — the wrapped-blanket register
+  heat:      "#FF7A4C", // hot coral            (was `warm`)
+  cool:      "#2EE8EC", // electric aqua
+  digestive: "#B8E04A", // bright peridot
+  immune:    "#C0432F", // bloodstone red       (was `body`)
+  sleep:     "#C77FFF", // neon amethyst
 };
 
 const CRYSTAL_FLAVOR_COLORS = {
@@ -85,30 +96,53 @@ const CRYSTAL_FLAVOR_COLORS = {
 // vocabulary the elementals already uses (see elementalAdjectives.js)
 // so the crystal name reads as a peer to the elementals on the
 // shelf below, not a separate language.
+/* KEYED BY FAMILY, and it has to stay exhaustive.
+
+   Four families had no entry here — comfort, heat, digestive, immune —
+   because this map still carried two names the families no longer use:
+   `warm` (the family is `heat`, whose label is "warming") and `body` (a
+   catch-all from before the body register was split into comfort,
+   digestive and immune). A crystal whose winning axis landed on any of
+   the four named itself "A Jade and undefined Swirling Crystal".
+
+   The description path had a `|| "Quiet"` fallback for exactly this and
+   the NAME path did not, so the guard existed and covered the quieter
+   half. Both are covered now, and tests/crystal-naming.test.mjs holds
+   the map exhaustive so the next family added can't reopen it. */
 const EFFECT_ADJECTIVES = {
-  calm:   "Sage",
+  calm:      "Sage",
   soothing:  "Jade",
   grounding: "Verdant",
   uplifting: "Sunstone",
-  focus:  "Sky",
-  energy: "Citrine",
-  warm:   "Ember",
-  cool:   "Aquamarine",
-  body:   "Bloodstone",
-  sleep:  "Twilight",
+  focus:     "Sky",
+  energy:    "Citrine",
+  comfort:   "Carnelian",
+  heat:      "Ember",       // was `warm`
+  cool:      "Aquamarine",
+  digestive: "Peridot",
+  immune:    "Bloodstone",  // was `body`, and bloodstone was always the
+                            // health-register colour — it just had no
+                            // family to belong to until immune existed
+  sleep:     "Twilight",
 };
 
 const FLAVOR_ADJECTIVES = {
-  fruit:   "Garnet",
-  floral:  "Rose-Quartz",
-  earthy:  "Onyx",
-  spiced:  "Cinnabar",
-  smoky:   "Obsidian",
-  fresh:   "Frost",
-  vegetal: "Jade",
-  marine:  "Tide",
-  sweet:   "Amber",
-  body:    "Stone",
+  fruit:     "Garnet",
+  floral:    "Rose-Quartz",
+  earthy:    "Onyx",
+  spiced:    "Cinnabar",
+  smoky:     "Obsidian",
+  fresh:     "Frost",
+  // Was "Jade", which soothing also uses — and a crystal takes one
+  // colour from each axis, so an effect-soothing, flavour-vegetal cup
+  // could name itself "A Jade and Jade Swirling Crystal". The euphony
+  // pass can't save that: it rejects the root echo, tries the swap,
+  // gets the identical pair back, and accepts it. Malachite is the
+  // same green without the collision.
+  vegetal:   "Malachite",
+  marine:    "Tide",
+  sweet:     "Amber",
+  mouthfeel: "Stone",       // was `body`
 };
 
 // Each voice describes the crystal's interior glow and the
@@ -225,6 +259,18 @@ function collectRecentMoods(sessions, journalEntries, now) {
   return moods;
 }
 
+/* The defect register is not a palate.
+   `off` collects bitter, astringent, tannic, harsh, acrid, soapy,
+   muddy, medicinal, pith and sharp — the words for a cup that went
+   wrong. FlavorMap already strips them from the flavour strip
+   (EXCLUDED_FROM_FLAVOR) so a reader doesn't file them as tastes, and
+   the same reasoning applies harder here: a crystal is meant to be a
+   portrait of what you reach for, and "you mostly brew things
+   astringent" is a brewing note, not an identity.
+   Left in the tally and it could win an axis outright — which is how
+   the crystal first came to have a family with no colour word. */
+const NOT_A_PALATE = new Set(["off"]);
+
 function collectRecentFlavors(sessions, getBlend, now) {
   const flavors = [];
   for (const s of sessions || []) {
@@ -234,7 +280,7 @@ function collectRecentFlavors(sessions, getBlend, now) {
     if (typeof blend.flavor === "string") flavors.push(blend.flavor);
     if (Array.isArray(blend.flavors))    flavors.push(...blend.flavors);
   }
-  return flavors;
+  return flavors.filter(f => !NOT_A_PALATE.has(FAMILY_BY_FLAVOR[f]));
 }
 
 // Pull the user's onboarding-declared intent — the moods they said
@@ -383,14 +429,22 @@ export function computeMoodCrystal({
 
   const [patternWord, patternVerb, patternSoloVoice] = patternForProfile(profile);
 
+  /* Last line of defence for the NAME, mirroring the `|| "Quiet"` the
+     description has carried all along. The maps above are held
+     exhaustive by a test, so this should never fire — but a name is the
+     most visible string in the app and "undefined" in it is the kind of
+     thing a user reports rather than a developer notices. */
+  const safePrimaryAdj = primaryAdj || "Quiet";
+  const safeSecondaryAdj = secondaryAdj || null;
+
   // Single-axis crystals skip the pattern word — pattern needs two
   // colors to read as a relationship. "A Sage Crystal" reads cleaner
   // than "A Sage Threaded Crystal" when there's nothing to thread
   // it with.
   let namePieces;
   let name;
-  if (!secondaryAdj) {
-    namePieces = [primaryAdj];
+  if (!safeSecondaryAdj) {
+    namePieces = [safePrimaryAdj];
     name = `${articleFor(namePieces[0])} ${namePieces.join(" ")} Crystal`;
   } else {
     // Run the same "sounds good" pass the unique creation title
@@ -401,7 +455,7 @@ export function computeMoodCrystal({
     // try the swap. If both fail, accept the rank-correct one —
     // pattern is a per-profile signature, so we don't substitute
     // it; the user keeps their crystal's identity intact.
-    const ranked  = orderModifiers(primaryAdj, secondaryAdj);
+    const ranked  = orderModifiers(safePrimaryAdj, safeSecondaryAdj);
     const swapped = [ranked[1], ranked[0]];
     const rankedSeq  = [...ranked,  patternWord];
     const swappedSeq = [...swapped, patternWord];

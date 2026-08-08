@@ -36,7 +36,30 @@ node tools/audit-unreachable.mjs       # declared but never visible in a cup
 node tools/audit-vocabulary.mjs        # is a WORD invented? census vs the docs
 node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at once
 node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
+node tools/audit-vocabulary-coverage.mjs  # maps that drifted from the list they key on
 ```
+
+`audit-vocabulary-coverage` is the answer to a different question from
+the others: not "is this claim sourced" but "does this lookup table
+still match the vocabulary it was written against". Two bugs in one day
+had that shape — a crystal named "A Jade and **undefined** Swirling
+Crystal" because its colour maps still keyed on `warm` and `body` after
+the families became `heat`, `comfort`, `digestive` and `immune`; and
+four hint flags that were persisted, seeded and threaded to screens
+that had stopped reading them.
+
+**The half worth running it for is EXTRA, not MISSING.** A stale key is
+what makes a map look covered — every gap found had one sitting next to
+it, and the file reads as complete right up until you compare it to the
+list. The tool found the second drifted map in `moodCrystal.js` after
+the first had just been fixed by hand, in the same file, by someone
+looking straight at it.
+
+Not every hit is a bug. Three spellings of the flavour vocabulary are
+all legitimate — tokens (`minty`), families (`fresh`), chips (`fruity`)
+— and a map may be partial on purpose. Say so in a comment on the map
+and the audit skips it; delete the comment and it reports again, which
+is why there's no exemption list to go stale.
 
 The drift audit checks flavour at FAMILY level, not leaf level — the
 docs write descriptive prose for taste where they use controlled words
@@ -149,20 +172,31 @@ What broke it open, in order, and worth copying:
 Contention and slow machines are real, and neither is the first guess
 worth acting on, because both have fixes that hide evidence.
 
-**Open investigation — `e2e/elemental-notices.spec.ts` under load.** Tests
-in this file have failed in three separate full runs, a different one
-each time, always passing alone and in a file-only run. Two were
-diagnosed and fixed for real (a notice covering the steep's minimize
-button; notices firing before the lodestone had been met). The third —
-"dismissing it puts it away" — is unexplained: a clean-path
-reproduction shows the × working exactly as intended, so the failure
-only appears under parallel load.
+**Closed — `e2e/elemental-notices.spec.ts` under load.** Kept here
+because the shape recurs. Tests in this file failed across five full
+runs, a different one each time, always passing alone. It read as one
+flaky file. It was four separate causes, and calling it "inherently
+load-sensitive" delayed finding any of them:
 
-The file is inherently the most load-sensitive in the suite: nearly
-every test asserts an ABSENCE, and absence assertions race whatever
-they're waiting on. Don't add a retry. The next occurrence should
-report which ribbon survived — "pulsing" and "charged" are different
-notices with different owners, and the shared locator matches both.
+1. A notice card covering the steep screen's minimize button — a real
+   bug any user could hit.
+2. Notices firing before the lodestone had ever been opened — also
+   real, and reported independently.
+3. A shared `banner()` locator matching `pulsing|charged`, so a test
+   meaning one notice could be satisfied by the other and then fail on
+   the body text of the one it wanted. Three failures, three faces,
+   one cause. Split into `arrivalBanner` / `chargeBanner`, with
+   `banner` kept only for the silence tests where "any notice at all"
+   is the actual claim.
+4. `fillTheStone` clicking "full" on a stone that could already be
+   full. The charge notice fires on a TRANSITION — deliberately, so an
+   already-charged stone doesn't greet you with old news — so the test
+   was asserting a notice the app was right not to send. Emptying
+   first makes the transition real.
+
+Two of the four were app bugs and two were test bugs, and every one of
+them looked like flake until it was read properly. Load didn't cause
+any of them; it changed the timing enough to expose them.
 
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 

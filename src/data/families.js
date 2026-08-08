@@ -113,7 +113,7 @@ export const MOOD_VOCABULARY = [
     leaves: [{
       token: "grounding",
       counterpart: null,   // adaptogen-adjacent; largely TCM and lay usage
-      summary: "Settling, centering, earthy.",
+      summary: "Settled in yourself — steadier footing rather than a quieter mind.",
       body: "Reishi's triterpenes carry this most strongly, with ashwagandha's withanolides and ripe pu-erh's aged-fermentation chemistry close behind. Lapsang's pine smoke and dandelion root pull here too — the deeper, low-pitched register.",
     }],
   },
@@ -182,7 +182,7 @@ export const MOOD_VOCABULARY = [
     leaves: [{
       token: "cooling",
       counterpart: "refrigerant; TCM cool-natured / Yin",
-      summary: "Refreshes and clarifies. The settling-down register opposite warming.",
+      summary: "Refreshes and clears the head — a cup that reads cool whatever its temperature.",
       body: "Green tea and white tea sit here through their lighter chemistry and lower oxidation; hibiscus through its anthocyanin tartness; mints through menthol. Distinct from menthol's mouthfeel cool, though the two can co-occur.",
     }],
   },
@@ -231,7 +231,7 @@ export const MOOD_VOCABULARY = [
       token: "sleepy",
       label: "sleep",
       counterpart: "sedative / hypnotic — a separate materia medica category from nervine",
-      summary: "Sedating, drowsiness-adjacent.",
+      summary: "The slow slide toward sleep — heavier than calm, and meant for the end of the day.",
       body: "Valerian's valerenic acid is the strongest in the catalog, with passionflower and reishi's triterpenes behind it. Distinct from calm on paper — nervine and sedative are different actions.",
     }],
   },
