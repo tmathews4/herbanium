@@ -13,8 +13,7 @@
 // to pass it. That's what this spec is for. It walks to each place a
 // brew panel appears and asserts the button is in it.
 import { test, expect, type Page } from "@playwright/test";
-import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
-import { brewFromDetail } from "./helpers/brew";
+import { brewFromDetail, bootApp as boot, ensureBrewPanel } from "./helpers/brew";
 
 // Opening a detail overlay pulls a lazy-loaded screen chunk and then
 // waits for the explorer to mount and settle. Under four workers that
@@ -23,62 +22,10 @@ import { brewFromDetail } from "./helpers/brew";
 // already make, for the same reason.
 test.beforeEach(() => test.slow());
 
-async function boot(page: Page) {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.addInitScript((schema) => {
-    localStorage.setItem("herbanium.schemaVersion", schema as string);
-    localStorage.setItem("herbanium.toursEnabled", "false");
-    localStorage.setItem("herbanium.toursSeen", JSON.stringify({
-      home: true, blend: true, herbanium: true,
-      recipes: true, reflections: true, fieldnotes: true,
-    }));
-  }, CURRENT_SCHEMA);
-  await page.goto("/?dev");
-}
-
+// boot and ensureBrewPanel both live in ./helpers/brew now — the walk to
+// a brew panel is shared knowledge, and this file was the second place
+// to know it. Same argument as brewFromDetail's own header.
 const brewButton = (page: Page) => page.locator('[data-tour="blend-brew"]');
-
-// Get to a rendered, open brew panel on whichever screen we're on.
-//
-// Two independent collapses, and they are NOT the same control. Detail
-// screens wrap the explorer in a "Brewing" section that may be shut, and
-// the brew row inside the panel folds on its own. Only expand either one
-// if it's actually closed — an unconditional click on the section header
-// SHUTS an already-open one, which is what the first version of this
-// spec did while reporting "the brew panel should be on screen".
-//
-// Both are asked directly now, via aria-expanded. Inferring "shut" from
-// "its contents aren't here yet" is the same bug wearing a condition.
-async function ensureBrewPanel(page: Page) {
-  // Say WHICH stage is missing. "no brew panel" covered three different
-  // failures — the detail overlay never opened, its lazy chunk never
-  // arrived, or the panel never portalled into the slot — and under
-  // contention they are not the same bug.
-  const detail = page.locator('[data-testid="blend-detail"]');
-  if (await detail.count()) {
-    await expect(detail, "the detail overlay should be open").toBeVisible({ timeout: 30_000 });
-  }
-  // ASK THE SECTION, don't guess from its contents. This used to read
-  // "if the brew row isn't in the DOM, the section must be shut" — and
-  // on a cold lazy chunk the row simply hasn't rendered yet, so the
-  // click SHUT a section that was already open and the panel never
-  // came back. It failed two or three tests a run, never the same
-  // ones, which is what sent this looking like load rather than logic.
-  const section = page.getByTestId("brewing-section");
-  if (await section.count()) {
-    await expect(section, "the Brewing section should say whether it's open")
-      .toHaveAttribute("aria-expanded", /true|false/, { timeout: 30_000 });
-    if ((await section.getAttribute("aria-expanded")) !== "true") await section.click();
-  }
-  const row = page.locator('[data-tour="blend-controls"]').first();
-  // 45s. This waits on a lazy screen chunk, an explorer mount and a
-  // portal into the host's dock; under four workers it has measured
-  // past 30s. It is a load-tolerance number, not a correctness one —
-  // the same walk takes ~2s run alone.
-  await expect(row, "the brew panel should be on screen").toBeVisible({ timeout: 45_000 });
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
-  await expect(page.locator('[data-tour="blend-sliders"]').first()).toBeVisible();
-}
 
 test.describe("every brew window has a Brew button", () => {
   test("composing a blend", async ({ page }) => {

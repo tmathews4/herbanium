@@ -248,7 +248,11 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
                    : null;
 
   return (
-    <div ref={barRef} style={{
+    // data-testid so a test can ask where the menu IS. It sits at z-40,
+    // above every detail overlay, so anything that strays under it is
+    // simply gone — see e2e/brew-dock-reachable.spec.ts, which measures
+    // each brew dock against this rect.
+    <div ref={barRef} data-testid="main-menu" style={{
       // OVERLAYS the page rather than sitting beside it, so the page
       // shows through — the whole point of the glass. It used to be a
       // flex sibling, which displaced the page instead of covering it,
