@@ -1691,7 +1691,13 @@ export const BlendExtractionExplorer = ({
                 // of one already on screen, and inherit its "already
                 // arrived" state with it — the new warning would slide
                 // in silently while an unrelated one re-animated.
-                <Arrival key={`${w.kind}:${w.text}`} duration={240} style={{
+                <Arrival key={`${w.kind}:${w.text}`} duration={240}
+                  // Keyed by KIND, not by copy. The antagonism spec asserts a
+                  // warning is present and then asserts what it does NOT say —
+                  // a text-matched locator would go quiet the moment the
+                  // wording it matched was the wording being corrected.
+                  data-testid={`cup-warning-${w.kind}`}
+                  style={{
                   padding: "8px 10px 8px 12px",
                   borderLeft: `2px solid ${advisory.accent}`,
                   background: advisory.bg,

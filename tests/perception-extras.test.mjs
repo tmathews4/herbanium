@@ -14,6 +14,8 @@
 
 import {
   loudnessOf, attenuateFragileEffects, FRAGILE_EFFECTS,
+  applyEffectSynergies, buildWarnings, antagonismFactor,
+  ANTAGONISM_MIN_MG, ANTAGONISM_FULL_MG, ANTAGONISM_FLOOR,
 } from "../src/algo/perception.js";
 import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
 import { ALLOWED_PARADOXES } from "../src/algo/perception.js";
@@ -396,7 +398,11 @@ test("a caffeinated cup with sedative herbs is told they're fighting", () => {
   const fired = warnings.filter(w => w.kind === "antagonism");
   assert(fired.length === 1,
     `expected the antagonism warning on black tea + chamomile, got ${fired.length}`);
-  assert(/works against|uphill/i.test(fired[0].text),
+  // Matches the CLAIM, not a phrasing. "uphill" was in the original
+  // wording and is deliberately gone: it said the caffeine wins and the
+  // sedatives are spent losing, which the valerian/hops trial
+  // contradicts. The claim that has to survive is mutual opposition.
+  assert(/work(s)? against|oppose|compete/i.test(fired[0].text),
     `the warning should say they oppose each other, got: ${fired[0].text}`);
 });
 
@@ -493,6 +499,82 @@ test("a leaf keeps its voice when unrelated leaves join it", () => {
   assert(crowded.calm >= alone.calm * 0.6,
     `chamomile's calm fell from ${alone.calm} to ${crowded.calm} when six ` +
     `unrelated leaves joined — the same 2g is still in the pot`);
+});
+
+/* ── caffeine/sedative antagonism ──────────────────────────────
+   The cup used to report sleepy 5 AND energy 5 with three
+   contradictory warnings attached. See docs/research/synergies.md
+   for the trials (Schellenberg 2004, Roache & Griffiths 1987) and
+   for why the floor is well above zero. */
+
+test("antagonismFactor: no damping below the caffeine threshold", () => {
+  assert(antagonismFactor(0) === 1, `0mg gave ${antagonismFactor(0)}`);
+  assert(antagonismFactor(ANTAGONISM_MIN_MG) === 1,
+    `at threshold gave ${antagonismFactor(ANTAGONISM_MIN_MG)}`);
+});
+
+test("antagonismFactor: floors at ANTAGONISM_FLOOR, never zero", () => {
+  assert(Math.abs(antagonismFactor(ANTAGONISM_FULL_MG) - ANTAGONISM_FLOOR) < 1e-9,
+    `at full gave ${antagonismFactor(ANTAGONISM_FULL_MG)}`);
+  assert(Math.abs(antagonismFactor(1000) - ANTAGONISM_FLOOR) < 1e-9,
+    `past full gave ${antagonismFactor(1000)}`);
+  assert(ANTAGONISM_FLOOR > 0,
+    "abolition is not supported by any source — the floor must stay above zero");
+});
+
+test("antagonismFactor: monotonic between threshold and full", () => {
+  const mid = antagonismFactor((ANTAGONISM_MIN_MG + ANTAGONISM_FULL_MG) / 2);
+  assert(mid < 1 && mid > ANTAGONISM_FLOOR, `mid-ramp factor out of band: ${mid}`);
+});
+
+test("a caffeinated sedative cup blunts BOTH registers, not just sleepy", () => {
+  // Mutual, because the antagonism is mutual — the valerian/hops trial
+  // has the herb inhibiting the caffeine, not only the reverse.
+  const withCaffeine = applyEffectSynergies({ energy: 5, sleepy: 5 }, 200);
+  const without = applyEffectSynergies({ energy: 5, sleepy: 5 }, 0);
+  assert(withCaffeine.effects.sleepy < without.effects.sleepy,
+    `sleepy not damped: ${withCaffeine.effects.sleepy} vs ${without.effects.sleepy}`);
+  assert(withCaffeine.effects.energy < without.effects.energy,
+    `energy not damped: ${withCaffeine.effects.energy} vs ${without.effects.energy}`);
+  assert(withCaffeine.effects.sleepy > 0, "sleepy must not be abolished");
+});
+
+test("sedation synergies don't fire in an antagonised cup", () => {
+  // "Deepens sedation" is user-visible language. A cup being warned it
+  // reads wired must not simultaneously be told it's settling.
+  const { synergyTags } = applyEffectSynergies({ energy: 5, sleepy: 5, calm: 5 }, 200);
+  const sedationTags = synergyTags.filter(t => /sedation|settle/i.test(t));
+  assert(sedationTags.length === 0,
+    `sedation tags survived antagonism: ${sedationTags.join(", ")}`);
+});
+
+test("no antagonism without real caffeine — energy alone doesn't trigger it", () => {
+  // Cardamom carries `energy` traditionally and holds no caffeine. The
+  // evidence is about a molecule, not a register, so a caffeine-free
+  // cup must be left entirely alone however much `energy` it claims.
+  const raw = { energy: 5, sleepy: 5, calm: 5 };
+  const { effects, synergyTags } = applyEffectSynergies(raw, 0);
+  const undamped = applyEffectSynergies(raw, 0).effects;
+  assert(effects.sleepy === undamped.sleepy && effects.sleepy >= 4.5,
+    `caffeine-free sleepy was damped: ${effects.sleepy}`);
+  assert(synergyTags.some(t => /sedation/i.test(t)),
+    `caffeine-free cup lost its sedation synergy: ${synergyTags.join(", ")}`);
+});
+
+test("the sedative safety warning survives caffeine damping", () => {
+  // Roache & Griffiths: caffeine reversed diazepam's sedation RATINGS
+  // but not its impairment of recall. A cup must not stop warning
+  // "don't drive" merely because the drinker won't feel the sedation.
+  const { effects, sedativeLoad } = applyEffectSynergies({ energy: 5, sleepy: 5, calm: 5 }, 200);
+  const damped = (effects.sleepy || 0) + (effects.calm || 0) * 0.5;
+  assert(sedativeLoad > damped,
+    `sedativeLoad (${sedativeLoad}) should exceed the damped figure (${damped})`);
+
+  const warned = buildWarnings({
+    perceivedEffects: effects, caffeineMg: 200, sedativeLoad,
+  });
+  assert(warned.some(w => w.kind === "ceiling"),
+    "sedative ceiling warning was suppressed by the damping");
 });
 
 console.log(`\n\n${pass} passed, ${fail} failed`);

@@ -223,6 +223,80 @@ Adenosine, PMID 20164566); caffeine reducing GABA/benzodiazepine site
 interaction (PMID 2835648); caffeine against diazepam-induced sedation
 (Global Scientific Journal).
 
+#### ADDENDUM — "the caffeine wins" is not what the direct evidence shows
+
+The paragraph above was reasoned from mechanism, and the direct human
+trial runs the other way. Both halves of the correction matter.
+
+**The antagonism is MUTUAL and dose-dependent in BOTH directions.**
+
+Schellenberg R, Sauer S, Abourashed EA, Koetter U, Brattström A (2004).
+*The fixed combination of valerian and hops (Ze 91019) acts via a
+central adenosine mechanism.* Planta Medica 70(7):594–597.
+PMID 15254851, DOI 10.1055/s-2004-827180.
+
+48 healthy men, randomised, placebo-controlled, blinded. Three arms —
+6 placebo tablets, 6 verum, or 2 verum plus 4 placebo; each verum
+tablet 250 mg valerian extract and 60 mg hops extract. All subjects
+took **200 mg caffeine simultaneously**, with quantitative EEG
+recording CNS activation. Two tablets **reduced** and six tablets
+**inhibited** the caffeine-induced arousal, at 60 minutes post-dose.
+Read by the authors as competition at central adenosine receptors:
+caffeine the antagonist, valerian/hops a partial agonist at the same
+site.
+
+At the doses tested, in other words, **the herb won.** Not "the calming
+leaves are spent working uphill" — the arousal was abolished.
+
+The human diazepam data points the same way about mutuality, and also
+upgrades a source. Roache JD, Griffiths RR (1987). *Interactions of
+diazepam and caffeine: behavioral and subjective dose effects in
+humans.* Pharmacol Biochem Behav 26(4):801–812. PMID 3602037. Nine
+subjects, all twelve combinations of diazepam (0/10/20 mg) and caffeine
+(0/200/400/600 mg). Caffeine generally antagonised diazepam's sedation
+ratings and psychomotor impairment — and did **not** consistently
+antagonise its effect on recall. So even the stimulant's win is partial
+and axis-specific. This replaces the animal/Global-Scientific-Journal
+citation above with human data.
+
+**THE MECHANISM DOES NOT GENERALISE ACROSS OUR SEDATIVE HERBS, and this
+is the part that constrains the app.**
+
+Ze 91019 competes with caffeine *at adenosine receptors* — the same
+receptor caffeine acts on. That shared site is why they cancel. But
+chamomile's apigenin has no established adenosine action:
+`docs/research/ingredients/chamomile.md` records that flumazenil does
+not reverse it, that BZ-site affinity is too low to explain the
+behaviour, and that the mechanism is "not well understood" (Avallone
+2000, Zanoli 2000, Losi 2004, Saadatmand 2024).
+
+So applying valerian's competition to every ingredient that ships
+`sleepy` would be **inventing a mechanism from a label** — the same
+error the ANTAGONISMS comment already refuses for cardamom's
+traditional `energy`. Eleven ingredients ship `sleepy`; one of them
+(valerian) has a direct caffeine trial behind it.
+
+**Limits, stated plainly.** Ze 91019 is a standardised extract at a
+therapeutic dose — six tablets is 1.5 g valerian extract plus 360 mg
+hops. A spoon of valerian root in a cup is neither that dose nor that
+preparation, and the trial measured EEG arousal at 60 minutes, not
+whether anyone fell asleep. The direction and the dose-dependence
+transfer; the magnitude does not.
+
+**What this means for the model.** The cup is a competition, not a
+winner-take-all, so the failure being corrected is `sleepy` 5 *and*
+`energy` 5 in one cup with three contradictory warnings attached.
+Both sides should blunt when they co-occur with real caffeine, roughly
+symmetrically, because that is what mutual competitive antagonism
+predicts and what both trials show. Neither should reach zero: no
+source shows abolition of either at cup-realistic doses, and the
+sedative is still physically in the cup — the stack warning stays true
+whatever the caffeine does.
+
+The **coefficient remains a modelling choice**, as with every bonus in
+this file (see below). Sourced: the direction, the mutuality, the
+dose-dependence. Not sourced: the number.
+
 ## What this audit did not settle
 
 The **bonus magnitudes** are unsourced across the board. Even where the

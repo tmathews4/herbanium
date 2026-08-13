@@ -479,9 +479,18 @@ anti-ulcerogenic. A 2015 randomised clinical study found significant
 symptom reduction in IBS patients after four weeks.
 
 **This is a different claim from `calm`, and worth keeping separate.**
-`calm` is apigenin at the GABA-A benzodiazepine site — anxiolytic in
-9 of 10 RCTs per the Saadatmand 2024 review §5 already cites. That is
-the mind. Smooth-muscle relaxation and mucosal protection are the
+`calm` is apigenin's anxiolytic effect — established in 9 of 10 RCTs
+per the Saadatmand 2024 review §5 already cites. That is the mind.
+
+(This line previously read "apigenin at the GABA-A benzodiazepine
+site", which contradicts the resolved mechanism note in §2 of this
+same document: flumazenil does not reverse the effect, BZ-site
+affinity is too low to account for it, and the mechanism is
+unresolved. The *effect* is well evidenced; the *site* is not, and
+naming it here was the retracted 1995 story leaking back in. Corrected
+rather than appended because it is an internal contradiction, not a
+finding that superseded an earlier one — the audits cannot see a
+paragraph disagreeing with another paragraph.) Smooth-muscle relaxation and mucosal protection are the
 body, and they're why chamomile has a topical and gastrointestinal
 tradition alongside the bedtime one. `settle` 3 covers the narrowly
 digestive part; `soothing` is the broader bodily ease that the

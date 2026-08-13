@@ -358,6 +358,20 @@ export const ALLOWED_PARADOXES = [
   ["warming", "cooling"],
 ];
 
+/* Where a real cup of caffeine starts, for BOTH halves of the
+   antagonism — the warning that fires and the damping that follows.
+
+   ONE CONSTANT, deliberately. These were briefly two literal 80s, one
+   on the rule below and one beside antagonismFactor. Same decision,
+   nothing holding them equal, and divergence is silent in the worst
+   direction: a cup told the caffeine is fighting the chamomile while
+   the numbers behind it never blunt, or the reverse. That is the exact
+   failure this whole correction exists to remove — every part right on
+   its own, nothing reconciling them. Declared here rather than beside
+   the factor because the rule below reads it, and a const is not
+   hoisted. */
+export const ANTAGONISM_MIN_MG = 80;
+
 /* Pairs where one effect actively SUPPRESSES the other. Not a curiosity
    to point out — a mistake to warn about.
 
@@ -368,9 +382,13 @@ export const ALLOWED_PARADOXES = [
    ability to potentiate benzodiazepine binding. Methylxanthines and
    benzodiazepines are characterised as behaviourally opposite.
 
-   So a chamomile-into-black-tea cup does not "walk both sides". The
-   caffeine wins and the calming leaves are spent opposing it, which is
-   worth telling someone who stacked them to wind down. */
+   So a chamomile-into-black-tea cup does not "walk both sides" — but it
+   is a COMPETITION, not a rout, and an earlier version of this comment
+   had that wrong. It read "the caffeine wins and the calming leaves are
+   spent opposing it", reasoned from mechanism alone; the direct human
+   trial runs the other way, with valerian/hops inhibiting caffeine's
+   EEG arousal outright at 200mg. Both sides blunt. See the addendum in
+   docs/research/synergies.md and ANTAGONISM_FLOOR below. */
 export const ANTAGONISMS = [
   {
     when: ["energy", "sleepy"],
@@ -391,10 +409,47 @@ export const ANTAGONISMS = [
        caffeine is the OPPOSITE case: L-theanine, the app's best-
        evidenced synergy. Firing this on calm would contradict the
        research two files over. */
-    minCaffeineMg: 80,
-    text: "Caffeine here works against the sedative herbs — it blocks adenosine and, at higher doses, the same GABA pathway valerian and chamomile act on. Expect the cup to read awake; the calming leaves are working uphill.",
+    minCaffeineMg: ANTAGONISM_MIN_MG,
+    text: "Caffeine and the sedative herbs here work against each other — they compete, and both come out blunted. Expect a muddled cup rather than either a clean lift or a clean wind-down.",
   },
 ];
+
+/* How far the competition blunts each side.
+   CORRECTED — this file used to say the caffeine simply wins. The direct
+   human trial says otherwise: Schellenberg 2004 (Planta Med 70:594-597,
+   PMID 15254851) gave 48 men 200mg caffeine with a valerian/hops extract
+   and found the herb REDUCED (2 tablets) or INHIBITED (6 tablets) the
+   caffeine arousal on EEG, by competing at the same adenosine receptor.
+   Roache & Griffiths 1987 (PMID 3602037) has caffeine antagonising
+   diazepam's sedation in humans — but not its effect on recall. Both
+   directions are real, both are dose-dependent, neither is total.
+
+   So: blunt BOTH registers, and floor them well above zero. Nothing
+   supports abolition at cup-realistic doses, and the sedative is still
+   physically in the cup — the stack warning stays true regardless.
+
+   Scaled by caffeine because that is the quantity we actually model;
+   200mg is the trial's dose. THE FLOOR IS A MODELLING CHOICE, like every
+   synergy bonus in this file. Sourced: direction, mutuality, dose-
+   dependence. Not sourced: 0.6.
+
+   Note the damping is a claim about the NET CUP, not about mechanism.
+   Valerian's adenosine competition is established; chamomile's apigenin
+   has no adenosine action (its own doc records the mechanism as
+   unresolved), so the warning text above deliberately stops at "they
+   compete" rather than naming a shared receptor. See
+   docs/research/synergies.md. ANTAGONISM_MIN_MG — the threshold this
+   ramp starts from — is declared above the ANTAGONISMS array, because
+   the warning rule reads it too. */
+export const ANTAGONISM_FULL_MG = 200;
+export const ANTAGONISM_FLOOR = 0.6;
+
+export function antagonismFactor(caffeineMg = 0) {
+  if (!(caffeineMg > ANTAGONISM_MIN_MG)) return 1;
+  const span = ANTAGONISM_FULL_MG - ANTAGONISM_MIN_MG;
+  const t = Math.min(1, (caffeineMg - ANTAGONISM_MIN_MG) / span);
+  return 1 - (1 - ANTAGONISM_FLOOR) * t;
+}
 
 /**
  * Hard cap at 5. The 0–5 range stays linear all the way up — a single
@@ -479,18 +534,48 @@ export function applyMasking(rawFlavors) {
  *   synergyTags: array of human labels ("calm focus", "rooted", ...)
  *   paradoxTags: array of `[a, b]` pairs that legitimately co-exist
  */
-export function applyEffectSynergies(rawEffects) {
+export function applyEffectSynergies(rawEffects, caffeineMg = 0) {
   const out = { ...rawEffects };
   const synergyTags = [];
 
+  /* Is the caffeine/sedative competition live? Decided on the RAW map,
+     before any bonus lands, so a synergy can't bootstrap the very
+     condition that ought to suppress it. */
+  const antagonised = (out.energy || 0) >= 1.5
+    && (out.sleepy || 0) >= 1.5
+    && caffeineMg >= ANTAGONISM_MIN_MG;
+
   for (const rule of EFFECT_SYNERGIES) {
     const [a, b] = rule.when;
+    /* A sedation bonus in an antagonised cup is the engine deepening
+       the register the same cup is warning is being opposed. "Deepens
+       sedation" is user-visible language, so this drops the tag as well
+       as the number — the cup does not get to be told it's settling
+       while it's also being told it reads wired. */
+    if (antagonised && "sleepy" in rule.bonus) continue;
     if ((out[a] || 0) >= 1.5 && (out[b] || 0) >= 1.5) {
       for (const [k, v] of Object.entries(rule.bonus)) {
         out[k] = (out[k] || 0) + v;
       }
       if (!synergyTags.includes(rule.label)) synergyTags.push(rule.label);
     }
+  }
+
+  /* How much sedative the cup actually contains, taken BEFORE the
+     damping below. The safety warning must read this rather than the
+     damped map: Roache & Griffiths found caffeine reversed diazepam's
+     SEDATION RATINGS while leaving its impairment of recall intact —
+     the impairment outlasts the feeling of it. A cup that stops
+     warning "don't drive" because the drinker won't notice being
+     sedated has the failure mode exactly backwards. */
+  const sedativeLoad = softCeiling(out.sleepy || 0)
+    + softCeiling(out.calm || 0) * 0.5;
+
+  // Mutual blunting — both sides, neither to zero. See ANTAGONISM_FLOOR.
+  if (antagonised) {
+    const f = antagonismFactor(caffeineMg);
+    out.energy = (out.energy || 0) * f;
+    out.sleepy = (out.sleepy || 0) * f;
   }
 
   // Soft ceiling — squash anything above 5 with a smooth curve.
@@ -502,7 +587,7 @@ export function applyEffectSynergies(rawEffects) {
     if ((out[a] || 0) >= 1.5 && (out[b] || 0) >= 1.5) paradoxTags.push([a, b]);
   }
 
-  return { effects: out, synergyTags, paradoxTags };
+  return { effects: out, synergyTags, paradoxTags, sedativeLoad };
 }
 
 /**
@@ -529,6 +614,8 @@ export function buildWarnings({
   baselineEffects = null,
   paradoxTags = [],
   caffeineMg = 0,
+  // Sedative content before caffeine damping; see applyEffectSynergies.
+  sedativeLoad,
 } = {}) {
   const warnings = [];
 
@@ -666,7 +753,12 @@ export function buildWarnings({
   }
 
   // Sedative ceiling — calm + sleepy summed pressure
-  const sedativePressure = (perceivedEffects.sleepy || 0) + (perceivedEffects.calm || 0) * 0.5;
+  // `sedativeLoad` is the pre-damping figure from applyEffectSynergies;
+  // see the note there for why this warning must not read the damped
+  // map. Falls back for callers that don't compute it (per-ingredient
+  // warnings, which have no cup-level caffeine to antagonise anything).
+  const sedativePressure = sedativeLoad
+    ?? ((perceivedEffects.sleepy || 0) + (perceivedEffects.calm || 0) * 0.5);
   if (sedativePressure >= 6) {
     warnings.push({ kind: "ceiling", text: "This stack of sedatives is at the ceiling — don't drive after." });
   }

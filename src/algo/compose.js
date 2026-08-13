@@ -1728,8 +1728,8 @@ const contributions = ingredients.map(({ id, g, role }) => {
 
   const { perceived: perceivedFlavorMap, maskingNotes } = applyMasking(rawFlavors);
 
-  let { effects: perceivedEffectMap, synergyTags, paradoxTags } =
-    applyEffectSynergies(rawEffects);
+  let { effects: perceivedEffectMap, synergyTags, paradoxTags, sedativeLoad } =
+    applyEffectSynergies(rawEffects, totalCaffeineMg);
 
   // Adaptogen-stack synergy — when 2+ ingredients flagged as
   // adaptogens are co-present at meaningful weight, tradition
@@ -1974,6 +1974,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
     perceivedFlavors: perceivedFlavorMap,
     paradoxTags,
     caffeineMg: totalCaffeineMg,
+    sedativeLoad,
   });
   // Traditionals at baseline also drop tannin/aromatic cup warnings —
   // the whole purpose of the tradition note is to acknowledge the
