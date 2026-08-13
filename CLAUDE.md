@@ -271,6 +271,85 @@ one of them a width silently overwritten by a later declaration.
 Style rules are deliberately excluded from that check. Mixing them back
 in is precisely what made the crashes invisible.
 
+## A declared contract beats a written-down one
+
+**Where behaviour is declared in data and honoured somewhere else, the
+check derives its expectations from the declaration — it never restates
+them.** `e2e/tour-contract.spec.ts` is the worked example and the
+reason this section exists.
+
+A guided-tour step declares demo state (`openControls`, `axisMode`,
+`demo`) and something four prop-levels away is meant to honour it.
+Nothing checked that it did, and two copies of the same fact drifted:
+
+- Six steps declared no `openControls` and silently inherited the
+  screen's default. Flipping that default folded the row under steps
+  that needed it open, and the tour went on pointing at a slider that
+  was no longer rendered.
+- `ComposeScreen` kept its own list of which steps run the steep-time
+  demo. That list still named the prediction and effects steps after the
+  row started folding on them, so the tour drove a control that wasn't
+  on screen — measured, the bars swung and the folded row's clock ran
+  7:47 to 3:24 with nothing visible causing it.
+
+**Twelve tests failed across four files and not one said "a step didn't
+get its state."** They said the callout moved, a slider was missing, a
+dock was 37px. One cause wearing twelve faces is what an unchecked
+contract does, and it is why the fix is a contract rather than twelve
+repairs.
+
+The rule that makes it work, and the one worth not getting wrong:
+
+> **The contract file must not contain the contract.**
+
+`tour-contract.spec.ts` imports `SCREEN_TOURS` and walks whatever is
+there. It never lists which steps open the row or which one demos — add
+a step, flip a flag, reorder them, and it holds the app to the new
+declaration with no edit. A hand-written table of expected states would
+be one more copy to drift, which is the exact failure it exists to
+catch. **If you find yourself typing the expected values into the test,
+stop — you are rebuilding the bug.**
+
+Both halves are verified to fail, and both were checked by breaking them
+on purpose:
+
+- **Declaration illegal** — `axisMode` on a step that folds the row is
+  reported from the data alone, before a browser starts. The pills are
+  rendered inside the row, so binding an axis while it's shut binds
+  nothing.
+- **Declaration not honoured** — breaking the prop chain reports
+  `step 3/13 (blend-graph — "The prediction"): declares demo, but the
+  brew sat at 6:00`.
+
+**A contract can encode a mistake, and this one briefly did.** The
+illegal-declaration rule was first written as "a step that demos must
+open the brew row", reasoning that oscillating the steep time while its
+control is put away is motion with an off-screen cause. That is wrong on
+the facts — a folded row is CONDENSED, not hidden; it still reads the
+temperature and the time, and that clock ticks with the bars. Enforcing
+it drove the movement off the two steps where the strips are the lit
+subject and left it only on the slider step, where they change dimmed
+behind the cutout. Every test passed and the tour got worse. It was
+caught by a person watching the tour, not by the suite.
+
+So: **a contract binds what you already know to be true; it does not
+settle a design question by being written down.** When adding a rule,
+ask what evidence it rests on, and prefer the narrowest rule that
+evidence supports. `tests/tour-layout.test.mjs` is the counter-example
+worth copying — its rule ("the row folds only at the very end, never
+mid-lesson") encodes a defect that was actually reported, and it
+correctly rejected the over-broad fix.
+
+The same shape is already in the repo and worth copying: `BREW_WINDOWS`
+in `e2e/helpers/brew.ts` names every brew surface and
+`tests/brew-surfaces.test.mjs` fails if `src/` grows a fourth that isn't
+registered. `src/data/tourBlend.js` + `tests/tour-blend.test.mjs` is the
+same idea for the tutorial's seeded pot — it holds the PROPERTIES that
+make the blend teach, not the pair, so the blend stays re-pickable.
+
+**A prose doc is the wrong tool here.** It goes stale silently, and
+silent staleness is the thing every audit in this file exists to catch.
+
 ## State that changes together changes through one path
 
 Follow React's own organisational guidance rather than inventing local

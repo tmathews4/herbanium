@@ -474,21 +474,17 @@ export const BlendExtractionExplorer = ({
   // drive the graph at all. Temperature is also the parameter a
   // newcomer is least likely to want to change.
   const [axis, setAxis] = useState("timeS");
-  // The tour's demo oscillates steep time so the user watches the
-  // prediction bars respond. If Temp happened to be the axis showing,
-  // they'd watch the bars move beside a slider that doesn't — the
-  // lesson inverted. That step forces Time; every other step leaves the
-  // user's own choice alone.
-  //
-  // `blend-graph` USED TO BE IN THIS LIST and is deliberately gone. The
-  // brew row now starts folded and the tour keeps it folded until step
-  // 8, so on the prediction step there is no slider on screen to force
-  // an axis for — the forcing was reaching past a closed panel to set
-  // which of two invisible controls was invisible. The demo it existed
-  // to serve belongs to `blend-sliders`, which is the step that opens
-  // the row and asks the user to drag.
-  const tourAxis = tourStep === "blend-sliders" ? "timeS" : null;
-  const shownAxis = axisOverride ?? tourAxis ?? axis;
+  /* No step-name list here any more, and that is the point.
+
+     This used to be `tourStep === "blend-graph" || "blend-sliders"` —
+     a second copy of which steps force which axis, living a file away
+     from the steps that know. It drifted the moment the brew row's
+     default changed, and it had to be edited again to follow. The steps
+     that need Time bound now say `axisMode: "timeS"` themselves, which
+     arrives here as `axisOverride` like every other declared demo state.
+
+     So: the tour's choice if it made one, otherwise the user's own. */
+  const shownAxis = axisOverride ?? axis;
 
   /* No band-selection state any more. Tapping the word under a slider
      used to open a description panel under that slider; now it sets the

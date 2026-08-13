@@ -42,11 +42,46 @@ export const SCREEN_TOURS = {
     // These two steps introduce the four windows. Held on Simple: family
     // rows are short enough to take in at a glance, and the next two
     // steps are what explain the other mode.
+    /* THESE TWO MOVE, AND THEY ARE THE ONLY STEPS THAT SHOW THE BARS
+       MOVING WHILE THE BARS ARE THE LIT SUBJECT. That is the whole
+       reason they carry `demo`, and it is worth stating because it was
+       briefly removed and the loss is easy to miss from the code.
+
+       The slider step demos too, but its spotlight is on the SLIDERS \u2014
+       the strips sit dimmed behind the cutout while they change, so a
+       reader watching the highlight never sees them move. Reported
+       exactly that way: "we never show that behaviour directly now,
+       they're greyed out changing in back."
+
+       AND THE ROW STAYS FOLDED HERE, which was got wrong once in each
+       direction and is worth writing down properly.
+
+       These steps briefly had `demo` removed, on the reasoning that
+       oscillating the brew while the row is folded is motion with an
+       off-screen cause. That reasoning was wrong on its facts: the
+       folded row is not hidden, it is CONDENSED \u2014 it still reads
+       "203\u00b0F \u00b7 6:00" and that clock ticks along with the bars. The
+       cause is on screen the whole time; it is a readout rather than a
+       slider. Step 7 then names the thing the reader has been watching
+       tick, which is a better arc than explaining it cold.
+
+       They were then briefly given `openControls: true` instead, to put
+       an actual slider under the moving bars. That is worse, and
+       tests/tour-layout.test.mjs catches it: opening the row here means
+       step 7 folds it again with five steps still to come, which is the
+       "it toggles to condense in the middle and it's not clear what
+       it's showing" defect the reordering note below already fixed
+       once. The row opens exactly once, at step 8, and folds exactly
+       once, at the end.
+
+       No `axisMode` either, for the same reason: the pills live inside
+       the row and there is nothing to bind while it is shut. The slider
+       step declares Time, which is where it can actually take effect. */
     { target: "blend-graph", title: "The prediction", pad: 6,
-      familyMode: true,
+      familyMode: true, demo: true,
       body: "What the cup tastes like \u2014 its flavours, and the palate underneath them." },
     { target: "blend-effects", title: "What it does", pad: 8,
-      familyMode: true,
+      familyMode: true, demo: true,
       body: "And what it does to you. Mind is what you'd notice \u2014 calm, focus, a lift. Body is what it works on \u2014 the throat, the gut, warmth." },
     // The toggle gets demonstrated rather than described \u2014 one step per
     // mode, so the strips change when the USER taps Next instead of on
@@ -65,6 +100,11 @@ export const SCREEN_TOURS = {
     // Neither says "watch the bars change" any more. That phrase belongs
     // to the slider step, which is the one actually asking you to watch
     // something move; here the change is a re-read of the same cup.
+    /* NOT demoing, deliberately, and these are the two steps where
+       stillness is right. They ARE a change to the strips: the toggle
+       re-reads the same cup by family or by note. Oscillating the brew
+       underneath that means two things move at once and neither reads
+       as the consequence of the control being taught. */
     { target: "blend-mode", title: "Simple or detailed", pad: 8,
       spotlight: ["blend-flavors"], familyMode: true,
       body: "Simple reads the taste by family \u2014 floral, fruity, smoky. One bar each. Tap Next for the other way." },
@@ -98,9 +138,18 @@ export const SCREEN_TOURS = {
     // to watch one thing while dragging another. `compact` shrinks the
     // callout for the same reason: this step competes with its own
     // subject for room, so it gives some up. Copy is short to match.
+    // `demo` oscillates the steep time while this step is up, so the
+    // bars answer a slider the reader can see. THE ONLY STEP THAT GETS
+    // IT, and the flag lives here rather than in a list inside
+    // ComposeScreen because the screen's list drifted from this file the
+    // moment the brew row started folded \u2014 it went on driving the
+    // prediction and effects steps, which no longer show a slider at
+    // all. A step declares its own demo state; nothing else keeps a
+    // second copy of which steps those are.
     { target: "blend-sliders", title: "Dial in the brew", pad: 6,
       keepClear: ["blend-graph", "blend-effects"],
-      familyMode: true, compact: true, openControls: true,
+      familyMode: true, compact: true, openControls: true, demo: true,
+      axisMode: "timeS",
       body: "Open. Drag the slider \u2014 watch all four windows move." },
     // The axis pills. A control that REPLACES what's on screen rather
     // than adding to it is invisible until someone says it's there.

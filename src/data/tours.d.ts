@@ -18,6 +18,20 @@ export interface TourStep {
   familyMode?: boolean;
   /** Tour-only demo state: forces the dock's brew row open or shut. */
   openControls?: boolean;
+  /** Tour-only demo state: forces which brew axis is bound. */
+  axisMode?: "timeS" | "tempC";
+  /**
+   * Tour-only demo state: oscillate the steep time while this step is up,
+   * so the prediction bars visibly answer the slider.
+   *
+   * DECLARED HERE RATHER THAN LISTED IN THE SCREEN, which is the whole
+   * point. ComposeScreen used to carry its own array of step names to
+   * run the demo on, so "which steps move" lived in two files with
+   * nothing holding them equal — and when the brew row started folded,
+   * the screen's copy went on driving a slider that two of those steps
+   * no longer showed. A step now says what it does, once.
+   */
+  demo?: boolean;
   /** Shrinks the callout for steps competing with their own subject. */
   compact?: boolean;
 }

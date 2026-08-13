@@ -164,7 +164,7 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
+export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, blendTourDemo, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   /* ONE FLAG, because there is one thing. The writing dock's panel
@@ -304,7 +304,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
     <div style={{ padding: "18px 20px 24px", fontFamily: ff.sans }}>
 
       {mode === "reverse" && (
-        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} />
+        <ReverseCompose reverseIngs={reverseIngs} setReverseIngs={setReverseIngs} go={go} startBrew={startBrew} saveComposedBlend={saveComposedBlend} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} blendTourActive={blendTourActive} blendTourStep={blendTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} blendTourDemo={blendTourDemo} />
       )}
 
       {/* Visitors — the notebook's third sub-tab. The lodestone
@@ -1417,7 +1417,7 @@ const FilterRow = ({ label, items, value, setValue, multi = false, perRow = null
   );
 };
 
-export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis }) => {
+export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, saveComposedBlend, generatedBlends, hiddenBlendIds, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, blendTourDemo }) => {
   // When the guided Blend tour starts on an empty pot, drop in a small
   // example *blend* — two ingredients at different parts (2 / 1) — so the
   // walkthrough shows what blending actually is: balancing ingredients,
@@ -1687,22 +1687,26 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // motion; it stops when the step advances or the tour ends. Honors
   // prefers-reduced-motion.
   //
-  // THE SLIDER STEP ONLY, and it used to be three steps. `blend-graph`
-  // and `blend-effects` were in this list on the argument that strips
+  // THE STEP SAYS WHETHER IT DEMOS. This was a list of step names held
+  // here, which is a second copy of a fact that already lived in
+  // tours.js — and it drifted exactly as a second copy does. The list
+  // named `blend-graph` and `blend-effects` on the argument that strips
   // introduced while sitting perfectly still read as static properties
-  // of the recipe rather than as a prediction about the cup. That was
-  // right while the brew row was open by default. It stopped being right
-  // when the row started folded: the tour keeps it folded until step 8,
-  // so on those two steps the demo drove a control that was not on
-  // screen. Measured — the bars swung and the folded row's clock ran
-  // 7:47 to 3:24 with nothing visible causing it.
+  // rather than as a prediction. That was right while the brew row was
+  // open by default. It stopped being right when the row started
+  // folded, and nothing here could know that, because the fact that
+  // changed was in the other file. Measured before the fix: the bars
+  // swung and the folded row's clock ran 7:47 to 3:24 with nothing
+  // visible causing it.
   //
   // Motion whose cause is off-screen is worse than stillness. It reads
   // as the app moving on its own, and it spends the very effect the
-  // slider step needs three steps before that step can explain it. The
-  // link is still taught, once, where the slider is visible and the copy
-  // says "watch all four windows move".
-  const tourDemoActive = blendTourStep === "blend-sliders";
+  // slider step needs three steps before that step can explain it.
+  //
+  // Now the step carries `demo` and this just reads it, so the two can't
+  // disagree. e2e/tour-contract.spec.ts walks the tour and checks that
+  // what each step DECLARES is what the screen actually does.
+  const tourDemoActive = !!blendTourDemo;
   useEffect(() => {
     if (!tourDemoActive) return undefined;
     const times = reverseIngs.map(id => INGREDIENTS[id]?.timeS).filter(Boolean);

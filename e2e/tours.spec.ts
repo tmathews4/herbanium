@@ -1163,22 +1163,22 @@ test.describe("the tour callout holds its position", () => {
 });
 
 /* ──────────────────────────────────────────────────────────────
-   NOTHING MOVES ON ITS OWN WHILE THE CONTROL IS PUT AWAY.
+   THE BARS MOVE WHILE THE BARS ARE WHAT'S LIT.
 
-   The tour oscillates the steep time on the slider step so the user
-   watches the bars answer a slider they can see. That demo used to run
-   on three steps, and two of them are steps where the brew row is
-   folded — so the bars swung and the folded row's clock ran (measured:
-   7:47 to 3:24) with no control on screen to explain it. Motion whose
-   cause is off-screen reads as the app driving itself, and it spends
-   the slider step's whole lesson three steps before that step arrives.
+   The tour oscillates the steep time so the reader sees the prediction
+   answer the brew. That only teaches anything if it happens while the
+   strips are the SPOTLIGHTED subject — on the slider step the cutout is
+   on the sliders and the strips change dimmed behind it, which was
+   reported exactly that way: "we never show that behaviour directly
+   now, they're greyed out changing in back."
 
-   This is the guard for that, and it is written as "the readout holds"
-   rather than "the demo list has one entry" on purpose: the failure is
-   a thing the USER sees, and it could come back from the tour data, the
-   step names, or the row default without the list ever changing.
+   So this holds the two halves that make the demo a demonstration:
+   the strips move while lit, and the control causing it is on screen
+   while they do. An earlier fix had the second without the first — it
+   stopped the movement on the folded steps and left it only where the
+   graph was dimmed, which is green on every other test and wrong.
    ────────────────────────────────────────────────────────────── */
-test.describe("the tour doesn't drive controls the user can't see", () => {
+test.describe("the graph is seen moving while it's the subject", () => {
   slowBecauseItWalksATour();
 
   async function advanceTo(page: Page, text: string) {
@@ -1191,47 +1191,62 @@ test.describe("the tour doesn't drive controls the user can't see", () => {
     throw new Error(`Blend tour never reached the "${text}" step`);
   }
 
-  // The folded row is the only readout of the brew while it's shut, so
-  // it is also the honest place to see whether anything is moving.
-  const clock = (page: Page) => page.locator('[data-tour="blend-controls"]')
+  const clock = (page: Page) => page.locator('[data-tour="blend-controls"]').first()
     .innerText().then(t => (t.match(/\d+:\d{2}/) || ["none"])[0]);
 
-  for (const step of ["The prediction", "What it does"]) {
-    test(`"${step}" holds still — the brew row is folded there`, async ({ page }) => {
-      // NOT reduced motion. The demo honours it, so emulating it here
-      // would make this pass by disabling the very thing under test —
-      // the same shape as a test that asserts a hidden element is quiet.
+  for (const [step, strip] of [
+    ["The prediction", "blend-graph"],
+    ["What it does", "blend-effects"],
+  ] as const) {
+    test(`"${step}" moves the bars, with the slider on screen`, async ({ page }) => {
+      // NOT reduced motion — the demo honours it, and emulating it here
+      // would switch off the subject of the test.
       await armTour(page, "blend", { motion: "no-preference" });
       await openTab(page, "Apothecary");
       await advanceTo(page, step);
 
-      const row = page.locator('[data-tour="blend-controls"]');
-      await expect(row, "this step should have the row folded")
-        .toHaveAttribute("aria-expanded", "false");
+      // Lit, not dimmed: this step's cutout is on the strip itself.
+      const spotlight = page.getByTestId("tour-spotlight");
+      const stripBox = (await page.locator(`[data-tour="${strip}"]`).boundingBox())!;
+      const spotBox = (await spotlight.boundingBox())!;
+      const overlaps =
+        spotBox.x < stripBox.x + stripBox.width && spotBox.x + spotBox.width > stripBox.x &&
+        spotBox.y < stripBox.y + stripBox.height && spotBox.y + spotBox.height > stripBox.y;
+      expect(overlaps,
+        `the cutout should be on ${strip} — otherwise the bars change dimmed`).toBe(true);
+
+      // And the cause is visible while they move. The row is FOLDED
+      // here — it opens once, at step 8 — but folded is condensed, not
+      // hidden: it still reads the temperature and the time, and that
+      // clock is what ticks alongside the bars. So the assertion is
+      // that the readout is on screen, not that the slider is.
+      const row = page.locator('[data-tour="blend-controls"]').first();
+      await expect(row, "the brew readout must be on screen while the bars move")
+        .toBeVisible();
+      await expect(row, "and it should still be showing the brew")
+        .toContainText(/\d+\s*°[CF].*\d+:\d{2}/s);
 
       const before = await clock(page);
-      await page.waitForTimeout(1200);      // ~20 demo ticks at 60ms
-      const after = await clock(page);
-      expect(after,
-        `the brew ran from ${before} to ${after} with no control on screen`)
-        .toBe(before);
+      await expect.poll(() => clock(page), {
+        message: `the bars should be moving on "${step}" — the brew sat at ${before}`,
+        timeout: 5_000,
+      }).not.toBe(before);
     });
   }
 
-  test("the slider step DOES move — the demo still happens where it's earned", async ({ page }) => {
-    // The other half, and the reason the test above can't just be
-    // "nothing ever moves": the lesson has to survive the fix.
+  test("the fold step holds still — nothing moves while the row is shut", async ({ page }) => {
+    // The other side of it. Step 7 folds the row to teach the fold, and
+    // a demo running there would be the off-screen-cause failure again.
     await armTour(page, "blend", { motion: "no-preference" });
     await openTab(page, "Apothecary");
-    await advanceTo(page, "Dial in the brew");
+    await advanceTo(page, "The brew row");
 
-    await expect(page.locator('[data-tour="blend-controls"]'),
-      "the slider step opens the row").toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator('[data-tour="blend-controls"]').first())
+      .toHaveAttribute("aria-expanded", "false");
 
     const before = await clock(page);
-    await expect.poll(() => clock(page), {
-      message: `the slider step should demonstrate movement — clock sat at ${before}`,
-      timeout: 5_000,
-    }).not.toBe(before);
+    await page.waitForTimeout(1200);
+    expect(await clock(page),
+      `the brew ran from ${before} with the row folded — no control on screen`).toBe(before);
   });
 });
