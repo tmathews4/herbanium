@@ -198,6 +198,45 @@ Two of the four were app bugs and two were test bugs, and every one of
 them looked like flake until it was read properly. Load didn't cause
 any of them; it changed the timing enough to expose them.
 
+**REOPENED, 2026-08-13 — a FIFTH cause, and the symptom is stated here
+rather than explained.** Do not re-read the four above and conclude
+it's one of them; it is not, and assuming so is what this note exists
+to prevent.
+
+Symptom: roughly one run in three, one test in this file fails, a
+different one each time, and it passes on immediate re-run. Observed on
+`:143` ("an elemental arriving announces itself") and `:187` ("the
+stone filling while you're on another screen says so"). The `:143`
+failure reads:
+
+```
+Error: nothing has arrived yet
+Locator: getByText(/your lodestone is (pulsing|charged)/i).first()
+Expected: 0   Received: 1
+```
+
+— a PRECONDITION assertion, failing because a lodestone notice is
+already on screen before the test has done anything to cause one.
+
+What is already ruled out, so nobody spends the time again:
+
+- **Not the caffeine/sedative work.** Reproduced on clean `HEAD` with
+  nothing in the working tree: one failure in three runs.
+- **Not load or worker contention.** It reproduces running this spec
+  file ALONE, seven tests, 15 seconds. That was the standing
+  explanation for the original four and it does not apply here.
+- **Not cause 3 recurring.** The locator involved is the combined
+  `pulsing|charged` one, but this is a silence assertion, which is
+  exactly the usage that split deliberately kept it for.
+
+The live suspicion, untested: seeded profile state leaking between
+tests, so a notice from a previous test's stone survives into the next
+test's "nothing has arrived yet". That the failing test varies while
+the assertion shape doesn't fits a shared-state ordering problem better
+than anything test-specific. Read a trace from a failing run before
+believing that — it is a guess, and the four above are what happens to
+guesses in this file.
+
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
 Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true locally, so a leftover server silently serves an old `dist/` and makes E2E results meaningless. Check with `ss -lntp | grep 5173` if results look impossible.
