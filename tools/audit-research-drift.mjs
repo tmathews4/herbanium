@@ -29,7 +29,7 @@ import { readFileSync, existsSync, readdirSync } from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
-import { strengthDrift, SEVERE } from "./lib/strength-drift.mjs";
+import { strengthDrift, SEVERE, UNPAIRABLE_CLASS } from "./lib/strength-drift.mjs";
 import { flavourFamilyGaps } from "./lib/flavour-parity.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -201,7 +201,8 @@ if (extras.length) {
   for (const r of extras) console.log(`  ${r.id.padEnd(20)} extra: ${r.extra.join(", ")}`);
 }
 
-const { diffs: strengthDiffs, unpairable } = strengthDrift(EXTRACTION_PROFILES);
+const { diffs: strengthDiffs, unpairable, paired, unpaired, unpairableBy } =
+  strengthDrift(EXTRACTION_PROFILES);
 if (strengthDiffs.length) {
   const severe = strengthDiffs.filter(d => d.delta >= SEVERE);
   console.log(`\nSTRENGTH DRIFT — right effect, wrong magnitude `
@@ -215,8 +216,55 @@ if (strengthDiffs.length) {
   const minor = strengthDiffs.length - severe.length;
   if (minor) console.log(`\n  (+${minor} differing by under ${SEVERE} — `
     + `transcription rounding and perception tuning, mostly fine)`);
-  if (unpairable) console.log(`\n  ${unpairable} doc brew points could not be paired to a `
-    + `shipped sample\n  (no exact tempC+timeS and no unique tempC) — NOT compared.`);
+}
+
+// Coverage prints unconditionally, OUTSIDE the block above. It used to be
+// nested inside it, so a run with no drift at all would have reported
+// nothing here — a clean bill of health over an unknown fraction of the
+// corpus, which is the one thing this audit is not allowed to imply.
+{
+  const total = paired + unpairable;
+  const pct = total ? Math.round((paired / total) * 100) : 0;
+  console.log(`\nSTRENGTH COVERAGE — ${paired}/${total} doc brew points compared (${pct}%)\n`);
+
+  // A doc point goes uncompared for two different reasons, and only one
+  // is a defect. WORKLIST entries are missing data: write the timeS into
+  // the doc table, or sample the profile at the temperature the research
+  // describes, and the point becomes comparable. EXCLUDED entries are
+  // correct and permanent — a gongfu rinse and a western steep share a
+  // temperature and are not the same cup.
+  const show = (title, kind) => {
+    const rows = Object.keys(unpairableBy)
+      .filter(r => UNPAIRABLE_CLASS[r]?.kind === kind);
+    if (!rows.length) return;
+    console.log(`  ${title}`);
+    for (const r of rows) {
+      console.log(`    ${String(unpairableBy[r]).padStart(3)}  ${r.padEnd(20)} `
+        + UNPAIRABLE_CLASS[r].note);
+    }
+    console.log();
+  };
+  show("FIXABLE — missing data, not disagreement:", "worklist");
+  show("EXCLUDED — comparing these would manufacture drift:", "excluded");
+
+  // A reason with no disposition would otherwise print nowhere. The guard in
+  // research-parity.test.mjs makes that a failure, but say so here too — the
+  // audit is read on its own, and a silent omission is the failure mode.
+  const unclassified = Object.keys(unpairableBy).filter(r => !UNPAIRABLE_CLASS[r]);
+  if (unclassified.length) {
+    console.log(`  ** UNCLASSIFIED REASONS (${unclassified.length}) — not counted above: `
+      + `${unclassified.join(", ")}\n`);
+  }
+
+  // Which ingredients carry the fixable ones, so the worklist has names.
+  const fixable = unpaired.filter(u => UNPAIRABLE_CLASS[u.reason]?.kind === "worklist");
+  if (fixable.length) {
+    const byId = {};
+    for (const u of fixable) byId[u.id] = (byId[u.id] || 0) + 1;
+    const worst = Object.entries(byId).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    console.log(`  Most uncompared points, by ingredient:`);
+    for (const [id, n] of worst) console.log(`    ${String(n).padStart(3)}  ${id}`);
+  }
 }
 
 const prepAll = rows.filter(r => r.prepOnly?.length);

@@ -77,23 +77,104 @@ export function researchBrewPoints(file) {
  */
 export const TIME_TOLERANCE = 0.25;   // ±25% of the doc's steep time
 
-export function pairSample(samples, pt) {
+/**
+ * Why a doc point went uncompared. The bare count these replace read as
+ * one fact and is at least two: some of these are FIXABLE BY WRITING
+ * DATA (a doc row with no timeS, a temperature the profile never
+ * samples) and some must never be compared at all (a gongfu rinse and a
+ * western steep at the same temperature). Reporting them as one number
+ * makes the fixable ones invisible, which is the same shape as a stale
+ * key making a map look complete.
+ */
+export const UNPAIRABLE = {
+  TEMP_UNSAMPLED:    "temp-unsampled",      // inside the grid, no row at this temp
+  TEMP_BELOW_GRID:   "temp-below-grid",     // cooler brew than the profile models
+  TEMP_ABOVE_GRID:   "temp-above-grid",     // hotter brew than the profile models
+  AMBIGUOUS_TEMP:    "ambiguous-temp",      // several samples share it, none exact
+  DOC_MISSING_TIME:  "doc-missing-time",    // doc row has no timeS to judge by
+  SAMPLE_MISSING_TIME: "sample-missing-time",
+  TIME_MISMATCH:     "time-mismatch",       // same temp, different cup
+};
+
+/**
+ * What to DO about each reason, kept beside the codes rather than in the
+ * audit's printer. A reason and its disposition are one fact; splitting
+ * them means adding a code without a disposition drops it silently from
+ * the coverage report, and the report still reads as complete. That is
+ * the drifted-map shape audit-vocabulary-coverage.mjs exists to catch,
+ * and there is no reason to reproduce it here.
+ *
+ * `worklist` — missing data. Write it and the point becomes comparable.
+ * `excluded` — correctly uncompared, permanently. Comparing these would
+ *   manufacture drift out of a scope decision or a different cup.
+ */
+export const UNPAIRABLE_CLASS = {
+  [UNPAIRABLE.TEMP_UNSAMPLED]: { kind: "worklist",
+    note: "inside the profile's grid — a sample here would pair" },
+  [UNPAIRABLE.DOC_MISSING_TIME]: { kind: "worklist",
+    note: "doc row has no timeS — add it and the point pairs exactly" },
+  [UNPAIRABLE.AMBIGUOUS_TEMP]: { kind: "worklist",
+    note: "several samples at that temp — a doc timeS disambiguates" },
+  [UNPAIRABLE.SAMPLE_MISSING_TIME]: { kind: "worklist",
+    note: "shipped sample has no timeS" },
+  [UNPAIRABLE.TIME_MISMATCH]: { kind: "excluded",
+    note: "same temp, different cup — correctly never compared" },
+  [UNPAIRABLE.TEMP_BELOW_GRID]: { kind: "excluded",
+    note: "cooler brew than the profile models — a scope decision, not drift" },
+  [UNPAIRABLE.TEMP_ABOVE_GRID]: { kind: "excluded",
+    note: "hotter brew than the profile models — a scope decision, not drift" },
+};
+
+/** Pair, with the reason when it declines. `reason` is null on success. */
+export function pairWithReason(samples, pt) {
   const exact = samples.find(s => s.tempC === pt.tempC && s.timeS === pt.timeS);
-  if (exact) return exact;
+  if (exact) return { sample: exact, reason: null };
+
   const byTemp = samples.filter(s => s.tempC === pt.tempC);
-  if (byTemp.length !== 1) return null;
+  if (byTemp.length === 0) {
+    // Outside the grid vs inside it are different problems with different
+    // fixes: a doc row below every sampled temperature describes a cooler
+    // brew than the app models at all (hibiscus cold-brews at 25C for four
+    // hours), which is a scope decision. A row INSIDE the envelope is just
+    // a sample the profile hasn't taken yet.
+    const temps = samples.map(s => s.tempC);
+    const reason = !temps.length ? UNPAIRABLE.TEMP_UNSAMPLED
+      : pt.tempC < Math.min(...temps) ? UNPAIRABLE.TEMP_BELOW_GRID
+      : pt.tempC > Math.max(...temps) ? UNPAIRABLE.TEMP_ABOVE_GRID
+      : UNPAIRABLE.TEMP_UNSAMPLED;
+    return { sample: null, reason };
+  }
+  if (byTemp.length > 1)   return { sample: null, reason: UNPAIRABLE.AMBIGUOUS_TEMP };
+
   const s = byTemp[0];
-  if (!pt.timeS || !s.timeS) return null;      // can't judge; don't guess
-  return Math.abs(s.timeS / pt.timeS - 1) <= TIME_TOLERANCE ? s : null;
+  if (!pt.timeS) return { sample: null, reason: UNPAIRABLE.DOC_MISSING_TIME };
+  if (!s.timeS)  return { sample: null, reason: UNPAIRABLE.SAMPLE_MISSING_TIME };
+
+  const ratio = s.timeS / pt.timeS;
+  if (Math.abs(ratio - 1) > TIME_TOLERANCE) {
+    return { sample: null, reason: UNPAIRABLE.TIME_MISMATCH,
+             detail: { docTimeS: pt.timeS, sampleTimeS: s.timeS } };
+  }
+  return { sample: s, reason: null };
+}
+
+export function pairSample(samples, pt) {
+  return pairWithReason(samples, pt).sample;
 }
 
 /**
  * Compare prescribed vs shipped strengths across every pairable brew
- * point. Returns { diffs, unpairable }, diffs sorted worst-first.
+ * point. Returns { diffs, unpairable, paired, unpaired, unpairableBy },
+ * diffs sorted worst-first.
+ *
+ * `paired` / `unpairable` are what COVERAGE is computed from: a tool
+ * that reports one severe drift is only reassuring if you also know
+ * what fraction of the corpus it was able to look at.
  */
 export function strengthDrift(EXTRACTION_PROFILES) {
   const diffs = [];
-  let unpairable = 0;
+  const unpaired = [];
+  let paired = 0;
 
   for (const f of readdirSync(DOCS).filter(x => x.endsWith(".md"))) {
     const slug = f.replace(/\.md$/, "");
@@ -103,8 +184,12 @@ export function strengthDrift(EXTRACTION_PROFILES) {
     const samples = EXTRACTION_PROFILES[id] || [];
 
     for (const pt of researchBrewPoints(resolve(DOCS, f))) {
-      const sample = pairSample(samples, pt);
-      if (!sample) { unpairable++; continue; }
+      const { sample, reason, detail } = pairWithReason(samples, pt);
+      if (!sample) {
+        unpaired.push({ id, tempC: pt.tempC, timeS: pt.timeS, reason, ...detail && { detail } });
+        continue;
+      }
+      paired++;
       const app = {};
       for (const e of sample.effects || []) {
         const [n, v] = Array.isArray(e) ? e : [e.name, e.value];
@@ -119,7 +204,11 @@ export function strengthDrift(EXTRACTION_PROFILES) {
     }
   }
   diffs.sort((a, b) => b.delta - a.delta);
-  return { diffs, unpairable };
+
+  const unpairableBy = {};
+  for (const u of unpaired) unpairableBy[u.reason] = (unpairableBy[u.reason] || 0) + 1;
+
+  return { diffs, unpairable: unpaired.length, paired, unpaired, unpairableBy };
 }
 
 /** Drift big enough to be a disagreement rather than rounding. */

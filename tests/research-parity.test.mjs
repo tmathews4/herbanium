@@ -59,7 +59,7 @@ import {
   MOOD_FAMILY_LABEL, MOOD_VOCABULARY, MOOD_LEAF_LABEL, CATEGORY_OF_EFFECT,
 } from "../src/data/families.js";
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
-import { severeDrift, driftKey } from "../tools/lib/strength-drift.mjs";
+import { severeDrift, driftKey, strengthDrift, UNPAIRABLE, UNPAIRABLE_CLASS } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
 import { flavourFamilyGaps, flavourGapKey } from "../tools/lib/flavour-parity.mjs";
 import { tooCloseToTell, MIN_DELTA_E } from "../tools/lib/palette.mjs";
@@ -745,6 +745,39 @@ test("every family colour resolves to a defined CSS variable", () => {
     if (!css.includes(`${v[1]}:`)) missing.push(`${fam} -> ${v[1]}`);
   }
   assert(missing.length === 0, `undefined CSS variables:\n    ${missing.join("\n    ")}`);
+});
+
+test("every unpairable reason has a disposition", () => {
+  // The coverage report prints reasons by looking them up in
+  // UNPAIRABLE_CLASS. A reason with no entry prints in neither the
+  // worklist nor the excluded list — it just isn't there, and the
+  // report reads as complete because nothing indicates a row is
+  // missing. Same failure as a colour map still keyed on a vocabulary
+  // that moved: the gap is invisible precisely because the file looks
+  // finished. Adding a code without deciding what to do about it
+  // should fail here, not go quiet.
+  const missing = Object.values(UNPAIRABLE)
+    .filter(r => !UNPAIRABLE_CLASS[r])
+    .map(r => `${r} (no worklist/excluded disposition)`);
+  assert(missing.length === 0, `unclassified reasons:\n    ${missing.join("\n    ")}`);
+
+  const bad = Object.entries(UNPAIRABLE_CLASS)
+    .filter(([, c]) => c.kind !== "worklist" && c.kind !== "excluded")
+    .map(([r, c]) => `${r} -> ${c.kind}`);
+  assert(bad.length === 0, `unknown disposition kinds:\n    ${bad.join("\n    ")}`);
+});
+
+test("strength coverage is reported against a real denominator", () => {
+  // paired + unpairable must account for every doc brew point read. If
+  // a point could ever be dropped without landing in one bucket, the
+  // coverage percentage silently improves — the one number in this
+  // audit that must never flatter itself.
+  const { paired, unpairable, unpaired } = strengthDrift(EXTRACTION_PROFILES);
+  assert(unpaired.length === unpairable,
+    `unpaired rows (${unpaired.length}) disagree with the count (${unpairable})`);
+  assert(paired + unpairable > 0, "no doc brew points were read at all");
+  assert(unpaired.every(u => u.reason),
+    "an unpaired point carries no reason");
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);
