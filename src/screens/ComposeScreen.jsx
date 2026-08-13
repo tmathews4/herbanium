@@ -1681,17 +1681,28 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     setBrewTimeS(profile.timeS);
   }, [profile.tempC, profile.timeS]);
 
-  // Guided-tour demo: while the Blend tour is on the graph/slider steps,
-  // gently oscillate the steep time so the prediction bars visibly move —
+  // Guided-tour demo: while the Blend tour is on the SLIDER step, gently
+  // oscillate the steep time so the prediction bars visibly move —
   // showing the user that the sliders drive the graph. It's demo-only
   // motion; it stops when the step advances or the tour ends. Honors
   // prefers-reduced-motion.
-  // blend-effects is in the list too: Mind and Body respond to the brew
-  // exactly as flavour and palate do, and a step that introduces them
-  // while they sit perfectly still reads as though they're static
-  // properties of the recipe rather than a prediction about the cup.
-  const tourDemoActive = ["blend-graph", "blend-effects", "blend-sliders"]
-    .includes(blendTourStep);
+  //
+  // THE SLIDER STEP ONLY, and it used to be three steps. `blend-graph`
+  // and `blend-effects` were in this list on the argument that strips
+  // introduced while sitting perfectly still read as static properties
+  // of the recipe rather than as a prediction about the cup. That was
+  // right while the brew row was open by default. It stopped being right
+  // when the row started folded: the tour keeps it folded until step 8,
+  // so on those two steps the demo drove a control that was not on
+  // screen. Measured — the bars swung and the folded row's clock ran
+  // 7:47 to 3:24 with nothing visible causing it.
+  //
+  // Motion whose cause is off-screen is worse than stillness. It reads
+  // as the app moving on its own, and it spends the very effect the
+  // slider step needs three steps before that step can explain it. The
+  // link is still taught, once, where the slider is visible and the copy
+  // says "watch all four windows move".
+  const tourDemoActive = blendTourStep === "blend-sliders";
   useEffect(() => {
     if (!tourDemoActive) return undefined;
     const times = reverseIngs.map(id => INGREDIENTS[id]?.timeS).filter(Boolean);

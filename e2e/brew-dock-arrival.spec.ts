@@ -87,7 +87,13 @@ test.describe("the brew dock grows into place", () => {
     const end = await heightAt(page, 1);
 
     expect(start, "an arrival that starts at full height isn't an arrival").toBeLessThanOrEqual(2);
-    expect(end, "and it has to end somewhere real").toBeGreaterThan(40);
+    // 20, not 40. The row arrives FOLDED now, so it lands at its header
+    // height (~37px) rather than its open one — the old threshold was
+    // reading the open panel and would have gone on passing for the
+    // wrong reason if the fold ever regressed. What this assertion is
+    // for is that the arrival ends somewhere real instead of collapsing
+    // to nothing, and that claim is unchanged.
+    expect(end, "and it has to end somewhere real").toBeGreaterThan(20);
     // The middle is what stops the curve being front-loaded. An earlier
     // easing spent 64% of the travel in the first 15% of the time and
     // still read as a pop, which is the failure this number guards.
@@ -166,6 +172,7 @@ test.describe("the brew dock grows into place", () => {
     expect(await countOf(page, DURATION),
       "no arrival animation should be created under reduced motion").toBe(0);
     const box = await dockRow(page).boundingBox();
-    expect(box!.height, "the controls should simply be there").toBeGreaterThan(40);
+    // Folded height, same as above — the claim is "present", not "open".
+    expect(box!.height, "the controls should simply be there").toBeGreaterThan(20);
   });
 });

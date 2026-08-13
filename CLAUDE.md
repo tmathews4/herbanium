@@ -205,9 +205,12 @@ to prevent.
 
 Symptom: roughly one run in three, one test in this file fails, a
 different one each time, and it passes on immediate re-run. Observed on
-`:143` ("an elemental arriving announces itself") and `:187` ("the
-stone filling while you're on another screen says so"). The `:143`
-failure reads:
+`:143` ("an elemental arriving announces itself"), `:187` ("the stone
+filling while you're on another screen says so") and `:396`
+("dismissing it puts it away and it doesn't come back") — three
+different tests across six runs, which is the strongest evidence yet
+that the cause is shared rather than per-test. The `:143` failure
+reads:
 
 ```
 Error: nothing has arrived yet

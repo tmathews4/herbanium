@@ -19,11 +19,20 @@ const ALL_SCREENS = ["home", "blend", "herbanium", "recipes", "reflections", "fi
 // `target`, enable tours, and set a valid schema key so the app doesn't
 // wipe storage on load. addInitScript serializes its function into the
 // browser, so the values are passed as an argument (no outer closure).
-async function armTour(page: Page, target: string) {
+async function armTour(
+  page: Page,
+  target: string,
+  opts: { motion?: "reduce" | "no-preference" } = {},
+) {
   // Emulate prefers-reduced-motion so the app skips the tour fade-in and
   // the steep-slider demo loop — faster walks, and no animation-timing
   // flake (we're testing layout, not racing animations).
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  //
+  // OVERRIDABLE, for the one describe block whose subject IS the demo
+  // loop. Reduced motion switches that loop off, so a test of what the
+  // loop does — or of where it must NOT run — would pass by disabling
+  // its own subject. Everything else should keep the default.
+  await page.emulateMedia({ reducedMotion: opts.motion ?? "reduce" });
   await page.addInitScript(
     ([seenList, tgt, schema]) => {
       localStorage.setItem("herbanium.schemaVersion", schema as string);
@@ -154,11 +163,20 @@ test.describe("guided tours stay on-screen, end to end", () => {
 });
 
 /* ──────────────────────────────────────────────────────────────
-   The teaching moment the Blend tour is built around: on BOTH the
-   "prediction" step and the "dial in the brew" step, the user has to
-   be able to see the prediction bars AND the temp/steep sliders at
-   the same time — that's how they learn the sliders drive the bars.
-   The callout mustn't cover either one, and neither may be off-screen.
+   The teaching moment the Blend tour is built around: on the "dial in
+   the brew" step, the user has to be able to see the prediction bars
+   AND the temp/steep sliders at the same time — that's how they learn
+   the sliders drive the bars. The callout mustn't cover either one, and
+   neither may be off-screen.
+
+   ONE STEP, not two. This used to name the "prediction" step as the
+   other half, from when the brew row was open by default and the two
+   steps ran adjacently. The row starts folded now and the tour keeps it
+   folded until the slider step, so the prediction step introduces the
+   bars on their own — and the pairing this paragraph described is one
+   the tour no longer has. `the bars and the brew sliders stay clear
+   together` was updated first and this header outlived it by a while,
+   which is the ordinary way a comment goes wrong.
 
    This is what caps the tour's seeded example blend at two
    ingredients (see ReverseCompose): a third ingredient's bars make
@@ -645,17 +663,37 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     // The flavour strip is the one element left that changes size WHILE
     // a step is up — the temp/steep sliders are a fixed-height row in
     // the dock now. Changing the steep time drops family rows in and out
-    // of the strip; in the real app the tour's demo loop does this on a
-    // timer, and the block swings ~50px.
+    // of the strip, and the block swings ~50px.
     //
     // Measured before the fix: bars 271→322 while the spotlight sat
     // frozen at 317, so the cutout clipped the bars at their tallest.
     // A once-per-step measurement can't see this, and neither can a
     // check taken at a step boundary — which is why this drives the
     // slider directly rather than clicking Next and hoping.
+    //
+    // THE ROW HAS TO BE OPENED FIRST, and that is the only thing that
+    // changed here. The brew row starts folded now, and the prediction
+    // step declares no openControls, so it shows whatever the user left
+    // — which on a fresh load is shut, with no slider to drive. Opening
+    // it is not a workaround: a tour can be replayed at any time from
+    // Settings, so "the row is open when the prediction step arrives" is
+    // an ordinary state, and it is the one in which this guarantee has
+    // anything to say. Dispatched rather than clicked because the tour
+    // overlay swallows pointer events by design.
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
     await advanceTo(page, "The prediction");
+
+    const opened = await page.evaluate(() => {
+      const row = document.querySelector('[data-tour="blend-controls"]') as HTMLElement | null;
+      if (!row) return "no row";
+      if (row.getAttribute("aria-expanded") === "true") return "already open";
+      row.click();
+      return "opened";
+    });
+    expect(opened, "the brew row should be there to open").not.toBe("no row");
+    await expect(page.locator('[data-tour="blend-sliders"]').first(),
+      "opening the row should put a slider on screen to drive").toBeVisible();
 
     const graph = page.locator('[data-tour="blend-graph"]');
     const spotlight = page.getByTestId("tour-spotlight");
@@ -987,9 +1025,19 @@ test.describe("the tour callout holds its position", () => {
     // The strongest form of the claim, because nothing else changes: the
     // step is the same, its text is the same, so every pixel of the
     // callout should be where it was. Only the graph resized.
+    //
+    // THE SLIDER STEP, not the prediction step. The brew row starts
+    // folded now and the tour keeps it folded until this step, so the
+    // prediction step has no slider to drag — the strip cannot be made
+    // to resize there at all. This is the better home for the claim
+    // anyway: `blend-sliders` is the step that opens the row and asks
+    // the user to drag, so the resize this guards against is one a real
+    // user causes here, on purpose, while the callout is up. The step
+    // keepClears blend-graph, which is exactly the arrangement being
+    // tested.
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
-    await advanceTo(page, "The prediction");
+    await advanceTo(page, "Dial in the brew");
 
     const callout = page.getByTestId("tour-callout");
     const next = callout.getByRole("button", { name: "Next", exact: true });
@@ -1015,7 +1063,7 @@ test.describe("the tour callout holds its position", () => {
       el.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
     });
-    expect(moved, "the prediction step should have the brew row open").toBe(true);
+    expect(moved, "the slider step should have the brew row open").toBe(true);
 
     // Give the strip time to re-render AND the tour every chance to
     // re-place the callout if it were still going to. A pass here has to
@@ -1111,5 +1159,79 @@ test.describe("the tour callout holds its position", () => {
     expect(Math.abs(after.y - before.y),
       `Next moved ${(after.y - before.y).toFixed(1)}px between the Time and Temp steps`)
       .toBeLessThanOrEqual(1);
+  });
+});
+
+/* ──────────────────────────────────────────────────────────────
+   NOTHING MOVES ON ITS OWN WHILE THE CONTROL IS PUT AWAY.
+
+   The tour oscillates the steep time on the slider step so the user
+   watches the bars answer a slider they can see. That demo used to run
+   on three steps, and two of them are steps where the brew row is
+   folded — so the bars swung and the folded row's clock ran (measured:
+   7:47 to 3:24) with no control on screen to explain it. Motion whose
+   cause is off-screen reads as the app driving itself, and it spends
+   the slider step's whole lesson three steps before that step arrives.
+
+   This is the guard for that, and it is written as "the readout holds"
+   rather than "the demo list has one entry" on purpose: the failure is
+   a thing the USER sees, and it could come back from the tour data, the
+   step names, or the row default without the list ever changing.
+   ────────────────────────────────────────────────────────────── */
+test.describe("the tour doesn't drive controls the user can't see", () => {
+  slowBecauseItWalksATour();
+
+  async function advanceTo(page: Page, text: string) {
+    const callout = page.getByTestId("tour-callout");
+    await expect(callout, "blend tour should start").toBeVisible();
+    for (let guard = 0; guard < 20; guard++) {
+      if ((await callout.innerText()).includes(text)) return;
+      await callout.getByRole("button", { name: "Next", exact: true }).click();
+    }
+    throw new Error(`Blend tour never reached the "${text}" step`);
+  }
+
+  // The folded row is the only readout of the brew while it's shut, so
+  // it is also the honest place to see whether anything is moving.
+  const clock = (page: Page) => page.locator('[data-tour="blend-controls"]')
+    .innerText().then(t => (t.match(/\d+:\d{2}/) || ["none"])[0]);
+
+  for (const step of ["The prediction", "What it does"]) {
+    test(`"${step}" holds still — the brew row is folded there`, async ({ page }) => {
+      // NOT reduced motion. The demo honours it, so emulating it here
+      // would make this pass by disabling the very thing under test —
+      // the same shape as a test that asserts a hidden element is quiet.
+      await armTour(page, "blend", { motion: "no-preference" });
+      await openTab(page, "Apothecary");
+      await advanceTo(page, step);
+
+      const row = page.locator('[data-tour="blend-controls"]');
+      await expect(row, "this step should have the row folded")
+        .toHaveAttribute("aria-expanded", "false");
+
+      const before = await clock(page);
+      await page.waitForTimeout(1200);      // ~20 demo ticks at 60ms
+      const after = await clock(page);
+      expect(after,
+        `the brew ran from ${before} to ${after} with no control on screen`)
+        .toBe(before);
+    });
+  }
+
+  test("the slider step DOES move — the demo still happens where it's earned", async ({ page }) => {
+    // The other half, and the reason the test above can't just be
+    // "nothing ever moves": the lesson has to survive the fix.
+    await armTour(page, "blend", { motion: "no-preference" });
+    await openTab(page, "Apothecary");
+    await advanceTo(page, "Dial in the brew");
+
+    await expect(page.locator('[data-tour="blend-controls"]'),
+      "the slider step opens the row").toHaveAttribute("aria-expanded", "true");
+
+    const before = await clock(page);
+    await expect.poll(() => clock(page), {
+      message: `the slider step should demonstrate movement — clock sat at ${before}`,
+      timeout: 5_000,
+    }).not.toBe(before);
   });
 });

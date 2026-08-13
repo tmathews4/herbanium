@@ -242,17 +242,19 @@ test.describe("the tour hands the screen back when it ends", () => {
     await expect(callout(page)).toBeHidden();
 
     // "Released" means falling back to the user's own state, which is
-    // open by default — not "the tour ends with the row shut". Those
-    // read the same until the default flips, which is exactly when this
-    // should catch it.
+    // CLOSED by default — not "the tour ends with the row open". Those
+    // read the same until the default flips, which is exactly what the
+    // previous version of this comment predicted and what happened: the
+    // default was open, this asserted "true", and the flip caught it
+    // here. The claim is unchanged; only the user's own state moved.
     await expect(row, "released, the row follows the user's own preference")
-      .toHaveAttribute("aria-expanded", "true");
+      .toHaveAttribute("aria-expanded", "false");
 
     await row.click();
-    await expect(row, "and tapping it folds — the reported bug was that nothing happened")
-      .toHaveAttribute("aria-expanded", "false");
+    await expect(row, "and tapping it opens — the reported bug was that nothing happened")
+      .toHaveAttribute("aria-expanded", "true");
     await row.click();
-    await expect(row, "and unfolds again").toHaveAttribute("aria-expanded", "true");
+    await expect(row, "and folds again").toHaveAttribute("aria-expanded", "false");
   });
 
   test("abandoning the tour on a step that pins the row SHUT hands it back too", async ({ page }) => {
@@ -260,6 +262,15 @@ test.describe("the tour hands the screen back when it ends", () => {
     // user skips partway. This step forces the row closed to explain
     // that it folds, so a tour abandoned here would leave the sliders
     // unreachable rather than merely stuck open.
+    //
+    // THE TAP IS THE ASSERTION HERE, not the state, and that changed
+    // with the default. The user's own state is now closed and this step
+    // pins it closed, so "released" and "still pinned" read IDENTICALLY
+    // as aria-expanded="false" — the exact worthless-coverage shape the
+    // note below this test warns about. What still separates them is
+    // whether the control answers: a leaked override holds the row shut
+    // through the tap, and that is the failure worth catching, because
+    // it leaves the sliders permanently unreachable.
     await boot(page, armOnly("blend"));
     await openTab(page, "Apothecary");
     const row = page.locator('[data-tour="blend-controls"]');
@@ -269,11 +280,12 @@ test.describe("the tour hands the screen back when it ends", () => {
 
     await btn(page, "Skip").click();
     await expect(callout(page)).toBeHidden();
-    await expect(row, "the row should drop back to the user's own state, not stay pinned shut")
-      .toHaveAttribute("aria-expanded", "true");
+    await expect(row, "the row should drop back to the user's own state, which is also shut")
+      .toHaveAttribute("aria-expanded", "false");
 
     await row.click();
-    await expect(row, "and answer taps from there").toHaveAttribute("aria-expanded", "false");
+    await expect(row, "and answer taps from there — pinned shut, this stays false")
+      .toHaveAttribute("aria-expanded", "true");
   });
 
   /* WHY THESE TWO SKIP RATHER THAN FINISH.
@@ -300,6 +312,16 @@ test.describe("the tour hands the screen back when it ends", () => {
 
     await btn(page, "Skip").click();
     await expect(callout(page)).toBeHidden();
+
+    // The row has to be opened to read the pills at all. Releasing the
+    // tour drops the row back to the user's own state, which is folded
+    // now, and the pills live inside it — so this used to assert on a
+    // control that had stopped being rendered and failed with "element
+    // not found" rather than with a wrong axis. Opening first puts the
+    // question back to the one being asked: WHICH axis came back.
+    const row = page.locator('[data-tour="blend-controls"]');
+    await expect(row).toHaveAttribute("aria-expanded", "false");
+    await row.click();
 
     await expect(page.getByTestId("brew-axis-timeS"),
       "the axis should fall back to the user's own choice, not stay on the demo's")

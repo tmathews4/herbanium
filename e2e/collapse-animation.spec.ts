@@ -88,9 +88,22 @@ test.describe("closing a dock doesn't flash it back open", () => {
        having animated too smoothly to observe. Duration survives
        dropped frames: an element that vanishes reaches zero on the
        frame after it starts, and one that animates takes most of its
-       280ms however few samples land in between. */
-    const started = frames.find((f) => f.h < resting - 2);
+       280ms however few samples land in between.
+
+       AND THE START IS THE LAST FULL FRAME, not the first short one.
+       Duration alone did not survive after all, for the same reason the
+       height version didn't: it timed from the first sample BELOW full
+       height, so a starved sampler that misses the early travel starts
+       the clock partway down. Measured, on a real and correct collapse:
+       samples at 195ms:82 then 318ms:36 — a 123ms gap — put `started`
+       at 36px, already 57% shut, and reported a 255ms animation as
+       58ms. Timing from the last frame still AT rest can only overstate
+       the travel, and overstating is safe here: the thing being caught
+       is a panel that vanishes, which reaches zero on the very next
+       frame and so measures ~16ms however the sampler behaves. */
+    const lastAtRest = [...frames].reverse().find((f) => f.h >= resting - 2);
     const ended = frames.find((f) => f.h <= 1);
+    const started = lastAtRest && ended && lastAtRest.t < ended.t ? lastAtRest : undefined;
     expect(started && ended, `never saw the collapse: ${show}`).toBeTruthy();
     const travel = ended!.t - started!.t;
     expect(travel,

@@ -360,19 +360,42 @@ export const BlendExtractionExplorer = ({
   // rollup. Persisted so users who prefer Simple keep that across
   // sessions after flipping.
   const [familyMode, setFamilyMode] = usePersistedState("explorerFamilyMode", false);
-  // OPEN by default, and persisted.
-  //
-  // It shipped collapsed when the block was ~230px and opening it cost a
-  // quarter of the screen. One axis at a time took it to 85px, which
-  // changed the trade: a first-time user who never taps the row never
-  // learns the cup is adjustable at all, and that's the more expensive
-  // failure. So the sliders are there on arrival.
-  //
-  // Persisted for the other half of it. An unpersisted default-open
-  // would re-open on EVERY visit, so a user who learned the control and
-  // wanted the screen back could never make that stick — the tax would
-  // fall hardest on the people who least need the prompt.
-  const [controlsOpen, setControlsOpen] = usePersistedState("explorerControlsOpen", true);
+  /* CLOSED on launch, and NOT remembered. No exceptions — the tour does
+     not hand it back open, and the reason is worth reading before adding
+     one.
+
+     The history, because this has moved twice. It shipped collapsed when
+     the block was ~230px and opening it cost a quarter of the screen.
+     One axis at a time took it to 85px, and it went open-and-persisted
+     on the argument that a first-time user who never taps the row never
+     learns the cup is adjustable at all.
+
+     The tour is what settled that argument. Discovery is the tutorial's
+     job now, and it does it explicitly: the row is folded for the first
+     seven steps, step 8 OPENS it to teach the sliders, and the last step
+     folds it again while saying so. Opening and closing are both
+     demonstrated, in that order, at the moment each is wanted. Paying
+     for discovery a second time, on every launch forever, buys nothing
+     the tour has not already delivered.
+
+     Not persisted, rather than persisted-with-a-false-default. A false
+     default still records the first tap for good, which is the same
+     stickiness pointed the other way: expanding a panel to read one cup
+     is not a standing preference about the app. `explorerFamilyMode`
+     above stays persisted because that one genuinely is — how you want
+     the strips read, not whether something happens to be open now.
+
+     THE TOUR MUST NOT LEAVE IT OPEN, and there was briefly an effect
+     here that did. It fired when the tour released its override, on the
+     reasoning that someone who just watched the sliders explained should
+     not find the row shut in the same breath. That reasoning is fine and
+     the step it lands on is not: the tour's LAST step is
+     `openControls: false` on purpose — it folds the row, says "it's
+     there whenever you want it", and hands the screen back the way the
+     user will actually leave it. Re-opening a beat later undid the final
+     thing the tour taught. Two mechanisms, one screen state, disagreeing
+     about it; the tour's is the deliberate one. */
+  const [controlsOpen, setControlsOpen] = useState(false);
   // Which slot these controls dock into. The tab dock by default; a
   // full-screen overlay that covers the tab bar provides its own, since
   // controls portaled under it are unreachable. See helpers/dock.js.
@@ -454,9 +477,17 @@ export const BlendExtractionExplorer = ({
   // The tour's demo oscillates steep time so the user watches the
   // prediction bars respond. If Temp happened to be the axis showing,
   // they'd watch the bars move beside a slider that doesn't — the
-  // lesson inverted. Those two steps force Time; every other step
-  // leaves the user's own choice alone.
-  const tourAxis = (tourStep === "blend-graph" || tourStep === "blend-sliders") ? "timeS" : null;
+  // lesson inverted. That step forces Time; every other step leaves the
+  // user's own choice alone.
+  //
+  // `blend-graph` USED TO BE IN THIS LIST and is deliberately gone. The
+  // brew row now starts folded and the tour keeps it folded until step
+  // 8, so on the prediction step there is no slider on screen to force
+  // an axis for — the forcing was reaching past a closed panel to set
+  // which of two invisible controls was invisible. The demo it existed
+  // to serve belongs to `blend-sliders`, which is the step that opens
+  // the row and asks the user to drag.
+  const tourAxis = tourStep === "blend-sliders" ? "timeS" : null;
   const shownAxis = axisOverride ?? tourAxis ?? axis;
 
   /* No band-selection state any more. Tapping the word under a slider

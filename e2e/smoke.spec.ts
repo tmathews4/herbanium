@@ -199,19 +199,33 @@ for (const withBrew of [false, true]) {
       await search.fill("chamomile");
       await page.getByRole("button", { name: /chamomile/i }).first().click();
       // The brew controls are a row in the tab dock, above Blend /
-      // Herbanium, and they arrive OPEN. That's the deliberate part: a
-      // first-time user who never taps the row never learns the cup is
-      // adjustable, so the sliders are on screen from the start.
+      // Herbanium, and they arrive FOLDED. That is the deliberate part,
+      // and it reversed: the row used to arrive open so a first-time
+      // user couldn't miss that the cup is adjustable. The tour does
+      // that job now — it folds the row for seven steps, opens it to
+      // teach the sliders, then folds it again while saying so — and
+      // paying for the same discovery on every launch forever bought
+      // nothing the tour hadn't already delivered.
+      //
+      // What has to stay true is that the row ANNOUNCES itself: folded
+      // is not hidden. It still reads the temperature and the time, and
+      // the chevron still says it opens.
       const controls = page.locator('[data-tour="blend-controls"]');
       const sliders = page.locator('[data-tour="blend-sliders"]');
       await expect(controls, "a pot should expose the brew row").toBeVisible();
-      await expect(sliders, "and it should arrive open, not hidden behind a tap")
-        .toBeVisible();
+      await expect(sliders, "and it should arrive folded, behind one tap")
+        .toBeHidden();
       // The chevron is what says the row folds — open it points down
       // (close), shut it points up (expand). Asserted as a rotation
       // matrix because that's what getComputedStyle resolves a transform
       // to: rotate(180deg) is (-1,0,0,-1).
       const chevron = controls.locator("svg");
+      await expect(chevron, "folded, the arrow points up")
+        .toHaveCSS("transform", "matrix(-1, 0, 0, -1, 0, 0)");
+
+      // And one tap is the whole cost of reaching the sliders.
+      await controls.click();
+      await expect(sliders, "tapping the row should open the controls").toBeVisible();
       await expect(chevron, "open, the arrow points down")
         .toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
 
@@ -333,6 +347,24 @@ for (const withBrew of [false, true]) {
       expect(hit, `${what}: the brew row must be touchable, not just present`).toBe("reachable");
     };
 
+    /* Open the brew row if it isn't already.
+
+       The row arrives FOLDED now, so three tests below that go straight
+       to a slider were reaching for a control behind a tap. Written once
+       rather than pasted three times, and asked via aria-expanded rather
+       than clicked unconditionally: a bare click on an already-open row
+       SHUTS it, which is the same bug pointed the other way and is
+       exactly what brew-everywhere.spec did once while reporting "the
+       brew panel should be on screen". */
+    const openBrewRow = async (page: Page) => {
+      const row = page.locator('[data-tour="blend-controls"]').first();
+      await expect(row, "the brew row should say whether it's open")
+        .toHaveAttribute("aria-expanded", /true|false/);
+      if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+      await expect(page.locator('[data-tour="blend-sliders"]').first(),
+        "opening the row should put the sliders on screen").toBeVisible();
+    };
+
     test("Recipes — a pre-made recipe's brew is adjustable, not read-only", async ({ page }) => {
       await openTab(page, "Journal");
       await openSubTab(page, "Recipes");
@@ -341,6 +373,7 @@ for (const withBrew of [false, true]) {
       const controls = page.locator('[data-tour="blend-controls"]');
       await expect(controls, "a recipe should offer the brew row").toBeVisible();
       await assertReachable(page, "recipe detail");
+      await openBrewRow(page);
 
       // Same control as the compose screen, not a second design: the
       // axis pills swap which slider is bound, one at a time.
@@ -383,6 +416,7 @@ for (const withBrew of [false, true]) {
       const controls = page.locator('[data-tour="blend-controls"]');
       await expect(controls, "an ingredient should offer the brew row").toBeVisible();
       await assertReachable(page, "ingredient detail");
+      await openBrewRow(page);
       await expect(page.locator('[data-tour="blend-sliders"] input[type=range]'),
         "one slider here as well").toHaveCount(1);
 
@@ -411,6 +445,12 @@ for (const withBrew of [false, true]) {
       // And it SURVIVES folding — that's the whole reason it sits in the
       // row's header rather than under the slider. Committing the cup
       // shouldn't require unfolding anything.
+      //
+      // Opened first, so the fold below is a real transition. The row
+      // arrives folded now, and clicking it from there would OPEN it —
+      // the assertion would then be reading the state it meant to
+      // create, and would pass without ever folding anything.
+      await openBrewRow(page);
       await page.locator('[data-tour="blend-controls"]').click();
       await expect(page.locator('[data-tour="blend-sliders"]'),
         "folding should put the sliders away").toBeHidden();
