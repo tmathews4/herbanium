@@ -38,6 +38,7 @@ import { Sprig, Pencil } from "../components/icons";
 import { Arrival, Collapse } from "../components/Arrival";
 import { createPortal } from "react-dom";
 import { WRITE_DOCK_ID, WRITE_SAVE_SLOT_ID } from "../helpers/dock";
+import { TOUR_BLEND } from "../data/tourBlend";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -1421,14 +1422,16 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // example *blend* — two ingredients at different parts (2 / 1) — so the
   // walkthrough shows what blending actually is: balancing ingredients,
   // with the parts and the steep together shaping how it all extracts.
-  // Two and not three on purpose: the prediction bars and the brew
-  // sliders both have to fit on screen beside the tour callout, so the
-  // user can watch the flavor/mood bars move as the sliders change.
   // Left in place after; the user can retune or remove either with ×.
+  //
+  // WHICH blend, and why it has to be that one, lives in
+  // src/data/tourBlend.js beside the constant — the reasoning is about
+  // the teaching, not about this effect, and it is guarded by
+  // tests/tour-blend.test.mjs rather than by a comment here.
   React.useEffect(() => {
     if (blendTourActive && reverseIngs.length === 0) {
-      setReverseIngs(["chamomile", "peppermint"]);
-      setPartsById({ chamomile: 2, peppermint: 1 });
+      setReverseIngs([...TOUR_BLEND.ids]);
+      setPartsById({ ...TOUR_BLEND.parts });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blendTourActive]);
