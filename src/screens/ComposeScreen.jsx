@@ -26,8 +26,8 @@ import {
   ff, theme, shadow, radius,
 } from "../theme";
 import {
-  formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
-  formatTsp, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts,
+  formatTemp, formatTempRange, formatTempShort, useUnit,
+  formatTsp, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts, POUR_SIZES,
 } from "../units/units";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
@@ -1603,7 +1603,14 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   }
 
   /* What to actually put in the pot. The only place `pour` is read:
-     the same recipe, scaled to how much you're making. */
+     the same recipe, scaled to how much you're making.
+
+     Read once, for the TOTAL under the ingredient list. A per-row
+     version of this shipped briefly and came straight back out — a gram
+     figure beside every parts number made the row read as two competing
+     amounts, and "5 · 1.7g" invites the question of which one you are
+     setting. The ratio is what the stepper edits; the total is what you
+     measure. One of each. */
   const displayGramsFor = (id) => amountMode === "parts"
     ? (partsToGrams(ratioEntries(), pour, gramsPerCupFor)[id] ?? 0)
     : gramsFor(id);
@@ -2267,21 +2274,31 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             textTransform: "uppercase", color: theme.ash,
             marginBottom: 8, lineHeight: 1.5,
           }}>
-            {/* WHAT A PART IS, and nothing else.
+            {/* WHAT THE POT COMES TO, which is the fact this slot can
+                still tell the truth about.
 
-                In weight mode the numbers already ARE the measurement,
-                so a translation line would tell the user what they can
-                read. And the volume this once claimed — "per 250 ml
-                cup" — was asserted rather than known; nobody's mug was
-                consulted.
+                It used to read "1 part ≈ 1 g of dry leaf", and that was
+                exact by construction right up until it wasn't: a part
+                became a SHARE of a cup's worth, so a part is now 1.67g
+                of assam or 0.2g of peppermint depending on the balance
+                and the pour. The sentence survived the change that
+                falsified it, which is the ordinary way a label goes
+                wrong — nothing referenced it, so nothing failed.
 
-                The tsp variant went too. "1 part ≈ ½ tsp" is only true
-                for a leaf of average density: a teaspoon runs 1.0g of
-                chamomile to 3.0g of powdered adaptogen, so the same
-                sentence was out by threefold across the catalogue. The
-                gram figure is exact by construction — a part IS a gram
-                to the engine — so that's the one worth printing. */}
-            {amountMode === "weight" ? null : "1 part ≈ 1 g of dry leaf"}
+                Two earlier versions died the same way and are worth not
+                reviving: "per 250 ml cup" asserted a volume nobody
+                measured, and "1 part ≈ ½ tsp" was out by threefold
+                across the catalogue, since a teaspoon runs 1.0g of
+                chamomile to 3.0g of powdered adaptogen.
+
+                The total is the honest replacement. It is what you
+                actually measure out, it moves with the Making setting,
+                and per-row amounts sit beside each leaf already — so
+                this says the one thing they don't. */}
+            {amountMode === "weight" ? null : (() => {
+              const total = reverseIngs.reduce((sum, id) => sum + displayGramsFor(id), 0);
+              return `${POUR_SIZES[pour]?.name ?? "a cup"} · ${total.toFixed(1)} g total`;
+            })()}
           </div>
         )}
         {reverseIngs.map((id, idx) => {
@@ -2393,18 +2410,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   : weightUnit === "g"
                     ? `${Number((Math.round(parts * 10) / 10).toFixed(1))} g`
                     : formatTsp(gramsToTsp(parts, INGREDIENTS[id].category))}</span>
-                {/* WHAT TO ACTUALLY MEASURE OUT. Parts stopped being
-                    grams, so "5 parts" no longer tells anyone what to
-                    put in the pot — and the answer moves with the pour,
-                    which is the whole reason that setting exists. Shown
-                    only in parts mode: weight mode is already reading
-                    grams, and repeating them would be noise. */}
-                {amountMode === "parts" && (
-                  <span data-testid={`measure-${id}`} style={{
-                    fontFamily: ff.mono, fontSize: 9.5,
-                    color: theme.ash, minWidth: 30, textAlign: "center",
-                  }}>{formatAmount(displayGramsFor(id), INGREDIENTS[id]?.category, weightUnit)}</span>
-                )}
                 <button
                   onClick={() => setParts(id, parts + stepFor(id))}
                   disabled={atCeiling}
