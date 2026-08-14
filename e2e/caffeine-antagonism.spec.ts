@@ -44,26 +44,52 @@ async function addIngredient(page: Page, name: string) {
 /**
  * Chamomile plus enough black tea to matter.
  *
- * THE DOSE IS THE POINT, and the first version of this spec got it
- * wrong. The composer adds a second ingredient at 1 part, and chamomile
- * 2g + assam 1g is only ~60mg of caffeine — under the 80mg threshold,
- * so the app correctly says nothing. Bumping assam to 2 parts puts the
- * cup at ~120mg, which is where the interaction is real.
+ * BUILT IN WEIGHT MODE, and that is the whole story of this helper.
  *
- * That the default pour DOESN'T fire this is worth stating rather than
- * working around: the antagonism is a claim about a genuine dose of
- * both, not about two names appearing in one recipe.
+ * Parts used to be grams, so "chamomile 2 : assam 2" was a 4g pot and
+ * reached the 80mg threshold easily. Parts are now a RATIO normalised
+ * to one cup's worth of leaf, and at that size the two conditions are
+ * mutually exclusive: raising the tea to reach 80mg necessarily lowers
+ * the chamomile below the sedative threshold. Measured across every
+ * sedative/caffeine pair in the catalogue — valerian, hops, lavender,
+ * passionflower against assam, matcha, gunpowder — and NONE of them
+ * fire at one cup. At 1:2 the caffeine reaches 80mg with sleepy down to
+ * 1.24; at 1:1 sleepy is 2.47 and the caffeine is only 60mg.
+ *
+ * That is the model being right rather than the warning being lost. One
+ * cup's worth of leaf genuinely cannot hold a serious dose of both, and
+ * the cup that can is a heavy one — which is why this now builds it in
+ * weight mode, and why the `pour` notice fires alongside. Both are true
+ * of the same cup and the app says both.
  */
 async function buildAntagonisedCup(page: Page) {
   await page.getByRole("button", { name: "Apothecary", exact: true }).click();
   await addIngredient(page, "chamomile");
   await addIngredient(page, "assam");
 
-  const more = page.getByRole("button", { name: /increase Assam Black parts/i });
-  await expect(more, "the composer should offer a parts stepper").toBeVisible({ timeout: 30_000 });
-  await more.click();
-
+  await crankToAHeavyCup(page);
   await ensureBrewPanel(page);
+}
+
+/**
+ * Take whatever is already in the pot up to a genuinely heavy dose, in
+ * weight mode.
+ *
+ * Counts taps rather than reading grams, because the readout speaks the
+ * user's chosen unit — teaspoons by default — and a spec that parsed it
+ * would be asserting on a display format. The step is a quarter-teaspoon
+ * of THAT leaf, so twelve taps is three teaspoons of each however the
+ * two differ in density. The warning assertions are the real gate.
+ */
+async function crankToAHeavyCup(page: Page) {
+  await page.getByTestId("amount-mode-weight").click();
+  const ups = page.getByRole("button", { name: /increase .* amount/i });
+  await expect(ups.first(), "weight mode should offer amount steppers")
+    .toBeVisible({ timeout: 30_000 });
+  const n = await ups.count();
+  for (let row = 0; row < n; row++) {
+    for (let i = 0; i < 12; i++) await ups.nth(row).click();
+  }
 }
 
 test.describe("caffeine and sedatives in one cup", () => {
@@ -100,8 +126,12 @@ test.describe("caffeine and sedatives in one cup", () => {
       "a caffeine-free chamomile cup should carry its sedation synergy")
       .toBeVisible({ timeout: 30_000 });
 
+    // Now make it a cup that genuinely holds both. In parts mode this is
+    // unreachable by construction — one cup's worth of leaf cannot carry
+    // a serious dose of caffeine AND of sedative, since raising one
+    // lowers the other. See the note on buildAntagonisedCup.
     await addIngredient(page, "assam");
-    await page.getByRole("button", { name: /increase Assam Black parts/i }).click();
+    await crankToAHeavyCup(page);
     await expect(warning(page, "antagonism")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId("synergy-deepens-sedation"),
       "a cup being warned it reads wired must not also claim to deepen sedation").toBeHidden();

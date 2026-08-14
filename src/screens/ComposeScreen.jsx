@@ -2,7 +2,7 @@
    screens/ComposeScreen.jsx — Compose screen and its ReverseCompose sibling.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   computeBrewProfile, resolveBlendAtBrew,
 } from "../algo/compose";
@@ -27,7 +27,7 @@ import {
 } from "../theme";
 import {
   formatAmount, formatTemp, formatTempRange, formatTempShort, useUnit,
-  formatTsp, gramsToTsp, TSP_BY_CATEGORY,
+  formatTsp, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts,
 } from "../units/units";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
@@ -1439,7 +1439,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
   const [rcSaveStatus, setRcSaveStatus] = useState(null);
   // Brew-save confirmation — reverse-built blends always start unsaved.
-  const { unit, weightUnit } = useUnit();
+  const { unit, weightUnit, pour } = useUnit();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   // Per-ingredient parts — explicit user-set values keyed by id.
@@ -1476,7 +1476,43 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
      the user chose in settings — half a gram, or a quarter teaspoon
      of THIS leaf, since a teaspoon of chamomile and a teaspoon of
      ginger are not the same mass. */
-  const [amountMode, setAmountMode] = usePersistedState("amountMode", "parts");
+  const [amountMode, setAmountModeRaw] = usePersistedState("amountMode", "parts");
+  /* Switching converts, so the cup is identical either side of the
+     toggle. Without this the stored number would simply be reread in
+     the other mode's units — 5 parts becoming 5 grams — which is the
+     one thing a display toggle must never do. */
+  const lastRatio = useRef(null);
+  const setAmountMode = (next) => {
+    if (next === amountMode) return;
+    const carried = {};
+    if (next === "weight") {
+      // Remember the ratio the user actually typed, so coming back can
+      // hand it to them rather than a re-derived equivalent.
+      lastRatio.current = Object.fromEntries(reverseIngs.map(id => [id, ratioFor(id)]));
+      for (const id of reverseIngs) carried[id] = gramsFor(id);
+    } else {
+      /* RESTORE THE RATIO, don't re-derive it, when the pot hasn't
+         actually moved. Deriving is lossy in a way that has nothing to
+         do with the cup: a ratio is scale-free, so a lone ingredient at
+         "2 parts" comes back as "1" — the same cup, a different label,
+         and a toggle that renumbers the recipe reads as the app editing
+         it. So the remembered ratio is reused whenever it still
+         resolves to the grams now in the pot; if the user changed
+         anything in weight mode it no longer will, and we derive. */
+      const remembered = lastRatio.current;
+      const resolves = remembered && reverseIngs.every(id => remembered[id] != null)
+        && (() => {
+          const g = partsToGrams(
+            reverseIngs.map(id => ({ id, parts: remembered[id] })), "cup", gramsPerCupFor);
+          return reverseIngs.every(id => Math.abs((g[id] ?? 0) - gramsFor(id)) < 1e-6);
+        })();
+      const derived = resolves ? remembered : gramsToParts(
+        reverseIngs.map(x => ({ id: x, g: gramsFor(x) })), gramsPerCupFor);
+      for (const id of reverseIngs) if (derived[id] != null) carried[id] = derived[id];
+    }
+    setPartsById(carried);
+    setAmountModeRaw(next);
+  };
   const gramsPerTspFor = (id) =>
     TSP_BY_CATEGORY[INGREDIENTS[id]?.category] || 1.5;
   // One step of the stepper, in grams, for the mode and unit in play.
@@ -1493,8 +1529,37 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     const snapped = Math.round(g / step) * step;
     return Math.max(step, Math.min(20, Math.round(snapped * 100) / 100));
   };
-  const partsFor = (id) => {
-    if (partsById[id] != null) return partsById[id];
+  /* WHAT THE STEPPER HOLDS, and it is not the same thing in both modes.
+
+     Parts mode holds a RATIO. Weight mode holds GRAMS. They used to be
+     the same number because a part was a gram outright, and that is
+     precisely what broke: "5 parts assam : 1 part peppermint" built a
+     6g pot — 3.33 cups' worth of leaf in one cup — so every strong
+     flavour sat at its ceiling and the strip went flat. A ratio is not
+     a quantity, and treating it as one silently made the pot bigger
+     every time someone expressed a stronger lead.
+
+     The two are still one store and switching still never changes the
+     cup, which is the promise the old comment made and this keeps:
+     parts -> weight seeds the grams the ratio already resolves to, and
+     weight -> parts seeds the ratio those grams are already in. Both
+     conversions are exact. `ratioFor` may therefore hold a fractional
+     value after a round trip through weight mode — that is honest
+     rather than tidy, and the stepper snaps to whole parts the moment
+     anyone touches it. Rounding on the way in would have changed the
+     cup behind a display toggle. */
+  const gramsPerCupFor = (id) => TSP_BY_CATEGORY[INGREDIENTS[id]?.category] || 1.5;
+
+  // The ratio a row is in. Explicit if the user set one, otherwise the
+  // default below.
+  const ratioFor = (id) => {
+    if (amountMode === "parts" && partsById[id] != null) return partsById[id];
+    if (amountMode !== "parts") {
+      // Derived from the grams actually in the pot.
+      const derived = gramsToParts(
+        reverseIngs.map(x => ({ id: x, g: gramsFor(x) })), gramsPerCupFor);
+      if (derived[id] != null) return derived[id];
+    }
     // First-added is the default lead at 2 parts; the rest start
     // as 1-part accents. The user can change the ratio anytime
     // via the row stepper without engaging if they don't want to.
@@ -1503,16 +1568,57 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     // 4:1 split that pushed strong leads into over-pull territory.
     return id === reverseIngs[0] ? 2 : 1;
   };
+
+  /* What the MODEL is given, and it is always one cup's worth.
+
+     A pot is not a stronger cup, it is more of the same cup — the water
+     scales with the leaf, so the concentration is identical. Every
+     extraction profile in the catalogue is written per 200ml ("1 tsp ·
+     200ml"), so handing it three cup-doses because the user is making a
+     pot would render that pot as a TRIPLE-STRENGTH cup. That is the
+     exact bug this whole change exists to remove, arriving through the
+     front door.
+
+     So parts always resolve against one cup, whatever the pour, and the
+     pour scales only what you MEASURE OUT (`displayGramsFor` below).
+     Brew a pot and the prediction is unchanged, which is correct: it is
+     the same tea, and there is just more of it. */
+  const ratioEntries = () => reverseIngs.map(x => ({
+    id: x,
+    parts: partsById[x] != null ? partsById[x] : (x === reverseIngs[0] ? 2 : 1),
+  }));
+
+  function gramsFor(id) {
+    if (amountMode !== "parts") {
+      if (partsById[id] != null) return partsById[id];
+      return partsToGrams(ratioEntries(), "cup", gramsPerCupFor)[id] ?? 0;
+    }
+    return partsToGrams(ratioEntries(), "cup", gramsPerCupFor)[id] ?? 0;
+  }
+
+  /* What to actually put in the pot. The only place `pour` is read:
+     the same recipe, scaled to how much you're making. */
+  const displayGramsFor = (id) => amountMode === "parts"
+    ? (partsToGrams(ratioEntries(), pour, gramsPerCupFor)[id] ?? 0)
+    : gramsFor(id);
+
+  // Kept under its old name because eleven call sites read it as "the
+  // amount of this row". It is grams, and always was.
+  const partsFor = (id) => gramsFor(id);
   const setParts = (id, n) => {
     setPartsById(prev => ({ ...prev, [id]: clampAmount(id, n) }));
   };
   // Primary highlight = whichever row has the highest parts (when
   // it stands clearly above 1). Rows tied at the max all get the
   // highlight; when everything's at 1 part no row is the lead.
+  /* The lead is a RATIO fact, not a grams fact. Reading grams here
+     broke the moment parts stopped being grams: at a cup's worth split
+     three ways every row is under 1g, so `maxParts > 1` found no lead
+     at all and the highlight silently vanished. */
   const maxParts = reverseIngs.length === 0
     ? 0
-    : Math.max(...reverseIngs.map(partsFor));
-  const isPrimary = (id) => maxParts > 1 && partsFor(id) === maxParts;
+    : Math.max(...reverseIngs.map(ratioFor));
+  const isPrimary = (id) => maxParts > 1 && ratioFor(id) === maxParts;
   // Mood + flavor sub-filters — multi-select. Same vocabulary as
   // Recipes (mood) and Herbanium (flavor) so filter language
   // stays consistent. Both empty = no constraint; either narrows the
@@ -2156,7 +2262,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         )}
         {reverseIngs.map((id, idx) => {
           const primary = isPrimary(id);
-          const parts = partsFor(id);
+          /* The number the STEPPER works in, which is the mode's own
+             unit: a ratio part in parts mode, grams in weight mode.
+             Reading grams here in parts mode would have stepped 1.67g
+             by 1 and called it "a part". */
+          const parts = amountMode === "parts" ? ratioFor(id) : partsFor(id);
           // 9 parts is the ratio language's ceiling; 20g is the pot's.
           const atCeiling = amountMode === "parts" ? parts >= 9 : parts >= 20;
           return (
@@ -2259,6 +2369,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                   : weightUnit === "g"
                     ? `${Number((Math.round(parts * 10) / 10).toFixed(1))} g`
                     : formatTsp(gramsToTsp(parts, INGREDIENTS[id].category))}</span>
+                {/* WHAT TO ACTUALLY MEASURE OUT. Parts stopped being
+                    grams, so "5 parts" no longer tells anyone what to
+                    put in the pot — and the answer moves with the pour,
+                    which is the whole reason that setting exists. Shown
+                    only in parts mode: weight mode is already reading
+                    grams, and repeating them would be noise. */}
+                {amountMode === "parts" && (
+                  <span data-testid={`measure-${id}`} style={{
+                    fontFamily: ff.mono, fontSize: 9.5,
+                    color: theme.ash, minWidth: 30, textAlign: "center",
+                  }}>{formatAmount(displayGramsFor(id), INGREDIENTS[id]?.category, weightUnit)}</span>
+                )}
                 <button
                   onClick={() => setParts(id, parts + stepFor(id))}
                   disabled={atCeiling}

@@ -28,7 +28,7 @@ import { useUnit } from "../units/units";
    ────────────────────────────────────────────────────────────── */
 
 export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
-  const { unit, setUnit, weightUnit, setWeightUnit } = useUnit();
+  const { unit, setUnit, weightUnit, setWeightUnit, pour, setPour } = useUnit();
 
   // Name edit mode
   const [editingName, setEditingName] = useState(false);
@@ -340,6 +340,40 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
                 cursor: "pointer",
                 transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
                 boxShadow: weightUnit === val ? "0 2px 6px -1px rgba(30,24,18,0.24)" : "none",
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Pour — how much you're MAKING, which is a different question
+            from what unit you read it in. Parts are a ratio and a ratio
+            needs a total; this is that total. Labelled in the unit
+            already chosen above rather than adding a second vocabulary:
+            a cup is one teaspoon of leaf, a pot is one tablespoon. */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
+          fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
+        }}>
+          <span>Making</span>
+          <div style={{
+            display: "inline-flex", alignItems: "center",
+            border: `1px solid ${theme.rule}`, borderRadius: 999,
+            padding: 2, background: theme.cream,
+          }}>
+            {[
+              ["cup", weightUnit === "g" ? "a cup" : "a cup · 1 tsp"],
+              ["pot", weightUnit === "g" ? "a pot" : "a pot · 1 tbsp"],
+            ].map(([val, label]) => (
+              <button key={val} data-testid={`pour-${val}`}
+                onClick={() => setPour(val)} style={{
+                fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
+                padding: "4px 12px", borderRadius: 999, border: "none",
+                background: pour === val ? theme.ink : "transparent",
+                color: pour === val ? theme.cream : theme.ash,
+                cursor: "pointer",
+                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
+                boxShadow: pour === val ? "0 2px 6px -1px rgba(30,24,18,0.24)" : "none",
               }}>{label}</button>
             ))}
           </div>

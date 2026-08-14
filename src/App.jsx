@@ -1062,6 +1062,10 @@ export default function App() {
   // Persisted preferences
   const [unit, setUnit] = usePersistedState("unit", "F");
   const [weightUnit, setWeightUnit] = usePersistedState("weightUnit", "tsp");
+  // How much you're making. Parts are a ratio, and a ratio needs a
+  // total before it is a cup — see POUR_SIZES in units/units.js for
+  // why that total is counted in cup-doses rather than grams.
+  const [pour, setPour] = usePersistedState("pour", "cup");
 
   // Persisted user data
   // For dev mode: default to SEED_MODES.power so the app looks populated.
@@ -3027,7 +3031,7 @@ export default function App() {
   // can respect existing unit preferences if any exist in localStorage.
   if (!profile && !isDev) {
     return (
-      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit, pour, setPour }}>
         <div style={{
           position: "fixed", inset: 0,
           background: theme.ivory,
@@ -3055,7 +3059,7 @@ export default function App() {
   // Fold's unfolded display.
   if (isNarrow || isNativeApp()) {
     return (
-      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+      <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit, pour, setPour }}>
         <div style={{
           position: "fixed", inset: 0,
           background: theme.ivory,
@@ -3083,7 +3087,7 @@ export default function App() {
   }
 
   return (
-    <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit }}>
+    <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit, pour, setPour }}>
     <div style={{
       minHeight: "100vh", width: "100%",
       background: `

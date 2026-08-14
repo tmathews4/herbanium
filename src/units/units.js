@@ -22,6 +22,7 @@ import React from "react";
 export const UnitContext = React.createContext({
   unit: "F", setUnit: () => {},                 // temperature — "C" | "F"
   weightUnit: "tsp", setWeightUnit: () => {},   // weight — "tsp" | "g"
+  pour: "cup", setPour: () => {},               // how much you're making — "cup" | "pot"
 });
 
 export const useUnit = () => React.useContext(UnitContext);
@@ -93,4 +94,75 @@ export const formatTsp = (tsp) => {
 export const formatAmount = (g, category, weightUnit = "tsp") => {
   if (weightUnit === "g") return `${g.toFixed(1)} g`;
   return formatTsp(gramsToTsp(g, category));
+};
+
+/* ─── Pour size — how much you're making ───────────────────────
+   Parts are a RATIO, and a ratio needs a total before it is a cup.
+   This is that total, measured in cup-doses rather than grams,
+   because a teaspoon of chamomile and a teaspoon of ginger are not
+   the same mass and `TSP_BY_CATEGORY` already knows it.
+
+   WHY THIS EXISTS. Parts used to be grams outright, so "5 parts
+   assam : 1 part peppermint" built a 6g pot — 3.33 cups' worth of
+   leaf in one cup. Every strong flavour then sat at its ceiling and
+   the strip went flat (malty 5.00, bold 5.00, minty 5.00, unable to
+   say which led). Reported as "that feels wrong", and it was, but not
+   where it looked: the readings were right and the pour was heavy.
+   The same ratio normalised to one cup reads malty 3.48, minty 1.52 —
+   assam leading, mint an accent.
+
+   Two sizes and no more. A cup is the unit every extraction profile
+   in the catalogue is written against ("1 tsp · 200ml"), and a pot is
+   the one other thing people actually brew. A free-form total would
+   re-open the exact hole this closes.  */
+export const POUR_SIZES = {
+  cup: { doses: 1, tspLabel: "1 tsp", name: "a cup" },
+  pot: { doses: 3, tspLabel: "1 tbsp", name: "a pot" },
+};
+
+export const pourDoses = (pour) => POUR_SIZES[pour]?.doses ?? 1;
+
+/**
+ * Turn a parts ratio into grams, normalised so the whole pot comes to
+ * `pour`'s worth of leaf.
+ *
+ * `entries` is [{ id, parts }]; `gramsPerCup` resolves an id to what a
+ * cup's dose of THAT leaf weighs. Returns { id: grams }.
+ *
+ * Each part is a share of the pour measured in CUP-DOSES, not grams,
+ * which is the whole point: one part of chamomile and one part of
+ * ginger are the same fraction of a cup, not the same mass.
+ */
+export const partsToGrams = (entries, pour, gramsPerCup) => {
+  const total = entries.reduce((s, e) => s + Math.max(0, e.parts || 0), 0);
+  const out = {};
+  if (!total) return out;
+  const doses = pourDoses(pour);
+  for (const e of entries) {
+    const share = Math.max(0, e.parts || 0) / total;
+    out[e.id] = share * doses * gramsPerCup(e.id);
+  }
+  return out;
+};
+
+/**
+ * The inverse view: what ratio is this pot already in?
+ *
+ * Grams stay canonical — they are what the cup is actually made of, and
+ * what weight mode edits directly — so parts are DERIVED rather than
+ * stored. That is what keeps the old promise that switching between
+ * parts and weight never changes the cup: there is still one store.
+ *
+ * Scaled so the smallest ingredient reads 1 part, which is the ratio
+ * language the steppers were built for.
+ */
+export const gramsToParts = (entries, gramsPerCup) => {
+  const doses = entries
+    .map(e => ({ id: e.id, d: (e.g || 0) / (gramsPerCup(e.id) || 1.5) }))
+    .filter(x => x.d > 0);
+  if (!doses.length) return {};
+  const min = Math.min(...doses.map(x => x.d));
+  const out = {};
+  for (const x of doses) out[x.id] = x.d / min;
+  return out;
 };
