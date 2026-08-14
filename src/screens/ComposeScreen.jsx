@@ -39,6 +39,7 @@ import { Arrival, Collapse } from "../components/Arrival";
 import { createPortal } from "react-dom";
 import { WRITE_DOCK_ID, WRITE_SAVE_SLOT_ID } from "../helpers/dock";
 import { TOUR_BLEND } from "../data/tourBlend";
+import { defaultPartsFor } from "../data/blendShares";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
@@ -1560,13 +1561,18 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         reverseIngs.map(x => ({ id: x, g: gramsFor(x) })), gramsPerCupFor);
       if (derived[id] != null) return derived[id];
     }
-    // First-added is the default lead at 2 parts; the rest start
-    // as 1-part accents. The user can change the ratio anytime
-    // via the row stepper without engaging if they don't want to.
-    // 2:1 lands closer to a typical hand-mix where the lead carries
-    // about twice the weight of the accents, instead of the older
-    // 4:1 split that pushed strong leads into over-pull territory.
-    return id === reverseIngs[0] ? 2 : 1;
+    /* THE LEAF DECIDES, not the order it was added in.
+
+       This used to be "first added gets 2 parts, everything after gets
+       1", which proposed a 1:2 cup when you added peppermint to a black
+       tea — a mint-led drink, from two taps that meant "tea with a bit
+       of mint". Position is not a blending convention; the ingredient
+       is. The shelf knows both of these: assam takes 69% of the blends
+       it appears in and peppermint 34%, so they now start 4:2.
+
+       Derived from the curated blends rather than picked — see
+       src/data/blendShares.js and the guard that re-derives them. */
+    return defaultPartsFor(id);
   };
 
   /* What the MODEL is given, and it is always one cup's worth.
@@ -1585,7 +1591,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
      the same tea, and there is just more of it. */
   const ratioEntries = () => reverseIngs.map(x => ({
     id: x,
-    parts: partsById[x] != null ? partsById[x] : (x === reverseIngs[0] ? 2 : 1),
+    parts: partsById[x] != null ? partsById[x] : defaultPartsFor(x),
   }));
 
   function gramsFor(id) {
@@ -2221,6 +2227,24 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
           </div>
         )}
       </div>
+      {/* ONE LINE, AND ONLY THE ONE THAT APPLIES. The two modes are not
+          interchangeable and nothing said so: parts are a recipe and
+          hold the pot at a cup's worth however you set the balance,
+          weight is an amount and will happily build a pot three times
+          that. A reader who doesn't know which they want is the reader
+          who over-doses the cup, so the distinction is worth a sentence
+          — and worth no more than a sentence, at the control rather
+          than in a tour step nobody replays. */}
+      {reverseIngs.length > 0 && (
+        <div data-testid="amount-mode-hint" style={{
+          marginTop: 4, fontFamily: ff.serif, fontStyle: "italic",
+          fontSize: 11.5, color: theme.ash, lineHeight: 1.45,
+        }}>
+          {amountMode === "parts"
+            ? "A recipe — the balance between leaves, always scaled to one cup."
+            : "Exact amounts — for a bigger pot, or a trim smaller than a part."}
+        </div>
+      )}
       <div style={{
         marginTop: 10, padding: 14, border: `1px solid ${theme.rule}`, borderRadius: 12,
         background: theme.cream,

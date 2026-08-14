@@ -12,6 +12,7 @@
 // cup. That's what the round-trip test below is really watching.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+import { defaultPartsFor } from "../src/data/blendShares";
 
 test.beforeEach(() => test.slow());
 
@@ -44,7 +45,14 @@ test.describe("parts or weight, one pot", () => {
 
     const readout = page.getByTestId("amount-chamomile");
     const asParts = (await readout.innerText()).trim();
-    expect(asParts, "a first ingredient starts as the 2-part lead").toBe("2");
+    // Derived, not restated. A leaf's starting parts come from the share
+    // the curated blends give it (chamomile is a base at 61%, so it
+    // opens heavy), and hardcoding a number here would make this spec a
+    // second copy of that answer — the drift blendShares.js exists to
+    // avoid. It used to read "2" because every first ingredient did,
+    // regardless of what it was.
+    expect(asParts, "a leaf should open at its own shelf share")
+      .toBe(String(defaultPartsFor("chamomile")));
 
     await page.getByTestId("amount-mode-weight").click();
     const asWeight = (await readout.innerText()).trim();
