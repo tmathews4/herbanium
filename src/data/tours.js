@@ -181,22 +181,38 @@ export const SCREEN_TOURS = {
     // is still looking at the slider they just moved.
     //
     // openControls because the band only renders inside the open panel.
-    // No spotlight list: the band alone is the subject. Folding the
-    // whole slider block in made the union tall enough that the callout
-    // had nowhere to sit but on top of it — covering the very thing the
-    // step is describing.
     // The recommendation is painted INTO the track now — a coloured
     // stretch of the rail rather than a band beneath it — so the copy
-    // points at the rail. The step lights the slider and the word under
-    // it together: the highlight used to trace an invisible box laid
-    // over the coloured span, which drew the outline of the band widget
-    // this design had already removed. It read as a control, because
-    // that is what it used to be.
+    // points at the rail.
+    //
+    // LIGHTS THE WHOLE BREW WINDOW, PULSES THE SPAN INSIDE IT. Same
+    // shape as the pills step and the Brew step, and for the same
+    // reason: the cutout says WHERE YOU ARE, and the terra pulse says
+    // which part of it to look at. A cutout drawn tight around the
+    // coloured stretch alone lifted a span of rail out of the panel it
+    // belongs to, so the one control the step is about — the slider it
+    // is painted on — sat outside the light while being described.
+    //
+    // This carried "no spotlight list" for a while on the argument that
+    // folding the slider block in made the union tall enough that the
+    // callout had nowhere to sit but on top of it. That was true of the
+    // old layout, where the band was a separate widget stacked BENEATH
+    // the track and the union was track plus band. The band is gone —
+    // the recommendation is in the rail — so the union is now just the
+    // brew window, which is the same union the two pills steps already
+    // light without trouble.
+    //
+    // The narrow mark stays narrow, and that is a separate guarantee:
+    // the PULSING element must be a span, not the whole rail, or the
+    // step marks "this is the slider", which the reader can already
+    // see. Held by "the toggle and pill pulses trace their own borders"
+    // in tours.spec.ts, which measures the pulse against the track.
     //
     // "Tap it" belongs to the word, not the rail — the rail has to stay
     // draggable — and the word MOVES the brew now rather than
     // explaining itself, which is what this copy has to say.
     { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
+      spotlight: ["blend-controls", "blend-sliders"],
       familyMode: true,
       body: "The coloured stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath to go straight there." },
     // Lights the WHOLE brew window and pulses the button inside it —

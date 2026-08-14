@@ -496,6 +496,28 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     expect(geom!.markW, "and mark the coloured stretch, not the whole rail")
       .toBeLessThan(geom!.trackW * 0.9);
     expect(geom!.markW, "while still being a real span").toBeGreaterThan(4);
+
+    /* AND THE CUTOUT HOLDS THE WHOLE BREW WINDOW while that span
+       pulses inside it — the third arrangement of this step, and the
+       one the other two were reaching for.
+
+       The two halves do different jobs and both are needed. The cutout
+       says WHERE YOU ARE; the pulse says which part to look at. Drawn
+       tight around the coloured stretch alone, the cutout lifted a
+       length of rail out of the panel it belongs to, leaving the slider
+       the recommendation is painted ON outside the light while the copy
+       described it. Same shape as the pills step and the Brew step,
+       which light the window and pulse the control inside it. */
+    const spot = (await page.getByTestId("tour-spotlight").boundingBox())!;
+    const row = (await page.locator('[data-tour="blend-controls"]').first().boundingBox())!;
+    const covers = (outer: typeof spot, inner: typeof row, slack = 8) =>
+      outer.x <= inner.x + slack && outer.y <= inner.y + slack
+      && outer.x + outer.width >= inner.x + inner.width - slack
+      && outer.y + outer.height >= inner.y + inner.height - slack;
+    expect(covers(spot, row),
+      `the cutout ${JSON.stringify(spot)} should hold the whole brew window `
+      + `${JSON.stringify(row)} — a hole around the span alone cuts the slider `
+      + `out of the light that is describing it`).toBe(true);
   });
 
   test("the folded-row step lights Brew along with the row", async ({ page }) => {
