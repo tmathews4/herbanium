@@ -505,12 +505,48 @@ live in `docs/capacitor-config.md`.
   dominance is ALREADY modelled separately by the masking matrix, so
   loudness is arguably counting it twice.
 
-  **THE OBVIOUS FIX DOES NOT WORK, and this is the part worth not
-  re-deriving.** Making `clampTo5` into a genuine soft curve is the
-  first thing anyone reaches for, and it cannot help: the raw values run
-  to ~29 against a scale topping at 5, so a knee-and-asymptote at 4.5
-  maps both 7.25 and 29 to 5.00 exactly as the clamp does. Measured
-  before being believed.
+  **1 PART ALREADY OVERFLOWS, AND DILUTION IS INVISIBLE.** Reported from
+  real use: "assam black 5 and peppermint 1, that feels wrong". It is.
+  Two facts sharpen the above:
+
+  - Peppermint at 1 part gives raw `minty` 6.3 against a cap of 5. The
+    parts UI cannot express less than 1 part, so peppermint can never be
+    an accent — it maxes on arrival, always.
+  - Raw tracks a leaf's ABSOLUTE dose, not its share (deliberately —
+    see the "DOSE, not share" note in `combineFlavors`; a leaf brings
+    what's in the pot). So adding assam does not dilute the mint at all:
+    9:1 reads 6.30 and 1:1 reads 6.40. Five extra parts of assam change
+    nothing the strip can show.
+
+  That cup reads `malty 5.00, bold 5.00, minty 5.00` — three bars
+  pinned, so it cannot say assam leads.
+
+  **TWO FIXES ARE RULED OUT BY MEASUREMENT. Don't re-walk them.**
+
+  1. *A genuinely soft ceiling.* The first thing anyone reaches for, and
+     it cannot help: raw runs to ~29 against a scale topping at 5, so a
+     knee-and-asymptote at 4.5 maps both 7.25 and 29 to 5.00 exactly as
+     the clamp does.
+
+  2. *Retuning `FLAVOR_LOUDNESS`.* Also fails, and this one is the
+     surprise. Compressing loud values toward 1 buys exactly one step:
+     `assam 5 : peppermint 1` improves, and 2 parts is back at 5.00 for
+     every coefficient tried. Taken to the limit — loudness forced to
+     1.0, no amplification at all — peppermint still caps at 2 parts
+     (raw 5.30). **`strength × dose` alone overflows before loudness is
+     applied**, so loudness is not what binds. It also barely moved the
+     pinning (36 → 28 bars of 630) and flipped MORE leading flavours
+     (7–11 blends) than the share-based prototype did.
+
+  A share/relative-loudness prototype DOES work on the reported cup
+  (malty 3.64 > minty 3.13, assam leads) and cuts pinning 36 → 5 bars.
+  It was not shipped: it buys only one step of mint headroom, drops 14
+  bars by more than 2 points including blends named for that very
+  flavour (`Lady Grey: citrus 5.0 → 2.9`, `mood:cooling: cool 4.8 →
+  2.4`), and couples every bar to whatever else is in the pot — solo
+  assam reads `malty 5.00`, but adding one part of mint drops it to
+  3.64. The patch is not in the repo; re-deriving it is ~10 lines in
+  `combineFlavors`.
 
   What would actually work is full-range compression
   (`5·(1−e^(−raw/6))`), which restores real discrimination —
