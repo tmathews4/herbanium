@@ -22,7 +22,7 @@ import React from "react";
 export const UnitContext = React.createContext({
   unit: "F", setUnit: () => {},                 // temperature — "C" | "F"
   weightUnit: "tsp", setWeightUnit: () => {},   // weight — "tsp" | "g"
-  pour: "cup", setPour: () => {},               // how much you're making — "cup" | "pot"
+  pour: "mug", setPour: () => {},               // how much you're making — a POUR_SIZES key
 });
 
 export const useUnit = () => React.useContext(UnitContext);
@@ -111,13 +111,26 @@ export const formatAmount = (g, category, weightUnit = "tsp") => {
    The same ratio normalised to one cup reads malty 3.48, minty 1.52 —
    assam leading, mint an accent.
 
-   Two sizes and no more. A cup is the unit every extraction profile
-   in the catalogue is written against ("1 tsp · 200ml"), and a pot is
-   the one other thing people actually brew. A free-form total would
-   re-open the exact hole this closes.  */
+   A FIXED SET, not a free-form total — that would re-open the exact
+   hole this closes. Each entry is a named vessel someone actually
+   pours into, and `doses` is `ml / REFERENCE_ML` by construction:
+   every profile in the catalogue is written per 200 ml ("1 tsp ·
+   200ml"), so a vessel's dose count is just how many reference cups
+   of water it holds. `tests/pour-parts.test.mjs` derives that from
+   this table rather than restating it, so a size added with mismatched
+   numbers fails before a browser starts.
+
+   WHY A MUG. "A cup" meaning 200 ml is a measurement, not a vessel —
+   the mug most people actually drink from is 12 oz / 350 ml, and the
+   gap sent a real user to a search engine to check whether our 2 g of
+   assam was too little. It wasn't; it was a cup's worth, and they were
+   filling a mug. The volume is on the label for that reason. */
+export const REFERENCE_ML = 200;
+
 export const POUR_SIZES = {
-  cup: { doses: 1, tspLabel: "1 tsp", name: "a cup" },
-  pot: { doses: 3, tspLabel: "1 tbsp", name: "a pot" },
+  cup: { doses: 1,    ml: 200, tspLabel: "1 tsp",  name: "a cup" },
+  mug: { doses: 1.75, ml: 350, tspLabel: "1¾ tsp", name: "a mug" },
+  pot: { doses: 3,    ml: 600, tspLabel: "1 tbsp", name: "a pot" },
 };
 
 export const pourDoses = (pour) => POUR_SIZES[pour]?.doses ?? 1;

@@ -11,7 +11,7 @@
  * These hold the arithmetic that separates the two.
  */
 import {
-  partsToGrams, gramsToParts, pourDoses, POUR_SIZES, TSP_BY_CATEGORY,
+  partsToGrams, gramsToParts, pourDoses, POUR_SIZES, REFERENCE_ML, TSP_BY_CATEGORY,
 } from "../src/units/units.js";
 import { INGREDIENTS } from "../src/data/ingredients.js";
 import { resolveBlendAtBrew, computeBrewProfile } from "../src/algo/compose.js";
@@ -104,10 +104,45 @@ test("every pour size is a real multiple of a cup", () => {
   for (const [id, size] of Object.entries(POUR_SIZES)) {
     assert(typeof size.doses === "number" && size.doses > 0,
       `pour size "${id}" has no usable dose count`);
-    assert(size.name && size.tspLabel, `pour size "${id}" is missing its labels`);
+    assert(size.name && size.tspLabel && size.ml,
+      `pour size "${id}" is missing its labels`);
   }
   assert(close(pourDoses("cup"), 1),
     "a cup must be exactly one cup-dose — everything else is measured against it");
+});
+
+test("a size's dose count is its volume, and the table is not asked twice", () => {
+  /* The one number a new pour size can get wrong quietly. Every profile
+     in the catalogue is written per 200 ml, so a vessel's dose count is
+     just how many reference cups of water it holds — a 350 ml mug is
+     1.75, and typing 1.5 there would hand out a shopping list for a cup
+     of tea nobody is brewing while every prediction went on reading
+     correct. Derived from `ml` rather than restated: adding a size only
+     needs the volume to be honest. */
+  for (const [id, size] of Object.entries(POUR_SIZES)) {
+    assert(close(size.doses, size.ml / REFERENCE_ML, 1e-9),
+      `pour size "${id}" claims ${size.doses} cup-doses but holds ${size.ml} ml, which is ${(size.ml / REFERENCE_ML).toFixed(3)}`);
+  }
+  assert(close(POUR_SIZES.cup.ml, REFERENCE_ML),
+    "the cup IS the reference volume — the profiles are written against it");
+});
+
+test("the mug scales the shopping list and nothing else", () => {
+  /* Why the default moved to the mug. It is the vessel most people
+     actually pour into, and it must stay the same tea: 1.75× the leaf
+     in 1.75× the water is one cup's concentration, which is the only
+     thing the prediction ever sees. */
+  const parts = [{ id: "assam", parts: 5 }, { id: "peppermint", parts: 1 }];
+  const mug = partsToGrams(parts, "mug", gpc);
+  assert(close(cupDosesOf(mug), 1.75, 1e-9),
+    `a mug should measure out 1.75 cups' worth, got ${cupDosesOf(mug).toFixed(3)}`);
+
+  // Same ratio, so the same cup — the balance is untouched by the vessel.
+  const cup = partsToGrams(parts, "cup", gpc);
+  for (const id of Object.keys(cup)) {
+    assert(close(mug[id] / cup[id], 1.75, 1e-9),
+      `${id} should scale by exactly 1.75, got ${(mug[id] / cup[id]).toFixed(4)}`);
+  }
 });
 
 console.log(`\n\n  ${pass} passed, ${fail} failed`);

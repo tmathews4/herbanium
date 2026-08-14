@@ -2269,7 +2269,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             bars scaling with the total is legible from watching them
             move, which is the better teacher. */}
         {reverseIngs.length > 0 && (
-          <div style={{
+          <div data-testid="pot-total" style={{
             fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em",
             textTransform: "uppercase", color: theme.ash,
             marginBottom: 8, lineHeight: 1.5,

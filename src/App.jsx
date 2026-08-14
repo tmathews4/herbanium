@@ -1065,7 +1065,14 @@ export default function App() {
   // How much you're making. Parts are a ratio, and a ratio needs a
   // total before it is a cup — see POUR_SIZES in units/units.js for
   // why that total is counted in cup-doses rather than grams.
-  const [pour, setPour] = usePersistedState("pour", "cup");
+  //
+  // Defaults to the MUG, not the cup. "A cup" here is 200 ml, the volume
+  // every extraction profile is written against; the vessel actually on
+  // the desk is a 12 oz mug, and starting at the measurement rather than
+  // the vessel is what had someone checking our 2 g of assam against a
+  // search engine. The prediction is identical either way — the pour
+  // scales the shopping list, never the concentration.
+  const [pour, setPour] = usePersistedState("pour", "mug");
 
   // Persisted user data
   // For dev mode: default to SEED_MODES.power so the app looks populated.

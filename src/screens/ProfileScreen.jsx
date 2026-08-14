@@ -21,7 +21,7 @@ import { FeedbackModal } from "./FeedbackModal";
 import {
   ff, radius, theme,
 } from "../theme";
-import { useUnit } from "../units/units";
+import { useUnit, POUR_SIZES } from "../units/units";
 
 /* ──────────────────────────────────────────────────────────────
    Screen: PROFILE
@@ -347,24 +347,40 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
 
         {/* Pour — how much you're MAKING, which is a different question
             from what unit you read it in. Parts are a ratio and a ratio
-            needs a total; this is that total. Labelled in the unit
-            already chosen above rather than adding a second vocabulary:
-            a cup is one teaspoon of leaf, a pot is one tablespoon. */}
+            needs a total; this is that total.
+
+            THE PILLS AND THE SUBLINE ARE BOTH DERIVED from POUR_SIZES.
+            The list used to be typed out here, so a size added to the
+            table would simply not appear, and the pill said "a cup ·
+            1 tsp" — the leaf, never the water. A cup means 200 ml here
+            and the mug on the desk holds 350; that gap is what sent
+            someone to a search engine to check our dose. Three pills
+            no longer fit the vessel AND its volume, so the volume moved
+            under the row label, where it describes the chosen size. */}
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Making</span>
+          <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            Making
+            <span data-testid="pour-detail" style={{
+              fontSize: 10, letterSpacing: "0.06em", color: theme.ash,
+            }}>
+              {(() => {
+                const size = POUR_SIZES[pour] ?? POUR_SIZES.cup;
+                return weightUnit === "g"
+                  ? `${size.ml} ml`
+                  : `${size.ml} ml · ${size.tspLabel} of leaf`;
+              })()}
+            </span>
+          </span>
           <div style={{
             display: "inline-flex", alignItems: "center",
             border: `1px solid ${theme.rule}`, borderRadius: 999,
             padding: 2, background: theme.cream,
           }}>
-            {[
-              ["cup", weightUnit === "g" ? "a cup" : "a cup · 1 tsp"],
-              ["pot", weightUnit === "g" ? "a pot" : "a pot · 1 tbsp"],
-            ].map(([val, label]) => (
+            {Object.entries(POUR_SIZES).map(([val, { name: label }]) => (
               <button key={val} data-testid={`pour-${val}`}
                 onClick={() => setPour(val)} style={{
                 fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.08em",
