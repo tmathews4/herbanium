@@ -1558,7 +1558,7 @@ const INGREDIENTS = {
     // anchors Maghrebi mint preparations. The pellets get their
     // character from heavy wok-firing during rolling, not actual
     // smoke; that's gentle toast, not a lapsang-style smoke note.
-    caffeine: 30, tempC: [80, 90], timeS: [90, 180],
+    caffeine: 35, tempC: [80, 90], timeS: [90, 180],
     tempZones: [
       { id: "under", tempC: [50, 75], character: "pellets barely opening.", moodImpact: "focus held back" },
       { id: "cool",  tempC: [75, 82], character: "soft toasted top, gentle body.", moodImpact: "focus gentle; calm settles" },
@@ -1609,7 +1609,7 @@ const INGREDIENTS = {
     // Roasted green — needs full boil but very short pour. The
     // caramel-toasted character is forgiving but past 90s the
     // toasted register flattens into char.
-    caffeine: 8, tempC: [95, 100], timeS: [30, 60],
+    caffeine: 12, tempC: [95, 100], timeS: [30, 60],
     tempZones: [
       { id: "under", tempC: [50, 90],  character: "the roast top barely surfaces.", moodImpact: "comfort held back" },
       { id: "cool",  tempC: [90, 95],  character: "soft caramel-toasted, gentle.", moodImpact: "comfort gentle; soothing settles" },
@@ -1667,7 +1667,7 @@ const INGREDIENTS = {
     // Pan-fired Chinese green — chestnut-sweet with a clean
     // vegetal body. Less tannin-prone than sencha; tolerates a
     // touch more time and heat.
-    caffeine: 28, tempC: [75, 85], timeS: [60, 120],
+    caffeine: 30, tempC: [75, 85], timeS: [60, 120],
     tempZones: [
       { id: "under", tempC: [50, 70], character: "chestnut barely surfaces.", moodImpact: "focus held back" },
       { id: "cool",  tempC: [70, 78], character: "soft chestnut-sweet top.", moodImpact: "focus crisp; calm clean" },
@@ -2027,7 +2027,7 @@ const INGREDIENTS = {
     shelfLife: "18–24 months (smoke is forgiving)",
     // Pine-smoked Wuyi black tea — campfire register, deep and
     // grounding. The smoke holds well; tannins climb past 5 min.
-    caffeine: 30, tempC: [95, 100], timeS: [180, 240],
+    caffeine: 35, tempC: [95, 100], timeS: [180, 240],
     tempZones: [
       { id: "under", tempC: [50, 90],  character: "smoke barely lifting.", moodImpact: "grounding held back" },
       { id: "cool",  tempC: [90, 95],  character: "softer smoke, gentler body.", moodImpact: "grounding gentle; warming present" },
@@ -2077,7 +2077,7 @@ const INGREDIENTS = {
     shelfLife: "indefinite (ages well; shou stabilizes fast)",
     // Fermented Yunnan tea — earthy, grounding, multi-steepable.
     // Quick first pour, then ~1-3 min for the canonical cup.
-    caffeine: 35, tempC: [95, 100], timeS: [60, 180],
+    caffeine: 30, tempC: [95, 100], timeS: [60, 180],
     tempZones: [
       { id: "under", tempC: [50, 90],  character: "earth barely surfaces.", moodImpact: "grounding held back" },
       { id: "cool",  tempC: [90, 95],  character: "soft earthy top.", moodImpact: "grounding gentle" },

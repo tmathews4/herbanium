@@ -393,7 +393,14 @@ test("aromatic off-notes claim no axis, so they keep their prose", () => {
    See docs/research/synergies.md. */
 
 test("a caffeinated cup with sedative herbs is told they're fighting", () => {
-  const cup = [{ id: "assam", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }];
+  /* 4g of assam, not 2, and the change is a correction rather than a
+     tuning. Caffeine used to be multiplied by GRAMS while being sourced
+     PER CUP, so 2g of assam reported 120mg against a documented 60 and
+     cleared the 80mg gate on half the tea it should have needed. With
+     the unit fixed, a cup that genuinely holds enough caffeine to fight
+     a sedative takes about two cup-doses of black tea — which is what
+     the warning has always been about. */
+  const cup = [{ id: "assam", g: 4, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }];
   const warnings = resolveBlendAtBrew(cup, 95, 240).warnings;
   const fired = warnings.filter(w => w.kind === "antagonism");
   assert(fired.length === 1,
@@ -411,8 +418,11 @@ test("the antagonism needs actual caffeine, not the word energy", () => {
      `energy` by tradition and holds no caffeine at all, so a cardamom
      and chamomile cup has nothing antagonising anything — firing there
      would be the app inventing chemistry from a label. */
+  // 4g of assam for the same reason as the test above: caffeine is
+  // sourced per cup-dose, and a cup that genuinely fights itself needs
+  // about two of them.
   const caffeinated = resolveBlendAtBrew(
-    [{ id: "assam", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }], 95, 240);
+    [{ id: "assam", g: 4, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }], 95, 240);
   const herbal = resolveBlendAtBrew(
     [{ id: "cardamom", g: 2, role: "lead" }, { id: "chamomile", g: 2, role: "lead" }], 95, 240);
 

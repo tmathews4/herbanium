@@ -780,6 +780,42 @@ test("strength coverage is reported against a real denominator", () => {
     "an unpaired point carries no reason");
 });
 
+test("every caffeine figure matches its research doc, per CUP", () => {
+  /* THE UNIT IS THE POINT, and getting it wrong cost the app a factor
+     of two across every tea for a long time.
+
+     `caffeine` is transcribed from each doc's "caffeine (mg per ~8oz
+     cup)" row. It is per CUP-DOSE, not per gram — assam's 60 is one
+     teaspoon in a mug, and a teaspoon of assam is 2g. compose.js
+     multiplied it by grams, so a standard cup reported 120mg against a
+     documented 60. Every caffeinated reading in the app was high by
+     exactly that ingredient's cup-dose: 2.0x for the fourteen true
+     teas, 1.2x for yerba mate.
+
+     Caught by a reader asking whether 2 tsp of assam is really 249mg.
+     It is about 120. This holds the transcription; the engine's use of
+     it is asserted in tests/pour-parts.test.mjs and by the thresholds
+     landing where their own comments say they should. */
+  const caffeinated = Object.entries(INGREDIENTS).filter(([, m]) => m.caffeine);
+  assert(caffeinated.length > 0, "no caffeinated ingredients found at all");
+
+  const bad = [];
+  for (const [id, meta] of caffeinated) {
+    const file = resolve(DOCS, `${id}.md`);
+    if (!existsSync(file)) { bad.push(`${id}: carries caffeine ${meta.caffeine} with no research doc`); continue; }
+    const row = readFileSync(file, "utf8").match(/caffeine \(mg per[^|]*\|([^|]*)\|/i);
+    if (!row) { bad.push(`${id}: doc has no "caffeine (mg per ~8oz cup)" row to check against`); continue; }
+    const txt = row[1].trim();
+    const nums = (txt.match(/\d+/g) || []).map(Number);
+    if (!nums.length) { bad.push(`${id}: doc's caffeine row names no number ("${txt}")`); continue; }
+    const lo = Math.min(...nums), hi = Math.max(...nums);
+    if (meta.caffeine < lo || meta.caffeine > hi) {
+      bad.push(`${id}: ships ${meta.caffeine}, doc says "${txt}"`);
+    }
+  }
+  assert(bad.length === 0, `caffeine figures adrift from their research:\n    ${bad.join("\n    ")}`);
+});
+
 console.log(`\n\n  ${pass} passed, ${fail} failed`);
 if (fail > 0) {
   console.log("\nFailures:");

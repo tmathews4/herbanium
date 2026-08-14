@@ -1407,10 +1407,26 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
     const timeRatio = Math.min(1.0, Math.max(0, timeS) / Math.max(60, recTimeS));
     return Math.max(0.05, effectiveTempFactor * timeRatio);
   };
+  /* PER CUP-DOSE, NOT PER GRAM, and this was wrong for a long time.
+
+     `meta.caffeine` is transcribed straight from each research doc's
+     "caffeine (mg per ~8oz cup)" row — assam 60, sencha 25, matcha 60.
+     It is a figure per CUP. This multiplied it by grams, so a standard
+     2g cup of assam reported 120mg against a documented 60, and the
+     error was exactly each ingredient's cup-dose: 2.0x across all
+     fourteen true teas, 1.2x for yerba mate. Every caffeinated reading
+     in the app was high by that factor.
+
+     Caught by a reader asking whether 2 tsp of assam is really 249mg.
+     It is about 120. Dividing by what a cup's dose of that leaf weighs
+     makes one cup-dose yield exactly the sourced number, which is what
+     the doc says and what `tests/research-parity.test.mjs` now holds. */
   const rawCaffeineMg = ingredients.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
     if (!meta || !meta.caffeine) return sum;
-    return sum + meta.caffeine * (g || 0) * caffeineExtractionFactor(meta);
+    const perCup = TSP_BY_CATEGORY[meta.category] || 1.5;
+    const cupDoses = (g || 0) / perCup;
+    return sum + meta.caffeine * cupDoses * caffeineExtractionFactor(meta);
   }, 0);
   // Soft cap on cup-level caffeine. Past about 200 mg the linear
   // grams×mg/g sum stops being physically honest — diffusion at
