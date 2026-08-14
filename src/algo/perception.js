@@ -59,7 +59,7 @@ const MASKING_MATRIX = {
   roasted:    { fresh: 0.75 },
 };
 
-// Amplifiers — small additive bonuses, capped by the soft ceiling later.
+// Amplifiers — small additive bonuses, capped at 5 later (clampTo5).
 const AMPLIFIERS = {
   sweet: { floral: 0.15, umami: 0.25, honey: 0.2 },
   umami: { sweet: 0.25 },
@@ -145,7 +145,7 @@ export const ADDITIVE_FLAVORS = new Set([
   "bitter", "bitterness", "astringent", "tannic",
 ]);
 
-// Soft ceiling for additive flavors. Past 5 the palate saturates
+// Hard cap for additive flavors. Past 5 the palate saturates
 // — a cup can't realistically read hotter / more bitter than this
 // regardless of how many sources contribute. Caps a runaway sum.
 const ADDITIVE_CAP = 5;
@@ -457,8 +457,20 @@ export function antagonismFactor(caffeineMg = 0) {
  * and a synergy bonus from 3 → 3.6 reads honestly. The "this is at
  * the ceiling" signal lives in the warnings layer (sedative stack
  * pressure), not in a numeric squash of legitimate values.
+ *
+ * NAMED `clampTo5`, AND IT USED TO BE NAMED `softCeiling`. The
+ * docstring above was always accurate; the name was not, and a caller
+ * had grown a comment describing it as squashing values "with a smooth
+ * curve", which is the opposite of what the line below does. That
+ * mattered once: a saturation investigation reached for a gentler
+ * curve here as the obvious fix, and the curve cannot help — see the
+ * note in CLAUDE.md, "Flavour bars saturate, and the ceiling is not
+ * why". Everything past 5 collapses to exactly 5 and loses its order.
+ * If you are here to make it soft, read that note first: the raw
+ * values run to ~29 against a scale whose top is 5, so the fix is a
+ * recalibration and not this function.
  */
-function softCeiling(x) {
+function clampTo5(x) {
   return Math.min(5, Math.max(0, x));
 }
 
@@ -530,7 +542,7 @@ export function applyMasking(rawFlavors) {
  *
  * Input shape:  { calm: 3.2, focus: 4.0, ... }
  * Output:
- *   effects:     same keys with synergy bonuses applied + soft ceiling
+ *   effects:     same keys with synergy bonuses applied, capped at 5
  *   synergyTags: array of human labels ("calm focus", "rooted", ...)
  *   paradoxTags: array of `[a, b]` pairs that legitimately co-exist
  */
@@ -568,8 +580,8 @@ export function applyEffectSynergies(rawEffects, caffeineMg = 0) {
      the impairment outlasts the feeling of it. A cup that stops
      warning "don't drive" because the drinker won't notice being
      sedated has the failure mode exactly backwards. */
-  const sedativeLoad = softCeiling(out.sleepy || 0)
-    + softCeiling(out.calm || 0) * 0.5;
+  const sedativeLoad = clampTo5(out.sleepy || 0)
+    + clampTo5(out.calm || 0) * 0.5;
 
   // Mutual blunting — both sides, neither to zero. See ANTAGONISM_FLOOR.
   if (antagonised) {
@@ -578,8 +590,11 @@ export function applyEffectSynergies(rawEffects, caffeineMg = 0) {
     out.sleepy = (out.sleepy || 0) * f;
   }
 
-  // Soft ceiling — squash anything above 5 with a smooth curve.
-  for (const k in out) out[k] = softCeiling(out[k]);
+  // Cap at 5. NOT a smooth curve — this comment claimed one for a
+  // while and the function has always been a hard clamp, which is
+  // why anything arriving above 5 loses its ordering here. See
+  // clampTo5's own note.
+  for (const k in out) out[k] = clampTo5(out[k]);
 
   // Paradoxes — surface as info, not warnings
   const paradoxTags = [];

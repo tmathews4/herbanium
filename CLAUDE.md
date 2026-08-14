@@ -478,6 +478,59 @@ live in `docs/capacitor-config.md`.
   reachable; add the row instead.
 
 
+- **Flavour bars saturate above ~25% dose, and the CEILING IS NOT WHY.**
+  Measured, not reasoned. Investigated after "peppermint is marking
+  menthol max the entire tutorial".
+
+  The pipeline is `raw = strength × loudness × grams`, then
+  `clampTo5`. For a 4g cup of peppermint against rooibos:
+
+  | dose | raw `minty` | shown |
+  |------|-------------|-------|
+  | 6%   | 2.29        | 2.29  |
+  | 13%  | 4.29        | 4.29  |
+  | 25%  | 7.25        | 5.00  |
+  | 50%  | 14.5        | 5.00  |
+  | 100% | 29          | 5.00  |
+
+  So the strip cannot tell a mint accent from an all-mint cup. It is
+  dose-dependent on loudness: flavours at loudness 2.0 pin on **7 of 7**
+  solo cups, loudness ≥1.5 on 41%, loudness <1.5 on 8%. `floral` (0.7)
+  never saturates; `apple` (1.0) goes at ~40%.
+
+  **The data is not the problem.** Peppermint's profile honestly
+  declares `minty` 3 at 90°C and 4 at 98°C. The ceiling comes from
+  `FLAVOR_LOUDNESS`, which is itself sourced — `docs/masking.md`, Eccles
+  1994, TRPM8 — so the multiplier is defensible. Note though that mint's
+  dominance is ALREADY modelled separately by the masking matrix, so
+  loudness is arguably counting it twice.
+
+  **THE OBVIOUS FIX DOES NOT WORK, and this is the part worth not
+  re-deriving.** Making `clampTo5` into a genuine soft curve is the
+  first thing anyone reaches for, and it cannot help: the raw values run
+  to ~29 against a scale topping at 5, so a knee-and-asymptote at 4.5
+  maps both 7.25 and 29 to 5.00 exactly as the clamp does. Measured
+  before being believed.
+
+  What would actually work is full-range compression
+  (`5·(1−e^(−raw/6))`), which restores real discrimination —
+  1.59 / 3.51 / 4.55 / 4.96 across that dose sweep. **It also moves every
+  reading in the app**: raw 3 shows 1.97 instead of 3.00, raw 5 shows
+  2.83 instead of 5.00. Every threshold tuned against today's numbers —
+  tannin, overpull, the 0.5 visibility floor, the drift audits — would
+  need re-tuning with it. That is a project with its own calibration
+  pass, not an edit, and it has not been done.
+
+  **Deliberately left alone for now.** Saturation past a quarter dose is
+  arguably perceptually honest — there isn't much "more than maximally
+  minty" to taste. The cost is real and specific: the bar stops being
+  informative exactly where blending decisions get made. Know that
+  before treating a 5.0 as a measurement.
+
+  The tutorial blend works around it rather than fixing it —
+  `tests/tour-blend.test.mjs` rejects any pick whose bars sit at the
+  ceiling, which is why the seeded pot is elderflower and tulsi.
+
 - **No backend.** Catalogue and extraction profiles ship bundled. Read-mostly reference data; bundling avoids network dependency, latency and hosting cost.
 - **Journaling is device-local, deliberately.** Single-purchase app, no subscription revenue, and mood data is sensitive.
 - **The algorithm stays in-process.** One client, no other consumers, and extracting it would break offline use.
