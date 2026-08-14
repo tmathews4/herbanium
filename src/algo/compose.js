@@ -1965,6 +1965,17 @@ const contributions = ingredients.map(({ id, g, role }) => {
   })();
 
   // (5a) Cup-level warnings — what the average reads.
+  /* How many cups' worth of leaf is actually in this cup.
+     `TSP_BY_CATEGORY` already knows what a cup's dose of each category
+     weighs — the same numbers `doseFactor` normalises against — so this
+     is a sum of each leaf in its own units rather than a raw gram total.
+     Chamomile and ginger do not weigh the same per spoon and must not
+     count the same here. */
+  const cupDoses = ingredients.reduce((sum, { id, g }) => {
+    const perCup = TSP_BY_CATEGORY[INGREDIENTS[id]?.category] || 1.5;
+    return sum + Math.max(0, g || 0) / perCup;
+  }, 0);
+
   const rawCupWarnings = _readingOnly ? [] : buildWarnings({
     baselineFlavors: _baseline?.flavors,
     baselineEffects: _baseline?.effects,
@@ -1975,12 +1986,18 @@ const contributions = ingredients.map(({ id, g, role }) => {
     paradoxTags,
     caffeineMg: totalCaffeineMg,
     sedativeLoad,
+    cupDoses,
   });
   // Traditionals at baseline also drop tannin/aromatic cup warnings —
   // the whole purpose of the tradition note is to acknowledge the
   // recipe lives past where modern analysis would call optimal.
+  // `pour` joins them. A gourd of yerba mate is 4.17 cup-doses and is
+  // not a mistake — it is the preparation. Same argument as tannin:
+  // the tradition note already says this recipe lives past where modern
+  // analysis would call optimal, and scolding the pour on top of that
+  // reads as the app not knowing its own catalogue.
   const cupWarnings = suppressAtBaseline
-    ? rawCupWarnings.filter(w => w.kind !== "tannin" && w.kind !== "aromatic")
+    ? rawCupWarnings.filter(w => w.kind !== "tannin" && w.kind !== "aromatic" && w.kind !== "pour")
     : rawCupWarnings;
 
   // (5b) Per-ingredient over-pull check. The mass-weighted sum dilutes

@@ -631,8 +631,37 @@ export function buildWarnings({
   caffeineMg = 0,
   // Sedative content before caffeine damping; see applyEffectSynergies.
   sedativeLoad,
+  // How many cups' worth of leaf are in this cup — each ingredient
+  // measured in its OWN units, not a raw gram total. See compose.js.
+  cupDoses = 0,
 } = {}) {
   const warnings = [];
+
+  /* HOW MUCH LEAF IS IN HERE, which nothing used to say.
+     Reported as "assam black 5 and peppermint 1, that feels wrong".
+     It was — but not for the reason it looked like. That pot is 3.33
+     cups' worth of leaf in one cup, so every strong flavour reads at
+     its ceiling and the strip goes flat: malty 5.00, bold 5.00, minty
+     5.00, unable to say which leads. The bars were right. Nothing
+     explained them, so the model looked broken instead of the pour.
+
+     The same ratio at 1.67 cup-doses reads cleanly — assam 4.71, mint
+     3.51, nothing pinned — so this is a pour problem, and the honest
+     fix is to say so rather than to quietly rescale the cup.
+
+     THRESHOLD CALIBRATED AGAINST THE CATALOGUE, not chosen. The 72
+     curated blends run a median of 1.50 cup-doses and a p90 of 2.28,
+     so 2.5 sits above the shelf's own heavy end and flags 2 of 72 —
+     both genuinely big pours. A threshold at 2.0 would have scolded
+     22% of the catalogue, which teaches the user to ignore it. */
+  if (cupDoses >= 2.5) {
+    warnings.push({
+      kind: "pour",
+      text: `A heavy pour — about ${cupDoses.toFixed(1)}× a cup's worth of leaf in one cup. `
+        + `Strong, and the flavour bars sit at their ceiling because of it, `
+        + `so the cup reads flatter than it is. Same recipe in smaller amounts reads clearer.`,
+    });
+  }
 
   for (const o of outsiders) {
     const isObj = o && typeof o === "object";

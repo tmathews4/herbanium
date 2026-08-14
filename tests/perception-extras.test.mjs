@@ -577,6 +577,42 @@ test("the sedative safety warning survives caffeine damping", () => {
     "sedative ceiling warning was suppressed by the damping");
 });
 
+/* ── the pour warning ──────────────────────────────────────────
+   Reported as "assam black 5 and peppermint 1, that feels wrong".
+   The bars were right and the pour was heavy: 3.33 cups' worth of
+   leaf in one cup, so every strong flavour sat at its ceiling and
+   the strip went flat. Nothing said so. */
+
+test("a heavy pour is called out, in cups' worth rather than grams", () => {
+  const warned = buildWarnings({ cupDoses: 3.33 });
+  const pour = warned.filter(w => w.kind === "pour");
+  assert(pour.length === 1, `expected one pour warning, got ${pour.length}`);
+  assert(/3\.3/.test(pour[0].text),
+    `the warning should say HOW heavy, got: ${pour[0].text}`);
+});
+
+test("an ordinary cup is not scolded for existing", () => {
+  // Calibrated against the shelf: the 72 curated blends run a median
+  // of 1.50 cup-doses and a p90 of 2.28. A threshold that fires on an
+  // ordinary pot teaches the reader to ignore it.
+  for (const doses of [0.8, 1.0, 1.5, 2.0, 2.28]) {
+    const warned = buildWarnings({ cupDoses: doses });
+    assert(!warned.some(w => w.kind === "pour"),
+      `${doses} cup-doses should pass without comment — that is inside the catalogue's own range`);
+  }
+});
+
+test("the pour warning counts each leaf in ITS OWN units", () => {
+  // A teaspoon of chamomile and a teaspoon of ginger are not the same
+  // mass, so a raw gram total would scold the flower and excuse the
+  // spice. Same gram total, different cup-doses, different verdict.
+  const flower = resolveBlendAtBrew([{ id: "chamomile", g: 4, role: "lead" }], 95, 300);
+  const spice = resolveBlendAtBrew([{ id: "ginger", g: 4, role: "lead" }], 95, 300);
+  const fired = c => (c.warnings || []).some(w => w.kind === "pour");
+  assert(fired(flower) !== fired(spice),
+    `4g of a light flower and 4g of a dense spice should not read as the same pour`);
+});
+
 console.log(`\n\n${pass} passed, ${fail} failed`);
 if (failures.length > 0) {
   console.log("\nFailures:");
