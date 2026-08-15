@@ -1,18 +1,34 @@
 /* ──────────────────────────────────────────────────────────────
    components/icons.jsx — botanical line-art SVG icons
 
-   Five small SVG components used throughout the app for decorative
-   and semantic marking. Each accepts size (or width) and color props
-   with theme-appropriate defaults so they fit wherever they're placed
+   Small SVG components used throughout the app for decorative and
+   semantic marking. Each accepts size (or width) and color props with
+   theme-appropriate defaults so they fit wherever they're placed
    without having to specify them explicitly.
 
-   - Sprig: upright stem with opposing leaves — generic herbal marker
-   - Flower: compass-rose-style bloom — ochre by default, used for
-     flower-category ingredients and accent decoration
-   - Leaf: simple pointed leaf — used for true-tea category
-   - Kettle: small kettle icon — used on the Steep screen and brew CTAs
+   THE CATEGORY GLYPHS ARE TAXONOMY, NOT DECORATION. Three of these
+   say what an ingredient IS, at five call sites and four sizes each,
+   and they are not free to reuse as ornament:
+
+   - Sprig: upright stem with opposing leaves — herbal AND adaptogen
+     (sage / plum respectively). Also a badge in ATTRIBUTE_GLYPHS.
+   - Flower: compass-rose-style bloom — flower-category ingredients
+   - Leaf: simple pointed leaf — true-tea category
+
+   The tab bar's four icons name their screen's activity instead:
+
+   - Kettle: Home — also the Steep screen and brew CTAs
+   - Flask: Apothecary — blending, the "experiment" CTA on Home
+   - Pencil: Journal
+   - PottedSprig: Profile — see its own note below for why this one
+     had to be drawn rather than borrowed
+
    - Ornament: horizontal decorative divider with central dot — used
      to visually separate sections, typographic flourish
+
+   Below those: mood icons (MOOD_ICONS) and the generic badge glyphs
+   that broaden the vocabulary for the 80+ attributes
+   (ATTRIBUTE_GLYPHS).
 
    All are pure functional components with no state. Safe to use in
    any render context.
@@ -102,6 +118,39 @@ export const ThumbDown = ({ size = 18, c = theme.terra }) => (
       <path d="M3 21 L3 12 L7 12 L7 21 Z" />
       <path d="M7 12 L10.5 4 C10.7 3.4 11.4 3 12 3 C12.8 3 13.3 3.6 13.3 4.4 V11 H19 C20 11 20.5 11.7 20.4 12.5 L19.3 19 C19.1 20.2 18 21 16.7 21 L7 21 Z" />
     </g>
+  </svg>
+);
+
+// PottedSprig — the Profile tab's icon: a sprig growing in a pot.
+//
+// It exists because Profile used to borrow Sprig itself, and Sprig is
+// TAXONOMY — it marks herbal and adaptogen ingredients across the
+// sheet, the detail screen and the library, and it's a badge in
+// ATTRIBUTE_GLYPHS besides. One mark meant "this is an herb" in the
+// catalogue and "this is you" in the tab bar. The pot is the whole
+// distinction: a cut specimen is a category, a planted one is yours.
+//
+// A CONSTELLATION WAS TRIED FIRST AND LOST TO MEASUREMENT, which is
+// worth recording because the argument for it was good. Profile's
+// centrepiece is TeaConstellation, so an icon of joined stars would
+// have named the screen the way Kettle, Flask and Pencil name theirs.
+// Rendered at the size it actually ships at, four variants all failed:
+// a joined zigzag reads as a line chart, a hub-and-spokes reads as an
+// X (a close button, in a tab bar), a branched asterism goes ambiguous
+// below ~30px, and loose dots read as noise. The idea drew worse than
+// it argued. Don't re-derive it without rendering it at 18px first.
+//
+// The pot is a flat trapezoid with a rim line, deliberately unlike
+// Flask's conical body and neck — the two sit three tabs apart and
+// must not be confused. Leaves are cut to two so the silhouette
+// survives at 18px; Sprig's six would fill in to a smudge.
+export const PottedSprig = ({ size = 20, c = theme.sage }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 14.5 V7" />
+    <path d="M12 11 C9.3 11 8.2 9.2 8.2 8.2" />
+    <path d="M12 9 C14.7 9 15.8 7.2 15.8 6.2" />
+    <path d="M6.8 14.5 H17.2" />
+    <path d="M8 14.5 L9 20.5 H15 L16 14.5" />
   </svg>
 );
 

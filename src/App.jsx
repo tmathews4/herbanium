@@ -5,7 +5,7 @@ import {
   SEED_MODES, materializeSeedSessions,
   materializeSeedJournalEntries,
 } from "./data/seeds";
-import { Sprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
+import { PottedSprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
 import { Button } from "./components/layout";
 import { DemoHint } from "./components/DemoHint";
 import { GuidedTour } from "./components/GuidedTour";
@@ -229,7 +229,12 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
     { k: "home",     label: "Home",     icon: <Kettle size={18} /> },
     { k: "apothecary", label: "Apothecary", icon: <Flask size={18} /> },
     { k: "shelf",      label: "Journal",   icon: <Pencil size={18} /> },
-    { k: "profile",  label: "Profile",  icon: <Sprig size={18} /> },
+    // PottedSprig, not Sprig: Sprig is the herbal/adaptogen category
+    // glyph across the sheet, detail and library screens, so it read as
+    // "this is an herb" everywhere except here, where it meant "you".
+    // The pot is the distinction — a cut specimen is a category, a
+    // planted one is yours.
+    { k: "profile",  label: "Profile",  icon: <PottedSprig size={18} /> },
   ];
 
   // Sub-tabs live inside the same dock as the main tabs and only show
