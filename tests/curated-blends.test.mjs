@@ -54,6 +54,12 @@ function gatherAll() {
     all.push({
       label: "BLEND", name: b.name, ings: b.ingredients,
       t: b.tempC, s: b.timeS, style: b.style,
+      // The curator's vessel. Auditing a 500ml recipe as though it were
+      // a cup audits a cup the app never renders — which is how Spring
+      // Tonic sat here clean while shipping three pinned bars and a
+      // false "heavy pour" notice. MOOD/PAIR blends are synthesised and
+      // carry no vessel, so they stay at the 200ml reference.
+      ml: b.ml,
       isTraditional: !!b.tradition,
     });
   }
@@ -112,7 +118,7 @@ for (const b of blends) {
     // for tannin/aromatic/outsider; experimentals do not. Accent
     // warnings can fire at baseline (the curator stretched the accent
     // on purpose); only LEAD warnings count toward "clean" here.
-    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true, b.isTraditional);
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, b.t, b.s, true, b.isTraditional, { ml: b.ml });
     const overs = overPullWarnings(brew).filter(isLeadWarning);
     const outs = outsiderWarnings(brew).filter(isLeadWarning);
     const tans = tanninWarnings(brew);
@@ -140,7 +146,7 @@ for (const b of blends) {
   // suppression were removed — surfaced under AUDIT=1 so a developer can
   // see how much load the suppression is carrying.
   if (process.env.AUDIT) {
-    const naive = resolveBlendAtBrew(b.ings, b.t, b.s);
+    const naive = resolveBlendAtBrew(b.ings, b.t, b.s, undefined, undefined, false, false, { ml: b.ml });
     const issues = [...overPullWarnings(naive), ...outsiderWarnings(naive)];
     if (issues.length > 0) audit.push({ ...b, overs: issues });
   }
@@ -202,7 +208,7 @@ const DELIBERATE_OVERDRAW = new Map([
 test("no recipe brews past its own recommendation without it being recorded", () => {
   const unlisted = [];
   for (const b of blends.filter(x => !x.isTraditional)) {
-    const brew = resolveBlendAtBrew(b.ings, b.t, b.s);
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, undefined, undefined, false, false, { ml: b.ml });
     const issues = [
       ...overPullWarnings(brew).filter(isLeadWarning),
       ...outsiderWarnings(brew).filter(isLeadWarning),
@@ -227,7 +233,7 @@ test("nothing sits in the over-draw list that no longer over-draws", () => {
   for (const [name] of DELIBERATE_OVERDRAW) {
     const b = blends.find(x => x.name === name);
     if (!b) { stale.push(`${name} — no such blend any more`); continue; }
-    const brew = resolveBlendAtBrew(b.ings, b.t, b.s);
+    const brew = resolveBlendAtBrew(b.ings, b.t, b.s, undefined, undefined, false, false, { ml: b.ml });
     const issues = [
       ...overPullWarnings(brew).filter(isLeadWarning),
       ...outsiderWarnings(brew).filter(isLeadWarning),

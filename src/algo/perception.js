@@ -650,10 +650,25 @@ export function buildWarnings({
      fix is to say so rather than to quietly rescale the cup.
 
      THRESHOLD CALIBRATED AGAINST THE CATALOGUE, not chosen. The 72
-     curated blends run a median of 1.50 cup-doses and a p90 of 2.28,
-     so 2.5 sits above the shelf's own heavy end and flags 2 of 72 —
-     both genuinely big pours. A threshold at 2.0 would have scolded
-     22% of the catalogue, which teaches the user to ignore it. */
+     curated blends run a median of 1.30 cup-doses and a p90 of 2.37,
+     so 2.5 sits above the shelf's own heavy end and flags 7 of 72. A
+     threshold at 2.0 would flag 15 — 21% of the catalogue — which
+     teaches the user to ignore it.
+
+     RE-DERIVED after `cupDoses` learned about water. The first pass
+     read a median of 1.50 and a p90 of 2.28 and flagged 2 of 72, but
+     it was measuring leaf against an assumed single cup rather than
+     against the vessel the recipe declares, so both the statistics
+     and the hits were wrong — it scolded Spring Tonic (3g in 500ml,
+     an ordinary 1.0× infusion) and stayed silent on Koicha, which is
+     10×. Same threshold, honest input; the number survived because
+     2.5 was always the right place to put it. See the normaliser in
+     compose.js and tests/pour-volume.test.mjs.
+
+     The seven it now flags are all genuinely concentrated
+     preparations — koicha, gongfu pours, a mate gourd — and most are
+     traditional, so `suppressAtBaseline` keeps them quiet at rest and
+     lets them speak only if the user pushes past the recipe. */
   if (cupDoses >= 2.5) {
     warnings.push({
       kind: "pour",

@@ -924,6 +924,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                 tempC: b.tempC,
                 timeS: b.timeS,
                 kind: "recipe",
+                // The vessel the curator wrote the recipe for. Spring
+                // Tonic is 3g in 500ml; without this the model read it
+                // as 3g in a cup and pinned three bars on an ordinary
+                // infusion.
+                ml: b.ml,
               }}
               tempC={brewTempC}
               setTempC={setBrewTempC}

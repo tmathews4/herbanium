@@ -209,6 +209,12 @@ const hexToRgb = (color) => {
 const TrackMap = ({
   kind, ingredients, tempC, timeS, tempCRange,
   showAxis = true, title,
+  /* How much water the cup holds, so the sampled curve is read at the
+     same dose the rest of the screen is. Threaded rather than assumed:
+     these strips call resolveBlendAtBrew themselves, and without it a
+     500ml recipe's curve would sample a pot's leaf as a cup's while
+     the bars beside it did not. See the normaliser in compose.js. */
+  ml,
   /* The cup's own warnings, so the ⚠ on a palate row can say what the
      prose band used to say instead of a second copy of it being
      written here. Only the ones tagged with an `axis` are ours — see
@@ -260,7 +266,7 @@ const TrackMap = ({
       const t = tMin + span * (i / (SAMPLES - 1));
       const brew = resolveBlendAtBrew(
         ingredients, t, timeS, undefined, undefined,
-        false, false, null,
+        false, false, { ml },
       );
       const flavorMap = {};
       (brew.flavors || []).forEach(([name, strength]) => {
@@ -284,7 +290,7 @@ const TrackMap = ({
       out.push({ t, flavorMap, effectMap, palateMap });
     }
     return out;
-  }, [ingredients, timeS, tMin, tMax, span]);
+  }, [ingredients, timeS, tMin, tMax, span, ml]);
 
   // Family roll-up. Default ON for flavor and mood strips; segmented
   // toggle lets the user dive into specific notes / specific effects.

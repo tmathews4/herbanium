@@ -9,7 +9,7 @@ import {
   MOOD_WORDS, PAIR_BLENDS,
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
-import { TSP_BY_CATEGORY } from "../units/units.js";
+import { TSP_BY_CATEGORY, REFERENCE_ML } from "../units/units.js";
 import { bestCoverageZone, bandTarget } from "./brewBounds.js";
 import { wouldCreateUnsafeCombination } from "../data/safety.js";
 
@@ -235,11 +235,11 @@ export function computeBrewProfile(ingredients, opts = {}) {
 // don't. The individual ones are the ones that name a leaf and say it
 // is being abused, so they're weighted an order heavier than the
 // cup-level reading of the same axis.
-export function overPullScore(ingredients, tempC, timeS) {
+export function overPullScore(ingredients, tempC, timeS, { ml } = {}) {
   // No baseline on purpose: an experimental blend gets no suppression
   // in the app either, so scoring with it would pick points that only
   // look quiet on a curated recipe.
-  const { warnings } = resolveBlendAtBrew(ingredients, tempC, timeS);
+  const { warnings } = resolveBlendAtBrew(ingredients, tempC, timeS, undefined, undefined, false, false, { ml });
   let individual = 0, cup = 0;
   for (const w of warnings) {
     if (w.kind !== "tannin" && w.kind !== "aromatic") continue;
@@ -1359,7 +1359,62 @@ function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
    and single-threaded, so a counter is safe; one level deep. */
 let _readingDepth = 0;
 
-export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false) {
+/* ── HOW MUCH WATER, which the model used not to ask ───────────
+   Every extraction profile in the catalogue is written per 200 ml —
+   `REFERENCE_ML`, and `POUR_SIZES.doses` is `ml / REFERENCE_ML` by
+   construction. The perception pipeline below reads GRAMS, so it was
+   reading a pot's worth of leaf as a cup's worth whenever the vessel
+   wasn't 200 ml. Nothing downstream knew the difference.
+
+   37 of the 49 curated blends declare an `ml` other than 200, and none
+   of it reached here — the string `ml` did not appear anywhere in
+   src/algo. Spring Tonic is 3 g in 500 ml, an ordinary infusion, and
+   it computed identically to 3 g in a single cup: earthy 5.00,
+   mineral 5.00, astringent 5.00, three bars pinned and a "heavy pour —
+   about 2.5× a cup's worth of leaf in one cup" notice on a cup that
+   holds exactly one cup's worth per cup. Reported as "doesn't seem
+   right for the actual recipe, its only 2 tsp total". It wasn't.
+
+   At its own dose the same recipe reads astringent 3.80, earthy 3.10,
+   mineral 2.90 — nothing pinned, the bars discriminating again, and
+   the pour notice correctly silent. THE WARNING WAS HONEST; it was
+   describing a defect one layer under it.
+
+   The composer had the same hole from the other side. `partsToGrams`
+   multiplies by `pourDoses`, so choosing "a pot" builds 3× the leaf —
+   correctly, that is what a pot holds — and the model then read that
+   as one cup. Normalising here closes both, because a pour size's ml
+   and its dose count are the same number.
+
+   NORMALISE AT THE BOUNDARY, not at each reader. Dose feeds flavour,
+   effects, caffeine and the pour check, and every one of them wants
+   the same per-cup figure; four call sites each dividing is the
+   duplicated-operation shape this codebase keeps finding. So the
+   exported function is a thin normaliser and the pipeline below only
+   ever sees a cup.
+
+   Callers that pass no `ml` are unchanged — the ratio is 1.
+
+   `opts` is read rather than destructured in the signature because
+   FlavorMap already passes a literal `null` in this position (it was
+   an unused slot); `{ ml } = {}` accepts undefined and throws on null. */
+export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, opts) {
+  const ml = opts?.ml;
+  const cupsOfWater = ml > 0 ? ml / REFERENCE_ML : 1;
+  const perCup = (cupsOfWater === 1 || !ingredients?.length)
+    ? ingredients
+    : ingredients.map(i => ({ ...i, g: (i.g || 0) / cupsOfWater }));
+  return resolveBlendAtBrewPerCup(
+    perCup, tempC, timeS, baselineTempC, baselineTimeS, curated, isTraditional,
+    ingredients,
+  );
+}
+
+/* The pipeline proper. Takes ONE CUP's worth of leaf — see the
+   normaliser above, which is the only thing that should call it with a
+   pot. Internal re-entry (the baseline read below) passes the already
+   normalised list, so it must not divide again. */
+function resolveBlendAtBrewPerCup(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, poured = ingredients) {
   const _readingOnly = _readingDepth > 0;
   if (!ingredients || !ingredients.length) {
     return {
@@ -1421,7 +1476,22 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
      It is about 120. Dividing by what a cup's dose of that leaf weighs
      makes one cup-dose yield exactly the sourced number, which is what
      the doc says and what `tests/research-parity.test.mjs` now holds. */
-  const rawCaffeineMg = ingredients.reduce((sum, { id, g }) => {
+  /* CAFFEINE IS THE ONE READING THAT IS NOT A CONCENTRATION, so it
+     alone reads `poured` — the leaf as the recipe actually lists it —
+     rather than the per-cup normalisation everything below uses.
+
+     You drink the vessel. A koicha is 4g whisked into 40ml and you
+     swallow all 40ml, so you have consumed 4g of matcha; that the
+     liquid is concentrated changes how it TASTES, not how much
+     caffeine went in. Normalising it was a regression introduced with
+     the volume fix and caught by measuring: koicha read 32.7mg before
+     and 163.6mg after, gyokuro 18.4 -> 36.8. The bars were right to
+     move and this number was not.
+
+     Everything else in this function is a per-sip intensity on a 0-5
+     perceptual scale, which is exactly what concentration means. This
+     is milligrams of a drug, and it belongs to the dose. */
+  const rawCaffeineMg = poured.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
     if (!meta || !meta.caffeine) return sum;
     const perCup = TSP_BY_CATEGORY[meta.category] || 1.5;
@@ -1970,7 +2040,11 @@ const contributions = ingredients.map(({ id, g, role }) => {
     }
     _readingDepth++;
     try {
-      const at = resolveBlendAtBrew(
+      // PerCup, not the normaliser: `ingredients` here is already one
+      // cup's worth. Going back through the front door would be a
+      // no-op today (no ml is passed) and a silent double-division the
+      // moment someone threads one through.
+      const at = resolveBlendAtBrewPerCup(
         ingredients, rec.tempC, rec.timeS,
         baselineTempC, baselineTimeS, curated, isTraditional,
       );

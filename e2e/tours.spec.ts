@@ -391,9 +391,22 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await expect(toggle, "the pulse should hold across both toggle steps")
       .toHaveCSS("animation-name", "tourTogglePulse");
     await expect(callout).toContainText("We'll leave it on Simple");
+    /* +20, and it was +40 until the cup learned how much water it holds.
+       The composer's `partsToGrams` multiplies by the pour's dose count,
+       so the default mug built 1.75x the leaf — and the model read that
+       as one cup, so every bar was inflated by the same factor. Detailed
+       showed 9 flavour rows; two of them (`warm` 0.6 and `delicate` 0.5)
+       cleared the 0.5 visibility floor ONLY because of the inflation.
+       At its true dose the blend shows 7, identical at cup, mug and pot,
+       which is the fix behaving. So the graph grows 28px now rather than
+       ~56px, and the old constant was measuring a bug.
+       Lowered deliberately and with the measurement, not to get to green.
+       The blend can be re-picked to widen the gap — tourBlend.js says so
+       and tests/tour-blend.test.mjs is the guard for it — but that is a
+       teaching decision, not a repair. */
     const detailedH = (await graph.boundingBox())!.height;
     expect(detailedH, `Detailed should grow the graph (simple=${simpleH}, detailed=${detailedH})`)
-      .toBeGreaterThan(simpleH + 40);
+      .toBeGreaterThan(simpleH + 20);
 
 
     // And advancing out of the walkthrough returns to the short layout
@@ -1142,8 +1155,12 @@ test.describe("the tour callout holds its position", () => {
     const buttonAfter = (await next.boundingBox())!;
     const detailedH = (await graph.boundingBox())!.height;
 
+    // +20 for the same reason as the sibling test above — see the note
+    // there. This is a PRECONDITION ("or this proves nothing"), so it
+    // has to stay above zero: the point of the test is that Next holds
+    // still WHILE the graph moves.
     expect(detailedH, "the graph should actually have grown, or this proves nothing")
-      .toBeGreaterThan(simpleH + 40);
+      .toBeGreaterThan(simpleH + 20);
     expect(Math.abs(buttonAfter.y - buttonBefore.y),
       `Next moved ${(buttonAfter.y - buttonBefore.y).toFixed(1)}px when the graph grew `
       + `(${Math.round(simpleH)}→${Math.round(detailedH)}px)`)

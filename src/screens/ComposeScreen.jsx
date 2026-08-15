@@ -1851,7 +1851,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
   // fires immediately so the user exploring an arbitrary combination
   // sees the consequence of each slider position the moment it lands.
   const liveBrew = ingsForProfile.length > 0
-    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS)
+    ? resolveBlendAtBrew(ingsForProfile, brewTempC, brewTimeS, undefined, undefined, false, false, { ml: POUR_SIZES[pour]?.ml })
     : { outsiders: [], perIngredient: [] };
   // Same as forward-mode filter: this banner is temp-axis only, so
   // exclude ingredients that are in their preferred temp band even
@@ -2523,7 +2523,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             // The same page every other path opens — just with nothing
             // loaded into it yet. The composer keeps hold of temp/time
             // because its save flow and its "at 94°" prose read them.
-            load={{ ingredients: ingsForProfile, kind: "blend" }}
+            // `partsToGrams` already multiplied by the pour's dose
+            // count, so a pot really does carry 3x the leaf. Handing
+            // the volume over is what stops the model reading that as
+            // one very strong cup.
+            load={{ ingredients: ingsForProfile, kind: "blend", ml: POUR_SIZES[pour]?.ml }}
             tempC={brewTempC}
             setTempC={setBrewTempC}
             timeS={brewTimeS}

@@ -299,6 +299,11 @@ const useDockArrival = (enabled) => {
 
 export const BlendExtractionExplorer = ({
   ingredients,              // [{id, g}, ...]
+  ml,                       // how much water the vessel holds. The
+                            // profiles are written per 200ml, so this
+                            // is what turns a pot's leaf into a cup's
+                            // dose before anything reads it. Omitted
+                            // means 200ml. See compose.js's normaliser.
   hideTraditionNote = false,  // suppress the inline note (caller renders elsewhere)
   onTraditionNoteChange,    // optional callback fired with the note payload
   defaultTempC,             // from computeBrewProfile (algorithm's recommendation)
@@ -535,8 +540,8 @@ export const BlendExtractionExplorer = ({
   // Experimental (user-built) blends skip baseline entirely so every
   // warning fires immediately.
   const brew = experimental
-    ? resolveBlendAtBrew(ingredients, tempC, timeS, undefined, undefined, false, false)
-    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated, isTraditional);
+    ? resolveBlendAtBrew(ingredients, tempC, timeS, undefined, undefined, false, false, { ml })
+    : resolveBlendAtBrew(ingredients, tempC, timeS, defaultTempC, defaultTimeS, curated, isTraditional, { ml });
 
   // Algorithm-derived "research-aligned" brew — the temperature-range
   // intersection (or grams-weighted compromise) plus weighted time.
@@ -713,6 +718,7 @@ export const BlendExtractionExplorer = ({
             promised a change in a strip that never changes. */}
         <div data-tour="blend-flavors">
           <FlavorMap
+            ml={ml}
           jumpNonce={brewJump}
             ingredients={ingredients}
             tempC={tempC}
@@ -734,6 +740,7 @@ export const BlendExtractionExplorer = ({
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
         <PalateMap
+            ml={ml}
           jumpNonce={brewJump}
           warnings={brew?.warnings || []}
           ingredients={ingredients}
@@ -1562,6 +1569,7 @@ export const BlendExtractionExplorer = ({
           sliders stay clear" test in e2e/tours.spec.ts still pins it. */}
       <div data-tour="blend-effects" style={{ marginBottom: 12 }}>
         <MindMap
+            ml={ml}
           jumpNonce={brewJump}
           ingredients={ingredients}
           tempC={tempC}
@@ -1571,6 +1579,7 @@ export const BlendExtractionExplorer = ({
           familyMode
         />
         <BodyMap
+            ml={ml}
           jumpNonce={brewJump}
           ingredients={ingredients}
           tempC={tempC}

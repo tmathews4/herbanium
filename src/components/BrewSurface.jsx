@@ -65,7 +65,11 @@ export const BrewSurface = ({
   isHouse = false,
   ...rest
 }) => {
-  const { ingredients = [], name = "", tempC: loadTempC, timeS: loadTimeS, kind = "blend" } = load || {};
+  // `ml` rides on the load with everything else the page varies by: a
+  // recipe brings the curator's vessel, the composer brings the pour
+  // size the user picked, an ingredient page is a plain 200ml cup.
+  // Absent means 200ml, which is what every profile is written per.
+  const { ingredients = [], name = "", tempC: loadTempC, timeS: loadTimeS, kind = "blend", ml } = load || {};
 
   const [ownTempC, setOwnTempC] = useState(loadTempC);
   const [ownTimeS, setOwnTimeS] = useState(loadTimeS);
@@ -87,6 +91,7 @@ export const BrewSurface = ({
   return (
     <BlendExtractionExplorer
       ingredients={ingredients}
+      ml={ml}
       defaultTempC={loadTempC}
       defaultTimeS={loadTimeS}
       tempC={tempC}
