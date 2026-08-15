@@ -142,15 +142,46 @@ export const ThumbDown = ({ size = 18, c = theme.terra }) => (
 //
 // The pot is a flat trapezoid with a rim line, deliberately unlike
 // Flask's conical body and neck — the two sit three tabs apart and
-// must not be confused. Leaves are cut to two so the silhouette
-// survives at 18px; Sprig's six would fill in to a smudge.
+// must not be confused. Two leaves only: Sprig's six would fill in to
+// a smudge at 18px.
+//
+// The leaves are CLOSED almond shapes, not the open curved strokes
+// Sprig uses, and they're deliberately unequal — smaller left, larger
+// right. Both matter at 18px. Open strokes read as bare twigs once
+// they're two pixels long, and a symmetric pair reads as a mechanical
+// arrow; the offset pair reads as a growing thing.
+//
+// THEY ARE FILLED, and that is the part not to "clean up" later. Every
+// other icon in this file is pure outline, so a filled shape looks
+// inconsistent in the source — but an outlined leaf this size closes
+// to a single line at tab scale, which is exactly how it was reported.
+// Widening the outline helped and didn't fix it; the fill does, and it
+// still holds at 14px. The pot stays stroked so the mark still reads
+// as one of this family rather than a solid glyph.
+//
+// Midribs were tried and dropped. They look better at 68px and turn to
+// mush at 18px, which is the only size this ships at.
+//
+// FILL THE BOX. The first version was drawn inside a smaller area than
+// the register uses and shipped looking underweight next to its
+// neighbours — reported as "a little small", and it was. Measured with
+// getBBox inside the 24×24 viewBox:
+//
+//   Kettle 18 × 18.5 = 333    Pencil 17 × 17   = 289
+//   Flask  14.4 × 18 = 259    Sprig  12 × 18   = 216
+//   this   13.2 × 17.6 = 233  (was 10.4 × 14.3 = 149)
+//
+// So the tab had LOST weight in the swap — 149 against the 216 Sprig
+// it replaced, 45% of Kettle. Size props don't reveal this; every icon
+// is nominally 18px and the artwork inside differs. Any new icon here
+// should be measured against that table rather than eyeballed.
 export const PottedSprig = ({ size = 20, c = theme.sage }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 14.5 V7" />
-    <path d="M12 11 C9.3 11 8.2 9.2 8.2 8.2" />
-    <path d="M12 9 C14.7 9 15.8 7.2 15.8 6.2" />
-    <path d="M6.8 14.5 H17.2" />
-    <path d="M8 14.5 L9 20.5 H15 L16 14.5" />
+    <path d="M12 13.5 V6.6" />
+    <path fill={c} d="M12 10 C11.79 7.78 9.44 6.18 7.3 6.8 C7.51 9.02 9.86 10.62 12 10 Z" />
+    <path fill={c} d="M12 7.3 C14.61 8.06 17.46 6.11 17.7 3.4 C15.09 2.64 12.24 4.59 12 7.3 Z" />
+    <path d="M5.4 13.5 H18.6" />
+    <path d="M6.7 13.5 L8.1 21 H15.9 L17.3 13.5" />
   </svg>
 );
 
