@@ -89,11 +89,11 @@ test.describe("every brew window has a Brew button", () => {
 
     await ensureBrewPanel(page);
     await brewButton(page).click();
-    // Every corner Brew asks first now. A leaf is already named, so this
-    // prompt carries no name field.
+    // Every corner Brew asks first now, and no prompt carries a name
+    // field any more — naming moved to the dock's Save corner.
     await expect(page.getByTestId("brew-confirm")).toBeVisible();
     await expect(page.getByTestId("brew-confirm-name"),
-      "an already-named thing shouldn't ask for a rename").toHaveCount(0);
+      "brewing doesn't ask for a name any more").toHaveCount(0);
     await page.getByTestId("brew-confirm-go").click();
 
     await expect(page.getByTestId("steep-screen").or(page.getByText(/steep/i).first()),
@@ -102,10 +102,17 @@ test.describe("every brew window has a Brew button", () => {
 });
 
 test.describe("brewing asks first", () => {
-  test("the composer's Brew confirms, and takes the name", async ({ page }) => {
-    // Brewing starts a timer and commits the cup — the one irreversible
-    // thing this screen does. The name is asked for here because this is
-    // the moment you know what to call it.
+  test("the composer's Brew confirms, and names the cup after its leaves", async ({ page }) => {
+    /* Brewing starts a timer and commits the cup — the one irreversible
+       thing this screen does — so it still asks. It no longer asks WHAT
+       TO CALL IT.
+
+       That field was here because the save prompt was unreachable, so
+       this dialog was the only way to name a composed pot and quietly
+       carried two jobs. The dock's Save corner owns naming now. An
+       unnamed pot brews under `suggestBlendName` — a description of the
+       leaves — which beats the "Untitled blend" this path fell back to
+       whenever the field was left alone. */
     await boot(page);
     await page.getByRole("button", { name: "Apothecary", exact: true }).click();
     const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
@@ -117,12 +124,18 @@ test.describe("brewing asks first", () => {
 
     const dialog = page.getByTestId("brew-confirm");
     await expect(dialog, "Brew should ask before starting a timer").toBeVisible();
-    await page.getByTestId("brew-confirm-name").fill("Evening Chamomile");
+    await expect(page.getByTestId("brew-confirm-name"),
+      "brewing shouldn't ask for a name — the Save corner owns that").toHaveCount(0);
     await page.getByTestId("brew-confirm-go").click();
 
     await expect(dialog).toBeHidden();
-    await expect(page.getByText("Evening Chamomile").first(),
-      "the name given at the prompt should follow the cup").toBeVisible({ timeout: 15_000 });
+    // Named after what's in it, and NOT "Untitled blend" — the string
+    // this path used to produce for anyone who skipped the field.
+    await expect(page.getByText(/chamomile/i).first(),
+      "an unnamed pot should brew under a description of its leaves")
+      .toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/untitled/i),
+      "and never as Untitled").toHaveCount(0);
   });
 
   test("backing out of the prompt brews nothing", async ({ page }) => {
@@ -155,7 +168,8 @@ test.describe("a named cup isn't asked to be renamed", () => {
     await expect(page.getByTestId("brew-confirm"),
       "a saved recipe should still confirm — it starts a timer").toBeVisible();
     await expect(page.getByTestId("brew-confirm-name"),
-      "but the recipe already has a name").toHaveCount(0);
+      "and it doesn't ask for a name — naming lives on the Save corner now")
+      .toHaveCount(0);
   });
 });
 

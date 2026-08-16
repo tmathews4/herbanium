@@ -40,6 +40,7 @@
 import React, { useState, useEffect } from "react";
 import { BlendExtractionExplorer } from "./BlendExtractionExplorer";
 import { BrewCornerButton, SaveCornerButton } from "./BrewButton";
+import { suggestBlendName } from "../helpers/misc";
 
 /**
  * @param load  { ingredients, name?, tempC?, timeS?, kind? }
@@ -116,7 +117,11 @@ export const BrewSurface = ({
       saveAction={onSave ? (
         <SaveCornerButton
           disabled={!ingredients.length}
-          defaultName={name}
+          // NOT pre-seeded, even where the load has a name. Saving from
+          // a recipe or a leaf makes YOUR copy of it, and handing back
+          // the original's name produces two catalogue rows reading the
+          // same — the duplicate-by-default problem "Untitled blend"
+          // had, wearing a nicer word.
           onSave={onSave}
         />
       ) : null}
@@ -124,15 +129,14 @@ export const BrewSurface = ({
         <BrewCornerButton
           disabled={!ingredients.length}
           pulsing={tour?.step === "blend-brew"}
-          // Asks first, everywhere. The NAME is asked for only when the
-          // load hasn't got one — a composed pot — because offering a
-          // recipe or a leaf a rename is a question nobody asked.
+          // Asks first, everywhere — but only whether to brew. Naming
+          // belongs to the Save corner now; a composed pot with no name
+          // brews under a description of itself rather than the
+          // "Untitled blend" this used to fall back to.
           confirm
-          askName={!name}
-          defaultName={name || "Untitled blend"}
-          onConfirm={(chosen) => onBrew({
+          onConfirm={() => onBrew({
             ...load,
-            name: chosen || name,
+            name: name || suggestBlendName(ingredients),
             ingredients,
             tempC,
             timeS,

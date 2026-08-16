@@ -2866,6 +2866,9 @@ export default function App() {
           // blend (it has the name and the live slider values); App just
           // starts it, the same as any other brew.
           onBrew={(blend) => startBrew(blend, "", ["calm"])}
+          // Same store as everywhere else — keeping a single leaf makes
+          // an ordinary one-ingredient recipe.
+          onSaveBlend={(blend, name) => saveComposedBlend(blend, name)}
         />
       )}
       {overlay === "blend" && blendOverlayId && (
@@ -2885,6 +2888,10 @@ export default function App() {
             if (modified) clearTwistState(blendOverlayId);
             startBrew(b, "", [b.mood]);
           }}
+          // The dock's Save corner, on the recipe screen. Same store as
+          // the composer's — a kept blend is a kept blend however you
+          // reached it.
+          onSaveBlend={(blend, name) => saveComposedBlend(blend, name)}
           onSaveAndBrew={(modified, name) => {
             const newId = saveComposedBlend(modified, name);
             const saved = LOCAL_BLENDS[newId] || { ...modified, id: newId };

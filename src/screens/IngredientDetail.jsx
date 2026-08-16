@@ -132,7 +132,7 @@ const SpecRow = ({ label, value }) => (
    Screen: INGREDIENT DETAIL
    ────────────────────────────────────────────────────────────── */
 
-export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHintShown, dismissIngredientHint, onBrew }) => {
+export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHintShown, dismissIngredientHint, onBrew, onSaveBlend }) => {
   const ing = INGREDIENTS[id] || INGREDIENTS.chamomile;
   // The brew panel here is CONTROLLED, so its Brew button commits the
   // temperature and time the user is actually looking at rather than
@@ -458,6 +458,14 @@ export const IngredientDetail = ({ id, onClose, onOpenIngredient, ingredientHint
                 timeS={brewTimeS}
                 setTimeS={setBrewTimeS}
                 onBrew={onBrew}
+                // A single leaf is a recipe you can keep, by the same
+                // argument this file's brew corner already makes: there
+                // is no harm in brewing one leaf, and a cup you've found
+                // the temperature for is worth writing down.
+                onSave={onSaveBlend ? (chosen) => onSaveBlend({
+                  name: chosen, ingredients: [{ id, g: 1.0 }],
+                  tempC: brewTempC, timeS: brewTimeS,
+                }, chosen) : undefined}
               />
             )}
 

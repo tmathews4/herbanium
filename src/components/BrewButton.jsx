@@ -55,26 +55,30 @@ export const BrewCornerButton = ({
   // True while the guided tour is pointing at this button.
   pulsing = false,
   label = "Brew",
-  // Ask before brewing. Receives the name the user settled on.
+  // Ask before brewing. Takes no argument now — see below.
   confirm = false,
   onConfirm,
-  defaultName = "",
-  // Whether the prompt also asks what to call it. True for a composed
-  // pot, which has no name yet. False when brewing something already
-  // named — a saved recipe or a single leaf — where a rename field is
-  // a question nobody asked.
-  askName = true,
 }) => {
   const [asking, setAsking] = useState(false);
-  const [name, setName] = useState(defaultName);
 
-  // Re-seed each time it opens rather than once at mount — the pot can
-  // change between asks, and a stale name is worse than a blank one.
-  const open = () => { setName(defaultName); setAsking(true); };
+  const open = () => setAsking(true);
 
+  /* BREWING NO LONGER ASKS WHAT TO CALL IT.
+
+     It used to, on the reasoning that the moment you commit to a cup is
+     the moment you know its name. Fair, but it was the ONLY way to name
+     a composed pot, because the save prompt was unreachable — so this
+     dialog was quietly carrying a second job. With a Save corner on the
+     dock, naming has a home of its own, and asking here is a second
+     prompt for a decision already made or deliberately deferred.
+
+     An unnamed pot brews under `suggestBlendName` — "Chamomile &
+     Lavender" — supplied by BrewSurface. That is a description of the
+     cup rather than a name for it, and it is strictly better than the
+     "Untitled blend" this path used to fall back to. */
   const commit = () => {
     setAsking(false);
-    onConfirm?.(name.trim() || defaultName || "Untitled blend");
+    onConfirm?.();
   };
 
   return (
@@ -141,9 +145,7 @@ export const BrewCornerButton = ({
           fontFamily: ff.sans, fontSize: 12.5, color: theme.inkSoft,
           lineHeight: 1.5, marginBottom: 0,
         }}>
-          {askName
-            ? "The timer starts now, at the temperature and time you've set. Give it a name while you're here."
-            : "The timer starts now, at the temperature and time you've set."}
+          The timer starts now, at the temperature and time you've set.
         </div>
 
         {/* A form, so Return commits — the same reasoning as the
@@ -153,29 +155,6 @@ export const BrewCornerButton = ({
       </div>
 
         <form onSubmit={(e) => { e.preventDefault(); commit(); }} style={{ margin: 0 }}>
-          {askName && (
-          <input
-            data-testid="brew-confirm-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="name this blend"
-            maxLength={40}
-            autoFocus
-            enterKeyHint="go"
-            style={{
-              // `width` was declared twice in this object — 100% here and
-              // calc(100% - 36px) below, which silently won. The margin
-              // and the calc are the pair that were meant, so the
-              // stray 100% goes.
-              display: "block", boxSizing: "border-box",
-              fontFamily: ff.serif, fontSize: 16, color: theme.ink,
-              background: "transparent", border: "none",
-              borderBottom: `1px solid ${theme.rule}`,
-              padding: "6px 2px", outline: "none",
-              margin: "0 18px 18px", width: "calc(100% - 36px)",
-            }}
-          />
-          )}
           {/* A FOOTER, not two floating buttons. Square, flush to the
               card's edges, split by the same hairline the dock uses —
               the same treatment as the Brew corner it was opened from,
@@ -276,9 +255,27 @@ export const SaveCornerButton = ({
   const open = () => { setName(defaultName); setResult(null); setAsking(true); };
   const close = () => { setAsking(false); setResult(null); };
 
+  /* IT WILL NOT SAVE AS "UNTITLED BLEND".
+
+     That string was the fallback on every save path, so the easiest
+     thing to do — open the prompt, press keep — produced a catalogue
+     entry indistinguishable from every other one made the same way.
+     Asked for directly: "don't let it save as untitled, make the user
+     enter a text and prompt them to if they try to save with
+     untitled".
+
+     So an empty field is refused rather than filled in for you, and the
+     literal fallback is refused too — otherwise the rule is one
+     copy-paste from being undone. The field is NOT pre-seeded with a
+     suggestion for the same reason: a prefilled name is a name nobody
+     chose, which is the behaviour being removed. */
   const commit = (e) => {
     e?.preventDefault?.();
-    const chosen = name.trim() || "Untitled blend";
+    const chosen = name.trim();
+    if (!chosen || /^untitled( blend)?$/i.test(chosen)) {
+      setResult({ ok: false, text: "Give it a name first — anything you'd recognise later." });
+      return;
+    }
     const id = onSave?.(chosen);
     if (id) {
       setResult({ ok: true, text: `Saved as "${chosen}"` });

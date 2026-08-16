@@ -110,3 +110,84 @@ test.describe("keeping a composed blend", () => {
       "declining the prompt should not have kept anything").toHaveCount(0);
   });
 });
+
+/* IT REFUSES TO SAVE AS "UNTITLED".
+
+   That string was the fallback on every save path, so the easiest
+   possible action — open the prompt, press keep — produced a catalogue
+   row indistinguishable from every other one made that way. Asked for
+   as "don't let it save as untitled, make the user enter a text and
+   prompt them to if they try to save with untitled".
+
+   Both halves are asserted: the refusal SAYS something (a dialog that
+   just does nothing reads as broken), and nothing reaches the
+   catalogue. Checking only the message would pass on a version that
+   complained and saved anyway. */
+test.describe("a blend has to be given a name", () => {
+  test("keeping with an empty name asks for one instead of inventing it", async ({ page }) => {
+    await openComposer(page);
+    await fillThePot(page);
+
+    await page.getByTestId("blend-save").click();
+    await expect(page.getByTestId("blend-save-name"),
+      "the field starts empty — a prefilled name is a name nobody chose")
+      .toHaveValue("");
+
+    await page.getByTestId("blend-save-confirm").click();
+    await expect(page.getByTestId("blend-save-status"),
+      "an empty name should be refused out loud").toContainText(/give it a name/i);
+    await expect(page.getByTestId("blend-save-dialog"),
+      "and the prompt should stay up so it can be answered").toBeVisible();
+
+    // Typing the old fallback by hand is refused too, or the rule is one
+    // copy-paste from being undone.
+    await page.getByTestId("blend-save-name").fill("Untitled blend");
+    await page.getByTestId("blend-save-confirm").click();
+    await expect(page.getByTestId("blend-save-status")).toContainText(/give it a name/i);
+
+    await page.getByRole("button", { name: "not yet", exact: true }).click();
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="subtabs"]')
+      .getByRole("button", { name: "Recipes", exact: true }).click();
+    await page.getByRole("button", { name: "All", exact: true }).first().click();
+    await expect(page.getByText(/untitled/i),
+      "nothing should have been kept under a placeholder name").toHaveCount(0);
+  });
+});
+
+/* EVERY BREW BAR OFFERS IT, which is the same argument BrewSurface's
+   header already makes about Brew: the corner went missing from two
+   panels when its styling lived at the call site, and "every brew
+   window gets one" is the rule that fixed it. A cup you have found the
+   temperature for is worth writing down wherever you found it.
+
+   Walked through the real screens rather than asserted on props — the
+   bug that motivated the rule was a panel rendering without the corner,
+   which only a walk can see. */
+test.describe("the save corner is on every brew bar", () => {
+  test("a saved recipe's brew bar offers it", async ({ page }) => {
+    await openComposer(page);
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await page.locator('[data-tour="subtabs"]')
+      .getByRole("button", { name: "Recipes", exact: true }).click();
+    // Through the catalogue rather than a saved row: this profile has
+    // saved nothing yet, and the claim is about the recipe SCREEN, which
+    // a curated blend reaches just as well.
+    await page.getByRole("button", { name: "All", exact: true }).first().click();
+    await page.getByText("Spring Tonic", { exact: false }).first().click();
+    await expect(page.getByTestId("blend-save"),
+      "a recipe screen should let you keep your version of it")
+      .toBeVisible({ timeout: 30_000 });
+  });
+
+  test("an ingredient's brew bar offers it", async ({ page }) => {
+    await openComposer(page);
+    await page.locator('[data-tour="subtabs"]')
+      .getByRole("button", { name: "Herbanium", exact: true }).click();
+    await page.locator('[data-tour="herb-search"]').getByRole("textbox").first().fill("chamomile");
+    await page.locator('[data-tour="herb-ingredient"]').first().click();
+    await page.getByRole("button", { name: "Brewing", exact: true }).first().click();
+    await expect(page.getByTestId("blend-save"),
+      "a single leaf is a recipe you can keep").toBeVisible({ timeout: 30_000 });
+  });
+});

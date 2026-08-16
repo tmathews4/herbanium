@@ -32,7 +32,7 @@ import {
    a friend's session — their review in a pull-quote up top.
    ────────────────────────────────────────────────────────────── */
 
-export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSaveAndBrew, isFavorite, onToggleFavorite, sessions, go, twists = [], setTwists = () => {}, curatedOverrides = {}, setCuratedOverrides = () => {} }) => {
+export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSaveBlend, onSaveAndBrew, isFavorite, onToggleFavorite, sessions, go, twists = [], setTwists = () => {}, curatedOverrides = {}, setCuratedOverrides = () => {} }) => {
   const { unit, weightUnit } = useUnit();
   const b = getBlend(blendId);
   // The page runs UNDER this screen's dock so its glass has something
@@ -934,6 +934,12 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               setTempC={setBrewTempC}
               timeS={brewTimeS}
               setTimeS={setBrewTimeS}
+              // Keeps YOUR version of this recipe — the leaves as they
+              // stand (twists included) at the brew you've dialled.
+              onSave={onSaveBlend ? (chosen) => onSaveBlend({
+                name: chosen, ingredients: mergedIngredients,
+                tempC: brewTempC, timeS: brewTimeS, ml: b.ml,
+              }, chosen) : undefined}
               isTraditional={!!b.tradition && twists.length === 0}
               isHouse={!!b.house && twists.length === 0}
               onBrew={handleBrewTap}
