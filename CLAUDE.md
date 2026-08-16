@@ -221,22 +221,17 @@ Two of the four were app bugs and two were test bugs, and every one of
 them looked like flake until it was read properly. Load didn't cause
 any of them; it changed the timing enough to expose them.
 
-**REOPENED, 2026-08-13 — a FIFTH cause, and the symptom is stated here
-rather than explained.** Do not re-read the four above and conclude
-it's one of them; it is not, and assuming so is what this note exists
-to prevent.
+**CLOSED AGAIN, 2026-08-16 — the FIFTH cause was the app rolling dice
+under the test.** Reopened 2026-08-13 with the symptom recorded and a
+suspicion attached; the suspicion was wrong, which is why it was
+recorded as a guess.
 
-Symptom: roughly one run in three, one test in this file fails, a
-different one each time, and it passes on immediate re-run. Observed on
-`:143` ("an elemental arriving announces itself"), `:187` ("the stone
-filling while you're on another screen says so") and `:396`
-("dismissing it puts it away and it doesn't come back") — three
-different tests across six runs, which is the strongest evidence yet
-that the cause is shared rather than per-test. Seen again 2026-08-16 on
-`:143` during unrelated work, so it is still live on current `HEAD` and
-did not go away with the save-naming or replay-latency changes; the file
-passed alone (7/7, 16.4s) on the immediate re-run, as always. The `:143`
-failure reads:
+Symptom, as it read for three days: roughly one run in three, one test
+in this file fails, a different one each time, and it passes on
+immediate re-run. Observed on `:143` ("an elemental arriving announces
+itself"), `:187` ("the stone filling while you're on another screen
+says so") and `:396` ("dismissing it puts it away and it doesn't come
+back"). The `:143` failure read:
 
 ```
 Error: nothing has arrived yet
@@ -244,27 +239,52 @@ Locator: getByText(/your lodestone is (pulsing|charged)/i).first()
 Expected: 0   Received: 1
 ```
 
-— a PRECONDITION assertion, failing because a lodestone notice is
-already on screen before the test has done anything to cause one.
+— a PRECONDITION assertion, failing because a lodestone notice was
+already on screen before the test had done anything to cause one.
 
-What is already ruled out, so nobody spends the time again:
+**The cause: every action site calls `tryRollOnAction`, which rolls
+`Math.random`.** `BASE_CHANCE` is 4.5%, multiplied by 4.0 on a profile
+with nothing earned — about 18% per eligible action. Each test makes
+two or three tab visits before its silence assertion (`meetTheLodestone`
+alone is two), so most runs of the file had a stray arrival somewhere,
+and when one landed before a silence check, that test failed. The app
+was behaving exactly as designed; the precondition was never guaranteed.
 
-- **Not the caffeine/sedative work.** Reproduced on clean `HEAD` with
-  nothing in the working tree: one failure in three runs.
-- **Not load or worker contention.** It reproduces running this spec
-  file ALONE, seven tests, 15 seconds. That was the standing
-  explanation for the original four and it does not apply here.
-- **Not cause 3 recurring.** The locator involved is the combined
-  `pulsing|charged` one, but this is a silence assertion, which is
-  exactly the usage that split deliberately kept it for.
+**Why the failing test moved while the assertion shape never did.** Only
+a silence assertion can see a stray arrival — a test waiting FOR a
+notice cannot fail this way. All three observed failures are silence
+assertions. One cause, three faces, for the second time in this file.
 
-The live suspicion, untested: seeded profile state leaking between
-tests, so a notice from a previous test's stone survives into the next
-test's "nothing has arrived yet". That the failing test varies while
-the assertion shape doesn't fits a shared-state ordering problem better
-than anything test-specific. Read a trace from a failing run before
-believing that — it is a guess, and the four above are what happens to
-guesses in this file.
+What proved it, and it is the same instruction the four earlier causes
+ended with: **read the failure's page snapshot, don't reason about it.**
+The ribbon on screen in a failing `:143` read "your lodestone is
+pulsing / Something stirs in the stone" — the ARRIVAL notice — in a test
+that had seeded the charge to 0 and had not yet forced a glimpse. Not a
+leftover, not a charge notice: a fresh roll.
+
+The recorded suspicion — seeded profile state leaking between tests —
+was wrong, and worth knowing why: each test gets its own browser
+context, so nothing survives between them. It fit the evidence
+("different test each time") and was still a guess. The note said to
+read a trace before believing it. That was the right instruction.
+
+Fixed by seeding `lastElementalRollAt` an hour into the future in the
+spec's `boot()`, which holds `rollOnAction`'s own cooldown shut for the
+whole run. Not `elementalsDisabled`, which would also switch off the
+charge and the dev forcer — the actual subjects. Deliberate arrivals
+still fire, which is why `:143` still passes rather than passing
+vacuously. `tests/elemental-roll.test.mjs` holds the cooldown property
+by name, so removing it fails there instead of quietly restoring the
+flake.
+
+Measured: 3 failures in 42 runs before, 0 in 70 after.
+
+Also ruled out along the way, so nobody re-spends it: not the
+caffeine/sedative work (reproduced on clean `HEAD`), not load or worker
+contention (reproduces running the file ALONE in 15s), and not cause 3
+recurring (the combined `pulsing|charged` locator is involved, but as a
+silence assertion, which is the usage the split deliberately kept it
+for).
 
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 

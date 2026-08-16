@@ -32,6 +32,43 @@ async function boot(page: Page, seed: () => void = () => {}) {
       home: true, blend: true, herbanium: true,
       recipes: true, reflections: true, fieldnotes: true,
     }));
+    /* NO ELEMENTAL MAY ARRIVE BY CHANCE WHILE THESE TESTS RUN — this is
+       the fifth cause from CLAUDE.md's reopened note, and it was neither
+       load nor leaked state.
+
+       Every action site calls tryRollOnAction, which rolls Math.random:
+       BASE_CHANCE 4.5% times a 4.0 first-time multiplier on a profile
+       with nothing earned, so ~18% per eligible action. Each test here
+       makes two or three tab visits (meetTheLodestone alone is two)
+       before asserting silence, and when one of those rolls landed, an
+       arrival ribbon appeared that the test had not caused. The app was
+       right; the precondition was never guaranteed.
+
+       That is why the failing test moved around while the assertion
+       shape never did. Only a SILENCE assertion can see a stray
+       arrival — the tests that wait for a notice cannot fail this way —
+       and every failure recorded in CLAUDE.md (:143, :187, :396) is a
+       silence assertion. One cause, three faces, again.
+
+       Proved from the page snapshot of a failing run: the ribbon on
+       screen read "your lodestone is pulsing / Something stirs in the
+       stone", which is the ARRIVAL notice, in a test that had seeded
+       the charge to 0 and had not yet forced a glimpse.
+
+       Suppressed through the roller's own cooldown rather than by
+       disabling elementals: `elementalsDisabled` would also switch off
+       the charge and the dev forcer, which are the subjects here.
+       rollOnAction returns null while `now - lastRollAt` is under
+       ROLL_COOLDOWN_MS, so a timestamp in the future closes that gate
+       for the whole run whatever a test's duration. Deliberate arrivals
+       — the forcer, milestones, a charged summon — are untouched, which
+       is exactly the line these tests want.
+
+       tests/elemental-roll.test.mjs holds that property, so removing
+       the cooldown fails there by name instead of quietly bringing this
+       back as flake. */
+    localStorage.setItem("herbanium.lastElementalRollAt",
+      JSON.stringify(Date.now() + 60 * 60 * 1000));
   }, CURRENT_SCHEMA);
   await page.addInitScript(seed);
   await page.goto("/?dev");
