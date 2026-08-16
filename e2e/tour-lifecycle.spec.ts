@@ -22,6 +22,10 @@
 // are first-run failures — the expensive kind.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+// The arrival gate's own number, imported rather than copied — the
+// replay-latency test below is a claim ABOUT this constant, so a budget
+// written by hand would stop meaning anything the moment it moved.
+import { GREETING_ARRIVAL_MS } from "../src/components/greetingTiming";
 
 const ALL_SCREENS = ["home", "blend", "herbanium", "recipes", "reflections", "fieldnotes"];
 
@@ -387,5 +391,40 @@ test.describe("a tour fires once", () => {
 
     await expect(callout(page), "replay should land on Home with the tour running")
       .toBeVisible({ timeout: ARRIVAL });
+  });
+
+  test("replay doesn't wait out Home's arrival sequence", async ({ page }) => {
+    /* THE TAP ABOVE HAPPENS AFTER PAST_ARRIVAL, which is why it never
+       caught this: the gate had already lifted before it clicked.
+
+       Reported as a noticeable delay on replay. `arrivalDone` is a
+       stopwatch started at app mount so the FIRST tour of a session
+       can't dim the opening sequence mid-animation, and the trigger
+       effect read it whether or not the user had asked. Measured from
+       tap to callout: 4.1s inside the window, 0.23s outside it.
+
+       Nothing was being protected — the arrival plays once per session,
+       so a user who has walked to Profile has already finished or
+       abandoned it. Budget is derived from the constant that caused the
+       wait rather than restated: the claim is precisely "it no longer
+       waits for that", so the number that would fail this test is the
+       number the gate uses. Half of it leaves room for a slow machine
+       while still being nowhere near a wait. */
+    await boot(page, { enabled: true, seen: ALL_SCREENS });
+    await openTab(page, "Profile");
+    const replay = page.getByRole("button", { name: "replay tour", exact: true });
+    await expect(replay, "Profile should offer the replay").toBeVisible();
+
+    // No settling wait — tapping INSIDE the arrival window is the case.
+    const startedAt = Date.now();
+    await replay.click();
+    await expect(callout(page), "the tour should start on request")
+      .toBeVisible({ timeout: ARRIVAL });
+    const waited = Date.now() - startedAt;
+
+    expect(waited,
+      `replay took ${waited}ms — a tour the user asked for shouldn't sit `
+      + `behind the ${GREETING_ARRIVAL_MS}ms arrival gate`)
+      .toBeLessThan(GREETING_ARRIVAL_MS / 2);
   });
 });

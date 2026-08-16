@@ -31,10 +31,15 @@ import { ff, theme } from "../theme";
    whether this is a first view — so the greeting and the poem card's
    flourish above it agree, and both animate or neither does. */
 // How long Home's opening sequence runs, end to end: the slogan starts
-// at SLOGAN_AT and takes 1.6s. Exported so anything that needs to wait
-// for the arrival — the guided tour, notably — waits on one number
-// rather than a duplicated guess that drifts when the timings move.
-export const GREETING_ARRIVAL_MS = 4400;
+// at SLOGAN_AT and takes 1.6s. Anything that needs to wait for the
+// arrival — the guided tour, notably — waits on one number rather than
+// a duplicated guess that drifts when the timings move.
+//
+// The value itself lives in ./greetingTiming.js, which is plain JS so
+// the E2E harness can import it; see that file. Re-exported here
+// because this is where callers expect to find it and where it belongs
+// conceptually.
+export { GREETING_ARRIVAL_MS } from "./greetingTiming";
 
 export const TeaGreeting = ({ name, kicker = null, arriving = false }) => {
   // The slogan is the finale, so it goes LAST — after the poem has

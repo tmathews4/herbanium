@@ -232,8 +232,11 @@ different one each time, and it passes on immediate re-run. Observed on
 filling while you're on another screen says so") and `:396`
 ("dismissing it puts it away and it doesn't come back") — three
 different tests across six runs, which is the strongest evidence yet
-that the cause is shared rather than per-test. The `:143` failure
-reads:
+that the cause is shared rather than per-test. Seen again 2026-08-16 on
+`:143` during unrelated work, so it is still live on current `HEAD` and
+did not go away with the save-naming or replay-latency changes; the file
+passed alone (7/7, 16.4s) on the immediate re-run, as always. The `:143`
+failure reads:
 
 ```
 Error: nothing has arrived yet
