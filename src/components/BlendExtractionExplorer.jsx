@@ -342,6 +342,12 @@ export const BlendExtractionExplorer = ({
   axisOverride = null,      // tour demo only: forces which slider is
                             // bound, so the pills step can show each in
                             // turn on the user's own Next tap.
+  saveAction = null,        // the dock's RIGHT corner, mirroring brewAction
+                            // on the left. Absolutely positioned like it
+                            // is, so neither corner shifts the centred
+                            // readout — a temperature that moves under a
+                            // dragging finger is the thing the row's
+                            // layout comment is most careful about.
   brewAction = null,        // node rendered at the foot of the open brew
                             // panel — the Brew button on Compose. Passed
                             // in rather than built here: what it DOES is
@@ -1282,6 +1288,15 @@ export const BlendExtractionExplorer = ({
                   position: "absolute", left: 0, top: 0, bottom: 0, zIndex: 1,
                   display: "flex", alignItems: "stretch",
                 }}>{brewAction}</div>
+              )}
+              {/* Same wrapper-for-position-only rule as Brew above: the
+                  corner keeps its own border radius and any animation,
+                  this div only decides where it sits. */}
+              {saveAction && (
+                <div style={{
+                  position: "absolute", right: 0, top: 0, bottom: 0, zIndex: 1,
+                  display: "flex", alignItems: "stretch",
+                }}>{saveAction}</div>
               )}
               <button
                 data-tour="blend-controls"

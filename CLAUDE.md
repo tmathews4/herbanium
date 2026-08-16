@@ -2,6 +2,29 @@
 
 Project instructions, loaded every session. These are rules, not suggestions.
 
+## A mid-turn message is a QUEUE, not an interrupt
+
+**When a new request arrives while work is in flight, write it down and
+keep going. Finish the thing in progress, then take the queue in
+order.** Say what was queued when acknowledging it, so nothing is
+silently dropped.
+
+This is not a preference about tidiness. Switching mid-task leaves the
+previous change half-verified — tests unwritten, suites unrun, a fix
+measured but not committed — and the half-done state is invisible to
+everyone including the person who made it. Two features landed at once
+are also one commit that can't be reverted separately.
+
+The exception is a report that the work in flight is WRONG. "That fix
+didn't work" is not a new request; it is information about the current
+one, and it belongs in the current one.
+
+**Read this file before starting, not after being asked about it.** The
+sections here are load-bearing and several were written because
+something shipped broken. Skimming it costs a minute; missing the
+research rule, the derived-contract rule or the pre-merge gate costs a
+session.
+
 ## Testing is part of "done"
 
 **Every new piece of functionality ships with a Playwright test in the same change.** Not a follow-up, not "later" — a feature without a test isn't finished.

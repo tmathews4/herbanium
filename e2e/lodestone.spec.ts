@@ -178,3 +178,50 @@ test.describe("lodestone colour follows the mood profile", () => {
   });
 
 });
+
+/* THE SUMMON ANSWERS ACROSS ITS CIRCLE, not just in the middle.
+
+   Reported as "the clickable region to summon is much smaller than it
+   used to be near the center". Measured, it was: the wrapper is 84x96
+   carrying `borderRadius: 50%`, so it hit-tests as an ellipse with dead
+   corners, while two box-shadow layers spread 20px+ past it and the
+   aura another 22px. A shadow paints and never takes a tap, so the
+   stone reads as a circle well over 120px across and answered on about
+   half of it.
+
+   ASSERTED WITH elementFromPoint rather than by clicking. A click that
+   lands on the row instead of the stone still succeeds — it toggles the
+   card's expand — so a click-based test passes whether or not the tap
+   reached the thing it aimed at. Asking what is actually on top at a
+   coordinate is the only form of this that can fail correctly. Same
+   reasoning as the notice-covering-minimize bug in CLAUDE.md.
+
+   The offsets are the ones that regressed: +-46px horizontally and 52px
+   up all missed before the transparent hit layer and hit after. */
+test.describe("the lodestone's summon target", () => {
+  test("answers across the glow, not only at its centre", async ({ page }) => {
+    await openFieldNotes(page, 0);
+    const stone = page.getByTestId("lodestone-summon");
+    // summonReady waits out PULSE_HOLD_MS (2.2s) before the stone offers
+    // itself at all — see ElementalsView. Waiting on the hook rather
+    // than on a sleep so a slower machine doesn't decide the outcome.
+    await expect(stone, "the stone should offer a summon on a fresh profile")
+      .toBeVisible({ timeout: 30_000 });
+
+    const reach = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="lodestone-summon"]')!;
+      const b = el.getBoundingClientRect();
+      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+      const at = (dx: number, dy: number) => {
+        const hit = document.elementFromPoint(cx + dx, cy + dy);
+        return !!hit && (hit === el || el.contains(hit));
+      };
+      return { centre: at(0, 0), up: at(0, -52), left: at(-46, 0), right: at(46, 0) };
+    });
+
+    expect(reach.centre, "the middle of the stone must take a tap").toBe(true);
+    expect(reach.up, "52px above centre is inside the glow and must take a tap").toBe(true);
+    expect(reach.left, "46px left of centre must take a tap").toBe(true);
+    expect(reach.right, "46px right of centre must take a tap").toBe(true);
+  });
+});

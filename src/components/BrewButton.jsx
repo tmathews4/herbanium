@@ -220,3 +220,182 @@ export const BrewCornerButton = ({
   </>
   );
 };
+
+/* ──────────────────────────────────────────────────────────────
+   SaveCornerButton — the dock's other corner.
+
+   Lives here rather than at the call site for the reason the header of
+   this file gives about Brew: the styling of a corner action is the
+   thing that gets rebuilt wrong, and Brew went missing from two panels
+   that way. This is the same corner mirrored, so it shares the file.
+
+   WHY IT EXISTS AT ALL. A composed pot could not be saved. The naming
+   prompt for it was fully built in ComposeScreen and nothing ever
+   opened it — `setRcSavePromptOpen(true)` appeared nowhere in `src/`,
+   so the whole block was unreachable. The only way to keep a blend was
+   to BREW it, because brewing saves as a side effect (App.jsx). Asked
+   for as "a quicker way to save these recipes"; it was the only way.
+
+   AND THE PROMPT IS A MODAL, not a panel at the foot of the page. The
+   first version reused that orphaned inline block, which meant tapping
+   a control in the fixed dock scrolled you to the bottom of a long
+   scrolling page to finish. Reported immediately: "I don't want it to
+   scroll to the save button at bottom, that shouldn't exist at all".
+   Right — an action offered in fixed chrome has to complete in fixed
+   chrome. Same reasoning, and the same portal, as the brew
+   confirmation above; that is why both live in this file.
+
+   THE CONFIRMATION IS ALSO IN HERE, for a reason worth keeping. The
+   old inline flow reported "Saved as ..." into the page, which a user
+   who saved from the dock might never scroll far enough to read. The
+   modal holds for a beat on the saved state instead, so the feedback
+   is where the eye already is.
+
+   NO ICON, deliberately. Brew earns a kettle because it is the primary
+   action. The three glyphs that would read as "keep this" — sprig,
+   flower, leaf — are the ingredient CATEGORY marks, and a fourth had
+   to be drawn for the Profile tab this same day for exactly that
+   reason. A word costs nothing and collides with nothing.
+
+   Mirrored, so `borderLeft` where Brew takes `borderRight`: each corner
+   carries the hairline on the side facing the readout.
+   ────────────────────────────────────────────────────────────── */
+export const SaveCornerButton = ({
+  onSave,                 // (name) => id | null. Truthy id means kept.
+  disabled = false,
+  label = "Save",
+  defaultName = "",
+}) => {
+  const [asking, setAsking] = useState(false);
+  const [name, setName] = useState(defaultName);
+  const [result, setResult] = useState(null);
+
+  // Re-seeded on open rather than at mount, for the same reason Brew
+  // gives: the pot changes between asks and a stale name is worse than
+  // an empty one.
+  const open = () => { setName(defaultName); setResult(null); setAsking(true); };
+  const close = () => { setAsking(false); setResult(null); };
+
+  const commit = (e) => {
+    e?.preventDefault?.();
+    const chosen = name.trim() || "Untitled blend";
+    const id = onSave?.(chosen);
+    if (id) {
+      setResult({ ok: true, text: `Saved as "${chosen}"` });
+      setTimeout(close, 1200);
+    } else {
+      setResult({ ok: false, text: "Couldn't save — try a different name." });
+    }
+  };
+
+  return (
+  <>
+  <Button
+    variant="secondary"
+    tone="bark"
+    disabled={disabled}
+    onClick={open}
+    data-tour="blend-save"
+    data-testid="blend-save"
+    // The prompt this opens has its own "Save", which COMMITS. Two
+    // controls reading "Save" is ambiguous to anyone navigating by
+    // accessible name, so this one says what it actually does.
+    aria-label="name and save this blend"
+    style={{
+      fontSize: 12, padding: "0 16px", gap: 6,
+      borderRadius: 0, letterSpacing: "0.04em",
+      alignSelf: "stretch", boxShadow: "none",
+      background: "transparent",
+      color: theme.bark,
+      border: "none",
+      borderLeft: `1px solid ${theme.ruleSoft}`,
+    }}
+  >{label}</Button>
+
+  {asking && createPortal(
+    <div
+      data-testid="blend-save-dialog"
+      onClick={close}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1200,
+        background: "rgba(20,16,10,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: "100%", maxWidth: 340,
+        background: theme.cream,
+        border: `1px solid ${theme.ruleSoft}`,
+        borderRadius: radius.md,
+        boxShadow: shadow.card,
+        overflow: "hidden",
+      }}>
+        <form onSubmit={commit}>
+          <div style={{ padding: "18px 18px 14px" }}>
+            <div style={{
+              fontFamily: ff.serif, fontSize: 19, color: theme.ink, marginBottom: 4,
+            }}>Keep this blend?</div>
+            <div style={{
+              fontFamily: ff.sans, fontSize: 12.5, color: theme.inkSoft,
+              lineHeight: 1.5, marginBottom: 12,
+            }}>It'll join your recipes with the temperature and time you've dialled in.</div>
+            <input
+              autoFocus
+              data-testid="blend-save-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="name your blend"
+              maxLength={48}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                fontFamily: ff.serif, fontSize: 15, color: theme.ink,
+                background: "rgba(var(--hi-rgb),0.05)",
+                border: `1px dashed ${theme.rule}`, borderRadius: 8,
+                padding: "10px 12px", outline: "none",
+              }}
+            />
+            {result && (
+              <div data-testid="blend-save-status" style={{
+                marginTop: 10,
+                fontFamily: ff.sans, fontSize: 12.5, lineHeight: 1.4,
+                color: result.ok ? theme.sageDeep : theme.terra,
+              }}>{result.text}</div>
+            )}
+          </div>
+          <div style={{
+            display: "flex", borderTop: `1px solid ${theme.ruleSoft}`,
+          }}>
+            <Button
+              variant="secondary" tone="ash" type="button"
+              onClick={close}
+              style={{
+                flex: 1, borderRadius: 0, border: "none",
+                borderRight: `1px solid ${theme.ruleSoft}`,
+                background: "transparent", boxShadow: "none",
+                color: theme.ash,
+                fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+                padding: "14px 10px",
+              }}
+            >not yet</Button>
+            <Button
+              variant="secondary" tone="terra" type="submit"
+              data-testid="blend-save-confirm"
+              style={{
+                flex: 1, borderRadius: 0, border: "none",
+                background: "transparent", boxShadow: "none",
+                color: theme.terra,
+                fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+                fontWeight: 600,
+                padding: "14px 10px",
+              }}
+            >keep it</Button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body,
+  )}
+  </>
+  );
+};

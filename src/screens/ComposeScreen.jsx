@@ -1436,9 +1436,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blendTourActive]);
-  const [rcSaveName, setRcSaveName] = useState("");
-  const [rcSavePromptOpen, setRcSavePromptOpen] = useState(false);
-  const [rcSaveStatus, setRcSaveStatus] = useState(null);
   // Brew-save confirmation — reverse-built blends always start unsaved.
   const { unit, weightUnit, pour } = useUnit();
   const [search, setSearch] = useState("");
@@ -2528,6 +2525,14 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
             // the volume over is what stops the model reading that as
             // one very strong cup.
             load={{ ingredients: ingsForProfile, kind: "blend", ml: POUR_SIZES[pour]?.ml }}
+            // Returns the new id (or null) — SaveCornerButton owns the
+            // naming prompt and reports the outcome inside its own
+            // modal, so nothing here has to render feedback into a page
+            // the user may have scrolled away from.
+            onSave={(chosen) => saveComposedBlend?.(
+              { name: chosen, ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS },
+              chosen,
+            )}
             tempC={brewTempC}
             setTempC={setBrewTempC}
             timeS={brewTimeS}
@@ -2563,67 +2568,6 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
         </div>
       )}
 
-      {rcSavePromptOpen && (
-        <div style={{
-          marginTop: 14, padding: "10px 12px", borderRadius: 8,
-          background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
-          display: "flex", flexDirection: "column", gap: 8,
-        }}>
-          <input
-            autoFocus
-            value={rcSaveName}
-            onChange={(e) => setRcSaveName(e.target.value)}
-            placeholder="name your blend"
-            maxLength={48}
-            style={{
-              width: "100%", boxSizing: "border-box",
-              fontFamily: ff.serif, fontSize: 15, color: theme.ink,
-              background: "rgba(var(--hi-rgb),0.05)",
-              border: `1px dashed ${theme.rule}`, borderRadius: 8,
-              padding: "10px 12px", outline: "none",
-            }}
-          />
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <Button variant="ghost" onClick={() => { setRcSavePromptOpen(false); setRcSaveStatus(null); }}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary" tone="ink"
-              onClick={() => {
-                const id = saveComposedBlend && saveComposedBlend(
-                  { name: rcSaveName.trim() || "Untitled blend", ingredients: ingsForProfile, tempC: brewTempC, timeS: brewTimeS },
-                  rcSaveName,
-                );
-                if (id) {
-                  setRcSaveStatus({ kind: "ok", text: `Saved as "${rcSaveName.trim() || 'Untitled blend'}"` });
-                  setRcSavePromptOpen(false);
-                  setRcSaveName("");
-                  setTimeout(() => setRcSaveStatus(null), 2000);
-                } else {
-                  setRcSaveStatus({
-                    kind: "err",
-                    text: "Couldn't save — try a different name or check the recipe.",
-                  });
-                  setTimeout(() => setRcSaveStatus(null), 3500);
-                }
-              }}
-              style={{ fontSize: 14, padding: "10px 24px" }}
-            >Save</Button>
-          </div>
-        </div>
-      )}
-      {rcSaveStatus && (
-        <div style={{
-          marginTop: 10, padding: "6px 10px", borderRadius: 8,
-          background: rcSaveStatus.kind === "err"
-            ? "rgba(176,84,47,0.08)"
-            : "rgba(98,124,92,0.10)",
-          border: `1px solid ${rcSaveStatus.kind === "err" ? theme.terra : theme.ruleSoft}`,
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 12,
-          color: rcSaveStatus.kind === "err" ? theme.terra : theme.sageDeep,
-          textAlign: "center",
-        }}>{rcSaveStatus.text}</div>
-      )}
 
     </>
   );

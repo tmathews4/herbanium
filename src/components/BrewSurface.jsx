@@ -39,7 +39,7 @@
 
 import React, { useState, useEffect } from "react";
 import { BlendExtractionExplorer } from "./BlendExtractionExplorer";
-import { BrewCornerButton } from "./BrewButton";
+import { BrewCornerButton, SaveCornerButton } from "./BrewButton";
 
 /**
  * @param load  { ingredients, name?, tempC?, timeS?, kind? }
@@ -60,6 +60,12 @@ export const BrewSurface = ({
   setTempC: setTempCProp,
   timeS: timeSProp,
   setTimeS: setTimeSProp,
+  // Keeping the pot, as opposed to brewing it. Only the composer passes
+  // one — a recipe already lives in the catalogue and a single leaf is
+  // not a blend — which is the same "what varies is the LOAD" rule the
+  // header states: the corner appears because this pot can be kept, not
+  // because of which screen is showing it.
+  onSave,
   tour = null,
   isTraditional = false,
   isHouse = false,
@@ -107,6 +113,13 @@ export const BrewSurface = ({
       familyModeOverride={tour?.familyMode}
       controlsOpenOverride={tour?.controlsOpen}
       axisOverride={tour?.axis}
+      saveAction={onSave ? (
+        <SaveCornerButton
+          disabled={!ingredients.length}
+          defaultName={name}
+          onSave={onSave}
+        />
+      ) : null}
       brewAction={onBrew ? (
         <BrewCornerButton
           disabled={!ingredients.length}

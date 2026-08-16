@@ -513,6 +513,38 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
             animation: "lodestoneAuraBreath 3.6s ease-in-out infinite",
           }}
         />
+        {/* THE TARGET IS THE GLOW, NOT THE GEM. Reported as "the
+            clickable region to summon is much smaller than it used to
+            be near the center", and measured: the wrapper is 80x92
+            carrying `borderRadius: 50%`, so it hit-tests as an ellipse
+            with dead corners — while the two box-shadow layers above
+            spread 20px+ past it and the aura another 22px. Shadows
+            paint; they never take a tap. So the lodestone reads as a
+            circle well over 120px across and answers on about half of
+            it, which is exactly the miss being described.
+
+            A transparent overlay rather than padding on the wrapper:
+            padding would grow the flex box and shove the title text,
+            and this has to change what takes the tap without moving
+            anything. -12px lands it at ~104x116 — the visible plate
+            plus its near glow — and stops short of the 14px gap to the
+            text, so the row's own expand tap keeps its territory.
+
+            Only while a summon is waiting. With nothing to summon the
+            wrapper has no handler and taps belong to the row's
+            expand button; a permanent overlay would enlarge a target
+            for an action that isn't offered. */}
+        {summonReady && (
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: -12,
+              borderRadius: "50%",
+              cursor: "pointer",
+            }}
+          />
+        )}
         <CrystalShape gradient={crystal.gradient} idSuffix={idSuffix} pattern={crystal.pattern} patternColor={crystal.patternColor} charge={charge} />
         {/* Pending-arrivals badge — small terra dot with count,
             anchored at the top-right of the crystal halo. Visibility
