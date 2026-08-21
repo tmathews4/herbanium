@@ -286,6 +286,20 @@ recurring (the combined `pulsing|charged` locator is involved, but as a
 silence assertion, which is the usage the split deliberately kept it
 for).
 
+**Open, seen once — `e2e/tours.spec.ts:697` ("the spotlight tracks the
+strip when it resizes mid-step").** Failed once in a full gate on
+2026-08-21, in the run right after the blend hero lost its mood glyph
+and descriptor. Passed in the next full gate, in two solo runs of the
+whole tours file, and alone. **The trace was lost** — the passing rerun
+cleared `test-results/` before it was read, which is a mistake worth
+not repeating: copy the failing trace out before re-running anything.
+
+Recorded rather than explained because there is a plausible mechanism
+and no evidence for it: that commit shortened the blend header, and
+this test is about spotlight geometry tracking a resize. One occurrence
+is not a pattern; if it goes twice more, it is a bug with a bad error
+message and the note above says how to open it.
+
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
 Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true locally, so a leftover server silently serves an old `dist/` and makes E2E results meaningless. Check with `ss -lntp | grep 5173` if results look impossible.

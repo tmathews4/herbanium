@@ -559,7 +559,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                       gap: 12,
                     }}>
-                      <button onClick={() => onOpenIngredient(ing.id)} style={{
+                      <button data-testid="blend-ingredient" onClick={() => onOpenIngredient(ing.id)} style={{
                         flex: 1, minWidth: 0, textAlign: "left",
                         background: "transparent", border: "none", padding: 0, cursor: "pointer",
                       }}>

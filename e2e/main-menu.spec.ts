@@ -132,8 +132,16 @@ test.describe("the main menu is reachable everywhere you can navigate", () => {
     // overlay, and the click spent thirty seconds being intercepted by
     // the recipe sitting on top of it — a locator bug that reads exactly
     // like a layout bug.
+    //
+    // WHICHEVER INGREDIENT THIS RECIPE HAS, not three named ones. It
+    // used to match /Gunpowder Green|Spearmint|Chamomile/ — the leaves
+    // of whatever blend happened to be first — and changing which
+    // collection the shelf opens on put a different recipe there and
+    // failed this test on an app that was working. The claim is "the
+    // menu survives an ingredient opened from inside a recipe"; which
+    // ingredient was never part of it.
     await page.getByTestId("blend-detail")
-      .getByRole("button", { name: /Gunpowder Green|Spearmint|Chamomile/i })
+      .getByTestId("blend-ingredient")
       .first().click();
     await expectMenu(page, "an ingredient opened from a recipe");
   });
