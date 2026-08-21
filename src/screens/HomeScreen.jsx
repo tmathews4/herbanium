@@ -535,8 +535,12 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
           cup, terra on a missed cup, and ink-soft on legacy / not-
           yet-filled rows. The verdict color carries the signal so
           we don't need a thumb icon or separate "+ extras" tag. */}
-      {(start || moodArc.endLabel || s.taste != null) && (
-        <div style={{
+      {/* NO GATE. The right-hand slot now always has something in it —
+          dots on a rated cup, the invitation on an unrated one — so
+          there is no state in which this row is empty, and the
+          condition that used to guard it is gone rather than left
+          standing as a constant. */}
+      <div style={{
           display: "flex", alignItems: "center", gap: 8, minWidth: 0,
         }}>
           <span style={{
@@ -562,33 +566,51 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
               }}>{moodArc.endLabel}</span>
             )}
           </span>
-          {s.taste != null && (
+          {/* ONE SLOT, UNDER THE TIME, holding whichever of the two
+              applies. The dots and the invitation are exclusive by
+              construction — a cup has a rating or it wants one — so
+              they are not two things sharing a space, they are the
+              same fact in its two states, and the eye can read the
+              right-hand column straight down.
+
+              IT SAT ON THE BREW LINE BELOW, and the note there argued
+              a terra pill level with the mood arc "competes with the
+              reading beside it". That is a real cost and it is paid
+              here: the arc is what the row is about. What buys it is
+              the column — time, then verdict, right-aligned and
+              stacked, instead of an invitation drifting along the
+              bottom edge among the brew figures. Moved on request
+              with the trade named, not because the earlier reasoning
+              was wrong. */}
+          {s.taste != null ? (
             <span style={{
               flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
             }}>
               {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
             </span>
+          ) : (
+            <span data-testid="row-review-cue" style={{
+              flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              color: theme.terra, border: `1px solid ${theme.rule}`,
+              borderRadius: 999, padding: "2px 9px", whiteSpace: "nowrap",
+            }}>review</span>
           )}
-        </div>
-      )}
+      </div>
 
-      {(brewParts.length > 0 || flavorTally || s.taste == null) && (
-        /* THE BREW LINE, AND THE INVITATION AT ITS FAR END.
+      {(brewParts.length > 0 || flavorTally) && (
+        /* THE BREW LINE. The review invitation used to end it, and the
+           `s.taste == null` clause in the gate above existed only to
+           make sure this line rendered at all on a cup that had
+           nothing else to put here. Both went with the cue, up to the
+           rating slot in the mood row — so an unrated cup with no brew
+           figures no longer draws an empty line.
 
-           The cue first sat in the rating slot up in the mood row —
-           genuinely empty on exactly the cups that want reviewing — but
-           that put a terra pill level with the mood arc, competing with
-           the reading beside it. Down here it lands on the row's last
-           line, level with the brew figures and opposite them, where it
-           reads as the row's action rather than part of its state. It
-           briefly carried a negative margin to straddle the rule below;
-           that put it over the divider and reading as a stray control
-           between two rows rather than as part of this one.
-
-           NO ARROW, and not a button. The row is the control and every
-           row is tappable, so an arrow on one of them promises a
-           distinction that is not there — and a nested button would be
-           invalid markup and a second tap target for one destination. */
+           NO ARROW ON THE CUE, and not a button. The row is the
+           control and every row is tappable, so an arrow on one of
+           them promises a distinction that is not there — and a nested
+           button would be invalid markup and a second tap target for
+           one destination. */
         <div style={{
           display: "flex", alignItems: "center", gap: 10,
           fontFamily: ff.sans, fontSize: 10.5,
@@ -606,14 +628,6 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
               </>
             )}
           </span>
-          {s.taste == null && (
-            <span data-testid="row-review-cue" style={{
-              flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              color: theme.terra, border: `1px solid ${theme.rule}`,
-              borderRadius: 999, padding: "2px 9px", whiteSpace: "nowrap",
-            }}>review</span>
-          )}
         </div>
       )}
     </button>
