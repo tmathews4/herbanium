@@ -512,7 +512,14 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
   const brewParts = [flavor, tempStr, timeStr].filter(Boolean);
 
   return (
-    <button onClick={() => openCup?.(s.id)} style={{
+    <button
+      onClick={() => openCup?.(s.id)}
+      data-testid="recent-brew-row"
+      // Whether this cup carries a rating, stated rather than inferred
+      // from counting dots — see e2e/unrated-cup.spec.ts. A cup is
+      // unrated until the follow-up asks; it used to be born at 4.
+      data-rated={typeof s.taste === "number"}
+      style={{
       width: "100%", textAlign: "left", background: "transparent",
       border: "none", borderTop: first ? "none" : `1px solid ${theme.ruleSoft}`,
       padding: "10px 2px", cursor: "pointer",

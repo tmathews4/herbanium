@@ -2224,7 +2224,9 @@ export default function App() {
       flavorsTasted: flavorsTasted || {},
       flavorsExtra:  flavorsExtra  || [],
       flavorsTarget: flavorsTarget || [],
-      taste: taste ?? 4,
+      // Only when a number was actually supplied — see the brew-completion
+      // caller. `?? 4` here was the other half of the same invention.
+      ...(typeof taste === "number" ? { taste } : {}),
       note: note || "",
       // Capture the user's actual brew settings — the explorer
       // sliders may have moved the temp/time off the blend's
@@ -2869,7 +2871,13 @@ export default function App() {
               flavorsTasted: {},
               flavorsExtra: [],
               flavorsTarget: Array.isArray(session.blend?.flavors) ? session.blend.flavors.slice(0, 6) : [],
-              taste: 4,
+              // NO TASTE. A cup arrives unrated, and stays unrated until
+              // the follow-up card asks. This used to log `taste: 4`,
+              // which rendered as four filled dots of five on a cup the
+              // user had brewed thirty seconds ago and never scored —
+              // in the same visual language as a rating they had
+              // actually given. A placeholder that renders as data is
+              // worse than a gap.
               note: "",
               save: true,
               rename: "",

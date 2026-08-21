@@ -133,8 +133,14 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   // the "Your log with this blend" section — aggregate stats + recent notes.
   const mySessions = (sessions || []).filter(s => s.who === "you" && s.blendId === blendId);
   const brewCount = mySessions.length;
-  const avgTaste = brewCount > 0
-    ? Math.round((mySessions.reduce((a, s) => a + (s.taste || 0), 0) / brewCount) * 10) / 10
+  /* AVERAGED OVER THE RATED ONES, not over every cup. `s.taste || 0`
+     divided by brewCount was harmless only while every session carried
+     a default 4; now that an unrated cup has no taste at all, counting
+     it as a zero would drag a blend's average down for the crime of
+     being brewed and not yet scored. */
+  const ratedSessions = mySessions.filter(s => typeof s.taste === "number");
+  const avgTaste = ratedSessions.length > 0
+    ? Math.round((ratedSessions.reduce((a, s) => a + s.taste, 0) / ratedSessions.length) * 10) / 10
     : 0;
 
   // Find the most common "actual" outcome across your brews. For single-mood
@@ -1066,7 +1072,9 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                       <span style={{ color: theme.sageDeep }}>{s.actual}</span>
                       <span style={{ margin: "0 8px", color: theme.rule }}>·</span>
                       <span style={{ color: theme.terra, letterSpacing: "0.1em" }}>
-                        {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5 - s.taste)}</span>
+                        {typeof s.taste === "number"
+                          ? <>{"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5 - s.taste)}</span></>
+                          : null}
                       </span>
                     </div>
                     <span style={{ fontFamily: ff.sans, fontSize: 10, color: theme.ash, letterSpacing: "0.08em", flexShrink: 0 }}>
