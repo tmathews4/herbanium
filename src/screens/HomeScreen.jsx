@@ -16,7 +16,7 @@ import { PoemLines, POEM_KEYFRAMES } from "../components/PoemLines";
 import { pickHomePoem, getTimeOfDay } from "../data/homePoem";
 import { TeaGreeting } from "../components/TeaGreeting";
 import { nextFollowUp } from "../data/followUp";
-import { getBlend, sessionAgo } from "../helpers/misc";
+import { getBlend, sessionAgo, mmss } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
 } from "../theme";
@@ -499,9 +499,16 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
   const tempStr = cupTempC
     ? formatTempShort(cupTempC, cupTempC, unit)
     : "";
-  const timeStr = cupTimeS
-    ? `${Math.round(cupTimeS / 60)}m`
-    : "";
+  /* THE SAME m:ss THE RECIPE CARD USES. This rounded to whole minutes,
+     and it rounded UP on every curated recipe that was not already
+     whole: 8 of 49 disagreed with their own card, all in the same
+     direction, so the log always claimed MORE steep than the recipe
+     asked for. Genmaicha's 2:30 logged as 3m. The matcha entries are
+     the sharp end — a 30-second whisk logged as 1m is double, on the
+     one preparation where seconds are the entire resolution, and
+     brewBounds keeps a 1-second slider step specifically for that
+     range. The app knew the number and the log threw it away. */
+  const timeStr = cupTimeS ? mmss(cupTimeS) : "";
   const brewParts = [flavor, tempStr, timeStr].filter(Boolean);
 
   return (

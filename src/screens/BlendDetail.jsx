@@ -786,10 +786,22 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
         {(() => {
           const tradSteps = BLEND_DIRECTIONS[b.id];
           const tempLabel = formatTempRange(b.tempC, b.tempC, unit);
-          const minutes = Math.round((b.timeS || 0) / 60);
-          const timeLabel = minutes >= 1
-            ? `${minutes} minute${minutes !== 1 ? "s" : ""}`
-            : `${b.timeS} seconds`;
+          /* PROSE, SO NOT m:ss — but not rounded either. This said
+             `Math.round(timeS / 60)` minutes, which turned every
+             half-minute recipe into a whole one and always upward: a
+             2:30 genmaicha read "3 minutes" and a 30-second matcha read
+             "1 minute", double its steep. Directions are the one place
+             a reader will follow the number literally, so the seconds
+             are spelled out rather than dropped. */
+          const total = b.timeS || 0;
+          const mins = Math.floor(total / 60);
+          const secs = total % 60;
+          const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+          const timeLabel = mins < 1
+            ? plural(secs, "second")
+            : secs === 0
+              ? plural(mins, "minute")
+              : `${plural(mins, "minute")} ${plural(secs, "second")}`;
           const fallbackSteps = [
             `Heat water to ${tempLabel}.`,
             `Use the gram amounts in the recipe above (or about 1–2 teaspoons of blend per ${b.ml || 250}ml).`,

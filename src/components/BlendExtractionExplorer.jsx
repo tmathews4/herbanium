@@ -37,7 +37,7 @@ import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor,
 import { INGREDIENTS } from "../data/ingredients";
 import { PROFILE_TIME_REACH, EXTRACTION_PROFILES } from "../data/extractionProfiles";
 import { FlavorMap, MindMap, BodyMap, PalateMap } from "./FlavorMap";
-import { restHintForCelsius } from "../helpers/misc";
+import { restHintForCelsius, mmss } from "../helpers/misc";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { Arrival, Collapse } from "./Arrival";
 import { EFFECT_SYNERGIES } from "../algo/perception";
@@ -1046,7 +1046,20 @@ export const BlendExtractionExplorer = ({
           const ends = axis === "tempC"
             ? [`${unit === "F" ? cToF(rangeMin) : rangeMin}°`,
                `${unit === "F" ? cToF(rangeMax) : rangeMax}°`]
-            : [`${Math.round(rangeMin / 60)}m`, `${Math.round(rangeMax / 60)}m`];
+            /* THE ENDS THE SLIDER ACTUALLY HAS. These were rounded to
+               whole minutes while the temperature labels beside them
+               were exact, and rounding an END is not a cosmetic loss:
+               the floor is 0:15 and read "0m", which is not a steep at
+               all but the pouring of water that TIME_HARD_MIN exists to
+               forbid; and a ceiling of 3:48 rounded UP to "4m", so the
+               axis named a value the control cannot reach.
+               That last one is what made the steep slider look broken
+               in the first place. A chamomile-and-lion's-mane pot stops
+               at 9:10 for a real reason — chamomile caps it — but the
+               axis said "9m" next to an ingredient row reading "10-30m",
+               which reads as a round, arbitrary limit rather than a
+               measured one. The honest number was always available. */
+            : [mmss(rangeMin), mmss(rangeMax)];
           /* WHAT THE COLOUR MEANS, in the space between the ends.
              The window is painted into the track now, which is quiet and
              legible but says nothing about ITSELF — a green stretch is
