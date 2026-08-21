@@ -423,7 +423,7 @@ export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) =
   const bg = tone === "terra" ? "rgba(176, 84, 47, 0.05)" : "rgba(98, 124, 92, 0.06)";
   const bd = tone === "terra" ? "rgba(176, 84, 47, 0.20)" : "rgba(98, 124, 92, 0.22)";
   return (
-    <div style={{
+    <div data-testid="vocab-info-card" style={{
       marginTop: 10, padding: "12px 14px", borderRadius: 8,
       background: bg, border: `1px solid ${bd}`,
       position: "relative",
@@ -445,7 +445,18 @@ export const VocabInfoCard = ({ term, summary, body, tone = "sage", onClose }) =
         fontFamily: ff.serif, fontSize: 13, color: theme.inkSoft,
         lineHeight: 1.5, marginRight: 18,
       }}>
-        {summary}{body ? " " + body : ""}
+        {/* BODY IS RENDERED, NOT CONCATENATED. It used to be
+            `" " + body`, which is fine for the description tables
+            (every FLAVOR_/EFFECT_DESCRIPTIONS body is a string) and
+            silently wrong for anything else: BlendDetail's heads-up
+            tag builds its body as JSX — one line per flagged
+            ingredient, its name in terra — and string-concatenating
+            an element gave the user "…interactions worth knowing
+            about. [object Object]".
+
+            A string body still renders as one flowing paragraph, so
+            nothing that worked before moved. */}
+        {summary}{body ? <>{" "}{body}</> : null}
       </div>
     </div>
   );

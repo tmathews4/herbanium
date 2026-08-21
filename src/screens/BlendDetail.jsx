@@ -452,6 +452,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                   return (
                     <button
                       key={i}
+                      data-testid="blend-tag"
                       onClick={() => setOpenTag(prev => prev?.label === t.label ? null : t)}
                       style={{
                         // 1/3 of the row width minus 2/3 of the gap, so 3 fit
