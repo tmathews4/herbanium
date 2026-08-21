@@ -23,6 +23,7 @@ import { Flower, Kettle } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
 import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { getBlend, sessionAgo } from "../helpers/misc";
+import { MAX_SNOOZES } from "../data/followUp";
 import { ff, theme } from "../theme";
 import { formatTempShort, useUnit } from "../units/units";
 
@@ -52,6 +53,30 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
   const reviewable = !!session
     && typeof session.moodScore !== "number"
     && !!patchSessionMoods;
+
+  /* CLOSING THE REVIEW IS ONE OPERATION, and it moves two things: the
+     cup's follow-up schedule and whether this panel is open. They were
+     hand-rolled apart — the × wrote the session and left the panel up,
+     the "not yet" pill folded the panel and re-timed the ask — which
+     is the shape CLAUDE.md's "state that changes together" note is
+     about, and it is why the × read as doing nothing. One function now,
+     and both controls collapsed into it.
+
+     SNOOZE WHILE THERE IS SNOOZE LEFT, THEN DISMISS. followUp.js caps
+     the deferral so nobody can push the ask past the 24h window the
+     card stays askable in; past that cap there is nothing left to
+     defer, so closing means the cup is answered-by-not-answering and
+     its scheduled check-in gets cancelled. Falling through rather than
+     hiding the control matters now that this is the ONLY way to put
+     the form away — a spent allowance used to hide the pill, which was
+     fine when the × was also there. MAX_SNOOZES is read, not restated;
+     the ceiling lives with the schedule. */
+  const closeReview = () => {
+    const spent = (session?.followUpSnoozes || 0) >= MAX_SNOOZES;
+    if (!spent && snoozeSessionMoods) snoozeSessionMoods(session.id);
+    else if (dismissSessionMoods) dismissSessionMoods(session.id);
+    setReviewOpen(false);
+  };
   // Append-a-note state — collapsed by default. Opens to a dashed
   // textarea + save/cancel pair below the marginalia. Each save
   // appends with a paragraph break so the note reads as a stack
@@ -481,25 +506,7 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
             session={session}
             actionSlotId={reviewOpen ? REVIEW_SLOT_ID : null}
             onSubmit={(payload) => patchSessionMoods(session.id, payload)}
-            onDismiss={dismissSessionMoods
-              ? () => dismissSessionMoods(session.id)
-              : undefined}
-            /* THE SNOOZE CAME WITH THE CARD. It used to be wired only on
-               Home's copy, so removing that copy would have orphaned it
-               — and followUp.js calls it "the honest deferral", the one
-               moment where "not yet" is a real answer rather than the
-               only possible one. Same three-snooze ceiling Home applied,
-               which exists so nobody can push the ask past the window
-               the card stays askable in. */
-            /* AND IT FOLDS THE PANEL. On Home "not yet" made the card
-               go, because that surface only showed a cup while it was
-               DUE. This panel is gated on the score instead — you are
-               here because you opened the cup — so deferring the ask
-               without closing the form would leave the user looking at
-               the thing they just said not yet to. */
-            onSnooze={snoozeSessionMoods && (session.followUpSnoozes || 0) < 3
-              ? () => { snoozeSessionMoods(session.id); setReviewOpen(false); }
-              : undefined}
+            onClose={closeReview}
           />
         </div>
       )}

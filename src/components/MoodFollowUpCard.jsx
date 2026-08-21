@@ -17,9 +17,9 @@
      - follow-up note (free-form)
 
    Submission calls onSubmit with a payload that App's
-   patchSessionMoods consumes; dismiss clears moodsPending without
-   filling. Either path sets moodsPending=false so Home's popup
-   gate doesn't re-fire.
+   patchSessionMoods consumes. The only other control is onClose,
+   which puts the form away without filling it — the host decides
+   what that does to the cup's pending state.
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
@@ -30,7 +30,7 @@ import { PARENT_MOODS, CURRENT_FEEL_EXTRAS, feltChips } from "../data/canon";
 import { formatAgo, getBlend } from "../helpers/misc";
 import { ff, theme } from "../theme";
 
-export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze, actionSlotId = null }) => {
+export const MoodFollowUpCard = ({ session, onSubmit, onClose, actionSlotId = null }) => {
   const blend = getBlend(session.blendId);
   const targets = session.targetMoods || [];
   const predictedFlavors = React.useMemo(() => {
@@ -159,27 +159,24 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze, actio
         }}>
           How did it land?
         </div>
-        {/* Snooze — the honest deferral. Dismissing drops the cup for
-            good; this keeps it pending and asks again later, which is
-            the right answer when the cup simply isn't finished yet.
-            Hidden once the snooze allowance is spent rather than left
-            as a button that does nothing. */}
-        {onSnooze && (
+        {/* ONE CLOSE CONTROL, AND IT DEFERS. There were two — a "not
+            yet" pill beside an × — and the × was the broken one: it
+            cleared moodsPending, but this panel is gated on whether a
+            SCORE exists, so nothing moved on screen and the form the
+            user had just closed was still sitting there. Reported as
+            "the x does nothing", which is exactly what it looked like.
+
+            Rather than fix the × into a second, quieter way to drop
+            the cup, it took the pill's job: closing the review is the
+            honest deferral, and the cup stays pending. What deferring
+            MEANS past the snooze ceiling is the host's call — see
+            closeReview in CupDetail — because the ceiling is a data
+            rule and this is a form. */}
+        {onClose && (
           <button
-            onClick={onSnooze}
-            style={{
-              flexShrink: 0, background: "transparent",
-              border: `1px solid ${theme.rule}`, borderRadius: 999,
-              color: theme.inkSoft, fontFamily: ff.sans, fontSize: 10.5,
-              letterSpacing: "0.04em", padding: "4px 10px", marginRight: 6,
-              cursor: "pointer",
-            }}
-          >not yet</button>
-        )}
-        {onDismiss && (
-          <button
-            onClick={onDismiss}
-            aria-label="dismiss"
+            onClick={onClose}
+            aria-label="close review"
+            data-testid="review-close"
             style={{
               flexShrink: 0, background: "transparent", border: "none",
               color: theme.ash, fontSize: 18, lineHeight: 1, padding: "0 4px",

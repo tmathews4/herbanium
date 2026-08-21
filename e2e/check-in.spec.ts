@@ -16,10 +16,12 @@
 // announcing something already on the screen behind it.
 //
 // What is left is the pair worth holding: finishing a brew is silent
-// and still logs the cup, and "not yet" defers without dropping it.
+// and still logs the cup, and closing the review defers it without
+// dropping the cup.
 import { test, expect, type Page } from "@playwright/test";
 import { brewFromDetail } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+import { MAX_SNOOZES } from "../src/data/followUp";
 
 
 async function brewACup(page: Page) {
@@ -101,11 +103,17 @@ test.describe("follow-up snooze", () => {
      to somebody who had opened the app to do something else. The snooze
      it carried is not gone: it rides the cup's own panel now.
 
-     Which changed what "not yet" has to do. On Home the card vanished
+     Which changed what deferring has to do. On Home the card vanished
      because that surface only showed a cup while it was DUE. The cup's
      panel is gated on whether a score exists — you are there because
      you opened it — so deferring without folding the form would leave
-     the user looking at the thing they just deferred. */
+     the user looking at the thing they just deferred.
+
+     AND THE CONTROL ITSELF CHANGED. There were two, a "not yet" pill
+     and an ×, and the × was broken: it cleared moodsPending, which
+     this panel does not read, so the form stayed on screen and the
+     tap looked like nothing. One × now, and it does what the pill
+     did. */
   async function cupDueNow(page: Page, snoozes = 0) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(([schema, used]) => {
@@ -135,32 +143,59 @@ test.describe("follow-up snooze", () => {
     return panel;
   }
 
-  test('"not yet" defers the ask instead of dropping the cup', async ({ page }) => {
+  /** Read the seeded cup back out of storage. */
+  async function storedCup(page: Page) {
+    return page.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem("herbanium.sessions") || "[]");
+      return {
+        moodsPending: raw[0]?.moodsPending,
+        snoozes: raw[0]?.followUpSnoozes,
+      };
+    });
+  }
+
+  test("closing the review defers the ask instead of dropping the cup", async ({ page }) => {
     await cupDueNow(page);
     const panel = await openTheCup(page);
 
-    await panel.getByRole("button", { name: /not yet/i }).click();
-    await expect(panel, "deferring should fold the form away").toBeHidden();
+    /* ONE WAY OUT, not two. The pill is gone, so a second control
+       coming back — or the × being restored alongside it — fails
+       here rather than in whichever of the two happens to be wired
+       wrong that day. */
+    await expect(panel.getByRole("button", { name: /not yet/i }),
+      "the × is the only way to put the form away").toHaveCount(0);
+
+    await panel.getByTestId("review-close").click();
+    await expect(panel, "closing should fold the form away").toBeHidden();
 
     // Crucially the cup is still pending, not dismissed — it comes back.
-    const pending = await page.evaluate(() => {
-      const raw = JSON.parse(localStorage.getItem("herbanium.sessions") || "[]");
-      return { moodsPending: raw[0]?.moodsPending, snoozes: raw[0]?.followUpSnoozes };
-    });
+    const pending = await storedCup(page);
     expect(pending.moodsPending, "the cup must stay pending after a snooze").toBe(true);
     expect(pending.snoozes, "the snooze should be counted").toBe(1);
   });
 
-  test("the snooze control disappears once the allowance is spent", async ({ page }) => {
+  test("past the snooze ceiling, closing drops the ask instead of deferring", async ({ page }) => {
     /* The ceiling exists so nobody can push the ask past the window the
        card stays askable in — snooze forever and the cup would age out
-       mid-conversation rather than being answered or dismissed. */
-    await cupDueNow(page, 3);
+       mid-conversation rather than being answered or dismissed.
+
+       This used to assert that the control DISAPPEARED once the
+       allowance was spent, which was right while the × sat beside it.
+       With one control it would leave the panel with no way out, so a
+       spent allowance falls through to dismissing instead: nothing
+       left to defer, so closing means the cup goes unanswered and its
+       check-in is cancelled. The cup can still be answered — the
+       submit button is untouched by any of this. */
+    await cupDueNow(page, MAX_SNOOZES);
     const panel = await openTheCup(page);
-    await expect(panel.getByRole("button", { name: /not yet/i }),
-      "three snoozes spent, so deferring is no longer offered").toHaveCount(0);
-    await expect(panel.getByTestId("review-submit").or(
-      page.locator('[data-testid="cup-brew-again"]').locator("..").getByTestId("review-submit")),
-      "but the cup can still be answered").toHaveCount(1);
+
+    await expect(panel.getByTestId("review-close"),
+      "the way out must survive a spent allowance").toBeVisible();
+    await panel.getByTestId("review-close").click();
+    await expect(panel, "closing should still fold the form away").toBeHidden();
+
+    const closed = await storedCup(page);
+    expect(closed.moodsPending, "with no snooze left, closing drops the ask").toBe(false);
+    expect(closed.snoozes, "and it must not push past the ceiling").toBe(MAX_SNOOZES);
   });
 });
