@@ -141,10 +141,23 @@ same register twice.
 Run **all three** locally and report the actual pass/fail counts:
 
 ```
-npm run typecheck                           # tsc over the E2E harness
-npm test                                    # node suite
-npx playwright test --project=pixel-9 ...   # E2E (Chromium only locally)
+npm run typecheck                                          # tsc over the E2E harness
+npm test                                                   # node suite
+npx playwright test --project=pixel-9 --project=galaxy-s9  # E2E (Chromium only locally)
 ```
+
+**Two viewports, not one, and galaxy-s9 is the one that earns its
+place.** It is the narrowest project CI runs (320 CSS px), and a whole
+class of defect is invisible at pixel-9's 360: anything that only
+breaks when text WRAPS. A preference label reading
+"Container (350 ml)" wrapped to six line boxes there and each line
+centred itself, so the label column stopped lining up — measured
+`rangeX 20, 20, 30`. Every local run was green and CI was red, on a
+spec written the session before precisely to hold that alignment.
+
+It roughly doubles the local gate (~8 minutes). That is the cost of
+not learning about the narrow viewport from a red CI run half an hour
+after the push, which is also a push that has already deployed.
 
 **Typecheck is not optional and is easy to forget** — it only covers the
 TypeScript E2E specs, so a change to `src/` can't break it and it feels

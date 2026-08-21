@@ -28,6 +28,12 @@ import { useUnit, POUR_SIZES } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
+/* Left, explicitly — see the note at the Preferences block. These
+   labels sit in a centred section and a long one wraps, so without
+   this each wrapped line centres itself and the label's first line
+   walks right of the ones above it. */
+const PREF_LABEL = { textAlign: "left" };
+
 export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, journalEntries, tabVisits, wildElementals = [], seenElementalIds, rolledElementalIds, omenShown, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit, pour, setPour } = useUnit();
 
@@ -307,6 +313,26 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
         );
       })()}
 
+      {/* PREF_LABEL EXISTS BECAUSE OF text-align INHERITANCE, and this
+          is the second bug it has caused. The Preferences block sits
+          inside a centred section, so every label inherits
+          `text-align: center`. A label that fits on one line
+          shrink-wraps and centring is invisible — which is why
+          Temperature and Weight looked fine everywhere and still do.
+
+          "Container (350 ml)" is longer, and on a narrow viewport
+          (galaxy-s9, 320 CSS px) it wraps to six line boxes inside its
+          flex item. Each line is then centred in that item, so the
+          first one starts 10px right of the other two labels and the
+          column of labels stops being a column. Measured: rangeX 20,
+          20, 30, with the third reporting six client rects.
+
+          The FIRST bug was the same inheritance — "Making" sat ~90px
+          off the left margin, and that was fixed by making the label
+          shorter, which removed the symptom on the viewport it was
+          read on and left the cause in place. Naming the alignment is
+          what actually fixes it, and it holds for a fourth row nobody
+          has written yet. */}
       <div style={{ margin: "22px 0 10px" }}><SectionLabel n="ii">Preferences</SectionLabel></div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{
@@ -314,7 +340,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span data-testid="pref-label">Temperature</span>
+          <span data-testid="pref-label" style={PREF_LABEL}>Temperature</span>
           <div style={{
             display: "inline-flex", alignItems: "center",
             border: `1px solid ${theme.rule}`, borderRadius: 999,
@@ -338,7 +364,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span data-testid="pref-label">Weight</span>
+          <span data-testid="pref-label" style={PREF_LABEL}>Weight</span>
           <div style={{
             display: "inline-flex", alignItems: "center",
             border: `1px solid ${theme.rule}`, borderRadius: 999,
@@ -402,7 +428,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
               this row is `space-between`, so they are pinned flush
               right and a longer or shorter label eats the gap rather
               than pushing them. */}
-          <span data-testid="pref-label">
+          <span data-testid="pref-label" style={PREF_LABEL}>
             Container{" "}
             <span data-testid="pour-detail" style={{ color: theme.ash }}>
               {`(${(POUR_SIZES[pour] ?? POUR_SIZES.cup).ml} ml)`}
