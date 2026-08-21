@@ -23,13 +23,14 @@
    ────────────────────────────────────────────────────────────── */
 
 import React from "react";
+import { createPortal } from "react-dom";
 import { Button } from "./layout";
 import { ThumbUp, ThumbDown } from "./icons";
 import { PARENT_MOODS, CURRENT_FEEL_EXTRAS, feltChips } from "../data/canon";
 import { formatAgo, getBlend } from "../helpers/misc";
 import { ff, theme } from "../theme";
 
-export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => {
+export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze, actionSlotId = null }) => {
   const blend = getBlend(session.blendId);
   const targets = session.targetMoods || [];
   const predictedFlavors = React.useMemo(() => {
@@ -50,6 +51,25 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => 
   const [extraMoods, setExtraMoods] = React.useState([]);
   const [followNote, setFollowNote] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
+
+  /* The host's action slot, re-read every render with no dependency
+     array — the same shape as the dock lookups elsewhere, and for the
+     same reason: a cached node is the precondition for the bug, because
+     a slot the host re-creates leaves this portal rendering into a
+     DETACHED div and the button silently never appears. setState only
+     fires when the node actually differs, so React bails in the normal
+     case.
+
+     When there is no slot it falls back to the foot of the form, which
+     is where Home's popup wants it — that card floats in a page and has
+     no bar to ride in. */
+  const [slot, setSlot] = React.useState(() =>
+    (actionSlotId ? document.getElementById(actionSlotId) : null));
+  React.useEffect(() => {
+    const el = actionSlotId ? document.getElementById(actionSlotId) : null;
+    if (el !== slot) setSlot(el);
+  });
+
 
   if (!blend) return null;
 
@@ -94,6 +114,35 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => 
       flavorsTarget: predictedFlavors,
     });
   };
+
+  const actionLabel = submitted ? "saved" : !canSubmit ? "pick a verdict" : "log it";
+  const ready = !submitted && canSubmit;
+  const actionButton = (
+    <Button
+      variant={slot ? "secondary" : "primary"}
+      tone="ink"
+      fullWidth={!slot}
+      onClick={submit}
+      disabled={submitted || !canSubmit}
+      data-testid="review-submit"
+      style={slot
+        /* IN THE BAR: square, transparent, flush — the same language as
+           "brew again" beside it and the confirm sheet's footer. Terra
+           once it will do something, ash while it waits. A dimmed terra
+           would read as the same control greyed out; this is a control
+           that has not switched on yet. */
+        ? {
+          flex: 1, borderRadius: 0, background: "transparent",
+          boxShadow: "none", padding: "15px 12px",
+          fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+          fontWeight: 600,
+          color: ready ? theme.terra : theme.ash,
+          border: "none", borderRight: `1px solid ${theme.rule}`,
+        }
+        : { fontSize: 14, padding: "11px" }}
+    >{actionLabel}</Button>
+  );
+  const action = slot ? createPortal(actionButton, slot) : actionButton;
 
   return (
     <div style={{
@@ -318,14 +367,7 @@ export const MoodFollowUpCard = ({ session, onSubmit, onDismiss, onSnooze }) => 
         }}
       />
 
-      <Button
-        variant="primary" tone="ink" fullWidth
-        onClick={submit}
-        disabled={submitted || !canSubmit}
-        style={{ fontSize: 14, padding: "11px" }}
-      >
-        {submitted ? "saved" : !canSubmit ? "pick a verdict" : "log it"}
-      </Button>
+      {action}
     </div>
   );
 };

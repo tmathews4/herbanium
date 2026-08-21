@@ -57,6 +57,13 @@ export const WRITE_DOCK_ID = "write-dock";
    writing surface scrolls and the header does not. */
 export const WRITE_SAVE_SLOT_ID = "write-save-slot";
 
+/* The cup screen's review action, which rides in the bottom bar beside
+   "brew again" rather than at the foot of its own form. Same reason the
+   write composer portals its Save out: the review card is taste dots,
+   mood chips, flavour chips and a textarea, so a footer button leaves
+   the screen exactly when the form is longest. */
+export const REVIEW_SLOT_ID = "review-slot";
+
 const BrewDockContext = createContext(BREW_DOCK_ID);
 
 export const BrewDockProvider = BrewDockContext.Provider;

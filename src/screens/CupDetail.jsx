@@ -17,7 +17,7 @@
    the recipe view, but the default landing is the journal entry.
    ────────────────────────────────────────────────────────────── */
 
-import { useDockHeight } from "../helpers/dock";
+import { useDockHeight, REVIEW_SLOT_ID } from "../helpers/dock";
 import React, { useState } from "react";
 import { Flower, Kettle } from "../components/icons";
 import { Button, SectionLabel } from "../components/layout";
@@ -39,8 +39,19 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
      arrangement the recipe and ingredient docks use. */
   const barRef = React.useRef(null);
   const barH = useDockHeight(barRef);
+  /* Whether this cup still wants reviewing, and whether the panel is
+     showing. Open by default: an unreviewed cup is usually the reason
+     somebody opened it, and the point of moving the card into the bar
+     was to stop it scrolling away, not to hide it. */
+  const [reviewOpen, setReviewOpen] = useState(true);
   const { unit } = useUnit();
   const blend = session ? getBlend(session.blendId) : null;
+  // Covers the same three paths the card always did: an early review
+  // before Home's ten-minute gate, a dismissed popup, and an older cup
+  // outside Home's 24h window that was never reviewed.
+  const reviewable = !!session
+    && typeof session.moodScore !== "number"
+    && !!patchSessionMoods;
   // Append-a-note state — collapsed by default. Opens to a dashed
   // textarea + save/cancel pair below the marginalia. Each save
   // appends with a paragraph break so the note reads as a stack
@@ -192,18 +203,9 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
           When the user submits here, patchSessionMoods sets
           moodScore + moodsPending=false, so the Home popup gate
           stops firing for this cup. */}
-      {typeof session.moodScore !== "number" && patchSessionMoods && (
-        <div style={{ marginTop: 18 }}>
-          <MoodFollowUpCard
-            key={session.id}
-            session={session}
-            onSubmit={(payload) => patchSessionMoods(session.id, payload)}
-            onDismiss={dismissSessionMoods
-              ? () => dismissSessionMoods(session.id)
-              : undefined}
-          />
-        </div>
-      )}
+      {/* The review card used to render HERE, above the cup's own
+          header, and scrolled away with the page. It lives in the bar
+          at the foot of this file now — see the dock block. */}
 
       {/* Header: blend name as the link to the recipe, with a subtle
           right-arrow affordance so the user understands it's tappable.
@@ -437,6 +439,55 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
           a cup you've already drunk and are choosing again — and the
           prompt exists to catch an accidental commit while dialling
           something in. There's nothing being dialled here. */}
+      {/* THE REVIEW, IN THE BAR IT COMMITS FROM.
+
+          It rendered above the cup's own header whenever a moodScore was
+          missing — first thing on the page, competing with the cup's
+          identity for the opening screenful, and scrolling away with
+          everything else. That is the same argument that moved "brew
+          again" out of the flow and into this bar one commit earlier;
+          it just had not been applied to the other committing action on
+          the screen.
+
+          THE PANEL OPENS BY DEFAULT on an unreviewed cup, so nothing
+          becomes less discoverable than it was. Collapsing is available
+          and is not the point of the change.
+
+          THE CARD KEEPS ITS STATE WHEN COLLAPSED. It stays mounted and
+          the panel hides; unmounting would throw away a half-filled
+          form every time somebody folded it away to read the cup they
+          are reviewing. Which is also why the slot div only exists
+          while open: with no slot, the card falls back to rendering its
+          action at its own foot, inside the hidden panel, where it is
+          invisible — so the bar can say "review" without two buttons
+          fighting over one cell. */}
+      {reviewable && (
+        <div
+          data-testid="cup-review-panel"
+          style={{
+            position: "absolute", left: 0, right: 0,
+            bottom: barH, zIndex: 2,
+            maxHeight: "70%", overflowY: "auto",
+            padding: "0 18px 12px",
+            background: "rgba(var(--ivory-rgb),0.94)",
+            backdropFilter: "blur(9px) saturate(1.1)",
+            WebkitBackdropFilter: "blur(9px) saturate(1.1)",
+            borderTop: `1px solid ${theme.rule}`,
+            ...(reviewOpen ? {} : { display: "none" }),
+          }}
+        >
+          <MoodFollowUpCard
+            key={session.id}
+            session={session}
+            actionSlotId={reviewOpen ? REVIEW_SLOT_ID : null}
+            onSubmit={(payload) => patchSessionMoods(session.id, payload)}
+            onDismiss={dismissSessionMoods
+              ? () => dismissSessionMoods(session.id)
+              : undefined}
+          />
+        </div>
+      )}
+
       {onBrewAgain && (
         <div ref={barRef} style={{
           /* ABSOLUTE, NOT STICKY. Sticky is confined to its parent's
@@ -453,6 +504,27 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
           WebkitBackdropFilter: "blur(9px) saturate(1.1)",
           borderTop: `1px solid ${theme.rule}`,
         }}>
+          {reviewable && (reviewOpen
+            /* The card portals its own action here — "pick a verdict"
+               while it waits, "log it" once it will do something. The
+               label logic already existed at the card's foot; only its
+               address changed. */
+            ? <div id={REVIEW_SLOT_ID} style={{ flex: 1, display: "flex" }} />
+            : (
+              <button
+                data-testid="cup-review-open"
+                onClick={() => setReviewOpen(true)}
+                style={{
+                  flex: 1,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  background: "transparent", border: "none", borderRadius: 0,
+                  borderRight: `1px solid ${theme.rule}`,
+                  padding: "15px 12px", cursor: "pointer",
+                  fontFamily: ff.sans, fontSize: 12.5, letterSpacing: "0.06em",
+                  fontWeight: 600, color: theme.ash,
+                }}
+              >review</button>
+            ))}
           <button
             data-testid="cup-brew-again"
             onClick={onBrewAgain}
