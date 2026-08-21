@@ -82,7 +82,12 @@ export function materializeSeedSessions(rawSessions) {
       ago,
       intent: s.intent || "",
       actual: s.actual || "",
-      taste: s.taste ?? 4,
+      /* NO DEFAULT. A cup carries no taste until somebody scores it —
+         the app stopped stamping one at brew time, so a seed that
+         stamps one represents a state the app can no longer produce.
+         Rows that mean to be rated say so; the pending ones below do
+         not, and now read on Home the way a real unreviewed cup does. */
+      ...(typeof s.taste === "number" ? { taste: s.taste } : {}),
       note: s.note || "",
       currentMoods: s.currentMoods || [],
       targetMoods: s.targetMoods || [],
@@ -130,15 +135,16 @@ export const SEED_MODES = {
       //    moodScore yet, only the brew-time intent and predicted-flavor
       //    target captured. Surfaces in the recent rail without the
       //    follow-up card (still inside the 10-minute hold-back).
-      { minutesAgo: 4, blendId: "morning",          actual: "brewed",    taste: 4, note: "First sip: bright, a little brisk.",
+      { minutesAgo: 4, blendId: "morning",          actual: "brewed",              note: "First sip: bright, a little brisk.",
         currentMoods: ["tired"], targetMoods: ["energy", "focus"],
         moodsPending: true,
         flavorsTarget: ["earthy", "honeyed", "brisk"],
         flavorsTasted: { earthy: true, honeyed: true, brisk: true } },
-      // ── Today — recent pending past the gate. Surfaces the inline
-      //    follow-up card on Home so the dev can demo the new flow
-      //    without brewing.
-      { minutesAgo: 35, blendId: "dusk",            actual: "brewed",    taste: 5, note: "Smelled like the porch in August.",
+      // ── Today — recent pending past the gate. Reads "pending review"
+      //    with a "review →" cue on Home, so the dev can reach the flow
+      //    without brewing. (It used to raise an inline follow-up card
+      //    here; that card moved to the cup itself.)
+      { minutesAgo: 35, blendId: "dusk",            actual: "brewed",              note: "Smelled like the porch in August.",
         currentMoods: ["anxious"], targetMoods: ["calm"],
         moodsPending: true,
         flavorsTarget: ["floral", "honeyed", "sweet"],

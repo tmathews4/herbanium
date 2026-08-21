@@ -91,7 +91,17 @@ test.describe("post-brew check-in notice", () => {
 });
 
 test.describe("follow-up snooze", () => {
-  // Seed a cup that's already due so the card is up without waiting.
+  /* THE CARD MOVED, SO THESE FOLLOW IT. Both of these used to seed a
+     due cup and find the follow-up card on Home. That card is gone from
+     Home — it was a second copy of a form the cup already owns, shown
+     to somebody who had opened the app to do something else. The snooze
+     it carried is not gone: it rides the cup's own panel now.
+
+     Which changed what "not yet" has to do. On Home the card vanished
+     because that surface only showed a cup while it was DUE. The cup's
+     panel is gated on whether a score exists — you are there because
+     you opened it — so deferring without folding the form would leave
+     the user looking at the thing they just deferred. */
   async function cupDueNow(page: Page, snoozes = 0) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(([schema, used]) => {
@@ -105,19 +115,28 @@ test.describe("follow-up snooze", () => {
         followUpAt: brewedAt + 30 * 60 * 1000,
         followUpSnoozes: used,
         moodsPending: true, actual: "brewed",
-        targetMoods: ["calm"], currentMoods: [], landed: {}, extra: [], taste: 4,
+        targetMoods: ["calm"], currentMoods: [], landed: {}, extra: [],
       }]));
     }, [CURRENT_SCHEMA, snoozes] as const);
     await page.goto("/");
   }
 
+  /** Home lists the cup; the review lives one tap in. */
+  async function openTheCup(page: Page) {
+    await page.waitForTimeout(5200);            // the greeting choreography
+    await page.locator('[data-testid="recent-brew-row"]').first().click();
+    const panel = page.getByTestId("cup-review-panel");
+    await expect(panel, "an unreviewed cup opens with its review showing")
+      .toBeVisible({ timeout: 30_000 });
+    return panel;
+  }
+
   test('"not yet" defers the ask instead of dropping the cup', async ({ page }) => {
     await cupDueNow(page);
-    const card = page.getByText("How did it land?", { exact: false }).first();
-    await expect(card, "a due cup should be asked about").toBeVisible();
+    const panel = await openTheCup(page);
 
-    await page.getByRole("button", { name: /not yet/i }).click();
-    await expect(card, "snoozing should put the card away for now").toBeHidden();
+    await panel.getByRole("button", { name: /not yet/i }).click();
+    await expect(panel, "deferring should fold the form away").toBeHidden();
 
     // Crucially the cup is still pending, not dismissed — it comes back.
     const pending = await page.evaluate(() => {
@@ -129,9 +148,15 @@ test.describe("follow-up snooze", () => {
   });
 
   test("the snooze control disappears once the allowance is spent", async ({ page }) => {
+    /* The ceiling exists so nobody can push the ask past the window the
+       card stays askable in — snooze forever and the cup would age out
+       mid-conversation rather than being answered or dismissed. */
     await cupDueNow(page, 3);
-    await expect(page.getByText("How did it land?", { exact: false }).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: /not yet/i }),
-      "a spent allowance should hide the control, not offer a dead button").toHaveCount(0);
+    const panel = await openTheCup(page);
+    await expect(panel.getByRole("button", { name: /not yet/i }),
+      "three snoozes spent, so deferring is no longer offered").toHaveCount(0);
+    await expect(panel.getByTestId("review-submit").or(
+      page.locator('[data-testid="cup-brew-again"]').locator("..").getByTestId("review-submit")),
+      "but the cup can still be answered").toHaveCount(1);
   });
 });

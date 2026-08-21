@@ -33,7 +33,7 @@ const formatBrewTime = (s) => {
   return r === 0 ? `${m} min` : `${m}m ${r}s`;
 };
 
-export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain, patchSessionMoods, dismissSessionMoods }) => {
+export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBrewAgain, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods }) => {
   /* The action floats over the page rather than scrolling with it, so
      the scroll area is padded by however tall the bar measures. Same
      arrangement the recipe and ingredient docks use. */
@@ -483,6 +483,22 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
             onSubmit={(payload) => patchSessionMoods(session.id, payload)}
             onDismiss={dismissSessionMoods
               ? () => dismissSessionMoods(session.id)
+              : undefined}
+            /* THE SNOOZE CAME WITH THE CARD. It used to be wired only on
+               Home's copy, so removing that copy would have orphaned it
+               — and followUp.js calls it "the honest deferral", the one
+               moment where "not yet" is a real answer rather than the
+               only possible one. Same three-snooze ceiling Home applied,
+               which exists so nobody can push the ask past the window
+               the card stays askable in. */
+            /* AND IT FOLDS THE PANEL. On Home "not yet" made the card
+               go, because that surface only showed a cup while it was
+               DUE. This panel is gated on the score instead — you are
+               here because you opened the cup — so deferring the ask
+               without closing the form would leave the user looking at
+               the thing they just said not yet to. */
+            onSnooze={snoozeSessionMoods && (session.followUpSnoozes || 0) < 3
+              ? () => { snoozeSessionMoods(session.id); setReviewOpen(false); }
               : undefined}
           />
         </div>

@@ -10,12 +10,10 @@ import {
 import {
   Button, SectionLabel,
 } from "../components/layout";
-import { MoodFollowUpCard } from "../components/MoodFollowUpCard";
 import { OrnamentRule } from "../components/OrnamentRule";
 import { PoemLines, POEM_KEYFRAMES } from "../components/PoemLines";
 import { pickHomePoem, getTimeOfDay } from "../data/homePoem";
 import { TeaGreeting } from "../components/TeaGreeting";
-import { nextFollowUp } from "../data/followUp";
 import { getBlend, sessionAgo, mmss } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
@@ -44,7 +42,7 @@ let homeArrived = false;
 // matching public-domain poem. The poem replaces the older
 // hand-written one-liner.
 
-export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, patchSessionMoods, dismissSessionMoods, snoozeSessionMoods, addJournalEntry, journalEntries = [] }) => {
+export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, savedBlendIds, favoriteBlendIds, profile, elementalsDisabled, addJournalEntry, journalEntries = [] }) => {
   const [arriving] = React.useState(() => {
     if (homeArrived) return false;
     homeArrived = true;
@@ -105,7 +103,6 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
   // The timing rules live in data/followUp.js — when to ask, how long
   // the ask stays worth making, and what a snooze does. Keeping them
   // out of the view means they're unit-tested rather than eyeballed.
-  const pendingMoodSession = nextFollowUp(sessions);
 
   // Home's recent log is brewed cups only — never the private free
   // entries / haiku / limericks that live in journalEntries. Those
@@ -401,27 +398,18 @@ export const HomeScreen = ({ go, openBlend, openCup, openInCompose, sessions, sa
         Herbanium
       </button>
 
-      {/* Mood follow-up card — surfaces pending mood logs from cups
-          brewed in the last 24h. Sits above the recent rail because
-          it's the most time-sensitive thing on the page; the longer
-          we wait to ask, the worse the user's recall. */}
-      {pendingMoodSession && (
-        <MoodFollowUpCard
-          // Stable key on session id forces React to unmount and
-          // remount when the pending session changes — without this,
-          // submitting the first of several pending cards leaves the
-          // component instance alive with `submitted: true` and a
-          // `null` score, so the second card opens with its save
-          // button disabled even after the user picks a strength.
-          key={pendingMoodSession.id}
-          session={pendingMoodSession}
-          onSubmit={(payload) => patchSessionMoods?.(pendingMoodSession.id, payload)}
-          onDismiss={() => dismissSessionMoods?.(pendingMoodSession.id)}
-          onSnooze={snoozeSessionMoods && (pendingMoodSession.followUpSnoozes || 0) < 3
-            ? () => snoozeSessionMoods(pendingMoodSession.id)
-            : undefined}
-        />
-      )}
+      {/* THE FOLLOW-UP CARD USED TO RENDER HERE, above the recent rail,
+          on the reasoning that it was the most time-sensitive thing on
+          the page. It was also a full form — taste dots, a verdict, a
+          dozen mood chips and a textarea — sitting on the home screen
+          in front of somebody who had opened the app to do something
+          else, and it duplicated a form that already exists on the cup.
+
+          The rail says it instead. An unreviewed cup reads "pending
+          review" where its outcome would go and carries a "review →"
+          cue where its rating would, and tapping the row opens the cup
+          with that same form already expanded. One form, one place,
+          reached from the row that is asking. */}
 
       {/* Your recent cups — header stays even before any brew so a
           new user sees this is the window where their cups will land. */}
@@ -574,12 +562,28 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
               }}>{moodArc.endLabel}</span>
             )}
           </span>
-          {s.taste != null && (
+          {/* THE RATING, OR THE WAY TO GIVE ONE. A cup carries no taste
+              until somebody scores it, so this slot is empty on exactly the
+              cups that still want reviewing — which makes it the place the
+              invitation belongs, at no cost to a row that has its rating.
+          
+              NOT A BUTTON, deliberately. The row IS one: tapping it opens the
+              cup, and the cup now opens with its review panel showing, so this
+              already goes exactly where it says. A nested button would be
+              invalid markup and a second tap target for one destination. */}
+          {s.taste != null ? (
             <span style={{
               flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
             }}>
               {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
             </span>
+          ) : (
+            <span data-testid="row-review-cue" style={{
+              flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              color: theme.terra, border: `1px solid ${theme.rule}`,
+              borderRadius: 999, padding: "2px 8px", whiteSpace: "nowrap",
+            }}>review →</span>
           )}
         </div>
       )}
@@ -800,12 +804,28 @@ export const SessionRow = ({ s, openCup, first }) => {
                 }}>{moodArc.endLabel}</span>
               )}
             </span>
-            {s.taste != null && (
+            {/* THE RATING, OR THE WAY TO GIVE ONE. A cup carries no taste
+                until somebody scores it, so this slot is empty on exactly the
+                cups that still want reviewing — which makes it the place the
+                invitation belongs, at no cost to a row that has its rating.
+            
+                NOT A BUTTON, deliberately. The row IS one: tapping it opens the
+                cup, and the cup now opens with its review panel showing, so this
+                already goes exactly where it says. A nested button would be
+                invalid markup and a second tap target for one destination. */}
+            {s.taste != null ? (
               <span style={{
                 flexShrink: 0, fontSize: 10, color: theme.terra, letterSpacing: "0.08em",
               }}>
                 {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
               </span>
+            ) : (
+              <span data-testid="row-review-cue" style={{
+                flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                color: theme.terra, border: `1px solid ${theme.rule}`,
+                borderRadius: 999, padding: "2px 8px", whiteSpace: "nowrap",
+              }}>review →</span>
             )}
           </div>
         )}
