@@ -2160,6 +2160,11 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 return (
                   <button
                     key={id}
+                    // Read by e2e/picker-order.spec.ts, which guards the
+                    // fit RANKING — the list re-sorting after a pick is
+                    // the feature, not a glitch. See the sort above.
+                    data-testid="candidate-chip"
+                    data-ingredient={id}
                     onClick={() => setReverseIngs([...reverseIngs, id])}
                     title={fitTitle}
                     style={{
