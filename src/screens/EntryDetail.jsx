@@ -20,6 +20,7 @@
 
 import React, { useState } from "react";
 import { Pencil } from "../components/icons";
+import { ConfirmSheet } from "../components/ConfirmSheet";
 import { Button, SectionLabel } from "../components/layout";
 import { JOURNAL_LANDED_MOOD_CHIPS, JOURNAL_CURRENT_MOOD_CHIPS, feltChips } from "../data/canon";
 import { ff, theme } from "../theme";
@@ -83,6 +84,9 @@ const ChipPicker = ({ label, glyph, value, setValue, chips }) => {
 export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
   const [editing, setEditing] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  // Up here with the others, and above the `if (!entry)` return below —
+  // a hook after an early return is called conditionally.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [draft, setDraft] = useState(() => ({
     title: entry?.title || "",
     text: entry?.text || "",
@@ -137,13 +141,10 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
   const editedAgo = entry.editedAt ? formatAgo(new Date(entry.editedAt)) : null;
   const revisions = Array.isArray(entry.revisions) ? entry.revisions : [];
 
-  const handleDelete = () => {
-    if (!onDelete) return;
-    if (window.confirm("Remove this journal entry?")) {
-      onDelete(entry.id);
-      onClose?.();
-    }
-  };
+  // The question renders now instead of blocking the thread. See
+  // components/ConfirmSheet: the work that followed `if (ok)` becomes
+  // onConfirm.
+  const handleDelete = () => { if (onDelete) setConfirmingDelete(true); };
 
   const handleSaveEdit = () => {
     if (!onEdit) return;
@@ -443,6 +444,21 @@ export const EntryDetail = ({ entry, onClose, onDelete, onEdit }) => {
           </>
         )}
       </div>
+
+      <ConfirmSheet
+        open={confirmingDelete}
+        testId="entry-delete-confirm"
+        title="Remove this entry?"
+        body="It goes for good — the journal keeps no copy."
+        cancelLabel="keep it"
+        confirmLabel="remove →"
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={() => {
+          setConfirmingDelete(false);
+          onDelete?.(entry.id);
+          onClose?.();
+        }}
+      />
     </div>
   );
 };

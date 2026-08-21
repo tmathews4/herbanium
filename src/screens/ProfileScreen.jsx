@@ -3,6 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import React, { useState, useRef } from "react";
+import { ConfirmSheet } from "../components/ConfirmSheet";
 import { Flower, Ornament, Pencil, ATTRIBUTE_GLYPHS } from "../components/icons";
 import { TeaConstellation } from "../components/TeaConstellation";
 import {
@@ -112,17 +113,18 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
         } catch {
           // Best-effort — failure here just means the milestone isn't recorded.
         }
-        if (!window.confirm("Import succeeded. Reload to apply your imported data? Any unsaved changes will be lost.")) {
-          setImportMessage({ kind: "ok", text: "Imported. Reload the page when ready." });
-          return;
-        }
-        window.location.reload();
+        // The import has already been written at this point; the only
+        // question left is whether to reload NOW. So the fallback when
+        // the answer is no is a message, not an undo.
+        setConfirmingReload(true);
       } catch (err) {
         setImportMessage({ kind: "error", text: `Import failed: ${err.message || "invalid JSON"}` });
       }
     };
     reader.readAsText(file);
   };
+
+  const [confirmingReload, setConfirmingReload] = useState(false);
 
   const yourSessions = sessions.filter(s => s.who === "you");
   const cupCount = yourSessions.length;
@@ -767,6 +769,20 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
       >
         Herbanium · v0.1.0
       </div>
+
+      <ConfirmSheet
+        open={confirmingReload}
+        testId="import-reload-confirm"
+        title="Import succeeded."
+        body="Reload to apply your imported data? Anything unsaved is lost."
+        cancelLabel="later"
+        confirmLabel="reload →"
+        onCancel={() => {
+          setConfirmingReload(false);
+          setImportMessage({ kind: "ok", text: "Imported. Reload the page when ready." });
+        }}
+        onConfirm={() => window.location.reload()}
+      />
     </div>
   );
 };

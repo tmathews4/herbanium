@@ -13,6 +13,7 @@ import { BREW_DOCK_ID, WRITE_DOCK_ID } from "./helpers/dock";
 // flash on cold start. Everything reached by navigation or overlay
 // is React.lazy so it ships in its own chunk and only downloads when
 // the user actually opens it.
+import { ConfirmSheet } from "./components/ConfirmSheet";
 import { HomeScreen } from "./screens/HomeScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
 // Single import() per screen module — referenced by both the lazy()
@@ -1780,24 +1781,26 @@ export default function App() {
      trust, so the timer runs and the app stays where you were rather
      than throwing a full-screen steep at you. Everything else opens the
      steep screen as before. */
-  const startBrew = (blend, intent, targetMoods, opts) => {
-    // Already steeping? Confirm before discarding the in-progress
-    // brew. Matches the rest of the app's confirm pattern (other
-    // delete-style flows use window.confirm too) so we don't grow
-    // a one-off modal component for a single edge case.
-    if (overlay === "steep" && session) {
-      const currentName = session.blend?.name || "your current brew";
-      const nextName = blend?.name || "a new brew";
-      const ok = window.confirm(
-        `${currentName} is still steeping. Cancel it and start ${nextName}?`
-      );
-      if (!ok) return;
-      // Drop the minimized banner; the SteepScreen `key` on
-      // blend identity (in render) handles full timer/state reset
-      // on the swap, and SteepScreen's own cleanup effect cancels
-      // the prior steep notification when blend.name changes.
-      setSteepMinimized(false);
-    }
+  /* THE BREW, ONCE THE QUESTION IS SETTLED.
+
+     `startBrew` used to ask with window.confirm and read the answer
+     where it stood — `if (!ok) return;` — then carry on down the same
+     function. A rendered sheet cannot answer in place, so the half
+     after the question moved here and the half before it stayed put.
+     That split is the whole cost of getting rid of the OS dialog, and
+     it is why these were converted one at a time.
+
+     The old comment argued the dialog was right because a sheet would
+     be "a one-off modal component for a single edge case". It was a
+     fair trade when it was written and it is not one now: the sheet
+     already existed inside BrewCornerButton, and there were four of
+     these, not one. */
+  const commitBrew = ({ blend, intent, targetMoods, opts, swapping }) => {
+    // Drop the minimized banner; the SteepScreen `key` on blend
+    // identity (in render) handles full timer/state reset on the swap,
+    // and SteepScreen's own cleanup effect cancels the prior steep
+    // notification when blend.name changes.
+    if (swapping) setSteepMinimized(false);
     setSession({ blend, intent, targetMoods, currentMoods: [] });
     // A brew is a new root, not a child of whatever opened it. Without
     // clearing the stack, the recipe detail you brewed FROM stays
@@ -1808,9 +1811,24 @@ export default function App() {
     // which is indistinguishable from losing it.
     clearOverlayHistory();
     setOverlay("steep");
-    // After setOverlay, not before: the branch above clears the banner
-    // when swapping an in-progress steep, and this has to win.
+    // After setOverlay, not before: the swap above clears the banner
+    // and this has to win.
     setSteepMinimized(!!opts?.minimized);
+  };
+
+  /* A brew waiting on an answer, or null. Holds the WHOLE request —
+     blend, intent, moods and opts — because the question is asked
+     between the tap and the brew, and everything the tap carried has to
+     survive that gap. */
+  const [pendingBrew, setPendingBrew] = useState(null);
+
+  const startBrew = (blend, intent, targetMoods, opts) => {
+    // Already steeping? Ask before discarding the cup in progress.
+    if (overlay === "steep" && session) {
+      setPendingBrew({ blend, intent, targetMoods, opts });
+      return;
+    }
+    commitBrew({ blend, intent, targetMoods, opts });
   };
 
   /* Start a saved cup on the spot — no prompt, no navigation. The
@@ -3070,6 +3088,24 @@ export default function App() {
           onLater={() => setChargeReady(false)}
         />
       )}
+
+      {/* Swapping a cup that is still steeping. Inside appContent so
+          both the phone and the browser path get it from one place;
+          the sheet portals to document.body regardless. */}
+      <ConfirmSheet
+        open={!!pendingBrew}
+        testId="brew-swap-confirm"
+        title={`${session?.blend?.name || "Your current brew"} is still steeping.`}
+        body={`Cancel it and start ${pendingBrew?.blend?.name || "a new brew"}?`}
+        cancelLabel="let it steep"
+        confirmLabel="start the new one →"
+        onCancel={() => setPendingBrew(null)}
+        onConfirm={() => {
+          const next = pendingBrew;
+          setPendingBrew(null);
+          if (next) commitBrew({ ...next, swapping: true });
+        }}
+      />
     </div>
   );
 

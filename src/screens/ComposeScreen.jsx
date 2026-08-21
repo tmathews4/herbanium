@@ -6,6 +6,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   computeBrewProfile, resolveBlendAtBrew,
 } from "../algo/compose";
+import { ConfirmSheet } from "../components/ConfirmSheet";
 import { BrewSurface } from "../components/BrewSurface";
 import {
   Kettle, Ornament,
@@ -166,6 +167,13 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
    ────────────────────────────────────────────────────────────── */
 
 export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, blendTourDemo, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
+  /* WHICH blend is being deleted, not whether one is. This lives at the
+     component root because the delete button is inside a .map over the
+     catalogue — a boolean would have every card sharing one sheet and
+     the sheet would not know whose name to print. Null means no
+     question is being asked. */
+  const [deletingBlend, setDeletingBlend] = useState(null);
+
   // Journal composer visibility — toggled by the "+ new entry" button
   // on Compose · Shelf · Journal.
   /* ONE FLAG, because there is one thing. The writing dock's panel
@@ -1209,9 +1217,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Delete "${b.name}" from your Catalogue?`)) {
-                              deleteBlend(b.id);
-                            }
+                            setDeletingBlend({ id: b.id, name: b.name });
                           }}
                           title="Delete from catalogue"
                           onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
@@ -1360,6 +1366,20 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
         />
       )}
 
+      <ConfirmSheet
+        open={!!deletingBlend}
+        testId="blend-delete-confirm"
+        title={`Delete ${deletingBlend?.name ?? "this blend"}?`}
+        body="It leaves your Catalogue. Cups you have already brewed from it stay in the journal."
+        cancelLabel="keep it"
+        confirmLabel="delete →"
+        onCancel={() => setDeletingBlend(null)}
+        onConfirm={() => {
+          const target = deletingBlend;
+          setDeletingBlend(null);
+          if (target) deleteBlend?.(target.id);
+        }}
+      />
     </div>
   );
 };
