@@ -80,32 +80,57 @@ test.describe("moving between main tabs", () => {
       .toEqual([]);
   });
 
-  test("the outgoing screen stays until the new one is ready", async ({ page, browserName }) => {
+  test("never shows neither screen", async ({ page, browserName }) => {
     test.skip(browserName !== "chromium", "CPU throttling is a CDP capability");
 
-    /* The mechanism, stated directly rather than through its symptom.
-       A transition keeps the current tree mounted while the next one
-       prepares; without it, Home is unmounted the instant the tap
-       lands. So: tap Profile, and Home must still be there a beat
-       later, with Profile not yet arrived. */
+    /* THE MECHANISM, AS AN INVARIANT RATHER THAN A SAMPLED STATE, and
+       the first version of this test is why. It slept 60ms after the
+       tap and asserted the old screen was still up — which assumes
+       there IS a visible in-between, and there often is not: with the
+       chunk already evaluated by the idle preloader the swap can
+       complete in well under that. The assertion measured a window
+       that need not exist, so it failed on a build that was working.
+       Under the full suite it failed on both viewports; alone it
+       failed too, which is what ruled out load.
+
+       What is actually true at every instant, transition or not, is
+       that ONE of the two screens is on it. Without the transition the
+       outgoing screen is torn down before the incoming one is ready
+       and the gap is filled by the fallback — so there are samples
+       where neither is present. That holds however fast the machine
+       is: a swap too quick to observe simply never produces a bad
+       sample, and a slow one produces many. */
     await bootApp(page);
     const cdp = await page.context().newCDPSession(page);
-    await page.waitForTimeout(5200);
+    await page.waitForTimeout(5200);              // the greeting choreography
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
 
     const home = page.locator('[data-tour="home-recent"]').first();
+    const profile = page.getByTestId("stat-elementals");
     await expect(home).toBeVisible();
 
     await page.getByRole("button", { name: "Profile", exact: true }).click();
-    await page.waitForTimeout(60);
-    const held = await home.isVisible().catch(() => false);
-    const logo = await fallbackLogo(page).count();
 
-    await expect(page.getByTestId("stat-elementals"),
-      "and it does eventually arrive").toBeVisible({ timeout: 30_000 });
+    const started = Date.now();
+    let empties = 0, samples = 0, sawFallback = false;
+    for (;;) {
+      const [onHome, onProfile, fb] = await Promise.all([
+        home.isVisible().catch(() => false),
+        profile.isVisible().catch(() => false),
+        fallbackLogo(page).count(),
+      ]);
+      samples++;
+      if (fb > 0) sawFallback = true;
+      if (!onHome && !onProfile) empties++;
+      if (onProfile) break;
+      if (Date.now() - started > 30_000) break;
+    }
 
-    expect(logo, "no fallback should have mounted in that window").toBe(0);
-    expect(held, "the screen you are leaving should still be there mid-navigation")
-      .toBe(true);
+    await expect(profile, "and it does arrive").toBeVisible({ timeout: 30_000 });
+    expect(sawFallback, "no fallback should have mounted on the way").toBe(false);
+    expect(empties,
+      `${empties} of ${samples} samples showed neither the screen being left ` +
+      `nor the one being opened — that gap is what the loading logo fills`)
+      .toBe(0);
   });
 });
