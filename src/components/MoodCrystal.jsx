@@ -325,7 +325,7 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
   );
 };
 
-export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal, summonReady = false, summonPendingCount = 0, onSummon, charge = 0, tourStep = null }) => {
+export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, lockedCrystal, setLockedCrystal, summonReady = false, summonGlow = false, summonPendingCount = 0, onSummon, charge = 0, tourStep = null }) => {
   // Live crystal — always computed from current activity, even when
   // locked, so we can stash a fresh snapshot into lockedCrystal when
   // the user taps "lock at this state."
@@ -491,7 +491,13 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
           ].filter(Boolean).join(", "),
           opacity: crystal.isFaint ? 0.55 : 1,
           transition: "box-shadow 0.4s ease, opacity 0.3s ease",
-          animation: summonReady ? "lodestoneSummonPulse 2.0s ease-in-out infinite" : undefined,
+          // SEPARATE FROM summonReady, which is availability. The glow
+          // is held for a beat around a tour (see ElementalsView) and
+          // that hold must not reach the handler above — a stone you
+          // can tap but that hasn't lit yet is a moment of understated
+          // affordance; a stone that glows and does nothing, or that
+          // silently expands the card instead, is a bug.
+          animation: summonGlow ? "lodestoneSummonPulse 2.0s ease-in-out infinite" : undefined,
         }}>
         {/* Continuous aura — a rhythmic breathing layer underneath
             the crystal that pulses opacity 0.45 → 1.0 → 0.45 across

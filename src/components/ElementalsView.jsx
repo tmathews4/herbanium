@@ -16,7 +16,7 @@
    screen only has to wire the persisted props through.
    ────────────────────────────────────────────────────────────── */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ff, theme } from "../theme";
 import { OmenCard } from "./OmenCard";
 import { summonedElementalIds } from "../data/summonedElementals";
@@ -221,18 +221,48 @@ export const ElementalsView = ({
 
      `tourStep` is null when nothing is running, which covers finishing,
      skipping and never starting. Someone who skipped has made the same
-     decision as someone who finished — they want the screen back. */
+     decision as someone who finished — they want the screen back.
+
+     ONLY WHEN THERE WAS A TOUR TO HAND OFF FROM. This started `false`
+     and armed its timer on mount, so every arrival at this screen —
+     the overwhelming majority, with no tour anywhere near — spent the
+     first 2.2s with the stone unlit. A handoff delay that runs when
+     nothing handed anything off is just a slow screen. */
   const PULSE_HOLD_MS = 2200;
-  const [pulseAllowed, setPulseAllowed] = useState(false);
+  const [pulseAllowed, setPulseAllowed] = useState(!tourStep);
+  const heldForTour = useRef(!!tourStep);
   useEffect(() => {
-    if (tourStep) { setPulseAllowed(false); return; }
+    if (tourStep) { heldForTour.current = true; setPulseAllowed(false); return; }
+    if (!heldForTour.current) return;
     const t = setTimeout(() => setPulseAllowed(true), PULSE_HOLD_MS);
     return () => clearTimeout(t);
   }, [tourStep]);
 
+  /* WHETHER A SUMMON IS ON OFFER, AND WHETHER IT GLOWS, ARE TWO
+     QUESTIONS.
+
+     They were one, and the pulse hold above was the answer to both:
+     `pulseAllowed` sat inside `summonReady`, which is also what decides
+     whether the stone carries a tap handler at all. So a delay written
+     to settle an animation quietly disarmed the control — and disarmed
+     it by REMOVING the handler, which hands the tap to the row's expand
+     button underneath. Reported as "instead of summoning it's expanding
+     the details page", and measured: on arrival at Field Notes with a
+     full stone, the crystal had no summon handle and a tap expanded the
+     card; 2.2s later the same tap summoned.
+
+     The hit target went with it — the transparent overlay in
+     MoodCrystal that widens the stone past its ellipse is drawn only
+     when a summon is offered, so through the same window the stone
+     answered on about half of what it looks like. Whether that is the
+     whole of the separate "hit box differs" report isn't settled; it is
+     at least one way to get one, and it goes away with this.
+
+     So: availability governs the handler, the hit target and the
+     testid; the hold governs the glow and nothing else. */
   const summonReady     = !elementalsDisabled
-    && pulseAllowed
     && (!omenShown || pendingArrivals.length > 0 || chargeReady);
+  const summonGlow      = summonReady && pulseAllowed;
   const onSummonClick = () => {
     if (!summonReady || summonTarget) return;
     if (!omenShown) {
@@ -442,6 +472,7 @@ export const ElementalsView = ({
         lockedCrystal={lockedCrystal}
         setLockedCrystal={setLockedCrystal}
         summonReady={summonReady && !summonTarget}
+        summonGlow={summonGlow && !summonTarget}
         // Pending count stays honest while an arrival card is open:
         // subtract one for the visitor currently being observed so
         // the badge reads "the rest of what's still waiting" instead

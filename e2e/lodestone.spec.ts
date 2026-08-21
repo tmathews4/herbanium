@@ -30,9 +30,18 @@ function sessionsFor(moods: string[], count = 6) {
   }));
 }
 
-async function openFieldNotes(page: Page, charge: number, moods: string[] | null = null) {
+// `title` is the creation title onboarding gives every real profile.
+// Off by default — most of these tests only need a crystal — but the
+// omen card renders on `profile?.title`, so anything asserting the
+// summon's OUTCOME has to seed one.
+async function openFieldNotes(
+  page: Page,
+  charge: number,
+  moods: string[] | null = null,
+  opts: { title?: string } = {},
+) {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.addInitScript(([c, schema]) => {
+  await page.addInitScript(([c, schema, title]) => {
     localStorage.setItem("herbanium.schemaVersion", schema as string);
     localStorage.setItem("herbanium.toursEnabled", "false");
     localStorage.setItem("herbanium.toursSeen", JSON.stringify({
@@ -43,8 +52,11 @@ async function openFieldNotes(page: Page, charge: number, moods: string[] | null
     // sessions on every load, which silently overwrites the mood
     // profile these tests set — every crystal came out identical until
     // that turned up.
-    localStorage.setItem("herbanium.profile", JSON.stringify({ name: "Test Brewer", onboarded: true }));
-  }, [charge, CURRENT_SCHEMA] as const);
+    localStorage.setItem("herbanium.profile", JSON.stringify({
+      name: "Test Brewer", onboarded: true,
+      ...(title ? { title } : {}),
+    }));
+  }, [charge, CURRENT_SCHEMA, opts.title ?? null] as const);
   if (moods) {
     await page.addInitScript((s) => {
       localStorage.setItem("herbanium.sessions", s as string);
@@ -202,9 +214,11 @@ test.describe("the lodestone's summon target", () => {
   test("answers across the glow, not only at its center", async ({ page }) => {
     await openFieldNotes(page, 0);
     const stone = page.getByTestId("lodestone-summon");
-    // summonReady waits out PULSE_HOLD_MS (2.2s) before the stone offers
-    // itself at all — see ElementalsView. Waiting on the hook rather
-    // than on a sleep so a slower machine doesn't decide the outcome.
+    // The stone offers itself as soon as the screen renders. It used to
+    // wait out PULSE_HOLD_MS first — see the describe block below, which
+    // is the regression net for that. The generous timeout stays: this
+    // test is about WHERE the stone answers, and shouldn't be the thing
+    // that fails if it ever arrives a frame late.
     await expect(stone, "the stone should offer a summon on a fresh profile")
       .toBeVisible({ timeout: 30_000 });
 
@@ -223,5 +237,51 @@ test.describe("the lodestone's summon target", () => {
     expect(reach.up, "52px above center is inside the glow and must take a tap").toBe(true);
     expect(reach.left, "46px left of center must take a tap").toBe(true);
     expect(reach.right, "46px right of center must take a tap").toBe(true);
+  });
+});
+
+/* THE HOLD ON THE GLOW MUST NOT REACH THE TAP.
+
+   `pulseAllowed` is a 2.2s hold that keeps the stone from lighting up
+   in the same frame a tour lets go of the screen. It was ANDed into
+   `summonReady`, which is also what decides whether the crystal carries
+   a click handler — so for the first 2.2s of every visit to Field
+   Notes, with a summon genuinely on offer, the stone had no handler at
+   all. The crystal sits inside the card's expand button, so the tap
+   didn't miss quietly: it fell through and toggled the card.
+
+   Reported as "instead of summoning it's expanding the details page,
+   which should only happen if we click the details expand button".
+
+   Both halves are asserted. The handle is checked with a bare count()
+   rather than a retrying matcher, because a matcher that waits would
+   pass on the old code too — it would simply wait out the hold, which
+   is the bug. */
+test.describe("the summon answers the moment the screen does", () => {
+  test("the stone carries its summon handle on arrival, not 2.2s later", async ({ page }) => {
+    await openFieldNotes(page, 0);
+    const handles = await page.locator('[data-testid="lodestone-summon"]').count();
+    expect(handles, "the stone should offer its summon as soon as it renders").toBe(1);
+  });
+
+  test("an immediate tap summons instead of expanding the card", async ({ page }) => {
+    await openFieldNotes(page, 0, null, { title: "Keeper of the Quiet Hour" });
+    const expander = page.locator('[data-tour="fieldnotes-lodestone"] button[aria-expanded]').first();
+    await expect(expander, "the card starts closed").toHaveAttribute("aria-expanded", "false");
+
+    /* BY COORDINATE, NOT BY TESTID. `getByTestId("lodestone-summon")`
+       auto-waits for the handle to appear, which on the broken code
+       means waiting out the very hold under test — the click then lands
+       after 2.2s and summons, and the test passes on the bug. Verified:
+       it did. A finger arrives when it arrives, so this taps where the
+       crystal is drawn and takes whatever answers. */
+    const box = (await expander.boundingBox())!;
+    await page.mouse.click(box.x + 28, box.y + box.height / 2);
+
+    // A fresh profile has never seen the omen, so the summon opens it.
+    await expect(page.getByTestId("omen-dismiss"), "the tap should summon")
+      .toBeVisible({ timeout: 10_000 });
+    await expect(expander, "and must not have reached the card's expand button")
+      .toHaveAttribute("aria-expanded", "false");
   });
 });
