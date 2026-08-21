@@ -357,22 +357,38 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
             someone to a search engine to check our dose. Three pills
             no longer fit the vessel AND its volume, so the volume moved
             under the row label, where it describes the chosen size. */}
+        {/* LABEL AND PILLS ON ONE LINE, VOLUME UNDER IT.
+
+            This row was a two-line label in a `space-between` row set to
+            `alignItems: center`, which centred BOTH sides on the block
+            rather than on the label: the word sat ~90px right of
+            "Temperature" and "Weight" while its subline sat at the left
+            margin, and the pills floated between the two lines, level
+            with neither. The row now nests — a label/pills line that
+            aligns like every other preference, and the volume beneath
+            it. */}
         <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            Making
-            <span data-testid="pour-detail" style={{
-              fontSize: 10, letterSpacing: "0.06em", color: theme.ash,
-            }}>
-              {(() => {
-                const size = POUR_SIZES[pour] ?? POUR_SIZES.cup;
-                return weightUnit === "g"
-                  ? `${size.ml} ml`
-                  : `${size.ml} ml · ${size.tspLabel} of leaf`;
-              })()}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          {/* THE VOLUME RIDES THE LABEL. As a line beneath it, it
+              inherited this section's centring and sat in the middle of
+              the row — the same inherited `text-align` that had pushed
+              "Making" ~90px off the left margin in the first place.
+              Inline in parentheses it is part of the label and cannot
+              drift.
+
+              The pills do not move when the number's width changes:
+              this row is `space-between`, so they are pinned flush
+              right and a longer or shorter label eats the gap rather
+              than pushing them. */}
+          <span>
+            Container{" "}
+            <span data-testid="pour-detail" style={{ color: theme.ash }}>
+              {`(${(POUR_SIZES[pour] ?? POUR_SIZES.cup).ml} ml)`}
             </span>
           </span>
           <div style={{
@@ -393,6 +409,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
               }}>{label}</button>
             ))}
           </div>
+        </div>
         </div>
 
         {/* Remove Elementals — hides the Elementals sub-tab + the
