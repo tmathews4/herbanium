@@ -562,44 +562,57 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
               }}>{moodArc.endLabel}</span>
             )}
           </span>
-          {/* THE RATING, OR THE WAY TO GIVE ONE. A cup carries no taste
-              until somebody scores it, so this slot is empty on exactly the
-              cups that still want reviewing — which makes it the place the
-              invitation belongs, at no cost to a row that has its rating.
-          
-              NOT A BUTTON, deliberately. The row IS one: tapping it opens the
-              cup, and the cup now opens with its review panel showing, so this
-              already goes exactly where it says. A nested button would be
-              invalid markup and a second tap target for one destination. */}
-          {s.taste != null ? (
+          {s.taste != null && (
             <span style={{
               flexShrink: 0, fontSize: 10.5, color: theme.terra, letterSpacing: "0.08em",
             }}>
               {"●".repeat(s.taste)}<span style={{ color: theme.rule }}>{"●".repeat(5-s.taste)}</span>
             </span>
-          ) : (
-            <span data-testid="row-review-cue" style={{
-              flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              color: theme.terra, border: `1px solid ${theme.rule}`,
-              borderRadius: 999, padding: "2px 8px", whiteSpace: "nowrap",
-            }}>review →</span>
           )}
         </div>
       )}
 
-      {(brewParts.length > 0 || flavorTally) && (
+      {(brewParts.length > 0 || flavorTally || s.taste == null) && (
+        /* THE BREW LINE, AND THE INVITATION AT ITS FAR END.
+
+           The cue first sat in the rating slot up in the mood row —
+           genuinely empty on exactly the cups that want reviewing — but
+           that put a terra pill level with the mood arc, competing with
+           the reading beside it. Down here it lands on the row's last
+           line, level with the brew figures and opposite them, where it
+           reads as the row's action rather than part of its state. It
+           briefly carried a negative margin to straddle the rule below;
+           that put it over the divider and reading as a stray control
+           between two rows rather than as part of this one.
+
+           NO ARROW, and not a button. The row is the control and every
+           row is tappable, so an arrow on one of them promises a
+           distinction that is not there — and a nested button would be
+           invalid markup and a second tap target for one destination. */
         <div style={{
+          display: "flex", alignItems: "center", gap: 10,
           fontFamily: ff.sans, fontSize: 10.5,
           color: theme.ash, letterSpacing: "0.04em",
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          {brewParts.join(" · ")}
-          {flavorTally && (
-            <>
-              {brewParts.length > 0 && " · "}
-              <span style={{ color: theme.sageDeep }}>{flavorTally.hits}/{flavorTally.total}</span> notes
-            </>
+          <span style={{
+            flex: 1, minWidth: 0,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {brewParts.join(" · ")}
+            {flavorTally && (
+              <>
+                {brewParts.length > 0 && " · "}
+                <span style={{ color: theme.sageDeep }}>{flavorTally.hits}/{flavorTally.total}</span> notes
+              </>
+            )}
+          </span>
+          {s.taste == null && (
+            <span data-testid="row-review-cue" style={{
+              flexShrink: 0, fontFamily: ff.sans, fontSize: 9.5,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              color: theme.terra, border: `1px solid ${theme.rule}`,
+              borderRadius: 999, padding: "2px 9px", whiteSpace: "nowrap",
+            }}>review</span>
           )}
         </div>
       )}

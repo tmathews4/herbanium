@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
-import { theme, ff, radius } from "./theme";
+import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
   SEED_MODES, materializeSeedSessions,
@@ -658,84 +658,21 @@ const mmssShort = (s) => {
   return `${m}:${r.toString().padStart(2, "0")}`;
 };
 
-/* ──────────────────────────────────────────────────────────────
-   Check-in notice — shown once, right after a brew is logged.
+/* THE CHECK-IN NOTICE LIVED HERE, and said "We'll ask how X landed in
+   a little while" after every brew.
 
-   A notice, not a question. At brew time the tea is ready but not
-   drunk, so asking "how did it land?" has no answer yet; the only
-   honest response would be "later", and a prompt whose right answer is
-   fixed teaches people to dismiss it — including later, when it does
-   matter. This just says the ask is coming, which is the gap that
-   actually existed. Doing nothing is the whole interaction — and now
-   the only one, since the timing chips were removed; see the block
-   where they used to render.
-   ────────────────────────────────────────────────────────────── */
-const CheckInNotice = ({ blendName, onClose }) => (
-  <div style={{
-    position: "fixed",
-    left: 12, right: 12,
-    bottom: "calc(96px + env(safe-area-inset-bottom))",
-    zIndex: 68,
-    display: "flex", justifyContent: "center",
-    pointerEvents: "none",
-  }}>
-    <div data-testid="check-in-notice" style={{
-      pointerEvents: "auto",
-      width: "100%", maxWidth: 460,
-      background: theme.cream,
-      border: `1px solid ${theme.ruleSoft}`,
-      borderRadius: radius.md,
-      boxShadow: "0 8px 26px rgba(30,24,18,0.16)",
-      padding: "12px 14px",
-      animation: "checkInNoticeIn 0.5s ease-out",
-    }}>
-      <div style={{
-        display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10,
-      }}>
-        <div style={{
-          fontFamily: ff.serif, fontSize: 13.5, color: theme.ink, lineHeight: 1.4,
-        }}>
-          We'll ask how {blendName ? <em style={{ fontStyle: "italic" }}>{blendName}</em> : "this cup"} landed in a little while.
-        </div>
-        <button
-          onClick={onClose}
-          aria-label="dismiss"
-          style={{
-            flexShrink: 0, background: "transparent", border: "none",
-            color: theme.ash, fontSize: 17, lineHeight: 1, padding: "0 2px", cursor: "pointer",
-          }}
-        >×</button>
-      </div>
-      {/* NO TIMING CHOOSER. It offered "in half an hour / in an hour /
-          tonight" at the one moment a person has just finished brewing
-          and cares least, to schedule a nudge about a cup of tea.
-          followUp.js already argued the case against it in its own
-          header — "a default, used when the user says nothing. Defaults
-          beat choices for something this small" — and then the notice
-          asked anyway.
+   It was already the quiet version of itself: a notice rather than a
+   question, because at brew time the tea is ready but not drunk, so
+   "how did it land?" has no answer yet. Then its timing chips went,
+   because a person who has just finished brewing is the last person who
+   wants to schedule a nudge. What was left announced a reminder — and
+   by then the reminder was visible without it. An unreviewed cup reads
+   "pending review" on its Home row and carries a "review →" cue where
+   its rating would go.
 
-          What settled it is that the reminder stopped depending on the
-          ask. An unreviewed cup now reads "pending review" on its Home
-          row and opens with its review panel showing, so the in-app
-          path is visible whether or not any timer fires. The scheduled
-          notification still earns its keep on the packaged app, where
-          it is the only thing that can reach a closed app — it just
-          does it on the default half hour rather than on a decision. */}
-      <style>{`
-        @keyframes checkInNoticeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: none; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          @keyframes checkInNoticeIn {
-            from { opacity: 0; transform: none; }
-            to   { opacity: 1; transform: none; }
-          }
-        }
-      `}</style>
-    </div>
-  </div>
-);
+   So the notice was telling you about something already on the screen
+   behind it. The scheduled notification still runs on its default half
+   hour; nothing about being asked later changed. */
 
 const BrewTimerBanner = ({ blendName, remaining, onTap }) => {
   const ready = remaining <= 0;
@@ -971,7 +908,6 @@ export default function App() {
   // trains people to dismiss it, including later when it does matter.
   // The notice closes the discoverability gap instead, and carries the
   // timing choice for anyone who wants one.
-  const [checkInNotice, setCheckInNotice] = useState(null);
   const [steepRemaining, setSteepRemaining] = useState(0);
   const [ingredientId, setIngredientId] = useState("chamomile");
   // Overlay history stack — back-button returns to the previous
@@ -1558,8 +1494,27 @@ export default function App() {
 
      The minimized steep is the deliberate exception: its whole purpose
      is to follow you around while you do something else. */
+  /* LEAVING A BREW MINIMIZES IT; IT NEVER DROPS IT.
+
+     This used to keep the steep only if it was ALREADY minimized, and
+     clear the overlay otherwise. So a brew you were watching — the one
+     case where the steep is unambiguously the thing you care about —
+     was the one a tab tap threw away. The session object survived in
+     memory with nothing rendering it: the full screen was gone because
+     the overlay was cleared, and the banner never appeared because
+     `steepMinimized` was still false. No route back, and the cup read
+     as lost.
+
+     Minimizing is what the user would have done, and the path already
+     exists: an already-minimized steep survives navigation today by
+     taking this same early return, leaving `overlay` set to "steep"
+     while the banner stands in for the screen. This just puts an
+     un-minimized one on that path first. */
   const clearOverlaysForNav = () => {
-    if (overlay === "steep" && steepMinimized) return;
+    if (overlay === "steep" && session) {
+      setSteepMinimized(true);
+      return;
+    }
     setOverlay(null);
     clearOverlayHistory();
   };
@@ -2854,7 +2809,6 @@ export default function App() {
               save: true,
               rename: "",
             });
-            setCheckInNotice({ blendName: session.blend?.name || null });
             closeSteep();
             setTab("home");
           }}
@@ -2867,12 +2821,6 @@ export default function App() {
           restores the steep overlay on tap. Persists across tab
           changes since it lives at App level, outside any tab
           wrapper. */}
-      {checkInNotice && (
-        <CheckInNotice
-          blendName={checkInNotice.blendName}
-          onClose={() => setCheckInNotice(null)}
-        />
-      )}
       {/* The minimized-brew row moved to the top of the column — see
           BrewTimerBanner's render above. It used to live here, fixed to
           the viewport, which is why it could only be shown for the steep
