@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
@@ -2542,20 +2542,46 @@ export default function App() {
   // controls add ~119px when a pot exists. A hardcoded inset would be
   // wrong on most screens and would silently drift the first time the
   // dock gained a row.
-  const tabBarRef = useRef(null);
+  /* A CALLBACK REF, because the bar is not always there when App mounts.
+     This was a mount-only effect reading `tabBarRef.current`, and if the
+     node wasn't attached yet it returned — with `[]` deps, forever.
+
+     Onboarding is exactly that case. `if (!profile && !isDev)` takes an
+     early return well above this and renders no TabBar at all, but hooks
+     still run on that render: the effect fired, found null, gave up.
+     Finishing onboarding mounted the bar with nothing left to measure
+     it, so `--app-dock-h` stayed 0 for the whole session.
+
+     0 is not a harmless default. The scroll pane runs UNDER the dock —
+     that is what gives the dock something to be glass over — and pads
+     itself by exactly this value so the last thing on a page can still
+     be scrolled clear. At 0 there is no padding, so the foot of EVERY
+     screen sits under the dock with nothing left to scroll: measured at
+     41px of Profile (the version line, and with it the way into dev
+     mode) and 74px of a recipe row. Reloading "fixed" it because by
+     then a profile existed on the first render and the ref was attached
+     in time — which is what made it read as intermittent.
+
+     A callback ref has no such race: React calls it with the node when
+     the bar mounts and with null when it goes, whenever that happens. */
+  const dockObserver = useRef(null);
   const [dockH, setDockH] = useState(0);
-  useEffect(() => {
-    const el = tabBarRef.current;
-    if (!el) return undefined;
+  const tabBarRef = useCallback((el) => {
+    if (dockObserver.current) {
+      dockObserver.current();
+      dockObserver.current = null;
+    }
+    if (!el) return;
     const read = () => setDockH(el.getBoundingClientRect().height);
     read();
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", read);
-      return () => window.removeEventListener("resize", read);
+      dockObserver.current = () => window.removeEventListener("resize", read);
+      return;
     }
     const ro = new ResizeObserver(read);
     ro.observe(el);
-    return () => ro.disconnect();
+    dockObserver.current = () => ro.disconnect();
   }, []);
 
   // Extract the actual app tree (scroll region + tab bar + overlays) so we can
