@@ -72,17 +72,21 @@ function sourceFiles(dir) {
    entry makes the guard report that line again, which is correct
    if the intent changes.
    ────────────────────────────────────────────────────────────── */
-const ALLOWED = [
-  {
-    file: "App.jsx",
-    match: /minHeight: "100vh", width: "100%"/,
-    why: "The OUTER desktop page — masthead, demo hints, footer — not the app "
-       + "column. It's an ordinary scrolling document, so overshooting the "
-       + "visible viewport costs nothing but a little extra scroll; the phone "
-       + "column nested inside it is the thing that has to be honest, and it "
-       + "uses 100dvh.",
-  },
-];
+/* EMPTY, AND THAT IS THE INTERESTING PART.
+
+   The single entry here exempted the outer desktop page — the masthead,
+   demo hints and footer wrapped around the app column — on the grounds
+   that an ordinary scrolling document can overshoot the visible
+   viewport harmlessly. True while it lasted. That page had also been
+   invisible for a long time, covered by PhoneFrame's `position: fixed;
+   inset: 0`, and when it was deleted this exemption became a recorded
+   decision about markup that no longer exists.
+
+   The "every exemption still matches something" test is what said so,
+   on the same run, unprompted. That check is the half worth having: a
+   stale entry is exactly what makes a list look considered, and nothing
+   else in the suite would have noticed a reason attached to nothing. */
+const ALLOWED = [];
 
 const files = sourceFiles(SRC);
 

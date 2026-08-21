@@ -7,7 +7,6 @@ import {
 } from "./data/seeds";
 import { PottedSprig, Flask, Flower, Pencil, Kettle, Ornament } from "./components/icons";
 import { Button } from "./components/layout";
-import { DemoHint } from "./components/DemoHint";
 import { GuidedTour } from "./components/GuidedTour";
 import { BREW_DOCK_ID, WRITE_DOCK_ID } from "./helpers/dock";
 // Screens — first-paint surfaces are eager so there's no chunk-load
@@ -3134,77 +3133,38 @@ export default function App() {
     );
   }
 
+  /* DESKTOP IS THE APP, AND NOTHING ELSE.
+
+     This branch used to render a full-width masthead — a 54px
+     <h1>Herbanium</h1>, the eyebrow line, the tagline, an ornament,
+     three DemoHint chips — then the app, then a footer, all on a cream
+     gradient. None of it had been visible for a long time. PhoneFrame
+     opens with `position: fixed; inset: 0` at `100vw x 100dvh` on an
+     opaque ivory, painted after the masthead in document order, so it
+     covered the entire page. Its own comment records why: the dark
+     phone-bezel preview was removed so laptop visitors would see a
+     normal centred web app, and the chrome that had framed the bezel
+     was never removed with it.
+
+     It was not harmless. The markup still shipped to screen readers and
+     to crawlers, so the page announced a heading, a tagline and three
+     onboarding hints that no sighted user could reach — and the hints
+     named surfaces by the wrong names anyway ("Compose" for the Blend
+     tab, a Dev section that does not exist until you tap the version
+     seven times), so what a crawler read was both invisible and wrong.
+     It was also the whole of the second scrollbar: the document ran
+     ~80px taller than the window, and those 80px were the buried
+     masthead. One cause, and both symptoms go with it.
+
+     Removed rather than restored on the reasoning that this should be
+     honest about what ships today. A desktop landing page is a real
+     thing to want and would be its own piece of work, not a strip of
+     dead markup left behind by a bezel. */
   return (
     <UnitContext.Provider value={{ unit, setUnit, weightUnit, setWeightUnit, pour, setPour }}>
-    <div style={{
-      minHeight: "100vh", width: "100%",
-      background: `
-        radial-gradient(ellipse at 20% 0%, rgba(181,130,89,0.1) 0%, transparent 45%),
-        radial-gradient(ellipse at 80% 100%, rgba(109,126,85,0.12) 0%, transparent 45%),
-        linear-gradient(180deg, #E8DCC0 0%, #D6C6A4 100%)
-      `,
-      padding: "40px 20px",
-      fontFamily: ff.sans,
-    }}>
-
-      {/* Masthead */}
-      <div style={{ maxWidth: 1400, margin: "0 auto 32px", textAlign: "center" }}>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 6 }}>
-          <Flower size={22} c={theme.terra} />
-          <div style={{
-            fontFamily: ff.sans, fontSize: 10.5, letterSpacing: "0.32em",
-            textTransform: "uppercase", color: theme.inkSoft,
-          }}>
-            An Apothecary's Journal — for the Quiet Cup
-          </div>
-          <Flower size={22} c={theme.terra} />
-        </div>
-        <h1 style={{
-          fontFamily: ff.serif, fontSize: 54, fontWeight: 300, color: theme.ink,
-          letterSpacing: "-0.02em", margin: "6px 0 4px", lineHeight: 1,
-        }}>
-          Herbanium
-        </h1>
-        <div style={{
-          fontFamily: ff.serif, fontStyle: "italic", fontSize: 15, color: theme.inkSoft,
-        }}>
-          Blend by mood · brew with intent · log the effect
-        </div>
-        <div style={{ marginTop: 14, display: "flex", justifyContent: "center" }}>
-          <Ornament w={180} c={theme.ochre} />
-        </div>
-      </div>
-
-      {/* Demo hint */}
-      <div style={{
-        maxWidth: 1400, margin: "0 auto 24px",
-        display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap",
-      }}>
-        <DemoHint label="Combine moods" detail="try calm + focus on Compose" />
-        <DemoHint label="Traditions tab" detail="Moroccan Mint, Masala Chai, Sencha" />
-        <DemoHint label="Flip seed mode" detail="Profile → Dev → try 'new user'" />
-      </div>
-
-      {/* Phones */}
-      <div style={{
-        maxWidth: 1400, margin: "0 auto",
-        display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 32,
-      }}>
-        <PhoneFrame>
-          {appContent}
-        </PhoneFrame>
-      </div>
-
-      {/* Footer notes */}
-      <div style={{
-        maxWidth: 900, margin: "40px auto 0", textAlign: "center",
-        fontFamily: ff.serif, fontStyle: "italic", fontSize: 13.5, color: theme.inkSoft, lineHeight: 1.6,
-      }}>
-        Placeholder name. "What's the tea?" reserved for the social surface.
-        <br />
-        Deterministic, local engine — no AI in the loop.
-      </div>
-    </div>
+      <PhoneFrame>
+        {appContent}
+      </PhoneFrame>
     </UnitContext.Provider>
   );
 }
