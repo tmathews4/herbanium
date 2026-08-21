@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import {
-  Flower, Leaf, Sprig, MOOD_ICONS,
+  Flower, Leaf, Sprig,
 } from "../components/icons";
 import {
   ChipRows, SectionLabel,
@@ -523,21 +523,18 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
         }}>{author}</div>
       )}
 
-      {/* Title — main-impact mood sigil + blend name. The sigil
-          carries the cup's primary register (calm waves, focus rings,
-          warming flame...) as a visual anchor. */}
+      {/* Title — the blend name, and nothing beside it.
+
+          A mood sigil used to sit in front of it, carrying the cup's
+          primary register as a visual anchor (calm waves, focus rings,
+          warming flame). It went at the same time as the matching
+          glyph and descriptor in BlendDetail's hero: the register is
+          already in the eyebrow, the subtitle and the tags, and the
+          glyph was the one copy of it that a reader had to learn
+          before it said anything. */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 10, minWidth: 0,
+        display: "flex", alignItems: "center", minWidth: 0,
       }}>
-        {(() => {
-          const Sigil = b.mood && MOOD_ICONS[b.mood];
-          if (!Sigil) return null;
-          return (
-            <span title={`primary impact: ${b.mood}`} style={{ flexShrink: 0, display: "inline-flex" }}>
-              <Sigil size={20} c={theme.terra} />
-            </span>
-          );
-        })()}
         <span style={{
           flex: 1, minWidth: 0,
           fontFamily: ff.serif, fontSize: 17, color: theme.ink, lineHeight: 1.2,

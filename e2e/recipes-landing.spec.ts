@@ -49,6 +49,35 @@ test.describe("the recipes shelf", () => {
       .toBeGreaterThan(favorites);
   });
 
+  test("names the blend without a glyph in front of it", async ({ page }) => {
+    /* Each row led with a mood sigil — the cup's primary register as a
+       flame, waves, rings. It went with the matching glyph and
+       descriptor in BlendDetail's hero, for the same reason: the
+       register is already in the eyebrow, the subtitle and the tags,
+       and the sigil was the one copy of it a reader had to learn
+       before it said anything.
+
+       Asserted across EVERY row rather than the first, because the
+       glyph is keyed on the blend's mood — one row without a mapped
+       mood rendered nothing there already, so checking one row could
+       pass while the rest still carried it. */
+    await openRecipes(page);
+
+    const rows = page.locator('[data-testid="blend-row"]');
+    await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+    const count = await rows.count();
+    expect(count, "the shelf should have rows to check").toBeGreaterThan(2);
+
+    const withGlyphs: string[] = [];
+    for (let i = 0; i < count; i++) {
+      if (await rows.nth(i).locator("svg").count() > 0) {
+        withGlyphs.push((await rows.nth(i).innerText()).split("\n")[1] || `row ${i}`);
+      }
+    }
+    expect(withGlyphs, `these rows still draw a glyph: ${withGlyphs.join(", ")}`)
+      .toHaveLength(0);
+  });
+
   test("leaving and coming back lands on it again", async ({ page }) => {
     /* Entering Recipes RESETS the filter — a second, separate write of
        the same decision, and the one a change to the initial state

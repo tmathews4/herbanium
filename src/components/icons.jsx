@@ -26,9 +26,9 @@
    - Ornament: horizontal decorative divider with central dot — used
      to visually separate sections, typographic flourish
 
-   Below those: mood icons (MOOD_ICONS) and the generic badge glyphs
-   that broaden the vocabulary for the 80+ attributes
-   (ATTRIBUTE_GLYPHS).
+   Below those: the mood icons and the generic badge glyphs that
+   broaden the vocabulary for the 80+ attributes, registered together
+   in ATTRIBUTE_GLYPHS.
 
    All are pure functional components with no state. Safe to use in
    any render context.
@@ -396,21 +396,13 @@ export const GlyphDroplet = ({ size = 28, c = theme.sky || theme.sage }) => (
   </svg>
 );
 
-// Map mood → component for the BlendDetail hero. Anything not in the map
-// falls back to Flower so user-composed/synth blends still get an icon.
-export const MOOD_ICONS = {
-  calm:      MoodCalm,
-  focus:     MoodFocus,
-  energy:    MoodEnergy,
-  sleepy:    MoodSleepy,
-  comfort:   MoodComfort,
-  soothing:  MoodSoothing,
-  warming:   MoodWarming,
-  cooling:   MoodCooling,
-  digestive: MoodDigestive,
-  grounding: MoodGrounding,
-  uplifting: MoodUplifting,
-};
+/* MOOD_ICONS stood here — the same eleven mood → component pairs as
+   ATTRIBUTE_GLYPHS below, under a second name, for the BlendDetail
+   hero and the recipe rows. Both of those stopped showing a mood
+   glyph, so the map had no readers and was a duplicate of a live one:
+   the exact arrangement where the two drift and the dead copy is the
+   one somebody edits. The glyphs themselves are untouched and still
+   ship through ATTRIBUTE_GLYPHS. */
 
 // Combined registry — used by the attribute panel to look up by glyph key.
 export const ATTRIBUTE_GLYPHS = {
