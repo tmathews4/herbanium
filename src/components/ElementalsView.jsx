@@ -19,7 +19,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ff, theme } from "../theme";
 import { OmenCard } from "./OmenCard";
-import { summonedElementalIds } from "../data/summonedElementals";
+import { summonedElementalIds, CREATION_ELEMENTAL_ID } from "../data/summonedElementals";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { MoodCrystal } from "./MoodCrystal";
 import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
@@ -183,9 +183,57 @@ export const ElementalsView = ({
     (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
   );
 
+  /* Creation card — unique elemental, decorated with element + gem
+     flavor lines + creature lore so it reads as dynamic as the rest.
+
+     BUILT HERE, ABOVE THE QUEUE, because it is a member of the queue.
+     It used to be assembled further down, next to the grid it renders
+     in, which is why it was never a candidate for summoning: the
+     summon flow ran before this existed and had to invent a second
+     kind of target to stand in for it. */
+  const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
+  const creatureDesc = describeCreationTitle(creationTitleName);
+  const titleParts = (creationTitleName || "").replace(/^The\s+/i, "").split(/\s+/);
+  const uniquePieces = [];
+  if (titleParts.length >= 3) {
+    if (titleParts[0]) uniquePieces.push(flavorLineFor(titleParts[0]));
+    if (titleParts[1]) uniquePieces.push(flavorLineFor(titleParts[1]));
+  }
+  if (creatureDesc) uniquePieces.push(creatureDesc);
+  // Closing reminder that this elemental belongs to the user alone —
+  // the rest of the elementals is a kind ("A Mist Heron"), this one is
+  // a singular ("The Twilight Pearl Hare").
+  uniquePieces.push("An elemental no one but you has yet documented.");
+  const creationCard = creationTitleName ? {
+    id: CREATION_ELEMENTAL_ID,
+    name: creationTitleName,
+    displayName: creationTitleName,
+    rarity: "legendary",
+    desc: uniquePieces.join(" "),
+  } : null;
+
   const seenIds = seenElementalIds || new Set();
+  /* ONE QUEUE, AND THE FIRST SUMMON IS IN IT.
+
+     The creation elemental was never queued. It reached the user
+     through a parallel flow — its own `kind` of summon target, its own
+     dismissal, its own count — and every one of those was a second copy
+     of something this queue already did. The copies diverged, which is
+     what a second copy is for: the creation elemental never entered
+     `seenElementalIds` (only the arrival dismissal writes it), so the
+     arrivals log read one higher than Profile's count, always. That is
+     the 8-against-9 a field pass reported.
+
+     It is an arrival. It goes at the head because it is the first thing
+     the stone has to say, and `omenShown` is the flag that records
+     having seen it — see onArrivalDismiss, where that is now the whole
+     of the special case. */
+  const creationPending = !elementalsDisabled && !!creationCard && !omenShown;
   const pendingArrivals = !elementalsDisabled
-    ? sortedEarned.filter(a => !seenIds.has(a.id))
+    ? [
+        ...(creationPending ? [creationCard] : []),
+        ...sortedEarned.filter(a => !seenIds.has(a.id)),
+      ]
     : [];
   const pendingIds = new Set(pendingArrivals.map(a => a.id));
   const revealedSorted = sortedEarned.filter(a => !pendingIds.has(a.id));
@@ -204,7 +252,9 @@ export const ElementalsView = ({
   // A full stone is its own reason to be ready, independent of whether
   // anything is already queued — that's the point of charging it.
   const chargeReady = !elementalsDisabled && lodestoneCharge >= 100;
-  const summonExhausted = !elementalsDisabled && omenShown
+  // The queue answers this now. It used to also ask `omenShown`,
+  // because the creation elemental wasn't in the queue to be counted.
+  const summonExhausted = !elementalsDisabled
     && pendingArrivals.length === 0 && !chargeReady;
   /* THE PULSE WAITS ITS TURN.
 
@@ -261,17 +311,18 @@ export const ElementalsView = ({
      So: availability governs the handler, the hit target and the
      testid; the hold governs the glow and nothing else. */
   const summonReady     = !elementalsDisabled
-    && (!omenShown || pendingArrivals.length > 0 || chargeReady);
+    && (pendingArrivals.length > 0 || chargeReady);
   const summonGlow      = summonReady && pulseAllowed;
   const onSummonClick = () => {
     if (!summonReady || summonTarget) return;
-    if (!omenShown) {
-      setSummonTarget({ kind: "omen" });
-      return;
-    }
+    /* Take the head, whatever it is. The third branch this used to
+       carry — `!omenShown` opens the omen — is gone: the omen IS the
+       head when it hasn't been seen. It also guarded nothing, since a
+       profile with no title set an omen target that rendered no card,
+       so the stone could be tapped into an empty state. */
     const next = pendingArrivals[0];
     if (next) {
-      setSummonTarget({ kind: "arrival", elemental: next });
+      setSummonTarget({ elemental: next });
       return;
     }
     // Nothing queued, but the stone is full: spend it. App rolls a wild
@@ -285,29 +336,49 @@ export const ElementalsView = ({
   // "Log it" tap. Runs once per autoOpenArrivalId value: finds the
   // matching elemental in pendingArrivals, sets it as summonTarget,
   // and signals App to clear the flag so the next render doesn't
-  // re-trigger. Skipped while the omen is unshown — the user's
-  // creation-title intro needs to land before any rolled arrival
-  // surfaces; otherwise we'd short-circuit the once-only welcome
-  // moment.
+  // re-trigger. Skipped while the creation elemental is still at the
+  // head of the queue — the user's title intro needs to land before any
+  // rolled arrival surfaces, or we short-circuit the once-only welcome
+  // moment. Asked as "is it still pending" rather than "!omenShown",
+  // which is the same question now that it is queued.
   React.useEffect(() => {
     if (!autoOpenArrivalId) return;
     if (elementalsDisabled) return;
     if (summonTarget) return;
-    if (!omenShown) return;
+    if (creationPending) return;
     const target = pendingArrivals.find(a => a.id === autoOpenArrivalId);
     if (target) {
-      setSummonTarget({ kind: "arrival", elemental: target });
+      setSummonTarget({ elemental: target });
     }
     if (onAutoOpenConsumed) onAutoOpenConsumed();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenArrivalId, omenShown]);
-  const onOmenDismiss = () => {
-    if (dismissOmen) dismissOmen();
-    setSummonTarget(null);
-  };
+  /* ONE DISMISSAL. There were two, and they did different work:
+     `onOmenDismiss` called dismissOmen and nothing else, while this one
+     marked the elemental seen and filled a featured slot. Nothing kept
+     them in step, and they drifted in the way parallel paths always do
+     — silently, in the half neither author was looking at.
+
+     THE UNIQUE CASE IS WHICH FLAG RECORDS "SEEN", and it is the branch
+     below. `omenShown` is that flag for the creation elemental and
+     stays that flag: it is already persisted on every live profile and
+     already what `summonedElementalIds` reads, so moving the record
+     into `seenElementalIds` would read cleaner and drop every existing
+     user's count by one on their next load. Not worth a migration for a
+     tidier field name.
+
+     No featured slot either, and that is not a decision — the creation
+     elemental renders in its OWN slot above the featured row, and the
+     row is built from `revealedSorted`, which never contains it.
+     Appending it would persist an id that `validFeatured` filters back
+     out on read. */
   const onArrivalDismiss = (id) => {
-    markElementalSeen(id);
     setSummonTarget(null);
+    if (id === CREATION_ELEMENTAL_ID) {
+      if (dismissOmen) dismissOmen();
+      return;
+    }
+    markElementalSeen(id);
     // Auto-fill any open featured slot when the user has fewer than
     // FEATURED_LIMIT *real* pins. Once all five are filled, new
     // arrivals settle into reserve and the user curates from there.
@@ -332,28 +403,6 @@ export const ElementalsView = ({
     });
   };
 
-  // Creation card — unique elemental, decorated with element + gem
-  // flavor lines + creature lore so it reads as dynamic as the rest.
-  const creationTitleName = profile ? (profile.title || generateCreationTitle(profile)) : null;
-  const creatureDesc = describeCreationTitle(creationTitleName);
-  const titleParts = (creationTitleName || "").replace(/^The\s+/i, "").split(/\s+/);
-  const uniquePieces = [];
-  if (titleParts.length >= 3) {
-    if (titleParts[0]) uniquePieces.push(flavorLineFor(titleParts[0]));
-    if (titleParts[1]) uniquePieces.push(flavorLineFor(titleParts[1]));
-  }
-  if (creatureDesc) uniquePieces.push(creatureDesc);
-  // Closing reminder that this elemental belongs to the user alone —
-  // the rest of the elementals is a kind ("A Mist Heron"), this one is
-  // a singular ("The Twilight Pearl Hare").
-  uniquePieces.push("An elemental no one but you has yet documented.");
-  const creationCard = creationTitleName ? {
-    id: "_creation",
-    name: creationTitleName,
-    displayName: creationTitleName,
-    rarity: "legendary",
-    desc: uniquePieces.join(" "),
-  } : null;
   const allCards = creationCard ? [creationCard, ...revealedSorted] : revealedSorted;
   const [openAttrId, setOpenAttrId] = useState(null);
   const openAttr = openAttrId ? allCards.find(a => a.id === openAttrId) : null;
@@ -440,10 +489,23 @@ export const ElementalsView = ({
 
   return (
     <div style={{ marginTop: 4 }}>
-      {summonTarget?.kind === "omen" && profile?.title && (
-        <OmenCard title={profile.title} onDismiss={onOmenDismiss} />
+      {/* TWO CARDS, ONE PATH. The ceremony differs — being named is not
+          the same event as meeting a visitor — so the presentation
+          forks here, on the elemental's id, and nowhere else. Both
+          dismiss through onArrivalDismiss. */}
+      {summonTarget?.elemental?.id === CREATION_ELEMENTAL_ID && (
+        <OmenCard
+          /* The CARD's name, not `profile.title`. A profile that has
+             never had a title persisted still gets one generated for
+             the grid tile — `profile.title || generateCreationTitle()`
+             — and this was the one surface that insisted on the stored
+             half. So the stone offered a summon, took the tap, set a
+             target, and rendered nothing at all. */
+          title={summonTarget.elemental.displayName}
+          onDismiss={() => onArrivalDismiss(CREATION_ELEMENTAL_ID)}
+        />
       )}
-      {summonTarget?.kind === "arrival" && summonTarget.elemental && (
+      {summonTarget?.elemental && summonTarget.elemental.id !== CREATION_ELEMENTAL_ID && (
         <ElementalArrivalCard
           elemental={summonTarget.elemental}
           onDismiss={() => onArrivalDismiss(summonTarget.elemental.id)}
@@ -473,18 +535,14 @@ export const ElementalsView = ({
         setLockedCrystal={setLockedCrystal}
         summonReady={summonReady && !summonTarget}
         summonGlow={summonGlow && !summonTarget}
-        // Pending count stays honest while an arrival card is open:
-        // subtract one for the visitor currently being observed so
-        // the badge reads "the rest of what's still waiting" instead
-        // of disappearing or counting the open card. On the omen
-        // path (no arrivals yet, just the creation intro), keep at 1
-        // until the omen is dismissed.
+        // Pending count stays honest while a card is open: subtract one
+        // for the visitor currently being observed, so the badge reads
+        // "the rest of what's still waiting" rather than counting the
+        // open card. One expression now — it used to need three, one
+        // per kind of target, and the omen arm was a hardcoded 1
+        // standing in for a queue entry that didn't exist.
         summonPendingCount={
-          summonTarget?.kind === "arrival"
-            ? Math.max(0, pendingArrivals.length - 1)
-            : summonTarget?.kind === "omen"
-              ? 0
-              : (!omenShown ? 1 : pendingArrivals.length)
+          summonTarget ? Math.max(0, pendingArrivals.length - 1) : pendingArrivals.length
         }
         onSummon={onSummonClick}
       />
@@ -574,7 +632,7 @@ export const ElementalsView = ({
           opacity: summonExhausted ? 0.55 : 1,
         }}>
           {summonExhausted ? "no specimen waiting"
-            : !omenShown ? "creation waiting"
+            : creationPending ? "creation waiting"
             : pendingArrivals.length > 1 ? `${pendingArrivals.length} waiting`
             : "1 waiting"}
         </span>
@@ -715,7 +773,7 @@ export const ElementalsView = ({
               overflow: "hidden",
             }}>
               {items.map((it, i) => {
-                const isCreation = it.id === "_creation";
+                const isCreation = it.id === CREATION_ELEMENTAL_ID;
                 const action = (rolledElementalAction || {})[it.id];
                 const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation, action);
                 const dateLabel = fmtDate(it.ts);
@@ -838,7 +896,7 @@ const AttributeShelf = ({
     const isOpen = openId === a.id;
     const inReserve = !!reserve.find(x => x.id === a.id);
     const isFeaturedTile = !!featured.find(x => x.id === a.id);
-    const isCreation = a.id === "_creation";
+    const isCreation = a.id === CREATION_ELEMENTAL_ID;
     // Indicate which featured tile would receive the incoming
     // reserve item if the user taps it next.
     const isSwapTarget = incomingId && isFeaturedTile && !isCreation;
@@ -916,7 +974,7 @@ const AttributeShelf = ({
     );
   };
 
-  const isCreationOpen = openAttr && openAttr.id === "_creation";
+  const isCreationOpen = openAttr && openAttr.id === CREATION_ELEMENTAL_ID;
   const canToggleOpen = openAttr && !isCreationOpen && toggleFeatured;
   const openIsFeatured = openAttr && isFeatured && isFeatured(openAttr.id);
   const featuredFull = featured.length >= featuredLimit;

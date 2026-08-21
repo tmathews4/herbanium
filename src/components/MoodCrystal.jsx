@@ -561,7 +561,7 @@ export const MoodCrystal = ({ sessions, journalEntries, getBlend, profile, locke
             tapping with 3 waiting flips the badge to 2 immediately
             and so on. Hidden once the count hits zero. */}
         {summonPendingCount > 0 && (
-          <span style={{
+          <span data-testid="lodestone-pending-badge" style={{
             position: "absolute",
             top: 0, right: 0,
             minWidth: 18, height: 18, padding: "0 5px",
