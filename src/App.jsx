@@ -70,6 +70,7 @@ import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
 import { applyCharge, isCharged, spendCharge, CHARGE_FULL } from "./data/lodestone";
+import { ELEMENTAL_NOTICES_ENABLED } from "./data/featureFlags";
 import { scheduleFollowUp, snoozeFollowUp } from "./data/followUp";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
@@ -873,7 +874,14 @@ export default function App() {
   const steepUp = () => overlay === "steep";
   // Both notices are about elementals, so neither may speak until the
   // user has been to the screen elementals live on.
-  const elementalNoticesAllowed = () => lodestoneSeen && !steepUp();
+  //
+  // AND CURRENTLY NEITHER SPEAKS AT ALL. The flag is the whole switch:
+  // every other condition, both ribbons, their copy, their animation
+  // and their navigation are untouched and still compile, so turning
+  // them back on is one edit in data/featureFlags. See the note there
+  // for what they were and why they are off.
+  const elementalNoticesAllowed = () =>
+    ELEMENTAL_NOTICES_ENABLED && lodestoneSeen && !steepUp();
   // End-of-brew elemental glimpse — when a freshly-logged cup unlocks
   // a new elemental, we surface a small "you glimpsed something" card
   // before sending the user home. The card invites them to navigate

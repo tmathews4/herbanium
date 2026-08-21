@@ -13,9 +13,10 @@
 // armed at any of them.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
+import { ELEMENTAL_NOTICES_ENABLED } from "../src/data/featureFlags";
 
 
-test.beforeEach(() => test.slow());
+
 
 /* The seed takes no argument. Typing it `(w: Window) => void` looked
    harmless and doesn't match what addInitScript accepts — Playwright's
@@ -136,6 +137,24 @@ const fillTheStone = async (page: Page) => {
 };
 
 test.describe("notices for what happened while you looked away", () => {
+  test.beforeEach(() => {
+    /* SKIPPED FROM THE SAME CONSTANT THE APP READS, not from a
+       hardcoded `test.describe.skip`. The notices are switched off in
+       src/data/featureFlags — flip that flag and this block comes back,
+       still asserting what it always asserted. A skip written here by
+       hand would be a second copy of that decision, and the one that
+       quietly stops matching.
+
+       SCOPED TO THIS DESCRIBE, not the file: the switched-off block at
+       the bottom asserts the opposite case and must not inherit this.
+       It did, at first, and reported itself as skipped in a run where
+       the only thing it could have been testing was live. */
+    test.skip(
+      !ELEMENTAL_NOTICES_ENABLED,
+      "the elemental notices are switched off — see src/data/featureFlags.js",
+    );
+    test.slow();
+  });
   test("nothing announces itself before the lodestone has been met", async ({ page }) => {
     /* REPORTED: the pulse notice fired the moment the app opened, and
        tapping it dropped the user onto the lodestone screen mid
@@ -465,5 +484,37 @@ test.describe("notices for what happened while you looked away", () => {
       .toHaveCount(0);
     await page.waitForTimeout(1500);
     await expect(banner(page), "a dismissed notice must stay dismissed").toHaveCount(0);
+  });
+});
+
+/* THE OTHER SIDE OF THE FLAG.
+
+   Everything above asserts what the notices DO, and skips itself while
+   they are switched off. This asserts the switch — that with the flag
+   down, the transition that used to raise a ribbon raises nothing.
+
+   Worth its own test rather than trusting the `&&`: the flag guards
+   `elementalNoticesAllowed`, and a future ribbon that forgets to ask
+   that question would slip past every skip in this file. This one asks
+   the user's question — is there a ribbon on screen — so it fails
+   whoever adds one, however they wire it.
+
+   Its skip is the mirror of the others', from the same constant. */
+test.describe("with the notices switched off", () => {
+  test.beforeEach(() => {
+    test.skip(
+      ELEMENTAL_NOTICES_ENABLED,
+      "the notices are switched on — the tests above are the live coverage",
+    );
+  });
+
+  test("filling the stone on another screen says nothing", async ({ page }) => {
+    await boot(page);
+    await meetTheLodestone(page);
+    await page.getByRole("button", { name: "Home", exact: true }).click();
+    await fillTheStone(page);
+    await page.getByRole("button", { name: "Home", exact: true }).click();
+    await page.waitForTimeout(1200);
+    await expect(banner(page), "no ribbon should appear at all").toHaveCount(0);
   });
 });
