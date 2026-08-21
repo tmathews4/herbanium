@@ -48,19 +48,36 @@ test.describe("post-brew check-in notice", () => {
       "no rating controls belong in a notice").toHaveCount(0);
   });
 
-  test("choosing a timing acknowledges the tap, then dismisses itself", async ({ page }) => {
+  test("offers no scheduling decision, only the acknowledgement", async ({ page }) => {
+    /* This used to assert the opposite: three timing chips ("in half an
+       hour", "in an hour", "tonight"), that tapping one reflected the
+       selection back, and that the notice then dismissed itself.
+
+       The chips are gone. They asked a person to schedule a nudge about
+       a cup of tea at the one moment they had just finished brewing and
+       cared least — and followUp.js had already argued the case in its
+       own header, "Defaults beat choices for something this small",
+       while the notice asked anyway.
+
+       What made it safe to remove is that the reminder stopped
+       depending on the ask: an unreviewed cup reads "pending review" on
+       its Home row and opens with its review panel showing, so the
+       in-app path is visible whether or not a timer fires. The
+       scheduled notification still runs, on the default half hour.
+
+       So the claim now is that the notice TELLS and does not ASK. The ×
+       is the only control it carries. */
     await brewACup(page);
-    const hour = notice(page).getByRole("button", { name: /in an hour/i });
-    await expect(hour).toBeVisible();
-    await hour.click();
-    // Selection is reflected back, so the tap doesn't feel like a no-op.
-    await expect(hour).toHaveCSS("border-color", /rgb\(/);
-    // ...and then the notice leaves. Choosing IS the interaction; it
-    // used to mark the choice and sit there, which reads as the tap
-    // not having taken and sends the user hunting for the x to confirm
-    // something already decided.
-    await expect(notice(page), "the notice should dismiss itself once answered")
-      .toBeHidden({ timeout: 4000 });
+    await expect(notice(page)).toBeVisible();
+
+    for (const label of [/in an hour/i, /half an hour/i, /tonight/i, /ask me/i]) {
+      await expect(notice(page).getByText(label),
+        `the notice should offer no timing choice, found ${label}`).toHaveCount(0);
+    }
+    const buttons = notice(page).getByRole("button");
+    await expect(buttons, "dismiss is the only control a notice needs")
+      .toHaveCount(1);
+    await expect(buttons.first()).toHaveAttribute("aria-label", "dismiss");
   });
 
   test("the notice can be dismissed and stays gone", async ({ page }) => {

@@ -5,13 +5,11 @@
    hour. So the app captures flavor at brew time and asks about mood
    later — and "later" is what this module owns.
 
-   Three things set the time:
+   Two things set the time (it was three — see DEFAULT_FOLLOWUP_MS):
 
    1. A default, used when the user says nothing. Defaults beat
       choices for something this small.
-   2. An explicit pick at brew time ("ask me in an hour"), because the
-      user knows their evening better than a constant does.
-   3. A snooze on the card itself. That one is the honest deferral:
+   2. A snooze on the card itself. That one is the honest deferral:
       it's the only moment where "not yet" is a real answer rather
       than the only possible one, since by then the cup may or may not
       be finished.
@@ -23,16 +21,21 @@
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
 
-// Options offered at brew time. `tonight` is deliberately absolute
-// rather than a duration — "tonight" means an evening hour, not
-// "eight hours from whenever this finished steeping", which for a
-// morning cup would land mid-afternoon.
-export const FOLLOWUP_CHOICES = [
-  { id: "default", label: "in half an hour", delayMs: 30 * MIN },
-  { id: "hour",    label: "in an hour",      delayMs: HOUR },
-  { id: "tonight", label: "tonight",         atHour: 20 },
-];
+/* HALF AN HOUR, FOR EVERY CUP. There were three options — "in half an
+   hour", "in an hour", "tonight" — offered in the notice at brew time,
+   and the header above still lists that pick as one of the three things
+   that set the time. It was removed: the moment a person has just
+   finished brewing is the moment they care least about scheduling a
+   nudge, and this file already argued the case against asking, one
+   paragraph up. "Defaults beat choices for something this small."
 
+   What made it safe to drop is that the reminder stopped depending on
+   it. An unreviewed cup reads "pending review" on its Home row and
+   opens with its review panel showing, so the in-app path is visible
+   whether or not a timer fires. The scheduled notification still earns
+   its keep on the packaged app — it is the only thing that can reach a
+   closed app — it just fires on this constant rather than on a
+   decision. */
 export const DEFAULT_FOLLOWUP_MS = 30 * MIN;
 
 // How long the card stays askable. Past this the cup is history and
@@ -46,25 +49,9 @@ export const FOLLOWUP_WINDOW_MS = 24 * HOUR;
 export const SNOOZE_MS = 45 * MIN;
 export const MAX_SNOOZES = 3;
 
-/**
- * When to ask, given a brew time and the user's pick. Unknown ids fall
- * back to the default rather than throwing — the id comes from a UI
- * that may gain options later.
- */
-export function scheduleFollowUp(brewedAt, choiceId = "default") {
-  const choice = FOLLOWUP_CHOICES.find(c => c.id === choiceId);
-  if (!choice) return brewedAt + DEFAULT_FOLLOWUP_MS;
-
-  if (choice.atHour != null) {
-    const at = new Date(brewedAt);
-    at.setHours(choice.atHour, 0, 0, 0);
-    // Already past that hour (a late-evening cup): the soonest sensible
-    // ask is the default delay, not tomorrow night — by tomorrow the
-    // cup is outside the window entirely.
-    if (at.getTime() <= brewedAt) return brewedAt + DEFAULT_FOLLOWUP_MS;
-    return at.getTime();
-  }
-  return brewedAt + choice.delayMs;
+/** When to ask, given a brew time. One answer, and see the constant. */
+export function scheduleFollowUp(brewedAt) {
+  return brewedAt + DEFAULT_FOLLOWUP_MS;
 }
 
 /**

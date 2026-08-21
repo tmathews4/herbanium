@@ -70,7 +70,7 @@ import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
 import { computeMoodCrystal } from "./data/moodCrystal";
 import { applyCharge, isCharged, spendCharge, CHARGE_FULL } from "./data/lodestone";
-import { scheduleFollowUp, snoozeFollowUp, FOLLOWUP_CHOICES } from "./data/followUp";
+import { scheduleFollowUp, snoozeFollowUp } from "./data/followUp";
 import { buildAttributeContext, evaluateAttributes, ATTRIBUTES } from "./data/attributes";
 import { rollOnAction, legacyEarnedIds } from "./data/elementalRoller";
 import { configureStatusBar, hapticTap, scheduleCheckInNotification, cancelCheckInNotification } from "./helpers/native";
@@ -666,10 +666,11 @@ const mmssShort = (s) => {
    honest response would be "later", and a prompt whose right answer is
    fixed teaches people to dismiss it — including later, when it does
    matter. This just says the ask is coming, which is the gap that
-   actually existed, and offers a timing choice for anyone who wants
-   one. Doing nothing is a complete interaction.
+   actually existed. Doing nothing is the whole interaction — and now
+   the only one, since the timing chips were removed; see the block
+   where they used to render.
    ────────────────────────────────────────────────────────────── */
-const CheckInNotice = ({ blendName, choice, onChoose, onClose }) => (
+const CheckInNotice = ({ blendName, onClose }) => (
   <div style={{
     position: "fixed",
     left: 12, right: 12,
@@ -705,26 +706,21 @@ const CheckInNotice = ({ blendName, choice, onChoose, onClose }) => (
           }}
         >×</button>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
-        <span style={{
-          fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
-          textTransform: "uppercase", color: theme.ash,
-        }}>ask me</span>
-        {FOLLOWUP_CHOICES.map(c => (
-          <button
-            key={c.id}
-            onClick={() => onChoose(c.id)}
-            style={{
-              fontFamily: ff.sans, fontSize: 11, letterSpacing: "0.02em",
-              padding: "4px 10px", borderRadius: 999,
-              border: `1px solid ${choice === c.id ? theme.terra : theme.rule}`,
-              background: choice === c.id ? "rgba(176,84,47,0.10)" : "transparent",
-              color: choice === c.id ? theme.terra : theme.inkSoft,
-              cursor: "pointer",
-            }}
-          >{c.label}</button>
-        ))}
-      </div>
+      {/* NO TIMING CHOOSER. It offered "in half an hour / in an hour /
+          tonight" at the one moment a person has just finished brewing
+          and cares least, to schedule a nudge about a cup of tea.
+          followUp.js already argued the case against it in its own
+          header — "a default, used when the user says nothing. Defaults
+          beat choices for something this small" — and then the notice
+          asked anyway.
+
+          What settled it is that the reminder stopped depending on the
+          ask. An unreviewed cup now reads "pending review" on its Home
+          row and opens with its review panel showing, so the in-app
+          path is visible whether or not any timer fires. The scheduled
+          notification still earns its keep on the packaged app, where
+          it is the only thing that can reach a closed app — it just
+          does it on the default half hour rather than on a decision. */}
       <style>{`
         @keyframes checkInNoticeIn {
           from { opacity: 0; transform: translateY(8px); }
@@ -2348,37 +2344,13 @@ export default function App() {
     hapticTap();
   };
 
-  // Re-time the just-logged cup's check-in from the notice.
-  const chooseFollowUpTiming = (choiceId) => {
-    const target = (sessions || []).find(s => s.who === "you" && s.moodsPending);
-    setCheckInNotice(n => (n ? { ...n, choice: choiceId } : n));
-    // Choosing IS the interaction, so the notice should leave once it's
-    // been answered. It used to mark the selection and then sit there,
-    // which reads as though the tap didn't take — leaving the user to
-    // hunt for the × to confirm something they'd already decided.
-    //
-    // Held briefly rather than closed instantly so the selected chip is
-    // visibly acknowledged first; dismissing on the same frame as the
-    // tap loses the confirmation entirely. Only closes if the choice is
-    // still the one just made, so a newer notice (or a changed mind)
-    // isn't torn down by a stale timer.
-    window.setTimeout(() => {
-      setCheckInNotice(n => (n && n.choice === choiceId ? null : n));
-    }, 1100);
-    if (!target) return;
-    const followUpAt = scheduleFollowUp(target.brewedAt || Date.now(), choiceId);
-    if (target.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
-    setSessions(prev => prev.map(s => (s.id === target.id ? { ...s, followUpAt } : s)));
-    scheduleCheckInNotification({
-      blendName: getBlend(target.blendId)?.name,
-      secondsFromNow: Math.max(60, Math.round((followUpAt - Date.now()) / 1000)),
-    }).then(notifId => {
-      if (notifId == null) return;
-      setSessions(prev => prev.map(s => (s.id === target.id ? { ...s, checkInNotifId: notifId } : s)));
-    });
-    hapticTap();
-  };
-
+  /* `chooseFollowUpTiming` lived here and re-scheduled the check-in
+     from a chip in the notice. The chips are gone, so the schedule is
+     the default half hour set once in addSession and never re-asked.
+     Snoozing from the card still re-times — see snoozeSessionMoods,
+     which followUp.js calls "the honest deferral": by then the cup may
+     or may not be finished, so "not yet" is a real answer rather than
+     the only possible one. */
   const dismissSessionMoods = (sessionId) => {
     const target = sessions.find(s => s.id === sessionId);
     if (target?.checkInNotifId != null) cancelCheckInNotification(target.checkInNotifId);
@@ -2882,7 +2854,7 @@ export default function App() {
               save: true,
               rename: "",
             });
-            setCheckInNotice({ blendName: session.blend?.name || null, choice: "default" });
+            setCheckInNotice({ blendName: session.blend?.name || null });
             closeSteep();
             setTab("home");
           }}
@@ -2898,8 +2870,6 @@ export default function App() {
       {checkInNotice && (
         <CheckInNotice
           blendName={checkInNotice.blendName}
-          choice={checkInNotice.choice}
-          onChoose={chooseFollowUpTiming}
           onClose={() => setCheckInNotice(null)}
         />
       )}

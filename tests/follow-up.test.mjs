@@ -10,7 +10,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import {
-  FOLLOWUP_CHOICES, DEFAULT_FOLLOWUP_MS, FOLLOWUP_WINDOW_MS,
+  DEFAULT_FOLLOWUP_MS, FOLLOWUP_WINDOW_MS,
   SNOOZE_MS, MAX_SNOOZES,
   scheduleFollowUp, snoozeFollowUp, isFollowUpDue, nextFollowUp,
 } from "../src/data/followUp.js";
@@ -35,54 +35,42 @@ const cup = (over = {}) => ({
   who: "you", moodsPending: true, brewedAt: MORNING, ...over,
 });
 
-// ── Choices ──────────────────────────────────────────────────────
+// ── The schedule ─────────────────────────────────────────────────
 
-test("every choice has an id and a human label", () => {
-  for (const c of FOLLOWUP_CHOICES) {
-    assert(typeof c.id === "string" && c.id, "choice missing id");
-    assert(typeof c.label === "string" && c.label, `choice ${c.id} missing label`);
-    assert(c.delayMs != null || c.atHour != null, `choice ${c.id} has no timing`);
-  }
-});
+test("every cup is asked about at the same default delay", () => {
+  /* There used to be three choices here — "in half an hour", "in an
+     hour", "tonight" — picked from chips in the post-brew notice, and
+     most of this file tested them: that each carried a label, that none
+     asked sooner than the default, that "tonight" meant an evening hour
+     rather than a duration, that a late cup fell back rather than
+     waiting until tomorrow.
 
-test("no choice asks sooner than the default", () => {
-  // The default already sits at the point where mood is knowable.
-  // Anything faster would be asking a question with no answer yet.
-  for (const c of FOLLOWUP_CHOICES) {
-    if (c.delayMs == null) continue;
-    assert(c.delayMs >= DEFAULT_FOLLOWUP_MS,
-      `${c.id} asks after ${c.delayMs}ms, sooner than the ${DEFAULT_FOLLOWUP_MS}ms default`);
-  }
-});
+     All of it went with the chips. The notice offered a scheduling
+     decision at the one moment a person has just finished brewing and
+     cares least, and followUp.js's own header already argued the case:
+     "Defaults beat choices for something this small." What made it safe
+     to drop is that the reminder stopped depending on it — an unreviewed
+     cup reads "pending review" on its Home row and opens with its
+     review panel showing, so the in-app path is visible whether or not
+     a timer fires.
 
-test("the default choice is the default delay", () => {
+     Kept as one test rather than deleted outright, because the constant
+     is still load-bearing: the notification fires on it, and asking
+     sooner would be asking a question the cup has no answer to yet. */
   assert(scheduleFollowUp(MORNING) === MORNING + DEFAULT_FOLLOWUP_MS,
-    "no pick should use the default");
-  assert(scheduleFollowUp(MORNING, "default") === MORNING + DEFAULT_FOLLOWUP_MS,
-    "an explicit default pick should match");
+    "a brew is asked about after the default delay");
+  assert(scheduleFollowUp(EVENING) === EVENING + DEFAULT_FOLLOWUP_MS,
+    "and the hour of the cup makes no difference to it");
 });
 
-test("an unknown choice falls back rather than throwing", () => {
-  // The id comes from UI that may gain options; a stale one shouldn't
-  // break logging a brew.
-  assert(scheduleFollowUp(MORNING, "next tuesday") === MORNING + DEFAULT_FOLLOWUP_MS,
-    "unknown id should fall back to the default");
-});
-
-test('"tonight" means an evening hour, not a fixed delay', () => {
-  // A duration would put a 9am cup's check-in mid-afternoon.
-  const at = new Date(scheduleFollowUp(MORNING, "tonight"));
-  assert(at.getHours() === 20, `expected 20:00, got ${at.getHours()}:00`);
-  assert(at.getDate() === new Date(MORNING).getDate(), "should be the same day");
-});
-
-test('"tonight" on a late cup asks soon instead of tomorrow', () => {
-  // 22:30 is already past the evening hour. Waiting until tomorrow
-  // night would put the ask outside the 24-hour window entirely.
-  const due = scheduleFollowUp(EVENING, "tonight");
-  assert(due === EVENING + DEFAULT_FOLLOWUP_MS,
-    `expected the default delay, got ${(due - EVENING) / MIN} min`);
-  assert(due - EVENING < FOLLOWUP_WINDOW_MS, "must stay inside the window");
+test("the delay is long enough to have an answer and short enough to matter", () => {
+  // Mood is not knowable at first sip, which is the whole reason the
+  // ask is deferred; and it has to land well inside the window the card
+  // stays askable in, or the cup becomes archaeology before anyone asks.
+  assert(DEFAULT_FOLLOWUP_MS >= 15 * MIN,
+    `${DEFAULT_FOLLOWUP_MS / MIN} min is too soon for an effect to be knowable`);
+  assert(DEFAULT_FOLLOWUP_MS < FOLLOWUP_WINDOW_MS / 2,
+    "the ask must land well inside the askable window");
 });
 
 // ── Due-ness ─────────────────────────────────────────────────────
