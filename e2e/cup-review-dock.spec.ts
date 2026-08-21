@@ -95,4 +95,47 @@ test.describe("reviewing a cup", () => {
     });
     expect(scored, "the verdict should have been recorded").toBe(true);
   });
+
+  test("a cup that delivered nothing says so, rather than showing a dash", async ({ page }) => {
+    /* Marking a cup as not delivering, and adding no other register, is
+       a real answer — but it used to render "anxious → —", which reads
+       as a blank where a word should be. That is exactly how a row
+       looks when somebody has answered nothing at all, so two opposite
+       states both rendered as an absence.
+
+       The two are italic alike, because neither is a mood NAME and
+       every settled value on the row is normal-weight. COLOUR is what
+       separates them: terra carries the verdict that the cup missed,
+       where pending is quiet ash because it claims nothing yet. Both
+       are asserted, or "they look different" is only an assumption. */
+    await openAnUnreviewedCup(page);
+    await page.getByTestId("cup-review-panel")
+      .getByRole("button", { name: "not really", exact: true }).first().click();
+    await page.locator('[data-testid="cup-brew-again"]').locator("..")
+      .getByTestId("review-submit").click();
+
+    await page.getByRole("button", { name: "Home", exact: true }).click();
+    await page.waitForTimeout(5200);   // the greeting choreography
+
+    const rows = page.locator('[data-testid="recent-brew-row"]');
+    await expect(rows.first()).toBeVisible({ timeout: 30_000 });
+    const text = await rows.evaluateAll(els =>
+      els.map(e => (e.textContent || "").replace(/\s+/g, " ")));
+    expect(text.some(t => /nothing landed/.test(t)),
+      "the reviewed cup should say what happened").toBe(true);
+    expect(text.some(t => /→\s*—/.test(t)),
+      "and never fall back to a bare dash").toBe(false);
+
+    const styles = await page.evaluate(() => {
+      const read = (needle: string) => Array.from(document.querySelectorAll("span"))
+        .filter(e => !e.children.length && e.textContent?.includes(needle))
+        .map(e => ({ italic: getComputedStyle(e).fontStyle, color: getComputedStyle(e).color }))[0];
+      return { landed: read("nothing landed"), pending: read("pending review") };
+    });
+    expect(styles.landed?.italic, "not a mood name, so not normal-weight").toBe("italic");
+    expect(styles.pending?.italic, "nor is pending").toBe("italic");
+    expect(styles.landed?.color,
+      "a verdict and a not-yet-asked must not look identical")
+      .not.toBe(styles.pending?.color);
+  });
 });

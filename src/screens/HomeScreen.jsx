@@ -570,7 +570,7 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
             {moodArc.endLabel && (
               <span style={{
                 color: moodArc.endColor,
-                ...(moodArc.endPending ? {} : { fontStyle: "normal" }),
+                ...(moodArc.endItalic ? {} : { fontStyle: "normal" }),
               }}>{moodArc.endLabel}</span>
             )}
           </span>
@@ -641,8 +641,8 @@ const flavorTallyFor = (s) => {
    follow-up verdict:
      thumbs up     → targets + extras, sage-deep (cup delivered, plus
                      any unexpected register that came along)
-     thumbs down   → extras alone (target missed); "—" if no extras,
-                     terra either way
+     thumbs down   → extras alone (target missed); "nothing landed" if
+                     no extras, terra either way
      rated 3       → targets + extras, neutral ink-soft
      NOT YET ASKED → "pending review", quiet and italic
    `endLabel` is "" when there is nothing to say on the end side (a
@@ -696,12 +696,25 @@ const buildMoodArc = (s, verdict) => {
     endColor = theme.inkSoft;
   } else {
     // Never asked. Nothing has landed, so nothing is claimed.
-    return { endLabel: "pending review", endColor: theme.ash, endPending: true };
+    return { endLabel: "pending review", endColor: theme.ash, endItalic: true };
   }
-  const endLabel = verdict === "down" && endParts.length === 0
-    ? "—"
-    : endParts.join(", ");
-  return { endLabel, endColor, endPending: false };
+  /* "NOTHING LANDED", NOT AN EM DASH. This case is a real answer — the
+     cup was marked as not delivering, and no other register was added —
+     but "anxious → —" reads as a blank where a word should be, which is
+     exactly how a row looks when somebody has answered nothing at all.
+     Two different states cannot both render as an absence.
+
+     Italic like "pending review", because neither is a mood NAME and
+     the row's settled values are all normal-weight. The COLOUR is what
+     keeps them apart: terra carries the verdict that the cup missed,
+     where pending is quiet ash because it claims nothing yet.
+
+     The flag is `endItalic` rather than `endPending` because it now
+     marks BOTH — a name meaning "not yet reviewed" would have been
+     wrong on this branch the moment it was reused for styling. */
+  const endBlank = verdict === "down" && endParts.length === 0;
+  const endLabel = endBlank ? "nothing landed" : endParts.join(", ");
+  return { endLabel, endColor, endItalic: endBlank };
 };
 
 export const SessionRow = ({ s, openCup, first }) => {
@@ -783,7 +796,7 @@ export const SessionRow = ({ s, openCup, first }) => {
               {moodArc.endLabel && (
                 <span style={{
                   color: moodArc.endColor,
-                  ...(moodArc.endPending ? {} : { fontStyle: "normal" }),
+                  ...(moodArc.endItalic ? {} : { fontStyle: "normal" }),
                 }}>{moodArc.endLabel}</span>
               )}
             </span>
