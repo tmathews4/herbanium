@@ -238,6 +238,19 @@
   --hi-rgb:     255, 255, 255;     /* inset highlight */
   --ivory-rgb:  243, 236, 220;     /* translucent surfaces (TabBar dock) */
   --terra-rgb:  176, 84, 47;       /* active-tab pill tint */
+  /* THE REVEAL WASH, and it is not the same thing as a dialog dim.
+     Summoning an elemental washes the whole screen to the app's own
+     ground and floats the card on it — a change of register, not an
+     obscuring. A dialog does the opposite: ConfirmSheet dims to a dark
+     translucent so the card reads as lifted ABOVE the page. Two
+     different jobs, so two different values, and only this one has to
+     invert with the theme.
+     It was written as the literal `rgba(232, 220, 192, 0.86)` in two
+     components — a light-palette value in a codebase where theme.js
+     promises "every inline style picks up dark mode without any
+     per-component wiring". In dark mode it flashed cream over a
+     near-black app. The second component had copied the first. */
+  --veil-rgb:   234, 224, 199;     /* reveal wash — paper */
 
   /* Hover fills for filled buttons. Light mode = slightly lifted from
      the rest accent (ink hover sits brighter than ink, terra hover
@@ -352,6 +365,7 @@
     --hi-rgb:     220, 232, 218;
     --ivory-rgb:  15, 20, 16;
     --terra-rgb:  194, 102, 66;
+    --veil-rgb:   20, 27, 23;        /* reveal wash — dark paper */
 
     /* Dark-mode hover fills — the rest accent (ink) is a light
        sage-cream, so the hover should be a *darker* dim of that to

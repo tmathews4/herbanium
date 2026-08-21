@@ -70,6 +70,37 @@ export async function bootApp(page: Page) {
 }
 
 /**
+ * The same booted app, but actually in the dark palette.
+ *
+ * TWO THINGS BOTH HAVE TO BE TRUE and only one of them is obvious.
+ * `emulateMedia({ colorScheme: "dark" })` sets the media query — and
+ * the app then ignores it, because `?dev` toggles a `force-light` class
+ * onto <html> and the entire `@media (prefers-color-scheme: dark)`
+ * block in index.css is guarded by `:root:not(.force-light)`. That
+ * class exists for a good reason (spot-checking the cream register on a
+ * phone stuck in system dark) and it means twenty of the suite's
+ * twenty-five boots have the dark palette switched off at the root.
+ *
+ * So the dark half of the app had no coverage at all, which is exactly
+ * where a field pass found its bugs: a cream scrim hardcoded into two
+ * reveal cards, flashing light over a near-black app. tours.spec.ts had
+ * already hit this trap and stripped the class inline in one test, with
+ * a comment saying that otherwise it "reports light and dark as
+ * identical while proving nothing". That workaround is this helper now.
+ *
+ * emulateMedia REPLACES the emulated state rather than merging, so
+ * reducedMotion is passed alongside — dropping it makes animations run
+ * and turns colour reads into races. Same footgun tours.spec documents.
+ */
+export async function bootDark(page: Page) {
+  await bootApp(page);
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await page.evaluate(() => document.documentElement.classList.remove("force-light"));
+  // Nothing re-adds it: App toggles the class in an effect keyed on
+  // isDev, which does not change again during a run.
+}
+
+/**
  * Get to a rendered, OPEN brew panel on whichever screen we're on.
  *
  * Two independent collapses, and they are NOT the same control. Detail

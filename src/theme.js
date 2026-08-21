@@ -18,6 +18,11 @@
 // the family colors are local hex tables not these palette tokens).
 export const theme = {
   ivory:    "var(--ivory)",
+  /* The reveal wash, as a ready-made rgba rather than a raw triplet:
+     both callers want the same opacity, and a second copy of 0.86 is a
+     second thing to drift. See --veil-rgb in index.css for why this is
+     not the dialog dim. */
+  veil:     "rgba(var(--veil-rgb), 0.86)",
   paper:    "var(--paper)",
   cream:    "var(--cream)",
   ink:      "var(--ink)",

@@ -54,7 +54,7 @@ export const ElementalArrivalCard = ({ elemental, onDismiss }) => {
       onClick={beginExit}
       style={{
         position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(232, 220, 192, 0.86)",
+        background: theme.veil,
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "0 24px",
         opacity,
