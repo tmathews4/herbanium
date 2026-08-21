@@ -20,6 +20,43 @@ import { wouldCreateUnsafeCombination } from "../data/safety.js";
 // room within their preferred window. Temp deviations always count
 // (no tolerance) because they shift extraction much more sharply.
 export const TRADITION_TIME_TOLERANCE_S = 120;
+/* ──────────────────────────────────────────────────────────────
+   WHAT COUNTS AS A COMPONENT OF THE CUP.
+
+   `role` is the obvious answer and it is the wrong one, because
+   ComposeScreen assigns it by ADD ORDER rather than by intent: the
+   first ingredient in gets 2 parts and everything after gets 1, so
+   `isPrimary` marks exactly one lead no matter what the user built.
+   A blend of two equal partners and a blend with a 0.2g seasoning
+   both come out as "one lead, one accent".
+
+   Two separate checks were reading role and quietly getting nothing:
+   the no-overlap notice is gated on two or more LEADS and so never
+   fired from the composer at all, and the under-steep warning fired
+   on 0.2g of vanilla in a chai.
+
+   Share of the cup's weight separates them and role cannot. Measured
+   across the 49 curated blends, the only leaves reading short of their
+   window are vanilla at 9.5% and 6.5% — deliberate seasoning — against
+   33.3% for the case these warnings exist for. 0.15 sits between with
+   room on both sides: under about a sixth of the pot a leaf flavours
+   the cup rather than composing it, and nobody expects seasoning to be
+   fully extracted. A genuine lead is a large share by construction, so
+   this never silences one.
+   ────────────────────────────────────────────────────────────── */
+export const MATERIAL_SHARE = 0.15;
+
+/**
+ * The ingredients that actually compose this cup, by weight — the ones
+ * a warning about extraction should be allowed to name. Catalysts are
+ * excluded outright; everything else is judged on its share.
+ */
+export function materialIngredients(ingredients) {
+  const list = (ingredients || []).filter(i => i && i.role !== "catalyst");
+  const total = list.reduce((sum, i) => sum + (i.g || 0), 0);
+  if (!(total > 0)) return list;
+  return list.filter(i => (i.g || 0) / total >= MATERIAL_SHARE);
+}
 
 /* ──────────────────────────────────────────────────────────────
    Default register mapping — engine-level lookup that resolves
@@ -2177,6 +2214,66 @@ const contributions = ingredients.map(({ id, g, role }) => {
   }
   const individualWarnings = pushedHarder ? allIndividualWarnings : [];
 
+  /* THE OTHER HALF OF THE SENTENCE, which the warnings layer has never
+     been able to say.
+
+     Every per-ingredient warning above is an OVER-pull: the filter is
+     `tannin` / `aromatic` and the text is "is being over-pulled". There
+     was no under-steep kind at all, and brewBounds says so out loud
+     where it explains why the opening cup clamps to the earliest
+     closing window: "over-pulling warns while under-steeping is
+     silent." The clamp was built to route AROUND the missing warning.
+
+     So the default steered into the one failure mode the app could not
+     describe. Chamomile and lion's mane have windows that do not meet;
+     the cup opens at 7:00, chamomile's ceiling, and lion's mane gets
+     70% of its MINIMUM steep. Three warnings fire on that cup — pour,
+     masking, ceiling — and not one of them mentions the leaf that is
+     barely in the water. Chatty and confident about everything except
+     the thing actually wrong, which reads as "checked, and it's fine."
+
+     NOT GATED ON `pushedHarder`, deliberately, and this is the whole
+     reason it is a separate list. That flag means "the user pushed past
+     the recommendation", which is the right suppressor for an over-pull
+     — at or below the baseline, a strong cup is accepted compromise.
+     Under-steeping is the opposite direction: it is at its worst AT the
+     baseline, because the baseline is what clamped short in the first
+     place. Gating it there would silence it exactly where it is most
+     deserved — the same trap the tradition note documents one block
+     down.
+
+     Same population as the over-pull loop (leads and accents, catalysts
+     skipped) and it carries `role` for the same reason, so a lead
+     reading short can render louder than an accent that is only a
+     whisper on purpose. Tolerance is the tradition tolerance, so short
+     and long are judged by one number rather than two that drift. */
+  const fmtS = (s) => s >= 60
+    ? `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`
+    : `${Math.round(s)}s`;
+  const understeepWarnings = [];
+  /* WEIGHTS COME FROM `ingredients`, NOT `contributions` — the latter
+     does not carry `g` at all, and reading it there silently produced
+     a share of 0/0 that skipped nobody. Caught because the two curated
+     vanilla blends kept firing after the threshold went in. */
+  const understeepG = new Map(ingredients.map(({ id, g }) => [id, g || 0]));
+  for (const { id, name, role } of contributions) {
+    const g = understeepG.get(id) || 0;
+    if (role === "catalyst") continue;
+    const meta = INGREDIENTS[id];
+    const sMin = meta?.timeS?.[0];
+    if (sMin == null) continue;
+    if (timeS >= sMin - TRADITION_TIME_TOLERANCE_S) continue;
+    // A whisper stays a whisper — see MATERIAL_SHARE for why this is a
+    // weight share and not the `role` the composer stamped on it.
+    if (totalG > 0 && g / totalG < MATERIAL_SHARE) continue;
+    understeepWarnings.push({
+      kind: "understeep",
+      role: role || "lead",
+      text: `${name} is barely in the water — it opens at ${fmtS(sMin)} `
+        + `and this cup stops at ${fmtS(timeS)}.`,
+    });
+  }
+
   // Tradition-over-literature notice fires when at least one lead
   // ingredient is meaningfully outside its preferred window OR a
   // cup-level warning is firing at the curated baseline. Temp
@@ -2239,6 +2336,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
   const warnings = [
     ...cupWarnings,
     ...individualWarnings,
+    ...understeepWarnings,
   ];
 
   return {

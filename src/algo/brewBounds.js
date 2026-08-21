@@ -494,6 +494,69 @@ export function recommendedBand({ items, primary, profiles, axis, otherValue }) 
   return null;
 }
 
+/* ──────────────────────────────────────────────────────────────
+   WHY THERE IS NO BAND.
+
+   `recommendedBand` returns null in two very different situations and
+   the rail drew the same nothing for both: leaves that simply have no
+   profile to read, and leaves whose declared windows DO NOT MEET —
+   chamomile closes at 7:00, lion's mane opens at 10:00, and no single
+   steep serves them both.
+
+   The second is the most teachable state the model can reach. It is
+   the concrete case where "different plants give up different
+   compounds at different rates" stops being a sentence and costs you
+   something, and it was rendered as absence. Absence is
+   indistinguishable from a band you scrolled past, so the app looked
+   like it had checked and found nothing wrong.
+
+   This answers WHICH TWO and BY HOW MUCH, so the caller can say it.
+   It deliberately does not decide what to do about it: the opening
+   brew still clamps, the slider still stops where the evidence stops,
+   and the user still chooses. Only the silence goes.
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * The earliest-closing window and the latest-opening one, when they
+ * do not overlap.
+ *
+ * Returns null when the windows DO meet — that is the ordinary case,
+ * where `recommendedBand` has something to draw and there is nothing
+ * to explain. Catalysts are skipped for the same reason they are
+ * skipped everywhere else: a trace dose carries no signal.
+ *
+ * @param items [{ id, name, role, [axis]: [lo, hi] }]
+ * @param axis  "tempC" | "timeS"
+ * @returns { closesFirst, opensLast, gap } | null
+ */
+export function windowConflict(items, axis) {
+  let closesFirst = null;
+  let opensLast = null;
+  for (const ing of items || []) {
+    if (!ing || ing.role === "catalyst") continue;
+    const range = ing[axis];
+    if (!range || range[0] == null || range[1] == null) continue;
+    const [lo, hi] = range;
+    /* TIES BROKEN BY ID, not by array order. Two leaves closing at the
+       same second is common (52 profiles share a lot of round
+       numbers), and "whichever was added first" would make the
+       sentence change when the user reorders a pot that brews
+       identically. */
+    if (!closesFirst || hi < closesFirst.at
+        || (hi === closesFirst.at && String(ing.id) < String(closesFirst.id))) {
+      closesFirst = { id: ing.id, name: ing.name, at: hi };
+    }
+    if (!opensLast || lo > opensLast.at
+        || (lo === opensLast.at && String(ing.id) < String(opensLast.id))) {
+      opensLast = { id: ing.id, name: ing.name, at: lo };
+    }
+  }
+  if (!closesFirst || !opensLast) return null;
+  if (closesFirst.id === opensLast.id) return null;   // one leaf can't fight itself
+  if (opensLast.at <= closesFirst.at) return null;    // they meet
+  return { closesFirst, opensLast, gap: opensLast.at - closesFirst.at };
+}
+
 /**
  * Where inside a band a "put me on the recommendation" tap should land:
  * the centre of it.

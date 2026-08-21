@@ -31,7 +31,7 @@ import { theme, ff } from "../theme";
 import { useBrewDockId } from "../helpers/dock";
 import { useUnit, cToF, gramsToTsp, formatTsp } from "../units/units";
 import { resolveBlendAtBrew, computeBrewProfile, recommendedBrewTarget,
-         TRADITION_TIME_TOLERANCE_S } from "../algo/compose";
+         TRADITION_TIME_TOLERANCE_S, materialIngredients } from "../algo/compose";
 import { unionAndPadTempRange, unionAndPadTimeRange, timeStepFor,
          recommendedBand } from "../algo/brewBounds";
 import { INGREDIENTS } from "../data/ingredients";
@@ -1775,6 +1775,62 @@ export const BlendExtractionExplorer = ({
         );
       })()}
 
+      {/* WITH THE OTHER ALERTS, which took three moves to get right.
+
+         It began between the flavour strips and the mind/body ones,
+         where it split the four windows into two pairs and pushed the
+         lower half down the page the moment a second lead was added.
+         Moving it below fixed that and overshot: it landed under the
+         synergy pills, so a notice saying the blend cannot be brewed
+         sat beneath a calm description of what the blend does, at the
+         very bottom, half-hidden behind the dock.
+
+         Both earlier positions were reaching for the same rule and
+         missing it. This is prose about something that BECAME TRUE and
+         wants reading now, so it belongs with the cup warnings above —
+         not among the standing descriptions, which are true of the cup
+         whatever the sliders are doing. Alerts together, descriptions
+         together. */}
+      {ingredients.length >= 2 && (() => {
+        const leads = materialIngredients(ingredients)
+          .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
+          .filter(({ meta }) => meta?.timeS);
+        if (leads.length < 2) return null;
+        const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
+        const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
+        if (intersectLo <= intersectHi) return null;
+        // Identify the two leads with the most extreme tension — one
+        // with the highest min, one with the lowest max.
+        const earliestEnder = leads.reduce((a, b) =>
+          a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
+        const latestStarter = leads.reduce((a, b) =>
+          a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
+        return (
+          <div data-testid="blend-no-overlap" style={{
+            marginBottom: 12,
+            padding: "8px 10px",
+            borderLeft: `2px solid ${theme.terra}`,
+            background: "rgba(176,84,47,0.08)",
+            borderRadius: "2px 6px 6px 2px",
+            fontFamily: ff.serif, fontSize: 12.5,
+            color: theme.ink, lineHeight: 1.5,
+          }}>
+            <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
+              No shared steep window.
+            </span>{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {earliestEnder.meta.name}
+            </span>{" "}
+            finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
+            <span style={{ color: theme.terra, fontStyle: "normal" }}>
+              {latestStarter.meta.name}
+            </span>{" "}
+            needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
+            lands, one lead won't extract right. Best to brew these separately.
+          </div>
+        );
+      })()}
+
 
       {/* Cup summary — dominant 1–2 effects and flavors as small
           pills matching the predicted-taste row's exact dimensions.
@@ -1915,71 +1971,6 @@ export const BlendExtractionExplorer = ({
           chemistry that's extracted, but they overstate what one cup
           can shift. Surfaced only when ≥20% adaptogen by weight so
           the caveat tracks with cups that are actually adaptogen-led. */}
-      {/* MOVED DOWN, out from between the strips.
-
-         This is prose about the BLEND — that two leads want steeps
-         that don't overlap — and it sat between the flavour strips and
-         the mind/body ones, where it split the four windows into two
-         pairs with a paragraph wedged in the gap. The strips read as
-         one instrument; a conditional block appearing mid-instrument
-         pushed the lower half down the page the moment a second lead
-         was added, and buried the comparison it was interrupting.
-
-         It belongs with the other alerts: things that became true and
-         want reading, above the standing notes and below the strips
-         they describe. */}
-      {/* No-overlap warning — fires when the blend has 2+ lead
-          ingredients whose timeS ranges don't share a single window. A
-          matcha (15-30s) + chamomile (300-420s) blend has no steep where
-          both extract correctly; whatever the slider lands on, one lead
-          is wrong. Only fires on lead vs lead — accents and catalysts
-          are intentionally stretched.
-
-          It sat with the steep slider until the controls moved into the
-          tab dock. It's prose about the BLEND, not about where the
-          slider is, and putting conditional prose in the dock made the
-          dock's height jump by ~60px the moment a user added a second
-          lead. Controls in the chrome, explanation on the page. */}
-      {ingredients.length >= 2 && (() => {
-        const leads = ingredients
-          .filter(({ role }) => (role || "lead") === "lead")
-          .map(({ id }) => ({ id, meta: INGREDIENTS[id] }))
-          .filter(({ meta }) => meta?.timeS);
-        if (leads.length < 2) return null;
-        const intersectLo = Math.max(...leads.map(({ meta }) => meta.timeS[0]));
-        const intersectHi = Math.min(...leads.map(({ meta }) => meta.timeS[1]));
-        if (intersectLo <= intersectHi) return null;
-        // Identify the two leads with the most extreme tension — one
-        // with the highest min, one with the lowest max.
-        const earliestEnder = leads.reduce((a, b) =>
-          a.meta.timeS[1] < b.meta.timeS[1] ? a : b);
-        const latestStarter = leads.reduce((a, b) =>
-          a.meta.timeS[0] > b.meta.timeS[0] ? a : b);
-        return (
-          <div style={{
-            marginBottom: 12,
-            padding: "8px 10px",
-            borderLeft: `2px solid ${theme.terra}`,
-            background: "rgba(176,84,47,0.08)",
-            borderRadius: "2px 6px 6px 2px",
-            fontFamily: ff.serif, fontSize: 12.5,
-            color: theme.ink, lineHeight: 1.5,
-          }}>
-            <span style={{ color: theme.terra, fontStyle: "normal", fontWeight: 500 }}>
-              No shared steep window.
-            </span>{" "}
-            <span style={{ color: theme.terra, fontStyle: "normal" }}>
-              {earliestEnder.meta.name}
-            </span>{" "}
-            finishes at {Math.round(earliestEnder.meta.timeS[1] / 60)} min while{" "}
-            <span style={{ color: theme.terra, fontStyle: "normal" }}>
-              {latestStarter.meta.name}
-            </span>{" "}
-            needs at least {Math.round(latestStarter.meta.timeS[0] / 60)} min — wherever the slider
-            lands, one lead won't extract right. Best to brew these separately.
-          </div>
-        );
-      })()}
 
       {/* STANDING NOTES — things that are true of this cup whatever the
           sliders are doing, kept together and kept quiet.
