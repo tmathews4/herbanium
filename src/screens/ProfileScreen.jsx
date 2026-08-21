@@ -314,7 +314,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Temperature</span>
+          <span data-testid="pref-label">Temperature</span>
           <div style={{
             display: "inline-flex", alignItems: "center",
             border: `1px solid ${theme.rule}`, borderRadius: 999,
@@ -338,7 +338,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           padding: "10px 0", borderTop: `1px solid ${theme.ruleSoft}`,
           fontFamily: ff.sans, fontSize: 13, color: theme.inkSoft,
         }}>
-          <span>Weight</span>
+          <span data-testid="pref-label">Weight</span>
           <div style={{
             display: "inline-flex", alignItems: "center",
             border: `1px solid ${theme.rule}`, borderRadius: 999,
@@ -402,7 +402,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
               this row is `space-between`, so they are pinned flush
               right and a longer or shorter label eats the gap rather
               than pushing them. */}
-          <span>
+          <span data-testid="pref-label">
             Container{" "}
             <span data-testid="pour-detail" style={{ color: theme.ash }}>
               {`(${(POUR_SIZES[pour] ?? POUR_SIZES.cup).ml} ml)`}

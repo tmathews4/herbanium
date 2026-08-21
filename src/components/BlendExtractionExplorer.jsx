@@ -1037,7 +1037,11 @@ export const BlendExtractionExplorer = ({
             step, rangeMin, rangeMax,
           });
           const endLabel = (text) => (
-            <span aria-hidden style={{
+            /* The axis ends carry a hook because they are a CLAIM about
+               what the control can do, and they were rounded wrong once
+               — a 0:15 floor reading "0m", a 3:48 ceiling reading "4m".
+               See the note on `ends` below. */
+            <span aria-hidden data-testid="axis-end" style={{
               fontFamily: ff.mono, fontSize: 9, color: theme.ash,
               whiteSpace: "nowrap", pointerEvents: "none",
             }}>{text}</span>
