@@ -179,7 +179,7 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
   const [scrolled, setScrolled] = useState(false);
 
   return (
-    <div style={{
+    <div data-testid="cup-detail" style={{
       position: "absolute", top: 0, left: 0, right: 0,
       // Stops at the dock instead of covering it — the main menu is
       // never not on screen. Falls back to 0px so the screen still
@@ -505,7 +505,23 @@ export const CupDetail = ({ session, onClose, openBlend, appendSessionNote, onBr
             key={session.id}
             session={session}
             actionSlotId={reviewOpen ? REVIEW_SLOT_ID : null}
-            onSubmit={(payload) => patchSessionMoods(session.id, payload)}
+            /* SUBMITTING PUTS YOU BACK WHERE YOU WERE. The review is a
+               thing you came here TO DO, and it was leaving you parked
+               on the cup's entry afterwards, reading a page you had
+               just finished writing. onClose is popOverlayHistory, so
+               this returns to whatever opened the cup — Home, the
+               journal, a blend — rather than to a fixed destination.
+
+               NO TIMER, and no "saved" beat before it goes. A delay
+               would need cleanup on unmount and would make the test
+               wait on a clock instead of a state change; more to the
+               point the receipt is better without it. You land back on
+               the row you came from and it is now showing a rating
+               where it was asking for one. */
+            onSubmit={(payload) => {
+              patchSessionMoods(session.id, payload);
+              onClose?.();
+            }}
             onClose={closeReview}
           />
         </div>

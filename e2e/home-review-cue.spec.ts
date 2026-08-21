@@ -125,6 +125,65 @@ test.describe("the recent-brews rail", () => {
       .toBeVisible({ timeout: 30_000 });
   });
 
+  test("finishing the review puts you back where you started", async ({ page }) => {
+    /* The review is a thing you came here TO DO. Submitting used to
+       leave you parked on the cup's entry, reading a page you had just
+       finished writing; now it returns to whatever opened the cup.
+
+       The strongest assertion is not "we are on Home" — it is that the
+       row you came from has CHANGED: it was asking for a rating and
+       now shows one. That covers the navigation and the save in one
+       claim, and it fails if either half stops working. */
+    const rows = await homeRows(page);
+    const row = rows.filter({ has: page.locator('[data-testid="row-review-cue"]') }).first();
+    const before = await rows.count();
+    await row.click();
+
+    const panel = page.getByTestId("cup-review-panel");
+    await expect(panel, "the cup opens with its review showing")
+      .toBeVisible({ timeout: 30_000 });
+
+    /* The submit lives in the cup's action bar and reads "pick a
+       verdict" until one is picked — a cup with target moods cannot be
+       logged without saying whether they landed. So answer it, the way
+       a person would, rather than reaching for a cup that happens not
+       to ask. */
+    const submit = page.getByTestId("review-submit");
+    await expect(submit).toBeVisible({ timeout: 15_000 });
+    if (!(await submit.isEnabled())) {
+      await panel.getByRole("button", { name: "yes", exact: true }).click();
+    }
+    await expect(submit, "a verdict picked, the review should be submittable")
+      .toBeEnabled({ timeout: 15_000 });
+    await submit.click();
+
+    /* THE CUP MUST BE GONE FROM THE DOM, not merely hidden. The first
+       version of this asserted the review PANEL was hidden, and that
+       panel is gated on whether a score exists — so it disappears the
+       moment the review is saved whether or not anything navigated.
+       It passed against the old behaviour, which is the only reason
+       anyone found out. Same trap on the rail: Home stays mounted
+       under the overlay, so its rows read as visible from behind a
+       screen covering them. */
+    await expect(page.getByTestId("cup-detail"),
+      "submitting should leave the cup behind, not just close its form")
+      .toHaveCount(0, { timeout: 15_000 });
+    await expect(panel).toHaveCount(0);
+    await expect(rows.first(), "and land back on the rail we came from")
+      .toBeVisible({ timeout: 15_000 });
+    expect(await rows.count(), "with the same cups on it").toBe(before);
+
+    const state = await rows.evaluateAll(els => els.map(e => ({
+      cue: !!e.querySelector('[data-testid="row-review-cue"]'),
+      dots: /●/.test(e.textContent || ""),
+    })));
+    expect(state.filter(r => r.cue).length,
+      "one fewer cup should be asking for a review than before")
+      .toBeLessThan(state.length);
+    expect(state[0].dots || !state[0].cue,
+      "the cup just reviewed should no longer be asking").toBe(true);
+  });
+
   test("the cue is markup the row can own", async ({ page }) => {
     // A button inside a button is invalid and would give one
     // destination two tap targets. The row is the control.
