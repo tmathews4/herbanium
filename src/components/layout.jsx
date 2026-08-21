@@ -530,7 +530,7 @@ export const StatCard = ({ label, value }) => (
 // Layout is forced via inline-flex column so clickable (button) and
 // static (div) variants align identically as flex items in the row —
 // browser button defaults otherwise drift the value/label baseline.
-export const Stat = ({ label, value, onClick }) => {
+export const Stat = ({ label, value, onClick, testId }) => {
   const baseStyle = {
     display: "inline-flex", flexDirection: "column", alignItems: "center",
     background: "transparent", border: "none", padding: 0,
@@ -543,9 +543,9 @@ export const Stat = ({ label, value, onClick }) => {
       <span style={{ fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: theme.ash, marginTop: 3 }}>{label}</span>
     </>
   );
-  if (!onClick) return <div style={baseStyle}>{inner}</div>;
+  if (!onClick) return <div data-testid={testId} style={baseStyle}>{inner}</div>;
   return (
-    <button onClick={onClick} style={{ ...baseStyle, cursor: "pointer" }}>
+    <button data-testid={testId} onClick={onClick} style={{ ...baseStyle, cursor: "pointer" }}>
       {inner}
     </button>
   );

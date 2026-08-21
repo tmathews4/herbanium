@@ -19,6 +19,7 @@
 import React, { useState, useEffect } from "react";
 import { ff, theme } from "../theme";
 import { OmenCard } from "./OmenCard";
+import { summonedElementalIds } from "../data/summonedElementals";
 import { ElementalArrivalCard } from "./ElementalArrivalCard";
 import { MoodCrystal } from "./MoodCrystal";
 import { ElementalSigil, sigilColorFor } from "./ElementalSigil";
@@ -606,46 +607,49 @@ export const ElementalsView = ({
           Wild elementals already carry their own ts. */}
       {!elementalsDisabled && (() => {
         const stamps = rolledElementalAt || {};
-        const items = [];
-        // Only include elementals the user has actually summoned via
-        // the lodestone (id present in seenElementalIds). The roll
-        // moment writes the id into rolledElementalIds + queues a
-        // glimpse banner; the timeline shouldn't pre-spoil what's
-        // still pulsing in the stone, only what the user has
-        // actually observed by tapping the lodestone.
+        /* WHICH ONES, from the shared rule. This list used to be built
+           by three inline loops here, and Profile counted a different
+           population entirely — see data/summonedElementals for the two
+           ways they diverged. The membership question is answered once
+           now; this block only says what each row LOOKS like.
+
+           The roll moment writes an id into rolledElementalIds and
+           queues a glimpse banner, so the timeline must not pre-spoil
+           what is still pulsing in the stone — only what the user has
+           observed by tapping the lodestone. That is the rule, and it
+           lives in the helper. */
+        const summoned = summonedElementalIds({
+          rolledIds,
+          wild: wildElementals,
+          seenIds,
+          hasCreationTitle: !!creationCard,
+          omenShown,
+        });
+        // Details by id, so a row can be rendered from the shared list.
+        // The creation elemental is stamped with the profile's creation
+        // date so it sits at the bottom of the timeline as the
+        // originating moment, with later arrivals stacking above it.
+        const detail = new Map();
         for (const a of earnedAttrs) {
-          if (!seenIds.has(a.id)) continue;
-          const ts = stamps[a.id];
-          items.push({
-            id: a.id,
-            displayName: a.displayName,
-            rarity: a.rarity,
-            ts: typeof ts === "number" ? ts : 0,
+          detail.set(a.id, {
+            id: a.id, displayName: a.displayName, rarity: a.rarity,
+            ts: typeof stamps[a.id] === "number" ? stamps[a.id] : 0,
           });
         }
         for (const w of (wildElementals || [])) {
-          if (!seenIds.has(w.id)) continue;
-          items.push({
-            id: w.id,
-            displayName: w.displayName || w.name,
-            rarity: w.rarity,
+          detail.set(w.id, {
+            id: w.id, displayName: w.displayName || w.name, rarity: w.rarity,
             ts: typeof w.ts === "number" ? w.ts : 0,
           });
         }
-        // Unique creation-title elemental — counts as "summoned" once
-        // the omen card has been dismissed, since dismissing the omen
-        // is the user's first act of observing the stone. Stamped
-        // with the profile creation date so it sits at the bottom of
-        // the timeline as the originating moment, with later
-        // arrivals stacking above it.
-        if (creationCard && omenShown) {
-          items.push({
-            id: creationCard.id,
-            displayName: creationCard.displayName,
+        if (creationCard) {
+          detail.set(creationCard.id, {
+            id: creationCard.id, displayName: creationCard.displayName,
             rarity: creationCard.rarity,
             ts: typeof profile?.createdAt === "number" ? profile.createdAt : 0,
           });
         }
+        const items = summoned.map(id => detail.get(id)).filter(Boolean);
         if (items.length === 0) return null;
         // Sort newest-first; legacy zeros land at the bottom.
         items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -685,7 +689,7 @@ export const ElementalsView = ({
                 const note = arrivalNote(it.ts, sessions, journalEntries, getBlend, isCreation, action);
                 const dateLabel = fmtDate(it.ts);
                 return (
-                  <div key={it.id} style={{
+                  <div key={it.id} data-testid="arrival-row" data-elemental={it.id} style={{
                     padding: "9px 12px 10px",
                     borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
                     textAlign: "left",

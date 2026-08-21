@@ -4,6 +4,7 @@
 
 import React, { useState, useRef } from "react";
 import { ConfirmSheet } from "../components/ConfirmSheet";
+import { summonedElementalIds } from "../data/summonedElementals";
 import { Flower, Ornament, Pencil, ATTRIBUTE_GLYPHS } from "../components/icons";
 import { TeaConstellation } from "../components/TeaConstellation";
 import {
@@ -11,7 +12,6 @@ import {
 } from "../components/layout";
 import { MOODS } from "../data/blends";
 import { SEED_MODES } from "../data/seeds";
-import { buildAttributeContext, evaluateAttributes, getUserPrefix, applyPrefix, isColorable } from "../data/attributes";
 import { generateCreationTitle } from "../data/creationTitle";
 import { getBlend } from "../helpers/misc";
 import {
@@ -28,7 +28,7 @@ import { useUnit, POUR_SIZES } from "../units/units";
    Screen: PROFILE
    ────────────────────────────────────────────────────────────── */
 
-export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, journalEntries, tabVisits, wildElementals = [], seenElementalIds, devForceGlimpse }) => {
+export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, setSeedMode, profile, setProfile, resetEverything, startTour, isDev, devModeEnabled, setDevModeEnabled, elementalsDisabled, setElementalsDisabled, lodestoneCharge = 0, setLodestoneCharge, journalEntries, tabVisits, wildElementals = [], seenElementalIds, rolledElementalIds, omenShown, devForceGlimpse }) => {
   const { unit, setUnit, weightUnit, setWeightUnit, pour, setPour } = useUnit();
 
   // Name edit mode
@@ -146,8 +146,19 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
     const b = getBlend(s.blendId);
     if (b) b.ingredients.forEach(ing => distinctIngredients.add(ing.id));
   });
-  const attrCtx = buildAttributeContext({ sessions, savedBlendIds, profile, journalEntries, tabVisits });
-  const attrEvaluation = evaluateAttributes(attrCtx);
+  /* THE RETIRED PREDICATE PATH, deleted rather than left running.
+     This built an attribute context and re-evaluated every attribute's
+     condition on each render to answer "how many elementals". Earning
+     became chance-based rolls a while ago and ElementalsView moved to
+     the rolled-id store then, noting the predicates survive only for a
+     one-time migration in App.jsx. This screen never moved, so it kept
+     asking a question the model had stopped answering — 7 against the
+     log's 3. The count now reads the same store the log does. */
+  // Elementals stat — the SAME list Field Notes spells out, counted.
+  // Both used to answer this separately and disagreed two ways at once;
+  // see data/summonedElementals for what "summoned" means and why the
+  // earlier fix, which pointed both at seenElementalIds, only closed
+  // half of it.
   // Elementals stat — count what the user has actually summoned/
   // observed (seenElementalIds), not what the engine has *earned*
   // for them (which can include unsummoned arrivals queued at the
@@ -159,9 +170,13 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
   const seenSet = seenElementalIds instanceof Set
     ? seenElementalIds
     : new Set(Array.isArray(seenElementalIds) ? seenElementalIds : []);
-  const elementalsCount = seenSet.size > 0
-    ? seenSet.size
-    : (attrEvaluation.filter(a => a.earned).length + (wildElementals?.length || 0));
+  const elementalsCount = summonedElementalIds({
+    rolledIds: rolledElementalIds,
+    wild: wildElementals,
+    seenIds: seenSet,
+    hasCreationTitle: !!profile,
+    omenShown,
+  }).length;
   const isEmptyUser = cupCount === 0 && blendCount === 0;
 
   return (
@@ -264,7 +279,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           <Stat label="Cups"      value={cupCount}    onClick={() => go("shelf", { mode: "journal" })} />
           <Stat label="Blends"    value={blendCount}  onClick={() => go("shelf", { mode: "recipes" })} />
           {!elementalsDisabled && (
-            <Stat label="Elementals"  value={elementalsCount} onClick={() => go("shelf", { mode: "visitors" })} />
+            <Stat label="Elementals"  testId="stat-elementals" value={elementalsCount} onClick={() => go("shelf", { mode: "visitors" })} />
           )}
         </div>
       </div>
