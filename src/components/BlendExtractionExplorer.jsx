@@ -54,7 +54,6 @@ import { SYNERGY_DESCRIPTIONS, PARADOX_DESCRIPTIONS } from "../data/vocabularyDe
 // chemistry doesn't support — plenty of people drink past it happily
 // and daily. The number is unchanged; only the claim about it is.
 const CAFFEINE_MAX_MG = 250;
-const CAFFEINE_GENTLE_MAX_MG = 40;
 const CAFFEINE_CAUTION_MG = 80;
 const CAFFEINE_WARN_MG = 130;
 
@@ -154,17 +153,23 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
         }}>high</span>
         <span style={{ position: "absolute", right: 0 }}>{CAFFEINE_MAX_MG}mg</span>
       </div>
-      {/* State-aware advisory band. Three flavors share one shape:
-          - gentle (< 40 mg): sage/green — genuinely light cup
+      {/* State-aware advisory band. TWO flavors share one shape:
           - at edge (= 130 mg): ochre/yellow — right on the line
-          - over (> 130 mg): terra/red — past the line, alarm
-          The 40-129 mg range gets NO advisory — that's normal-cup
-          territory (regular black tea, mid sencha, etc.). The bar's
-          color and the numeric readout already carry the signal;
-          a "gentle pour" badge on every breakfast tea felt like a
-          gold-star sticker for drinking tea. */}
+          - over (> 130 mg): terra/red — past the line
+
+          Everything below 130 mg gets NO advisory. There used to be a
+          third, a sage "gentle pour" band under 40 mg reading "well
+          under the heads-up line — easy on the system", and the
+          argument against it is the one this comment ALREADY made
+          about the 40-129 range: a badge for an ordinary cup is a
+          gold-star sticker for drinking tea. Under 40 mg is no more a
+          finding than 80 is, and the bar's colour and the milligram
+          readout say it already, quietly, without the app
+          congratulating anyone.
+
+          What is left is a band that only appears when something has
+          changed — which is what makes it worth reading when it does. */}
       {(() => {
-        const gentle = mg > 0 && mg < CAFFEINE_GENTLE_MAX_MG;
         /* DESCRIBE THE CUP, don't grade the drinker. "Too much" and
            "over the line" are verdicts, and they're the app's opinion
            rather than its chemistry — plenty of people drink well past
@@ -191,20 +196,13 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
               tag: "strong cup",
               body: "a deliberate strong cup — one more part and it climbs.",
             }
-          : gentle
-          ? {
-              accent: "#627C5C",  // sageDeep
-              bg: "rgba(98, 124, 92, 0.08)",
-              tag: "gentle pour",
-              body: "well under the heads-up line — easy on the system.",
-            }
           : null;
         if (!advisory) return null;
         return (
           // Grows in. This band is the app noticing something — a cup
           // crossing into strong — and a notice that was simply always
           // there by the time you looked reads as a label, not a change.
-          <Arrival duration={240} style={{
+          <Arrival duration={240} data-testid="caffeine-advisory" style={{
             marginTop: 8,
             padding: "8px 10px 8px 12px",
             borderLeft: `2px solid ${advisory.accent}`,
@@ -1656,7 +1654,7 @@ export const BlendExtractionExplorer = ({
         // and masking/paradox/ceiling stay here.
         //
         // Caffeine-kind warnings are also filtered out — the caffeine
-        // bar's own advisory band (gentle / at-edge / over-the-line)
+        // bar's own advisory band (at-edge / over-the-line)
         // above this list now carries the caffeine signal in a more
         // structured form, so the prose warning here would duplicate it.
         /* Anything the palate strip already flags is dropped here.

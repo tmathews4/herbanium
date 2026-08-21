@@ -127,6 +127,39 @@ test.describe("a blend's caffeine", () => {
       `the tag says ${tagMg}mg and the gauge says ${gaugeMg}mg on the same page`)
       .toBeLessThan(0.25);
   });
+
+  test("says nothing extra about an ordinary cup", async ({ page }) => {
+    /* The gauge used to raise a sage "gentle pour" band under 40mg —
+       "well under the heads-up line, easy on the system". It is gone,
+       and the argument is the one the component already made about the
+       40-129mg range it stayed quiet on: a badge for an ordinary cup
+       is a gold-star sticker for drinking tea, and a band that appears
+       for most cups stops being worth reading on the one that matters.
+
+       Asserted on a cup that HAS caffeine, so the silence is a
+       decision rather than the band simply having nothing to fire on.
+       The advisory itself is not removed — it still speaks past the
+       heads-up line. */
+    /* A LIGHT CUP, not the chai. The band fired under 40mg, so a 60mg
+       blend cannot tell the two states apart — the first version of
+       this test used Masala Chai and passed with the band put back,
+       which is how it was caught. Moroccan Mint is the cup the removed
+       band actually spoke on. */
+    await openBlend(page, "Moroccan Mint");
+
+    const gauge = page.getByTestId("caffeine-load-mg");
+    await gauge.scrollIntoViewIfNeeded();
+    await expect(gauge).toBeVisible({ timeout: 15_000 });
+    const mg = Number((await gauge.innerText()).match(/(\d+)/)?.[1]);
+    expect(mg, "this cup should carry caffeine, or the silence proves nothing")
+      .toBeGreaterThan(0);
+    expect(mg, "and should be light enough that the removed band would have fired")
+      .toBeLessThan(40);
+
+    await expect(page.getByTestId("caffeine-advisory"),
+      `${mg}mg is an ordinary cup and should raise no advisory band`)
+      .toHaveCount(0);
+  });
 });
 
 test.describe("a blend's tags", () => {
