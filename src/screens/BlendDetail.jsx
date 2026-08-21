@@ -11,6 +11,7 @@ import {
   Button, SectionLabel, VocabInfoCard, FitOneLine,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import { nominalCaffeineMg } from "../algo/caffeine";
 import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";
 import { getBlend, sessionAgo, restHintForCelsius } from "../helpers/misc";
 import {
@@ -268,10 +269,11 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
             {/* Signal tag tiles — centered under the name/subtitle column,
                 not the full hero, so they read as belonging to the title. */}
             {(() => {
-          const caffeineMg = (b.ingredients || []).reduce((sum, ing) => {
-            const meta = INGREDIENTS[ing.id];
-            return sum + (meta?.caffeine || 0) * (ing.g || 0);
-          }, 0);
+          /* READ THE CONVERSION, don't restate it — meta.caffeine is
+             mg per CUP-DOSE and this used to multiply it by grams, so
+             the tag said 120mg on a chai whose caffeine gauge, further
+             down the very same page, said 60. See algo/caffeine.js. */
+          const caffeineMg = nominalCaffeineMg(b.ingredients);
           const flagged = (b.ingredients || []).some(ing => INGREDIENTS[ing.id]?.headsUp);
           const tags = [];
           if (caffeineMg > 0) {

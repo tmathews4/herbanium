@@ -24,6 +24,7 @@
 
 import { INGREDIENTS } from "./ingredients.js";
 import { getBlend } from "../helpers/misc.js";
+import { nominalCaffeineMg } from "../algo/caffeine.js";
 
 const RECENT_WINDOW = 20;
 
@@ -80,11 +81,11 @@ function buildWindow(sessions) {
     if (b.tradition) bump(ctx.byTradition, b.tradition);
     if (b.style) bump(ctx.byStyle, b.style);
     (b.ingredients || []).forEach(i => bump(ctx.byIngredient, i.id));
-    const caffeineMg = (b.ingredients || []).reduce((sum, i) => {
-      const meta = INGREDIENTS[i.id];
-      return sum + (meta?.caffeine || 0) * (i.g || 0);
-    }, 0);
-    if (caffeineMg > 0) ctx.caffeinated += 1;
+    /* Only ever asked whether it is above zero, so this third copy of
+       the mg-per-cup-dose formula never printed a wrong number — it
+       was multiplying by grams like the two that did. Reading the
+       helper keeps it from being the one that gets printed later. */
+    if (nominalCaffeineMg(b.ingredients) > 0) ctx.caffeinated += 1;
     else ctx.caffeineFree += 1;
   });
   ctx.maxRepeat = ctx.byBlendId.size > 0 ? Math.max(...ctx.byBlendId.values()) : 0;

@@ -10,6 +10,7 @@ import {
 } from "../data/blends.js";
 import { INGREDIENTS } from "../data/ingredients.js";
 import { TSP_BY_CATEGORY, REFERENCE_ML } from "../units/units.js";
+import { cupDosesFor } from "./caffeine.js";
 import { bestCoverageZone, bandTarget } from "./brewBounds.js";
 import { wouldCreateUnsafeCombination } from "../data/safety.js";
 
@@ -1531,9 +1532,11 @@ function resolveBlendAtBrewPerCup(ingredients, tempC, timeS, baselineTempC, base
   const rawCaffeineMg = poured.reduce((sum, { id, g }) => {
     const meta = INGREDIENTS[id];
     if (!meta || !meta.caffeine) return sum;
-    const perCup = TSP_BY_CATEGORY[meta.category] || 1.5;
-    const cupDoses = (g || 0) / perCup;
-    return sum + meta.caffeine * cupDoses * caffeineExtractionFactor(meta);
+    /* The grams -> cup-doses conversion is algo/caffeine.js's, not a
+       second copy here. It was a second copy: the shelf badge and the
+       heads-up tag kept the pre-fix formula and printed roughly double
+       what this line produced, on the same page. */
+    return sum + meta.caffeine * cupDosesFor(g, meta.category) * caffeineExtractionFactor(meta);
   }, 0);
   // Soft cap on cup-level caffeine. Past about 200 mg the linear
   // grams×mg/g sum stops being physically honest — diffusion at

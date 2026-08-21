@@ -91,6 +91,44 @@ test.describe("a blend's hero", () => {
   });
 });
 
+test.describe("a blend's caffeine", () => {
+  /* THE PAGE HAD TWO ANSWERS. The "caffeinated" tag at the top said
+     "about 120mg per cup" for the chai; the caffeine gauge further
+     down the same page said 60. `meta.caffeine` is mg per CUP-DOSE
+     and the tag multiplied it by grams — a mistake the engine had
+     already found and fixed inside itself, leaving the two display
+     sites with the old formula. Reported by reading one page.
+
+     tests/caffeine-display.test.mjs holds the conversion. This holds
+     the thing that was actually WRONG for the reader: the two numbers
+     on one screen agreeing.
+
+     Compared with slack rather than for equality, on purpose — the
+     gauge scales by how hot and how long you are brewing, the tag
+     describes the recipe at its recommended brew, and those are
+     legitimately a few mg apart. A doubling is not. */
+  test("says the same thing at the top of the page as at the bottom", async ({ page }) => {
+    await openBlend(page, BLEND);
+
+    await page.getByRole("button", { name: "caffeinated", exact: true }).click();
+    const summary = await page.getByTestId("vocab-info-card").innerText();
+    const tagMg = Number(summary.match(/about\s+(\d+)\s*mg/i)?.[1]);
+    expect(tagMg, `no milligram figure in the tag card: ${JSON.stringify(summary)}`)
+      .toBeGreaterThan(0);
+
+    const gauge = page.getByTestId("caffeine-load-mg");
+    await gauge.scrollIntoViewIfNeeded();
+    await expect(gauge).toBeVisible({ timeout: 15_000 });
+    const gaugeMg = Number((await gauge.innerText()).match(/(\d+)/)?.[1]);
+    expect(gaugeMg, "no milligram figure in the caffeine gauge").toBeGreaterThan(0);
+
+    const drift = Math.abs(tagMg - gaugeMg) / gaugeMg;
+    expect(drift,
+      `the tag says ${tagMg}mg and the gauge says ${gaugeMg}mg on the same page`)
+      .toBeLessThan(0.25);
+  });
+});
+
 test.describe("a blend's tags", () => {
   test("open a card that reads as prose, not as an object", async ({ page }) => {
     await openBlend(page, BLEND);

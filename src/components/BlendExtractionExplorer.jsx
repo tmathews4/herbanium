@@ -106,7 +106,7 @@ const CaffeineBar = ({ caffeineMg = 0, totalG = 0, totalTsp = 0, weightUnit = "g
               cup sits, and an alarm glyph on a strong tea told the
               drinker they'd done something wrong — which is a verdict,
               not a reading. */}
-          <span>{mg} mg</span>
+          <span data-testid="caffeine-load-mg">{mg} mg</span>
         </div>
       </div>
       <div style={{

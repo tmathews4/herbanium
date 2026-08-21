@@ -12,6 +12,7 @@ import {
   ChipRows, SectionLabel,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
+import { nominalCaffeineMg } from "../algo/caffeine";
 import { FLAVOR_FAMILY_CHIPS } from "../data/blends";
 import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import {
@@ -482,13 +483,11 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
   // traditional-rows-auto-brewing incident: a missing prop quietly routed
   // to startBrew and the wrong behavior shipped.)
   const handleTap = () => openBlend(b.id);
-  // Caffeine summary — total estimated mg in the cup, weighted by gram amount.
-  // Used to render a small "caf ~Xmg" badge alongside the blend name when > 0.
-  const caffeineMg = (b.ingredients || []).reduce((sum, ing) => {
-    const meta = INGREDIENTS[ing.id];
-    if (!meta || !meta.caffeine) return sum;
-    return sum + meta.caffeine * (ing.g || 0);
-  }, 0);
+  /* Caffeine summary for the "caf ~Xmg" badge. The conversion lives in
+     algo/caffeine.js because this file used to carry its own copy of
+     it, multiplying a per-cup-dose figure by grams — every badge on
+     the shelf read roughly double. */
+  const caffeineMg = nominalCaffeineMg(b.ingredients);
   const caffeineDisplay = caffeineMg > 0 ? Math.round(caffeineMg) : 0;
   return (
   <button
