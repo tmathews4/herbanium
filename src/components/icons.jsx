@@ -127,12 +127,12 @@ export const ThumbDown = ({ size = 18, c = theme.terra }) => (
 // TAXONOMY — it marks herbal and adaptogen ingredients across the
 // sheet, the detail screen and the library, and it's a badge in
 // ATTRIBUTE_GLYPHS besides. One mark meant "this is an herb" in the
-// catalogue and "this is you" in the tab bar. The pot is the whole
+// catalog and "this is you" in the tab bar. The pot is the whole
 // distinction: a cut specimen is a category, a planted one is yours.
 //
 // A CONSTELLATION WAS TRIED FIRST AND LOST TO MEASUREMENT, which is
 // worth recording because the argument for it was good. Profile's
-// centrepiece is TeaConstellation, so an icon of joined stars would
+// centerpiece is TeaConstellation, so an icon of joined stars would
 // have named the screen the way Kettle, Flask and Pencil name theirs.
 // Rendered at the size it actually ships at, four variants all failed:
 // a joined zigzag reads as a line chart, a hub-and-spokes reads as an
@@ -164,7 +164,7 @@ export const ThumbDown = ({ size = 18, c = theme.terra }) => (
 //
 // FILL THE BOX. The first version was drawn inside a smaller area than
 // the register uses and shipped looking underweight next to its
-// neighbours — reported as "a little small", and it was. Measured with
+// neighbors — reported as "a little small", and it was. Measured with
 // getBBox inside the 24×24 viewBox:
 //
 //   Kettle 18 × 18.5 = 333    Pencil 17 × 17   = 289

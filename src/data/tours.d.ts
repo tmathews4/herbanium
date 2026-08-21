@@ -14,7 +14,7 @@ export interface TourStep {
   spotlight?: string[];
   /** Elements that must stay on screen and out from under the callout. */
   keepClear?: string[];
-  /** Tour-only demo state: forces the flavour strips simple/detailed. */
+  /** Tour-only demo state: forces the flavor strips simple/detailed. */
   familyMode?: boolean;
   /** Tour-only demo state: forces the dock's brew row open or shut. */
   openControls?: boolean;

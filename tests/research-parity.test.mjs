@@ -31,17 +31,17 @@
       puts two opposed effects at the SAME brew point, the opposition
       isn't real and the app should have language for it.
 
-   2. THE FAMILY TREE IS WHOLE. Every effect and flavour token maps to
-      a family, and every family a token maps to has a colour and a
+   2. THE FAMILY TREE IS WHOLE. Every effect and flavor token maps to
+      a family, and every family a token maps to has a color and a
       slot in the display order. This is what "simple rolls up into
       detailed" depends on: Simple mode draws one bar per family and
       Detailed opens the leaves underneath, so a token with no family
-      is invisible in one mode and a family with no colour is drawn in
-      fallback grey.
+      is invisible in one mode and a family with no color is drawn in
+      fallback gray.
 
       Both halves have already failed in real life — "settle" had no
       family, and splitting soothing/grounding/uplifting out needed
-      three new colours and three order slots that nothing would have
+      three new colors and three order slots that nothing would have
       caught.
 
    Run: node tests/research-parity.test.mjs
@@ -61,7 +61,7 @@ import {
 import { EFFECT_DESCRIPTIONS } from "../src/data/vocabularyDescriptions.js";
 import { severeDrift, driftKey, strengthDrift, UNPAIRABLE, UNPAIRABLE_CLASS } from "../tools/lib/strength-drift.mjs";
 import { undescribedOppositions } from "../tools/lib/opposition.mjs";
-import { flavourFamilyGaps, flavourGapKey } from "../tools/lib/flavour-parity.mjs";
+import { flavorFamilyGaps, flavorGapKey } from "../tools/lib/flavor-parity.mjs";
 import { tooCloseToTell, MIN_DELTA_E } from "../tools/lib/palette.mjs";
 import { census, INVENTION_RATIO } from "../tools/audit-vocabulary.mjs";
 import { outsideResearchedRange, paramKey, isDeliberate } from "../tools/lib/brew-params.mjs";
@@ -84,7 +84,7 @@ console.log("Research parity + family-tree integrity\n");
 // app's word wins because it's the one the user meets; see CLAUDE.md.
 //
 // `warming -> comfort` USED TO BE HERE and has been retired. They are
-// two different claims, and the catalogue's own research says so most
+// two different claims, and the catalog's own research says so most
 // clearly under ginger: warming 5 is "genuine TRPV1-agonist warming,
 // distinct from caffeine-driven warming or simply hot-drink warmth",
 // and soothing is rated SEPARATELY as its consequence ("the warming
@@ -184,7 +184,7 @@ test("no ingredient ships an effect its research doesn't prescribe", () => {
 });
 
 // Docs that deliberately describe a CATEGORY rather than one shipped
-// ingredient. green-tea.md covers green tea as a class; the catalogue
+// ingredient. green-tea.md covers green tea as a class; the catalog
 // ships sencha, dragonwell, gunpowder and the rest individually.
 const CATEGORY_DOCS = new Set(["green-tea"]);
 
@@ -265,7 +265,7 @@ test("every effect token in the extraction data has a family", () => {
     `effect tokens with no family — Simple mode can't draw them:\n    ${[...orphans].join("\n    ")}`);
 });
 
-test("every flavour token in the extraction data has a family", () => {
+test("every flavor token in the extraction data has a family", () => {
   const orphans = new Set();
   for (const [id, samples] of Object.entries(EXTRACTION_PROFILES)) {
     for (const sample of samples) {
@@ -277,12 +277,12 @@ test("every flavour token in the extraction data has a family", () => {
     }
   }
   assert(orphans.size === 0,
-    `flavour tokens with no family:\n    ${[...orphans].join("\n    ")}`);
+    `flavor tokens with no family:\n    ${[...orphans].join("\n    ")}`);
 });
 
 test("every declared ingredient effect has a family", () => {
   // The ingredient page reads these directly, so an orphan here shows
-  // as an uncoloured row rather than as nothing.
+  // as an uncolored row rather than as nothing.
   const orphans = new Set();
   for (const [id, meta] of Object.entries(INGREDIENTS)) {
     for (const e of meta.effects || []) {
@@ -297,7 +297,7 @@ test("every declared ingredient effect has a family", () => {
 
 // Every other guard here checks what a cup CLAIMS. This one checks the
 // numbers the app tells you to brew at, which is the most directly
-// user-facing data in the catalogue and the only place where being
+// user-facing data in the catalog and the only place where being
 // wrong makes a worse cup rather than a wrong label. Nothing checked
 // it until the unpairable-brew-point count made the grids visible.
 //
@@ -357,15 +357,15 @@ test("the known-over-ceiling list has no stale entries", () => {
     `no longer over the ceiling — remove from KNOWN_OVER_CEILING:\n    ${stale.join("\n    ")}`);
 });
 
-// ── 1f. Flavour the research names and the cup doesn't show ──────
+// ── 1f. Flavor the research names and the cup doesn't show ──────
 
 // The drift audit compared EFFECTS in both directions from the day it
-// was written and never looked at flavours. Sixteen sat prescribed in
+// was written and never looked at flavors. Sixteen sat prescribed in
 // §6 rows and absent from every profile, and were found by hand
 // through the unreachable audit rather than reported. This is that
 // blind spot closed.
 //
-// Family-level on purpose: flavour leaf words are near-synonyms in a
+// Family-level on purpose: flavor leaf words are near-synonyms in a
 // way effect words aren't. Lapsang's doc says `smoky` and its profile
 // says `smoked`; linden's doc says `honey-sweet` and its profile says
 // `honey`. Those are the same claim, and comparing leaves reports them
@@ -379,19 +379,19 @@ const KNOWN_FLAVOUR_GAPS = new Set([
   "tulsi:fruit", "tulsi:vegetal", "yerba-mate:fresh",
 ]);
 
-test("no new flavour family goes missing from the cup", () => {
-  const fresh = flavourFamilyGaps(EXTRACTION_PROFILES)
-    .filter(g => !KNOWN_FLAVOUR_GAPS.has(flavourGapKey(g)))
+test("no new flavor family goes missing from the cup", () => {
+  const fresh = flavorFamilyGaps(EXTRACTION_PROFILES)
+    .filter(g => !KNOWN_FLAVOUR_GAPS.has(flavorGapKey(g)))
     .map(g => `${g.id}: research names ${g.family} (${g.words.join(", ")}), no cup shows it`);
   assert(fresh.length === 0,
-    `flavour families the research names and the cup doesn't:\n    ${fresh.join("\n    ")}`);
+    `flavor families the research names and the cup doesn't:\n    ${fresh.join("\n    ")}`);
 });
 
-test("the known-flavour-gap list has no stale entries", () => {
-  const live = new Set(flavourFamilyGaps(EXTRACTION_PROFILES).map(flavourGapKey));
+test("the known-flavor-gap list has no stale entries", () => {
+  const live = new Set(flavorFamilyGaps(EXTRACTION_PROFILES).map(flavorGapKey));
   const stale = [...KNOWN_FLAVOUR_GAPS].filter(k => !live.has(k));
   assert(stale.length === 0,
-    `these flavour families now reach the cup — remove from KNOWN_FLAVOUR_GAPS:\n    ${stale.join("\n    ")}`);
+    `these flavor families now reach the cup — remove from KNOWN_FLAVOUR_GAPS:\n    ${stale.join("\n    ")}`);
 });
 
 // ── 1d. Vocabulary the app invented ──────────────────────────────
@@ -619,7 +619,7 @@ test("every family label resolves to a vocabulary description", () => {
     `family labels with no description entry: ${missing.join(", ")}`);
 });
 
-// Family colours that read as the same band at a glance. All of these
+// Family colors that read as the same band at a glance. All of these
 // are the green cluster — calm, soothing, grounding, body — which are
 // semantically adjacent registers, so a viewer confusing two of them
 // is confusing two related things. That's a different and much smaller
@@ -627,8 +627,8 @@ test("every family label resolves to a vocabulary description", () => {
 //
 // `immune` was added at #7FA3A0 and landed ΔE 6.7 from `focus`: two
 // unrelated registers, indistinguishable side by side. Nothing caught
-// it because colour had never been measured, only chosen. It's indigo
-// now, ΔE 24-30 from its nearest neighbour.
+// it because color had never been measured, only chosen. It's indigo
+// now, ΔE 24-30 from its nearest neighbor.
 const KNOWN_CLOSE_COLOURS = new Set([
   "light:digestive/grounding", "light:calm/grounding", "light:calm/soothing",
   "light:cool/focus",
@@ -637,15 +637,15 @@ const KNOWN_CLOSE_COLOURS = new Set([
   "dark:energy/uplifting", "dark:grounding/soothing",
 ]);
 
-test("no two effect families are the same colour to look at", () => {
+test("no two effect families are the same color to look at", () => {
   const fresh = tooCloseToTell()
     .filter(p => !KNOWN_CLOSE_COLOURS.has(p.key))
     .map(p => `${p.key} — ΔE ${p.dE.toFixed(1)}, below ${MIN_DELTA_E}`);
   assert(fresh.length === 0,
-    `family colours too close to tell apart:\n    ${fresh.join("\n    ")}`);
+    `family colors too close to tell apart:\n    ${fresh.join("\n    ")}`);
 });
 
-test("the known-close-colour list has no stale entries", () => {
+test("the known-close-color list has no stale entries", () => {
   const live = new Set(tooCloseToTell().map(p => p.key));
   const stale = [...KNOWN_CLOSE_COLOURS].filter(k => !live.has(k));
   assert(stale.length === 0,
@@ -658,18 +658,18 @@ test("every picker chip points at a family that exists", () => {
   // that no longer exists is a filter that silently matches nothing,
   // and nothing else in the suite looks at it.
   //
-  // Renaming the flavour family `body` to `mouthfeel` broke the Creamy
+  // Renaming the flavor family `body` to `mouthfeel` broke the Creamy
   // chip exactly this way, and every test stayed green. Caught by
   // grepping for stragglers, which is not a method.
-  const flavourFamilies = new Set(Object.values(FAMILY_BY_FLAVOR));
-  const badFlavour = FLAVOR_FAMILY_CHIPS
-    .filter(c => !flavourFamilies.has(c.family))
-    .map(c => `flavour chip "${c.label}" -> ${c.family}`);
+  const flavorFamilies = new Set(Object.values(FAMILY_BY_FLAVOR));
+  const badFlavor = FLAVOR_FAMILY_CHIPS
+    .filter(c => !flavorFamilies.has(c.family))
+    .map(c => `flavor chip "${c.label}" -> ${c.family}`);
   const effectFamilies = new Set(Object.values(FAMILY_BY_EFFECT));
   const badMood = PARENT_MOODS
     .filter(m => !effectFamilies.has(m.family))
     .map(m => `mood chip "${m.label}" -> ${m.family}`);
-  const bad = [...badFlavour, ...badMood];
+  const bad = [...badFlavor, ...badMood];
   assert(bad.length === 0,
     `picker chips aimed at families that don't exist:\n    ${bad.join("\n    ")}`);
 });
@@ -713,11 +713,11 @@ test("target pickers still offer both categories", () => {
     `target pickers lost a category — offering only ${[...cats].join(", ")}`);
 });
 
-test("every effect family has a colour", () => {
+test("every effect family has a color", () => {
   const families = new Set(Object.values(FAMILY_BY_EFFECT));
   const missing = [...families].filter(f => !EFFECT_FAMILY_COLORS[f]);
   assert(missing.length === 0,
-    `families drawn in fallback grey: ${missing.join(", ")}`);
+    `families drawn in fallback gray: ${missing.join(", ")}`);
 });
 
 test("every effect family has a slot in the display order", () => {
@@ -734,8 +734,8 @@ test("the display order has no families that don't exist", () => {
   assert(ghosts.length === 0, `ordered but unreachable: ${ghosts.join(", ")}`);
 });
 
-test("every family colour resolves to a defined CSS variable", () => {
-  // The colours are var(--effect-x) strings; a var with no definition
+test("every family color resolves to a defined CSS variable", () => {
+  // The colors are var(--effect-x) strings; a var with no definition
   // silently renders as nothing at all.
   const css = readFileSync(resolve(__dirname, "../src/index.css"), "utf8");
   const missing = [];
@@ -752,7 +752,7 @@ test("every unpairable reason has a disposition", () => {
   // UNPAIRABLE_CLASS. A reason with no entry prints in neither the
   // worklist nor the excluded list — it just isn't there, and the
   // report reads as complete because nothing indicates a row is
-  // missing. Same failure as a colour map still keyed on a vocabulary
+  // missing. Same failure as a color map still keyed on a vocabulary
   // that moved: the gap is invisible precisely because the file looks
   // finished. Adding a code without deciding what to do about it
   // should fail here, not go quiet.

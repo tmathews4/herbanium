@@ -104,17 +104,17 @@ export const formatAmount = (g, category, weightUnit = "tsp") => {
 
    WHY THIS EXISTS. Parts used to be grams outright, so "5 parts
    assam : 1 part peppermint" built a 6g pot — 3.33 cups' worth of
-   leaf in one cup. Every strong flavour then sat at its ceiling and
+   leaf in one cup. Every strong flavor then sat at its ceiling and
    the strip went flat (malty 5.00, bold 5.00, minty 5.00, unable to
    say which led). Reported as "that feels wrong", and it was, but not
    where it looked: the readings were right and the pour was heavy.
-   The same ratio normalised to one cup reads malty 3.48, minty 1.52 —
+   The same ratio normalized to one cup reads malty 3.48, minty 1.52 —
    assam leading, mint an accent.
 
    A FIXED SET, not a free-form total — that would re-open the exact
    hole this closes. Each entry is a named vessel someone actually
    pours into, and `doses` is `ml / REFERENCE_ML` by construction:
-   every profile in the catalogue is written per 200 ml ("1 tsp ·
+   every profile in the catalog is written per 200 ml ("1 tsp ·
    200ml"), so a vessel's dose count is just how many reference cups
    of water it holds. `tests/pour-parts.test.mjs` derives that from
    this table rather than restating it, so a size added with mismatched
@@ -136,7 +136,7 @@ export const POUR_SIZES = {
 export const pourDoses = (pour) => POUR_SIZES[pour]?.doses ?? 1;
 
 /**
- * Turn a parts ratio into grams, normalised so the whole pot comes to
+ * Turn a parts ratio into grams, normalized so the whole pot comes to
  * `pour`'s worth of leaf.
  *
  * `entries` is [{ id, parts }]; `gramsPerCup` resolves an id to what a

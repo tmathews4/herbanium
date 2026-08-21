@@ -4,7 +4,7 @@
 // fill is drawn as a wash over the UNCHARGED portion, translated up as
 // charge grows, so the charged part stays the true crystal. None of
 // that is visible to a screenshot diff in any stable way (the crystal's
-// colour and pattern are computed from session data and change between
+// color and pattern are computed from session data and change between
 // loads), so the geometry is asserted directly.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
@@ -12,7 +12,7 @@ import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
 // Seed a mood profile straight into sessions. computeMoodCrystal reads
 // currentMoods/targetMoods/actual off recent sessions, so a handful of
 // same-mood cups is enough to pin the crystal's primary family — and
-// therefore its colour — deterministically.
+// therefore its color — deterministically.
 function sessionsFor(moods: string[], count = 6) {
   const now = Date.now();
   return Array.from({ length: count }, (_, i) => ({
@@ -95,8 +95,8 @@ test.describe("lodestone charge fill", () => {
 });
 
 /* ──────────────────────────────────────────────────────────────
-   The crystal's colour is computed from the user's recent moods and
-   flavours — it's the visible face of the same signal that biases the
+   The crystal's color is computed from the user's recent moods and
+   flavors — it's the visible face of the same signal that biases the
    elemental roller. Worth pinning: it's easy to break by touching the
    family maps, and nothing else in the suite would notice.
 
@@ -105,7 +105,7 @@ test.describe("lodestone charge fill", () => {
    (Threaded / Veined / Dotted all vary per profile).
    ────────────────────────────────────────────────────────────── */
 
-// Every colour the crystal's body gradient is built from.
+// Every color the crystal's body gradient is built from.
 const gradientColors = (page: Page) => page.evaluate(() => {
   const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
   const stops = stone.querySelectorAll('svg defs linearGradient stop, svg defs radialGradient stop');
@@ -114,11 +114,11 @@ const gradientColors = (page: Page) => page.evaluate(() => {
     .filter(c => c.startsWith("#"));
 });
 
-test.describe("lodestone colour follows the mood profile", () => {
+test.describe("lodestone color follows the mood profile", () => {
   // Straight from CRYSTAL_EFFECT_COLORS in data/moodCrystal.js.
   // Seeded with "calm" alone, not calm + soothing: those are separate
   // families now (see data/families.js), so the old pair was a coin
-  // toss between two colours that happened to land on calm.
+  // toss between two colors that happened to land on calm.
   const CALM = "#4DEB7E";   // neon spring-green
   const SLEEP = "#C77FFF";  // neon amethyst
   const ENERGY = "#FFC318"; // saturated amber-yellow
@@ -128,12 +128,12 @@ test.describe("lodestone colour follows the mood profile", () => {
   // its neutral palette, which is a silently passing test waiting to
   // happen. "drowsy" and "alert" aren't in the map; "sleepy" and
   // "energy" are.
-  test("a calm profile renders a calm-coloured crystal", async ({ page }) => {
+  test("a calm profile renders a calm-colored crystal", async ({ page }) => {
     await openFieldNotes(page, 0, ["calm"]);
     expect(await gradientColors(page), "calm should drive the crystal green").toContain(CALM);
   });
 
-  test("a sleep profile renders a different colour than a calm one", async ({ page }) => {
+  test("a sleep profile renders a different color than a calm one", async ({ page }) => {
     await openFieldNotes(page, 0, ["sleepy"]);
     const colors = await gradientColors(page);
     expect(colors, "sleep should drive the crystal amethyst").toContain(SLEEP);
@@ -154,15 +154,15 @@ test.describe("lodestone colour follows the mood profile", () => {
     // asserting determinism it never had.
     //
     // The invariant that matters is structural — the charge fill paints
-    // with the card surface colour in its own clipped group, and never
+    // with the card surface color in its own clipped group, and never
     // touches the body gradient. A charged stone has to stay the user's
-    // own mood colour, or the meter would be lying about their moods.
+    // own mood color, or the meter would be lying about their moods.
     await openFieldNotes(page, 50, ["calm"]);
     const layers = await page.evaluate(() => {
       const stone = document.querySelector('[data-tour="fieldnotes-lodestone"]')!;
       const wash = stone.querySelector('[data-crystal-layer="charge-wash"] rect') as SVGRectElement;
       // The crystal's OWN gradients — the body and its emit core. The
-      // sweep's gradient is decoration painted in the surface colour on
+      // sweep's gradient is decoration painted in the surface color on
       // purpose, so including it would make this assert the opposite of
       // what it means.
       const stops = Array.from(
@@ -199,7 +199,7 @@ test.describe("lodestone colour follows the mood profile", () => {
    The offsets are the ones that regressed: +-46px horizontally and 52px
    up all missed before the transparent hit layer and hit after. */
 test.describe("the lodestone's summon target", () => {
-  test("answers across the glow, not only at its centre", async ({ page }) => {
+  test("answers across the glow, not only at its center", async ({ page }) => {
     await openFieldNotes(page, 0);
     const stone = page.getByTestId("lodestone-summon");
     // summonReady waits out PULSE_HOLD_MS (2.2s) before the stone offers
@@ -216,12 +216,12 @@ test.describe("the lodestone's summon target", () => {
         const hit = document.elementFromPoint(cx + dx, cy + dy);
         return !!hit && (hit === el || el.contains(hit));
       };
-      return { centre: at(0, 0), up: at(0, -52), left: at(-46, 0), right: at(46, 0) };
+      return { center: at(0, 0), up: at(0, -52), left: at(-46, 0), right: at(46, 0) };
     });
 
-    expect(reach.centre, "the middle of the stone must take a tap").toBe(true);
-    expect(reach.up, "52px above centre is inside the glow and must take a tap").toBe(true);
-    expect(reach.left, "46px left of centre must take a tap").toBe(true);
-    expect(reach.right, "46px right of centre must take a tap").toBe(true);
+    expect(reach.center, "the middle of the stone must take a tap").toBe(true);
+    expect(reach.up, "52px above center is inside the glow and must take a tap").toBe(true);
+    expect(reach.left, "46px left of center must take a tap").toBe(true);
+    expect(reach.right, "46px right of center must take a tap").toBe(true);
   });
 });

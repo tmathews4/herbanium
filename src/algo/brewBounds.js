@@ -213,7 +213,7 @@ export function unionAndPadTimeRange(ingredients, INGREDIENTS, timeReach = null)
        NO GLOBAL FLOOR, deliberately. Sending every slider to a fixed 8
        minutes would run 29 of 52 ingredients past their last measured
        row, where the interpolated curve holds its last value — the
-       slider travels and the flavour bars stand still. The warnings do
+       slider travels and the flavor bars stand still. The warnings do
        keep responding out there, so the cup is not un-evaluated; it is
        un-described, which is still the wrong trade when watching the
        cup change is the point. The way to lengthen those is to write
@@ -310,7 +310,7 @@ export function alongProfile(rows, from, to, value) {
  * Each ingredient's profile answers "at this temperature, I want this
  * long" on its own; the blend's window is the span those answers
  * cover. A single-ingredient cup would otherwise collapse to a point,
- * so the result is widened to `minSpan` around its centre — a
+ * so the result is widened to `minSpan` around its center — a
  * recommendation you can't move inside is decoration, which is the bug
  * that started this.
  *
@@ -338,7 +338,7 @@ export function coupledBand({ ingredients, profiles, axis, otherValue, within, m
     .filter(v => v != null && Number.isFinite(v));
   if (ideals.length === 0) return null;
 
-  /* CENTRED ON THE IDEALS, SIZED BY THEIR SPREAD, CLIPPED TO THE
+  /* CENTERED ON THE IDEALS, SIZED BY THEIR SPREAD, CLIPPED TO THE
      AGREEMENT.
 
      Simply intersecting the ideals with the agreed window looked
@@ -350,13 +350,13 @@ export function coupledBand({ ingredients, profiles, axis, otherValue, within, m
      that only moves sometimes is worse than one that never does,
      because you can't tell which you're looking at.
 
-     Centring keeps it tracking: the middle follows the leaves' answers
+     Centering keeps it tracking: the middle follows the leaves' answers
      even when those answers are off the end, while the clip still
      guarantees it never recommends outside what they agree on. */
-  const centre = Math.max(wLo, Math.min(wHi, (Math.min(...ideals) + Math.max(...ideals)) / 2));
+  const center = Math.max(wLo, Math.min(wHi, (Math.min(...ideals) + Math.max(...ideals)) / 2));
   const half = Math.max(minSpan / 2, (Math.max(...ideals) - Math.min(...ideals)) / 2);
-  const lo = Math.max(wLo, centre - half);
-  const hi = Math.min(wHi, centre + half);
+  const lo = Math.max(wLo, center - half);
+  const hi = Math.min(wHi, center + half);
   if (hi <= lo) return [wLo, wHi];
   return [lo, hi];
 }
@@ -559,7 +559,7 @@ export function windowConflict(items, axis) {
 
 /**
  * Where inside a band a "put me on the recommendation" tap should land:
- * the centre of it.
+ * the center of it.
  *
  * NO CLAMP HERE, and that is the point. This used to stop short of the
  * earliest-closing window on the time axis, borrowing the rule

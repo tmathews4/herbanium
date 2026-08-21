@@ -50,8 +50,8 @@ export const SCREEN_TOURS = {
        The slider step demos too, but its spotlight is on the SLIDERS \u2014
        the strips sit dimmed behind the cutout while they change, so a
        reader watching the highlight never sees them move. Reported
-       exactly that way: "we never show that behaviour directly now,
-       they're greyed out changing in back."
+       exactly that way: "we never show that behavior directly now,
+       they're grayed out changing in back."
 
        AND THE ROW STAYS FOLDED HERE, which was got wrong once in each
        direction and is worth writing down properly.
@@ -79,7 +79,7 @@ export const SCREEN_TOURS = {
        step declares Time, which is where it can actually take effect. */
     { target: "blend-graph", title: "The prediction", pad: 6,
       familyMode: true, demo: true,
-      body: "What the cup tastes like \u2014 its flavours, and the palate underneath them." },
+      body: "What the cup tastes like \u2014 its flavors, and the palate underneath them." },
     { target: "blend-effects", title: "What it does", pad: 8,
       familyMode: true, demo: true,
       body: "And what it does to you. Mind is what you'd notice \u2014 calm, focus, a lift. Body is what it works on \u2014 the throat, the gut, warmth." },
@@ -92,7 +92,7 @@ export const SCREEN_TOURS = {
     // (see blendTourFamilyMode in App.jsx); both steps light the bars
     // alongside the toggle, because what the toggle DOES is the lesson.
     //
-    // The FLAVOUR strip only, not the whole graph. The toggle drives
+    // The FLAVOR strip only, not the whole graph. The toggle drives
     // FlavorMap alone — PalateMap takes no familyMode, and its rows read
     // the same in both modes — so lighting the palate too promised a
     // change in a strip that never changes.
@@ -176,12 +176,12 @@ export const SCREEN_TOURS = {
       spotlight: ["blend-controls", "blend-sliders"], axisMode: "tempC",
       body: "And Temp \u2014 how hot the water is. The slider swaps with the pill; whichever you're not holding keeps its value." },
     // The recommended band. It sits right under the track and reads as
-    // decoration until someone says otherwise — a coloured stripe among
-    // coloured stripes. Placed straight after the drag, while the user
+    // decoration until someone says otherwise — a colored stripe among
+    // colored stripes. Placed straight after the drag, while the user
     // is still looking at the slider they just moved.
     //
     // openControls because the band only renders inside the open panel.
-    // The recommendation is painted INTO the track now — a coloured
+    // The recommendation is painted INTO the track now — a colored
     // stretch of the rail rather than a band beneath it — so the copy
     // points at the rail.
     //
@@ -189,7 +189,7 @@ export const SCREEN_TOURS = {
     // shape as the pills step and the Brew step, and for the same
     // reason: the cutout says WHERE YOU ARE, and the terra pulse says
     // which part of it to look at. A cutout drawn tight around the
-    // coloured stretch alone lifted a span of rail out of the panel it
+    // colored stretch alone lifted a span of rail out of the panel it
     // belongs to, so the one control the step is about — the slider it
     // is painted on — sat outside the light while being described.
     //
@@ -214,7 +214,7 @@ export const SCREEN_TOURS = {
     { target: "blend-ranges", title: "The recommended range", pad: 6, openControls: true,
       spotlight: ["blend-controls", "blend-sliders"],
       familyMode: true,
-      body: "The coloured stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath to go straight there." },
+      body: "The colored stretch of the slider is where these leaves agree \u2014 brew inside it and every ingredient is working. It shifts as you change the other dial. Tap the word beneath to go straight there." },
     // Lights the WHOLE brew window and pulses the button inside it —
     // the same shape as the pills step. The window is what you've been
     // setting up across the last four steps; Brew is what you do with
@@ -271,11 +271,11 @@ export const SCREEN_TOURS = {
     { target: "fieldnotes-lodestone", title: "The lodestone", pad: 8,
       body: "Spirits are drawn in by how you brew and write. The stone fills as you go, and a full stone always draws one in — tap it to summon what's waiting." },
     { target: "lodestone-details", title: "Look closer", pad: 8,
-      body: "The stone's colour is your own — mixed from the moods and flavours of your recent cups. Open this to see what it's made of." },
+      body: "The stone's color is your own — mixed from the moods and flavors of your recent cups. Open this to see what it's made of." },
     // Targets a control that only exists inside the expanded panel;
     // MoodCrystal opens the panel for this step (the overlay swallows
     // taps, so the user can't do it themselves mid-tour).
     { target: "lodestone-lock", title: "Keep this one", pad: 8,
-      body: "Fond of the colour you've got? Lock it here and the stone holds that composition instead of drifting with your next few cups. Unlock any time to let it track again." },
+      body: "Fond of the color you've got? Lock it here and the stone holds that composition instead of drifting with your next few cups. Unlock any time to let it track again." },
   ],
 };

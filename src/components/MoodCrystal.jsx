@@ -197,15 +197,15 @@ const CrystalShape = ({ gradient, idSuffix, pattern = "Threaded", patternColor, 
       {/* Charge level — the stone fills from the base as it charges.
           Drawn as a wash over the UNCHARGED part rather than a tint
           over the charged part. Tinting the filled portion with the
-          crystal's own colour just floods it and erases the secondary
+          crystal's own color just floods it and erases the secondary
           hue: at two-thirds the whole stone read as "greener", not as
-          "two-thirds full", and a same-colour surface line was
+          "two-thirds full", and a same-color surface line was
           invisible. Washing toward the card surface instead leaves the
           charged portion as the true crystal, which is the half the
           user should be looking at, and puts a legible boundary
           between pale and vivid.
 
-          The wash colour is theme.cream — a CSS variable — so it
+          The wash color is theme.cream — a CSS variable — so it
           lightens on paper and darkens in the forest-noir dark theme
           instead of always washing white.
 

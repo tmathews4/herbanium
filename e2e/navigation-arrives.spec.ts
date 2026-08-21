@@ -12,7 +12,7 @@
 // about it is hidden.
 //
 // So the check has to be about what the USER can reach: the destination
-// must be the topmost thing at its own centre point. document
+// must be the topmost thing at its own center point. document
 // .elementFromPoint answers exactly that question and nothing else does.
 import { test, expect, type Page } from "@playwright/test";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion";
@@ -36,7 +36,7 @@ async function boot(page: Page) {
  * Is this element the thing under the finger, or is something over it?
  *
  * Returns the tag/testid of whatever is actually on top at the target's
- * centre, so a failure names the culprit instead of just saying "no".
+ * center, so a failure names the culprit instead of just saying "no".
  */
 async function whatIsOnTopOf(page: Page, selector: string) {
   return page.evaluate((sel) => {
@@ -47,7 +47,7 @@ async function whatIsOnTopOf(page: Page, selector: string) {
     const x = Math.round(r.left + r.width / 2);
     const y = Math.round(r.top + Math.min(r.height / 2, 120));
     const top = document.elementFromPoint(x, y);
-    if (!top) return { reached: false, why: "nothing at its centre point" };
+    if (!top) return { reached: false, why: "nothing at its center point" };
     if (el.contains(top) || top.contains(el)) return { reached: true, why: "" };
     // Name the blocker as helpfully as we can.
     let node: Element | null = top;

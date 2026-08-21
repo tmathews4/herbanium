@@ -599,7 +599,7 @@ export const EXTRACTION_PROFILES = {
     // gallic acid), so bitterness climbs and cocoa, a volatile
     // top-note, is gone rather than merely reduced.
     // EXPLICIT STRENGTHS, because the curve IS the lesson. Index-derived
-    // strengths cap a diagnostic flavour at 3, which would put
+    // strengths cap a diagnostic flavor at 3, which would put
     // astringency at 3 here AND at 3 in the row below — a flat top,
     // nothing to read, and an over-pull point that teaches nothing.
     // tests/calibration.test.mjs fails exactly that shape, and caught
@@ -718,7 +718,7 @@ export const EXTRACTION_PROFILES = {
     // root and the brew view showed neither. Grounding at the gentle
     // point and the standard cup's temperature were also off.
     /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
-       formula couldn't express it. Diagnostic flavours (bitter,
+       formula couldn't express it. Diagnostic flavors (bitter,
        astringent, tannic...) get their strength from ROW INDEX,
        capped at 3 — so any profile carrying `bitter` in its top two
        rows reads identically in both, and this ingredient's whole
@@ -727,7 +727,7 @@ export const EXTRACTION_PROFILES = {
        brewed to the end of its window scored the same, so it could
        neither stop firing nor start.
 
-       Four profiles in the catalogue hit that, all of them long
+       Four profiles in the catalog hit that, all of them long
        decoctions whose bitter appears late: turmeric, valerian,
        reishi, ashwagandha. Pre-declared flavorStrengths are the
        format's own way out (see annotateFlavorStrengths), so the
@@ -740,7 +740,7 @@ export const EXTRACTION_PROFILES = {
        a climb across it is exactly the signal the warning needs, and
        no invented over-pull row is required to produce one.
 
-       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       The numbers here are DIVIDED BY THE FLAVOR'S LOUDNESS, because
        the doc's "Basic tastes" describe the cup you drink and this
        field stores what goes in before the engine amplifies it —
        bitter carries a loudness of 1.8, so a stored 3 arrives as a
@@ -768,7 +768,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["warming", 0.4]],
       character: "Cold-pour turmeric — pale yellow water, curcumin still locked in the rhizome's fat-soluble fraction." },
     /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
-       formula couldn't express it. Diagnostic flavours (bitter,
+       formula couldn't express it. Diagnostic flavors (bitter,
        astringent, tannic...) get their strength from ROW INDEX,
        capped at 3 — so any profile carrying `bitter` in its top two
        rows reads identically in both, and this ingredient's whole
@@ -777,7 +777,7 @@ export const EXTRACTION_PROFILES = {
        brewed to the end of its window scored the same, so it could
        neither stop firing nor start.
 
-       Four profiles in the catalogue hit that, all of them long
+       Four profiles in the catalog hit that, all of them long
        decoctions whose bitter appears late: turmeric, valerian,
        reishi, ashwagandha. Pre-declared flavorStrengths are the
        format's own way out (see annotateFlavorStrengths), so the
@@ -790,7 +790,7 @@ export const EXTRACTION_PROFILES = {
        a climb across it is exactly the signal the warning needs, and
        no invented over-pull row is required to produce one.
 
-       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       The numbers here are DIVIDED BY THE FLAVOR'S LOUDNESS, because
        the doc's "Basic tastes" describe the cup you drink and this
        field stores what goes in before the engine amplifies it —
        bitter carries a loudness of 1.8, so a stored 3 arrives as a
@@ -917,7 +917,7 @@ export const EXTRACTION_PROFILES = {
       effects: [["calm", 0.6]],
       character: "Cold-pour valerian — barely any funk, the valerenic acid waiting for heat." },
     /* BITTERNESS TRANSCRIBED FROM THE DOC, because the default
-       formula couldn't express it. Diagnostic flavours (bitter,
+       formula couldn't express it. Diagnostic flavors (bitter,
        astringent, tannic...) get their strength from ROW INDEX,
        capped at 3 — so any profile carrying `bitter` in its top two
        rows reads identically in both, and this ingredient's whole
@@ -926,7 +926,7 @@ export const EXTRACTION_PROFILES = {
        brewed to the end of its window scored the same, so it could
        neither stop firing nor start.
 
-       Four profiles in the catalogue hit that, all of them long
+       Four profiles in the catalog hit that, all of them long
        decoctions whose bitter appears late: turmeric, valerian,
        reishi, ashwagandha. Pre-declared flavorStrengths are the
        format's own way out (see annotateFlavorStrengths), so the
@@ -939,7 +939,7 @@ export const EXTRACTION_PROFILES = {
        a climb across it is exactly the signal the warning needs, and
        no invented over-pull row is required to produce one.
 
-       The numbers here are DIVIDED BY THE FLAVOUR'S LOUDNESS, because
+       The numbers here are DIVIDED BY THE FLAVOR'S LOUDNESS, because
        the doc's "Basic tastes" describe the cup you drink and this
        field stores what goes in before the engine amplifies it —
        bitter carries a loudness of 1.8, so a stored 3 arrives as a

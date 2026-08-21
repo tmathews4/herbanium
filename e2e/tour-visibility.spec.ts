@@ -7,7 +7,7 @@
 // the failure this exists for is an element that is both, and covered.
 //
 // The blend tour's last step is why. The page scrolls UNDER the glass dock now, so
-// `scrollIntoView({ block: "center" })` centres a target within a pane
+// `scrollIntoView({ block: "center" })` centers a target within a pane
 // whose lower third is behind the menu. The last step of the blend tour
 // was highlighted, scrolled to, and sitting underneath the tab bar.
 //

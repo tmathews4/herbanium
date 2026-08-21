@@ -173,7 +173,7 @@ test("a leaf that HAS a bitter register speaks up when pushed past its window", 
 
 test("no profile's bitterness is flat across its top two rows", () => {
   /* The data half, checked at the source rather than through the cup.
-     The index-derived strength caps diagnostic flavours at 3, so a
+     The index-derived strength caps diagnostic flavors at 3, so a
      profile carrying one in both of its last two rows has no curve
      left to read — which is what pinned these four. Pre-declared
      flavorStrengths are the way out; this fails if anyone adds a

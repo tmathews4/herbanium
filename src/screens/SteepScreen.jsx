@@ -765,7 +765,7 @@ export const SteepScreen = ({ blend, intent, setIntent, targetMoods, setTargetMo
 
           Equal cells divided by hairlines, square, transparent — the
           language the brew corner and the confirm prompt's footer both
-          speak. `done early` carries its primacy in colour rather than
+          speak. `done early` carries its primacy in color rather than
           in a fill, so the row stays a row.
 
           Sticky rather than a layout change: the steep page is one

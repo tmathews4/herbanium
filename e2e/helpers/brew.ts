@@ -9,7 +9,7 @@
 // tests went down at once — not because the app broke, but because the
 // knowledge was copied eleven times instead of named once.
 //
-// The same shape this session kept finding: behaviour defined at the
+// The same shape this session kept finding: behavior defined at the
 // call site rather than in the thing being called. Naming it here means
 // the next change to how brewing starts is one edit.
 import { expect, type Page } from "@playwright/test";
@@ -90,7 +90,7 @@ export async function bootApp(page: Page) {
  *
  * emulateMedia REPLACES the emulated state rather than merging, so
  * reducedMotion is passed alongside — dropping it makes animations run
- * and turns colour reads into races. Same footgun tours.spec documents.
+ * and turns color reads into races. Same footgun tours.spec documents.
  */
 export async function bootDark(page: Page) {
   await bootApp(page);

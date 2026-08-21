@@ -8,7 +8,7 @@
    the favorites list feel pre-curated rather than chosen. With a
    single-seed start, the favorites list is an explicit user
    choice from minute one — they add the rest via the curated
-   Catalogue or their own compositions.
+   Catalog or their own compositions.
 
    The blend ID below must exist in src/data/blends.js BLENDS array.
    ────────────────────────────────────────────────────────────── */

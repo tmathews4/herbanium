@@ -36,7 +36,7 @@ const ings = TOUR_BLEND.ids.map(id => ({
 const profile = computeBrewProfile(ings);
 const at = t => resolveBlendAtBrew(ings, profile.tempC, t);
 const effectsOf = s => s.perceivedEffects || s.effects || {};
-const flavoursOf = s => s.perceivedFlavors || s.flavors || {};
+const flavorsOf = s => s.perceivedFlavors || s.flavors || {};
 const cup = at(profile.timeS);
 
 test("every seeded ingredient exists and carries its parts", () => {
@@ -44,7 +44,7 @@ test("every seeded ingredient exists and carries its parts", () => {
     `the callout has to share the screen with the bars and the sliders — `
     + `two ingredients, got ${TOUR_BLEND.ids.length}`);
   for (const id of TOUR_BLEND.ids) {
-    assert(INGREDIENTS[id], `seeded ingredient "${id}" is not in the catalogue`);
+    assert(INGREDIENTS[id], `seeded ingredient "${id}" is not in the catalog`);
     assert(TOUR_BLEND.parts[id] > 0, `seeded ingredient "${id}" has no parts`);
   }
   // The pair the seed names and the pair the parts name must be the same
@@ -101,7 +101,7 @@ test("the bars actually move across the steep window", () => {
      are flat over the window demonstrates the opposite of what the copy
      is saying, silently and while looking fine.
 
-     Measured as total swing summed over every bar, flavour and effect,
+     Measured as total swing summed over every bar, flavor and effect,
      which is what the eye actually reads. The threshold is a floor on
      "visibly moves", not a target. */
   const range = profile.timeSRange || profile.timeRange || [profile.timeS, profile.timeS];
@@ -120,10 +120,10 @@ test("the bars actually move across the steep window", () => {
     }
     return total;
   };
-  const flavour = swing(flavoursOf);
+  const flavor = swing(flavorsOf);
   const effect = swing(effectsOf);
-  assert(flavour >= 5,
-    `flavour bars barely move across the window (${flavour.toFixed(1)}) — `
+  assert(flavor >= 5,
+    `flavor bars barely move across the window (${flavor.toFixed(1)}) — `
     + `the slider steps would be teaching a graph that sits still`);
   assert(effect >= 5,
     `effect bars barely move across the window (${effect.toFixed(1)})`);
@@ -136,7 +136,7 @@ test("no bar sits pinned at the ceiling through the tour", () => {
      A summed swing cannot see saturation. A bar stuck at 5.0 across the
      whole window contributes ZERO to the total, so a blend with a frozen
      headline bar scores exactly like a blend that simply lacks that
-     flavour — and the sum stays healthy on the strength of the small
+     flavor — and the sum stays healthy on the strength of the small
      bars moving underneath. The first tutorial blend went in that way:
      tulsi 2 : peppermint 1, with `minty` at 5.0 from 240s of a 180-420s
      window and `spiced` joining it at 300s. Both headline bars were
@@ -165,7 +165,7 @@ test("no bar sits pinned at the ceiling through the tour", () => {
       `${what} pinned at the ceiling for most of the steep window: ${stuck.join(", ")} — `
       + `the largest bars on the strip would sit still while the tour says "watch them move"`);
   };
-  pinned(flavoursOf, "flavours");
+  pinned(flavorsOf, "flavors");
   pinned(effectsOf, "effects");
 });
 
@@ -185,9 +185,9 @@ test("the prominent bars are the ones that move", () => {
       return sum + (Math.max(...vals) - Math.min(...vals));
     }, 0);
   };
-  const f = topSwing(flavoursOf);
+  const f = topSwing(flavorsOf);
   const e = topSwing(effectsOf);
-  assert(f >= 4, `the four biggest flavour bars barely move (${f.toFixed(1)})`);
+  assert(f >= 4, `the four biggest flavor bars barely move (${f.toFixed(1)})`);
   assert(e >= 4, `the four biggest effect bars barely move (${e.toFixed(1)})`);
 });
 

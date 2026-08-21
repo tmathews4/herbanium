@@ -54,7 +54,7 @@ export const OmenCard = ({ title, onDismiss }) => {
   const opacity = phase === "entering" || phase === "leaving" ? 0 : 1;
   const transitionMs = phase === "entering" ? FADE_IN_MS : FADE_OUT_MS;
   const stripped = stripLeadingThe(title) || "spirit";
-  // Per-creature lore line (e.g. "Grey pack-runner with steady
+  // Per-creature lore line (e.g. "Gray pack-runner with steady
   // amber eyes.") — woven into the omen so each user's unique
   // reads in its own creature's register, not a generic "wisps by".
   const loreInline = inlineLower(describeCreationTitle(title) || "");

@@ -45,7 +45,7 @@ export const INGREDIENT_DETAIL_DOCK_ID = "brew-dock-ingredient-detail";
    node and stack them. Same reasoning that split the two detail slots.
 
    Only the CONTROL docks. The composer itself is a textarea, two mood
-   rows, a flavour picker and a title — far taller than chrome, and the
+   rows, a flavor picker and a title — far taller than chrome, and the
    dock is explicitly not allowed to scroll (the tour picks the pane it
    scrolls by finding a scroll parent). So the dock carries the corner
    action, the current form and the chooser; the writing surface stays

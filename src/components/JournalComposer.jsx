@@ -289,7 +289,7 @@ export const JournalComposer = ({ onSave, mode = "free", setMode, actionSlotId =
                which is exactly the question a disabled-until-ready
                button is answering. Ash while it waits, rather than a
                dimmed terra: a faded accent reads as the same control
-               greyed out, and this is a control that hasn't switched on
+               grayed out, and this is a control that hasn't switched on
                yet. */
             color: ready ? theme.terra : theme.ash,
             border: "none", borderRight: `1px solid ${theme.ruleSoft}`,

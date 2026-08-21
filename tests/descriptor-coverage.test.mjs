@@ -13,19 +13,19 @@
 
    IT ALREADY HAPPENED, twice, and both were self-inflicted:
    relabelling the `sweet` family to `sweet aroma` moved the key the
-   flavour strip looks a family up by, leaving that bar with no
+   flavor strip looks a family up by, leaving that bar with no
    description at all; and the mood relabel would have done the same
    to three more if the leaf labels hadn't been carried across with
    their families.
 
    WHAT COUNTS AS "SHOWN", which is the whole subtlety here:
 
-     - flavour LEAVES that are both reachable and used. A token
-       stripped by EXCLUDED_FROM_FLAVOR never renders as a flavour
+     - flavor LEAVES that are both reachable and used. A token
+       stripped by EXCLUDED_FROM_FLAVOR never renders as a flavor
        row (bitter and friends live on the palate strip instead), and
        a token no extraction profile uses can't appear in any cup.
        Describing either is writing content nobody can reach.
-     - flavour FAMILY labels, by the label rather than the key — that
+     - flavor FAMILY labels, by the label rather than the key — that
        distinction is exactly what broke `sweet aroma`.
      - palate axes and mood labels, which are small, always visible,
        and currently complete.
@@ -80,7 +80,7 @@ const PALATE_AXES = [...(composeSrc.match(/const BALANCE_AXES = \[([\s\S]*?)\];/
    ────────────────────────────────────────────────────────────── */
 const NO_DESCRIPTION_YET = {
   rich:
-    "A quality descriptor, not a flavour — the same category "
+    "A quality descriptor, not a flavor — the same category "
     + "profile-keys.test.mjs already calls out (\"mild, complex, smooth ... "
     + "not real flavors and shouldn't be in profiles to begin with\"). It "
     + "says a cup has body, which is a judgement about every note at once "
@@ -93,26 +93,26 @@ const NO_DESCRIPTION_YET = {
 
 test("the exclusion set and profiles were actually read", () => {
   assert(EXCLUDED.size > 5, `parsed ${EXCLUDED.size} excluded tokens — the regex has drifted`);
-  assert(USED.size > 40, `only ${USED.size} flavours used across all profiles — parse looks wrong`);
+  assert(USED.size > 40, `only ${USED.size} flavors used across all profiles — parse looks wrong`);
   assert(PALATE_AXES.length >= 4, `parsed ${PALATE_AXES.length} palate axes`);
 });
 
-test("every flavour a cup can actually show has a description", () => {
+test("every flavor a cup can actually show has a description", () => {
   const missing = Object.keys(FAMILY_BY_FLAVOR)
-    .filter(t => !EXCLUDED.has(t))          // shown on the flavour strip at all
+    .filter(t => !EXCLUDED.has(t))          // shown on the flavor strip at all
     .filter(t => USED.has(t))               // reachable in some cup
     .filter(t => !FLAVOR_DESCRIPTIONS[t]?.summary)
     .filter(t => !(t in NO_DESCRIPTION_YET));
   assert(missing.length === 0,
-    `these render as flavour rows and open an empty panel:\n  ${missing.join(", ")}`);
+    `these render as flavor rows and open an empty panel:\n  ${missing.join(", ")}`);
 });
 
-test("every flavour family explains itself, by the label it displays", () => {
+test("every flavor family explains itself, by the label it displays", () => {
   // BY LABEL, not by key. `sweet` the key has a description; `sweet
   // aroma` the label is what the strip looks up, and renaming one
   // without the other is what silently emptied that panel.
   const INTERNAL = {
-    off: "A diagnostic bucket whose members are all stripped from the flavour "
+    off: "A diagnostic bucket whose members are all stripped from the flavor "
        + "strip by EXCLUDED_FROM_FLAVOR, so the label never reaches a user.",
   };
   const missing = [...new Set(Object.values(FAMILY_BY_FLAVOR))]
@@ -131,7 +131,7 @@ test("every palate axis explains itself", () => {
 test("every mood explains itself — by label, token AND family key", () => {
   // ALL THREE, because the strips don't agree on which they draw. The
   // Mind and Body strips render family KEYS (`heat`, `cool`, `sleep`),
-  // the flavour strip renders labels, and Detailed rows render tokens.
+  // the flavor strip renders labels, and Detailed rows render tokens.
   // Checking labels alone is what let `heat` go mute: the key had no
   // entry, the label did, and the guard was looking at the label.
   const missing = [];
@@ -149,7 +149,7 @@ test("every recorded gap is still a real, reachable word", () => {
   // would excuse a NEW word that happened to reuse the name.
   for (const token of Object.keys(NO_DESCRIPTION_YET)) {
     assert(token in FAMILY_BY_FLAVOR,
-      `NO_DESCRIPTION_YET names "${token}", which is no longer a flavour — delete it`);
+      `NO_DESCRIPTION_YET names "${token}", which is no longer a flavor — delete it`);
     assert(USED.has(token),
       `NO_DESCRIPTION_YET names "${token}", which no profile uses any more — delete it`);
     assert(!FLAVOR_DESCRIPTIONS[token]?.summary,

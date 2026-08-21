@@ -39,7 +39,7 @@ export const TRADITION_TIME_TOLERANCE_S = 120;
    across the 49 curated blends, the only leaves reading short of their
    window are vanilla at 9.5% and 6.5% — deliberate seasoning — against
    33.3% for the case these warnings exist for. 0.15 sits between with
-   room on both sides: under about a sixth of the pot a leaf flavours
+   room on both sides: under about a sixth of the pot a leaf flavors
    the cup rather than composing it, and nobody expects seasoning to be
    fully extracted. A genuine lead is a large share by construction, so
    this never silences one.
@@ -211,7 +211,7 @@ export function computeBrewProfile(ingredients, opts = {}) {
        while `sIntMax` is what stops a blend opening already in a
        warning state. assam + matcha + chamomile shows why — its
        compromise zone is 4-7 minutes and matcha's window ends at 30
-       seconds, so centring on the band would over-pull matcha on
+       seconds, so centering on the band would over-pull matcha on
        arrival. The clamp wins, and the cup opens at 30s: outside the
        band, but not shouting. */
     const zone = bestCoverageZone(zonePool, zonePrimary, "timeS");
@@ -244,8 +244,8 @@ export function computeBrewProfile(ingredients, opts = {}) {
 
    The band is geometry — brewBounds knows where the leaves agree. It
    does not know how the cup READS there, and those are not the same
-   question. Sweeping the catalogue turned up 61 ingredient pairs whose
-   band centre fires a per-ingredient over-pull warning one or two
+   question. Sweeping the catalog turned up 61 ingredient pairs whose
+   band center fires a per-ingredient over-pull warning one or two
    degrees above a point in the same band that doesn't: rose + vanilla
    is quiet at 92°C and warns at 93°C. A control labelled RECOMMENDED
    that answers with a cup already being told off is worse than one
@@ -253,11 +253,11 @@ export function computeBrewProfile(ingredients, opts = {}) {
 
    So: geometry proposes, the perception model disposes. Walk the
    band on the slider's own grid, ask what the cup would say at each
-   point, and take the quietest — nearest the centre when several tie,
+   point, and take the quietest — nearest the center when several tie,
    which is nearly always.
 
    IT ONLY CHOOSES WITHIN THE BAND. If every point in the band warns,
-   the centre is still the answer: the band is where the research says
+   the center is still the answer: the band is where the research says
    to brew, and this must not talk the user out of the recommendation
    just because the model is grumpy across the whole of it. That case
    is a data problem — an ingredient whose researched window reads as
@@ -317,10 +317,10 @@ export function recommendedBrewTarget({
   const lo = Math.max(base, band.lo);
   const hi = Math.min(rangeMax != null ? rangeMax : band.hi, band.hi);
   if (hi < lo) {
-    /* AND HERE THE CLAMP DOES APPLY. Honouring the request is what
+    /* AND HERE THE CLAMP DOES APPLY. Honoring the request is what
        makes the tap worth having when the band is reachable — you
        asked for the band, you get the band, warning and all. When it
-       ISN'T reachable there is no request to honour: the user can't
+       ISN'T reachable there is no request to honor: the user can't
        see that band, can't drag to it, and the word isn't even drawn
        (see bandWithin in the explorer). Steeping past a leaf's window
        to get closer to something nobody can reach buys nothing and
@@ -1397,7 +1397,7 @@ function buildBalanceBars(perceivedFlavorMap, perceivedEffectMap) {
 let _readingDepth = 0;
 
 /* ── HOW MUCH WATER, which the model used not to ask ───────────
-   Every extraction profile in the catalogue is written per 200 ml —
+   Every extraction profile in the catalog is written per 200 ml —
    `REFERENCE_ML`, and `POUR_SIZES.doses` is `ml / REFERENCE_ML` by
    construction. The perception pipeline below reads GRAMS, so it was
    reading a pot's worth of leaf as a cup's worth whenever the vessel
@@ -1420,14 +1420,14 @@ let _readingDepth = 0;
    The composer had the same hole from the other side. `partsToGrams`
    multiplies by `pourDoses`, so choosing "a pot" builds 3× the leaf —
    correctly, that is what a pot holds — and the model then read that
-   as one cup. Normalising here closes both, because a pour size's ml
+   as one cup. Normalizing here closes both, because a pour size's ml
    and its dose count are the same number.
 
-   NORMALISE AT THE BOUNDARY, not at each reader. Dose feeds flavour,
+   NORMALIZE AT THE BOUNDARY, not at each reader. Dose feeds flavor,
    effects, caffeine and the pour check, and every one of them wants
    the same per-cup figure; four call sites each dividing is the
    duplicated-operation shape this codebase keeps finding. So the
-   exported function is a thin normaliser and the pipeline below only
+   exported function is a thin normalizer and the pipeline below only
    ever sees a cup.
 
    Callers that pass no `ml` are unchanged — the ratio is 1.
@@ -1448,9 +1448,9 @@ export function resolveBlendAtBrew(ingredients, tempC, timeS, baselineTempC, bas
 }
 
 /* The pipeline proper. Takes ONE CUP's worth of leaf — see the
-   normaliser above, which is the only thing that should call it with a
+   normalizer above, which is the only thing that should call it with a
    pot. Internal re-entry (the baseline read below) passes the already
-   normalised list, so it must not divide again. */
+   normalized list, so it must not divide again. */
 function resolveBlendAtBrewPerCup(ingredients, tempC, timeS, baselineTempC, baselineTimeS, curated = false, isTraditional = false, poured = ingredients) {
   const _readingOnly = _readingDepth > 0;
   if (!ingredients || !ingredients.length) {
@@ -1515,12 +1515,12 @@ function resolveBlendAtBrewPerCup(ingredients, tempC, timeS, baselineTempC, base
      the doc says and what `tests/research-parity.test.mjs` now holds. */
   /* CAFFEINE IS THE ONE READING THAT IS NOT A CONCENTRATION, so it
      alone reads `poured` — the leaf as the recipe actually lists it —
-     rather than the per-cup normalisation everything below uses.
+     rather than the per-cup normalization everything below uses.
 
      You drink the vessel. A koicha is 4g whisked into 40ml and you
      swallow all 40ml, so you have consumed 4g of matcha; that the
      liquid is concentrated changes how it TASTES, not how much
-     caffeine went in. Normalising it was a regression introduced with
+     caffeine went in. Normalizing it was a regression introduced with
      the volume fix and caught by measuring: koicha read 32.7mg before
      and 163.6mg after, gyokuro 18.4 -> 36.8. The bars were right to
      move and this number was not.
@@ -1583,9 +1583,9 @@ function resolveBlendAtBrewPerCup(ingredients, tempC, timeS, baselineTempC, base
      TSP_BY_CATEGORY already knows what a teaspoon of each category
      weighs. x = 1 means "a cup's worth of this leaf".
 
-     The curve is Michaelis–Menten, normalised so one cup-dose scores
+     The curve is Michaelis–Menten, normalized so one cup-dose scores
      exactly 1.0 — which keeps every single-leaf calibration in the
-     catalogue where it was:
+     catalog where it was:
 
          dose(x) = x · (S + 1) / (x + S)
 
@@ -2061,7 +2061,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
 
      KNOWN LIMIT, and it is the reason the ingredient audit matters:
      four leaves (turmeric, valerian, reishi, ashwagandha) sit pegged
-     at the cap for bitterness from the centre of their researched
+     at the cap for bitterness from the center of their researched
      window onward. Their reading doesn't RISE when over-steeped
      because it has nowhere left to go, so this check will keep quiet
      where it should speak. Re-gridding those four profiles is what
@@ -2077,7 +2077,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
     }
     _readingDepth++;
     try {
-      // PerCup, not the normaliser: `ingredients` here is already one
+      // PerCup, not the normalizer: `ingredients` here is already one
       // cup's worth. Going back through the front door would be a
       // no-op today (no ml is passed) and a silent double-division the
       // moment someone threads one through.
@@ -2094,7 +2094,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
   // (5a) Cup-level warnings — what the average reads.
   /* How many cups' worth of leaf is actually in this cup.
      `TSP_BY_CATEGORY` already knows what a cup's dose of each category
-     weighs — the same numbers `doseFactor` normalises against — so this
+     weighs — the same numbers `doseFactor` normalizes against — so this
      is a sum of each leaf in its own units rather than a raw gram total.
      Chamomile and ginger do not weigh the same per spoon and must not
      count the same here. */
@@ -2122,7 +2122,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
   // not a mistake — it is the preparation. Same argument as tannin:
   // the tradition note already says this recipe lives past where modern
   // analysis would call optimal, and scolding the pour on top of that
-  // reads as the app not knowing its own catalogue.
+  // reads as the app not knowing its own catalog.
   const cupWarnings = suppressAtBaseline
     ? rawCupWarnings.filter(w => w.kind !== "tannin" && w.kind !== "aromatic" && w.kind !== "pour")
     : rawCupWarnings;
@@ -2310,7 +2310,7 @@ const contributions = ingredients.map(({ id, g, role }) => {
      The note is a statement about the LEVEL anyway ("this cup is
      strong, and the practice means it to be"), so it asks for the
      level directly: the same reading, judged with no baseline, which
-     is buildWarnings' absolute behaviour. */
+     is buildWarnings' absolute behavior. */
   const baselineWarningFires = _baseline
     ? buildWarnings({
         perceivedFlavors: _baseline.flavors,

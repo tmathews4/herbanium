@@ -332,7 +332,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
     await armTour(page, "blend");
     await openTab(page, "Apothecary");
     const callout = page.getByTestId("tour-callout");
-    // The FLAVOUR strip, not the whole graph. The toggle drives
+    // The FLAVOR strip, not the whole graph. The toggle drives
     // FlavorMap alone — the palate below it takes no familyMode and
     // reads identically in both modes — so the steps light this and the
     // measurements follow.
@@ -395,7 +395,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
        The composer's `partsToGrams` multiplies by the pour's dose count,
        so the default mug built 1.75x the leaf — and the model read that
        as one cup, so every bar was inflated by the same factor. Detailed
-       showed 9 flavour rows; two of them (`warm` 0.6 and `delicate` 0.5)
+       showed 9 flavor rows; two of them (`warm` 0.6 and `delicate` 0.5)
        cleared the 0.5 visibility floor ONLY because of the inflation.
        At its true dose the blend shows 7, identical at cup, mug and pot,
        which is the fix behaving. So the graph grows 28px now rather than
@@ -472,7 +472,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
       .toBeVisible();
   });
 
-  test("the ranges step pulses the coloured stretch, not the whole rail", async ({ page }) => {
+  test("the ranges step pulses the colored stretch, not the whole rail", async ({ page }) => {
     /* TWO REGRESSIONS IN ONE STEP, both shipped and both reported.
 
        First the pulse vanished: retargeting the step deleted the
@@ -506,7 +506,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
     expect(geom, "the ranges step should have something to point at").not.toBeNull();
     expect(geom!.pulse, "the recommended range should pulse").toBe("tourTogglePulse");
-    expect(geom!.markW, "and mark the coloured stretch, not the whole rail")
+    expect(geom!.markW, "and mark the colored stretch, not the whole rail")
       .toBeLessThan(geom!.trackW * 0.9);
     expect(geom!.markW, "while still being a real span").toBeGreaterThan(4);
 
@@ -516,7 +516,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
 
        The two halves do different jobs and both are needed. The cutout
        says WHERE YOU ARE; the pulse says which part to look at. Drawn
-       tight around the coloured stretch alone, the cutout lifted a
+       tight around the colored stretch alone, the cutout lifted a
        length of rail out of the panel it belongs to, leaving the slider
        the recommendation is painted ON outside the light while the copy
        described it. Same shape as the pills step and the Brew step,
@@ -695,7 +695,7 @@ test.describe("Blend tour — bars and sliders visible together", () => {
   });
 
   test("the spotlight tracks the strip when it resizes mid-step", async ({ page }) => {
-    // The flavour strip is the one element left that changes size WHILE
+    // The flavor strip is the one element left that changes size WHILE
     // a step is up — the temp/steep sliders are a fixed-height row in
     // the dock now. Changing the steep time drops family rows in and out
     // of the strip, and the block swings ~50px.
@@ -951,7 +951,7 @@ test.describe("the tour's pulse traces the control it points at", () => {
     // It used to hardcode rgba(176,84,47) — the LIGHT terra — which put a
     // dull dark terracotta on a dark ground and made the highlight hard
     // to find. The app carries a themed --terra-rgb; the pulse now uses
-    // it. Asserted as "the colour actually changes with the scheme",
+    // it. Asserted as "the color actually changes with the scheme",
     // which is the property that was missing, rather than pinning either
     // value.
     await armTour(page, "blend");
@@ -965,7 +965,7 @@ test.describe("the tour's pulse traces the control it points at", () => {
     // this test reports light and dark as identical while proving nothing.
     await page.evaluate(() => document.documentElement.classList.remove("force-light"));
 
-    const ringColour = () => page.evaluate(() => {
+    const ringColor = () => page.evaluate(() => {
       const el = document.querySelector('[data-tour="blend-axis"]') as HTMLElement;
       // The animated shadow resolves through the keyframes, so read the
       // custom property the pulse composes from instead.
@@ -978,13 +978,13 @@ test.describe("the tour's pulse traces the control it points at", () => {
     // motion setting, and passing it before armTour drops the scheme.
     // That's why the first draft reported light and dark as identical.
     await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-    const light = await ringColour();
+    const light = await ringColor();
 
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    const dark = await ringColour();
+    const dark = await ringColor();
 
     expect(light, "light mode should resolve a terra triplet").toMatch(/\d+, *\d+, *\d+/);
-    expect(dark, `the pulse colour should change with the theme (light ${light}, dark ${dark})`)
+    expect(dark, `the pulse color should change with the theme (light ${light}, dark ${dark})`)
       .not.toBe(light);
   });
 
@@ -998,7 +998,7 @@ test.describe("the tour's pulse traces the control it points at", () => {
     // and blend-sliders together — have no one shape to trace, and
     // GuidedTour deliberately takes the last element's corners for the
     // group. Asserting the target's own radius there fails against
-    // correct behaviour: the first draft of this test did exactly that
+    // correct behavior: the first draft of this test did exactly that
     // and reported "the cutout is 0px around a 999px target", which was
     // the union's radius doing its job.
     await armTour(page, "blend");
@@ -1208,8 +1208,8 @@ test.describe("the tour callout holds its position", () => {
    answer the brew. That only teaches anything if it happens while the
    strips are the SPOTLIGHTED subject — on the slider step the cutout is
    on the sliders and the strips change dimmed behind it, which was
-   reported exactly that way: "we never show that behaviour directly
-   now, they're greyed out changing in back."
+   reported exactly that way: "we never show that behavior directly
+   now, they're grayed out changing in back."
 
    So this holds the two halves that make the demo a demonstration:
    the strips move while lit, and the control causing it is on screen

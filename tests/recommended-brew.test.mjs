@@ -7,8 +7,8 @@
    The word under the brew slider sets the slider to the band it
    names. The band is geometry — brewBounds knows where the leaves
    agree — and geometry doesn't know how the cup READS at that point.
-   Sweeping the catalogue found the gap: 61 ingredient pairs whose
-   band centre fires a per-ingredient over-pull warning within a
+   Sweeping the catalog found the gap: 61 ingredient pairs whose
+   band center fires a per-ingredient over-pull warning within a
    degree or two of a point in the SAME band that doesn't. Rose +
    vanilla is quiet at 92°C and warns at 93°C, and the tap was
    landing on 93.
@@ -167,7 +167,7 @@ test("when a quiet point exists in the band, the tap finds it", () => {
     .filter(i => INGREDIENTS[i].tempC && INGREDIENTS[i].timeS)
     .sort();
   const missed = [];
-  // Every 7th pair — a deterministic slice across the whole catalogue,
+  // Every 7th pair — a deterministic slice across the whole catalog,
   // wide enough to catch a systematic failure without running the
   // perception model tens of thousands of times in a unit suite.
   let n = 0;

@@ -18,7 +18,7 @@
 // sheet appearing proves the sheet renders; it does not prove the OS
 // dialog is gone, and during the conversion both could have been true
 // at once. Playwright auto-dismisses dialogs when nothing is listening,
-// so without this the old behaviour would have passed silently.
+// so without this the old behavior would have passed silently.
 import { test, expect, type Page } from "@playwright/test";
 import { bootApp as boot } from "./helpers/brew";
 

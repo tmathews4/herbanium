@@ -120,18 +120,18 @@ test("the fonts are latin-subset, not the full family", () => {
   }
 });
 
-test("every shipped font ships its licence", () => {
+test("every shipped font ships its license", () => {
   // OFL 1.1's one hard requirement on redistribution.
   const files = readdirSync(FONT_DIR);
   const fonts = files.filter(n => n.endsWith(".woff2"));
-  const licences = files.filter(n => /^OFL.*\.txt$/i.test(n));
+  const licenses = files.filter(n => /^OFL.*\.txt$/i.test(n));
   assert(fonts.length > 0, "no fonts found");
-  assert(licences.length >= 3,
-    `${fonts.length} font files but only ${licences.length} licence(s) — OFL requires the `
-    + `licence travel with the font`);
-  for (const l of licences) {
+  assert(licenses.length >= 3,
+    `${fonts.length} font files but only ${licenses.length} license(s) — OFL requires the `
+    + `license travel with the font`);
+  for (const l of licenses) {
     const text = readFileSync(join(FONT_DIR, l), "utf8");
-    assert(/SIL OPEN FONT LICENSE/i.test(text), `${l} doesn't look like an OFL licence`);
+    assert(/SIL OPEN FONT LICENSE/i.test(text), `${l} doesn't look like an OFL license`);
   }
 });
 

@@ -7,7 +7,7 @@
    Narrow on purpose. For each ingredient it matches doc brew points to
    shipped samples by (tempC, timeS) and ADDS effect names the doc
    prescribes and the sample lacks, at the doc's value. It never edits
-   an existing value, never removes anything, never touches flavours or
+   an existing value, never removes anything, never touches flavors or
    character text, and never adds a sample.
 
    That deliberately leaves value drift alone — Ashwagandha's shipped
@@ -43,7 +43,7 @@ function docBrewPoints(file) {
     const temp = block.match(/\|\s*tempC\s*\|\s*([\d.]+)\s*\|/);
     const time = block.match(/\|\s*timeS\s*\|\s*([\d.]+)\s*\|/);
     const eff = block.match(/\|\s*effects\s*\|\s*(\[\[.*?\]\])\s*\|/);
-    // Flavours are a bare bracketed list in the docs: [earthy, mild].
+    // Flavors are a bare bracketed list in the docs: [earthy, mild].
     const flv = block.match(/\|\s*flavors\s*\|\s*\[([^\]]*)\]\s*\|/);
     if (!temp || !time || !eff) continue;
     const effects = [...eff[1].matchAll(/\[\s*"([^"]+)"\s*,\s*([\d.]+)\s*\]/g)]
@@ -66,7 +66,7 @@ function docBrewPoints(file) {
     const flavors = (flv ? flv[1].split(",") : [])
       .map(x => x.trim().replace(/^["']|["']$/g, ""))
       .filter(Boolean)
-      // Same rule as effects: a flavour with no family can't be drawn,
+      // Same rule as effects: a flavor with no family can't be drawn,
       // and inventing one is an editorial call.
       .filter(n => {
         if (FAMILY_BY_FLAVOR[n]) return true;
@@ -171,8 +171,8 @@ for (const [id, points] of Object.entries(docFor)) {
     src = src.slice(0, idx) + merged + src.slice(idx + existing.length);
     changes.push({ id, tempC: sample.tempC, timeS: sample.timeS, add, raise });
 
-    // Flavours, same rules. Samples using flavorStrengths (the
-    // cold-pour points) are skipped — they carry per-flavour weights
+    // Flavors, same rules. Samples using flavorStrengths (the
+    // cold-pour points) are skipped — they carry per-flavor weights
     // and appending a bare name would silently change their shape.
     if (Array.isArray(sample.flavors) && best.flavors?.length) {
       const haveF = new Set(sample.flavors);
@@ -197,7 +197,7 @@ for (const c of applied) {
   console.log(`  ${c.id.padEnd(18)} ${String(c.tempC).padStart(3)}C/${String(c.timeS).padStart(4)}s  `
     + (c.add ? `+ ${[...c.add.map(([n, v]) => `${n} ${v}`),
                      ...(c.raise || []).map(([n, v]) => `${n} ->${v}`)].join(", ")}`
-             : `+ flavours ${c.addF.join(", ")}`));
+             : `+ flavors ${c.addF.join(", ")}`));
 }
 if (skipped.length) {
   console.log(`\nSKIPPED (${skipped.length}) — couldn't anchor on the existing array:`);
@@ -211,7 +211,7 @@ if (unmapped.size) {
 }
 
 if (unmappedFlavors.size) {
-  console.log(`\nUNMAPPED FLAVOURS (${unmappedFlavors.size}) — skipped:`);
+  console.log(`\nUNMAPPED FLAVORS (${unmappedFlavors.size}) — skipped:`);
   for (const [n, c] of unmappedFlavors) console.log(`  ${n} (in ${c} brew points)`);
 }
 

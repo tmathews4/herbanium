@@ -120,7 +120,7 @@ checkBrew(
 checkBrew(
   "Garden Court, Darjeeling base",
   "exp-garden-court", 90, 180,
-  "Darjeeling warm/short → aromatic, bergamot warm/short → aromatic, rose warm/short → aromatic. Cup reads as a light, fragrant Earl-Grey-meets-Darjeeling.",
+  "Darjeeling warm/short → aromatic, bergamot warm/short → aromatic, rose warm/short → aromatic. Cup reads as a light, fragrant Earl-Gray-meets-Darjeeling.",
 );
 
 console.log("\n" + BAR);

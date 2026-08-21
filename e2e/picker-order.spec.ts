@@ -3,7 +3,7 @@
 //
 // This spec exists because the ranking was removed once, by me, on the
 // theory that it duplicated the chip's green / yellow / red tint. It
-// does not. The colour says whether ONE candidate fits; the order
+// does not. The color says whether ONE candidate fits; the order
 // surfaces which candidates fit without the user scanning fifty-odd
 // chips for green. Selecting an ingredient and watching the compatible
 // ones rise is how the picker teaches what goes with what — it is the
@@ -11,7 +11,7 @@
 //
 // The cost is real and is not what this spec is for: because the score
 // is null on an empty pot and live the moment anything is added, one
-// pick reorders the list. Measured across the catalogue, an average of
+// pick reorders the list. Measured across the catalog, an average of
 // 9.3 of the ten visible rows change identity after a single pick. A
 // fast second tap at a remembered position can therefore land on
 // something else. That is a tap-timing problem to be solved without
@@ -47,7 +47,7 @@ test.describe("the ingredient picker", () => {
     await page.getByRole("button", { name: "Apothecary", exact: true }).click();
 
     const before = await chips(page);
-    expect(before.length, "the catalogue should offer plenty to pick from").toBeGreaterThan(10);
+    expect(before.length, "the catalog should offer plenty to pick from").toBeGreaterThan(10);
     expect(before.every(c => c.fit === -1),
       "with an empty pot nothing has a fit to report yet").toBe(true);
 

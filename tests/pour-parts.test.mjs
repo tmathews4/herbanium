@@ -2,7 +2,7 @@
  *
  * A part used to be a gram outright, so "5 parts assam : 1 part
  * peppermint" built a 6g pot — 3.33 cups' worth of leaf in one cup.
- * Every strong flavour then sat at its ceiling and the strip went flat:
+ * Every strong flavor then sat at its ceiling and the strip went flat:
  * malty 5.00, bold 5.00, minty 5.00, unable to say which led. Reported
  * as "that feels wrong", and it was, though not where it looked. The
  * readings were right; the pour was heavy, because expressing a
@@ -76,10 +76,10 @@ test("a pot is more of the same cup, not a stronger one", () => {
   const cup = list(partsToGrams([{ id: "assam", parts: 5 }, { id: "peppermint", parts: 1 }], "cup", gpc));
   const p = computeBrewProfile(cup);
   const a = resolveBlendAtBrew(cup, p.tempC, p.timeS);
-  const flavours = a.perceivedFlavors || a.flavors || {};
-  assert(Object.keys(flavours).length > 0, "the cup should read as something");
+  const flavors = a.perceivedFlavors || a.flavors || {};
+  assert(Object.keys(flavors).length > 0, "the cup should read as something");
   // Nothing pinned: this is the reading the report was missing.
-  const pinned = Object.entries(flavours).filter(([, v]) => v >= 4.95).map(([k]) => k);
+  const pinned = Object.entries(flavors).filter(([, v]) => v >= 4.95).map(([k]) => k);
   assert(pinned.length === 0,
     `a balanced cup's worth should not pin any bar, got ${pinned.join(", ")}`);
 });
@@ -100,7 +100,7 @@ test("grams and parts are one store — the round trip is exact", () => {
 
 test("every pour size is a real multiple of a cup", () => {
   // A guard on the table rather than on one entry: adding a size
-  // without a dose count would silently normalise to 1.
+  // without a dose count would silently normalize to 1.
   for (const [id, size] of Object.entries(POUR_SIZES)) {
     assert(typeof size.doses === "number" && size.doses > 0,
       `pour size "${id}" has no usable dose count`);
@@ -113,7 +113,7 @@ test("every pour size is a real multiple of a cup", () => {
 
 test("a size's dose count is its volume, and the table is not asked twice", () => {
   /* The one number a new pour size can get wrong quietly. Every profile
-     in the catalogue is written per 200 ml, so a vessel's dose count is
+     in the catalog is written per 200 ml, so a vessel's dose count is
      just how many reference cups of water it holds — a 350 ml mug is
      1.75, and typing 1.5 there would hand out a shopping list for a cup
      of tea nobody is brewing while every prediction went on reading

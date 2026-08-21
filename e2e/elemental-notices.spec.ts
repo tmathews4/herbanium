@@ -209,7 +209,7 @@ test.describe("notices for what happened while you looked away", () => {
   });
 
   test("an already-full lodestone doesn't greet you on every load", async ({ page }) => {
-    /* The seeding behaviour, and the reason both watchers start from a
+    /* The seeding behavior, and the reason both watchers start from a
        ref rather than from zero. Without it, opening the app on a
        charged stone — or with elementals already collected — would
        announce things the user did days ago, every single time. */
@@ -330,7 +330,7 @@ test.describe("notices for what happened while you looked away", () => {
        applying it overwrites seenElementalIds. Draining all 26 through
        the UI does work and took ~55s of summon-and-dismiss, which under
        fullyParallel starves its own file-mates into failing; a test
-       that makes its neighbours flake isn't paying its way.
+       that makes its neighbors flake isn't paying its way.
 
        What works is the migration flag. The legacy pass that grants the
        pile is explicitly one-time and records that in
@@ -397,7 +397,7 @@ test.describe("notices for what happened while you looked away", () => {
 
          So a missing stone is treated as "not yet", not as a failure.
          The only thing that decides this test is the assertion after
-         the loop, which is the behaviour under test; everything in here
+         the loop, which is the behavior under test; everything in here
          is just getting to that state.
 
          force, because the crystal pulses for as long as something is

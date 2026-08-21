@@ -104,9 +104,9 @@ export const FAMILY_COLORS = {
 
 // Where a token has no family. The family-tree guard in
 // research-parity forbids this, so it should be unreachable — but it
-// used to fall back to the literal "body", which silently coloured an
-// unknown token as if it were creamy (flavour) or digestive (effect).
-// Borrowing a real family's colour to represent "we don't know" is the
+// used to fall back to the literal "body", which silently colored an
+// unknown token as if it were creamy (flavor) or digestive (effect).
+// Borrowing a real family's color to represent "we don't know" is the
 // kind of thing that reads as data rather than as a gap.
 const UNKNOWN_FAMILY = "other";
 
@@ -213,7 +213,7 @@ const TrackMap = ({
      same dose the rest of the screen is. Threaded rather than assumed:
      these strips call resolveBlendAtBrew themselves, and without it a
      500ml recipe's curve would sample a pot's leaf as a cup's while
-     the bars beside it did not. See the normaliser in compose.js. */
+     the bars beside it did not. See the normalizer in compose.js. */
   ml,
   /* The cup's own warnings, so the ⚠ on a palate row can say what the
      prose band used to say instead of a second copy of it being

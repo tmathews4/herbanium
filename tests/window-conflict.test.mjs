@@ -104,19 +104,19 @@ test("role does not separate a partner from a seasoning; weight does", () => {
   assert(partner.length === 2, `lion's mane at 33% of the cup is a component, got ${partner.length} of 2`);
 
   const chai = BLENDS.find(b => b.name === "Vanilla Chai");
-  assert(chai, "Vanilla Chai should still exist in the catalogue");
+  assert(chai, "Vanilla Chai should still exist in the catalog");
   const material = materialIngredients(chai.ingredients).map(i => i.id);
   assert(!material.includes("vanilla"),
     "0.2g of vanilla is seasoning, not an under-steeped component — it must not be named");
 });
 
 test("the threshold sits clear of both sides it separates", () => {
-  // 9.5% is the loudest seasoning in the catalogue, 33.3% the case
+  // 9.5% is the loudest seasoning in the catalog, 33.3% the case
   // these warnings exist for. A threshold that drifts into either is
   // the bug returning, so it is asserted rather than trusted.
   assert(MATERIAL_SHARE > 0.10 && MATERIAL_SHARE < 0.30,
     `MATERIAL_SHARE of ${MATERIAL_SHARE} no longer sits between the seasoning it excludes `
-    + `(9.5% max, measured across the catalogue) and the partner it must keep (33.3%)`);
+    + `(9.5% max, measured across the catalog) and the partner it must keep (33.3%)`);
 });
 
 /* ── the warning that was missing ────────────────────────────── */
@@ -155,7 +155,7 @@ test("it clears once the cup is steeped long enough", () => {
 test("no curated blend fires it", () => {
   /* A warning that fires on shipped recipes is noise, and this one
      started as noise: before the weight rule it named vanilla in two
-     curated cups. The catalogue is the regression surface. */
+     curated cups. The catalog is the regression surface. */
   const noisy = [];
   for (const b of BLENDS) {
     if (!b.ingredients?.length || b.timeS == null) continue;

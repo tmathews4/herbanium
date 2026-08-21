@@ -379,7 +379,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
                 label: isHouse ? "house staple" : "experiment",
                 summary: isHouse ? "Herbanium house signature." : "Algorithmic experiment.",
                 body: isHouse
-                  ? "The one experimental treated as a permanent catalogue staple — undeletable, always present."
+                  ? "The one experimental treated as a permanent catalog staple — undeletable, always present."
                   : "The catalog's chemistry suggests this combination but no tradition has codified it. Try, log, judge for yourself.",
                 tone: "terra",
                 fg: theme.plum, bg: "transparent", border: theme.plum, dashed: true,
@@ -956,7 +956,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               isHouse={!!b.house && twists.length === 0}
               onBrew={handleBrewTap}
             />
-            {/* The cup this recipe is written for. Centred and tucked
+            {/* The cup this recipe is written for. Centered and tucked
                 under the panel rather than right-aligned below it:
                 hanging off the bottom-right corner it read as a stray
                 tag with nothing to attach to, in a third typographic
@@ -980,7 +980,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
             has, so while it's open this full-width CTA was a second
             button doing the same job — and doing it differently, with
             no confirmation where the corner asks first. One page, two
-            brews, two behaviours.
+            brews, two behaviors.
 
             Not deleted outright: the Brewing section folds, taking the
             panel and its corner with it, and a folded recipe page still

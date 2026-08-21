@@ -1105,7 +1105,7 @@ export const WAIT_PROMPTS = [
   { type: "prompt", text: "Write the last thing you remember tasting today." },
   { type: "prompt", text: "Imagine the leaves before they were leaves. Where did they grow?" },
   { type: "prompt", text: "What sound is in the room that wasn't there a minute ago?" },
-  { type: "prompt", text: "If you could only describe this brew in a colour, which?" },
+  { type: "prompt", text: "If you could only describe this brew in a color, which?" },
   { type: "prompt", text: "What were you carrying when you walked into the kitchen?" },
   { type: "prompt", text: "Write one line you would want to read again tomorrow." },
   { type: "prompt", text: "Who taught you to make tea? Or who would you want to?" },
@@ -1116,7 +1116,7 @@ export const WAIT_PROMPTS = [
   { type: "prompt", text: "Listen for the next sound longer than three seconds." },
   { type: "prompt", text: "What are you trying not to think about right now?" },
   { type: "prompt", text: "Write a single word for the weather inside you." },
-  { type: "prompt", text: "Three words for the colour of the brew before you sip." },
+  { type: "prompt", text: "Three words for the color of the brew before you sip." },
   { type: "prompt", text: "What does this hour feel like, exactly?" },
 ];
 

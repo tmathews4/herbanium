@@ -22,7 +22,7 @@
    wrong one: 30 of 52 cards cap under 8 minutes and only one of those
    has data out that far. Past the last measured row the interpolated
    curve holds its last value, so the slider would travel while the
-   flavour prediction stood still — measured on eight short-capped
+   flavor prediction stood still — measured on eight short-capped
    ingredients, seven identical at their last row and at 8 minutes.
 
    Warnings are the exception and an earlier version of this comment

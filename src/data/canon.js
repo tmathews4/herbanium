@@ -37,7 +37,7 @@ export const PARENT_MOODS = [
   // soothing, grounding and uplifting became their own families when
   // the effect map was split; before that they were folded into calm
   // and energy. Onboarding offers one option per family, so without
-  // these three a user couldn't ask for a register the catalogue now
+  // these three a user couldn't ask for a register the catalog now
   // tracks — and the recommender had no signal for them.
   { key: "soothing",  family: "soothing",  label: "Soothing",  note: "bodily ease, gentle support" },
   { key: "grounding", family: "grounding", label: "Grounded",  note: "steadying, settled in yourself" },
@@ -227,7 +227,7 @@ export const expandDraw = (picked = []) => {
  * for this to survive. */
 const FELT_LABEL = {
   focus:     "Focused",
-  energy:    "Energised",
+  energy:    "Energized",
   uplifting: "Lifted",
   comfort:   "Comforted",
   soothing:  "Eased",

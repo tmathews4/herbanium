@@ -224,7 +224,7 @@ export const FLAVOR_DESCRIPTIONS = {
   },
   berry: {
     summary: "Red-fruit tartness — hibiscus and cranberry's defining note.",
-    body: "Bright sourness rounded by anthocyanins, the same red pigments that give the cup its colour.",
+    body: "Bright sourness rounded by anthocyanins, the same red pigments that give the cup its color.",
   },
   orchid: {
     summary: "Oolong's signature floral — creamy rather than perfumed.",
@@ -252,10 +252,10 @@ export const FLAVOR_DESCRIPTIONS = {
   },
   rice: {
     summary: "Genmaicha's toasted grain — popcorn-adjacent, warm and dry.",
-    body: "Roasted brown rice through Maillard browning. It's the one flavour in the catalogue that comes from something other than the leaf.",
+    body: "Roasted brown rice through Maillard browning. It's the one flavor in the catalog that comes from something other than the leaf.",
   },
   sage: {
-    summary: "Camphor-edged and savoury — a kitchen herb, not a tea note.",
+    summary: "Camphor-edged and savory — a kitchen herb, not a tea note.",
     body: "Thujone and camphor give the drying, faintly medicinal lift that keeps sage from reading as simply green.",
   },
 
@@ -308,7 +308,7 @@ export const FLAVOR_DESCRIPTIONS = {
     summary: "Natural sugar-without-sugar, from amino acids and polysaccharides.",
     body: "Licorice's glycyrrhizin sets the ceiling at 5 (50× sucrose by weight); rooibos' aspalathin, vanilla's vanillin, and white tea's L-theanine hold the gentler middle.",
   },
-  // The FAMILY, keyed by its display label. The flavour strip looks a
+  // The FAMILY, keyed by its display label. The flavor strip looks a
   // family up by what it shows, and this one shows "sweet aroma" — so
   // relabelling it away from the palate axis left the family bar with
   // no description at all until this entry existed.
@@ -318,7 +318,7 @@ export const FLAVOR_DESCRIPTIONS = {
   // the rename is that they are different claims.
   "sweet aroma": {
     summary: "Smells sweet — honey, vanilla, caramel — whether or not it tastes it.",
-    body: "Aromatic sweetness rather than the tongue's. Vanillin has essentially no sweet taste; the brain reads the odour as sweetness and the cup seems sweeter than its sugars. Descriptive sensory analysis calls this cluster \"sweet aromatics\" precisely to hold it apart from the basic taste.",
+    body: "Aromatic sweetness rather than the tongue's. Vanillin has essentially no sweet taste; the brain reads the odor as sweetness and the cup seems sweeter than its sugars. Descriptive sensory analysis calls this cluster \"sweet aromatics\" precisely to hold it apart from the basic taste.",
   },
   honey: {
     summary: "Soft amber sweetness — flower and dried-grass.",

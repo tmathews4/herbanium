@@ -121,7 +121,7 @@ const EFFECT_ADJECTIVES = {
   cool:      "Aquamarine",
   digestive: "Peridot",
   immune:    "Bloodstone",  // was `body`, and bloodstone was always the
-                            // health-register colour — it just had no
+                            // health-register color — it just had no
                             // family to belong to until immune existed
   sleep:     "Twilight",
 };
@@ -134,7 +134,7 @@ const FLAVOR_ADJECTIVES = {
   smoky:     "Obsidian",
   fresh:     "Frost",
   // Was "Jade", which soothing also uses — and a crystal takes one
-  // colour from each axis, so an effect-soothing, flavour-vegetal cup
+  // color from each axis, so an effect-soothing, flavor-vegetal cup
   // could name itself "A Jade and Jade Swirling Crystal". The euphony
   // pass can't save that: it rejects the root echo, tries the swap,
   // gets the identical pair back, and accepts it. Malachite is the
@@ -262,13 +262,13 @@ function collectRecentMoods(sessions, journalEntries, now) {
 /* The defect register is not a palate.
    `off` collects bitter, astringent, tannic, harsh, acrid, soapy,
    muddy, medicinal, pith and sharp — the words for a cup that went
-   wrong. FlavorMap already strips them from the flavour strip
+   wrong. FlavorMap already strips them from the flavor strip
    (EXCLUDED_FROM_FLAVOR) so a reader doesn't file them as tastes, and
    the same reasoning applies harder here: a crystal is meant to be a
    portrait of what you reach for, and "you mostly brew things
    astringent" is a brewing note, not an identity.
    Left in the tally and it could win an axis outright — which is how
-   the crystal first came to have a family with no colour word. */
+   the crystal first came to have a family with no color word. */
 const NOT_A_PALATE = new Set(["off"]);
 
 function collectRecentFlavors(sessions, getBlend, now) {
@@ -398,7 +398,7 @@ export function computeMoodCrystal({
 
   // Empty pool — the unbrewed baseline. Two soft ash-cream tones
   // so the crystal renders as a translucent quartz, not a flat
-  // grey shape that looks broken.
+  // gray shape that looks broken.
   if (!primary) {
     return {
       name: "A Neutral Crystal",

@@ -220,7 +220,7 @@ test.describe("a recipe page offers exactly one brew", () => {
   test("the full-width CTA stands down while the panel is open", async ({ page }) => {
     // The page used to carry both, and they didn't agree: the panel's
     // corner asks for confirmation, the CTA didn't. One page, two
-    // brews, two behaviours.
+    // brews, two behaviors.
     await boot(page);
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await page.locator('[data-tour="recipes-row"]').first().click();
@@ -456,7 +456,7 @@ test.describe("the folded brew row is a readout and a chevron", () => {
     const reading = row.locator("span").filter({ hasText: /·/ }).first();
     await expect(reading).toBeVisible();
 
-    /* CENTRED ON THE WHOLE BAR, not on what the Brew corner left over.
+    /* CENTERED ON THE WHOLE BAR, not on what the Brew corner left over.
        Brew is absolutely positioned so the toggle spans the full width,
        which is what makes this row and the writing dock the same shape.
        If Brew ever goes back to being a flex sibling the reading slides
@@ -466,8 +466,8 @@ test.describe("the folded brew row is a readout and a chevron", () => {
     const rowMid = rowBox.x + rowBox.width / 2;
     const readMid = readBox.x + readBox.width / 2;
     expect(Math.abs(readMid - rowMid),
-      `the reading centred at ${Math.round(readMid)} against a row centre of ` +
-      `${Math.round(rowMid)} — it should centre on the bar, not beside Brew`)
+      `the reading centered at ${Math.round(readMid)} against a row center of ` +
+      `${Math.round(rowMid)} — it should center on the bar, not beside Brew`)
       .toBeLessThan(rowBox.width * 0.06);
 
     // And it still does the one thing it's for.

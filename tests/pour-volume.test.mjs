@@ -1,9 +1,9 @@
 /* ──────────────────────────────────────────────────────────────
    tests/pour-volume.test.mjs — the cup knows how much water it holds.
 
-   Every extraction profile in the catalogue is written per 200 ml
+   Every extraction profile in the catalog is written per 200 ml
    (`REFERENCE_ML`). The perception pipeline reads GRAMS, so until the
-   normaliser in `compose.js` existed it read a pot's worth of leaf as a
+   normalizer in `compose.js` existed it read a pot's worth of leaf as a
    cup's worth whenever the vessel wasn't 200 ml — and 37 of the 49
    curated blends declare one that isn't.
 
@@ -42,14 +42,14 @@ const withVessel = BLENDS.filter(b => b.ml && b.ml !== REFERENCE_ML);
 
 console.log(`Pour volume — ${BLENDS.length} curated blends, ${withVessel.length} with a vessel other than ${REFERENCE_ML}ml\n`);
 
-/* The fix has to be load-bearing. If this drops to zero the catalogue
+/* The fix has to be load-bearing. If this drops to zero the catalog
    stopped declaring volumes and the rest of the file proves nothing. */
-test("the catalogue actually exercises this", () => {
+test("the catalog actually exercises this", () => {
   assert(withVessel.length > 0,
     `no blend declares an ml other than ${REFERENCE_ML} — this file is vacuous`);
 });
 
-/* 1. THE NORMALISER DOES WHAT IT SAYS.
+/* 1. THE NORMALIZER DOES WHAT IT SAYS.
 
    Resolving with a vessel must equal resolving leaf already divided
    down to that vessel's per-cup dose. Derived both ways from the same
@@ -61,7 +61,7 @@ for (const b of withVessel) {
     const viaVessel = resolveBlendAtBrew(b.ingredients, b.tempC, b.timeS, b.tempC, b.timeS, true, false, { ml: b.ml });
     const viaHand   = resolveBlendAtBrew(preScaled,     b.tempC, b.timeS, b.tempC, b.timeS, true, false);
     assert(JSON.stringify(viaVessel.flavors) === JSON.stringify(viaHand.flavors),
-      `flavours differ:\n  vessel ${JSON.stringify(viaVessel.flavors.slice(0, 4))}\n  hand   ${JSON.stringify(viaHand.flavors.slice(0, 4))}`);
+      `flavors differ:\n  vessel ${JSON.stringify(viaVessel.flavors.slice(0, 4))}\n  hand   ${JSON.stringify(viaHand.flavors.slice(0, 4))}`);
     assert(JSON.stringify(viaVessel.effects) === JSON.stringify(viaHand.effects),
       "effects differ between the vessel path and the hand-scaled one");
   });
@@ -73,7 +73,7 @@ for (const b of withVessel) {
    swallow all 40 ml, so you have had 4 g of matcha — that the liquid is
    concentrated changes how it TASTES, not how much caffeine went in.
 
-   This is not hypothetical: normalising caffeine along with everything
+   This is not hypothetical: normalizing caffeine along with everything
    else was a regression introduced WITH the volume fix, and it took
    koicha from 32.7mg to 163.6mg and gyokuro from 18.4 to 36.8 before
    measurement caught it. The bars were right to move; this number was

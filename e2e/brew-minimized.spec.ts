@@ -87,7 +87,7 @@ test.describe("a minimized brew survives the whole app", () => {
       const r = el.getBoundingClientRect();
       const top = document.elementFromPoint(
         Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
-      if (!top) return "nothing at its centre";
+      if (!top) return "nothing at its center";
       return (el.contains(top) || top === el) ? null : (top.textContent || top.tagName).slice(0, 60);
     });
     expect(blocker, `minimize was covered by "${blocker}"`).toBeNull();

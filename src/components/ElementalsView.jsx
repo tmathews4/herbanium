@@ -460,11 +460,11 @@ export const ElementalsView = ({
 
       {/* WHAT THE THING IS, said once, on the screen it lives on.
 
-          The crystal reports its name, its colour and — behind the
+          The crystal reports its name, its color and — behind the
           details toggle — the family ranks and onboarding intent driving
           both. All of that explains how the lodestone is CALCULATED and
           none of it says what it IS, so a reader who never opened the
-          details had a coloured stone that changed for reasons.
+          details had a colored stone that changed for reasons.
 
           The alternative was renaming Field Notes to Lodestone, which
           would have named the screen after one thing on it. A paragraph
@@ -473,7 +473,7 @@ export const ElementalsView = ({
           Every clause is a real mechanic, not atmosphere: the thirty
           days are the window MoodCrystal reads over, the two inputs are
           exactly the ones it reads (its own header says "moods and
-          flavors"), the colour and name come from that signal, and the
+          flavors"), the color and name come from that signal, and the
           lean is the same bias maybeRollWild uses to pick what turns up
           (see data/wildElementals.js). The last sentence names the
           elementals outright rather than saying "what gathers here" —
@@ -498,7 +498,7 @@ export const ElementalsView = ({
           NAMING THE TWO INPUTS is the difference between poetry and an
           explanation. "Every cup you brew and every entry you keep" was
           true and told you nothing you could act on — it reads as all
-          use counting equally. Moods logged and flavours brewed are the
+          use counting equally. Moods logged and flavors brewed are the
           two signals that actually move it, so a reader who wants a
           different stone knows which dials exist.
 
@@ -517,8 +517,8 @@ export const ElementalsView = ({
         These are your field notes — what you have observed of the
         elementals your lodestone draws in. A lodestone is a stone that
         has learned which way is north; this one learns from you,
-        leaning a little with every mood you log and flavour you brew,
-        until its colour and its name reflect your last thirty days.
+        leaning a little with every mood you log and flavor you brew,
+        until its color and its name reflect your last thirty days.
       </div>
       <div data-testid="lodestone-gloss" style={{
         margin: "0 2px 14px",

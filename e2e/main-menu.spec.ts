@@ -45,7 +45,7 @@ async function boot(page: Page) {
  * asserting about some other element that happens to carry the id.
  *
  * Probes THREE points across the row — a menu can be half-covered by
- * something anchored to one edge, and a single centre probe would miss
+ * something anchored to one edge, and a single center probe would miss
  * it. Returns a description rather than a boolean so a failure says what
  * was on top instead of just "false".
  */
@@ -64,7 +64,7 @@ async function menuState(page: Page): Promise<string> {
     const y = r.top + r.height / 2;
     for (const [label, x] of [
       ["left", r.left + r.width * 0.15],
-      ["centre", r.left + r.width * 0.5],
+      ["center", r.left + r.width * 0.5],
       ["right", r.left + r.width * 0.85],
     ] as [string, number][]) {
       const top = document.elementFromPoint(x, y);

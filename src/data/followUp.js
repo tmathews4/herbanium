@@ -1,8 +1,8 @@
 /* ──────────────────────────────────────────────────────────────
    data/followUp.js — when to ask how a cup landed.
 
-   Flavour is knowable at first sip; effect isn't knowable for half an
-   hour. So the app captures flavour at brew time and asks about mood
+   Flavor is knowable at first sip; effect isn't knowable for half an
+   hour. So the app captures flavor at brew time and asks about mood
    later — and "later" is what this module owns.
 
    Three things set the time:

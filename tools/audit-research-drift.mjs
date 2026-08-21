@@ -30,7 +30,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { EXTRACTION_PROFILES } from "../src/data/extractionProfiles.js";
 import { strengthDrift, SEVERE, UNPAIRABLE_CLASS } from "./lib/strength-drift.mjs";
-import { flavourFamilyGaps } from "./lib/flavour-parity.mjs";
+import { flavorFamilyGaps } from "./lib/flavor-parity.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS = resolve(__dirname, "../docs/research/ingredients");
@@ -274,7 +274,7 @@ if (prepAll.length) {
   for (const r of prepAll) console.log(`  ${r.id.padEnd(20)} ${r.prepOnly.join(", ")}`);
 }
 
-const flavGaps = flavourFamilyGaps(EXTRACTION_PROFILES);
+const flavGaps = flavorFamilyGaps(EXTRACTION_PROFILES);
 if (flavGaps.length) {
   console.log(`\nFLAVOUR FAMILIES THE RESEARCH NAMES AND NO CUP SHOWS (${flavGaps.length}):\n`);
   console.log(`  Family-level, because the docs and the app use different words`);

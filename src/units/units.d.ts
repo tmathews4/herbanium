@@ -11,13 +11,13 @@
 // formatting the harness has no business reaching into; add to this
 // file when a spec has a reason to derive from it, not before.
 
-/** The volume every extraction profile in the catalogue is written against. */
+/** The volume every extraction profile in the catalog is written against. */
 export const REFERENCE_ML: number;
 
 export interface PourSize {
   /** How many reference cups' worth of leaf to measure out. `ml / REFERENCE_ML`. */
   doses: number;
-  /** What the vessel holds. The number the user recognises. */
+  /** What the vessel holds. The number the user recognizes. */
   ml: number;
   /** Nominal leaf for one pour, in the unit the settings row speaks. */
   tspLabel: string;

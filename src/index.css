@@ -11,7 +11,7 @@
    the running app was falling back to ui-monospace.
 
    Bundling settles all of it. One declaration, no divergence, and the
-   same reasoning the catalogue already follows: this app ships its
+   same reasoning the catalog already follows: this app ships its
    reference data rather than fetching it, and typography is no
    different. It also fixes two things that were only visible
    elsewhere — the Capacitor build rendered in fallback faces with no
@@ -32,9 +32,9 @@
    Vite rewrites these url()s to hashed asset paths at build, which is
    what makes them resolve inside the Capacitor WebView.
 
-   Licences ship beside the files (OFL 1.1, all three families) in
+   Licenses ship beside the files (OFL 1.1, all three families) in
    src/assets/fonts/. Keep them there — redistributing OFL fonts
-   without the licence is the one thing the licence asks.
+   without the license is the one thing the license asks.
    ────────────────────────────────────────────────────────────── */
 
 @font-face {
@@ -173,9 +173,9 @@
 
 /* The knob reads as a physical marker ON the ramp rather than the end
    of a fill — ivory with an ink ring, so it stays legible over green,
-   amber and terra alike. margin-top centres it against the 8px track
+   amber and terra alike. margin-top centers it against the 8px track
    (Blink measures thumb offset from the track's top edge; Gecko
-   centres for you, hence no equivalent there). */
+   centers for you, hence no equivalent there). */
 .brew-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -458,7 +458,7 @@ textarea::placeholder {
    luminance just under the waterline.
 
    The charge level was legible but inert: a wash, a hard line, and a
-   coloured body that never moved. A stone that holds something ought
+   colored body that never moved. A stone that holds something ought
    to look like it holds something.
 
    Two separate ideas, deliberately. The SWEEP travels the whole

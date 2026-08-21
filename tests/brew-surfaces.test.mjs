@@ -24,7 +24,7 @@
    than as the stale list it is.
 
    It reads the source as text on purpose: importing a .jsx screen
-   pulls React, the catalogue and the whole engine behind it to answer
+   pulls React, the catalog and the whole engine behind it to answer
    a question about which files contain a string.
    ────────────────────────────────────────────────────────────── */
 

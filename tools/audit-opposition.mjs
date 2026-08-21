@@ -43,7 +43,7 @@ import { OPPOSED, pairKey, coveredPairs, sameCupOppositions } from "./lib/opposi
 const idFor = slug => [slug, slug.replace(/-/g, "")].find(c => EXTRACTION_PROFILES[c]);
 const docFiles = readdirSync(DOCS).filter(f => f.endsWith(".md"));
 
-/** Flavour lists per doc brew point — docs give names, not strengths. */
+/** Flavor lists per doc brew point — docs give names, not strengths. */
 function flavorPoints(file) {
   const out = [];
   for (const b of readFileSync(file, "utf8").split(/^###\s+/m)) {
@@ -82,7 +82,7 @@ for (const [a, b] of OPPOSED) {
   console.log();
 }
 
-// ── 2. Flavours ──────────────────────────────────────────────────
+// ── 2. Flavors ──────────────────────────────────────────────────
 const M = maskingMatrix();
 const THRESHOLD = 0.4;
 const masked = [];
@@ -98,7 +98,7 @@ for (const f of docFiles) {
 }
 masked.sort((a, b) => b.coef - a.coef);
 
-console.log(`FLAVOURS — doc puts both in one cup, matrix attenuates one by ${THRESHOLD}+\n`);
+console.log(`FLAVORS — doc puts both in one cup, matrix attenuates one by ${THRESHOLD}+\n`);
 for (const m of masked) {
   console.log(`  ${m.id.padEnd(15)}${String(m.tempC).padStart(3)}C  `
     + `${m.masker.padEnd(11)} masks ${m.maskee.padEnd(11)} coef ${m.coef}`);

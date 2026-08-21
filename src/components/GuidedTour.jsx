@@ -216,7 +216,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // where the previous step had left them with the callout across
       // their top.
       //
-      // Centring is measured against the VISIBLE region — pane minus the
+      // Centering is measured against the VISIBLE region — pane minus the
       // dock — for the same reason everything else here is.
       if (subject) {
         // BOTH, in this order. scrollIntoView is the only thing that
@@ -227,8 +227,8 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
         // its bars at top -82, off screen entirely.
         subject.scrollIntoView({ block: "center", inline: "nearest" });
         // Then the fine pass, on the pane we actually adjust below.
-        // scrollIntoView centres within the pane's whole box, which now
-        // runs under the dock; this re-centres against the part the
+        // scrollIntoView centers within the pane's whole box, which now
+        // runs under the dock; this re-centers against the part the
         // user can see. Without it the subject settles low and the
         // converge loop starts from the wrong place.
         if (pane) {
@@ -242,13 +242,13 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       if (group.length === 0) return;
       // PLAIN STEPS STILL HAVE TO CLEAR THE DOCK. `block: "center"` is
       // relative to the scroll pane, and the pane now runs UNDER the
-      // bottom bar — so a target near the end of the page centres into
+      // bottom bar — so a target near the end of the page centers into
       // a region whose lower third is covered, and lands behind the
       // menu. "Brew or save" did exactly this: highlighted, scrolled to,
       // and hidden.
       //
       // Only a correction, not a re-layout: if the target already sits
-      // inside the visible band the delta is zero and centring stands.
+      // inside the visible band the delta is zero and centering stands.
       // The keepClear path below does its own, stronger fit, so this
       // runs for the steps that have no group to fit.
       // Pull the subject up out of the dock if it's overhanging. Used by
@@ -293,7 +293,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
       // The pane's box MINUS the dock. The page scrolls underneath the
       // bottom bar now — that's what makes it read as glass — so the
       // pane extends further down than the user can actually see. Fit
-      // the group to what's visible, or the tour cheerfully centres its
+      // the group to what's visible, or the tour cheerfully centers its
       // subject half-behind the menu and reports it as on screen.
       const paneRect = pane.getBoundingClientRect();
       const region = { ...paneRect, bottom: paneRect.bottom - dockHeight() };
@@ -362,7 +362,7 @@ export const GuidedTour = ({ steps = [], onStep, onClose }) => {
     };
     // Track the lit elements' SIZE, not just the step change.
     //
-    // The flavour strip is the one thing left that resizes while a step
+    // The flavor strip is the one thing left that resizes while a step
     // is up: Simple/Detailed swaps family rows for leaf rows and the
     // block grows ~200px. The temp/steep sliders used to do this too,
     // which is what the double-rAF below was really compensating for —

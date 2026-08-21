@@ -21,7 +21,7 @@
  *
  *   A BAR PINNED AT MAX IS A FLAT BAR, and this is the one that got
  *   missed. The first pick was tulsi 2 : peppermint 1, chosen with a
- *   metric that summed swing across every flavour — so `minty`, sitting
+ *   metric that summed swing across every flavor — so `minty`, sitting
  *   at 5.0 from 240s of a 180-420s window, contributed zero and the
  *   total still read as healthy. On screen it was the largest thing in
  *   the strip and it never moved for four fifths of the tour. Reported

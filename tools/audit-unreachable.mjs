@@ -4,7 +4,7 @@
    Which declared properties can a cup never actually show?
 
    An ingredient's page lists what the herb IS — its raw declared
-   effects and flavours. The brewing view shows what a cup of it would
+   effects and flavors. The brewing view shows what a cup of it would
    PERCEPTUALLY be, after masking and fragile-effect attenuation. Those
    are different numbers on purpose, and mostly that's the point of the
    perception layer.
@@ -15,7 +15,7 @@
    something the app will never deliver. Ashwagandha lists soothing and
    warming and produces neither anywhere in 95–100°C / 10–20 min.
 
-   This sweeps the whole catalogue and reports every such case, so the
+   This sweeps the whole catalog and reports every such case, so the
    fix can be sized before it's chosen. It deliberately reports
    BORDERLINE properties too — ones that only just surface — because a
    property that peaks at 0.31 is technically reachable and practically

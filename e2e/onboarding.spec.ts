@@ -53,7 +53,7 @@ test.describe("onboarding — the name step", () => {
   });
 
   test("Return respects the same guard as the button", async ({ page }) => {
-    // Next is greyed out until the name has a non-whitespace character.
+    // Next is grayed out until the name has a non-whitespace character.
     // Return goes through the identical check rather than round it —
     // the bug that would exist if Enter were wired to its own handler.
     await boot(page);

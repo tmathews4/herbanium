@@ -4,7 +4,7 @@
 // 249 mg of caffeine?" The caffeine was a separate unit error, but the
 // question underneath it survived the fix — the searching that produced
 // the 3–4 g figure was for a 12 OZ MUG, and our 2 g is for a 200 ml
-// cup, which is the volume every extraction profile in the catalogue
+// cup, which is the volume every extraction profile in the catalog
 // is written against. Both numbers were right about different vessels,
 // and the app only offered the one nobody drinks from.
 //

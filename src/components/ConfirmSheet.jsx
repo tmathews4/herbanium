@@ -40,7 +40,7 @@ export const ConfirmSheet = ({
   body,
   cancelLabel = "not yet",
   confirmLabel = "yes →",
-  /* THE CONFIRM SIDE'S COLOUR, and the only reason this is a prop.
+  /* THE CONFIRM SIDE'S COLOR, and the only reason this is a prop.
      Deleting and brewing are both terra in this palette — the app has
      one accent for "this is the committing answer" and does not keep a
      separate destructive red, because a red button in a cream apothecary

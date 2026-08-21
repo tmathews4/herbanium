@@ -10,7 +10,7 @@
 // The dock's right corner is the way in now, mirroring Brew on the
 // left. Two claims are worth holding, and they are separate:
 //
-//   1. It KEEPS the pot — the blend reaches the catalogue under the
+//   1. It KEEPS the pot — the blend reaches the catalog under the
 //      name given, which is the whole point of the feature.
 //   2. It completes IN THE CHROME it was offered in. The first version
 //      reused the orphaned inline panel and so a control in a fixed
@@ -84,7 +84,7 @@ test.describe("keeping a composed blend", () => {
       "the outcome should be said where it was asked").toContainText(/Evening Calm/);
     await expect(dialog, "and the dialog should let go on its own").toBeHidden({ timeout: 10_000 });
 
-    // The claim that matters: it is actually in the catalogue.
+    // The claim that matters: it is actually in the catalog.
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await page.locator('[data-tour="subtabs"]')
       .getByRole("button", { name: "Recipes", exact: true }).click();
@@ -114,14 +114,14 @@ test.describe("keeping a composed blend", () => {
 /* IT REFUSES TO SAVE AS "UNTITLED".
 
    That string was the fallback on every save path, so the easiest
-   possible action — open the prompt, press keep — produced a catalogue
+   possible action — open the prompt, press keep — produced a catalog
    row indistinguishable from every other one made that way. Asked for
    as "don't let it save as untitled, make the user enter a text and
    prompt them to if they try to save with untitled".
 
    Both halves are asserted: the refusal SAYS something (a dialog that
    just does nothing reads as broken), and nothing reaches the
-   catalogue. Checking only the message would pass on a version that
+   catalog. Checking only the message would pass on a version that
    complained and saved anyway. */
 test.describe("a blend has to be given a name", () => {
   test("keeping with an empty name asks for one instead of inventing it", async ({ page }) => {
@@ -170,7 +170,7 @@ test.describe("the save corner is on every brew bar", () => {
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await page.locator('[data-tour="subtabs"]')
       .getByRole("button", { name: "Recipes", exact: true }).click();
-    // Through the catalogue rather than a saved row: this profile has
+    // Through the catalog rather than a saved row: this profile has
     // saved nothing yet, and the claim is about the recipe SCREEN, which
     // a curated blend reaches just as well.
     await page.getByRole("button", { name: "All", exact: true }).first().click();

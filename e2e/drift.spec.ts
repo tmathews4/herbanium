@@ -120,7 +120,7 @@ const survey = (page: Page) => page.evaluate(() => {
   return {
     vw, vh, overflowX, culprits, fonts,
     dockPct: dock ? Math.round((dock.getBoundingClientRect().height / vh) * 1000) / 10 : null,
-    flavoursPct: frac('[data-tour="blend-flavors"]'),
+    flavorsPct: frac('[data-tour="blend-flavors"]'),
     graphPct: frac('[data-tour="blend-graph"]'),
     slidersPct: frac('[data-tour="blend-sliders"]'),
   };
@@ -132,7 +132,7 @@ function report(label: string, s: Awaited<ReturnType<typeof survey>>) {
   console.log(
     `  [${test.info().project.name}] ${label}: ${s.vw}x${s.vh}`
     + `  dock ${pct(s.dockPct)}`
-    + `  flavours ${pct(s.flavoursPct)}`
+    + `  flavors ${pct(s.flavorsPct)}`
     + `  graph ${pct(s.graphPct)}`
     + `  sliders ${pct(s.slidersPct)}`
     + `  fonts ${s.fonts.sans ? "sans✓" : "sans✗"}/${s.fonts.serif ? "serif✓" : "serif✗"}/${s.fonts.mono ? "mono✓" : "mono✗"}`,

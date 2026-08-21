@@ -1,7 +1,7 @@
 /* ──────────────────────────────────────────────────────────────
    tools/lib/palette.mjs
 
-   Are any two effect families the same colour to look at?
+   Are any two effect families the same color to look at?
 
    The strip draws one band per family, stacked. Two bands the eye
    can't separate is the same failure as two words meaning the same
@@ -9,14 +9,14 @@
 
    `immune` was added at #7FA3A0 and sat ΔE 6.7 from `focus`, which is
    indistinguishable in adjacent bands. Nothing caught it because
-   colour had never been measured, only chosen.
+   color had never been measured, only chosen.
 
    ΔE here is CIE76 — a plain Euclidean distance in Lab. It's the
    crude one; CIEDE2000 is better calibrated. It's enough for this
    question, which is "could someone confuse these", not "are these
-   perceptually identical to a colourimeter".
+   perceptually identical to a colorimeter".
 
-   Colours are read from src/index.css rather than families.js because
+   Colors are read from src/index.css rather than families.js because
    families.js holds `var(--effect-x)` references and the real values
    live in the stylesheet, per theme.
    ────────────────────────────────────────────────────────────── */
@@ -48,7 +48,7 @@ export const deltaE = (a, b) => {
   return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
 };
 
-/** Effect-family colours per theme, straight out of the stylesheet. */
+/** Effect-family colors per theme, straight out of the stylesheet. */
 export function effectPalettes() {
   const css = readFileSync(CSS, "utf8");
   const [lightBlock, darkBlock = ""] = css.split("prefers-color-scheme: dark");
@@ -57,7 +57,7 @@ export function effectPalettes() {
   return { light: grab(lightBlock), dark: grab(darkBlock) };
 }
 
-/** Below this, two bands read as the same colour at a glance. */
+/** Below this, two bands read as the same color at a glance. */
 export const MIN_DELTA_E = 12;
 
 /** Pairs closer than MIN_DELTA_E, keyed `<theme>:<a>/<b>` (a,b sorted). */

@@ -2,8 +2,8 @@
 //
 // WHAT THIS IS FOR. A tour step declares demo state — `openControls`,
 // `axisMode`, `demo` — and something several components away is supposed
-// to honour it. Nothing checked that it did. The declaration and the
-// behaviour were connected by a prop chain four levels deep and by a
+// to honor it. Nothing checked that it did. The declaration and the
+// behavior were connected by a prop chain four levels deep and by a
 // list of step names kept in a different file, and both drifted.
 //
 // The bill, from one change to one default:
@@ -43,7 +43,7 @@ const BLEND = SCREEN_TOURS.blend;
 async function armBlendTour(page: Page) {
   // NOT reduced motion. The steep demo honours it, so emulating it would
   // switch off half of what this spec checks — a contract test that
-  // disables the behaviour under contract passes for nothing.
+  // disables the behavior under contract passes for nothing.
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.addInitScript((schema) => {
     localStorage.setItem("herbanium.schemaVersion", schema as string);
@@ -138,7 +138,7 @@ test.describe("the blend tour gets the state each step declares", () => {
     /* Data-only, and deliberately kept separate from the walk: this
        fails before a browser starts and without the step needing to be
        reachable. The walk proves the app honours a declaration; this
-       proves the declaration is a sane thing to honour.
+       proves the declaration is a sane thing to honor.
 
        THE RULE IS ABOUT `axisMode`, NOT `demo`, and that distinction is
        the correction of a wrong turn worth not repeating. The rule here

@@ -85,7 +85,7 @@ function titleCaseIng(s) {
 // to first two by position when grams are missing or equal. Joins
 // with an ampersand for a clean two-word title; one-ingredient
 // blends drop the ampersand. Trailing accent ingredients are
-// summarised with "+ accents" rather than listed exhaustively.
+// summarized with "+ accents" rather than listed exhaustively.
 export function suggestBlendName(ingredients) {
   if (!ingredients || ingredients.length === 0) return "Untitled blend";
   const sorted = [...ingredients].sort((a, b) => (b.g || 0) - (a.g || 0));

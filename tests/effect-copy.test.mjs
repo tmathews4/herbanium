@@ -18,10 +18,10 @@
                exhale", "a wrapped-blanket ease".
 
      grounding "Settling, centering, EARTHY." A bare adjective list, and
-               `earthy` is a FLAVOUR FAMILY in this app — a word the
-               reader may have just picked on the onboarding flavour
+               `earthy` is a FLAVOR FAMILY in this app — a word the
+               reader may have just picked on the onboarding flavor
                step. An effect described in a taste word invites exactly
-               the confusion the flavour/palate guard was written to
+               the confusion the flavor/palate guard was written to
                prevent, one register over.
 
    That last one is why this file exists next to
@@ -64,18 +64,18 @@ test("no summary ships our own vocabulary to the reader", () => {
   }
 });
 
-test("no summary describes an effect in a flavour word", () => {
-  /* The onboarding flavour step offers Earthy, Fresh, Sweet and the
+test("no summary describes an effect in a flavor word", () => {
+  /* The onboarding flavor step offers Earthy, Fresh, Sweet and the
      rest as tastes. An effect whose summary calls itself earthy is
      asking the reader to hold one word in two registers, which is the
      confusion register-collision.test.mjs exists to prevent on the two
      strips. Same rule, different surface. */
-  const flavourWords = PARENT_FLAVORS.map(f => f.label.toLowerCase());
+  const flavorWords = PARENT_FLAVORS.map(f => f.label.toLowerCase());
   for (const l of leaves) {
-    for (const w of flavourWords) {
+    for (const w of flavorWords) {
       const asWord = new RegExp(`\\b${w}\\b`, "i");
       assert(!asWord.test(l.summary),
-        `${l.name}'s summary calls it "${w}", which is a flavour family: "${l.summary}"`);
+        `${l.name}'s summary calls it "${w}", which is a flavor family: "${l.summary}"`);
     }
   }
 });

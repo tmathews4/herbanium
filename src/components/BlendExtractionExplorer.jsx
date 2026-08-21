@@ -303,7 +303,7 @@ export const BlendExtractionExplorer = ({
                             // profiles are written per 200ml, so this
                             // is what turns a pot's leaf into a cup's
                             // dose before anything reads it. Omitted
-                            // means 200ml. See compose.js's normaliser.
+                            // means 200ml. See compose.js's normalizer.
   hideTraditionNote = false,  // suppress the inline note (caller renders elsewhere)
   onTraditionNoteChange,    // optional callback fired with the note payload
   defaultTempC,             // from computeBrewProfile (algorithm's recommendation)
@@ -344,7 +344,7 @@ export const BlendExtractionExplorer = ({
                             // turn on the user's own Next tap.
   saveAction = null,        // the dock's RIGHT corner, mirroring brewAction
                             // on the left. Absolutely positioned like it
-                            // is, so neither corner shifts the centred
+                            // is, so neither corner shifts the centered
                             // readout — a temperature that moves under a
                             // dragging finger is the thing the row's
                             // layout comment is most careful about.
@@ -359,11 +359,11 @@ export const BlendExtractionExplorer = ({
 }) => {
   const { unit, weightUnit } = useUnit();
 
-  // Simple/Detailed mode for the FLAVOUR strip. It used to drive the
+  // Simple/Detailed mode for the FLAVOR strip. It used to drive the
   // mood strip too, and no longer does: every mood family became
   // single-leaf when `warm` split into comfort and heat, so Simple and
   // Detailed render identical rows there and the control was doing
-  // nothing. Flavour still has real depth — earthy holds 22 tokens —
+  // nothing. Flavor still has real depth — earthy holds 22 tokens —
   // which is where a rollup is worth a toggle.
   // Default to Detailed (familyMode=false) — the leaf-level read is
   // the explorer's reason for being, and curious users seeing
@@ -637,7 +637,7 @@ export const BlendExtractionExplorer = ({
               renders — so one definition serves both rather than two
               copies drifting apart.
 
-              TWO RINGS, AND A THEMED COLOUR. The old pulse was a single
+              TWO RINGS, AND A THEMED COLOR. The old pulse was a single
               ring reaching 6px and fading to 0.02 alpha — close to
               invisible by the end of its own travel — and it hardcoded
               rgba(176,84,47), which is the LIGHT terra. In dark mode that
@@ -742,7 +742,7 @@ export const BlendExtractionExplorer = ({
             Offering a control that changes nothing is worse than not
             offering it.
 
-            Flavour is the opposite and keeps the toggle: `earthy`
+            Flavor is the opposite and keeps the toggle: `earthy`
             holds 22 tokens, `fresh` 14, `fruit` 13. That's where a
             rollup earns its keep. */}
         <PalateMap
@@ -833,7 +833,7 @@ export const BlendExtractionExplorer = ({
           return { lo, hi, kind, hint: `${label} — tap to brew here` };
         };
 
-        /* THE TOUR'S ANCHOR, back on the coloured span itself.
+        /* THE TOUR'S ANCHOR, back on the colored span itself.
 
            This was moved to the whole rail-and-word wrapper to kill an
            outlined capsule that looked like a leftover widget. That
@@ -841,7 +841,7 @@ export const BlendExtractionExplorer = ({
            recommended range", and highlighting the entire toggle bar
            says "this is the slider", which the user can see.
 
-           So the box is back, tracing exactly the coloured stretch —
+           So the box is back, tracing exactly the colored stretch —
            and this time it draws NOTHING of its own. No border, no
            fill. The spotlight cutout and the pulse are the highlight;
            the ghost only says where to put them. That was the actual
@@ -850,7 +850,7 @@ export const BlendExtractionExplorer = ({
 
            FULL WIDTH, no thumb inset. The old version inset itself by
            half a thumb while the track's gradient runs edge to edge, so
-           the highlight sat a few pixels off the colour it was meant to
+           the highlight sat a few pixels off the color it was meant to
            be tracing — measured at 1.6px left and 3.4px right. */
         const RangeGhost = ({ rangeMin, rangeMax, axis }) => {
           const span = rangeMax - rangeMin;
@@ -890,7 +890,7 @@ export const BlendExtractionExplorer = ({
            30, and its compromise zone sits at 240-300s.
 
            The rail already handled that honestly: nothing overlaps, so
-           it paints no coloured stretch. The WORD didn't — it appeared
+           it paints no colored stretch. The WORD didn't — it appeared
            over a plain rail, naming a recommendation that wasn't drawn
            anywhere and couldn't be reached, and tapping it moved the
            slider by nothing anyone could see. Reported as "I hit
@@ -921,7 +921,7 @@ export const BlendExtractionExplorer = ({
            points of blend either side of each boundary says "around
            here" instead of drawing a border the chemistry hasn't got. */
         const rampFor = (axis, rangeMin, rangeMax) => {
-          /* BLUE, WITH A WINDOW. Every colour on this rail now
+          /* BLUE, WITH A WINDOW. Every color on this rail now
              corresponds to something the research actually knows.
 
              The first version ramped blue -> green -> ochre -> terra,
@@ -932,7 +932,7 @@ export const BlendExtractionExplorer = ({
              precisely the question a diagonal cannot answer. It looked
              informative and was inventing.
 
-             So: blue is the range, and a coloured window is what the
+             So: blue is the range, and a colored window is what the
              leaves agree on.
 
                GREEN     every leaf's window contains it — a real sweet
@@ -941,7 +941,7 @@ export const BlendExtractionExplorer = ({
                OCHRE     no full agreement, but the primary lead
                          overlaps some of the others — the compromise
                          zone, which is a weaker claim and says so in a
-                         weaker colour.
+                         weaker color.
                NOTHING   the leaves have no common ground. Blue all the
                          way across: the app has no recommendation and
                          doesn't pretend to. */
@@ -974,12 +974,12 @@ export const BlendExtractionExplorer = ({
           /* THE COMPROMISE WINDOW IS HATCHED, so "provisional" survives
              without relying on hue.
 
-             Sage and ochre happen to hold up under simulated colour
+             Sage and ochre happen to hold up under simulated color
              deficiency — they differ in LIGHTNESS as much as hue, so
              protanopia still separates them by dE 21 — but that was
              luck, not design, and it left the difference between "every
              leaf agrees" and "this is the best compromise available"
-             resting on colour alone. Stripes say provisional in a
+             resting on color alone. Stripes say provisional in a
              channel nobody can lose.
 
              THE PERCENTAGE-POSITION GOTCHA: with a sized background,
@@ -996,7 +996,7 @@ export const BlendExtractionExplorer = ({
         };
 
         /* The ends of the track, labelled at the ends of the track —
-           and, in the empty middle nobody was using, what the coloured
+           and, in the empty middle nobody was using, what the colored
            window MEANS and the tap that puts you in it. One row still. */
         const RangeBands = ({ rangeMin, rangeMax, axis, step, onSnap }) => {
           const span = rangeMax - rangeMin;
@@ -1019,7 +1019,7 @@ export const BlendExtractionExplorer = ({
              a steep time you'd already chosen. Only one slider is on
              screen at a time anyway; the word belongs to it.
 
-             ALWAYS the centre, including when you're already inside the
+             ALWAYS the center, including when you're already inside the
              band. An earlier version left a value alone if it already
              counted as recommended, which is defensible and reads as a
              dead button: same tap, sometimes nothing.
@@ -1060,7 +1060,7 @@ export const BlendExtractionExplorer = ({
                which reads as a round, arbitrary limit rather than a
                measured one. The honest number was always available. */
             : [mmss(rangeMin), mmss(rangeMax)];
-          /* WHAT THE COLOUR MEANS, in the space between the ends.
+          /* WHAT THE COLOR MEANS, in the space between the ends.
              The window is painted into the track now, which is quiet and
              legible but says nothing about ITSELF — a green stretch is
              only obviously a recommendation once you already know. The
@@ -1110,28 +1110,28 @@ export const BlendExtractionExplorer = ({
                        under a cursor.
 
                        Copied rather than reinvented — three attempts
-                       here (a pill, a coloured emboss, a bark-filled
+                       here (a pill, a colored emboss, a bark-filled
                        button) all missed by inventing a treatment when
                        the app already had one.
 
                        NEUTRAL. The rules are `ruleSoft` and the label
                        is bark, not the band's sage or ochre. A control
-                       that changes colour by meaning reads as a status
+                       that changes color by meaning reads as a status
                        light; the rail underneath is already painted in
-                       those colours and is the honest place for it, and
+                       those colors and is the honest place for it, and
                        the WORD still names which kind of window it is.
 
                        The only departure: a whisper of top-down
                        gradient, which is the "bubbling up" the flat
                        version was missing. Neutral, so it reads as
-                       light on a surface rather than a colour. */
+                       light on a surface rather than a color. */
                     position: "relative",
                     display: "inline-flex", alignItems: "center",
                     justifyContent: "center",
                     /* FLAT, like the quick-brew column it copies.
 
                        Four treatments were tried here — a pill, a
-                       coloured emboss, a bark-filled button, and edge
+                       colored emboss, a bark-filled button, and edge
                        shading — and each added weight to a control that
                        sits on a row of hairlines and open space. The
                        two rules and the gap above and below them are
@@ -1215,7 +1215,7 @@ export const BlendExtractionExplorer = ({
           // scrolling page, not a layer over it, so there is no content
           // behind this row to show through. (The dock's inherited
           // backdrop-blur is vestigial for the same reason.) Anything
-          // done here is flat colour, so the honest choice is the
+          // done here is flat color, so the honest choice is the
           // quieter one.
           // className carries the arrival animation (see index.css).
           // The border stays on the inner element so the hairline
@@ -1232,12 +1232,12 @@ export const BlendExtractionExplorer = ({
                 used to carry it cost the dock 44px whenever the panel
                 was open.
 
-                Not centred. The temp and time readout scans as one unit
+                Not centered. The temp and time readout scans as one unit
                 and splitting it with a button breaks that read — and
                 left puts the commit action at the OPPOSITE end from the
                 chevron, so the two easiest mis-taps are a row apart
                 rather than adjacent. Commit and fold shouldn't be
-                neighbours.
+                neighbors.
 
                 Sibling buttons rather than one nested inside the other:
                 a button inside a button is invalid, and the whole reason
@@ -1247,7 +1247,7 @@ export const BlendExtractionExplorer = ({
                 it reading as an object dropped into the row rather than
                 part of it — and sitting visibly low, because the row's
                 padding was 8px at the top and 0 at the bottom while the
-                pill centred itself against the readout beside it.
+                pill centered itself against the readout beside it.
 
                 Now the row has no padding of its own and stretches its
                 children, so Brew fills the header's full height and runs
@@ -1271,16 +1271,16 @@ export const BlendExtractionExplorer = ({
                 same argument in reverse.
 
                 Brew as a flex sibling took width from the toggle, so the
-                reading centred itself in whatever was left. Pinned
+                reading centered itself in whatever was left. Pinned
                 instead, the toggle spans the whole bar and the reading
-                centres against the dock — which is what the writing dock
+                centers against the dock — which is what the writing dock
                 does with Save and "Write", so the two rows now read as
                 one component the app uses twice.
 
-                Centring also moves the text less than the right edge
+                Centering also moves the text less than the right edge
                 did, which is not obvious. Beside the chevron, 5:30
                 becoming 10:00 pushes the reading's left edge a full
-                character; centred, the pair shifts half of one. A
+                character; centered, the pair shifts half of one. A
                 readout that changes under a dragging finger should
                 travel as little as it can. */}
             <div style={{
@@ -1328,7 +1328,7 @@ export const BlendExtractionExplorer = ({
                   // and an instruction competing for the same corner.
                   // Split, each end says one thing: what the cup is set
                   // to, and what this row does.
-                  // Spans the whole bar so the reading centres against
+                  // Spans the whole bar so the reading centers against
                   // the dock rather than against what Brew left over.
                   display: "flex", alignItems: "center",
                   justifyContent: "center", gap: 8,
@@ -1497,7 +1497,7 @@ export const BlendExtractionExplorer = ({
                             beneath it, together.
 
                             It used to point at an invisible box laid over
-                            the coloured span, because a gradient stop
+                            the colored span, because a gradient stop
                             can't be spotlit and the tour needs something
                             with a rect. What that drew was a small
                             outlined capsule floating on the track: the
@@ -1580,10 +1580,10 @@ export const BlendExtractionExplorer = ({
       })()}
 
       {/* Mind and Body read as what the cup DOES to you, after what it
-          TASTES like (flavour, palate) above them.
+          TASTES like (flavor, palate) above them.
 
           Palate used to live down here and the mood strip up there, on
-          the reasoning that flavour and mood were the prediction and
+          the reasoning that flavor and mood were the prediction and
           balance was the caveat. The four-window split changed the
           arithmetic: three strips above the sliders pushed them toward
           the fold and the tour's bars-and-sliders check reported the
@@ -1768,9 +1768,9 @@ export const BlendExtractionExplorer = ({
                     /* LEFT. #root sets text-align: center, so every
                        band inherited it — which put the inline tag
                        (GENTLE POUR, PARADOX) in the middle of a
-                       centred sentence rather than at the head of a
+                       centered sentence rather than at the head of a
                        line, and made a two-line body pivot around its
-                       own centre. A label leads; it doesn't float. */
+                       own center. A label leads; it doesn't float. */
                   borderRadius: "0 6px 6px 0",
                   fontFamily: ff.serif, fontSize: 12.5,
                   color: theme.ink, lineHeight: 1.45, textAlign: "left",
@@ -1790,7 +1790,7 @@ export const BlendExtractionExplorer = ({
 
       {/* WITH THE OTHER ALERTS, which took three moves to get right.
 
-         It began between the flavour strips and the mind/body ones,
+         It began between the flavor strips and the mind/body ones,
          where it split the four windows into two pairs and pushed the
          lower half down the page the moment a second lead was added.
          Moving it below fixed that and overshot: it landed under the
@@ -1923,8 +1923,8 @@ export const BlendExtractionExplorer = ({
             <div style={{
               fontFamily: ff.sans, fontSize: 9.5, letterSpacing: "0.16em",
               textTransform: "uppercase", color: theme.ash, marginBottom: 6,
-              // Left, like CAFFEINE LOAD above it. The region centres
-              // its prose, so an eyebrow that inherits lands centred
+              // Left, like CAFFEINE LOAD above it. The region centers
+              // its prose, so an eyebrow that inherits lands centered
               // over a left-aligned row of pills and reads as a caption
               // for something else.
               textAlign: "left",

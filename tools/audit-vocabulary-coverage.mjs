@@ -8,7 +8,7 @@
      "A Jade and undefined Swirling Crystal" — EFFECT_ADJECTIVES was
      keyed by effect family and still carried `warm` and `body`. The
      families had become `heat`, `comfort`, `digestive` and `immune`.
-     Four families with no colour, and the map looked full.
+     Four families with no color, and the map looked full.
 
      Four dead hint flags — persisted, seeded, threaded to screens, and
      read by nothing, because the thing that read them was deleted and
@@ -65,7 +65,7 @@ const VOCABULARIES = [
     where: "src/data/families.js — MOOD_VOCABULARY[].leaves[].token",
   },
   {
-    name: "flavour families",
+    name: "flavor families",
     keys: new Set(Object.values(FAMILY_BY_FLAVOR)),
     where: "src/data/families.js — FAMILY_BY_FLAVOR values",
   },
@@ -75,25 +75,25 @@ const VOCABULARIES = [
     where: "src/data/canon.js — PARENT_MOODS[].key",
   },
   {
-    /* Individual flavour WORDS — the third spelling. `bitter`, `minty`,
+    /* Individual flavor WORDS — the third spelling. `bitter`, `minty`,
        `tar` and `tart` are tokens the profiles carry; they roll up into
        families, which roll up into chips. A map keyed by tokens is
        neither drifted nor exhaustive-by-nature, since no map lists all
        ~200 of them, so this vocabulary exists mainly to stop
        token-keyed maps being misread as broken family maps. */
-    name: "flavour tokens",
+    name: "flavor tokens",
     keys: new Set(Object.keys(FAMILY_BY_FLAVOR)),
     where: "src/data/families.js — FAMILY_BY_FLAVOR keys",
     partialByNature: true,
   },
   {
-    /* Chip keys, not families: the flavour chips are `fruity` and
+    /* Chip keys, not families: the flavor chips are `fruity` and
        `creamy` where the families are `fruit` and `mouthfeel`. Both
        spellings are load-bearing — the chip is what a user picks, the
        family is what the model groups by — so a map keyed either way is
        correct and the audit has to know both. Found by running this on
        a map written the same afternoon. */
-    name: "flavour chip keys",
+    name: "flavor chip keys",
     keys: new Set(PARENT_FLAVORS.map(f => f.key)),
     where: "src/data/canon.js — PARENT_FLAVORS[].key",
   },
@@ -181,7 +181,7 @@ for (const file of sourceFiles("src")) {
        covers all twelve effect families exactly and was still being
        listed as an incomplete parent-mood map. */
     // A token-keyed map has nothing to be missing — the vocabulary is
-    // an open list, so only its EXTRA keys (words that aren't flavours
+    // an open list, so only its EXTRA keys (words that aren't flavors
     // at all any more) are worth saying out loud.
     if (best?.partialByNature) {
       if (best.extra.length) findings.push({ ...best, missing: [] });

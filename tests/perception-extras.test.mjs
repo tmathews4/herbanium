@@ -468,7 +468,7 @@ test("warming and cooling are still allowed to co-exist", () => {
    never entered the maths — and a leaf's contribution collapsed when
    unrelated leaves joined it, though the same 2g was still in the cup.
 
-   That was the largest behavioural change of the lot and it had no test
+   That was the largest behavioral change of the lot and it had no test
    of its own; the calibration suites pinned the cup's values, which
    would let dose-blindness return as long as the shipped blends landed
    in the same place. These pin the property instead. */
@@ -483,7 +483,7 @@ test("more of a leaf makes a stronger cup", () => {
 });
 
 test("but not proportionally — the curve saturates", () => {
-  // Michaelis-Menten, normalised so one cup-dose scores 1.0. Eight
+  // Michaelis-Menten, normalized so one cup-dose scores 1.0. Eight
   // times the leaf is emphatically not eight times the cup, and a
   // linear model would be as wrong as a share-based one.
   const at = (g) => Object.fromEntries(
@@ -590,7 +590,7 @@ test("the sedative safety warning survives caffeine damping", () => {
 /* ── the pour warning ──────────────────────────────────────────
    Reported as "assam black 5 and peppermint 1, that feels wrong".
    The bars were right and the pour was heavy: 3.33 cups' worth of
-   leaf in one cup, so every strong flavour sat at its ceiling and
+   leaf in one cup, so every strong flavor sat at its ceiling and
    the strip went flat. Nothing said so. */
 
 test("a heavy pour is called out, in cups' worth rather than grams", () => {
@@ -608,7 +608,7 @@ test("an ordinary cup is not scolded for existing", () => {
   for (const doses of [0.8, 1.0, 1.5, 2.0, 2.28]) {
     const warned = buildWarnings({ cupDoses: doses });
     assert(!warned.some(w => w.kind === "pour"),
-      `${doses} cup-doses should pass without comment — that is inside the catalogue's own range`);
+      `${doses} cup-doses should pass without comment — that is inside the catalog's own range`);
   }
 });
 

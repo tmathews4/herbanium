@@ -1,12 +1,12 @@
 /* ──────────────────────────────────────────────────────────────
    tests/register-collision.test.mjs
 
-   The flavour strip and the palate strip are different claims, and
+   The flavor strip and the palate strip are different claims, and
    the app draws them one above the other. So no word may name a
    family on one and an axis on the other — a reader has no way to
    tell two identical labels apart, and the app teaches by pointing.
 
-   THE CASE THIS EXISTS FOR. `sweet` was a flavour family AND
+   THE CASE THIS EXISTS FOR. `sweet` was a flavor family AND
    `sweetness` a palate axis, both computed from the same four
    tokens (BALANCE_AXES in algo/compose.js re-sums sweet, honey,
    honeyed, honey-sweet). 76 of 87 sweet-bearing profile rows drew
@@ -16,13 +16,13 @@
 
    The app had already solved this shape once and only halfway:
    EXCLUDED_FROM_FLAVOR in FlavorMap.jsx strips bitter, astringent
-   and menthol from the flavour strip because otherwise "the user
+   and menthol from the flavor strip because otherwise "the user
    sees the same note twice" — with sweet and tart as deliberate
    exceptions. This guard covers the exceptions.
 
    WHAT'S CHECKED, and what deliberately isn't: the LABELS must not
    collide. The underlying tokens still legitimately feed both — a
-   cup's sweetness is computed from its sweet-ish flavours, which is
+   cup's sweetness is computed from its sweet-ish flavors, which is
    the model working. Only the words the user reads have to differ.
 
    Run: node tests/register-collision.test.mjs
@@ -62,14 +62,14 @@ test("the palate axes were found in the algorithm", () => {
   assert(PALATE_AXES.includes("sweetness"), `no sweetness axis: ${JSON.stringify(PALATE_AXES)}`);
 });
 
-test("no flavour family is displayed under a palate axis's name", () => {
+test("no flavor family is displayed under a palate axis's name", () => {
   const axes = new Set(PALATE_AXES);
   const clash = shownFamilies.filter(l => axes.has(l));
   assert(clash.length === 0,
-    `these read identically on the flavour and palate strips: ${clash.join(", ")}`);
+    `these read identically on the flavor and palate strips: ${clash.join(", ")}`);
 });
 
-test("no flavour family label merely adds -ness to a palate axis, or vice versa", () => {
+test("no flavor family label merely adds -ness to a palate axis, or vice versa", () => {
   // The near-miss, which is the form the original bug took: `sweet`
   // against `sweetness` never collided as strings, and read as the same
   // word to every user who saw them stacked.
@@ -93,7 +93,7 @@ test("every relabelled family is a real family", () => {
   const families = new Set(Object.values(FAMILY_BY_FLAVOR));
   for (const key of Object.keys(FLAVOR_FAMILY_LABEL)) {
     assert(families.has(key),
-      `FLAVOR_FAMILY_LABEL relabels "${key}", which no flavour maps to — dead entry`);
+      `FLAVOR_FAMILY_LABEL relabels "${key}", which no flavor maps to — dead entry`);
   }
 });
 

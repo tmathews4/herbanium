@@ -370,7 +370,7 @@ import("../src/data/blends.js").then(({ BLENDS }) => {
   setTimeout(() => {
     /* ── 7. THE APP DOESN'T GRADE THE DRINKER ──────────────────────────
 
-   Everything above audits CATALOGUE copy. This one reaches into two
+   Everything above audits CATALOG copy. This one reaches into two
    components, and deliberately: they're where the app stopped
    describing a cup and started marking it.
 
@@ -463,7 +463,7 @@ test("but it still signals that a strong cup is strong", () => {
 const APP_TALK = [
   "the app", "detailed mode", "simple mode", "used to be", "folded into",
   "name of its own", "two findings", "this file", "the vocabulary",
-  "palate strip", "flavor strip", "flavour strip",
+  "palate strip", "flavor strip", "flavor strip",
 ];
 
 test("no descriptor explains the app instead of the tea", () => {

@@ -28,7 +28,7 @@
    3. LITERATURE COUNTERPART — whether the word maps onto an
       established herbal action or TCM category. Tea's own sensory
       lexicons are no help: the Lee 2007 green-tea lexicon, the
-      Chinese CTSEM method and QDA are vocabularies for FLAVOUR,
+      Chinese CTSEM method and QDA are vocabularies for FLAVOR,
       AROMA and MOUTHFEEL. None of them name effects. Effect
       vocabulary comes from materia medica and TCM instead, and a
       word with no counterpart there is doing lay work.
@@ -160,6 +160,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   console.log("\n  Tea's own sensory lexicons (Lee 2007 green tea, CTSEM, QDA) cover");
-  console.log("  flavour, aroma and mouthfeel only — none of them name effects, so");
+  console.log("  flavor, aroma and mouthfeel only — none of them name effects, so");
   console.log("  materia medica and TCM are the reference frames available.\n");
 }

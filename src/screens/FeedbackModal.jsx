@@ -23,7 +23,7 @@ import { ff, theme } from "../theme";
 const FEATURE_OPTIONS = [
   { key: "compose",     label: "Composing" },
   { key: "shelf",       label: "Shelf" },
-  { key: "catalogue",   label: "Catalogue" },
+  { key: "catalog",   label: "Catalog" },
   { key: "journal",     label: "Journal" },
   { key: "apothecary",  label: "Apothecary" },
   { key: "brewing",     label: "Brewing science" },
@@ -181,7 +181,7 @@ export const FeedbackModal = ({ onClose }) => {
         </div>
 
         {/* Recipe submission — open invitation to send your own blend
-            for possible inclusion in the curated catalogue. */}
+            for possible inclusion in the curated catalog. */}
         <div style={{ marginBottom: 18 }}>
           <div style={{ fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: theme.inkSoft, marginBottom: 8 }}>
             Submit your own recipe

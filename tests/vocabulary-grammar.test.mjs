@@ -3,7 +3,7 @@
 
    Every strip in the app is a list of words in a column, and a
    column of words reads as a set. When one entry is a different
-   part of speech from its neighbours it stops reading as a member
+   part of speech from its neighbors it stops reading as a member
    and starts reading as a mistake — `bitterness, sweetness,
    astringency, tartness, menthol` has one word that plainly isn't
    the same kind of thing as the other four.
@@ -13,7 +13,7 @@
    vocabulary that exists, but to stop the next addition drifting.
 
      palate axes      abstract sensation nouns  -ness / -ency / -ity
-     flavour families single-word adjectives    fruity, floral, smoky
+     flavor families single-word adjectives    fruity, floral, smoky
      mood families    nouns — the STATE, not the adjective
 
    THE MOOD REGISTER USED TO MIX THREE FORMS, four words each:
@@ -84,7 +84,7 @@ const PALATE_AXES = [...(composeSrc.match(/const BALANCE_AXES = \[([\s\S]*?)\];/
 const PALATE_EXCEPTIONS = {
   menthol:
     "Names the compound rather than the sensation, deliberately. The "
-    + "sensation word is `coolness`, which normalises to the same stem as "
+    + "sensation word is `coolness`, which normalizes to the same stem as "
     + "the `cooling` MOOD — and those are two different claims the app "
     + "works hard to keep apart (mouthfeel via TRPM8 vs felt temperature). "
     + "Given a choice between breaking the grammar and reintroducing the "
@@ -103,7 +103,7 @@ test("every palate axis is an abstract sensation noun", () => {
     `palate axes should read as sensations (-ness/-ency/-ity): ${bad.join(", ")}`);
 });
 
-/* ── Flavour families ────────────────────────────────────────── */
+/* ── Flavor families ────────────────────────────────────────── */
 
 const FLAVOUR_EXCEPTIONS = {
   "sweet aroma":
@@ -113,26 +113,26 @@ const FLAVOUR_EXCEPTIONS = {
     + "this cluster `sweet aromatics` precisely to hold it apart from the "
     + "basic taste. See tests/register-collision.test.mjs.",
   off:
-    "A diagnostic bucket, not a flavour a drinker would name. Its members "
-    + "(bitter, astringent, tannic...) are stripped from the flavour strip "
+    "A diagnostic bucket, not a flavor a drinker would name. Its members "
+    + "(bitter, astringent, tannic...) are stripped from the flavor strip "
     + "by EXCLUDED_FROM_FLAVOR, so the label is effectively internal.",
 };
 
-const shownFlavourFamilies = [...new Set(Object.values(FAMILY_BY_FLAVOR))]
+const shownFlavorFamilies = [...new Set(Object.values(FAMILY_BY_FLAVOR))]
   .map(f => FLAVOR_FAMILY_LABEL[f] || f);
 
-test("every flavour family reads as a single-word adjective", () => {
-  const bad = shownFlavourFamilies
+test("every flavor family reads as a single-word adjective", () => {
+  const bad = shownFlavorFamilies
     .filter(l => !(l in FLAVOUR_EXCEPTIONS))
     .filter(l => l.includes(" ") || !/^[a-z]+$/.test(l));
   assert(bad.length === 0,
-    `flavour families should be one adjective (fruity, floral, smoky): ${bad.join(", ")}`);
+    `flavor families should be one adjective (fruity, floral, smoky): ${bad.join(", ")}`);
 });
 
 test("every recorded exception still applies", () => {
   // A stale reason is worse than none — it silently widens the rule.
   for (const label of Object.keys(FLAVOUR_EXCEPTIONS)) {
-    assert(shownFlavourFamilies.includes(label),
+    assert(shownFlavorFamilies.includes(label),
       `FLAVOUR_EXCEPTIONS excuses "${label}", which is no longer a family label — delete it`);
   }
   for (const axis of Object.keys(PALATE_EXCEPTIONS)) {

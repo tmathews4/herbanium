@@ -4,14 +4,14 @@
 
    REPORTED: "A Jade and undefined Swirling Crystal".
 
-   The crystal takes one colour word from each of its two winning axes,
+   The crystal takes one color word from each of its two winning axes,
    looked up by FAMILY. Both maps had drifted from the families they
    key on:
 
      EFFECT_ADJECTIVES carried `warm` and `body`. Neither is a family.
      `heat` is (its label is "warming"), and `body` predates the body
      register being split into comfort, digestive and immune. Four
-     families with no colour.
+     families with no color.
 
      FLAVOR_ADJECTIVES carried `body` where the family is `mouthfeel`.
 
@@ -28,7 +28,7 @@
    in the app.
 
    Also checks the two maps don't share a word. `vegetal` was "Jade" and
-   so is `soothing`, and a crystal draws one colour from each axis —
+   so is `soothing`, and a crystal draws one color from each axis —
    which meant a soothing, vegetal cup could be "A Jade and Jade
    Swirling Crystal". The euphony pass cannot save that: it rejects the
    root echo, tries the swap, gets the identical pair back, and accepts
@@ -63,19 +63,19 @@ const assert = (cond, msg) => { if (!cond) throw new Error(msg); };
 
 const EFFECT = parseMap("EFFECT_ADJECTIVES");
 const FLAVOR = parseMap("FLAVOR_ADJECTIVES");
-/* The colour map had the identical drift and was missed by the first
+/* The color map had the identical drift and was missed by the first
    fix, because it sits forty lines from the adjectives and looks
    nothing like them. Guarded here so the pair can't diverge again. */
 const COLORS = parseMap("CRYSTAL_EFFECT_COLORS");
 
-test("the colour maps are readable at all", () => {
+test("the color maps are readable at all", () => {
   assert(EFFECT && Object.keys(EFFECT).length >= 8,
     "couldn't parse EFFECT_ADJECTIVES — this guard is asleep, fix the parser");
   assert(FLAVOR && Object.keys(FLAVOR).length >= 8,
     "couldn't parse FLAVOR_ADJECTIVES — this guard is asleep, fix the parser");
 });
 
-test("every effect family has a render colour too", () => {
+test("every effect family has a render color too", () => {
   for (const f of MOOD_VOCABULARY) {
     assert(COLORS[f.family],
       `effect family "${f.family}" has no CRYSTAL_EFFECT_COLORS entry — ` +
@@ -87,31 +87,31 @@ test("every effect family has a render colour too", () => {
   }
 });
 
-test("every effect family has a colour word", () => {
+test("every effect family has a color word", () => {
   for (const f of MOOD_VOCABULARY) {
     assert(EFFECT[f.family],
-      `effect family "${f.family}" has no colour — a crystal winning on it ` +
+      `effect family "${f.family}" has no color — a crystal winning on it ` +
       `would be named "A ... and undefined ... Crystal"`);
   }
 });
 
-test("every flavour family a crystal can land on has a colour word", () => {
+test("every flavor family a crystal can land on has a color word", () => {
   /* `off` is the exception and it is excluded at the source rather than
      here. It collects bitter, astringent, tannic, harsh, acrid, soapy,
      muddy, medicinal, pith and sharp — the words for a cup that went
-     wrong. FlavorMap already strips them from the flavour strip so a
+     wrong. FlavorMap already strips them from the flavor strip so a
      reader doesn't file them as tastes, and a crystal is a portrait of
      what you reach for: "you mostly brew things astringent" is a
      brewing note, not an identity.
 
      This guard found it. The first version asserted every family had a
-     colour, `off` failed, and the honest answer turned out to be that
+     color, `off` failed, and the honest answer turned out to be that
      the crystal should never have been able to land there — the missing
-     colour was the symptom, not the bug. */
+     color was the symptom, not the bug. */
   for (const fam of new Set(Object.values(FAMILY_BY_FLAVOR))) {
     if (fam === "off") continue;
     assert(FLAVOR[fam],
-      `flavour family "${fam}" has no colour — same undefined in the name`);
+      `flavor family "${fam}" has no color — same undefined in the name`);
   }
 });
 
@@ -119,11 +119,11 @@ test("the defect register is excluded where the crystal is built", () => {
   // Skipping `off` above is only safe if the source really filters it.
   // Read for the filter rather than trusting the comment.
   assert(/NOT_A_PALATE/.test(SRC) && /NOT_A_PALATE\.has\(FAMILY_BY_FLAVOR\[/.test(SRC),
-    "moodCrystal.js no longer filters the `off` register out of its flavour " +
-    "tally — either restore the filter or give `off` a colour word");
+    "moodCrystal.js no longer filters the `off` register out of its flavor " +
+    "tally — either restore the filter or give `off` a color word");
 });
 
-test("no colour word is keyed to something that isn't a family", () => {
+test("no color word is keyed to something that isn't a family", () => {
   /* The other half, and the half that let this rot quietly: `warm` and
      `body` sat in these maps looking like coverage while the families
      they were meant to cover went unnamed. An extra key is not
@@ -134,20 +134,20 @@ test("no colour word is keyed to something that isn't a family", () => {
       `EFFECT_ADJECTIVES has "${key}", which is not an effect family — ` +
       `stale keys hide missing ones`);
   }
-  const flavourFamilies = new Set(Object.values(FAMILY_BY_FLAVOR));
+  const flavorFamilies = new Set(Object.values(FAMILY_BY_FLAVOR));
   for (const key of Object.keys(FLAVOR)) {
-    assert(flavourFamilies.has(key),
-      `FLAVOR_ADJECTIVES has "${key}", which is not a flavour family`);
+    assert(flavorFamilies.has(key),
+      `FLAVOR_ADJECTIVES has "${key}", which is not a flavor family`);
   }
 });
 
 test("the two maps never offer the same word", () => {
-  // A crystal takes one colour from each axis, so a word in both maps
+  // A crystal takes one color from each axis, so a word in both maps
   // can pair with itself: "A Jade and Jade Swirling Crystal".
   for (const [ek, ev] of Object.entries(EFFECT)) {
     for (const [fk, fv] of Object.entries(FLAVOR)) {
       assert(ev !== fv,
-        `effect "${ek}" and flavour "${fk}" are both "${ev}" — a cup with ` +
+        `effect "${ek}" and flavor "${fk}" are both "${ev}" — a cup with ` +
         `both would name itself "${ev} and ${ev}"`);
     }
   }

@@ -657,7 +657,7 @@ const BLENDS = [
   //    catalog suggests would taste good and serve a purpose, but
   //    don't appear in any traditional preparation. Each is hand-
   //    tuned to a clean sweet spot. Marked house: true so they
-  //    can't be deleted from the Catalogue. ────────────────────
+  //    can't be deleted from the Catalog. ────────────────────
 
   {
     id: "exp-quiet-apple",
@@ -852,7 +852,7 @@ const BLENDS = [
 
   {
     id: "exp-smoky-grey",
-    name: "Smoky Grey",
+    name: "Smoky Gray",
     subtitle: "Earl Grey over pine smoke — Calabrian bergamot meets Wuyi fire",
     ingredients: [
       { id: "lapsang",  g: 1.5 },

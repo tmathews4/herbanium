@@ -150,7 +150,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           <StepName
             name={name}
             setName={setName}
-            // Guarded by the same condition that greys out Next, so
+            // Guarded by the same condition that grays out Next, so
             // Return can't skip a step the button wouldn't.
             onSubmit={() => { if (canAdvance) advance(); }}
           />
@@ -300,7 +300,7 @@ const WelcomeBullet = ({ title, body }) => (
 
 // `onSubmit` is the same advance the Next button runs, not a parallel
 // path — Enter must be subject to the same guard, or it would walk past
-// the empty-name check that greys the button out.
+// the empty-name check that grays the button out.
 const StepName = ({ name, setName, onSubmit }) => (
   <div style={{ textAlign: "center" }}>
     <div style={{
@@ -425,7 +425,7 @@ const StepDraw = ({ value, setValue }) => {
           reads well. It has three options; this has ten, and ten
           full-width rows do not fit a phone. So the same anatomy in two
           columns — same component, told to be compact — which keeps the
-          two steps recognisably the same question shape without
+          two steps recognizably the same question shape without
           scrolling the answer off the screen. */}
       <div style={{
         display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
@@ -462,7 +462,7 @@ const StepDraw = ({ value, setValue }) => {
    pu-erh for earthy — which was accurate and was the wrong move at the
    door. Naming lapsang to someone who has never heard of lapsang
    explains nothing; it just moves the unfamiliar word one line down and
-   adds the suggestion that they should have known it. The catalogue is
+   adds the suggestion that they should have known it. The catalog is
    where those names are worth learning, and by then they arrive with a
    cup attached.
 

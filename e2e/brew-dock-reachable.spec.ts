@@ -57,7 +57,7 @@ type Obstruction = {
  *
  * Sampled at fractions rather than at corners: a rounded corner
  * legitimately belongs to the parent, and a bar covering only the
- * bottom edge of a control is a real failure that a centre-only probe
+ * bottom edge of a control is a real failure that a center-only probe
  * would miss. The vertical extremes (10% and 90%) are the ones that
  * catch a dock sliding under the menu, since it goes under bottom-first.
  */
@@ -70,7 +70,7 @@ async function obstructionsOf(locator: Locator, dockId: string): Promise<{
     const r = el.getBoundingClientRect();
     /* WITHIN THE DOCK, OVERLAP IS THE DESIGN. The corner Brew is
        absolutely positioned across the toggle row on purpose, so that
-       the row's readout can centre on the whole bar rather than on
+       the row's readout can center on the whole bar rather than on
        what Brew leaves over — e2e/brew-everywhere.spec.ts asserts
        exactly that. A first version of this check sampled the toggle
        row, found Brew sitting on its left, and reported the app
@@ -88,7 +88,7 @@ async function obstructionsOf(locator: Locator, dockId: string): Promise<{
       return `<${n.tagName.toLowerCase()}${id ? ` "${id}"` : ""}>${text ? ` — "${text}"` : ""}`;
     };
     const points: Array<[string, number, number]> = [
-      ["centre", 0.5, 0.5],
+      ["center", 0.5, 0.5],
       ["top edge", 0.5, 0.1],
       ["bottom edge", 0.5, 0.9],
       ["left", 0.15, 0.5],

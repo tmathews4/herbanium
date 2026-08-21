@@ -374,15 +374,15 @@ test("only the last toggle step signs off with where we're leaving it", () => {
     "the Simple step shouldn't claim we're done — Detailed hasn't been shown yet");
 });
 
-test("both toggle steps light up the FLAVOUR strip", () => {
+test("both toggle steps light up the FLAVOR strip", () => {
   // The bars changing is the lesson, so the strip is lit alongside the
-  // toggle. The flavour strip specifically: the toggle drives FlavorMap
+  // toggle. The flavor strip specifically: the toggle drives FlavorMap
   // and nothing else — PalateMap takes no familyMode and reads the same
   // in both modes — so lighting the whole graph promised a change in a
   // strip that never changes.
   blend.filter(s => s.target === "blend-mode").forEach((s, i) => {
     assert((s.spotlight || []).includes("blend-flavors"),
-      `toggle step ${i} must spotlight the flavour strip — the bars changing IS the lesson`);
+      `toggle step ${i} must spotlight the flavor strip — the bars changing IS the lesson`);
     assert(!(s.spotlight || []).includes("blend-graph"),
       `toggle step ${i} shouldn't light the whole graph; the palate doesn't respond to the toggle`);
   });

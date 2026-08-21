@@ -62,7 +62,7 @@ export function shelfShares() {
  * THE FLOOR IS REAL AND WORTH KNOWING. One part against a 9-part lead
  * is 10% of the pot, and the shelf puts cloves at 3% and cardamom at 8%.
  * Whole parts simply cannot express a spice trim, so those land at 1 and
- * read heavier than the catalogue brews them. That is a limit of the
+ * read heavier than the catalog brews them. That is a limit of the
  * ratio language, not a bad measurement — weight mode is the answer for
  * spice work, and this tool prints which ingredients hit the floor so
  * the gap stays visible rather than looking like data.

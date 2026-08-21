@@ -24,7 +24,7 @@
 
    assam + matcha + chamomile is the case that forces the choice: its
    compromise zone runs 4-7 minutes and matcha's window closes at 30
-   seconds. Centring on the band would over-pull matcha on arrival, so
+   seconds. Centering on the band would over-pull matcha on arrival, so
    the clamp wins and the cup opens at 30s — outside the band, but
    quiet. The disagreement is real and is a data problem (a blend
    nobody should brew together), not a rounding one.
@@ -110,7 +110,7 @@ test("time moves toward the zone when the clamp allows it", () => {
   const { timeS } = computeBrewProfile(ings);
   if (zone && (zone.range[0] + zone.range[1]) / 2 <= lowestMax) {
     assert(Math.abs(timeS - (zone.range[0] + zone.range[1]) / 2) <= 30,
-      `expected the opening time near the zone centre, got ${timeS}s for ${JSON.stringify(zone.range)}`);
+      `expected the opening time near the zone center, got ${timeS}s for ${JSON.stringify(zone.range)}`);
   } else {
     assert(timeS <= lowestMax, `still must not exceed ${lowestMax}s, got ${timeS}s`);
   }
@@ -122,7 +122,7 @@ test("an empty pot still answers", () => {
     "an empty blend should still produce a usable default");
 });
 
-test("no blend in the catalogue opens on an over-pull", () => {
+test("no blend in the catalog opens on an over-pull", () => {
   // Swept rather than sampled: the clamp is the one guarantee that
   // must hold for every pot anyone can build, and a single pair that
   // breaks it is a cup that greets the user with a warning.

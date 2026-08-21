@@ -2950,7 +2950,7 @@ const INGREDIENTS = {
     headsUp: "Concentrated bergamot oil on skin can briefly raise sun sensitivity. Tea-grade bergamot is processed to remove that compound — safe at cup levels.",
     blurb: "The Calabrian peel that defines Earl Grey. Almost the entire world supply grows along a 100km stretch of the Ionian coast, where the climate produces an essential oil unusually high in linalool and linalyl acetate — the same compounds that drive lavender's calm. That chemistry is why the cup reads as citrus brightness with a floral, faintly sedative finish, not a sharp lemon-like citrus. A perfume note before it's a flavor.",
     facts: [
-      "Earl Grey tea is named after 1830s British PM Charles Grey, who reportedly received bergamot-scented tea as a diplomatic gift from a Chinese envoy. The first commercial Earl Grey appeared in the 1830s.",
+      "Earl Grey tea is named after 1830s British PM Charles Gray, who reportedly received bergamot-scented tea as a diplomatic gift from a Chinese envoy. The first commercial Earl Grey appeared in the 1830s.",
       "Bergamot grows almost exclusively in Calabria, Italy — about 90% of the world's bergamot oil comes from a 100km stretch of the Ionian coast.",
       "Bergamot's primary aromatic compounds — linalool and linalyl acetate — are the same ones that drive lavender's calming pharmacology. That's why the cup reads as citrus with a floral, slightly sedative finish.",
       "Eau de cologne began as a bergamot-led formula in 18th-century Köln, Germany. The original 4711 formulation, still sold, is a bergamot-rosemary-neroli blend.",

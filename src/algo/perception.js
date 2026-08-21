@@ -380,7 +380,7 @@ export const ANTAGONISM_MIN_MG = 80;
    chamomile's apigenin work through. Caffeine given with diazepam cuts
    sleep duration dose-dependently, and chronic caffeine reduces GABA's
    ability to potentiate benzodiazepine binding. Methylxanthines and
-   benzodiazepines are characterised as behaviourally opposite.
+   benzodiazepines are characterised as behaviorally opposite.
 
    So a chamomile-into-black-tea cup does not "walk both sides" — but it
    is a COMPETITION, not a rout, and an earlier version of this comment
@@ -464,7 +464,7 @@ export function antagonismFactor(caffeineMg = 0) {
  * curve", which is the opposite of what the line below does. That
  * mattered once: a saturation investigation reached for a gentler
  * curve here as the obvious fix, and the curve cannot help — see the
- * note in CLAUDE.md, "Flavour bars saturate, and the ceiling is not
+ * note in CLAUDE.md, "Flavor bars saturate, and the ceiling is not
  * why". Everything past 5 collapses to exactly 5 and loses its order.
  * If you are here to make it soft, read that note first: the raw
  * values run to ~29 against a scale whose top is 5, so the fix is a
@@ -624,7 +624,7 @@ export function buildWarnings({
   // What the SAME leaves read at the brew we recommend. When absent
   // (a caller judging one leaf on its own, with no recommendation to
   // compare to) the checks fall back to absolute levels, which is the
-  // old behaviour.
+  // old behavior.
   baselineFlavors = null,
   baselineEffects = null,
   paradoxTags = [],
@@ -640,7 +640,7 @@ export function buildWarnings({
   /* HOW MUCH LEAF IS IN HERE, which nothing used to say.
      Reported as "assam black 5 and peppermint 1, that feels wrong".
      It was — but not for the reason it looked like. That pot is 3.33
-     cups' worth of leaf in one cup, so every strong flavour reads at
+     cups' worth of leaf in one cup, so every strong flavor reads at
      its ceiling and the strip goes flat: malty 5.00, bold 5.00, minty
      5.00, unable to say which leads. The bars were right. Nothing
      explained them, so the model looked broken instead of the pour.
@@ -649,10 +649,10 @@ export function buildWarnings({
      3.51, nothing pinned — so this is a pour problem, and the honest
      fix is to say so rather than to quietly rescale the cup.
 
-     THRESHOLD CALIBRATED AGAINST THE CATALOGUE, not chosen. The 72
+     THRESHOLD CALIBRATED AGAINST THE CATALOG, not chosen. The 72
      curated blends run a median of 1.30 cup-doses and a p90 of 2.37,
      so 2.5 sits above the shelf's own heavy end and flags 7 of 72. A
-     threshold at 2.0 would flag 15 — 21% of the catalogue — which
+     threshold at 2.0 would flag 15 — 21% of the catalog — which
      teaches the user to ignore it.
 
      RE-DERIVED after `cupDoses` learned about water. The first pass
@@ -662,7 +662,7 @@ export function buildWarnings({
      and the hits were wrong — it scolded Spring Tonic (3g in 500ml,
      an ordinary 1.0× infusion) and stayed silent on Koicha, which is
      10×. Same threshold, honest input; the number survived because
-     2.5 was always the right place to put it. See the normaliser in
+     2.5 was always the right place to put it. See the normalizer in
      compose.js and tests/pour-volume.test.mjs.
 
      The seven it now flags are all genuinely concentrated
@@ -673,7 +673,7 @@ export function buildWarnings({
     warnings.push({
       kind: "pour",
       text: `A heavy pour — about ${cupDoses.toFixed(1)}× a cup's worth of leaf in one cup. `
-        + `Strong, and the flavour bars sit at their ceiling because of it, `
+        + `Strong, and the flavor bars sit at their ceiling because of it, `
         + `so the cup reads flatter than it is. Same recipe in smaller amounts reads clearer.`,
     });
   }

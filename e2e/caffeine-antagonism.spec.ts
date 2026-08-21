@@ -15,7 +15,7 @@
 // more than usual, because NO SHIPPED BLEND fires this warning. Every
 // curated blend that pairs caffeine with a sedative herb keeps the
 // sedative well under the threshold, so the only route to this state is
-// a blend the user builds. It was unreachable from the catalogue and
+// a blend the user builds. It was unreachable from the catalog and
 // therefore unreachable from any spec that opens one.
 //
 // The research behind the numbers is in docs/research/synergies.md:
@@ -47,11 +47,11 @@ async function addIngredient(page: Page, name: string) {
  * BUILT IN WEIGHT MODE, and that is the whole story of this helper.
  *
  * Parts used to be grams, so "chamomile 2 : assam 2" was a 4g pot and
- * reached the 80mg threshold easily. Parts are now a RATIO normalised
+ * reached the 80mg threshold easily. Parts are now a RATIO normalized
  * to one cup's worth of leaf, and at that size the two conditions are
  * mutually exclusive: raising the tea to reach 80mg necessarily lowers
  * the chamomile below the sedative threshold. Measured across every
- * sedative/caffeine pair in the catalogue — valerian, hops, lavender,
+ * sedative/caffeine pair in the catalog — valerian, hops, lavender,
  * passionflower against assam, matcha, gunpowder — and NONE of them
  * fire at one cup. At 1:2 the caffeine reaches 80mg with sleepy down to
  * 1.24; at 1:1 sleepy is 2.47 and the caffeine is only 60mg.

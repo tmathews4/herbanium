@@ -7,7 +7,7 @@
    the steep slider, watch the prediction change. That only lands if
    the blend actually MOVES across its steep window. Chamomile +
    peppermint was chosen by hand; this checks whether anything in the
-   catalogue teaches it better, and scores the current pair alongside
+   catalog teaches it better, and scores the current pair alongside
    the candidates so "keep what we have" is a real possible answer.
 
    Two things are scored, matching what the step is trying to show:
@@ -17,7 +17,7 @@
                it move" signal. One bar moving a lot beats five bars
                drifting slightly; a user tracks one thing.
 
-     arrival — a flavour or effect that is BELOW the visibility
+     arrival — a flavor or effect that is BELOW the visibility
                threshold early in the steep and above it later. That's
                the "something new appears" moment, which is the part
                that reads as chemistry rather than as a slider nudging
@@ -50,7 +50,7 @@ const VISIBLE = 0.3;
 const LEAD_G = 2.0;
 const ACCENT_G = 1.0;
 // Row budget, calibrated against reality rather than guessed. This
-// counts every flavour AND effect family over threshold at a single
+// counts every flavor AND effect family over threshold at a single
 // point in the sweep, which is not what the UI draws — the strips sort
 // and cap. Chamomile + peppermint scores 12 here and renders as a
 // 292px graph that we measured fitting beside the sliders, so 12 is
@@ -61,7 +61,7 @@ const MAX_BARS = 12;
 // mid-steep crossing without the sweep taking minutes over ~10k pairs.
 const SAMPLES = 9;
 // "off" is the over-steep spoilage track. It has the biggest swings in
-// the catalogue by far, and scoring it would hand the tour a blend
+// the catalog by far, and scoring it would hand the tour a blend
 // whose lesson is "steep longer and your tea goes bad". True, but not
 // the first thing a new user should be taught, and not what the step's
 // copy says. Still counted as a ROW — it takes up space on the phone.

@@ -63,7 +63,7 @@ test("every source has a positive gain and a daily cap", () => {
 
 test("no single action can fill the stone on its own", () => {
   // If one action could top it out, the other three would be noise and
-  // the meter would say the app values one behaviour.
+  // the meter would say the app values one behavior.
   for (const action of CHARGE_ACTIONS) {
     const s = CHARGE_SOURCES[action];
     assert(s.gain * s.perDay < CHARGE_FULL,
@@ -218,7 +218,7 @@ test("spending returns to zero, not to a leftover remainder", () => {
    announcement was wired to one CALLER rather than to the event, so
    when the lodestone added a new path it announced nothing.
 
-   This is a source check rather than a behavioural one, because the
+   This is a source check rather than a behavioral one, because the
    thing being prevented is a future edit, not a current bug: a fifth
    caller writing the stores directly would work perfectly and diverge
    quietly, which is exactly how the first four got out of step. */

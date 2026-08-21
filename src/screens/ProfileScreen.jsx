@@ -362,7 +362,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
         {/* LABEL AND PILLS ON ONE LINE, VOLUME UNDER IT.
 
             This row was a two-line label in a `space-between` row set to
-            `alignItems: center`, which centred BOTH sides on the block
+            `alignItems: center`, which centered BOTH sides on the block
             rather than on the label: the word sat ~90px right of
             "Temperature" and "Weight" while its subline sat at the left
             margin, and the pills floated between the two lines, level
@@ -377,7 +377,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           {/* THE VOLUME RIDES THE LABEL. As a line beneath it, it
-              inherited this section's centring and sat in the middle of
+              inherited this section's centering and sat in the middle of
               the row — the same inherited `text-align` that had pushed
               "Making" ~90px off the left margin in the first place.
               Inline in parentheses it is part of the label and cannot
@@ -788,7 +788,7 @@ export const ProfileScreen = ({ go, openCup, sessions, savedBlendIds, seedMode, 
 };
 
 /* ──────────────────────────────────────────────────────────────
-   SourcesPanel — categorised list of the literature, monographs,
+   SourcesPanel — categorized list of the literature, monographs,
    pharmacopoeia, and traditional texts the catalog draws from.
    Per-ingredient citations live in docs/research/ingredients/*.md;
    this panel surfaces the high-level inventory so users can see
@@ -813,7 +813,7 @@ const SOURCES = [
         full: "Blumenthal M, Goldberg A, Brinckmann J (eds.). Herbal Medicine: Expanded Commission E Monographs. Newton, MA: Integrative Medicine Communications / American Botanical Council; 2000. Translates the Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM) Commission E approvals.",
       },
       {
-        summary: "United States Pharmacopeia (USP) — botanical monographs and standardised assays",
+        summary: "United States Pharmacopeia (USP) — botanical monographs and standardized assays",
         full: "United States Pharmacopeial Convention. USP–NF: Dietary Supplements Compendium and Botanical Monographs (current revision). Rockville, MD: USP. Identity, purity, strength, and assay specifications for botanical articles.",
       },
       {

@@ -10,7 +10,7 @@
 //
 // That last one is not hypothetical. REPORTED: "after the tutorial you
 // can't minimize the brew window." The tours drive real UI state while
-// they run — they force the flavour strips into Simple, pin the brew
+// they run — they force the flavor strips into Simple, pin the brew
 // row open or shut, and choose which axis the slider is bound to — and
 // each of those is an override sitting ON TOP of the user's own
 // preference. Nothing cleared them, so the blend tour's last step left
@@ -334,7 +334,7 @@ test.describe("the tour hands the screen back when it ends", () => {
 
   test("abandoning the tour on a Simple step leaves the toggle working", async ({ page }) => {
     // NOT "the strips revert to Detailed" — they shouldn't, and asserting
-    // that failed against correct behaviour. The toggle step deliberately
+    // that failed against correct behavior. The toggle step deliberately
     // writes the persisted preference to Simple (see the comment above
     // the effect in BlendExtractionExplorer: the user is left where the
     // tour put them, holding the strips short enough that the bars and

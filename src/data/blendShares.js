@@ -9,9 +9,9 @@
  *
  * NOTE THIS IS NOT DENSITY. `TSP_BY_CATEGORY` already knows a teaspoon
  * of chamomile weighs 1.0g and a teaspoon of ginger 2.5g, and parts are
- * normalised against it, so a part of each is already the same share of
+ * normalized against it, so a part of each is already the same share of
  * a cup. What this file adds is the CONVENTION on top: how much of a
- * blend that leaf usually is. The catalogue proves the two are
+ * blend that leaf usually is. The catalog proves the two are
  * independent — peppermint and assam have identical solo doses ("1 tsp ·
  * 200ml") and completely different blend shares, 34% against 69%.
  *
@@ -26,7 +26,7 @@
  * THE WHOLE-PARTS FLOOR IS REAL. One part against a nine-part lead is
  * 10% of the pot, and the shelf brews cloves at 3%, black pepper at 4%,
  * cinnamon and cardamom at 8%. Those land at 1 and are therefore
- * HEAVIER than the catalogue brews them — a limit of the ratio
+ * HEAVIER than the catalog brews them — a limit of the ratio
  * language, not a bad reading. Weight mode is the answer for spice work,
  * and the derivation tool prints every ingredient sitting on that floor.
  */
@@ -46,7 +46,7 @@ export const DERIVED_PARTS = {
 };
 
 /* ASSIGNED, because the shelf has fewer than three examples. Each is
-   placed against a measured neighbour rather than invented, and the
+   placed against a measured neighbor rather than invented, and the
    reason is written here rather than in a commit nobody will find.
    When a curated blend gives one of these three appearances, it moves
    to DERIVED_PARTS above and the guard starts holding it. */

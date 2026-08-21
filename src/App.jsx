@@ -313,9 +313,9 @@ const TabBar = ({ tab, setTab, apothecaryMode, shelfMode, setApothecaryModeActio
           //
           // Halfway between the two settings that were tried on a real
           // phone: 14px/0.72 read as a flat panel with no depth at all,
-          // and 4px/0.45 let the flavour bars through clearly enough to
+          // and 4px/0.45 let the flavor bars through clearly enough to
           // compete with the RANGE BAND under the slider — itself a
-          // coloured bar, saying where the recommended brew sits, and
+          // colored bar, saying where the recommended brew sits, and
           // the one element here that has to stay unmistakable.
           //
           // 9px/0.58 keeps the sense that something is behind the row
@@ -1358,7 +1358,7 @@ export default function App() {
   }, [profile?.synthsVersion]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Onboarding completion handler. No algorithmic synths are generated
-  // anymore — discoverability happens through the curated Catalogue
+  // anymore — discoverability happens through the curated Catalog
   // (traditionals + house experimentals). The favorites rail seeds
   // with adjacent traditions only, picked from the user's draws.
   const handleOnboardingComplete = ({ name, timeOfDay, draw, flavors }) => {
@@ -1621,7 +1621,7 @@ export default function App() {
   // moods + flavors are arrays for multi-select sub-filtering. Selections
   // across rows AND together (collection ∩ moods ∩ flavors); within mood
   // and flavor rows the chips OR together.
-  const [catalogueFilter, setCatalogueFilter] = useState({
+  const [catalogFilter, setCatalogFilter] = useState({
     collection: "favorites", moods: [], flavors: [],
   });
   // Tapping a sub-tab is navigation, so it has to leave whatever detail
@@ -1654,7 +1654,7 @@ export default function App() {
     // want a wider browse. Deep-links can still override downstream
     // via composePreselect.
     if (k === "recipes" && shelfMode !== "recipes") {
-      setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
+      setCatalogFilter({ collection: "favorites", moods: [], flavors: [] });
     }
     setShelfMode(k);
   };
@@ -1689,7 +1689,7 @@ export default function App() {
   };
 
   // Restore a curated blend the user previously deleted from their
-  // catalogue. Only meaningful for entries in BLENDS — user-generated
+  // catalog. Only meaningful for entries in BLENDS — user-generated
   // blends in `generatedBlends` were dropped, not hidden.
   const unhideBlend = (id) => {
     setHiddenBlendIds(prev => {
@@ -2710,8 +2710,8 @@ export default function App() {
       }}>
         <Suspense fallback={<ScreenFallback />}>
         {tab === "home"    && <HomeScreen   go={go} openBlend={openBlend} openCup={openCup} openInCompose={openInCompose} sessions={sessions} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} profile={profile} elementalsDisabled={elementalsDisabled} patchSessionMoods={patchSessionMoods} dismissSessionMoods={dismissSessionMoods} snoozeSessionMoods={snoozeSessionMoods} addJournalEntry={addJournalEntry} journalEntries={journalEntries} />}
-        {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} blendTourDemo={blendTourDemo} lodestoneCharge={lodestoneCharge} />}
-        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogueFilter={catalogueFilter} setCatalogueFilter={setCatalogueFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} onLodestoneSeen={() => setLodestoneSeen(true)} blendTourStep={activeTourStep} />}
+        {tab === "apothecary" && <ComposeScreen section="apothecary" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} mode={apothecaryMode} setMode={setApothecaryMode} setModeUserAction={setApothecaryModeAction} catalogFilter={catalogFilter} setCatalogFilter={setCatalogFilter} blendTourActive={activeTour === "blend"} blendTourStep={activeTourStep} blendTourFamilyMode={blendTourFamilyMode} blendTourControlsOpen={blendTourControlsOpen} blendTourAxis={blendTourAxis} blendTourDemo={blendTourDemo} lodestoneCharge={lodestoneCharge} />}
+        {tab === "shelf" && <ComposeScreen section="shelf" quickBrew={quickBrew} go={go} startBrew={startBrew} savedBlendIds={savedBlendIds} favoriteBlendIds={favoriteBlendIds} generatedBlends={generatedBlends} hiddenBlendIds={hiddenBlendIds} deleteBlend={deleteBlend} unhideBlend={unhideBlend} saveComposedBlend={saveComposedBlend} openBlend={openBlend} openCup={openCup} openEntry={openEntry} composePreselect={composePreselect} composeView={composeView} openInCompose={openInCompose} sessions={sessions} journalEntries={journalEntries} addJournalEntry={addJournalEntry} deleteJournalEntry={deleteJournalEntry} profile={profile} tabVisits={tabVisits} elementalsDisabled={elementalsDisabled} omenShown={omenShown} dismissOmen={() => setOmenShown(true)} seenElementalIds={seenElementalIds} setSeenElementalIds={setSeenElementalIds} featuredElementals={featuredElementals} setFeaturedElementals={setFeaturedElementals} wildElementals={wildElementals} rolledElementalIds={rolledElementalIds} rolledElementalAt={rolledElementalAt} rolledElementalAction={rolledElementalAction} autoOpenArrivalId={autoOpenArrivalId} onAutoOpenConsumed={() => setAutoOpenArrivalId(null)} lockedCrystal={lockedCrystal} setLockedCrystal={setLockedCrystal} mode={shelfMode} setMode={setShelfMode} setModeUserAction={setShelfModeAction} catalogFilter={catalogFilter} setCatalogFilter={setCatalogFilter} lodestoneCharge={lodestoneCharge} onChargedSummon={summonFromCharge} onLodestoneSeen={() => setLodestoneSeen(true)} blendTourStep={activeTourStep} />}
         {tab === "profile" && <ProfileScreen go={go} openCup={openCup} sessions={sessions} savedBlendIds={savedBlendIds} seedMode={seedMode} setSeedMode={setSeedMode} profile={profile} setProfile={setProfile} resetEverything={resetEverything} startTour={replayTours} isDev={isDev} devModeEnabled={devModeEnabled} setDevModeEnabled={setDevModeEnabled} elementalsDisabled={elementalsDisabled} setElementalsDisabled={setElementalsDisabled} lodestoneCharge={lodestoneCharge} setLodestoneCharge={setLodestoneCharge} journalEntries={journalEntries} tabVisits={tabVisits} wildElementals={wildElementals} seenElementalIds={seenElementalIds} devForceGlimpse={isDev ? (() => {
           // Pick an attribute that's both unrolled AND unseen so the
           // elementals will treat the tap-through as a real first
@@ -3179,7 +3179,7 @@ export default function App() {
      opaque ivory, painted after the masthead in document order, so it
      covered the entire page. Its own comment records why: the dark
      phone-bezel preview was removed so laptop visitors would see a
-     normal centred web app, and the chrome that had framed the bezel
+     normal centered web app, and the chrome that had framed the bezel
      was never removed with it.
 
      It was not harmless. The markup still shipped to screen readers and

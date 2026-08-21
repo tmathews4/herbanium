@@ -15,7 +15,7 @@
 export const HAIKU_PROMPTS = [
   { key: "thing",   label: "A small thing nearby",       placeholder: "candle" },
   { key: "sound",   label: "A sound you can hear",       placeholder: "kettle" },
-  { key: "color",   label: "A colour or texture",        placeholder: "amber" },
+  { key: "color",   label: "A color or texture",        placeholder: "amber" },
   { key: "feeling", label: "A feeling word",             placeholder: "warm" },
 ];
 
@@ -58,7 +58,7 @@ export function assembleHaiku(slots, seed = 0) {
   const safe = {
     thing:   (slots.thing   || "thing").trim(),
     sound:   (slots.sound   || "sound").trim(),
-    color:   (slots.color   || "colour").trim(),
+    color:   (slots.color   || "color").trim(),
     feeling: (slots.feeling || "feeling").trim(),
   };
   const idx = ((seed % TEMPLATES.length) + TEMPLATES.length) % TEMPLATES.length;

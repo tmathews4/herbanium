@@ -258,7 +258,7 @@ export const SaveCornerButton = ({
   /* IT WILL NOT SAVE AS "UNTITLED BLEND".
 
      That string was the fallback on every save path, so the easiest
-     thing to do — open the prompt, press keep — produced a catalogue
+     thing to do — open the prompt, press keep — produced a catalog
      entry indistinguishable from every other one made the same way.
      Asked for directly: "don't let it save as untitled, make the user
      enter a text and prompt them to if they try to save with
@@ -268,12 +268,12 @@ export const SaveCornerButton = ({
      literal fallback is refused too — otherwise the rule is one
      copy-paste from being undone. The field is NOT pre-seeded with a
      suggestion for the same reason: a prefilled name is a name nobody
-     chose, which is the behaviour being removed. */
+     chose, which is the behavior being removed. */
   const commit = (e) => {
     e?.preventDefault?.();
     const chosen = name.trim();
     if (!chosen || /^untitled( blend)?$/i.test(chosen)) {
-      setResult({ ok: false, text: "Give it a name first — anything you'd recognise later." });
+      setResult({ ok: false, text: "Give it a name first — anything you'd recognize later." });
       return;
     }
     const id = onSave?.(chosen);

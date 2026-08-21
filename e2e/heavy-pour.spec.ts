@@ -2,11 +2,11 @@
 //
 // REPORTED: "assam black 5 and peppermint 1, that feels wrong". It did,
 // and the bars were not the problem. Parts were grams then, so 5 + 1 was
-// 3.33 cups' worth of leaf in one cup — every strong flavour sat at its
+// 3.33 cups' worth of leaf in one cup — every strong flavor sat at its
 // ceiling and the strip went flat, with no way to say which led.
 //
 // THAT EXACT CUP IS NO LONGER BUILDABLE IN PARTS MODE, which is the
-// point of this file now. Parts became a ratio normalised to one cup's
+// point of this file now. Parts became a ratio normalized to one cup's
 // worth, so no arrangement of them can over-dose the pot — 9:1 is the
 // same amount of leaf as 1:1, just a different balance. The warning did
 // not become dead: it moved to where a heavy cup is now actually made,
@@ -63,7 +63,7 @@ test.describe("a heavy pour says so", () => {
 
   test("an ordinary cup is not scolded, however the ratio is set", async ({ page }) => {
     // The half that keeps the notice worth reading — and it is a
-    // stronger claim than it used to be. Parts normalise to one cup, so
+    // stronger claim than it used to be. Parts normalize to one cup, so
     // even a lopsided 5:1 is an ordinary amount of leaf: the ratio moved
     // and the pour did not. That is the fix this warning was written
     // alongside, asserted from the user's side.

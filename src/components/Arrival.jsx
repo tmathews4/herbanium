@@ -146,7 +146,7 @@ export const Arrival = ({
    change their mind mid-travel, and must keep its children mounted
    through the closing animation or there is nothing left to animate.
    Folding those into one component would mean a flag selecting between
-   two behaviours that share four lines.
+   two behaviors that share four lines.
 
    CHILDREN STAY MOUNTED while closing, then unmount. That's the whole
    reason this can't be CSS: `{open && <panel/>}` removes the subject

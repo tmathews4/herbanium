@@ -62,7 +62,7 @@ export const BrewSurface = ({
   timeS: timeSProp,
   setTimeS: setTimeSProp,
   // Keeping the pot, as opposed to brewing it. Only the composer passes
-  // one — a recipe already lives in the catalogue and a single leaf is
+  // one — a recipe already lives in the catalog and a single leaf is
   // not a blend — which is the same "what varies is the LOAD" rule the
   // header states: the corner appears because this pot can be kept, not
   // because of which screen is showing it.
@@ -119,7 +119,7 @@ export const BrewSurface = ({
           disabled={!ingredients.length}
           // NOT pre-seeded, even where the load has a name. Saving from
           // a recipe or a leaf makes YOUR copy of it, and handing back
-          // the original's name produces two catalogue rows reading the
+          // the original's name produces two catalog rows reading the
           // same — the duplicate-by-default problem "Untitled blend"
           // had, wearing a nicer word.
           onSave={onSave}

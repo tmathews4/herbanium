@@ -6,7 +6,7 @@
    Every audit so far has checked what a cup CLAIMS — effects, their
    strengths, the words used. None checked the numbers the app tells
    you to actually brew at, which is the most directly user-facing
-   data in the catalogue and the one place being wrong makes a worse
+   data in the catalog and the one place being wrong makes a worse
    cup rather than a wrong label.
 
    The docs carry sourced ranges:
@@ -74,7 +74,7 @@ export const paramKey = r => `${r.id}:${r.axis}:${r.direction}`;
 /** The `<id>:<axis>` key brewIntent records departures under. */
 export const intentKey = r => `${r.id}:${r.axis}`;
 
-/** Departures the catalogue has deliberately chosen — see brewIntent.js. */
+/** Departures the catalog has deliberately chosen — see brewIntent.js. */
 export const isDeliberate = r =>
   Object.prototype.hasOwnProperty.call(DELIBERATE_RANGE_DEPARTURES, intentKey(r));
 

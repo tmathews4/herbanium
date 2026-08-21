@@ -2,7 +2,7 @@
    data/brewIntent.js — where the app departs from its research on
    purpose, and why.
 
-   Everything else in this catalogue is answerable to the docs: an
+   Everything else in this catalog is answerable to the docs: an
    effect the research doesn't prescribe is a bug, a strength that
    doesn't match is a bug. Brew PARAMETERS are the one place that
    isn't quite true, because the research documents how an ingredient
@@ -20,7 +20,7 @@
 
    Read by tools/lib/brew-params.mjs and the guard in
    tests/research-parity.test.mjs. Removing an entry makes the audit
-   report that ingredient again, which is the correct behaviour if the
+   report that ingredient again, which is the correct behavior if the
    intent ever changes.
    ────────────────────────────────────────────────────────────── */
 

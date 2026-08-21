@@ -436,7 +436,7 @@ export const ATTRIBUTES = [
   // ─── Recent: mood-family patterns ─────────────────────────
   { id: "soft-hand", name: "The Moon-Doe", rarity: "common", window: "recent",
     glyph: "calm", tint: "sage", frame: "circle", accent: "none",
-    desc: "Small grey bird with wings folded close along its sides. Drawn by your reach for the quiet cup.",
+    desc: "Small gray bird with wings folded close along its sides. Drawn by your reach for the quiet cup.",
     earned: ctx => moodFamily(ctx.recent, ["calm","sleepy","soothing"]) >= 5 },
   { id: "restless-one", name: "The Wind-Spirit", rarity: "common", window: "recent",
     glyph: "energy", tint: "ochre", frame: "circle", accent: "rays",
@@ -486,7 +486,7 @@ export const ATTRIBUTES = [
     earned: ctx => flavorCount(ctx.recent, "bitter") >= 3 },
   { id: "smokesworn", name: "The Tengu", rarity: "rare", window: "recent",
     glyph: "warming", tint: "ash", frame: "diamond", accent: "none",
-    desc: "Grey shadow padding through pine smoke at the timberline. Drawn by the smell of woodsmoke in your cup.",
+    desc: "Gray shadow padding through pine smoke at the timberline. Drawn by the smell of woodsmoke in your cup.",
     earned: ctx => flavorCount(ctx.recent, "smoky") >= 2 },
   { id: "umami-initiate", name: "The Tanuki", rarity: "uncommon", window: "recent",
     glyph: "focus", tint: "sageDeep", frame: "square", accent: "dot",
@@ -575,7 +575,7 @@ export const ATTRIBUTES = [
     earned: ctx => traditionMatches(ctx.recent, /South Asian|Ayurvedic/i) >= 3 },
   { id: "old-continent", name: "The Sidhe", rarity: "uncommon", window: "recent",
     glyph: "scroll", tint: "ochre", frame: "square", accent: "none",
-    desc: "Striped grey digger keeping its slow burrow under the hedgerow. Drawn by an Old-Continent kettle still tending herbs.",
+    desc: "Striped gray digger keeping its slow burrow under the hedgerow. Drawn by an Old-Continent kettle still tending herbs.",
     earned: ctx => traditionMatches(ctx.recent, /European|Western/i) >= 3 },
   { id: "andean-path", name: "The Condor", rarity: "rare", window: "recent",
     glyph: "compass", tint: "plum", frame: "hex", accent: "rays",
@@ -896,7 +896,7 @@ export const ATTRIBUTES = [
     earned: ctx => usePick(ctx, "calm", ["spiced"]) },
   { id: "spirit-dove",        name: "The Dove",           rarity: "common", window: "recent",
     glyph: "calm", tint: "sage", frame: "circle", accent: "none",
-    desc: "Small grey bird with wings folded close along its sides. Drawn by peace — the cup unhurried.",
+    desc: "Small gray bird with wings folded close along its sides. Drawn by peace — the cup unhurried.",
     earned: ctx => usePick(ctx, "calm", ["floral"]) },
   { id: "spirit-magpie",      name: "The Magpie",         rarity: "rare", window: "recent",
     glyph: "digestive", tint: "ochre", frame: "diamond", accent: "dot",
@@ -1135,13 +1135,13 @@ export const ATTRIBUTES = [
     } },
 
   // ─── Workflow spirits — earned by exploring app paths users may
-  //     overlook: catalogue-curation, mood/flavor
+  //     overlook: catalog-curation, mood/flavor
   //     completionism, true-tea breadth, decoction patience. Each is
   //     tied to a specific UI flow so the spirit becomes a reason to
   //     try something the user hasn't done yet. ─────────────────────
   { id: "odin", name: "The Wanderer-Raven", rarity: "legendary", window: "lifetime",
     glyph: "scroll", tint: "plum", frame: "diamond", accent: "star",
-    desc: "Long wingless dragon resting on a hoard of kept brews. Drawn by your own composed blends gathering in your catalogue.",
+    desc: "Long wingless dragon resting on a hoard of kept brews. Drawn by your own composed blends gathering in your catalog.",
     earned: ctx => {
       let n = 0;
       for (const id of ctx.savedBlendIds) if (String(id).startsWith("local-")) n++;
@@ -1149,7 +1149,7 @@ export const ATTRIBUTES = [
     } },
   { id: "feng-huang", name: "The Phoenix-Crane", rarity: "legendary", window: "lifetime",
     glyph: "leaf", tint: "ochre", frame: "hex", accent: "rays",
-    desc: "Five-coloured phoenix of Chinese myth, plumage holding every direction. Drawn by a kettle that has brewed white, green, oolong, black, and pu-erh — every face of the leaf.",
+    desc: "Five-colored phoenix of Chinese myth, plumage holding every direction. Drawn by a kettle that has brewed white, green, oolong, black, and pu-erh — every face of the leaf.",
     earned: ctx => {
       const byI = ctx.lifetime.byIngredient;
       const has = ids => ids.some(id => byI.has(id));
@@ -1169,11 +1169,11 @@ export const ATTRIBUTES = [
     earned: ctx => ctx.lifetime.byMood.size >= 9 },
   { id: "hoopoe", name: "The Hoopoe", rarity: "uncommon", window: "lifetime",
     glyph: "flower", tint: "ochre", frame: "circle", accent: "rays",
-    desc: "Crowned multicoloured bird of Persian and Egyptian myth, leader of all birds in flight. Drawn by a kettle that has tasted every flavour family the catalogue holds.",
+    desc: "Crowned multicolored bird of Persian and Egyptian myth, leader of all birds in flight. Drawn by a kettle that has tasted every flavor family the catalog holds.",
     earned: ctx => ctx.lifetime.distinctFlavors >= 8 },
   { id: "zaratan", name: "The Zaratan", rarity: "rare", window: "lifetime",
     glyph: "heart", tint: "plum", frame: "diamond", accent: "dot",
-    desc: "Vast island-turtle of medieval bestiaries, an entire small world resting on its back. Drawn by a deep catalogue of cups kept close.",
+    desc: "Vast island-turtle of medieval bestiaries, an entire small world resting on its back. Drawn by a deep catalog of cups kept close.",
     earned: ctx => ctx.savedBlendIds.size >= 30 },
   { id: "cu-sith", name: "The Cu Sith", rarity: "uncommon", window: "lifetime",
     glyph: "heart", tint: "sage", frame: "circle", accent: "star",

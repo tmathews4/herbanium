@@ -1,10 +1,10 @@
 /* ──────────────────────────────────────────────────────────────
-   data/families.js — raw flavour/effect word → family.
+   data/families.js — raw flavor/effect word → family.
 
    Plain data, deliberately outside FlavorMap.jsx. Node can't import
    .jsx, so anything in a component file is invisible to the test suite
    and to tools/ — and these maps are exactly what a tool sweeping the
-   catalogue needs. FlavorMap re-exports them so component imports are
+   catalog needs. FlavorMap re-exports them so component imports are
    unchanged.
    ────────────────────────────────────────────────────────────── */
 
@@ -64,7 +64,7 @@ export const FAMILY_BY_FLAVOR = {
 /* ──────────────────────────────────────────────────────────────
    THE MOOD VOCABULARY — one canonical tree.
 
-   Family, display label, colour, order, and the DEFINITION of every
+   Family, display label, color, order, and the DEFINITION of every
    word, in one place. It used to be spread across four files, and
    they disagreed: the comment on FAMILY_BY_EFFECT below called
    `soothing` "bodily comfort (demulcent — throat, gut)" while
@@ -77,7 +77,7 @@ export const FAMILY_BY_FLAVOR = {
 
    `counterpart` is the established herbal action or TCM category the
    word answers to. Tea's own sensory lexicons (Lee 2007, CTSEM, QDA)
-   are flavour-and-aroma vocabularies and never name effects, so
+   are flavor-and-aroma vocabularies and never name effects, so
    materia medica is the reference frame. A leaf with a null
    counterpart carries no external definition and only our own
    research docs constrain it — worth knowing when judging whether a
@@ -344,13 +344,13 @@ export const MOOD_COUNTERPARTS = Object.fromEntries(
    for the thing actually tasted.
 
    `sweet aroma` is the odd one — the only two-word label, and the break
-   is deliberate. The flavour family and the palate axis `sweetness`
+   is deliberate. The flavor family and the palate axis `sweetness`
    were drawing two bars from the same words on the same screen, and a
    reader had no way to tell why. They are not the same claim:
 
      sweet aroma  — honey, vanilla, caramel. Compounds that SMELL sweet.
                     Vanillin has essentially no sweet taste; the brain
-                    reads the odour as sweetness.
+                    reads the odor as sweetness.
      sweetness    — the tongue register, beside bitterness and
                     astringency. Sugars and amino acids.
 

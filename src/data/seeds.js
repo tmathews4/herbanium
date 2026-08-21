@@ -247,7 +247,7 @@ export const SEED_MODES = {
        what the fixture sets up. */
     hints: { ingredientHintShown: true },
     // User-composed blends — make Composer + Self-Repeater fire and
-    // give the Catalogue a couple of "your composition" entries.
+    // give the Catalog a couple of "your composition" entries.
     generatedBlends: [
       {
         id: "local-tomscalm",

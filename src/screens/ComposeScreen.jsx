@@ -44,7 +44,7 @@ import { defaultPartsFor } from "../data/blendShares";
 
 // Stable signature for an ingredient list — same ids with same grams,
 // order-independent. Used to detect when a candidate brew already
-// exists in the user's catalogue under a different name.
+// exists in the user's catalog under a different name.
 function ingredientsKey(ings) {
   return (ings || [])
     .map(i => `${i.id}:${Number(i.g ?? 0).toFixed(2)}`)
@@ -52,7 +52,7 @@ function ingredientsKey(ings) {
     .join("|");
 }
 
-// Find a catalogue entry that matches the candidate by tempC and
+// Find a catalog entry that matches the candidate by tempC and
 // ingredient set (ids + grams). Returns the matched blend or null.
 // Skips entries the user has hidden.
 function findDuplicateBlend(candidate, allBlends, hidden) {
@@ -166,10 +166,10 @@ const JournalEntryRow = ({ entry, first, openEntry }) => {
    Screen: COMPOSE
    ────────────────────────────────────────────────────────────── */
 
-export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogueFilter, setCatalogueFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, blendTourDemo, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
+export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew, savedBlendIds, favoriteBlendIds, generatedBlends, hiddenBlendIds, deleteBlend, unhideBlend, saveComposedBlend, openBlend, openCup, openEntry, composePreselect, composeView, openInCompose, sessions = [], journalEntries = [], addJournalEntry, deleteJournalEntry, profile, tabVisits, elementalsDisabled, omenShown, dismissOmen, seenElementalIds, setSeenElementalIds, featuredElementals, setFeaturedElementals, wildElementals, rolledElementalIds, rolledElementalAt, rolledElementalAction, autoOpenArrivalId, onAutoOpenConsumed, lockedCrystal, setLockedCrystal, mode, setMode, setModeUserAction, catalogFilter, setCatalogFilter, blendTourActive, blendTourStep, blendTourFamilyMode, blendTourControlsOpen, blendTourAxis, blendTourDemo, lodestoneCharge = 0, onChargedSummon, onLodestoneSeen }) => {
   /* WHICH blend is being deleted, not whether one is. This lives at the
      component root because the delete button is inside a .map over the
-     catalogue — a boolean would have every card sharing one sheet and
+     catalog — a boolean would have every card sharing one sheet and
      the sheet would not know whose name to print. Null means no
      question is being asked. */
   const [deletingBlend, setDeletingBlend] = useState(null);
@@ -288,7 +288,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
   React.useEffect(() => {
     if (!composePreselect) return;
     setMode("recipes");
-    setCatalogueFilter({ collection: "favorites", moods: [], flavors: [] });
+    setCatalogFilter({ collection: "favorites", moods: [], flavors: [] });
   }, [composePreselect?.at]);
 
   // Deep-link from Profile stats: lands on Compose with the requested
@@ -469,7 +469,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                 timeline; the timeline should open at the top of it.
 
                 Only the CONTROL moves. The composer is a textarea, two
-                mood rows, a flavour picker and a title — chrome it is
+                mood rows, a flavor picker and a title — chrome it is
                 not, and the dock is explicitly not allowed to scroll,
                 because the guided tour finds the pane it scrolls by
                 looking for a scroll parent and would try to fit the
@@ -544,13 +544,13 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                     {/* SAVE OVERLAYS, IT DOESN'T SHARE THE ROW.
 
                         As a flex sibling it stole width from the toggle,
-                        so "Write" centred itself in whatever was left and
-                        drifted off the bar's true centre the moment Save
+                        so "Write" centered itself in whatever was left and
+                        drifted off the bar's true center the moment Save
                         appeared — the label moving sideways as a side
                         effect of starting to write.
 
                         Absolutely positioned at the left instead: the
-                        toggle spans the full width and centres against
+                        toggle spans the full width and centers against
                         the whole dock, and Save sits over its left end
                         with a higher stacking order so the tap lands on
                         Save rather than the fold underneath. Left,
@@ -575,7 +575,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                         flex: 1, background: "transparent",
                         border: "none", cursor: "pointer",
                         padding: "11px 12px",
-                        // Centred, because it is now the only thing in
+                        // Centered, because it is now the only thing in
                         // the row and a lone label pinned left would read
                         // as one end of a pair whose other half is
                         // missing.
@@ -594,7 +594,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                           reason: this panel opens UPWARD out of the dock,
                           so up means expand. It is the only thing left
                           saying which way the row goes, which is why it
-                          keeps the label's colour rather than fading to
+                          keeps the label's color rather than fading to
                           ash the way a second-rank glyph would. */}
                       <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden
                            style={{
@@ -833,7 +833,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
       })()}
 
       {mode === "recipes" && (() => {
-        // Recipe Book — the full catalogue of curated traditional and
+        // Recipe Book — the full catalog of curated traditional and
         // experimental blends, plus user-composed local- entries. The
         // favorites filter gives the user-saved view.
         const hidden = hiddenBlendIds || new Set();
@@ -845,21 +845,21 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
         );
         const experimental = [...curatedExperimental, ...generatedExperimental];
 
-        // Recipe Book always shows the catalogue with filter chips.
+        // Recipe Book always shows the catalog with filter chips.
         // Filter state is a structured object: collection (single-select),
         // moods (multi-select OR), flavors (multi-select OR). String form
         // is supported for backwards-compat with any cached older state.
         if (true) {
-          const cf = typeof catalogueFilter === "string"
-            ? { collection: catalogueFilter, moods: [], flavors: [] }
-            : { collection: "favorites", moods: [], flavors: [], ...(catalogueFilter || {}) };
-          const setCollection = (c) => setCatalogueFilter({ ...cf, collection: c });
+          const cf = typeof catalogFilter === "string"
+            ? { collection: catalogFilter, moods: [], flavors: [] }
+            : { collection: "favorites", moods: [], flavors: [], ...(catalogFilter || {}) };
+          const setCollection = (c) => setCatalogFilter({ ...cf, collection: c });
           const toggleInList = (key, item) => {
             const list = cf[key] || [];
             const next = list.includes(item)
               ? list.filter(x => x !== item)
               : [...list, item];
-            setCatalogueFilter({ ...cf, [key]: next });
+            setCatalogFilter({ ...cf, [key]: next });
           };
 
           // Step 1 — collection bucket.
@@ -872,7 +872,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
               seen.add(b.id);
               return true;
             });
-            catEmpty = "No catalogue blends to show.";
+            catEmpty = "No catalog blends to show.";
           } else if (cf.collection === "favorites") {
             const fav = favoriteBlendIds || new Set();
             const seen = new Set();
@@ -900,7 +900,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
             pool = [...traditional, ...experimental]
               .filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i)
               .filter(b => b.mood === cf.collection);
-            catEmpty = `No catalogue blends match ${cf.collection} yet.`;
+            catEmpty = `No catalog blends match ${cf.collection} yet.`;
           }
 
           // Step 2 — sub-filter by mood (OR within row) and flavor
@@ -1110,7 +1110,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                 <>
                   {catVisible.map((b, i) => {
                   // House experimentals (Tom Foolery + the curated research
-                  // blends) are permanent Catalogue staples — undeletable.
+                  // blends) are permanent Catalog staples — undeletable.
                   const isHouseStaple = b.house === true || b.id === "exp-tom-foolery";
                   const author = b.tradition
                     || (isHouseStaple ? "Herbanium house"
@@ -1118,7 +1118,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                        : b.id?.startsWith("local-") ? "your composition"
                        : b.experimental ? "Herbanium experiment"
                        : null);
-                  // Any catalogue blend except permanent house staples
+                  // Any catalog blend except permanent house staples
                   // can be removed; curated traditions get hidden via
                   // hiddenBlendIds and can be restored from the panel
                   // below the list.
@@ -1157,7 +1157,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                           onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75"; }}
                           style={{
                             // ITS OWN COLUMN of the row's bottom line,
-                            // centred between the caffeine badge and the
+                            // centered between the caffeine badge and the
                             // temp/time readout. Pinned right it landed
                             // under the temperature and read as part of
                             // it; the middle of that line is empty on
@@ -1176,13 +1176,13 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                             // dock divides its cells with.
                             // Bounded to the meta line's own band, NOT
                             // the row's full height. A full-height
-                            // column sits under the centre of the row —
+                            // column sits under the center of the row —
                             // which is precisely where a tap meant to
                             // OPEN the recipe lands, so it would eat
                             // that tap and brew instead. The row's own
                             // comment already warns about this: a
                             // missing prop once routed rows to startBrew
-                            // and the wrong behaviour shipped.
+                            // and the wrong behavior shipped.
                             position: "absolute", bottom: 6, height: 30,
                             left: "50%", transform: "translateX(-50%)",
                             display: "flex", alignItems: "center",
@@ -1219,7 +1219,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
                             e.stopPropagation();
                             setDeletingBlend({ id: b.id, name: b.name });
                           }}
-                          title="Delete from catalogue"
+                          title="Delete from catalog"
                           onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; }}
                           style={{
@@ -1370,7 +1370,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
         open={!!deletingBlend}
         testId="blend-delete-confirm"
         title={`Delete ${deletingBlend?.name ?? "this blend"}?`}
-        body="It leaves your Catalogue. Cups you have already brewed from it stay in the journal."
+        body="It leaves your Catalog. Cups you have already brewed from it stay in the journal."
         cancelLabel="keep it"
         confirmLabel="delete →"
         onCancel={() => setDeletingBlend(null)}
@@ -1553,7 +1553,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
      the same number because a part was a gram outright, and that is
      precisely what broke: "5 parts assam : 1 part peppermint" built a
      6g pot — 3.33 cups' worth of leaf in one cup — so every strong
-     flavour sat at its ceiling and the strip went flat. A ratio is not
+     flavor sat at its ceiling and the strip went flat. A ratio is not
      a quantity, and treating it as one silently made the pot bigger
      every time someone expressed a stronger lead.
 
@@ -1596,7 +1596,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
      A pot is not a stronger cup, it is more of the same cup — the water
      scales with the leaf, so the concentration is identical. Every
-     extraction profile in the catalogue is written per 200ml ("1 tsp ·
+     extraction profile in the catalog is written per 200ml ("1 tsp ·
      200ml"), so handing it three cup-doses because the user is making a
      pot would render that pot as a TRIPLE-STRENGTH cup. That is the
      exact bug this whole change exists to remove, arriving through the
@@ -2310,7 +2310,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 Two earlier versions died the same way and are worth not
                 reviving: "per 250 ml cup" asserted a volume nobody
                 measured, and "1 part ≈ ½ tsp" was out by threefold
-                across the catalogue, since a teaspoon runs 1.0g of
+                across the catalog, since a teaspoon runs 1.0g of
                 chamomile to 3.0g of powdered adaptogen.
 
                 The total is the honest replacement. It is what you
@@ -2576,12 +2576,12 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 tempC: cup.tempC,
                 timeS: cup.timeS,
               };
-              const allCatalogue = [
+              const allCatalog = [
                 ...BLENDS,
                 ...((generatedBlends || []).filter(x => !BLENDS.find(y => y.id === x.id))),
               ];
               // Straight to the timer — saving lives on the steep screen.
-              const dup = findDuplicateBlend(candidate, allCatalogue, hiddenBlendIds);
+              const dup = findDuplicateBlend(candidate, allCatalog, hiddenBlendIds);
               startBrew(
                 dup
                   ? { ...dup, tempC: candidate.tempC, timeS: candidate.timeS }
@@ -2600,7 +2600,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
 
 /* ──────────────────────────────────────────────────────────────
    RestoreDeletedPanel — collapsible "X removed · search · restore"
-   block at the bottom of Catalogue. Lets the user bring back any
+   block at the bottom of Catalog. Lets the user bring back any
    curated blend they've previously deleted; user-composed blends
    that were dropped from generatedBlends can't be restored here
    (they're gone from storage, not just hidden).

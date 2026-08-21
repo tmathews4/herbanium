@@ -17,7 +17,7 @@
 // flashed cream over a near-black app.
 //
 // So the assertion here is deliberately not "the scrim is the right
-// colour". It is the CLASS of mistake: with the app in its dark
+// color". It is the CLASS of mistake: with the app in its dark
 // palette, nothing large should be painting a light surface. A check
 // pinned to one component's value would have to be extended by hand for
 // every next one, which is how the first two diverged.
@@ -26,7 +26,7 @@ import { bootDark } from "./helpers/brew";
 
 test.beforeEach(() => test.slow());
 
-/** Perceived lightness 0..1 of a computed colour, ignoring transparents. */
+/** Perceived lightness 0..1 of a computed color, ignoring transparents. */
 const LUMA = `(css) => {
   const m = css.match(/rgba?\\(([^)]+)\\)/);
   if (!m) return null;
@@ -110,7 +110,7 @@ test.describe("the dark palette", () => {
       .toBeLessThan(0.2);
   });
 
-  test("no component hardcodes a light surface colour", async () => {
+  test("no component hardcodes a light surface color", async () => {
     /* The generalisation, and the half a rendered check cannot reach:
        most of these components only appear in states a spec cannot
        cheaply build. A literal light rgb() in an inline style is a
