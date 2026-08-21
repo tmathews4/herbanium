@@ -563,8 +563,15 @@ export const CompactSessionRow = ({ s, openCup, first }) => {
             {(start && moodArc.endLabel) && (
               <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
             )}
+            {/* Pending keeps the row's italic. The surrounding span is
+                italic and every settled value overrides it to normal, so
+                NOT overriding is what marks this as a state rather than
+                a reading. */}
             {moodArc.endLabel && (
-              <span style={{ color: moodArc.endColor, fontStyle: "normal" }}>{moodArc.endLabel}</span>
+              <span style={{
+                color: moodArc.endColor,
+                ...(moodArc.endPending ? {} : { fontStyle: "normal" }),
+              }}>{moodArc.endLabel}</span>
             )}
           </span>
           {s.taste != null && (
@@ -630,16 +637,42 @@ const flavorTallyFor = (s) => {
   return { hits, total: target.length };
 };
 
-// Mood arc for cup rows. Returns the end-side label and color
-// derived from the follow-up verdict:
-//   thumbs up → targets + extras, sage-deep (cup delivered + any
-//               unexpected register that came along)
-//   thumbs down → extras alone (target missed); "—" if no extras,
-//               terra in either case
-//   no verdict → targets + extras, neutral ink-soft
-// `endLabel` is "" when there's nothing to say on the end side
-// (legacy session with no targets and no extras). Caller decides
-// whether to render the arrow at all based on start/end presence.
+/* Mood arc for cup rows. The end-side label and color, from the
+   follow-up verdict:
+     thumbs up     → targets + extras, sage-deep (cup delivered, plus
+                     any unexpected register that came along)
+     thumbs down   → extras alone (target missed); "—" if no extras,
+                     terra either way
+     rated 3       → targets + extras, neutral ink-soft
+     NOT YET ASKED → "pending review", quiet and italic
+   `endLabel` is "" when there is nothing to say on the end side (a
+   legacy session with no targets and no extras). The caller decides
+   whether to draw the arrow at all, from start/end presence.
+
+   THE LAST CASE USED TO SHOW THE TARGETS, and that is what this split
+   exists for. The right-hand side is what LANDED — but before the
+   follow-up is answered nothing has landed, so it showed `targetMoods`,
+   the moods the cup is FOR, with an arrow pointing at them. Reported as
+   a cup rendering "calm → calm" seconds after brewing, having been
+   asked nothing.
+
+   It read fine almost always, which is why it lasted: the two sides
+   normally differ ("tired → energy, focus") and the arrow parses as
+   intent. It only misreads when the going-in mood and the reached-for
+   mood are the same word — and then it reads as an outcome the app has
+   no basis for.
+
+   The original design had a `for` prefix; the block comment above
+   CompactSessionRow still shows "for calm → calm", and that word was
+   doing the whole job. It is not rendered anywhere any more, and the
+   left side quietly changed from the blend's intent to the user's own
+   currentMoods. Naming the state beats restoring the prefix: "pending
+   review" says WHY the side is empty, where a bare hanging arrow just
+   asks to be read as a shrug.
+
+   NOT KEYED ON `verdict`, which is null both for a cup rated exactly 3
+   and for a cup never asked. Keyed on whether a score exists at all —
+   otherwise a neutral 3 would lose its label along with the bug. */
 const buildMoodArc = (s, verdict) => {
   const targets = Array.isArray(s?.targetMoods) ? s.targetMoods.filter(Boolean) : [];
   const extras  = Array.isArray(s?.extraMoods)  ? s.extraMoods.filter(Boolean)  : [];
@@ -655,17 +688,20 @@ const buildMoodArc = (s, verdict) => {
   } else if (verdict === "down") {
     endParts = extras.length > 0 ? extras : [];
     endColor = theme.terra;
-  } else {
-    // No verdict — fall back to targets / extras / legacy `actual`
+  } else if (coerceMoodScore(s) != null || legacyEnd) {
+    // Answered but neutral — a cup rated exactly 3 earns no verdict.
     endParts = targets.length > 0 || extras.length > 0
       ? [...targets, ...extras]
       : (legacyEnd ? [legacyEnd] : []);
     endColor = theme.inkSoft;
+  } else {
+    // Never asked. Nothing has landed, so nothing is claimed.
+    return { endLabel: "pending review", endColor: theme.ash, endPending: true };
   }
   const endLabel = verdict === "down" && endParts.length === 0
     ? "—"
     : endParts.join(", ");
-  return { endLabel, endColor };
+  return { endLabel, endColor, endPending: false };
 };
 
 export const SessionRow = ({ s, openCup, first }) => {
@@ -740,8 +776,15 @@ export const SessionRow = ({ s, openCup, first }) => {
               {(start && moodArc.endLabel) && (
                 <span style={{ margin: "0 5px", color: theme.terra, fontStyle: "normal" }}>→</span>
               )}
+              {/* Pending keeps the row's italic. The surrounding span is
+                  italic and every settled value overrides it to normal, so
+                  NOT overriding is what marks this as a state rather than
+                  a reading. */}
               {moodArc.endLabel && (
-                <span style={{ color: moodArc.endColor, fontStyle: "normal" }}>{moodArc.endLabel}</span>
+                <span style={{
+                  color: moodArc.endColor,
+                  ...(moodArc.endPending ? {} : { fontStyle: "normal" }),
+                }}>{moodArc.endLabel}</span>
               )}
             </span>
             {s.taste != null && (

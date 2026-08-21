@@ -18,7 +18,7 @@
 // app showed a number nobody had given, indistinguishable from one
 // they had.
 import { test, expect, type Page } from "@playwright/test";
-import { brewFromDetail } from "./helpers/brew";
+import { bootApp as boot, brewFromDetail } from "./helpers/brew";
 import { CURRENT_SCHEMA } from "../src/data/schemaVersion.js";
 
 test.beforeEach(() => test.slow());
@@ -42,6 +42,49 @@ async function brewACup(page: Page) {
 }
 
 test.describe("a freshly brewed cup", () => {
+  test("claims no outcome until the follow-up is answered", async ({ page }) => {
+    /* The mood arc's right-hand side is what LANDED. Before the
+       follow-up is answered nothing has landed, and it used to show
+       `targetMoods` — the moods the cup is FOR — with an arrow pointing
+       at them. Reported as a cup rendering "calm → calm" seconds after
+       brewing, having been asked nothing.
+
+       It read fine almost always, which is why it lasted: the two sides
+       normally differ ("tired → energy, focus") and the arrow parses as
+       intent. It only misreads when the going-in mood and the
+       reached-for mood are the same word. So this asserts the STATE is
+       named, not that some particular pair fails to collide — a test
+       built around "calm → calm" would pass on a seed that happens not
+       to produce it. */
+    await boot(page);
+    await page.waitForTimeout(5200);   // the greeting choreography
+
+    const rows = page.locator('[data-testid="recent-brew-row"]');
+    await expect(rows.first(), "Home should list recent brews")
+      .toBeVisible({ timeout: 30_000 });
+    const text = await rows.evaluateAll(els =>
+      els.map(e => (e.textContent || "").replace(/\s+/g, " ")));
+
+    const pending = text.filter(t => /pending review/.test(t));
+    expect(pending.length,
+      "the seed carries cups whose follow-up has not been answered")
+      .toBeGreaterThan(0);
+    expect(text.some(t => !/pending review/.test(t) && /→/.test(t)),
+      "and cups that HAVE been reviewed still show what landed — otherwise "
+      + "this passes by the arc having stopped rendering").toBe(true);
+
+    /* Italic is the tell, and it is load-bearing rather than decoration:
+       every settled value on this row overrides the container's italic
+       to normal, so staying italic is what separates a state from a
+       reading. */
+    const styled = await page.evaluate(() => Array.from(document.querySelectorAll("span"))
+      .filter(e => e.children.length === 0 && /pending review/.test(e.textContent || ""))
+      .map(e => getComputedStyle(e).fontStyle));
+    expect(styled.length, "the pending label should be its own span").toBeGreaterThan(0);
+    expect(styled.every(f => f === "italic"),
+      `pending should stay italic, got ${styled.join(", ")}`).toBe(true);
+  });
+
   test("carries no rating until one is given", async ({ page }) => {
     await brewACup(page);
 
