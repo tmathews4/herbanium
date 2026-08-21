@@ -1091,7 +1091,35 @@ export default function App() {
     setGeneratedBlends(mode.generatedBlends || []);
     setJournalEntries(materializeSeedJournalEntries(mode.journalEntries));
     setTabVisits(mode.tabVisits || {});
-    setSeenElementalIds(new Set(mode.seenElementalIds || []));
+    /* A SEED MAY ONLY CLAIM TO HAVE SEEN WHAT IT ALSO ROLLED.
+       `seen` is written by dismissing an arrival card, so in the app
+       it is always a subset of what has arrived — you cannot observe
+       an elemental that never came. A seed that lists ids in `seen`
+       alone describes a state no user can reach, and it did: the
+       power seed named ten welcomed specimens and three pins, and
+       eight of the ten were never rolled, so both surfaces showed
+       THREE and every pin was filtered back out as invalid.
+
+       It also made the count movable by chance. Both surfaces count
+       `rolled AND seen`, so those eight sat waiting for a random roll
+       to land on one of them — at which point the number went up with
+       no arrival, nothing on screen, and nothing the user did. That is
+       what failed elemental-counts in CI, reading three in the log and
+       four on Profile a few hundred ms later.
+
+       Granting them closes the mechanism rather than the exposure: a
+       newly rolled id is unseen by definition, so it can no longer
+       change either count on arrival. */
+    const seedSeen = new Set(mode.seenElementalIds || []);
+    setSeenElementalIds(seedSeen);
+    /* THROUGH THE WRAPPER, not the setter. An elemental becoming yours
+       is three parallel stores, and tests/lodestone.test.mjs holds
+       that only grantElementals writes them — it caught the first
+       version of this line, correctly. Going through it also stamps
+       rolledElementalAt, so the seed's welcomed specimens carry a
+       timestamp and sort into the arrivals timeline instead of piling
+       at ts 0. */
+    if (seedSeen.size) grantElementals([...seedSeen]);
     setFeaturedElementals(mode.featuredElementals || []);
     setWildElementals(mode.wildElementals || []);
     setLastWildAt(mode.lastWildAt || 0);

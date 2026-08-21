@@ -65,6 +65,38 @@ export async function bootApp(page: Page) {
       home: true, blend: true, herbanium: true,
       recipes: true, reflections: true, fieldnotes: true,
     }));
+    /* THE APP ROLLS DICE UNDER THE TEST, and every action site does it:
+       `tryRollOnAction` fires on brew, journal, compose, favorite and
+       on every TAB VISIT. At 4.5% base times 4.0 on a lightly-earned
+       profile that is roughly 18% per eligible action, and no spec
+       makes fewer than two or three visits before it looks at
+       anything.
+
+       So the state a test measured a moment ago is not the state it
+       measures next, and the failure lands on whichever assertion
+       happens to straddle the roll. `elemental-counts.spec.ts` was
+       caught by it in CI: the arrivals log read three, the click to
+       Profile rolled, and Profile read four. One test, one run, passed
+       on retry — which is what makes it look like flake rather than
+       like the app doing exactly what it was built to do.
+
+       Pushing lastElementalRollAt an hour into the future holds
+       `rollOnAction`'s own cooldown shut for the whole run. NOT
+       `elementalsDisabled`, which would also switch off the charge,
+       the milestones, a charged summon and the dev forcer — the very
+       things some of these specs are about. Deliberate arrivals still
+       fire; only the dice stop.
+
+       This is the same fix, for the same cause, that closed the
+       elemental-notices flake — see CLAUDE.md, the fifth cause. That
+       spec seeds it in its own boot because it seeds a great deal
+       else; here it belongs to the shared boot, since every spec that
+       uses it has the same exposure and none of them wants a random
+       arrival. tests/elemental-roll.test.mjs holds the cooldown
+       property by name, so deleting it fails there rather than
+       quietly restoring the flake. */
+    localStorage.setItem("herbanium.lastElementalRollAt",
+      JSON.stringify(Date.now() + 60 * 60 * 1000));
   }, CURRENT_SCHEMA);
   await page.goto("/?dev");
 }

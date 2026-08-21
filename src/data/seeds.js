@@ -237,7 +237,15 @@ export const SEED_MODES = {
     tabVisits: { home: 64, apothecary: 38, shelf: 27, profile: 9 },
     // Elementals state — power user has welcomed (logged) a handful
     // of specimens and pinned three to the front page.
-    seenElementalIds: ["first-brew", "ten-cups", "first-favorite", "first-apothecary", "first-shelf", "first-profile", "four-corners", "the-buzzed", "smokesworn", "the-druid"],
+    /* `first-favorite` sat in this list and is not an id — nothing in
+       ATTRIBUTES has ever been called that, and nothing else in the
+       repo mentions it. It cost the seed one welcomed specimen
+       silently, because an id that names nothing renders nothing.
+       The real favourites milestone is `favorite-five`, and this
+       profile has six, so it is a state the seed can honestly claim.
+       tests/seed-elementals.test.mjs now rejects an id that isn't in
+       the catalogue. */
+    seenElementalIds: ["first-brew", "ten-cups", "favorite-five", "first-apothecary", "first-shelf", "first-profile", "four-corners", "the-buzzed", "smokesworn", "the-druid"],
     featuredElementals: ["the-druid", "smokesworn", "the-buzzed"],
     // Flow flags — power user has seen and dismissed every
     // tutorial, summoned their unique elemental, and so on.
