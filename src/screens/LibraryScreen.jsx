@@ -492,6 +492,7 @@ export const BlendListRow = ({ b, first, author, go, openBlend, highlighted }) =
   const caffeineDisplay = caffeineMg > 0 ? Math.round(caffeineMg) : 0;
   return (
   <button
+    data-testid="blend-row"
     onClick={handleTap}
     onMouseEnter={(e) => {
       if (highlighted) return;

@@ -18,6 +18,7 @@ import {
   BLENDS, FLAVOR_FAMILY_CHIPS,
 } from "../data/blends";
 import { PARENT_MOODS } from "../data/canon";
+import { defaultCatalogFilter } from "../data/catalogFilter";
 import { FAMILY_BY_FLAVOR } from "../components/FlavorMap";
 import { INGREDIENTS } from "../data/ingredients";
 import { checkIngredientInteractions } from "../data/safety";
@@ -285,6 +286,11 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
   // When a favorite is tapped on Home (or a saved blend in Apothecary),
   // composePreselect arrives here. Switch to Recipe Book / favorites so
   // the user sees their saved recipe highlighted, ready to set intent.
+  //
+  // DELIBERATELY NOT the shelf default. Recipes now opens on All (see
+  // data/catalogFilter.js); this path is a jump to one recipe rather
+  // than a browse, and narrowing the list is what makes the
+  // preselected one findable.
   React.useEffect(() => {
     if (!composePreselect) return;
     setMode("recipes");
@@ -852,7 +858,7 @@ export const ComposeScreen = ({ section = "apothecary", quickBrew, go, startBrew
         if (true) {
           const cf = typeof catalogFilter === "string"
             ? { collection: catalogFilter, moods: [], flavors: [] }
-            : { collection: "favorites", moods: [], flavors: [], ...(catalogFilter || {}) };
+            : { ...defaultCatalogFilter(), ...(catalogFilter || {}) };
           const setCollection = (c) => setCatalogFilter({ ...cf, collection: c });
           const toggleInList = (key, item) => {
             const list = cf[key] || [];

@@ -65,6 +65,7 @@ function preloadRoutes() {
 }
 // Helpers
 import { getBlend, LOCAL_BLENDS } from "./helpers/misc";
+import { defaultCatalogFilter } from "./data/catalogFilter";
 import { pickSeedBlends } from "./helpers/onboarding";
 import { generateCreationTitle } from "./data/creationTitle";
 import { maybeRollWild } from "./data/wildElementals";
@@ -1580,9 +1581,7 @@ export default function App() {
   // moods + flavors are arrays for multi-select sub-filtering. Selections
   // across rows AND together (collection ∩ moods ∩ flavors); within mood
   // and flavor rows the chips OR together.
-  const [catalogFilter, setCatalogFilter] = useState({
-    collection: "favorites", moods: [], flavors: [],
-  });
+  const [catalogFilter, setCatalogFilter] = useState(defaultCatalogFilter);
   // Tapping a sub-tab is navigation, so it has to leave whatever detail
   // screen you're on — exactly as tapping a main tab does.
   //
@@ -1607,13 +1606,12 @@ export default function App() {
   };
   const setShelfModeAction = (k) => {
     leaveDetailForNav();
-    // Recipes lands on the user's Favorites by default — that's the
-    // most common destination on a brew-now visit. The user can
-    // flip to All / Traditional / etc. via the chip strip if they
-    // want a wider browse. Deep-links can still override downstream
-    // via composePreselect.
+    // Entering Recipes resets the filter to its default collection —
+    // see data/catalogFilter.js for which, and for why it stopped
+    // being Favorites. Deep-links still override downstream via
+    // composePreselect.
     if (k === "recipes" && shelfMode !== "recipes") {
-      setCatalogFilter({ collection: "favorites", moods: [], flavors: [] });
+      setCatalogFilter(defaultCatalogFilter());
     }
     setShelfMode(k);
   };
