@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef, useTransition, lazy, Suspense } from "react";
 import { theme, ff } from "./theme";
 import { UnitContext } from "./units/units";
 import {
@@ -1556,6 +1556,34 @@ export default function App() {
     clearOverlayHistory();
   };
 
+  /* A TAB SWITCH IS A TRANSITION, and that is what stops the logo.
+
+     Every screen but Home is `lazy`, so switching tabs suspends. A
+     suspending update inside a Suspense boundary unmounts the current
+     screen and shows the fallback — reported as "going to profile
+     shows the herbanium logo for a moment behind screen then load
+     profile page". The fallback already waits 0.12s before fading in
+     precisely so a warm navigation never sees it; Profile cold
+     measures ~400ms, so it is seen.
+
+     Marking the update as a transition tells React the old screen may
+     stay on screen until the new one is ready, instead of tearing it
+     down to a placeholder. The wait does not get shorter — it stops
+     being a flash of nothing.
+
+     MEASURED, NOT ASSUMED, and the baseline matters: the logo appears
+     on Profile and Apothecary on this morning's build too, so this is
+     an old rough edge rather than a regression. What DID change today
+     is Journal, 139-168ms before against 299-389ms after, because
+     Recipes now opens on the whole catalogue rather than a handful of
+     favourites. That one is a real cost of a real decision and is
+     noted separately.
+
+     `clearOverlaysForNav` stays urgent. Closing what is on top of you
+     is the response to the tap; deferring it would leave an overlay
+     sitting there while the tab beneath it changed. */
+  const [, startTabTransition] = useTransition();
+
   const navigateTab = (next) => {
     clearOverlaysForNav();
     if (next === tab) return;
@@ -1571,7 +1599,7 @@ export default function App() {
         return [...trimmed, tab];
       });
     }
-    setTab(next);
+    startTabTransition(() => setTab(next));
   };
   const goBack = () => {
     if (overlayHistory.length > 0) {
@@ -1581,11 +1609,12 @@ export default function App() {
     if (tabHistory.length > 0) {
       const prev = tabHistory[tabHistory.length - 1];
       setTabHistory(h => h.slice(0, -1));
-      setTab(prev);
+      startTabTransition(() => setTab(prev));
       return;
     }
     // No history — fall back to home if we're not already there.
-    if (tab !== "home") setTab("home");
+    // Back is the same navigation as a tap and suspends the same way.
+    if (tab !== "home") startTabTransition(() => setTab("home"));
   };
   // Home is the root — even if a stale history slipped past
   // navigateTab's reset, never expose "back" to the user from home.
