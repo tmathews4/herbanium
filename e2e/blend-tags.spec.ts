@@ -42,6 +42,55 @@ async function openBlend(page: Page, name: string) {
   await page.getByRole("button", { name: new RegExp(name, "i") }).first().click();
 }
 
+test.describe("a blend's hero", () => {
+  /* THE NAME SITS IN THE MIDDLE OF THE BAND. It used to sit in the
+     right-hand column of a two-column grid, with a 56px mood glyph and
+     the mood word ("WARMING") in the left one — so the blend's own name
+     was pushed off centre to make room for a word the tags underneath
+     already said.
+
+     Measured rather than reasoned about: reading the CSS would have
+     called the old header centred too, because the title WAS centred —
+     in its column. The question is where it lands in the band. */
+  test("centres the name in the band, with no column beside it", async ({ page }) => {
+    await openBlend(page, BLEND);
+
+    const hero = page.getByTestId("blend-hero");
+    const title = hero.getByRole("heading", { level: 1 });
+    await expect(title).toBeVisible({ timeout: 15_000 });
+
+    const band = await hero.boundingBox();
+    const name = await title.boundingBox();
+    if (!band || !name) throw new Error("no box for the hero or its title");
+
+    const bandMid = band.x + band.width / 2;
+    const nameMid = name.x + name.width / 2;
+    expect(Math.abs(nameMid - bandMid),
+      `the name's centre is ${Math.round(nameMid)} and the band's is ` +
+      `${Math.round(bandMid)} — something is taking width beside it`)
+      .toBeLessThan(4);
+  });
+
+  test("carries no control but its tags", async ({ page }) => {
+    /* The mood descriptor was a BUTTON — it opened an effect card —
+       and it was the only opener that card had. Asserting on the word
+       "warming" would only hold for this blend; asserting that every
+       button in the hero is a tag holds for all of them, and fails if
+       the descriptor comes back on any. */
+    await openBlend(page, BLEND);
+
+    const hero = page.getByTestId("blend-hero");
+    await expect(hero.locator('[data-testid="blend-tag"]').first()).toBeVisible({ timeout: 15_000 });
+
+    const buttons = hero.getByRole("button");
+    const total = await buttons.count();
+    const tags = await hero.locator('[data-testid="blend-tag"]').count();
+    const extras = await hero.locator('button:not([data-testid="blend-tag"])').allInnerTexts();
+    expect(total, `the hero holds ${total - tags} control(s) that are not ` +
+      `tags: ${extras.map(t => JSON.stringify(t.trim())).join(", ")}`).toBe(tags);
+  });
+});
+
 test.describe("a blend's tags", () => {
   test("open a card that reads as prose, not as an object", async ({ page }) => {
     await openBlend(page, BLEND);

@@ -6,17 +6,12 @@ import React from "react";
 import { BrewSurface } from "../components/BrewSurface";
 import { Arrival } from "../components/Arrival";
 import { BrewDockProvider, BLEND_DETAIL_DOCK_ID, useDockHeight } from "../helpers/dock";
-import {
-  Flower, Kettle, MOOD_ICONS,
-} from "../components/icons";
+import { Kettle } from "../components/icons";
 import {
   Button, SectionLabel, VocabInfoCard, FitOneLine,
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
 import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";
-import {
-  EFFECT_DESCRIPTIONS,
-} from "../data/vocabularyDescriptions";
 import { getBlend, sessionAgo, restHintForCelsius } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
@@ -41,7 +36,6 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
   const dockRef = React.useRef(null);
   const dockH = useDockHeight(dockRef);
 
-  const [openMood, setOpenMood] = React.useState(null);
   const [openTag, setOpenTag] = React.useState(null);
   const [directionsOpen, setDirectionsOpen] = React.useState(false);
   // Section collapse state. Defaults to open so the first-time
@@ -225,71 +219,30 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
       {/* Hero — flat cream with a soft drop shadow so it reads as a
           lifted card sitting on the ivory page rather than a heavier
           gradient strip. Mirrors Home's card-on-page elevation. */}
-      <div style={{
+      <div data-testid="blend-hero" style={{
         background: theme.cream,
         padding: "8px 22px 20px",
         borderBottom: `1px solid ${theme.ruleSoft}`,
         boxShadow: shadow.card,
       }}>
 
-        {/* Header grid — three rows × two columns. Icon spans rows
-            1-2 in the left column (alongside title + subtitle on the
-            right). Mood label lives in row 3 of the left column,
-            which is the same grid row as the tag tiles on the right
-            — so the label and the first tag row share a row line and
-            naturally align without pixel-level math. */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          columnGap: 14,
-          rowGap: 0,
-          alignItems: "start",
-        }}>
-          <div style={{
-            gridColumn: 1, gridRow: "1 / span 2",
-            justifySelf: "center", alignSelf: "start",
-            width: 56, height: 56, borderRadius: "50%",
-            background: theme.ivory, border: `1px solid ${theme.rule}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {(() => {
-              const Icon = MOOD_ICONS[b.mood] || Flower;
-              return <Icon size={32} />;
-            })()}
-          </div>
-          <div style={{
-            gridColumn: 1, gridRow: 3,
-            justifySelf: "center", alignSelf: "start",
-            // Pin to the top of the tag block (where the first tag
-            // row sits) rather than centering in the block, so the
-            // label tracks tag row 1 even when a second row exists.
-            // Small marginTop nudges the label's center onto the
-            // first row's center line (label half-height ≈ 7,
-            // tag-row half-height ≈ 8.5 → 1.5px tweak).
-            marginTop: 1.5,
-          }}>
-            {EFFECT_DESCRIPTIONS[b.mood] ? (
-              <button
-                onClick={() => setOpenMood(prev => prev === b.mood ? null : b.mood)}
-                style={{
-                  background: openMood === b.mood ? "rgba(98, 124, 92, 0.10)" : "transparent",
-                  border: "none", padding: "2px 6px", borderRadius: 4,
-                  fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
-                  textTransform: "uppercase", color: theme.ash, cursor: "pointer",
-                }}
-              >
-                {b.mood} <span style={{ fontSize: 9, color: theme.sageDeep }}>ⓘ</span>
-              </button>
-            ) : (
-              <span style={{
-                fontFamily: ff.sans, fontSize: 10, letterSpacing: "0.2em",
-                textTransform: "uppercase", color: theme.ash,
-              }}>
-                {b.mood}
-              </span>
-            )}
-          </div>
-          <div style={{ gridColumn: 2, gridRow: 1, textAlign: "center", minWidth: 0 }}>
+        {/* THE HERO IS JUST THE TEXT NOW — name, subtitle, tags, each
+            centred in the full width of the band.
+
+            It used to be a two-column grid: a 56px mood glyph spanning
+            rows 1-2 on the left with the mood word ("WARMING ⓘ") under
+            it in row 3, and the title column beside them. The grid
+            existed to make the mood word share a row line with the
+            first tag row without pixel math — real care, spent on an
+            arrangement that pushed the blend's own name off centre to
+            make room for a single word repeated by the tags below it.
+
+            Dropping the left column drops the reason for the grid, so
+            the grid goes too rather than surviving as a one-column
+            one with the row/column coordinates still written on every
+            child. */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}>
+          <div style={{ textAlign: "center", minWidth: 0 }}>
             <h1 style={{ fontFamily: ff.serif, fontSize: 28, fontWeight: 400, color: theme.ink, margin: 0, lineHeight: 1.05 }}>
               {b.name}
             </h1>
@@ -300,7 +253,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               inconsistently) and ellipsis truncation (which hid
               content). Falls back to no shrink on browsers
               without ResizeObserver. */}
-          <div style={{ gridColumn: 2, gridRow: 2, textAlign: "center", minWidth: 0 }}>
+          <div style={{ textAlign: "center", minWidth: 0 }}>
             <FitOneLine
               text={b.subtitle}
               baseSize={13}
@@ -311,10 +264,7 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               }}
             />
           </div>
-          {/* Tag row sits at gridRow 3 alongside the mood label so
-              the two share a row baseline. The wrapping div takes
-              the grid placement; the tag content lives inside. */}
-          <div style={{ gridColumn: 2, gridRow: 3, textAlign: "center", minWidth: 0 }}>
+          <div style={{ textAlign: "center", minWidth: 0, marginTop: 8 }}>
             {/* Signal tag tiles — centered under the name/subtitle column,
                 not the full hero, so they read as belonging to the title. */}
             {(() => {
@@ -513,17 +463,13 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
             />
           </div>
         )}
-        {openMood && EFFECT_DESCRIPTIONS[openMood] && (
-          <div style={{ marginBottom: 18 }}>
-            <VocabInfoCard
-              term={openMood}
-              summary={EFFECT_DESCRIPTIONS[openMood].summary}
-              body={EFFECT_DESCRIPTIONS[openMood].body}
-              tone="sage"
-              onClose={() => setOpenMood(null)}
-            />
-          </div>
-        )}
+        {/* The mood info card lived here and had exactly ONE opener —
+            the "WARMING ⓘ" descriptor in the hero. That went, so this
+            went with it rather than staying as state nothing can set:
+            a card that cannot be reached is the shape the vocabulary
+            audits exist to find. The effect words are still explained
+            where they are chosen, on the ingredient and in the
+            extraction explorer. */}
 
         {/* Cultural beat — the ritual / lived practice behind the
             cup. Surfaces for curated traditions (each has its own
