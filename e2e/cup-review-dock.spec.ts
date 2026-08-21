@@ -73,20 +73,25 @@ test.describe("reviewing a cup", () => {
     await expect(cell).toBeEnabled();
   });
 
-  test("logging it settles the cup and hands the bar back", async ({ page }) => {
+  test("logging it records the verdict and leaves the cup", async ({ page }) => {
+    /* THIS USED TO ASSERT THE OPPOSITE HALF and it was right to, until
+       submitting stopped leaving you on the cup. It checked that the
+       panel went and "brew again" took the whole bar back — a real
+       claim about a reviewed cup, just no longer reachable by
+       submitting one. It is still reachable by OPENING one, which the
+       next test does, so the claim moved rather than being deleted.
+
+       Asserted on the STORE as well as on the screen: a cup that
+       navigated away without saving would pass the visual half. */
     await openAnUnreviewedCup(page);
     await page.getByTestId("cup-review-panel")
       .getByRole("button", { name: "yes", exact: true }).first().click();
     await page.locator('[data-testid="cup-brew-again"]').locator("..")
       .getByTestId("review-submit").click();
 
-    /* A reviewed cup has no review to offer, so the panel goes and
-       "brew again" takes the whole bar back. Asserted on the STORE as
-       well, because a panel that merely hid while the score never
-       landed would pass the visual half. */
-    await expect(page.getByTestId("cup-review-panel")).toBeHidden({ timeout: 15_000 });
-    expect(await barCells(page), "brew again should have the bar to itself")
-      .toEqual(["brew again →"]);
+    await expect(page.getByTestId("cup-detail"),
+      "submitting should hand you back to whatever opened the cup")
+      .toHaveCount(0, { timeout: 15_000 });
 
     const scored = await page.evaluate(() => {
       const all = JSON.parse(localStorage.getItem("herbanium.sessions") || "[]");
@@ -94,6 +99,32 @@ test.describe("reviewing a cup", () => {
       return mine.some((s: any) => typeof s.moodScore === "number" && s.moodsPending === false);
     });
     expect(scored, "the verdict should have been recorded").toBe(true);
+  });
+
+  test("a cup that has been reviewed hands the bar back to brew again", async ({ page }) => {
+    /* The other half of the test above, reached the way it now is:
+       open a cup that carries a score. A reviewed cup has no review to
+       offer, so the panel never mounts and "brew again" has the bar to
+       itself. Reviewing one and re-opening it is what makes this hold
+       for a cup the USER just settled, rather than only for whatever
+       the seed happened to ship already-rated. */
+    await openAnUnreviewedCup(page);
+    await page.getByTestId("cup-review-panel")
+      .getByRole("button", { name: "yes", exact: true }).first().click();
+    await page.locator('[data-testid="cup-brew-again"]').locator("..")
+      .getByTestId("review-submit").click();
+    await expect(page.getByTestId("cup-detail")).toHaveCount(0, { timeout: 15_000 });
+
+    const rows = page.locator('[data-testid="recent-brew-row"]');
+    await expect(rows.first(), "back on the rail we came from").toBeVisible({ timeout: 15_000 });
+    await rows.first().click();
+
+    await expect(page.getByTestId("cup-detail"), "the cup opens again")
+      .toHaveCount(1, { timeout: 30_000 });
+    await expect(page.getByTestId("cup-review-panel"),
+      "a settled cup has no review to offer").toHaveCount(0);
+    expect(await barCells(page), "brew again should have the bar to itself")
+      .toEqual(["brew again →"]);
   });
 
   test("a cup that delivered nothing says so, rather than showing a dash", async ({ page }) => {
