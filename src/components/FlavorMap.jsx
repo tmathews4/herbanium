@@ -1139,8 +1139,33 @@ const TrackMap = ({
           })}
         </div>
 
+        {/* THE LABEL COLUMN IS BOUNDED, and it was not.
+
+            `flex: 0 0 auto` sizes to the widest label, so the column
+            takes whatever the longest word needs and the bands get the
+            remainder. The rows already ellipsize — but ellipsis only
+            fires inside a constrained box, and nothing constrained
+            this one, so the text always won.
+
+            Measured at 320px: the labels take 98px of a 260px strip in
+            Detailed mode, leaving 102 for the graph. Detail-mode words
+            are longer than family names AND carry an indent, so the
+            mode that most needs the plot is the one with least of it.
+            Reported from a Pixel as the graph being "entirely blocked
+            by the text so can't see the detailed underexpressions" —
+            with the system font scaled up, which this column had no
+            answer to at all.
+
+            A share cap rather than a pixel one: the constraint is how
+            much of the STRIP the words may take, and that is the same
+            question at every width and every font size. minWidth keeps
+            the bands' left edge steady across blends, which is what
+            the per-row LABEL_W was doing on its own. */}
         <div style={{
-          flex: "0 0 auto",
+          flex: "0 1 auto",
+          minWidth: LABEL_W,
+          maxWidth: "45%",
+          overflow: "hidden",
           display: "flex", flexDirection: "column", gap: TRACK_GAP,
         }}>
           {renderedList.map(item => {
@@ -1186,7 +1211,12 @@ const TrackMap = ({
                   display: "flex", alignItems: "center",
                   justifyContent: "space-between",
                   gap: 3,
-                  minWidth: LABEL_W,
+                  /* Fill the column rather than set its width — the
+                     column carries LABEL_W now, and a row that insists
+                     on its own minimum would push straight back
+                     through the cap above. */
+                  width: "100%",
+                  minWidth: 0,
                   paddingLeft: depth * CHILD_INDENT_PX,
                   cursor: hasDescription ? "pointer" : "default",
                   textDecoration: isSelected ? "underline" : "none",
