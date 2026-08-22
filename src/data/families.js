@@ -243,8 +243,89 @@ export const FAMILY_BY_EFFECT = Object.fromEntries(
   MOOD_VOCABULARY.flatMap(f => f.leaves.map(l => [l.token, f.family]))
 );
 
+/* Canonical hierarchy order for the FLAVOR strip, the mirror of
+   MOOD_FAMILY_ORDER below. Families on the left are the brighter,
+   lighter registers; the right end carries body, dark, off-notes.
+
+   It lived in FlavorMap.jsx, which meant compareTracks could not see
+   it — node cannot import .jsx, and the comparator is here precisely
+   so a test can hold it. Same argument as this file's own header.
+
+   The 'off' family is deliberately absent: bitter and astringent live
+   in the palate strip as their own diagnostic axes, and the remaining
+   off tokens (medicinal/soapy/muddy/pith/sharp) surface in the
+   zone-text descriptions when a brew over-pulls. A dedicated
+   off-notes track was double-counting the diagnostic. */
+export const FLAVOR_FAMILY_ORDER = [
+  "fruit", "floral", "sweet", "fresh", "vegetal", "marine",
+  "spiced", "smoky", "earthy", "mouthfeel",
+];
+
 // Order reads top-to-bottom as quiet -> alert -> warm -> cool -> body.
 export const MOOD_FAMILY_ORDER = MOOD_VOCABULARY.map(f => f.family);
+
+/* ── Leaf order, and why it exists ────────────────────────────────
+
+   The strips order their rows by family so that reading one across a
+   slider drag is structurally stable — the calm row always sits where
+   calm sits. In DETAIL mode the rows are leaf tokens, and every leaf
+   of a family shares its family's position, so they all tie. That tie
+   used to be broken by the leaf's current peak, "so the loudest member
+   sits at the top of its group" — which quietly undid the stability
+   one level down: change the temperature, two leaves cross, and they
+   swap rows under the reader.
+
+   Reported as exactly that: "when changing temp or time, shouldn't
+   resort the mind/body/palate graphs. I saw detailed categories
+   switching position back and forth as they usurped each others
+   values which read glitchy."
+
+   So leaves get a canonical order too, from the same vocabulary the
+   families come from. The cost is real and worth stating: the
+   strongest leaf no longer leads its group. Position is now telling
+   you WHICH register this is, not how much of it there is — and the
+   bar already says how much.
+
+   COMPARING NAMES ONLY IS THE POINT. The comparator never sees a
+   strength, so it cannot depend on the brew even by accident; that is
+   a property a test can hold, and tests/track-order.test.mjs does. */
+export const EFFECT_LEAF_ORDER = MOOD_VOCABULARY.flatMap(
+  f => f.leaves.map(l => l.token));
+
+/* Authored grouped by family, so the file's own key order is the
+   within-family order. Derived rather than restated for the same
+   reason MOOD_FAMILY_ORDER is. */
+export const FLAVOR_LEAF_ORDER = Object.keys(FAMILY_BY_FLAVOR);
+
+/**
+ * Order comparator for a strip's rows: family position first, then the
+ * leaf's canonical position inside it, then the name. Takes names, not
+ * values, so the order is a property of the vocabulary rather than of
+ * the cup in front of you.
+ */
+export function compareTracks(kind) {
+  const familyOrder = kind === "mood"   ? MOOD_FAMILY_ORDER
+                    : kind === "flavor" ? FLAVOR_FAMILY_ORDER
+                    : null;
+  const byName = kind === "mood" ? FAMILY_BY_EFFECT : FAMILY_BY_FLAVOR;
+  const leafOrder = kind === "mood" ? EFFECT_LEAF_ORDER : FLAVOR_LEAF_ORDER;
+  const leafRank = new Map(leafOrder.map((t, i) => [t, i]));
+
+  return (a, b) => {
+    if (familyOrder) {
+      const fa = familyOrder.indexOf(byName[a] || a);
+      const fb = familyOrder.indexOf(byName[b] || b);
+      const ia = fa === -1 ? familyOrder.length : fa;
+      const ib = fb === -1 ? familyOrder.length : fb;
+      if (ia !== ib) return ia - ib;
+    }
+    const la = leafRank.has(a) ? leafRank.get(a) : leafRank.size;
+    const lb = leafRank.has(b) ? leafRank.get(b) : leafRank.size;
+    if (la !== lb) return la - lb;
+    // Last resort, so two unknown tokens still order the same way twice.
+    return a.localeCompare(b);
+  };
+}
 
 export const EFFECT_FAMILY_COLORS = Object.fromEntries(
   MOOD_VOCABULARY.map(f => [f.family, f.color])

@@ -32,7 +32,7 @@ import { resolveBlendAtBrew } from "../algo/compose";
 import {
   EFFECT_FAMILY_COLORS, FAMILY_BY_EFFECT, FAMILY_BY_FLAVOR, MOOD_FAMILY_ORDER,
   MOOD_FAMILY_LABEL, FLAVOR_FAMILY_LABEL, MOOD_LEAF_LABEL,
-  CATEGORY_OF_FAMILY, CATEGORY_OF_EFFECT,
+  CATEGORY_OF_FAMILY, CATEGORY_OF_EFFECT, compareTracks,
 } from "../data/families";
 import { EFFECT_DESCRIPTIONS, FLAVOR_DESCRIPTIONS } from "../data/vocabularyDescriptions";
 import { ff, theme } from "../theme";
@@ -58,22 +58,6 @@ const PRIMARY_THRESHOLD = 0.5;
 const SECONDARY_THRESHOLD = 0.3;
 // Cap on secondary tracks shown when expanded.
 const MAX_SECONDARY = 6;
-
-// Canonical hierarchy order for the flavor strip. Tracks render in
-// this order regardless of which crossed strongest at any given
-// brew — so a strip's reading is structurally stable as the user
-// drags the temp/time sliders. Families on the left are the
-// brighter, lighter registers; the right end carries body, dark,
-// off-notes. Detail-mode tokens inherit the order of their family.
-const FLAVOR_FAMILY_ORDER = [
-  "fruit", "floral", "sweet", "fresh", "vegetal", "marine",
-  "spiced", "smoky", "earthy", "mouthfeel",
-  // 'off' family removed from the strip — bitter/astringent live in
-  // the palate strip (their own diagnostic axes), and the rest of
-  // the off-family tokens (medicinal/soapy/muddy/pith/sharp) already
-  // surface in the zone-text descriptions when a brew over-pulls.
-  // A dedicated off-notes track was double-counting the diagnostic.
-];
 
 // Same idea for moods.
 
@@ -487,22 +471,23 @@ const TrackMap = ({
     // mass ratio — the strip should reflect what the user will taste,
     // not the raw chemistry. Mood/palate strips don't have an analogous
     // hierarchy curated yet, so they keep raw-peak ordering.
-    // Stable hierarchy ordering — tracks render in their family's
-    // canonical position regardless of which crossed strongest at
-    // any given brew. Reading the strip across slider drags is
-    // structurally stable: the calm row always sits where calm sits.
-    // Detail-mode leaf tokens inherit their family's position; ties
-    // within a family resolve by descending peak so the loudest
-    // member sits at the top of its group.
-    const familyOrder = kind === "flavor" ? FLAVOR_FAMILY_ORDER
-                       : kind === "mood"  ? MOOD_FAMILY_ORDER
-                       : null;
-    const orderIndex = (name) => {
-      if (!familyOrder) return 0;
-      const fam = (kind === "flavor" ? FAMILY_BY_FLAVOR : FAMILY_BY_EFFECT)[name] || name;
-      const idx = familyOrder.indexOf(fam);
-      return idx === -1 ? familyOrder.length : idx;
-    };
+    /* Stable hierarchy ordering — tracks render in their family's
+       canonical position regardless of which crossed strongest at any
+       given brew. Reading the strip across slider drags is
+       structurally stable: the calm row always sits where calm sits.
+
+       THAT USED TO BE HALF TRUE. Detail-mode rows are leaf tokens and
+       every leaf of a family shares its family's position, so they all
+       tied — and the tie broke on the leaf's current peak, "so the
+       loudest member sits at the top of its group". Change the
+       temperature, two leaves cross, and they swap rows under the
+       reader. Reported as detailed categories "switching position back
+       and forth as they usurped each others values".
+
+       The comparator lives in data/families.js now and takes NAMES,
+       not values, so it cannot depend on the brew even by accident.
+       See the note there for what that costs. */
+    const compare = compareTracks(kind);
     // A mood strip can be scoped to one category, which is how Mind and
     // Body get their own windows rather than sharing one. `name` is a
     // family key in family mode and a leaf token in detail mode, so
@@ -512,11 +497,7 @@ const TrackMap = ({
 
     const tracks = Object.entries(peaks)
       .filter(([name, peak]) => peak >= SECONDARY_THRESHOLD && inCategory(name))
-      .sort((a, b) => {
-        const oi = orderIndex(a[0]) - orderIndex(b[0]);
-        if (oi !== 0) return oi;
-        return b[1] - a[1];
-      })
+      .sort((a, b) => compare(a[0], b[0]))
       .map(([name]) => name);
     return { tracks, peaks };
     // useFamilyMode is part of the deps because pickMap above uses
