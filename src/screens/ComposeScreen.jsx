@@ -2396,6 +2396,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 marginRight: 4,
               }}>
                 <button
+                  className="tap-target"
                   onClick={() => setParts(id, parts - stepFor(id))}
                   disabled={parts <= stepFor(id)}
                   aria-label={`decrease ${INGREDIENTS[id].name} ${amountMode === "parts" ? "parts" : "amount"}`}
@@ -2439,6 +2440,7 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                     ? `${Number((Math.round(parts * 10) / 10).toFixed(1))} g`
                     : formatTsp(gramsToTsp(parts, INGREDIENTS[id].category))}</span>
                 <button
+                  className="tap-target"
                   onClick={() => setParts(id, parts + stepFor(id))}
                   disabled={atCeiling}
                   aria-label={`increase ${INGREDIENTS[id].name} ${amountMode === "parts" ? "parts" : "amount"}`}

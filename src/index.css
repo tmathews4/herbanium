@@ -593,3 +593,44 @@ button {
 button:active {
   transform: translateY(0.5px);
 }
+
+/* ── Finger-sized taps on a thumbnail-sized control ─────────────────
+
+   REPORTED: "toggling the tsp amount with the + and - on pixel chrome
+   is not working all the time, have to keep clicking" — and then, the
+   detail that names it: "with fingers mind you, that might be the
+   problem too big".
+
+   It is. The parts steppers draw a 22x22 circle, which is half the
+   44px both platforms ask for and under WCAG 2.5.8's 24px floor. A
+   finger pad is roughly 45px across; aiming it at 22px means missing
+   often enough to read as the control being broken rather than as
+   having missed.
+
+   THE CIRCLE STAYS 22px. Growing the button would grow the drawn ring
+   with it and push the row's layout around; what wants to be bigger is
+   the area that responds, not the mark. A transparent ::after extends
+   the hit region past the visual bounds without occupying any space,
+   which is the standard answer and the only one that leaves the design
+   alone.
+
+   The insets are measured against what is next to it, not chosen for
+   roundness: the stepper rows sit on a 43px pitch, so 10px top and
+   bottom gives 42px and cannot reach the row above or below; the two
+   buttons are 48px apart edge to edge, so 11px each side gives 44px
+   and they do not overlap each other or the number between them. */
+.tap-target {
+  position: relative;
+}
+.tap-target::after {
+  content: "";
+  position: absolute;
+  inset: -10px -11px;
+  /* No background: this is reach, not decoration. */
+}
+/* A disabled stepper must not swallow taps meant for the row behind
+   it — the minus is disabled at 1 part, which is where a user is most
+   likely to be prodding. */
+.tap-target:disabled::after {
+  content: none;
+}
