@@ -135,7 +135,21 @@ selections.
 
 **Specialty single-tradition herbs:**
 - **Marshmallow root** (*Althaea*) — Throat-soothing
-  mucilaginous; safe but specialty
+  mucilaginous; safe but specialty.
+  **SHIPPED BY MISTAKE AND REMOVED, 2026-08-23.** It was listed here
+  as out of scope and recorded as non-catalog in
+  `app-data-updates-pending.md` ("non-catalog pairs (honey, milk,
+  lemon, marshmallow-root, etc.) dropped"), and it was in
+  `INGREDIENTS` anyway — a blurb, 12 facts and card effects
+  (`soothing 4, digestive 3, calm 1`), with **no research doc and no
+  extraction profile**, the only one of 53 without either. Because it
+  had no profile, `research-parity` never checked its effects: an
+  ingredient silently exempt from this project's central rule, the
+  same shape as the lemon-balm doc-resolution bug.
+  `tools/audit-claims.mjs --anchor` was what surfaced it, reporting 13
+  prose claims with no doc to check them against.
+  Two blends' prose still named it — see `tests/blend-prose.test.mjs`.
+  Re-adding it means writing the research and the profile first.
 - **Mullein** (*Verbascum*) — Respiratory specialty
 - **Yarrow** (*Achillea*) — Fever/wound European tradition
 - **Coriander seed** — Common in Indian preparations; minor

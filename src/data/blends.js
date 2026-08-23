@@ -302,6 +302,7 @@ const BLENDS = [
     name: "All-Heal",
     subtitle: "valerian and lemon balm — a classical sleep pairing",
     ingredients: [
+      { id: "chamomile", g: 1.5 },
       { id: "valerian", g: 1.0 },
       { id: "lemonbalm", g: 1.5 },
       { id: "passionflower", g: 0.5 },
@@ -329,7 +330,7 @@ const BLENDS = [
     tradition: "Western herbal / TCM",
     style: "decoction",
     effects: [["soothing", 4], ["digestive", 3], ["warming", 2]],
-    culturalNote: "The mucilage-forward blend Western herbalists reach for when the throat is raw. Licorice and marshmallow coat the irritated tissue; the cup is meant to be drunk slowly, let the demulcent do its mechanical work.",
+    culturalNote: "The blend Western herbalists reach for when the throat is raw. Licorice is the anchor — sweet, and the one leaf here the research rates as soothing at full strength; ginger, fennel and peppermint work on the tickle behind it. Meant to be drunk slowly and warm.",
   },
   {
     id: "spring-tonic",
@@ -1434,7 +1435,7 @@ const BLEND_DIRECTIONS = {
   ],
   "throat-coat": [
     "Bring water just below boiling.",
-    "Pour over and cover — the mucilage in slippery elm and marshmallow needs a long covered steep.",
+    "Pour over and cover — licorice gives up its sweetness and its soothing compounds slowly, so the lid stays on.",
     "Steep 8 minutes. Sip warm; the mouth-coating effect is the point.",
   ],
   "spring-tonic": [
