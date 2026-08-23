@@ -491,6 +491,36 @@ the steep screen's minimize button. Tap minimize, nothing happens.
 
 What broke it open, in order, and worth copying:
 
+**`node tools/audit-blind-clicks.mjs` now enforces this, because a
+paragraph did not.** The rule below is correct, has been written down
+since the elemental-notices investigation, and was broken twice in one
+session anyway — 24 tests at 90 seconds each, reporting nothing but
+"Test timeout of 90000ms exceeded". Every other recurring failure here
+earned a machine check; this one had prose. Asking a reader to
+remember harder is the fix with the worst record in this repo.
+
+It is a RATCHET at 97, not a zero gate, and the number came from
+measuring rather than from what would have been tidy. 456 actions,
+397 with no `expect()` naming the same locator — 88%, which is a wall,
+not a gate. Most are fine: clicking the Profile tab without asserting
+it exists is not this bug. So the check tiers them. RISKY means the
+locator PICKS from several matches (`.first()`, `.nth()`) or is built
+from data, so whether it exists depends on earlier state having
+worked; both real failures were that shape and neither was a plain
+literal. Plain literals are reported for information only.
+
+**The baseline read 23 until the scanner was fixed, and that is the
+part worth carrying.** Its receiver regex had no `/` in its character
+class, so a regex-literal selector — `getByRole("button", { name:
+/lavender/i }).first()` — failed to parse and was silently skipped.
+The tool was blindest to exactly the locators most likely to be
+missing, while printing a confident low number. A second attempt
+sliced the whole line prefix instead and swept in `.first()` from
+earlier clauses, reporting 98 the other way. Only a backward scan that
+balances delimiters reads the actual expression. **Lower was not
+better; lower was wrong** — the same lesson as the year regex in
+`--conflict`, arrived at again from the opposite direction.
+
 - **A bare `.click()` has no timeout of its own.** It waits out the
   whole test budget and reports "timeout in beforeEach", which names the
   hook and never the thing that was missing. Assert visibility BEFORE
