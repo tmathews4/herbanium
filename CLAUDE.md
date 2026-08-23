@@ -332,10 +332,31 @@ run. It is acceptable beside `attested`; beside `verified` it was the
 whole problem.
 
 **A measurement that moves when you write about it is not a
-measurement.** The blockquote count jumped by 14 the moment these
-addenda were written, because prose ABOUT `verified` was being counted
-as claims marked `verified`. Blockquote markers are now counted only
-on blockquote lines.
+measurement — and this one moved twice.** The blockquote count jumped
+by 14 the moment these addenda were written, because prose ABOUT
+`verified` counted as claims marked `verified`. Restricting the count
+to blockquote LINES fixed that and then broke the same way again, since
+the correction notes are themselves blockquotes that discuss the
+marker. The property that actually separates a claim from commentary
+is POSITION: a claim ENDS with its marker, while prose mentions one
+mid-sentence. Counting only terminal markers took 390 down to 379 —
+the missing 11 were this file's own annotations.
+
+"Is not a table row" was never the property. It was a proxy that
+happened to work until the corpus grew a paragraph about itself.
+
+**What the blockquote markers ARE, since the number is easy to
+misread.** 371 of them sit in one section, §8 "History & cultural
+context" — the docs' research NARRATIVE, not the claims tables that
+feed the app. §10 is literally headed "Facts for the Steep screen" and
+those 46 are all cited now. A blockquote is a paragraph, so it has no
+Source column and the two hardest questions cannot be asked of it at
+all. 244 name a year or author inline (rooibos's PDO paragraph carries
+"May 2021" in the sentence); 135 name nothing checkable, and those are
+mostly general botany and interpretive framing — "the plant tolerates
+drought and poor soils", "Ayurveda independently arrived at the same
+solution". Weak markers there matter less than on a shipped fact, but
+that section is where the shipped facts get their authority.
 
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line

@@ -142,8 +142,20 @@ for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
      by 14 the first time these docs were edited. A measurement that
      moves when you write about it is not measuring the corpus. */
   for (const m of text.matchAll(/`verified`/g)) {
-    const line = text.slice(text.lastIndexOf("\n", m.index) + 1, m.index).trimStart();
-    if (line.startsWith(">")) quoteVerified++;
+    const lineStart = text.lastIndexOf("\n", m.index) + 1;
+    let lineEnd = text.indexOf("\n", m.index);
+    if (lineEnd < 0) lineEnd = text.length;
+    const before = text.slice(lineStart, m.index).trimStart();
+    const after = text.slice(m.index + "`verified`".length, lineEnd).trim();
+    /* A claim ENDS with its marker. Prose about markers mentions one
+       mid-sentence: "this row was marked `verified` and is now
+       `attested`". Requiring terminal position is what separates the
+       corpus from commentary ON the corpus — and this is the THIRD
+       time this count was inflated by writing about it, first by
+       counting non-blockquote prose, then by counting blockquoted
+       addenda. Position is the property; "is not a table row" never
+       was. */
+    if (before.startsWith(">") && after === "") quoteVerified++;
   }
 }
 
