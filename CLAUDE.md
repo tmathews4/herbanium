@@ -313,6 +313,35 @@ this test is about spotlight geometry tracking a resize. One occurrence
 is not a pattern; if it goes twice more, it is a bug with a bad error
 message and the note above says how to open it.
 
+**A NEW spec runs against every locally-installed project before it
+is pushed, not just the gate's two.** The full gate is pixel-9 +
+galaxy-s9 because running everything twice over is slow. That is fine
+for a suite that already passed CI once; it is not fine for a spec
+nobody has ever run, and `e2e/tap-targets.spec.ts` proved it — written
+and verified on pixel-9 and galaxy-s9, red in CI on pixel-fold-open,
+iphone-15 and ipad-pro, all three by a single pixel of a threshold
+computed from CSS arithmetic rather than measured.
+
+```
+npx playwright test e2e/<new>.spec.ts \
+  --project=pixel-9 --project=galaxy-s9 --project=pixel-fold-open \
+  --project=pixel-fold-cover --project=desktop-chrome
+```
+
+Seconds for one file, and it covers five of the nine projects CI runs.
+The four it cannot cover are WebKit and Firefox, which is a reason to
+be conservative about thresholds, not a reason to skip the five.
+
+**And set a geometric threshold from MEASUREMENT, never from the CSS.**
+Insets predict a 42px reach; devices measure 39 to 42 because subpixel
+rounding differs. The prediction is not the property. Deriving the
+bound from something else on the page is not automatically better
+either — the second attempt scaled the expectation with the row pitch,
+which sounds principled and is wrong when the inset is a constant: a
+device laying rows out on a 55px pitch still reaches 40, and the
+"derived" expectation of 47 failed a control that was exactly as big
+as everywhere else.
+
 Only Chromium browsers are installed locally — WebKit and Firefox run in CI, and they *do* find real differences (WebKit renders text ~35% taller in places; Firefox panes are shorter). Say so rather than implying full-matrix coverage.
 
 Watch for a stale `vite preview` on `:5173`: `reuseExistingServer` is true locally, so a leftover server silently serves an old `dist/` and makes E2E results meaningless. Check with `ss -lntp | grep 5173` if results look impossible.

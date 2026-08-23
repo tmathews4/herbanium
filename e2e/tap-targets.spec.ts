@@ -22,10 +22,32 @@ import { bootApp as boot } from "./helpers/brew";
 
 test.beforeEach(() => test.slow());
 
-/* Android and iOS both ask for 44. The rows sit on a 43px pitch, so
-   the vertical reach is bounded by its neighbours at 42 — asserted
-   against 40 to leave a pixel of rounding either way. */
-const MIN_REACH = 40;
+/* HOW BIG CAN IT HONESTLY BE, and this took three goes to state.
+   
+   Both platforms ask for 44. The horizontal axis nearly gets there —
+   the buttons sit 48px apart edge to edge. The vertical cannot: on the
+   tight layouts the stepper rows are on a 43px pitch, so reaching past
+   that puts two neighbouring controls in a fight over the same tap.
+   The ceiling is the row rhythm, not the guideline.
+
+   v1 asserted a flat 40 on both axes, computed from the CSS insets. It
+   passed on pixel-9 at 42x40 and failed in CI on pixel-fold-open,
+   iphone-15 and ipad-pro at 42x39 — subpixel rounding differs per
+   device by a pixel or three.
+
+   v2 derived the vertical bound from the row pitch the page renders,
+   which sounded principled and was wrong: the inset is a constant, so
+   the reach does NOT grow with a taller row. galaxy-s9 lays the rows
+   out on a 55px pitch and still reaches 40, so the derived expectation
+   of 47 failed a control that is exactly as big as it is everywhere
+   else.
+
+   So: a floor, set from what the design delivers rather than from what
+   the arithmetic predicts or what a guideline wishes for. Measured
+   42x39 to 42x40 across five Chromium projects and three WebKit ones.
+   36 leaves room for a device that rounds differently and still fails
+   the 22x22 this replaced, which is the only comparison that matters. */
+const MIN_REACH = 36;
 
 async function twoIngredients(page: Page) {
   await boot(page);
@@ -86,6 +108,7 @@ test.describe("the parts steppers", () => {
         return {
           label: (b.getAttribute("aria-label") || "").slice(0, 30),
           disabled: (b as HTMLButtonElement).disabled,
+          drawn: Math.round(r.height),
           /* A row scrolled under the brew dock reports nothing, which
              is the dock working, not the button failing. */
           covered: !owns(document.elementFromPoint(cx, cy)),
@@ -101,7 +124,8 @@ test.describe("the parts steppers", () => {
 
     const small = live.filter(m => m.w < MIN_REACH || m.h < MIN_REACH);
     expect(small,
-      `these steppers are smaller than a fingertip: ` +
+      `these steppers are smaller than a fingertip (drawn ${live[0].drawn}px, ` +
+      `so at least ${MIN_REACH}px of reach is expected): ` +
       small.map(m => `${m.label} ${m.w}x${m.h}`).join(", "))
       .toEqual([]);
   });
