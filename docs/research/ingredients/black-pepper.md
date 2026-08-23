@@ -456,7 +456,23 @@
 >   nominal rent of one peppercorn) emerges from this era and
 >   persists in modern legal terminology. Alaric the Visigoth
 >   demanded 3,000 pounds of pepper in his ransom of Rome
->   (408 CE). `verified`
+>   (408 CE) — Zosimus lists it alongside 5,000 lb of gold,
+>   30,000 lb of silver, 4,000 silk tunics and 3,000 scarlet
+>   fleeces. `verified`
+> - **NOT SUPPORTED — "Roman empresses paid taxes in
+>   peppercorns."** Shipped in the blurb, the facts list and
+>   the steep-timer content for some time, and it is wrong on
+>   both halves. Pepper as rent, tax, tribute and dowry is a
+>   MEDIEVAL European practice, from roughly the 11th century
+>   on, and no source ties it to empresses or to the Roman
+>   imperial period. It reads like the Alaric ransom
+>   ("Rome + pepper + a large payment") compressed together
+>   with the peppercorn-rent tradition that came centuries
+>   later. Pepper WAS expensive in Rome and heavily used —
+>   Apicius calls for it constantly, Pliny gives a price of
+>   about 1 denarius per pound — but expensive is not the same
+>   as legal tender. Corrected in the app to the medieval
+>   framing this section already carried. `refuted`
 > - **Age of Exploration (1400s-1500s):** Pepper drives
 >   European exploration. Vasco da Gama's 1498 voyage to
 >   India was specifically to bypass Arab/Venetian pepper

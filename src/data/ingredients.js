@@ -1214,9 +1214,9 @@ const INGREDIENTS = {
     pairs: ["turmeric", "cinnamon", "cardamom", "ginger", "cloves", "assam"],
     dose: "1–3 cracked peppercorns · 250ml (5–10 in chai)",
     headsUp: "A pinch in tea is gentle. Concentrated piperine supplements can affect how the body metabolizes some medications — talk to your doctor if you take prescriptions, especially before surgery.",
-    blurb: "The Malabar Coast of South India is pepper's native ground — Kerala has shipped peppercorns west for two and a half thousand years. Roman empresses paid taxes in them; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
+    blurb: "The Malabar Coast of South India is pepper's native ground — Kerala has shipped peppercorns west for two and a half thousand years. Medieval Europe paid rents and dowries in them; Vasco da Gama crossed an ocean for them. The bite is piperine, which slows liver enzymes that would otherwise clear other compounds — which is exactly why the Ayurvedic recipe pairs turmeric with pepper. The kitchen got the pharmacology right millennia before the journals did.",
     facts: [
-      "Roman empresses paid in peppercorns; Vasco da Gama crossed an ocean for them.",
+      "Medieval Europe paid rents, tribute and dowries in peppercorns; Vasco da Gama crossed an ocean for them in 1498.",
       "The bite is piperine — the same molecule that quietly slows the liver's enzymes, which is why turmeric travels in pepper's company.",
       "Black, white, green, and red peppercorns all come from the same vine — different stages of ripeness, different processing.",
       "Pepper's 'bite' isn't taste at all but pain — piperine activates TRPV1 receptors, the same triggered by capsaicin in chili. Different molecule, same alarm.",

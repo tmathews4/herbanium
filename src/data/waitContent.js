@@ -141,7 +141,7 @@ export const WAIT_FACTS = {
     { type: "fact",      text: "Vanillin, the principal aromatic, is now synthesized from petrochemicals and wood pulp. Real vanilla pods carry hundreds of supporting molecules the lab can't replicate." },
   ],
   "black-pepper": [
-    { type: "fact",      text: "Roman empresses paid taxes in peppercorns. Vasco da Gama crossed an ocean for them. For most of European history, pepper was its own currency." },
+    { type: "fact",      text: "Medieval Europe paid rents, tribute and dowries in peppercorns. Vasco da Gama crossed an ocean for them. For centuries of European history, pepper was its own currency — \"peppercorn rent\" still means a nominal sum in English law." },
     { type: "fact",      text: "The bite the tongue feels is piperine, which slows liver enzymes that would otherwise clear other compounds — exactly why the Ayurvedic recipe pairs turmeric with pepper." },
     { type: "tradition", text: "Visigoths sacking Rome in 410 demanded 3,000 pounds of pepper as part of the ransom. The spice was already older than the empire it broke." },
   ],
