@@ -128,7 +128,7 @@ const BLENDS = [
     tradition: "Maghrebi",
     style: "low-temp",
     effects: [["focus", 3], ["cooling", 3], ["uplifting", 3]],
-    culturalNote: "The three-pour ritual — pouring from height to oxygenate and back into the pot three times — is the host's gesture: the first pour gentle as life, the second strong as love, the third bitter as death. A guest who declines all three glasses is making a statement.",
+    culturalNote: "Poured from height to aerate the tea and returned to the pot until it is right — the height is the host's craft, and the foam is the proof of it. Three glasses are served in turn, and the Tuareg saying carried across the Maghreb gives each one a character: the first gentle as life, the second strong as love, the third bitter as death. A guest who declines all three is making a statement.",
   },
   {
     id: "darj-neat",
@@ -273,7 +273,7 @@ const BLENDS = [
     tradition: "South American gaucho",
     style: "low-temp",
     effects: [["energy", 4], ["focus", 3], ["uplifting", 2]],
-    culturalNote: "Drunk through a metal bombilla from a hollowed gourd, passed in a circle of friends or family. The first pour is for the cebador — bitter, weak, the unsweetened opening of the round. Subsequent pours sweeten or take herbs.",
+    culturalNote: "Drunk through a metal bombilla from a hollowed gourd, passed in a circle of friends or family. The first pour is the cebador's own, and taken deliberately: it is the harshest of the round, carrying the dust off the leaf, so serving it to a guest would be a discourtesy. Subsequent pours sweeten or take herbs.",
   },
 
   // ── Apothecary classics (herbal traditionals) ─────────────
@@ -295,7 +295,7 @@ const BLENDS = [
     tradition: "Ayurvedic",
     style: "decoction",
     effects: [["warming", 4], ["soothing", 3], ["digestive", 3]],
-    culturalNote: "Made for centuries by Indian grandmothers for joint pain, weakness, the after-tail of illness. The black pepper isn't seasoning — it raises curcumin's bioavailability by orders of magnitude. The kitchen anticipated the pharmacology.",
+    culturalNote: "Made for centuries by Indian grandmothers for joint pain, weakness, the after-tail of illness. The black pepper isn't seasoning — piperine slows the enzymes that would clear curcumin, and the single most-cited study measured a twentyfold rise in blood levels. That result has never been independently replicated, and later trials of the pairing are mixed. The kitchen got there first; the pharmacology is still arguing.",
   },
   {
     id: "all-heal",
@@ -468,7 +468,7 @@ const BLENDS = [
     public: true,
     tradition: "British (Twinings, 1992)",
     effects: [["uplifting", 4], ["energy", 3], ["focus", 2], ["digestive", 2]],
-    culturalNote: "Twinings developed it in 1992 for the Norwegian market — lighter, more citrus, less bergamot than the Earl. A modern blend with a deliberately gentler register.",
+    culturalNote: "Twinings developed it in the early 1990s for a Nordic market that found Earl Grey too strong — on sale in Norway in 1994, Britain in 1996. Lemon and orange peel alongside the bergamot make it lighter and more overtly citrus than the Earl. A modern blend with a deliberately gentler register.",
   },
   {
     id: "russian-lemon",

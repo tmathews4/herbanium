@@ -103,11 +103,22 @@ function particulars(text) {
   return [...out];
 }
 
+/* Blend cultural notes have no per-ingredient doc and were skipped
+   entirely — the tool printed "blends (no doc to check): 45" and that
+   line read as a fact of life rather than a hole. It was a hole: 32
+   notes asserting real places, real practices and real dates, with
+   nothing to compare them to. docs/research/blends.md is the one file
+   they all answer to, and the first pass through it found four wrong. */
+const BLEND_DOC = (() => {
+  try { return readFileSync(resolve(DOCS, "../blends.md"), "utf8").toLowerCase(); }
+  catch { return null; }
+})();
+
 /* A particular is anchored if the doc contains it. Numbers are matched
    with separators stripped, so "300,000" finds "300000" and vice versa. */
 const loose = t => t.toLowerCase().replace(/[\s,]/g, "");
-function unanchored(id, text) {
-  const doc = docFor[id];
+function unanchored(id, text, doc) {
+  if (doc === undefined) doc = docFor[id];
   if (!doc) return null;                       // no doc at all — reported separately
   const flat = loose(doc);
   return particulars(text).filter(p => !doc.includes(p.toLowerCase()) && !flat.includes(loose(p)));
@@ -147,10 +158,12 @@ for (const c of claims) {
   for (const m of c.text.matchAll(/\b[a-z][a-z'’-]{2,}\b/g)) COMMON.add(bare(m[0]));
 }
 
-/* Blends have no ingredient doc of their own; culturalNote is scored
-   but never anchor-checked, and is counted apart so the totals add up. */
+/* Blend cultural notes anchor against docs/research/blends.md; every
+   other claim against its own ingredient's doc. */
 for (const c of claims) {
-  c.loose = c.where === "culturalNote" ? null : unanchored(c.id, c.text);
+  c.loose = c.where === "culturalNote"
+    ? unanchored(c.id, c.text, BLEND_DOC)
+    : unanchored(c.id, c.text);
 }
 
 /* ── --conflict: the same fact, told twice, differently ────────────
@@ -277,7 +290,7 @@ const floating = checkable.filter(c => c.loose.length === particulars(c.text).le
 console.log(`\nParticulars (years, quantities, proper nouns):`);
 console.log(`  claims carrying any:        ${checkable.length}`);
 console.log(`  with NONE in their doc:     ${floating.length}  <- nothing wrote these down`);
-console.log(`  blends (no doc to check):   ${claims.filter(c => c.loose === null).length}`);
+console.log(`  no doc at all to check:     ${claims.filter(c => c.loose === null).length}`);
 
 if (anchor) {
   const shown = selected.filter(c => c.loose && c.loose.length);
