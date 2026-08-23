@@ -12,7 +12,7 @@ import {
 } from "../components/layout";
 import { INGREDIENTS } from "../data/ingredients";
 import { nominalCaffeineMg } from "../algo/caffeine";
-import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS } from "../data/blends";
+import { BLEND_DIRECTIONS, BLEND_SOURCES, BLEND_TABLE_ACCENTS, SOURCE_REGISTERS } from "../data/blends";
 import { getBlend, sessionAgo, restHintForCelsius } from "../helpers/misc";
 import {
   ff, theme, shadow, radius,
@@ -1071,13 +1071,28 @@ export const BlendDetail = ({ blendId, onClose, onOpenIngredient, onBrew, onSave
               background: theme.cream, border: `1px solid ${theme.ruleSoft}`,
               textAlign: "left",
             }}>
+              {/* The REGISTER sits above the citation, upright and small,
+                  because the citation itself is italic serif and a
+                  reader skimming four italic lines cannot tell a
+                  randomised trial from a folk teaching. Naming it is
+                  the whole point of the row — the credibility of a
+                  journal reference should not spread sideways to the
+                  tradition printed underneath it. */}
               {BLEND_SOURCES[b.id].map((src, i) => (
-                <div key={i} style={{
-                  fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
-                  color: theme.inkSoft, lineHeight: 1.5,
-                  padding: "6px 0",
+                <div key={i} data-testid="blend-source" style={{
+                  padding: "8px 0",
                   borderTop: i === 0 ? "none" : `1px solid ${theme.ruleSoft}`,
-                }}>{src}</div>
+                }}>
+                  <div data-testid="blend-source-register" style={{
+                    fontFamily: ff.sans, fontSize: 9.5, letterSpacing: 0.7,
+                    textTransform: "uppercase", color: theme.inkSoft, opacity: 0.75,
+                    marginBottom: 3,
+                  }}>{SOURCE_REGISTERS[src.register] ?? src.register}</div>
+                  <div style={{
+                    fontFamily: ff.serif, fontStyle: "italic", fontSize: 12.5,
+                    color: theme.inkSoft, lineHeight: 1.5,
+                  }}>{src.text}</div>
+                </div>
               ))}
             </div>
           </>

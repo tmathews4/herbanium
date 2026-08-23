@@ -1575,23 +1575,43 @@ const BLEND_DIRECTIONS = {
   ],
 };
 
-// Per-blend source attributions — listed at the bottom of a blend's
-// page when the preparation, brew window, or pairing is drawn from a
-// specific named source. Removed from subtitles and preparation copy
-// so the user-facing language stays evocative; the credit lives in
-// its proper place at the foot of the page.
+/* Per-blend source attributions — listed at the bottom of a blend's
+   page when the preparation, brew window, or pairing is drawn from a
+   specific named source. Removed from subtitles and preparation copy
+   so the user-facing language stays evocative; the credit lives in
+   its proper place at the foot of the page.
+
+   EVERY ENTRY NAMES ITS REGISTER, and that is the load-bearing part.
+   These four lines used to render as identical italic serif inside one
+   box labelled "Sources" — a 1999 randomised placebo-controlled trial,
+   two historical attributions, and a living folk herbalist's teaching,
+   all dressed the same. A reader cannot tell them apart, and the
+   journal citation lends its authority to whatever sits beside it.
+   That is the same failure as a `verified` marker nobody checks,
+   except it is the version users actually see.
+
+   The register is DATA, not prose, so the renderer can set it apart
+   visually and `tests/blend-sources.test.mjs` can hold every entry to
+   the vocabulary. Adding a source without one fails the suite rather
+   than quietly inheriting the credibility of the entry above it. */
+const SOURCE_REGISTERS = {
+  trial:      "Clinical trial",
+  history:    "Historical record",
+  tradition:  "Living tradition",
+};
+
 const BLEND_SOURCES = {
   "sencha-properly": [
-    "Soen Nagatani's 1738 sencha-steaming method — the Japanese green-tea innovation that displaced earlier pan-fired styles.",
+    { register: "history", text: "Soen Nagatani's 1738 sencha-steaming method — the Japanese green-tea innovation that displaced earlier pan-fired styles." },
   ],
   "usucha": [
-    "Eisai (12th c.), the traveler-scholar who introduced whisked powdered green tea (matcha) from China to Japan.",
+    { register: "history", text: "Eisai (12th c.), the traveler-scholar who introduced whisked powdered green tea (matcha) from China to Japan." },
   ],
   "all-heal": [
-    "Cerny A, Schmid K. 1999. Tolerability and efficacy of a valerian/lemon balm fixed-combination preparation in healthy volunteers. Fitoterapia 70:221–228.",
+    { register: "trial", text: "Cerny A, Schmid K. 1999. Tolerability and efficacy of a valerian/lemon balm fixed-combination preparation in healthy volunteers. Fitoterapia 70:221–228. Double-blind, placebo-controlled, multicentre — in healthy volunteers, for minor sleep disturbance." },
   ],
   "spring-tonic": [
-    "Susun Weed's Wise Woman tradition — the long, covered, four-hour infusion approach to mineral-rich herbal nourishment.",
+    { register: "tradition", text: "Susun Weed's Wise Woman tradition — the long, covered, four-hour infusion approach to mineral-rich herbal nourishment. A named teaching, not a clinical finding." },
   ],
 };
 
@@ -1634,6 +1654,7 @@ export {
   BLENDS,
   BLEND_DIRECTIONS,
   BLEND_SOURCES,
+  SOURCE_REGISTERS,
   BLEND_TABLE_ACCENTS,
   MOOD_BLENDS,
   PAIR_BLENDS,
