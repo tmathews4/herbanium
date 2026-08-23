@@ -153,6 +153,103 @@ for (const c of claims) {
   c.loose = c.where === "culturalNote" ? null : unanchored(c.id, c.text);
 }
 
+/* ── --conflict: the same fact, told twice, differently ────────────
+   The shape that has bitten four times in this corpus and was caught
+   by hand every time:
+
+     ingredients.js  "...Alaric demanded 3,000 pounds ... in 408 CE"
+     waitContent.js  "Visigoths sacking Rome in 410 demanded 3,000..."
+
+   Both surfaces talk about the same event, one of them is wrong, and
+   nothing compares them because they live in different files and no
+   test reads prose. Assam had it (blurb correct, steep timer calling
+   Bruce a botanist), Ceylon had it (facts list and timer wrong in two
+   DIFFERENT ways), pepper had it twice over.
+
+   Detection is deliberately narrow, because the cheap version of this
+   is unusable: flag two claims about the SAME INGREDIENT that share a
+   distinctive proper noun but disagree on a year. Sharing "Alaric"
+   and differing on 408/410 is a contradiction. Sharing nothing but
+   "Chinese" is a coincidence, which is why the shared token must be a
+   proper noun the corpus does not use elsewhere in lower case — the
+   same calibration the anchor check uses.
+
+   IT REPORTS PAIRS, NOT VERDICTS. Two dates can legitimately differ
+   (a plant described in one year and cultivated in another). The tool
+   cannot tell those apart and does not try; it puts the pair in front
+   of a reader, which is all that was ever missing. */
+const NEAR_YEARS = 25;   // see below
+/* A name appearing in more than a few of ONE ingredient's claims is that
+   ingredient's background vocabulary, not a marker of a single event.
+   Measured: "Hangzhou" is in 4 of dragonwell's 16 claims and produced the
+   last false positive; "Alaric" is in exactly 2 of black pepper's 16 and
+   names precisely the contradicting pair. "Vasco" is in 3 — the same
+   voyage told three times, which is worth SEEING, not suppressing.
+   The threshold is picked from those observations, not derived. A wrong
+   call here costs one line of reading, which is the right way round. */
+const BACKGROUND_AT = 4;
+
+function conflicts(all) {
+  /* A YEAR, not any three-digit number. "600-2,000m" is an elevation and
+     was the first thing this reported. Four digits, or three with an era
+     marker, and never one carrying a unit. */
+  /* Pulling a YEAR out of prose is fiddlier than it looks, and the first
+     two attempts each failed on a case this tool exists for:
+
+       "600-2,000m elevation"  -> 600 is not a year (unit follows a range)
+       "3,000 pounds of pepper" -> the 000 is a thousands separator
+       "264 million kg"        -> a magnitude, not a year
+       "sacking Rome in 410"   -> IS a year, and carries no era marker
+
+     The second attempt fixed the elevation by demanding BCE/CE on any
+     three-digit number, which silently dropped that last line — the
+     exact contradiction the detector was built to find. So: take three-
+     and four-digit numbers, reject a thousands fragment by what precedes
+     it, and reject a measurement by what follows. */
+  const years = t => [...t.matchAll(/(?<![\d,.])\b(\d{3,4})\b/g)]
+    .filter(m => !/^\s*[-–]?\s*[\d,]*\s*(?:m|km|cm|ml|l|g|kg|°|%|million|billion|thousand)\b/
+      .test(t.slice(m.index + m[1].length)))
+    .map(m => +m[1]);
+
+  /* The ingredient naming ITSELF is not evidence that two claims describe
+     one event — every darjeeling fact says "Darjeeling". Drop the id and
+     its word-parts from the shared set. */
+  const nouns = (t, id) => {
+    const own = new Set(String(id).toLowerCase().split(/[-_]/));
+    return particulars(t).filter(x => /^[A-Z]/.test(x) && !own.has(x.toLowerCase()));
+  };
+
+  const byId = {};
+  for (const c of all) (byId[c.id] = byId[c.id] || []).push(c);
+
+  const out = [];
+  for (const group of Object.values(byId)) {
+    const seen = {};
+    for (const c of group) for (const n of new Set(nouns(c.text, c.id))) seen[n] = (seen[n] || 0) + 1;
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const a = group[i], b = group[j];
+        const shared = nouns(a.text, a.id)
+          .filter(n => nouns(b.text, b.id).includes(n) && seen[n] < BACKGROUND_AT);
+        if (!shared.length) continue;
+        const ya = years(a.text), yb = years(b.text);
+        if (!ya.length || !yb.length) continue;
+        if (ya.some(y => yb.includes(y))) continue;    // they agree on a year — fine
+
+        /* NEAR years are the tell. Two tellings of ONE event disagree by a
+           little — Alaric at 408 against 410. Two DIFFERENT events about
+           one ingredient sit decades apart: rooibos's 2021 trade protection
+           and its 1968 folk remedy share "African" and contradict nothing.
+           Distance is what separates a contradiction from a coincidence. */
+        const gap = Math.min(...ya.flatMap(x => yb.map(y => Math.abs(x - y))));
+        if (gap > NEAR_YEARS) continue;
+        out.push({ a, b, shared, ya, yb, gap });
+      }
+    }
+  }
+  return out;
+}
+
 const only = process.argv.find(a => a.startsWith("--tag="))?.slice(6);
 const min = Number(process.argv.find(a => a.startsWith("--min="))?.slice(6) || 0);
 const list = process.argv.includes("--list");
@@ -191,6 +288,16 @@ if (anchor) {
     console.log(`\n[${c.score}] ${c.where} ${c.id}  {${c.tags.join(",")}}${flag}`);
     console.log(`    missing from doc (${c.loose.length}/${all}): ${c.loose.join(", ")}`);
     console.log(`    ${c.text.replace(/\s+/g, " ").slice(0, 220)}`);
+  }
+}
+
+if (process.argv.includes("--conflict")) {
+  const pairs = conflicts(claims);
+  console.log(`\n--- ${pairs.length} same-ingredient pair(s) sharing a name but disagreeing on a year ---`);
+  for (const { a, b, shared, ya, yb, gap } of pairs) {
+    console.log(`\n${a.id}  shares: ${shared.join(", ")}  (years ${gap} apart)`);
+    console.log(`  [${a.where}] years ${ya.join("/")}: ${a.text.replace(/\s+/g, " ").slice(0, 150)}`);
+    console.log(`  [${b.where}] years ${yb.join("/")}: ${b.text.replace(/\s+/g, " ").slice(0, 150)}`);
   }
 }
 

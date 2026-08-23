@@ -62,6 +62,7 @@ node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the resea
 node tools/audit-vocabulary-coverage.mjs  # maps that drifted from the list they key on
 node tools/audit-claims.mjs --min=2 --list  # PROSE: which sentences assert a checkable fact
 node tools/audit-claims.mjs --anchor       # ...and which have NO particular written down anywhere
+node tools/audit-claims.mjs --conflict     # the same fact told twice, differently
 ```
 
 ### The prose says things too, and nothing was checking it
@@ -185,6 +186,46 @@ name of the body issuing the limit. Substance documented, attribution
 floating. Still worth fixing, since a named institution is exactly what
 a reader would look up, but it is a citation gap, not an invented
 claim.
+
+**`--conflict` catches the shape that bit four times.** Every prose
+error found so far that shipped in more than one place shipped
+DIFFERENTLY in each: pepper at 408 in the facts list and 410 in the
+steep timer; assam's blurb crediting Maniram Dewan while its timer
+called Bruce a discovering botanist; ceylon wrong in two distinct ways
+across two surfaces. The claims live in different files, no test reads
+prose, and nothing compared them. All four were found by a person
+reading.
+
+The check is narrow on purpose: two claims about the SAME ingredient
+that share a distinctive proper noun but disagree on a year, where the
+years are CLOSE. Distance is what separates a contradiction from a
+coincidence — two tellings of one event differ by a little (408 against
+410), while two different events about one ingredient sit decades apart
+(rooibos's 2021 trade protection and its 1968 folk remedy both say
+"African" and contradict nothing). It also drops the ingredient's own
+name, and any name appearing in four or more of that ingredient's
+claims, as background vocabulary: every darjeeling fact says
+"Darjeeling", and "Hangzhou" is in four dragonwell claims, while
+"Alaric" is in exactly the two that disagreed.
+
+**Getting a year out of prose took three attempts and the middle one
+was worse than useless.** "600-2,000m" is an elevation, "3,000 pounds"
+hides a thousands separator, "264 million kg" is a magnitude — and
+"sacking Rome in 410" is a real year with no era marker. The second
+attempt fixed the elevation by requiring BCE/CE on any three-digit
+number, which silently dropped the one line the tool existed to find,
+and it reported a clean zero while doing it. **A heuristic tuned until
+it reports nothing is indistinguishable from a heuristic that works.**
+Verify by reintroducing the defect: restore the 410 text and the tool
+must name `black-pepper, shares: Rome, years 2 apart`.
+
+It reports PAIRS, NOT VERDICTS, and it stays a hand-run tool rather
+than a node test for that reason. Two dates can legitimately differ,
+and a hard-failing test on a heuristic would either block real content
+or need an exemption list — which is the thing every audit here avoids.
+Its finding on the corpus today is zero, which is a real result: the
+by-hand corrections caught every instance of a shape nothing was
+checking for.
 
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line
