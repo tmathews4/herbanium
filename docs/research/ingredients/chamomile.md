@@ -339,6 +339,7 @@ claim (Steep App brewtea.app, widely corroborated).
 | ref-1 | [RESEARCH] — German Commission E monograph on *Matricariae flos* | monograph (traditional use) |
 | ref-2 | [RESEARCH] — Hobbs, *Chamomile: Medicinal, Cosmetic, and Agricultural Uses* or similar reference | book |
 
+| ref-potter-1902 | Potter, Beatrix. *The Tale of Peter Rabbit* (1902) — the primary text; Mrs Rabbit doses Peter with chamomile tea after the Mr McGregor episode. | primary literary source |
 **Starting points for additional research:**
 
 - PubMed: *Matricaria chamomilla* clinical trials (anxiety, GAD, insomnia) — many more RCTs exist beyond Mao 2016
@@ -363,7 +364,7 @@ counterpoints-beside-claims: we don't hide the folk, we label it.
 
 | # | Type | Confidence | Fact | Source |
 |---|------|------------|------|--------|
-| 1 | culture | verified | Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine. | Beatrix Potter, *The Tale of Peter Rabbit*, 1902 |
+| 1 | culture | verified | Peter Rabbit's mother gave him chamomile tea after his Mr. McGregor scare — Beatrix Potter knew her folk medicine. | ref-potter-1902 |
 | 2 | fact | established | There are actually two main plants called chamomile — German (annual, what's in most tea) and Roman (perennial, more bitter). | botanical taxonomy |
 | 3 | fact | verified | Chamomile tea reduces anxiety in clinical trials, but the exact brain mechanism is still being worked out — early papers thought it acted like a mild benzodiazepine, later research found the picture more complicated. | ref-saadatmand-2024, ref-avallone-2000 |
 | 4 | history | attested | The Latin name *Matricaria* comes from *matrix*, meaning womb — the Romans used it as a gynecological remedy. | widely documented etymology; Latin root verifiable, specific Roman medical use attested in herbal histories but primary classical source untraced |

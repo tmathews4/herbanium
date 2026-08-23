@@ -201,8 +201,8 @@
 
 | # | Type | Confidence | Fact | Source |
 |---|------|-----------|------|--------|
-| 1 | culture | verified | Italian *canarino* — boiled water poured over lemon peel and sometimes a bay leaf — is a traditional after-dinner digestive named for its yellow color, *like a canary*. It's served in households more often than in cafés. | ref-3 |
-| 2 | history | verified | Russian "tea with lemon" (*chai s limonom*) became standard during the 19th century when both samovars and citrus imports reached the Russian middle class. The combination cuts through the tannic Russian Caravan blend that defined the tea hour. | ref-1 |
+| 1 | culture | attested | Italian *canarino* — boiled water poured over lemon peel and sometimes a bay leaf — is a traditional after-dinner digestive named for its yellow color, *like a canary*. It's served in households more often than in cafés. | ref-3 |
+| 2 | history | attested | Russian "tea with lemon" (*chai s limonom*) became standard during the 19th century when both samovars and citrus imports reached the Russian middle class. The combination cuts through the tannic Russian Caravan blend that defined the tea hour. | ref-1 |
 | 3 | fact | verified | Lemon peel oil is over 70% limonene and a few percent citral — the same citral that gives lemongrass its sharpness. This shared compound is why lemon peel and lemongrass blend so cleanly. | ref-3 |
 | 4 | fact | verified | Lemon oil inhalation has been measured to reduce stress markers in animal and human studies — the volatiles cross into the bloodstream within minutes via the olfactory pathway. | ref-2 |
 | 5 | fact | verified | Lemon peel is sharper and more volatile than orange or bergamot peel because citral evaporates faster than the oils that dominate the others. This is why lemon-heavy blends taste flatter the next day. | ref-1 |
@@ -242,3 +242,25 @@ fast transport to distant ports, and trivially easy to rob overnight
 compared with olives or grapes. A weak new Italian state could not
 enforce property rights in western Sicily, so protection was sold by
 the people best placed to supply the threat. `verified`
+
+
+---
+
+## Addendum — confidence markers corrected (2026-08-23)
+
+**Cultural and historical rows marked `verified` on the strength of a
+chemistry citation are now `attested`.** Rows affected: #1 (culture), #2 (history).
+
+This is a downgrade of the MARKER, not a doubt about the facts. Each
+row cited a real, resolvable, respectable source — and the source was a
+pharmacology review, a systematic review or an analytical paper, none
+of which can settle an etymology, a folk proverb or when a dish first
+appears in a cookbook. `tools/audit-confidence.mjs` exists because
+exactly that mismatch let sage's 812 CE *Capitulare* date ship as
+`verified`: real ref, incapable of carrying the claim, nobody asked.
+
+`attested` is the honest register here — well attested in cultural and
+historical writing, not verified against a citation in this file.
+Restoring `verified` means citing something that can bear the weight:
+a historian, an etymological dictionary, a dated cookbook. Not a
+phytochemist.

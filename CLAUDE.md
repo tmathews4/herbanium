@@ -289,6 +289,54 @@ other doc uses a table. The parser knew one shape. A tidy, alarming,
 completely wrong finding — the same failure mode as the year regex in
 `--conflict`, and the reason both tools now say what they cannot see.
 
+**The worklist is worked off: A, B and C are all zero.** 67 table
+`verified` markers became 46, and every survivor cites a resolvable ref
+whose TYPE can carry its claim. What it took, in the order the tool
+kept correcting me:
+
+- **Two more claims were simply wrong**, and one is the pepper error a
+  THIRD time. Orange peel said medieval mulled wine "almost universally"
+  included orange or citron peel — medieval *hippocras* was cinnamon,
+  ginger, clove and grains of paradise, and fruit-led spiced wines
+  appear from the 17th century. A later practice relocated into an
+  earlier period, exactly like Roman empresses and Chinese candied
+  ginger. Sage said it was "one of the four herbs in the medieval
+  *vinaigre des quatre voleurs*" — the FOUR were the thieves, not the
+  herbs; early recipes run to a dozen or more, and the legend is
+  18th-century plague, not medieval.
+- **Ten cultural rows were downgraded, not doubted.** Etymologies,
+  folk proverbs and cookbook history cited to pharmacology reviews.
+  The facts are fine; `attested` is the honest marker when the source
+  in the file cannot settle the claim. Restoring `verified` needs a
+  historian, not a phytochemist.
+- **Three rows gained real citations** in place of hand-waves.
+  "Well-established botanical history" became Ray's *Synopsis
+  Methodica* (1696), where peppermint was first described from a plant
+  found in Hertfordshire by a Dr Eales. "Well-established Native
+  American ethnobotany" became Moerman. Chamomile's Peter Rabbit row
+  turned out to be properly sourced already, just in prose.
+
+**"No source named" was three different things and reporting them as
+one was the tool's own overstatement.** The first run said 14
+`verified` claims cited nothing. Reading them: 3 were real gaps, and 11
+were in docs whose §9 is a BULLET LIST with no ref ids — sencha, reishi
+and genmaicha all carry genuine sources that simply cannot be cited by
+id. That is a doc-format difference, not eleven unsourced claims. Those
+three docs now have ref tables.
+
+**40% of the Source column is prose, not citation.** "Tea-industry
+convention", "well-established", "processing reality", "content
+composition". A category name is not a source, and a cell holding one
+reads as cited to anyone skimming. The tool now counts the split every
+run. It is acceptable beside `attested`; beside `verified` it was the
+whole problem.
+
+**A measurement that moves when you write about it is not a
+measurement.** The blockquote count jumped by 14 the moment these
+addenda were written, because prose ABOUT `verified` was being counted
+as claims marked `verified`. Blockquote markers are now counted only
+on blockquote lines.
+
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line
 again. `tests/retracted-claims.test.mjs` reads

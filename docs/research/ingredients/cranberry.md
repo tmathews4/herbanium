@@ -202,11 +202,11 @@
 
 | # | Type | Confidence | Fact | Source |
 |---|------|-----------|------|--------|
-| 1 | culture | verified | Cranberries are one of only three fruits native to North America that became commercial crops, alongside blueberry and Concord grape. Indigenous peoples of the Northeast — Algonquian, Wampanoag, Lenape — used them as food, dye, and medicine long before European contact. | ref-1 |
-| 2 | history | verified | The name "cranberry" comes from "craneberry" — early American settlers thought the flower's pink stamens looked like a crane's beak. The Algonquian word *atoca* preceded it by centuries. | ref-1 |
+| 1 | culture | attested | Cranberries are one of only three fruits native to North America that became commercial crops, alongside blueberry and Concord grape. Indigenous peoples of the Northeast — Algonquian, Wampanoag, Lenape — used them as food, dye, and medicine long before European contact. | ref-1 |
+| 2 | history | attested | The name "cranberry" comes from "craneberry" — early American settlers thought the flower's pink stamens looked like a crane's beak. The Algonquian word *atoca* preceded it by centuries. | ref-1 |
 | 3 | fact | verified | The tartness in cranberry comes from three different acids — quinic, malic, and citric — together at higher concentrations than most fruits. This is why cranberry tastes "sharper" than other berries even at similar pH. | ref-1 |
 | 4 | fact | verified | Cranberry's reputation for urinary health rests on proanthocyanidins (PACs) — compounds that block *E. coli* from sticking to bladder walls in lab studies. Tea-level doses are far below therapeutic thresholds, so the cup is flavor, not medicine. | ref-2 |
-| 5 | history | verified | The classic American cranberry sauce — boiled with sugar — appears in 19th-century cookbooks well before becoming a Thanksgiving fixture. The first commercial cranberry farm started in Massachusetts in 1816. | ref-1 |
+| 5 | history | attested | The classic American cranberry sauce — boiled with sugar — appears in 19th-century cookbooks well before becoming a Thanksgiving fixture. The first commercial cranberry farm started in Massachusetts in 1816. | ref-1 |
 
 ---
 
@@ -247,3 +247,25 @@ them at 3 — that gap is a separate matter, tracked by the strength
 guard rather than this one.
 
 <!-- sourced-effects: uplifting, cooling -->
+
+
+---
+
+## Addendum — confidence markers corrected (2026-08-23)
+
+**Cultural and historical rows marked `verified` on the strength of a
+chemistry citation are now `attested`.** Rows affected: #1 (culture), #2 (history), #5 (history).
+
+This is a downgrade of the MARKER, not a doubt about the facts. Each
+row cited a real, resolvable, respectable source — and the source was a
+pharmacology review, a systematic review or an analytical paper, none
+of which can settle an etymology, a folk proverb or when a dish first
+appears in a cookbook. `tools/audit-confidence.mjs` exists because
+exactly that mismatch let sage's 812 CE *Capitulare* date ship as
+`verified`: real ref, incapable of carrying the claim, nobody asked.
+
+`attested` is the honest register here — well attested in cultural and
+historical writing, not verified against a citation in this file.
+Restoring `verified` means citing something that can bear the weight:
+a historian, an etymological dictionary, a dated cookbook. Not a
+phytochemist.

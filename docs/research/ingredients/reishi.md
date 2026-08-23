@@ -136,6 +136,13 @@
 
 ## 9. Sources (starting points)
 
+| Ref | Citation | Type |
+|-----|----------|------|
+| ref-shennong | *Shen Nong Ben Cao Jing* (~100 BCE, Han dynasty) — China's earliest pharmacopoeia; the original listing of lingzhi among the superior herbs. | primary historical text |
+| ref-wachtel-galor | Wachtel-Galor S, et al. *Ganoderma lucidum* (Lingzhi or Reishi): A Medicinal Mushroom. In: Herbal Medicine: Biomolecular and Clinical Aspects, 2nd ed. | review |
+| ref-jin-2016 | Jin X, et al. *Ganoderma lucidum* (Reishi mushroom) for cancer treatment. *Cochrane Database of Systematic Reviews*. | systematic review |
+
+
 - Wachtel-Galor, S., et al. "*Ganoderma lucidum* (Lingzhi or Reishi): A Medicinal Mushroom." *Herbal Medicine: Biomolecular and Clinical Aspects* (2nd ed., 2011). NCBI Bookshelf NBK92757.
 - Jin, X., et al. "*Ganoderma lucidum* (Reishi mushroom) for cancer treatment." *Cochrane Database of Systematic Reviews* (2016).
 - Sliva, D. "*Ganoderma lucidum* (Reishi) in cancer treatment." *Integrative Cancer Therapies* (2003).
@@ -149,10 +156,10 @@
 | # | Type | Confidence | Fact | Source |
 |---|------|------------|------|--------|
 | 1 | culture | attested | Taoist painters drew reishi in the hands of immortals; Chinese emperors hoarded wild specimens. | Chinese cultural-art history |
-| 2 | history | verified | Reliable cultivation of reishi only began in the 1970s — before that, it was almost entirely wild-foraged. | mushroom-cultivation history |
-| 3 | fact | verified | Reishi appears in the Shen Nong Ben Cao Jing — China's earliest pharmacopoeia, around 100 BCE — as a "superior" herb for long life. | classical TCM text |
+| 2 | history | attested | Reliable cultivation of reishi only began in the 1970s — before that, it was almost entirely wild-foraged. | cultivation history — widely repeated, no source located for the 1970s date |
+| 3 | fact | verified | Reishi appears in the Shen Nong Ben Cao Jing — China's earliest pharmacopoeia, around 100 BCE — as a "superior" herb for long life. | ref-shennong |
 | 4 | fact | established | The bitter is triterpene, the same family found in licorice and ginseng — and the reason the cup needs a long decoction. | well-established phytochemistry |
-| 5 | fact | verified | Reishi is one of the most-studied medicinal mushrooms — over 400 papers per year, mostly on immune-modulating polysaccharides. | bibliometric standard |
+| 5 | fact | attested | Reishi is one of the most-studied medicinal mushrooms — over 400 papers per year, mostly on immune-modulating polysaccharides. | no source located for the papers-per-year figure |
 | 6 | fact | attested | Six color varieties of reishi were classified in TCM — red, black, blue-green, white, yellow, purple. Red is what's commercial today. | classical TCM classification |
 | 7 | culture | established | The traditional preparation is double-decoction: hours in water, then again, sweetened with jujube and goji. | TCM preparation tradition |
 | 8 | fact | verified | Modern clinical trials show modest immune effects in cancer adjunct treatment — improving quality of life and recovery markers. | ref-jin-2016 |
@@ -273,3 +280,20 @@ Removed from the card. Nothing is lost from the cup; the claim either
 never had support or is carried by a neighbour that does.
 
 <!-- sourced-effects: grounding, calm, immune, comfort -->
+
+
+---
+
+## Addendum — confidence markers audited (2026-08-23)
+
+This doc's §9 was a bullet list with no ref ids, so every claim row's
+Source column held PROSE rather than a citation — "content
+composition", "processing reality", "well-established". A column that
+looks like a citation and is not one is worse than an empty column,
+because it reads as sourced.
+
+The bullets that are real citations now have ids and are cited by the
+rows they actually support. The rows they do not support have been
+downgraded: `verified` is for a claim a named source can carry, and a
+category name is not a source. Restoring `verified` on those means
+citing something specific.

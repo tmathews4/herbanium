@@ -189,10 +189,10 @@
 
 | # | Type | Confidence | Fact | Source |
 |---|------|-----------|------|--------|
-| 1 | culture | verified | German *Apfeltee* — dried apple, cinnamon, and a clove or two — has been a winter staple in Bavarian and Austrian households for centuries. The name predates the word "tea" entering German; it was originally just *Apfelsud*, "apple decoction." | ref-2 |
+| 1 | culture | attested | German *Apfeltee* — dried apple, cinnamon, and a clove or two — has been a winter staple in Bavarian and Austrian households for centuries. The name predates the word "tea" entering German; it was originally just *Apfelsud*, "apple decoction." | ref-2 |
 | 2 | fact | verified | Drying concentrates apple's sugars: a fresh apple is about 10% sugar by weight, while dried apple is 50–60%. This is why dried apple sweetens a cup that fresh apple slices wouldn't touch. | ref-1 |
 | 3 | fact | verified | Apple pectin gives a tea cup a noticeable roundness — pectin is a soluble fiber that thickens liquid slightly, the same property used to set jam. This is what makes apple-heavy blends drink "fuller" than spice-only blends. | ref-1 |
-| 4 | history | verified | The Bircher-Benner clinic in 1900s Zürich used apple infusions and apple-based muesli as part of a raw-food diet protocol — the muesli is named for its founder, who originally prescribed it to tuberculosis patients. | ref-3 |
+| 4 | history | attested | The Bircher-Benner clinic in 1900s Zürich used apple infusions and apple-based muesli as part of a raw-food diet protocol — the muesli is named for its founder, who originally prescribed it to tuberculosis patients. | ref-3 |
 | 5 | fact | verified | Apple is one of the few infusion ingredients that has no over-pull ceiling worth worrying about. Long steeps don't make it bitter — they just make it sweeter. | ref-1 |
 
 ---
@@ -283,3 +283,25 @@ Recorded here rather than silently deleted or silently kept. It is
 plausible and unsupported, it makes no health or historical assertion,
 and the honest status is "nobody has written this down". If it is ever
 worth resolving, the route is a supplier, not a search. `folk`
+
+
+---
+
+## Addendum — confidence markers corrected (2026-08-23)
+
+**Cultural and historical rows marked `verified` on the strength of a
+chemistry citation are now `attested`.** Rows affected: #1 (culture), #4 (history).
+
+This is a downgrade of the MARKER, not a doubt about the facts. Each
+row cited a real, resolvable, respectable source — and the source was a
+pharmacology review, a systematic review or an analytical paper, none
+of which can settle an etymology, a folk proverb or when a dish first
+appears in a cookbook. `tools/audit-confidence.mjs` exists because
+exactly that mismatch let sage's 812 CE *Capitulare* date ship as
+`verified`: real ref, incapable of carrying the claim, nobody asked.
+
+`attested` is the honest register here — well attested in cultural and
+historical writing, not verified against a citation in this file.
+Restoring `verified` means citing something that can bear the weight:
+a historian, an etymological dictionary, a dated cookbook. Not a
+phytochemist.

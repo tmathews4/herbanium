@@ -56,7 +56,7 @@ const HISTORICAL = /^(history|culture|tradition|etymology)$/i;
 
 const cells = (line) => line.split("|").slice(1, -1).map(c => c.trim());
 
-const findings = { uncited: [], unresolved: [], mismatch: [] };
+const findings = { uncited: [], unidd: [], unresolved: [], mismatch: [] };
 let tableVerified = 0, quoteVerified = 0, docs = 0;
 
 for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
@@ -102,7 +102,20 @@ for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
     const where = `${file} #${n} (${claimType})`;
     const brief = fact.replace(/\s+/g, " ").slice(0, 95);
 
-    if (!cited.length) { findings.uncited.push({ where, brief, source }); continue; }
+    if (!cited.length) {
+      /* TWO DIFFERENT THINGS, and lumping them was misleading. A row
+         with no ref in a doc that HAS a ref table is a real gap —
+         someone could have cited and didn't. A row with no ref in a
+         doc whose sources are a bullet list has nothing to cite BY ID:
+         sencha, reishi and genmaicha all carry real "Sources (starting
+         points)" sections with no ref ids at all, so every row in them
+         reports empty. That is a doc-format difference, not 11
+         unsourced claims, and reporting it as the latter would be the
+         same overstatement this tool exists to catch. */
+      (Object.keys(refs).length ? findings.uncited : findings.unidd)
+        .push({ where, brief, source });
+      continue;
+    }
 
     for (const r of cited) if (!refs[r]) { const l = resolveLoose(r); if (l) refs[r] = l; }
     const missing = cited.filter(r => !refs[r]);
@@ -119,10 +132,18 @@ for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
     }
   }
 
-  /* Blockquote claims carry no source column. */
+  /* Blockquote claims carry no source column. Counted only when the
+     marker sits on a BLOCKQUOTE line, which is the shape a claim
+     actually takes — "> ... `verified`".
+
+     Not merely "anything that is not a table row": prose ABOUT the
+     markers then counts as a claim, and this tool's own addenda
+     ("rows marked `verified` are now `attested`") inflated the figure
+     by 14 the first time these docs were edited. A measurement that
+     moves when you write about it is not measuring the corpus. */
   for (const m of text.matchAll(/`verified`/g)) {
-    const line = text.slice(text.lastIndexOf("\n", m.index) + 1, m.index);
-    if (!line.trimStart().startsWith("|")) quoteVerified++;
+    const line = text.slice(text.lastIndexOf("\n", m.index) + 1, m.index).trimStart();
+    if (line.startsWith(">")) quoteVerified++;
   }
 }
 
@@ -132,12 +153,33 @@ const show = (title, rows, fmt) => {
   if (rows.length > 25) console.log(`  ... and ${rows.length - 25} more`);
 };
 
+/* HOW MANY SOURCE CELLS ARE ACTUALLY CITATIONS.
+   The column is headed "Source" and 43% of it once held prose — "tea-
+   industry convention", "well-established", "processing reality",
+   "content composition". A category name is not a source, and a cell
+   that names one reads as cited to anybody skimming. This counts the
+   difference rather than trusting the column. */
+let cellsTotal = 0, cellsCited = 0, cellsProse = 0;
+for (const file of readdirSync(DOCS).filter(f => f.endsWith(".md"))) {
+  for (const line of readFileSync(resolve(DOCS, file), "utf8").split("\n")) {
+    const c = cells(line);
+    if (c.length < 5 || !/^\d+$/.test(c[0])) continue;
+    cellsTotal++;
+    if (/ref-[\w-]+/i.test(c[4] || "")) cellsCited++;
+    else if ((c[4] || "").trim()) cellsProse++;
+  }
+}
+
 console.log(`\nConfidence audit over ${docs} ingredient docs`);
+console.log(`Claim rows: ${cellsTotal} — ${cellsCited} cite a ref id, ` +
+  `${cellsProse} hold prose instead (${Math.round(100 * cellsProse / (cellsTotal || 1))}%)`);
 console.log(`\`verified\` in claims tables (citable):   ${tableVerified}`);
 console.log(`\`verified\` in prose blockquotes (no source column): ${quoteVerified}`);
 
-show("A. `verified` with NO source named", findings.uncited,
-  r => `  ${r.where}\n      ${r.brief}`);
+show("A. `verified` with no ref, in a doc that HAS a ref table — a real gap",
+  findings.uncited, r => `  ${r.where}\n      ${r.brief}`);
+show("A2. `verified` in a doc whose sources are a bullet list with no ids — cannot cite by id",
+  findings.unidd, r => `  ${r.where}\n      ${r.brief}`);
 show("B. cites a ref that does not resolve in §9", findings.unresolved,
   r => `  ${r.where}  -> ${r.missing.join(", ")}\n      ${r.brief}`);
 show("C. history/culture claim backed only by empirical refs — CAN the source bear it?",
@@ -145,5 +187,6 @@ show("C. history/culture claim backed only by empirical refs — CAN the source 
   r => `  ${r.where}  <- ${r.refs.join(", ")}\n      ${r.brief}`);
 
 const total = findings.uncited.length + findings.unresolved.length + findings.mismatch.length;
+console.log(`\n(A2 is ${findings.unidd.length} rows across docs with no ref ids — a format gap, not a sourcing one.)`);
 console.log(`\n${total} of ${tableVerified} table claims want a human look.`);
 console.log(`C is a SMELL, not a verdict — a review can carry an etymology if it happens to cover one.`);

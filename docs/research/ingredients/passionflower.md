@@ -279,13 +279,14 @@ Sources: ref-elsas-2010, ref-akhondzadeh-2001, traditional.
 | ref-msk-passionflower | Memorial Sloan Kettering Cancer Center. About Herbs: Passionflower. | clinical reference |
 | ref-carlini-2003 | Carlini EA. (2003). Plants and the central nervous system. *Pharmacology Biochemistry and Behavior*, 75(3):501-512. Notes that active ingredients of passionflower have "not been conclusively defined." | review |
 
+| ref-moerman | Moerman DE. *Native American Ethnobotany*. Timber Press — the standard ethnobotanical record; Cherokee, Houma, Mikasuki and Seminole uses of *Passiflora incarnata* are catalogued there. | ethnobotany |
 ---
 
 ## 10. Facts for the Steep screen
 
 | # | Type | Confidence | Fact | Source |
 |---|------|------------|------|--------|
-| 1 | history | verified | Passionflower is indigenous to the southeastern United States, and was used for anxiety and insomnia by Cherokee, Houma, Seminole, and other Native American peoples long before European contact. The plant's medicinal tradition is older than its colonial Christian name. | well-established Native American ethnobotany |
+| 1 | history | verified | Passionflower is indigenous to the southeastern United States, and was used for anxiety and insomnia by Cherokee, Houma, Seminole, and other Native American peoples long before European contact. The plant's medicinal tradition is older than its colonial Christian name. | ref-moerman |
 | 2 | culture | attested | The name "passionflower" was given by 16th-century Spanish missionaries who saw the flower's unusual structure — radial corona, three stigmas, five anthers — as a visual representation of Christ's crucifixion. The flower got its name from its shape, not its effects. | colonial-era Spanish missionary accounts |
 | 3 | fact | verified | Passionflower appears to work through the same receptor system as benzodiazepine medications (like Xanax or Valium) — its flavonoids bind to the benzodiazepine site on GABA-A receptors as mild partial agonists. It's listed in the pharmacopoeias of six countries for this reason. | ref-medina-1997, ref-appel-2011 |
 | 4 | fact | verified | The way passionflower tea is prepared actually changes what's in it — cold extraction preserves GABA itself, while hot water extracts more flavonoids. A 2010 study found some extracts were calming while others were the opposite, depending on method. | ref-elsas-2010 |

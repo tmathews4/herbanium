@@ -141,6 +141,14 @@ Sencha is the most temperature-sensitive tea in the catalog. Time at 75°C is fa
 
 ## 9. Sources (starting points)
 
+| Ref | Citation | Type |
+|-----|----------|------|
+| ref-goto-1996 | Goto T, et al. (1996). Distribution of catechins in Japanese green tea (sencha). *Food Chemistry*. | analytical |
+| ref-yilmaz-2015 | Yilmaz Y, et al. (2015). Effect of brewing parameters on EGCG content of green tea. | analytical / brewing |
+| ref-vuong | Vuong QV. Optimum conditions for the water extraction of L-theanine from green tea. *J Sep Sci*. | analytical / brewing |
+| ref-jtpa-sencha | Japanese Tea Production Association — sencha consumption and production statistics. | industry statistics |
+
+
 - Goto, T., et al. "Distribution of catechins in Japanese green tea (sencha)." *Food Chemistry* (1996).
 - Yilmaz, Y., et al. "Effect of brewing parameters on EGCG content of green tea." (2015).
 - Vuong, Q.V. "Optimum conditions for the water extraction of L-theanine from green tea." *Journal of Separation Science* (2011).
@@ -154,13 +162,13 @@ Sencha is the most temperature-sensitive tea in the catalog. Time at 75°C is fa
 
 | # | Type | Confidence | Fact | Source |
 |---|------|------------|------|--------|
-| 1 | history | verified | In 1738 a tea master named Soen Nagatani steamed leaves instead of pan-firing them, and Japan's everyday cup was reinvented overnight. | well-documented Japanese tea history |
+| 1 | history | attested | In 1738 a tea master named Soen Nagatani steamed leaves instead of pan-firing them, and Japan's everyday cup was reinvented overnight. | tea history — Nagatani 1738 is standard in Japanese tea writing; no primary source cited here |
 | 2 | fact | established | Sencha makes up roughly 80% of all tea consumed in Japan. | Japanese Tea Association statistics |
-| 3 | fact | verified | Brewing temperature for sencha is 70-80°C; boiling water turns the cup bitter and grassy in a way nothing recovers from. | tea-industry convention |
-| 4 | fact | verified | Steam stops oxidation faster than fire — chlorophyll stays green, theanine stays sweet, and the leaf burns at a boil. | well-established processing fact |
+| 3 | fact | verified | Brewing temperature for sencha is 70-80°C; boiling water turns the cup bitter and grassy in a way nothing recovers from. | ref-yilmaz-2015, ref-vuong |
+| 4 | fact | established | Steam stops oxidation faster than fire — chlorophyll stays green, theanine stays sweet, and the leaf burns at a boil. | processing mechanism — steam denatures polyphenol oxidase faster than pan-firing |
 | 5 | fact | established | Shizuoka prefecture grows about 40% of Japan's sencha — volcanic soil and Pacific air. | Japanese tea-region statistics |
-| 6 | fact | verified | First-flush sencha (shincha, picked late April) is the prized version — sweeter, more theanine-rich. | Japanese tea convention |
-| 7 | fact | verified | The leaves are steamed within hours of picking — Japanese green tea factories are still mostly built next to the fields. | production reality |
+| 6 | fact | attested | First-flush sencha (shincha, picked late April) is the prized version — sweeter, more theanine-rich. | shincha convention in Japanese tea trade |
+| 7 | fact | attested | The leaves are steamed within hours of picking — Japanese green tea factories are still mostly built next to the fields. | industry practice |
 | 8 | fact | established | Sencha contains a high concentration of L-theanine, the amino acid responsible for green tea's "calm focus" character. | ref-haskell-2008 |
 
 ---
@@ -218,3 +226,20 @@ Shipping it at the 70°C point only is consistent: that is the cup the
 before catechin extraction takes the cup somewhere else.
 
 <!-- sourced-effects: cooling -->
+
+
+---
+
+## Addendum — confidence markers audited (2026-08-23)
+
+This doc's §9 was a bullet list with no ref ids, so every claim row's
+Source column held PROSE rather than a citation — "content
+composition", "processing reality", "well-established". A column that
+looks like a citation and is not one is worse than an empty column,
+because it reads as sourced.
+
+The bullets that are real citations now have ids and are cited by the
+rows they actually support. The rows they do not support have been
+downgraded: `verified` is for a claim a named source can carry, and a
+category name is not a source. Restoring `verified` on those means
+citing something specific.

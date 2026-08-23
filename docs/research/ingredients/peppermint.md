@@ -280,13 +280,14 @@ Sources: traditional practice, ref-khanna-2014.
 | ref-jafc-2021 | *Journal of Agricultural and Food Chemistry* (2021) — brewing 1 g peppermint leaf in 100 mL water extracts ~12 mg menthol. | extraction chemistry |
 | ref-plant-ibs-2024 | (2024). Plant-derived treatments for IBS: clinical outcomes, mechanistic insights, and their position in international guidelines. PMC12845297. Peppermint oil identified as most effective botanical for IBS. | guideline review |
 
+| ref-ray-1696 | Ray J. (1696). *Synopsis Methodica Stirpium Britannicarum*, 2nd ed. — the first published description of peppermint, from a plant found in Hertfordshire by a Dr Eales; renamed in his *Historia Plantarum* (1704). | historical / botanical |
 ---
 
 ## 10. Facts for the Steep screen
 
 | # | Type | Confidence | Fact | Source |
 |---|------|------------|------|--------|
-| 1 | fact | verified | Peppermint isn't an ancient species — it's a natural hybrid of water mint and spearmint, first formally identified in an English mint field in 1696. In evolutionary terms, it's one of the newer herbs in the human tea tradition. | well-established botanical history |
+| 1 | fact | verified | Peppermint isn't an ancient species — it's a natural hybrid of water mint and spearmint, first formally identified in an English mint field in 1696. In evolutionary terms, it's one of the newer herbs in the human tea tradition. | ref-ray-1696 |
 | 2 | fact | verified | Peppermint oil has one of the strongest clinical evidence bases of any herbal medicine — meta-analyses of 12 randomized trials in 835 patients show it reduces irritable bowel syndrome symptoms more than placebo, with a number-needed-to-treat of 4. | ref-alammar-2019, ref-black-2022 |
 | 3 | fact | established | The "cool" sensation of menthol isn't just metaphor — it activates TRPM8 cold receptors, the same receptors triggered by actual cold temperatures. Your tongue genuinely thinks it's cold. | well-established neurophysiology |
 | 4 | fact | verified | A 5-minute cup of peppermint tea delivers roughly 12 mg of menthol — about one-tenth of the clinically-tested dose used for IBS. Tea is a gentler version of the same medicine. | ref-jafc-2021 |

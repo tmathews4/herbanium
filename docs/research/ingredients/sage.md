@@ -215,14 +215,14 @@
 
 | # | Type | Confidence | Fact | Source |
 |---|------|-----------|------|--------|
-| 1 | history | verified | The Latin *salvere* — "to save" or "to heal" — is the root of the English name "sage." The medical school of Salerno's couplet "Cur moriatur homo cui salvia crescit in horto?" — "Why should a man die when sage grows in his garden?" — survives in half a dozen languages as a piece of folk wisdom. | ref-1 |
-| 2 | culture | verified | Sage is one of the four herbs in the medieval *vinaigre des quatre voleurs* — "four thieves vinegar" — the legendary plague-era infusion that grave robbers reportedly used to avoid catching the disease from their victims. | ref-1 |
+| 1 | history | attested | The Latin *salvere* — "to save" or "to heal" — is the root of the English name "sage." The medical school of Salerno's couplet "Cur moriatur homo cui salvia crescit in horto?" — "Why should a man die when sage grows in his garden?" — survives in half a dozen languages as a piece of folk wisdom. | ref-1 |
+| 2 | culture | attested | Sage is one of the herbs in the *vinaigre des quatre voleurs* — "four thieves vinegar" — the plague-era infusion grave robbers were said to have used to rob the dying without catching it. The four were the THIEVES, not the herbs: early recipes run to a dozen or more, and the tidy four-herb version is a later retelling. | ref-1 |
 | 3 | fact | verified | Small clinical trials have measured modest acute improvements in memory and attention from sage extracts in healthy adults. The mechanism is similar to early Alzheimer's drugs — both block the same enzyme — but sage's effect is much weaker, and tea-level doses are well below what those trials used. | ref-2 |
 | 4 | fact | verified | Sage's volatile oil is dominated by thujone — the same compound that made absinthe famous and feared. At cup-level doses thujone is fine; at concentrated extract doses it can lower seizure threshold, which is why pregnancy and epilepsy are real cautions. | ref-4 |
 | 5 | history | verified | Sage gargle is one of the oldest continuously practiced throat remedies in European herbalism. The astringent rosmarinic acid genuinely tightens mucous-membrane tissue, which is the mechanism behind the centuries-old practice. | ref-3 |
-| 6 | culture | verified | The Romans considered sage so important they performed a small ceremony around its harvest — only iron-free tools, and only after the right offerings. Pliny the Elder wrote about it in the 1st century. | ref-1 |
+| 6 | culture | attested | The Romans considered sage so important they performed a small ceremony around its harvest — only iron-free tools, and only after the right offerings. Pliny the Elder wrote about it in the 1st century. | ref-1 |
 | 7 | fact | verified | The "common sage" English-speakers know is *Salvia officinalis* — distinct from white sage (the smudge stick), Spanish sage, and clary sage. There are over 900 species in the *Salvia* genus, but only a handful are commonly used in food or tea. | ref-1 |
-| 8 | culture | verified | In medieval English folk tradition, eating sage in May was said to grant longevity — "He that would live for aye / Must eat sage in May." The May timing tracked the leaf's peak volatile-oil content before summer flowering. | ref-1 |
+| 8 | culture | attested | In medieval English folk tradition, eating sage in May was said to grant longevity — "He that would live for aye / Must eat sage in May." The May timing tracked the leaf's peak volatile-oil content before summer flowering. | ref-1 |
 | 9 | fact | verified | Sage contains both 1,8-cineole and camphor — the same compounds that give rosemary and eucalyptus their bright, slightly cooling register. This shared chemistry is why sage and rosemary so often appear together in Mediterranean cooking. | ref-1 |
 | 10 | history | attested | Charlemagne ordered sage planted in every royal estate's garden in his *Capitulare de villis* — a list of 90+ plants the empire considered essential, issued around the turn of the ninth century. Sage's place in European herbalism has been continuous ever since. | ref-1 |
 
@@ -279,3 +279,30 @@ Removed from the card. Nothing is lost from the cup; the claim either
 never had support or is carried by a neighbour that does.
 
 <!-- sourced-effects: focus, soothing, digestive, cooling -->
+
+
+<!-- retracted: one of the four herbs -->
+<!-- retracted: medieval *vinaigre des quatre voleurs* -->
+<!-- retracted: medieval vinaigre des quatre voleurs -->
+
+
+---
+
+## Addendum — confidence markers corrected (2026-08-23)
+
+**Cultural and historical rows marked `verified` on the strength of a
+chemistry citation are now `attested`.** Rows affected: #1 (history), #6 (culture), #8 (culture).
+
+This is a downgrade of the MARKER, not a doubt about the facts. Each
+row cited a real, resolvable, respectable source — and the source was a
+pharmacology review, a systematic review or an analytical paper, none
+of which can settle an etymology, a folk proverb or when a dish first
+appears in a cookbook. `tools/audit-confidence.mjs` exists because
+exactly that mismatch let sage's 812 CE *Capitulare* date ship as
+`verified`: real ref, incapable of carrying the claim, nobody asked.
+
+`attested` is the honest register here — well attested in cultural and
+historical writing, not verified against a citation in this file.
+Restoring `verified` means citing something that can bear the weight:
+a historian, an etymological dictionary, a dated cookbook. Not a
+phytochemist.

@@ -128,6 +128,12 @@
 
 ## 9. Sources (starting points)
 
+| Ref | Citation | Type |
+|-----|----------|------|
+| ref-hodge-1953 | Hodge JE. (1953). Dehydrated foods: chemistry of browning reactions in model systems. *J Agric Food Chem* 1:928-943 — the foundational Maillard paper, and the successor literature it opened. | food chemistry |
+| ref-jtpa | Japanese Tea Production Association — production statistics for genmaicha as a category. | industry statistics |
+
+
 - Japanese Tea Production Association: production statistics for genmaicha as a category.
 - Standard Japanese tea references for cultural history (Sasaki, Aoki, etc.).
 - Maillard-chemistry references for the rice-roasting contribution: Hodge 1953 and successor literature.
@@ -141,13 +147,12 @@
 |---|------|------------|------|--------|
 | 1 | history | attested | Genmaicha was originally a wartime and post-war frugality drink — rice was cheaper than tea, and the blend stretched scarce leaves. | Japanese tea-history sources |
 | 2 | fact | established | The rice's tannins soften the green tea's edge — an accidental blending that became a style. | well-established |
-| 3 | fact | verified | Half the caffeine of plain sencha because half the cup is rice, not tea. | content composition |
+| 3 | fact | established | Half the caffeine of plain sencha because half the cup is rice, not tea. | derived from blend composition — roughly half the cup is rice; no direct measurement cited |
 | 4 | fact | established | The popping rice grains in some genmaicha are added on purpose — a textural and visual flourish. | tea-industry convention |
-| 5 | fact | verified | Genmaicha's roasted-rice character comes from the Maillard reaction during the toasting — same browning chemistry as bread crusts. | well-established food chemistry |
+| 5 | fact | verified | Genmaicha's roasted-rice character comes from the Maillard reaction during the toasting — same browning chemistry as bread crusts. | ref-hodge-1953 |
 | 6 | culture | established | Frequently the recommended cup for sushi pairings — its toasty depth complements the rice in the food. | Japanese culinary convention |
 | 7 | fact | established | Modern premium genmaicha sometimes uses matcha-blended sencha — the green is brighter, the umami fuller. | tea-industry convention |
-| 8 | fact | verified | Despite tasting roasted, genmaicha's tea base is unfired green tea — the rice carries all the toasted character. | processing reality |
-
+| 8 | fact | established | Despite tasting roasted, genmaicha's tea base is unfired green tea — the rice carries all the toasted character. | processing convention — the base leaf is steamed, not fired |
 ---
 
 ## 11. Open questions
@@ -233,3 +238,20 @@ did. Tradition, on the same footing as the catalogue's other
 `sources: traditional` entries.
 
 <!-- sourced-effects: warming -->
+
+
+---
+
+## Addendum — confidence markers audited (2026-08-23)
+
+This doc's §9 was a bullet list with no ref ids, so every claim row's
+Source column held PROSE rather than a citation — "content
+composition", "processing reality", "well-established". A column that
+looks like a citation and is not one is worse than an empty column,
+because it reads as sourced.
+
+The bullets that are real citations now have ids and are cited by the
+rows they actually support. The rows they do not support have been
+downgraded: `verified` is for a claim a named source can carry, and a
+category name is not a source. Restoring `verified` on those means
+citing something specific.

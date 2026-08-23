@@ -204,7 +204,7 @@
 | # | Type | Confidence | Fact | Source |
 |---|------|-----------|------|--------|
 | 1 | culture | verified | Aged tangerine peel — *chen pi* — is one of the most valued herbs in Chinese medicine. Peels are stored for years; older peels command higher prices, with 30-year-old chen pi selling for over $1,000 per kilogram. | ref-2 |
-| 2 | history | verified | Mulled wine recipes from the medieval period almost universally include orange or citron peel; the practice traces back to the Roman *conditum paradoxum*. The modern German *Gluhwein* still follows the same template. | ref-3 |
+| 2 | history | attested | Spiced wine is genuinely ancient — the Roman *conditum paradoxum*, then medieval *hippocras*, which leaned on cinnamon, ginger, clove and grains of paradise. Citrus is the late arrival: fruit-led spiced wines appear from the 17th century on, so the orange in a modern *Glühwein* is the newest part of a very old drink. | ref-3 |
 | 3 | fact | verified | Orange peel oil is over 90% limonene — the same compound that gives all citrus its lift. The difference between orange and lemon is mostly the small percentages of other oils riding alongside it. | ref-1 |
 | 4 | fact | verified | The white pith holds the bitter flavonoids (hesperidin, naringenin) that give orange peel its bittersweet backbone. Cheap orange peel is mostly pith — which is why it tastes harshly bitter rather than warmly aromatic. | ref-3 |
 | 5 | fact | verified | Orange peel is a mild prokinetic — it gently nudges stomach emptying. This is why it shows up in nearly every traditional after-meal blend across Chinese, Italian, and English herbalism. | ref-1 |
@@ -250,3 +250,6 @@ Removed. `uplifting` 2 and `digestive` 2 are the sourced picture,
 with `comfort` 1 alongside.
 
 <!-- sourced-effects: uplifting, digestive, comfort -->
+
+
+<!-- retracted: medieval period almost universally include orange -->
