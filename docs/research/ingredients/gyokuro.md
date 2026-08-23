@@ -460,3 +460,17 @@ closes the gap between what the card promises and what a cup can
 deliver.
 
 <!-- sourced-effects: soothing, grounding -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**The 50°C, 60 ml steep — sourced to practice.** The steep-timer content
+gives gyokuro a small kyusu and about 60 ml of water at 50°C. Those
+numbers are the conventional Japanese preparation and match §5's brew
+grid: the point of the low temperature is to hold back catechin
+extraction so the shade-grown theanine dominates, and the small volume
+is what keeps the leaf-to-water ratio high enough for that to be worth
+doing. Treating gyokuro like sencha — hotter water, more of it — pulls
+the bitterness the shading exists to avoid. `verified`

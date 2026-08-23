@@ -220,3 +220,25 @@
 | Facts | 3 | All cross-referenced |
 
 **Overall status:** Verified — confident enough to ship.
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Sicilian citrus and the origins of the mafia — sourced.** The facts
+list has carried this claim unsourced. It is well supported, and by
+economic history rather than folklore: Dimico, Isopi and Olsson,
+"Origins of the Sicilian Mafia: The Market for Lemons", *Journal of
+Economic History* (2017), find a strong town-level association between
+mafia presence and citrus production using the 1881-86 Damiani
+inquiry.
+
+The mechanism is specific to the crop. Demand rose sharply once citrus
+was recognised as preventing scurvy — Messina's lemon exports went
+from 740 barrels in 1837 to 20,707 by 1850 — and lemon groves are
+unusually extortable: high value, walled and irrigated, dependent on
+fast transport to distant ports, and trivially easy to rob overnight
+compared with olives or grapes. A weak new Italian state could not
+enforce property rights in western Sicily, so protection was sold by
+the people best placed to supply the threat. `verified`

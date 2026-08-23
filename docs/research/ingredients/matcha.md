@@ -614,3 +614,21 @@ research doesn't support, purely to make an audit line go away.
 Recorded instead as a known structural limit.
 
 <!-- preparation-only: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Whole leaf versus infusion — the theanine arithmetic, sourced.** The
+steep-timer content claims that drinking the leaf rather than straining
+it changes the L-theanine-to-caffeine maths. It does, and measurably:
+a 2 g serving of matcha carries roughly 30-40 mg of L-theanine against
+about 5-10 mg in a cup of steeped green tea, because the whole leaf is
+consumed and because shading raises theanine before harvest. Matching
+one gram of matcha's theanine from steeped sencha would take three or
+four cups, with the tannin load that implies.
+
+The "calm focus" register is the COMBINATION, not theanine alone —
+L-theanine with caffeine improves accuracy and alertness on demanding
+tasks more than either compound by itself. `verified`

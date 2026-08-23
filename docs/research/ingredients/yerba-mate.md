@@ -651,3 +651,14 @@ naming a carcinogen flatly overstates a 2A evaluation. Reworded to
 match the evidence's own confidence. This is a health claim, so it
 gets the hedge it earns. `verified` (temperature effect)
 
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Pope Francis and mate — sourced.** Jorge Bergoglio is from Buenos
+Aires, drinks mate, and has been repeatedly photographed with a gourd,
+including receiving them from crowds at the Vatican. Recorded here
+because the facts list carries it and nothing else in this doc did.
+It is a cultural note, not a claim about the plant. `attested`

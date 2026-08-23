@@ -592,3 +592,16 @@ literature as a mild sedative and sleep aid.
 So the app was asserting the *opposite* of the evidence. Both effects
 removed from the extraction profile. `calm`, `soothing` and `sleepy`
 already carry the sourced picture.
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Lemon balm in the *Capitulare de villis* — sourced.** The capitulary's
+list of roughly 90-100 plants every royal estate was to grow includes
+lemon balm alongside sage, mint, rue, mallow and the rest of the
+mouth-and-throat group. The ORDER is not in doubt; only its date is,
+and the app now says "around the turn of the ninth century" rather
+than naming a year (see sage.md for why 812 CE was dropped).
+`verified` (contents), `attested` (dating)

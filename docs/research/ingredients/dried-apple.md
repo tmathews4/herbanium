@@ -266,3 +266,20 @@ unchanged; the word is corrected.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Cultivar claim — UNVERIFIABLE, left standing deliberately.** The facts
+list says commercial dried apple in herbal blends is sweet-cultivar
+fruit (Gala, Fuji, Jonathan) and that tart cultivars like Granny Smith
+are rarely used. No published source establishes this either way; it
+is a trade-practice claim about what processors buy, and that
+information is commercial rather than literature.
+
+Recorded here rather than silently deleted or silently kept. It is
+plausible and unsupported, it makes no health or historical assertion,
+and the honest status is "nobody has written this down". If it is ever
+worth resolving, the route is a supplier, not a search. `folk`

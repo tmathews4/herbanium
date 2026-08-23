@@ -552,3 +552,20 @@ evidence changes; the word does.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**The narrow germplasm of *Vanilla planifolia* — sourced.** Commercial
+vanilla is propagated from cuttings, not seed, and genomic surveys
+find very low genetic variation across the cultivated crop worldwide:
+much of the world's planting material traces to a limited clonal
+source, leaving almost no variability for breeding.
+
+The consequence is not academic. Clonal uniformity is why the crop is
+so exposed to *Fusarium* root and stem rot, which has cut world
+vanilla production by around half. Hand-pollination since Albius in
+1841 (§8) made global cultivation possible; propagating by cutting is
+what kept it genetically narrow. `verified`

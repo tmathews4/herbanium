@@ -492,3 +492,17 @@ Replaced with what the record does support: candied ginger begins as
 Song-dynasty preservation. `folk`
 
 <!-- retracted: candied ginger as currency -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Elizabeth I and the gingerbread men — sourced, and correctly hedged.**
+The facts list says she "is credited with" inventing them, which is
+the right strength. Carole Levin, historian of the reign, confirms a
+banquet at which gingerbread was shaped into likenesses of foreign
+dignitaries and members of the court; the queen kept a royal
+gingerbread maker, alongside the marzipan castles and birds these
+banquets were known for. Read as a piece of court diplomacy rather
+than as a confectionery first. `attested`

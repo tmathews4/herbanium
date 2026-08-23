@@ -585,3 +585,19 @@
     real chemistry. Worth surfacing in user-facing copy as
     "natural cousin to prescription sleep medications" without
     overclaiming equivalence.
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Onset takes weeks, not one night — sourced.** The facts list compares
+valerian's onset to an SSRI rather than a sedative. That matches the
+trial literature: the studies reporting the clearest effects used
+nightly dosing at 300-600 mg for two to four weeks, and single-dose
+evidence is inconsistent. The mechanism offered is gradual modulation
+of GABA receptor sensitivity rather than acute sedation.
+
+This matters for the cup more than most facts do — a reader who tries
+one evening's infusion and concludes it does nothing has run the
+experiment the evidence says will fail. `attested`

@@ -546,3 +546,18 @@ unchanged; the word is corrected.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**The coumarin limit has a name, and the doc did not carry it.** §7
+covers the cassia/Ceylon coumarin difference thoroughly — ~1% by
+weight in cassia, about 25 mg in a teaspoon, against ~0.004% in
+Ceylon. What it never named was the body behind the guidance the
+facts list cites: the German Federal Institute for Risk Assessment
+(Bundesinstitut für Risikobewertung, BfR), whose tolerable daily
+intake for coumarin is 0.1 mg per kg of body weight — around 6 mg for
+a 60 kg adult, which a single teaspoon of cassia exceeds several times
+over. The claim was sound; the attribution was floating. `verified`

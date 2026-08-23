@@ -145,6 +145,47 @@ rose as oldest cultivated ornamental, Poivre's 1770 theft, and
 peppermint's IBS meta-analysis (Alammar 2019 — 12 trials, 835 patients,
 NNT 4).
 
+**Third pass: the unanchored list is now worked off.** Every claim
+carrying a signal AND no doc support has been resolved — 43 down to 28,
+and all 28 remaining score zero (soft descriptive lines like "pickled
+ginger is a palate cleanser"). Resolving one means one of three things,
+and which one is a finding in itself:
+
+- **True but unwritten → write the research.** Eleven docs gained
+  addenda: Sicilian citrus and the mafia (Dimico, Isopi & Olsson 2017,
+  on the 1881-86 Damiani inquiry), vanilla's clonal germplasm and the
+  *Fusarium* collapse, vintage sheng auction records, matcha's theanine
+  arithmetic, Elizabeth I's gingerbread banquet, valerian's two-to-four-
+  week onset, the *Capitulare* contents, spearmint's carvone, gyokuro's
+  50°C steep, Pope Francis's gourd.
+- **Wrong → correct it.** Hojicha lattes were "a Tokyo cafe
+  innovation": the tea is KYOTO, 1920s, and the latte is a mid-2010s
+  boom across Japan. Turmeric's supplement fact called bioavailability
+  systems "preservative packaging" and Meriva a liposome when it is a
+  phytosome. Vanilla's vague "150+ years" became the documented anchor
+  it rests on — Albius, 1841.
+- **Unverifiable → say so, and keep it.** Dried apple's cultivar claim
+  is about what processors buy. No literature settles it either way, so
+  the doc records it as `folk` with the reason. Silently deleting it
+  and silently keeping it are both worse than writing down that nobody
+  knows.
+
+One health claim was hedged rather than corrected: turmeric for liver
+complaints cited only the favourable half. Fatty-liver trials do show
+improved enzymes, and NIH's LiverTox records dozens of acute liver
+injuries from concentrated turmeric products. Both now ship. An app
+teaching herbal chemistry does not get to present one side of a safety
+literature.
+
+**Know the anchor check's false positive before acting on a hit.**
+Cinnamon's coumarin fact reported unanchored on "German Federal
+Institute for Risk Assessment" while the doc carried four paragraphs
+on cassia's ~1% coumarin and its 25 mg teaspoon — everything but the
+name of the body issuing the limit. Substance documented, attribution
+floating. Still worth fixing, since a named institution is exactly what
+a reader would look up, but it is a citation gap, not an invented
+claim.
+
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line
 again. `tests/retracted-claims.test.mjs` reads

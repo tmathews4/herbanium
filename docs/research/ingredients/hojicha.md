@@ -442,3 +442,20 @@ evidence changes; the word does.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Kyoto, 1920s — and the latte is not a Tokyo invention.** The facts
+list said "modern hojicha lattes are a Tokyo cafe innovation". Neither
+half survives checking. Hojicha itself originates in KYOTO in the
+1920s, when merchants began roasting the stems, twigs and coarse leaf
+that could not be sold as higher grades. The latte is much more
+recent and much less localised: a hojicha boom across Japanese cafes
+in the mid-2010s, with Starbucks Japan's hojicha Frappuccino marking
+the mainstream turn, spreading internationally after that. No source
+attaches the drink's invention to Tokyo. Corrected. `verified`
+
+<!-- retracted: Tokyo cafe innovation -->

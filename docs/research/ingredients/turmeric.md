@@ -553,3 +553,35 @@ Reasoning for caution:
    with: ginger (golden milk), cinnamon (chai-style), cardamom
    (Indian preparations), black pepper (bioavailability — but
    pepper isn't in the catalog).
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Two facts rewritten (2026-08-23).**
+
+*Supplement formulations.* The line described BCM-95 and Meriva as
+"liposomal formulations" and "preservative packaging", and said most
+commercial supplements use them. Three errors: these are BIOAVAILABILITY
+delivery systems, not preservatives; Meriva is a phospholipid complex
+(phytosome), not a liposome; and branded bioavailable formulations are
+a segment of the market, not most of it — plain extract with piperine
+remains common. BCM-95 pairs curcuminoids with turmeric's own
+essential oils and reports roughly 6-9x plasma curcumin over
+unformulated extract; Meriva's phytosome underpins the Belcaro 2010
+knee-OA trial; Theracurmin uses nanoparticle dispersion. `verified`
+
+*Liver.* The line said Persian medicine used turmeric for liver
+complaints and that modern work finds "moderate evidence in line with
+the traditional use", which is true as far as it goes and one-sided.
+Meta-analysis of curcumin in metabolic-dysfunction-associated fatty
+liver disease does find improved ALT/AST and steatosis. But NIH's
+LiverTox records several dozen cases of clinically apparent acute
+liver injury attributed to concentrated turmeric products. An app
+teaching herbal chemistry should not present only the favourable half
+of a safety-relevant literature, so the fact now names both.
+`verified` (both directions)
+
+<!-- retracted: preservative packaging -->
+<!-- retracted: similar liposomal formulations -->

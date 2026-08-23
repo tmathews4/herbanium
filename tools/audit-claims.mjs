@@ -48,6 +48,16 @@
    regex cannot see, and plenty of true things are simply undocumented
    here. What it is, is unchecked-by-anything — the state the pepper
    claim lived in for as long as it shipped.
+
+   THE COMMON FALSE POSITIVE is worth knowing before you act on a hit:
+   the doc covers the SUBSTANCE and omits the ATTRIBUTION. Cinnamon's
+   coumarin fact reported unanchored on "German Federal Institute for
+   Risk Assessment" while the doc had four paragraphs on cassia's ~1%
+   coumarin and the 25 mg teaspoon — everything except the name of the
+   body issuing the limit. That is still worth fixing, because a named
+   institution is precisely the kind of particular a reader would
+   check, but it is a citation gap and not an invented claim. Read the
+   hit before deciding which you have.
    ────────────────────────────────────────────────────────────── */
 
 import { readFileSync, readdirSync } from "node:fs";

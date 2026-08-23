@@ -515,3 +515,18 @@ focus. Recorded as `focus` at the same strengths — the evidence
 supports the effect, only the register was wrong.
 
 <!-- sourced-effects: focus -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Why the cocktail mints are spearmint — sourced by chemistry, not
+lore.** Mint juleps and mojitos are made with spearmint varieties
+rather than peppermint, and the facts list explains it by carvone
+versus menthol. That is the right account: spearmint's character
+compound is carvone, which carries no cooling TRPM8 activity, while
+peppermint's menthol does — and menthol's cooling reads as competing
+with spirit rather than lifting it. §4 of this doc covers the carvone
+chemistry; the bar practice is the everyday consequence of it.
+`attested` (bar practice), `verified` (chemistry)

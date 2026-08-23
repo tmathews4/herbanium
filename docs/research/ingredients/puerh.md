@@ -525,3 +525,21 @@ closes the gap between what the card promises and what a cup can
 deliver.
 
 <!-- sourced-effects: focus -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Vintage sheng at auction — sourced.** Pre-1990 raw pu-erh is traded
+as an investment asset, and the numbers are documented rather than
+anecdotal: a late-1980s 8582 cake has drawn bids around HK$5.75
+million, six 1980s cakes sold as a lot for HK$1,056,000 at Poly
+Auction Hong Kong, and older material goes far higher — a 1920s
+seven-piece tong at HK$5.28 million (about US$672,000), and a
+century-old seven-piece lot at HK$13.8 million. Sotheby's has run
+dedicated vintage pu-erh sales. `verified`
+
+Worth keeping in proportion for the app's purposes: this is a
+collectors' market attached to documented provenance, not a statement
+about how a cup tastes.
