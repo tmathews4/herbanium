@@ -41,10 +41,11 @@
 > Dioscorides described it in *De Materia Medica* (1st century
 > CE); Pliny the Elder noted bees' attraction to it (hence the
 > Greek name *Melissa*). Hildegard of Bingen (12th century)
-> praised its ability to "make the heart merry." French
-> Carmelite nuns formulated *Eau de Mélisse des Carmes*
-> (Carmelite Water) in the 14th century — a complex herbal
-> tonic still produced today. Pharmacologically, lemon balm
+> praised its ability to "make the heart merry." Discalced
+> Carmelite friars in Paris set down *Eau de Mélisse des
+> Carmes* (Carmelite Water) in 1611 — a complex herbal
+> tonic still produced today; an older 14th-century origin
+> is traditionally claimed but not documented (see §8). Pharmacologically, lemon balm
 > directly modulates the GABAergic system through inhibition
 > of GABA transaminase (the enzyme that breaks down GABA),
 > increasing brain GABA levels. Multiple RCTs support effects
@@ -308,11 +309,28 @@
 >   in *Physica*: "Melissa lifts the heart, makes us happy,
 >   and prevents melancholy." Foundational text for European
 >   medieval herbalism. `verified`
-> - **14th century:** French Carmelite nuns at the Couvent
->   des Grands Carmes (Paris) develop *Eau de Mélisse des
->   Carmes* (Carmelite Water) — a complex herbal tonic that
->   becomes one of the most famous herbal preparations in
->   Europe. Production continues today. `verified`
+> - **14th century (traditional attribution):** Carmelite nuns,
+>   usually placed at the Abbey of St Just, are credited with an
+>   early Carmelite Water. Widely repeated, not documented — no
+>   contemporary source has been produced for it. `folk`
+> - **1611:** The recipe first appears in a Carmelite pharmacopeia,
+>   and Discalced Carmelite FRIARS at the rue de Vaugirard house
+>   in Paris produce *Eau de Mélisse des Carmes* under the
+>   patronage of Marie de Médicis — first for the house, then for
+>   public sale by royal authorization. This is the formulation
+>   that became famous; the Boyer family has made it since 1838
+>   and still does. `verified`
+>
+>   **CORRECTED.** This entry read "14th century: French Carmelite
+>   NUNS at the Couvent des Grands Carmes (Paris)", marked
+>   `verified`, and it fused three separate things: the undocumented
+>   14th-century nuns tradition, a Paris house that was a FRIARY,
+>   and the 1611 Discalced formulation that is the actual documented
+>   one. The shipped fact drifted further still — "invented by
+>   17th-century French Carmelite nuns", taking the century from one
+>   attribution and the order-branch from the other.
+
+<!-- retracted: 17th-century French Carmelite nuns -->
 > - **16th century:** Paracelsus (Swiss Renaissance physician,
 >   1493-1541) calls lemon balm the "elixir of life." John
 >   Gerard's Herbal (1597) recommends it for nervous

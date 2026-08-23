@@ -459,6 +459,25 @@
 >   (408 CE) — Zosimus lists it alongside 5,000 lb of gold,
 >   30,000 lb of silver, 4,000 silk tunics and 3,000 scarlet
 >   fleeces. `verified`
+>
+>   **408 IS THE RANSOM; 410 IS THE SACK. They are different
+>   events and pepper belongs only to the first.** Alaric
+>   blockaded Rome in 408 and was bought off — the terms above,
+>   agreed and paid, after which he withdrew to Etruria. The
+>   sack of Rome in 410 followed the collapse of negotiations
+>   and involved no ransom at all. The steep-timer content
+>   said "Visigoths sacking Rome in 410 demanded 3,000 pounds
+>   of pepper as part of the ransom", welding the two together,
+>   while the facts list said "the fall of Rome was paid in
+>   pepper" — also wrong, in a second way: Rome did not fall in
+>   408, and pepper was the SMALLEST item on a bill led by
+>   5,000 lb of gold. Both corrected 2026-08-23. The
+>   interesting fact survives either way: pepper was worth
+>   itemising next to gold.
+
+<!-- retracted: Roman empresses paid taxes -->
+<!-- retracted: fall of Rome was paid in pepper -->
+<!-- retracted: sacking Rome in 410 -->
 > - **NOT SUPPORTED — "Roman empresses paid taxes in
 >   peppercorns."** Shipped in the blurb, the facts list and
 >   the steep-timer content for some time, and it is wrong on

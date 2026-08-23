@@ -224,7 +224,21 @@
 | 7 | fact | verified | The "common sage" English-speakers know is *Salvia officinalis* — distinct from white sage (the smudge stick), Spanish sage, and clary sage. There are over 900 species in the *Salvia* genus, but only a handful are commonly used in food or tea. | ref-1 |
 | 8 | culture | verified | In medieval English folk tradition, eating sage in May was said to grant longevity — "He that would live for aye / Must eat sage in May." The May timing tracked the leaf's peak volatile-oil content before summer flowering. | ref-1 |
 | 9 | fact | verified | Sage contains both 1,8-cineole and camphor — the same compounds that give rosemary and eucalyptus their bright, slightly cooling register. This shared chemistry is why sage and rosemary so often appear together in Mediterranean cooking. | ref-1 |
-| 10 | history | verified | Charlemagne ordered sage planted in every royal estate's garden in his 812 CE *Capitulare de villis* — a list of 90+ herbs the empire considered essential. Sage's place in European herbalism has been continuous ever since. | ref-1 |
+| 10 | history | verified | Charlemagne ordered sage planted in every royal estate's garden in his *Capitulare de villis* — a list of 90+ plants the empire considered essential, issued around the turn of the ninth century. Sage's place in European herbalism has been continuous ever since. | ref-1 |
+
+> **DATE CORRECTED — the *Capitulare de villis* is not securely dated
+> to 812 CE.** This row, and the shipped blurb and fact, both carried
+> a flat "812 CE" marked `verified`. It is not: the scholarly consensus
+> places the capitulary between 771 and 800, and no proposal has won
+> the field — a 1912 study argues for Louis the Pious in Aquitaine
+> around 794, others tie it to the famine of 792-793. 812 is one
+> circulated date among several and is the one herbal writing repeats.
+> The ORDER is not in doubt and neither is sage's place on the list;
+> only the year was overprecise. Copy now reads "around the turn of
+> the ninth century". Same correction applied to lemon balm, which
+> carried "ninth century" from the same list. `attested` (dating)
+
+<!-- retracted: 812 CE -->
 
 ---
 

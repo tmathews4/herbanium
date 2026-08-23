@@ -352,6 +352,11 @@
 | "Called 'liquid moonbeam'" | `folk` | Poetic framing, real enough as cultural aesthetic |
 | "Celestial rabbits and moon-descent legend" | `folk` | Origin myth, not claimed as history |
 | "Ancient imperial tea served to Chinese emperors" | `folk` | 20th-century marketing — Silver Needle is younger than this framing implies |
+| "Commoners could not legally obtain white tea until the tribute system collapsed" | `folk` | The imperial-exclusivity framing above, with a legal prohibition added on top. No source offered for either half; shipped in the facts list until 2026-08-23 |
+
+<!-- retracted: imperial tribute exclusive -->
+<!-- retracted: could not legally obtain -->
+<!-- retracted: 2002 Pace University -->
 | "White tea has more antioxidants than green tea" | `attested` | Per-weight basis, depending on cultivar and measurement method — not consistently true |
 | "White tea is decaffeinated" | `folk` | Myth — caffeine is present and occasionally high |
 | "Only cultivated in Fuding and Zhenghe" | `verified` | Commercial reality for authentic Fujian white tea |

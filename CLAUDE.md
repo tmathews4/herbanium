@@ -60,7 +60,53 @@ node tools/audit-vocabulary.mjs        # is a WORD invented? census vs the docs
 node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at once
 node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
 node tools/audit-vocabulary-coverage.mjs  # maps that drifted from the list they key on
+node tools/audit-claims.mjs --min=2 --list  # PROSE: which sentences assert a checkable fact
 ```
+
+### The prose says things too, and nothing was checking it
+
+Every audit above reads effects, moods and flavours. **None of them
+reads a sentence.** The app ships 849 prose items — 53 blurbs, 624
+facts, 32 cultural notes, 140 steep-timer facts — and a blurb could
+assert any history it liked without a tool noticing. One did:
+"Roman empresses paid taxes in peppercorns" shipped in the blurb, the
+facts list AND the steep timer, and is wrong on both halves. Its own
+research doc had the medieval framing, correctly, the whole time. A
+reader found it.
+
+`audit-claims.mjs` **does not know whether anything is true** — that is
+a question for sources, not a regex. It ranks the corpus by how badly a
+claim would fail if it were wrong: named people, dates, institutions,
+superlatives, numbers, clinical language. 314 items carry at least one
+of those signals, 50 carry two or more. A sentence with no proper noun,
+no date and no number is usually description the extraction docs
+already cover; a sentence naming a monarch and a century is a
+checkable assertion about the world, which is the shape the pepper
+claim had.
+
+**The failure has three distinct sources, and they need different
+fixes.** All three turned up in the first pass through the top 50:
+
+- **Copy drifted from a doc that was right.** Assam's steep-timer line
+  called Robert Bruce a "British botanist" who "discovered" wild tea —
+  the doc marks that framing as colonial flattening and the blurb
+  already handles it properly. White tea's "imperial tribute exclusive"
+  is marked `folk` in its own doc. Fix the copy.
+- **The doc itself was wrong.** Sage's `Capitulare de villis` date of
+  812 CE was marked `verified` in the research; the scholarly consensus
+  is 771-800 and no proposal has won. Fix the doc, then the copy.
+- **No doc covered it at all.** Ceylon's "over 300,000 tonnes" (real:
+  ~264,000) and "largest exporter for much of the 20th century" (real:
+  from 1965) were written straight into the app. Write the research.
+
+**A retraction is declared, not remembered.** A corrected sentence stays
+corrected only until someone reaches for the same nice-sounding line
+again. `tests/retracted-claims.test.mjs` reads
+`<!-- retracted: phrase -->` markers out of the research docs and fails
+if any of them reappears in shipped prose. Put the marker next to the
+evidence that killed the claim — the test holds no list of its own, so
+retracting something new is one line in the doc a future reader is
+already looking at.
 
 `audit-vocabulary-coverage` is the answer to a different question from
 the others: not "is this claim sourced" but "does this lookup table

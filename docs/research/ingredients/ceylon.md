@@ -235,6 +235,32 @@
 >   Mahaiyawa Cemetery, Kandy. `verified`
 > - **1893:** One million packets of Ceylon tea sold at the Chicago
 >   World's Fair — a posthumous commercial triumph. `verified`
+> - **1965:** Sri Lanka becomes the world's largest tea exporter for
+>   the first time, after production and export both passed 200,000
+>   tonnes in the 1960s. It holds the position for decades before
+>   Kenya overtakes it, and was pushed to third by India in 2024.
+>   `verified`
+> - **Today:** Annual production sits near 264 million kg (2025),
+>   against 262.7 million in 2024 — recovering from the 2021-22
+>   fertiliser-ban collapse but well under the pre-crisis peak.
+>   `verified`
+>
+>   **TWO SHIPPED CLAIMS CORRECTED AGAINST THIS.** The facts list
+>   said Sri Lanka "was the world's largest tea exporter for much of
+>   the 20th century" — it was, from 1965, which is a third of the
+>   century and not most of it. It also said the island "still
+>   produces over 300,000 tonnes annually", which is roughly 40,000
+>   tonnes above the real figure and reads as a number rather than a
+>   round-up. The steep-timer line was worse: "within forty years,
+>   the island was the world's largest tea exporter" puts in 1907 a
+>   thing that happened in 1965. Neither claim was in this doc; both
+>   were written straight into the app. What IS true within forty
+>   years of 1867 is that tea replaced coffee across the island, and
+>   that is what the line now says.
+
+<!-- retracted: over 300,000 tonnes -->
+<!-- retracted: largest tea exporter for much of the 20th century -->
+<!-- retracted: within forty years, the island was the world's largest -->
 
 **The Lipton connection:**
 

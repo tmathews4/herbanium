@@ -60,7 +60,7 @@ export const WAIT_FACTS = {
     { type: "fact",      text: "The leaf burns at a true boil. Brew between 70 and 80°C or you'll lose the theanine to scorched grass." },
   ],
   assam: [
-    { type: "fact",      text: "Assam was discovered growing wild by British botanist Robert Bruce in 1823, disproving the assumption that tea was exclusively Chinese — and breaking the empire's monopoly on the trade." },
+    { type: "fact",      text: "In 1823 the Singpho showed Robert Bruce the wild tea their people had been drinking for generations. It was news only to Europe — and it broke China's monopoly on the trade." },
     { type: "fact",      text: "Camellia sinensis assamica has bigger leaves and more caffeine than its Chinese cousin — the cup demands milk and gets it." },
     { type: "tradition", text: "British breakfast culture was built on Assam, and on the labor that picked it. The leaf travels with that history." },
   ],
@@ -143,7 +143,7 @@ export const WAIT_FACTS = {
   "black-pepper": [
     { type: "fact",      text: "Medieval Europe paid rents, tribute and dowries in peppercorns. Vasco da Gama crossed an ocean for them. For centuries of European history, pepper was its own currency — \"peppercorn rent\" still means a nominal sum in English law." },
     { type: "fact",      text: "The bite the tongue feels is piperine, which slows liver enzymes that would otherwise clear other compounds — exactly why the Ayurvedic recipe pairs turmeric with pepper." },
-    { type: "tradition", text: "Visigoths sacking Rome in 410 demanded 3,000 pounds of pepper as part of the ransom. The spice was already older than the empire it broke." },
+    { type: "tradition", text: "Alaric's Visigoths besieged Rome in 408 and named their price: gold, silver, silk — and 3,000 pounds of pepper. The sack came two years later, when no ransom was on the table." },
   ],
   white: [
     { type: "fact",      text: "White tea is the youngest leaves on the bush — withered in the sun, never fired or rolled. The cup tastes the leaf almost as the bush gave it." },
@@ -188,7 +188,7 @@ export const WAIT_FACTS = {
   ceylon: [
     { type: "fact",      text: "A coffee blight in the 1860s burned through Ceylon's plantations. The planters switched crops, and an island became famous for tea instead." },
     { type: "fact",      text: "Ceylon's bright citrus character is altitude. Cooler-grown leaves climb higher into the aromatic register; estate names like Uva and Dimbula are altitude bands." },
-    { type: "tradition", text: "James Taylor, a Scottish planter, established Ceylon's first commercial tea garden in 1867. Within forty years, the island was the world's largest tea exporter." },
+    { type: "tradition", text: "James Taylor, a Scottish planter, established Ceylon's first commercial tea garden in 1867 — nineteen acres at Loolecondera. Within forty years tea had replaced coffee across the island." },
   ],
   lapsang: [
     { type: "tradition", text: "Legend says soldiers passing through the Wuyi mountains in the late Ming forced tea farmers to dry their leaves over pinewood fires to free the camp. The smoke became the tea." },

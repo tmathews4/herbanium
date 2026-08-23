@@ -411,6 +411,10 @@
 | Claim | Confidence | Source/notes |
 |-------|------------|-------------|
 | "Robert Bruce discovered Assam tea in 1823" | `attested` | Colonial flattening — Singpho and Khamti had used wild tea for centuries; Bruce introduced it to European commerce |
+| "Bruce was a British botanist" | `folk` | He was a Scottish adventurer and trader. The species was classified later, by Nathaniel Wallich at Calcutta, from samples Bruce's brother Charles sent after Robert died in 1824 |
+
+<!-- retracted: British botanist Robert Bruce -->
+<!-- retracted: first European to recognize -->
 | "The Singpho made *phalap* from wild tea" | `attested` | Oral tradition extending potentially to 12th century; not directly documented in pre-colonial texts |
 | "Assam tea is warming (TCM)" | `attested` | Standard TCM framing; high oxidation = Yang energy |
 | "CTC was invented in Assam in 1931" | `verified` | William McKercher at Borbam Tea Estate |
