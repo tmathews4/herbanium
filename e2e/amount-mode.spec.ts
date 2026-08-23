@@ -117,6 +117,49 @@ test.describe("parts or weight, one pot", () => {
       "and the readout should follow it").toMatch(/tsp|tbsp|pinch/i);
   });
 
+  test("the pot total speaks the chosen unit too, not just the rows", async ({ page }) => {
+    // REPORTED: "we list grams for the parts total qty when parts are
+    // selected. Should be tsp if using that in our settings."
+    //
+    // The rows already followed the setting; the TOTAL did not, and the
+    // total is the one line that says what to measure out. So a
+    // teaspoon user read teaspoons everywhere and a gram figure on the
+    // only line they'd act on.
+    //
+    // Asserted in PARTS mode deliberately — weight mode hides this line
+    // entirely, so the bug lived where the test wasn't looking.
+    await boot(page);
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByTestId("weight-unit-tsp").click();
+    await addChamomile(page);
+
+    /* CASE-INSENSITIVE, and that is not incidental. The label is
+       uppercased in CSS, so innerText hands back "A MUG · 1.8 G TOTAL".
+       A case-sensitive /\d\s*g\b/ misses that "G" — which means the
+       NEGATIVE assertion below would have passed happily while grams
+       were on screen. The first version of this test did exactly that
+       and only caught the bug through the positive tsp assertion. */
+    const GRAMS = /\d[\d.,]*\s*g\b/i;
+    const SPOONS = /\b(tsp|tbsp|pinch)\b/i;
+
+    const total = page.getByTestId("pot-total");
+    await expect(total, "the total sits under the ingredient list in parts mode")
+      .toBeVisible({ timeout: 30_000 });
+    expect((await total.innerText()).trim(),
+      "with teaspoons chosen, the total must not be handed over in grams")
+      .not.toMatch(GRAMS);
+    expect((await total.innerText()).trim(),
+      "and it should speak the teaspoon ladder the rows already speak")
+      .toMatch(SPOONS);
+
+    // The other direction, so this can't pass by the label going blank.
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByTestId("weight-unit-g").click();
+    await addChamomile(page);
+    expect((await page.getByTestId("pot-total").innerText()).trim(),
+      "with grams chosen it should still say grams").toMatch(GRAMS);
+  });
+
   test("the mode survives a reload, like the other unit preferences", async ({ page }) => {
     await boot(page);
     await addChamomile(page);

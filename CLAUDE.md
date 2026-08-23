@@ -487,6 +487,34 @@ this test is about spotlight geometry tracking a resize. One occurrence
 is not a pattern; if it goes twice more, it is a bug with a bad error
 message and the note above says how to open it.
 
+**SEEN A SECOND TIME, 2026-08-23, and this time the trace was kept.**
+Same test, `galaxy-s9`, in a full gate that otherwise passed (it was
+reported as flaky — it passed on retry, so the run exited 0 and the
+count was three short of the total, which is the only surface clue a
+flake leaves in a truncated log). The measured failure:
+
+```
+Error: the cutout's top should stay pinned to the strip's as it resizes
+       (offset -15.2px before, 6.0px after; strip 254→27px)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 2
+Received: 21.1875
+```
+
+So the assertion is about the CHANGE in offset, not the offset itself:
+the cutout sat 15.2px above the strip's top before the resize and 6.0px
+below it after, a 21.2px swing against a 2px budget, while the strip
+collapsed from 254px to 27px. That is a large, specific, geometric
+number — not a timeout, not a missing locator. Whatever it is, it is
+not "the machine was busy".
+
+**Occurrence three opens the investigation.** Two things to do first,
+both of which cost nothing and were missed last time: copy
+`test-results/**` somewhere before re-running anything (the passing
+rerun deletes it, which is how the first trace was lost), and check
+whether the run reported FLAKY rather than failed — a green exit code
+with a passed-count below the total is a flake hiding in plain sight.
+
 **A NEW spec runs against every locally-installed project before it
 is pushed, not just the gate's two.** The full gate is pixel-9 +
 galaxy-s9 because running everything twice over is slow. That is fine

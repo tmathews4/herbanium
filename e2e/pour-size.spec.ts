@@ -52,7 +52,9 @@ const potTotal = (page: Page) => page.getByTestId("pot-total");
 const gramsIn = async (page: Page) => {
   const text = (await potTotal(page).innerText()).trim();
   const match = text.match(/([\d.]+)\s*g total/i);
-  expect(match, `the total should name a weight, got "${text}"`).not.toBeNull();
+  expect(match,
+    `the total should name a weight in GRAMS, got "${text}" — if this says ` +
+    `tsp, the test forgot to select grams in Profile`).not.toBeNull();
   return Number(match![1]);
 };
 
@@ -83,6 +85,20 @@ test.describe("how much you're making", () => {
        a second copy of the answer, and a second copy is the drift every
        contract spec in this repo exists to catch. */
     await boot(page);
+
+    /* ASK FOR GRAMS. This test compares totals numerically against
+       POUR_SIZES.doses within 0.15g, and only the gram readout carries
+       that precision — the teaspoon ladder rounds to a quarter and
+       rolls up to tablespoons above 3, so "1½ tsp" cannot express the
+       difference between a cup and a mug's worth of chamomile.
+       
+       It used to pass without this because the total was hardcoded to
+       grams no matter what the user had chosen, which was the bug
+       fixed alongside this line. The test was reading a readout no
+       teaspoon user ever saw. */
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByTestId("weight-unit-g").click();
+
     await addChamomile(page);
 
     const totals: Record<string, number> = {};

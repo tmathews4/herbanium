@@ -96,6 +96,26 @@ export const formatAmount = (g, category, weightUnit = "tsp") => {
   return formatTsp(gramsToTsp(g, category));
 };
 
+/* The same question for a POT rather than a leaf: what do I measure out
+   in total, in the unit the user chose.
+
+   SUM THE TEASPOONS, DO NOT CONVERT THE SUMMED GRAMS. Grams add freely
+   across categories; teaspoons do not, because a teaspoon is a volume
+   and every category has its own density — 1.0g of chamomile against
+   3.0g of powdered adaptogen, a threefold spread. Adding the grams and
+   dividing once by any single density is wrong for every mixed pot,
+   and wrong by more the more the pot mixes.
+
+   `items` is [{ grams, category }] rather than ids, so this stays a
+   formatter and does not reach into the catalog. */
+export const formatTotal = (items, weightUnit = "tsp") => {
+  if (weightUnit === "g") {
+    return `${items.reduce((sum, it) => sum + (it.grams || 0), 0).toFixed(1)} g`;
+  }
+  return formatTsp(items.reduce(
+    (sum, it) => sum + gramsToTsp(it.grams || 0, it.category), 0));
+};
+
 /* ─── Pour size — how much you're making ───────────────────────
    Parts are a RATIO, and a ratio needs a total before it is a cup.
    This is that total, measured in cup-doses rather than grams,

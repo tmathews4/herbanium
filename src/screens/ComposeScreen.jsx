@@ -29,7 +29,7 @@ import {
 } from "../theme";
 import {
   formatTemp, formatTempRange, formatTempShort, useUnit,
-  formatTsp, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts, POUR_SIZES,
+  formatTsp, formatTotal, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts, POUR_SIZES,
 } from "../units/units";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
@@ -2320,12 +2320,26 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                 chamomile to 3.0g of powdered adaptogen.
 
                 The total is the honest replacement. It is what you
-                actually measure out, it moves with the Making setting,
+                actually measure out, it moves with the Making setting
+                AND with the weight unit — it shipped in grams to
+                teaspoon users for as long as it existed, which is the
+                same class of mistake as the label above: nothing
+                referenced the unit, so nothing failed —
                 and per-row amounts sit beside each leaf already — so
                 this says the one thing they don't. */}
             {amountMode === "weight" ? null : (() => {
-              const total = reverseIngs.reduce((sum, id) => sum + displayGramsFor(id), 0);
-              return `${POUR_SIZES[pour]?.name ?? "a cup"} · ${total.toFixed(1)} g total`;
+              /* Grams here regardless of the setting was the bug: someone
+                 who measures in teaspoons got teaspoons on every row and
+                 a gram figure on the one line that says what to measure.
+                 formatTotal sums per-leaf teaspoons rather than
+                 converting the summed grams, because a teaspoon is a
+                 volume and chamomile and powdered reishi are not the
+                 same mass. */
+              return `${POUR_SIZES[pour]?.name ?? "a cup"} · ${formatTotal(
+                reverseIngs.map(id => ({
+                  grams: displayGramsFor(id),
+                  category: INGREDIENTS[id]?.category,
+                })), weightUnit)} total`;
             })()}
           </div>
         )}
