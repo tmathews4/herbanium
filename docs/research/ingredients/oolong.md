@@ -439,3 +439,18 @@ closes the gap between what the card promises and what a cup can
 deliver.
 
 <!-- sourced-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**"Oolong was the first tea brought back to Britain."** Not supported.
+Early British imports are recorded as green tea and bohea, and no
+source makes 17th-century shipments "almost entirely" what we would
+now call oolong. This doc's own §8 dates oolong-style tea to
+17th-18th century Fujian with the Wuyishan/Anxi origin contested,
+which is both more interesting and actually sourced — that is what
+the fact now says. `folk`
+
+<!-- retracted: first tea brought back to Britain -->

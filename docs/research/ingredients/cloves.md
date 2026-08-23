@@ -475,3 +475,21 @@ undrinkable. Small amounts go a long way.
    (golden milk context) is added, Herbanium will have a
    coherent "warming spice" family. Future blend-recommendation
    logic should recognize this clustering.
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**The Afo tree — tense and confidence both wrong.** Afo I on Ternate
+stood over 400 years and was CUT UP FOR FIREWOOD in the early 2000s;
+its remains are walled off, and a successor of roughly 230 years is
+the oldest living clove tree. The shipped line had it standing in the
+present tense. It also said the tree is "documented as the parent of
+nearly every clove tree in Zanzibar and Madagascar" — that parentage
+is what visitors to the site are told, a tradition attached to
+Poivre's 1770 theft, not a documented lineage, and Madagascar does not
+appear in the sources at all. Poivre's smuggling itself is solid.
+`attested` (parentage), `verified` (Poivre 1770)
+
+<!-- retracted: is documented as the parent -->

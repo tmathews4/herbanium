@@ -470,3 +470,25 @@
    exist but apply primarily to high-dose supplementation.
    Tea-drinking ginger almost never reaches clinically
    significant interaction levels.
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**"Ancient China used candied ginger as currency."** No evidence.
+Searching the historical record turns up ginger-as-currency in
+MEDIEVAL EUROPE — the same commodity-money tradition that produced
+peppercorn rent — and nothing of the kind for ancient China, where
+ginger is abundantly documented as medicine and food instead.
+
+This is the pepper error a second time, and the shape is worth
+naming: a European commodity-money practice relocated onto an ancient
+empire, which makes it sound older and more exotic. "Roman empresses
+paid taxes in peppercorns" was the same move. When a claim has that
+shape, check which continent the practice actually belongs to.
+
+Replaced with what the record does support: candied ginger begins as
+Song-dynasty preservation. `folk`
+
+<!-- retracted: candied ginger as currency -->

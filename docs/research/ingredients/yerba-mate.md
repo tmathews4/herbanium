@@ -636,3 +636,18 @@ closes the gap between what the card promises and what a cup can
 deliver.
 
 <!-- sourced-effects: warming -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**Register tightened on the cancer claim.** The line said "the heat,
+not the mate, is the carcinogen". The direction is right and well
+supported — the association is driven by drinking temperature, and
+cold mate shows no increased risk — but IARC's finding is that
+beverages above ~65°C are PROBABLY carcinogenic (Group 2A), and
+naming a carcinogen flatly overstates a 2A evaluation. Reworded to
+match the evidence's own confidence. This is a health claim, so it
+gets the hedge it earns. `verified` (temperature effect)
+

@@ -349,3 +349,18 @@ evidence changes; the word does.
 <!-- sourced-effects: comfort -->
 
 <!-- superseded-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**"Protected by a South African geographic indication in 2014 — only
+Cederberg-grown rooibos can carry the name internationally."** The
+INTERNATIONAL protection is the EU Protected Designation of Origin,
+granted in 2021, which made rooibos the first African product to hold
+one. South African domestic standards predate that, but they are not
+what stops the name being used abroad, and 2014 is not the year of
+either. Corrected to the PDO. `verified` (2021 PDO)
+
+<!-- retracted: geographic indication in 2014 -->

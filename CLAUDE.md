@@ -61,6 +61,7 @@ node tools/audit-opposition.mjs        # opposed pairs one ingredient holds at o
 node tools/audit-brew-params.mjs       # does the BREWING ADVICE match the research?
 node tools/audit-vocabulary-coverage.mjs  # maps that drifted from the list they key on
 node tools/audit-claims.mjs --min=2 --list  # PROSE: which sentences assert a checkable fact
+node tools/audit-claims.mjs --anchor       # ...and which have NO particular written down anywhere
 ```
 
 ### The prose says things too, and nothing was checking it
@@ -98,6 +99,51 @@ fixes.** All three turned up in the first pass through the top 50:
 - **No doc covered it at all.** Ceylon's "over 300,000 tonnes" (real:
   ~264,000) and "largest exporter for much of the 20th century" (real:
   from 1965) were written straight into the app. Write the research.
+
+**`--anchor` is the half that does not need a source in hand.** Ranking
+tells you where to look; anchoring tells you what nobody wrote down.
+For each claim it extracts the hard particulars — years, quantities,
+proper nouns, the tokens a claim can be wrong ABOUT — and asks whether
+any of them appear in that ingredient's research doc. 486 claims carry
+particulars; **43 have not one of them anywhere in their own doc.**
+That is not a list of errors. It is the list of sentences whose truth
+rests on nothing but the person who typed them, which is the state the
+pepper claim lived in for as long as it shipped.
+
+Two design notes worth keeping. It matches PARTICULARS, not sentences —
+prose gets reworded constantly and sentence matching would report
+nothing but noise, while a year survives rewording and is what a
+fact-check would look up anyway. And it tells a name from a
+sentence-initial word by CALIBRATING ON THE CORPUS: any word appearing
+in lower case anywhere in the 849 items is an ordinary word whatever
+case one sentence gives it. That killed "Powdered", "Today's" and
+"Despite" while keeping "Tutankhamun", "Mojitos" and "Stradivarius". A
+hand-kept stop list was the first attempt and would have gone stale the
+first time someone began a sentence with "Pickled".
+
+**The second pass verified 20 more claims against sources and found 8
+more wrong** — lavender's lavender-oil-in-Tutankhamun's-tomb (no source
+exists; Carter smelled mummification balm), clove oil beating oregano
+and cinnamon (comparative studies put cinnamon first and one ranks
+clove last of three), the Afo tree described in the present tense when
+it was cut up for firewood twenty years ago, oolong as the first tea
+brought to Britain, passionflower's Aztec sedative (the plant is North
+American and this doc already said so), rooibos's 2014 GI (the
+international one is the 2021 EU PDO), yerba mate's flat "carcinogen"
+against IARC's 2A, and ginger as ancient Chinese currency.
+
+That last one is **the pepper error a second time**, and the shape is
+worth naming: a MEDIEVAL EUROPEAN commodity-money practice relocated
+onto an ancient empire, where it sounds older and more exotic. Roman
+empresses and their peppercorns was the same move. When a claim has
+that shape, check which continent the practice belongs to.
+
+Confirmed sound, so nobody re-spends the search: Elizabeth I and the
+gingerbread men (a real banquet, per Carole Levin), valerian's two-to-
+four-week onset, Darjeeling's 87 gardens, Dragonwell's 2001 GI, the
+rose as oldest cultivated ornamental, Poivre's 1770 theft, and
+peppermint's IBS meta-analysis (Alammar 2019 — 12 trials, 835 patients,
+NNT 4).
 
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line

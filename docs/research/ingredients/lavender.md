@@ -385,3 +385,22 @@ Removed from the card. Nothing is lost from the cup; the claim either
 never had support or is carried by a neighbour that does.
 
 <!-- sourced-effects: calm, sleepy -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**"Lavender oil in Tutankhamun's tomb, still detectable."**
+Widely repeated, and no source has ever been produced for it — the
+phrasing traces to no identifiable original. What Carter's team
+actually reported on opening the sealed jars was the smell of
+mummification balm, a compound preparation, not any single flower.
+The general phenomenon is real and better attested: myrtle and
+immortelle used in funerary ritual still carry detectable volatiles
+after nearly 2,000 years. The superlative bolted onto the shipped
+version — "the only flower scent that survived three millennia" —
+had no support at all. `folk`
+
+<!-- retracted: tomb included lavender oil -->
+<!-- retracted: only flower scent that survived -->

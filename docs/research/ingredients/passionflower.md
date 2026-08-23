@@ -421,3 +421,22 @@ rather than rising toward `calm`'s level, and it is not presented as
 trial-backed bodily relief.
 
 <!-- sourced-effects: soothing -->
+
+
+---
+
+## Addendum — prose claim audit (2026-08-23)
+
+**"First formally described in 1620; Aztec physicians used it as a
+sedative."** Both halves wrong, and this doc already had the right
+account in §1. *Passiflora incarnata* is native to the southeastern
+United States — the Aztecs are Mesoamerican, and the sedative
+tradition recorded in the ethnobotanical literature is Cherokee,
+Houma, Seminole and their neighbours. The European introduction is
+Monardes, from Spanish contact in the 1500s, not a formal description
+in 1620. The point the line was reaching for survives intact and is
+better without the wrong names on it: the naming was a renaming.
+`folk` (Aztec attribution, 1620 date)
+
+<!-- retracted: 1620 -->
+<!-- retracted: Aztec physicians -->
