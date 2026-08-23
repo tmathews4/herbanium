@@ -63,6 +63,7 @@ node tools/audit-vocabulary-coverage.mjs  # maps that drifted from the list they
 node tools/audit-claims.mjs --min=2 --list  # PROSE: which sentences assert a checkable fact
 node tools/audit-claims.mjs --anchor       # ...and which have NO particular written down anywhere
 node tools/audit-claims.mjs --conflict     # the same fact told twice, differently
+node tools/audit-confidence.mjs           # is a `verified` marker EARNED?
 ```
 
 ### The prose says things too, and nothing was checking it
@@ -226,6 +227,67 @@ or need an exemption list — which is the thing every audit here avoids.
 Its finding on the corpus today is zero, which is a real result: the
 by-hand corrections caught every instance of a shape nothing was
 checking for.
+
+### Is `verified` earned? Mostly nobody has ever checked
+
+The docs mark **608 claims `verified`**, 325 `attested`, 176 `folk`, 136
+`established`. Every audit above asks whether a claim is PRESENT in the
+research. None asked whether the research can carry it, and the marker
+is self-assigned.
+
+**It has been wrong, and how it survived is the mechanical part.** Sage
+said Charlemagne ordered sage planted "in his 812 CE *Capitulare de
+villis*", marked `verified`, citing `ref-1`. Look at what ref-1 is:
+
+> Hamidpour M et al. "Chemistry, pharmacology, and medicinal property
+> of sage ... to prevent and cure illnesses such as obesity, diabetes,
+> depression, dementia ..." — type: **review**
+
+A pharmacology review of sage cannot date a Carolingian capitulary. The
+row cited a real, resolvable, respectable source that was incapable of
+supporting the claim attached to it, and nothing noticed because "has a
+ref" was as far as anyone looked. `audit-confidence.mjs` asks three
+questions instead, hardest last:
+
+1. Does a `verified` claim cite anything at all? — **14 don't.**
+2. Does its ref resolve in §9 Sources? — **0 dangling** (see below).
+3. **Can that source bear that claim?** A history or culture claim
+   backed only by clinical, analytical or pharmacological refs is a
+   category mismatch. — **13 hits, and sage #10 is one of them.**
+
+That last number is the validation worth noting: the tool independently
+flags the exact claim that was found wrong by hand, without being told
+about it.
+
+**(3) is a SMELL, not a verdict.** A pharmacology review can perfectly
+well carry an etymology if its introduction happens to cover one. The
+tool cannot read the paper — only that the types don't line up and a
+human should look. That is still 608 claims narrowed to 27.
+
+**The headline is the split, not the hits.** Only **67** `verified`
+markers sit in claims tables, which are the only structure that records
+a citation. **~404 sit in prose blockquotes with no source column at
+all** — so for six out of seven confidence markers in the corpus,
+questions 2 and 3 cannot even be asked. Those are counted and reported
+separately rather than silently passed, because the count IS the
+finding.
+
+**No source column is not the same as unsourced, and the difference is
+measurable.** Of those 404, **255 (63%) name a year, an era, an author
+or a ref inline** — rooibos's PDO paragraph carries "May 2021" in the
+sentence itself, which is a perfectly good handle even without a
+column to put it in. **149 (37%) name nothing checkable at all.** That
+smaller number is the real worklist; quoting the larger one as if it
+were all unsourced would be the same overstatement this section exists
+to catch.
+
+**One false alarm, recorded so it isn't rediscovered.** The first run
+reported three dangling refs in `lions-mane.md` and `reishi.md`. They
+were not dangling: those two docs write §9 as a BULLET LIST of full
+citations and refer to them by author-year (`ref-lai-2013`), while every
+other doc uses a table. The parser knew one shape. A tidy, alarming,
+completely wrong finding — the same failure mode as the year regex in
+`--conflict`, and the reason both tools now say what they cannot see.
 
 **A retraction is declared, not remembered.** A corrected sentence stays
 corrected only until someone reaches for the same nice-sounding line

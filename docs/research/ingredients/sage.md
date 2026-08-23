@@ -224,7 +224,7 @@
 | 7 | fact | verified | The "common sage" English-speakers know is *Salvia officinalis* — distinct from white sage (the smudge stick), Spanish sage, and clary sage. There are over 900 species in the *Salvia* genus, but only a handful are commonly used in food or tea. | ref-1 |
 | 8 | culture | verified | In medieval English folk tradition, eating sage in May was said to grant longevity — "He that would live for aye / Must eat sage in May." The May timing tracked the leaf's peak volatile-oil content before summer flowering. | ref-1 |
 | 9 | fact | verified | Sage contains both 1,8-cineole and camphor — the same compounds that give rosemary and eucalyptus their bright, slightly cooling register. This shared chemistry is why sage and rosemary so often appear together in Mediterranean cooking. | ref-1 |
-| 10 | history | verified | Charlemagne ordered sage planted in every royal estate's garden in his *Capitulare de villis* — a list of 90+ plants the empire considered essential, issued around the turn of the ninth century. Sage's place in European herbalism has been continuous ever since. | ref-1 |
+| 10 | history | attested | Charlemagne ordered sage planted in every royal estate's garden in his *Capitulare de villis* — a list of 90+ plants the empire considered essential, issued around the turn of the ninth century. Sage's place in European herbalism has been continuous ever since. | ref-1 |
 
 > **DATE CORRECTED — the *Capitulare de villis* is not securely dated
 > to 812 CE.** This row, and the shipped blurb and fact, both carried
@@ -237,6 +237,16 @@
 > only the year was overprecise. Copy now reads "around the turn of
 > the ninth century". Same correction applied to lemon balm, which
 > carried "ninth century" from the same list. `attested` (dating)
+>
+> **The row is now `attested`, not `verified`, and the citation is the
+> reason.** It cites ref-1 — Hamidpour et al., a pharmacology review of
+> sage's chemistry. That paper cannot date a Carolingian capitulary; it
+> was never the kind of source that could. The claim survived as
+> "verified" because it HAD a ref and nobody asked whether the ref could
+> bear it. `tools/audit-confidence.mjs` was written out of this row and
+> flags it independently. Restoring `verified` needs a source that
+> actually addresses the capitulary — a Carolingian historian, not a
+> phytochemist.
 
 <!-- retracted: 812 CE -->
 
