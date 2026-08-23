@@ -17,7 +17,11 @@
    for every mixed pot and looks right in every single-leaf test.
    ────────────────────────────────────────────────────────────── */
 
-import { formatTotal, gramsToTsp, formatTsp, TSP_BY_CATEGORY } from "../src/units/units.js";
+import {
+  formatTotal, gramsToTsp, formatTsp, TSP_BY_CATEGORY,
+  partsToGrams, partsToGramsForTotal, standardTotalGrams,
+  clampTotalGrams, TOTAL_BOUNDS, POUR_SIZES,
+} from "../src/units/units.js";
 
 let pass = 0, fail = 0;
 const test = (name, fn) => {
@@ -73,5 +77,59 @@ test("an empty pot doesn't throw or print NaN", () => {
   }
 });
 
-console.log(`\n\n  ${pass} passed, ${fail} failed`);
+
+/* ─── Dictating the total ──────────────────────────────────────
+   The pot's weight is normally the vessel's business. Someone with a
+   scale and 7g of leaf wants to say so, and that must NOT reopen the
+   hole POUR_SIZES closed: parts used to silently be grams, so
+   "5 assam : 1 peppermint" built a 6g pot — 3.3 cups of leaf in one
+   cup — and every strong flavour pinned at its ceiling.
+
+   The difference is that the number is deliberate and bounded. These
+   hold both halves: the mix must survive rescaling untouched, and the
+   dial must not reach the old bug.                                */
+
+const perCup = (id) => ({ leaf: 2.0, flower: 1.0 })[id] ?? 1.5;
+const RATIO = [{ id: "leaf", parts: 5 }, { id: "flower", parts: 1 }];
+
+test("a dictated total is hit exactly", () => {
+  const out = partsToGramsForTotal(RATIO, perCup, 7);
+  const sum = Object.values(out).reduce((a, b) => a + b, 0);
+  assert(Math.abs(sum - 7) < 1e-9, `asked for 7g, got ${sum}`);
+});
+
+test("rescaling does not change the mix", () => {
+  const std = partsToGrams(RATIO, "mug", perCup);
+  const scaled = partsToGramsForTotal(RATIO, perCup, 7);
+  const before = std.leaf / std.flower;
+  const after = scaled.leaf / scaled.flower;
+  assert(Math.abs(before - after) < 1e-9,
+    `the ratio moved under rescaling: ${before} -> ${after}. Parts are ` +
+    `volumetric; scaling multiplies every leaf by ONE factor or the ` +
+    `blend the user built is not the blend they brew.`);
+});
+
+test("the dial cannot reach the pot-in-a-cup bug", () => {
+  const standard = standardTotalGrams(RATIO, "cup", perCup);
+  assert(standard > 0, "fixture produced no standard total");
+  // Ask for twenty times a cup's worth — roughly the old failure.
+  const clamped = clampTotalGrams(standard * 20, standard);
+  assert(clamped <= standard * TOTAL_BOUNDS.max + 1e-9,
+    `${clamped}g got through against a ceiling of ${standard * TOTAL_BOUNDS.max}g`);
+  // And it clamps upward too, so a zero-ish pot can't be brewed.
+  assert(clampTotalGrams(0.0001, standard) >= standard * TOTAL_BOUNDS.min - 1e-9,
+    "a near-zero total should be lifted to the floor, not brewed");
+});
+
+test("the standard total tracks the vessel, derived from POUR_SIZES", () => {
+  // DERIVED: the expectation comes from the table, not a typed number.
+  const cup = standardTotalGrams(RATIO, "cup", perCup);
+  for (const [id, size] of Object.entries(POUR_SIZES)) {
+    const got = standardTotalGrams(RATIO, id, perCup);
+    assert(Math.abs(got - cup * size.doses) < 1e-9,
+      `${size.name} should be ${size.doses}x a cup: expected ${cup * size.doses}, got ${got}`);
+  }
+});
+
+console.log(`\n  ${pass} passed, ${fail} failed (with the dictated-total block)`);
 if (fail) process.exit(1);

@@ -29,6 +29,23 @@ async function boot(page: Page) {
   await page.goto("/?dev");
 }
 
+/* Adding a SECOND leaf needs the search refilled — the box still holds
+   the first leaf's name, so the second is simply not on screen. The
+   first version of the dictated-total test skipped that and spent 90
+   seconds in a bare .click() waiting for a button that could never
+   appear, reporting only "test timeout". Assert, then click. */
+async function addLeaf(page: Page, name: string) {
+  await page.getByRole("button", { name: "Apothecary", exact: true }).click();
+  const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
+  await search.fill(name);
+  const card = page.getByRole("button", { name: new RegExp(name, "i") }).first();
+  await expect(card, `"${name}" should be listed once searched for`)
+    .toBeVisible({ timeout: 30_000 });
+  await card.click();
+  await expect(page.getByTestId(`amount-${name.toLowerCase()}`),
+    "the pot should list what was just added").toBeVisible({ timeout: 30_000 });
+}
+
 async function addChamomile(page: Page) {
   await page.getByRole("button", { name: "Apothecary", exact: true }).click();
   const search = page.locator('[data-tour="blend-search"]').getByRole("textbox").first();
@@ -158,6 +175,103 @@ test.describe("parts or weight, one pot", () => {
     await addChamomile(page);
     expect((await page.getByTestId("pot-total").innerText()).trim(),
       "with grams chosen it should still say grams").toMatch(GRAMS);
+  });
+
+  test("you can dictate the pot's weight, and the ratio scales to meet it", async ({ page }) => {
+    // REQUESTED: "let the user edit that field so they can dictate the
+    // weight of the proportions and feed that weight into our calc,
+    // but default to a standard serving."
+    //
+    // The load-bearing claim is not that the number changes — it is
+    // that the RATIO SURVIVES. Parts are volumetric, so dictating a
+    // total multiplies every leaf by one factor; if the mix moved, the
+    // blend you built is not the blend you brew.
+    await boot(page);
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByTestId("weight-unit-g").click();
+    await addChamomile(page);
+
+    // A second leaf, so there is a ratio to preserve at all.
+    await addLeaf(page, "Lavender");
+
+    const ratioBefore = [
+      (await page.getByTestId("amount-chamomile").innerText()).trim(),
+      (await page.getByTestId("amount-lavender").innerText()).trim(),
+    ];
+
+    await page.getByTestId("pot-total-edit").click();
+    const box = page.getByTestId("pot-total-input");
+    await expect(box, "tapping the total should open an editable field").toBeVisible();
+    await box.fill("7");
+    await box.press("Enter");
+
+    await expect(page.getByTestId("pot-total"),
+      "the total should now read what was asked for").toContainText(/7(\.0)?\s*g/i);
+    expect([
+      (await page.getByTestId("amount-chamomile").innerText()).trim(),
+      (await page.getByTestId("amount-lavender").innerText()).trim(),
+    ], "the PARTS are a ratio and must not move when the pot is rescaled")
+      .toEqual(ratioBefore);
+  });
+
+  test("a dictated pot reaches the PREDICTION, not just the shopping list", async ({ page }) => {
+    /* "feed that weight into our calc" is the half that could have been
+       faked. Scaling only what you measure out would look identical on
+       the total line and change nothing about the cup.
+
+       The distinction the app already draws, and this had to respect:
+       choosing a bigger VESSEL scales water and leaf together, so the
+       concentration is unchanged and the prediction must NOT move — a
+       pot is more of the same cup. Dictating a weight holds the vessel
+       still and changes the leaf, which is a real concentration change,
+       so it must.
+
+       Asserted through the palate warnings because they are the
+       model's own output: a standard chamomile cup raises none, and a
+       four-times pot raises them. Measured, not assumed — a probe run
+       gave 0 and 2. */
+    await boot(page);
+    await addChamomile(page);
+
+    const warnings = page.locator('[data-testid^="palate-warn-"]');
+    const before = await warnings.count();
+
+    await page.getByTestId("pot-total-edit").click();
+    const box = page.getByTestId("pot-total-input");
+    await box.fill("99");                 // clamps to the 4x ceiling
+    await box.press("Enter");
+    await expect(page.getByTestId("pot-total-reset"),
+      "the pot should now be running above standard").toBeVisible();
+
+    await expect.poll(() => warnings.count(), {
+      message: "a four-times pot must reach the prediction — if this stays " +
+        "equal, the dictated weight is only scaling the shopping list",
+      timeout: 10_000,
+    }).toBeGreaterThan(before);
+  });
+
+  test("reset puts the pot back to the vessel's standard serving", async ({ page }) => {
+    // The default has to survive the feature — "default to a standard
+    // serving" is half the request, and a dial with no way back is a
+    // setting the user is stuck inside.
+    await boot(page);
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await page.getByTestId("weight-unit-g").click();
+    await addChamomile(page);
+
+    const standard = (await page.getByTestId("pot-total").innerText()).trim();
+    await expect(page.getByTestId("pot-total-reset"),
+      "nothing to reset before anything is dictated").toHaveCount(0);
+
+    await page.getByTestId("pot-total-edit").click();
+    await page.getByTestId("pot-total-input").fill("6");
+    await page.getByTestId("pot-total-input").press("Enter");
+    expect((await page.getByTestId("pot-total").innerText()).trim(),
+      "the dictated total should differ from the standard one").not.toBe(standard);
+
+    await page.getByTestId("pot-total-reset").click();
+    expect((await page.getByTestId("pot-total").innerText()).trim(),
+      "reset should restore the vessel's standard serving exactly").toBe(standard);
   });
 
   test("the mode survives a reload, like the other unit preferences", async ({ page }) => {

@@ -96,6 +96,53 @@ export const formatAmount = (g, category, weightUnit = "tsp") => {
   return formatTsp(gramsToTsp(g, category));
 };
 
+/* ─── Dictating the total ───────────────────────────────────────
+   The pot's weight is normally the vessel's business: parts are a
+   ratio, POUR_SIZES says how many cup-doses you are making, and
+   partsToGrams multiplies out. That is the default and it stays the
+   default.
+
+   But a person with a scale and 7g of leaf wants to say so. These two
+   let them, WITHOUT reopening the hole POUR_SIZES was built to close.
+   The old bug was that parts silently WERE grams, so "5 assam : 1
+   peppermint" quietly built a 6g pot — 3.3 cups of leaf in one cup —
+   and every strong flavour pinned at its ceiling. The difference here
+   is that the number is chosen deliberately and bounded: see
+   TOTAL_BOUNDS below.
+
+   Parts stay VOLUMETRIC. Rescaling multiplies every leaf by one
+   factor, so the mix is exactly the mix it was — chamomile stays light
+   and assam stays dense. Only the amount moves. */
+
+/** What the pot comes to at the vessel's standard strength. */
+export const standardTotalGrams = (entries, pour, gramsPerCup) =>
+  Object.values(partsToGrams(entries, pour, gramsPerCup))
+    .reduce((sum, g) => sum + g, 0);
+
+/* How far the dial turns, as a multiple of the vessel's standard.
+   A quarter-strength cup is a real thing to want and so is a
+   deliberately heavy one; four cups' worth of leaf in a mug is not a
+   strength, it is the old bug with a text field in front of it. */
+export const TOTAL_BOUNDS = { min: 0.25, max: 4 };
+
+export const clampTotalGrams = (targetGrams, standardGrams) => {
+  if (!(standardGrams > 0)) return standardGrams;
+  const lo = standardGrams * TOTAL_BOUNDS.min;
+  const hi = standardGrams * TOTAL_BOUNDS.max;
+  return Math.min(hi, Math.max(lo, targetGrams));
+};
+
+/** The same ratio, scaled so the pot weighs what the user asked. */
+export const partsToGramsForTotal = (entries, gramsPerCup, targetGrams) => {
+  const base = partsToGrams(entries, "cup", gramsPerCup);
+  const sum = Object.values(base).reduce((s, g) => s + g, 0);
+  if (!sum || !(targetGrams > 0)) return base;
+  const k = targetGrams / sum;
+  const out = {};
+  for (const [id, g] of Object.entries(base)) out[id] = g * k;
+  return out;
+};
+
 /* The same question for a POT rather than a leaf: what do I measure out
    in total, in the unit the user chose.
 

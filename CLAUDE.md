@@ -844,6 +844,35 @@ live in `docs/capacitor-config.md`.
   reachable; add the row instead.
 
 
+- **A DICTATED POT WEIGHT changes the prediction. A bigger VESSEL does
+  not. That asymmetry is the feature, not an inconsistency.**
+
+  `POUR_SIZES` deliberately scales only what you MEASURE OUT: a pot is
+  more of the same cup, water and leaf rise together, concentration is
+  unchanged, so `gramsFor` always resolves parts against one cup
+  whatever the pour. Handing the model three cup-doses because someone
+  is making a pot would render it a triple-strength cup, which is the
+  bug that whole design removed.
+
+  Letting a user type a total is the opposite case and it took reading
+  that note twice to see why it is not the same mistake. The vessel is
+  fixed — the water does not move — and the leaf does. That is a real
+  concentration change, so `strengthFactor()` feeds it to the model. A
+  4g mug and a 12g mug that predict the same cup would be lying.
+
+  Guarded so it cannot become the old bug wearing a text field:
+  `TOTAL_BOUNDS` clamps the dial to 0.25x-4x the vessel's standard, the
+  override is stored WITH the pour it was set against (so changing
+  vessel falls back to standard rather than carrying an 8g override
+  onto a pot), and the ratio is untouchable — rescaling multiplies
+  every leaf by one factor, because parts are volumetric.
+
+  Verified through the model's OWN OUTPUT rather than the total line:
+  a standard chamomile cup raises no palate warnings and a 4x pot
+  raises two. Measured with a throwaway probe before the assertion was
+  written, because "the weight feeds the calc" is exactly the claim a
+  test could pass while being false.
+
 - **Flavour bars saturate above ~25% dose, and the CEILING IS NOT WHY.**
   Measured, not reasoned. Investigated after "peppermint is marking
   menthol max the entire tutorial".

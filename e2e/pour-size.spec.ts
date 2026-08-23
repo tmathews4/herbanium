@@ -51,7 +51,10 @@ const potTotal = (page: Page) => page.getByTestId("pot-total");
 
 const gramsIn = async (page: Page) => {
   const text = (await potTotal(page).innerText()).trim();
-  const match = text.match(/([\d.]+)\s*g total/i);
+  /* \s+ between the unit and "total", not a literal space: the total
+     line is several elements now (the amount is an editable control),
+     so innerText comes back as "A CUP\n1.0 g\nTOTAL". */
+  const match = text.match(/([\d.]+)\s*g\s+total/i);
   expect(match,
     `the total should name a weight in GRAMS, got "${text}" — if this says ` +
     `tsp, the test forgot to select grams in Profile`).not.toBeNull();

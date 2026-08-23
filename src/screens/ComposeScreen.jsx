@@ -30,6 +30,7 @@ import {
 import {
   formatTemp, formatTempRange, formatTempShort, useUnit,
   formatTsp, formatTotal, gramsToTsp, TSP_BY_CATEGORY, partsToGrams, gramsToParts, POUR_SIZES,
+  standardTotalGrams, partsToGramsForTotal, clampTotalGrams, TOTAL_BOUNDS,
 } from "../units/units";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { BlendListRow, LibraryScreen } from "./LibraryScreen";
@@ -1501,6 +1502,20 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
      of THIS leaf, since a teaspoon of chamomile and a teaspoon of
      ginger are not the same mass. */
   const [amountMode, setAmountModeRaw] = usePersistedState("amountMode", "parts");
+
+  /* A DICTATED POT WEIGHT, or null for the vessel's standard.
+     
+     Stored WITH the pour it was set against rather than as a bare
+     number, and that is deliberate: an 8g override carried onto "a
+     pot" would make a deliberately weak three-cup brew and look like a
+     bug. Changing vessel falls back to standard because the stored
+     pour stops matching — no effect, no second setter to forget, and
+     nothing to keep in sync. (An effect that reset it would also trip
+     the cascading-render rule for no benefit.) */
+  const [potTotal, setPotTotal] = usePersistedState("potTotal", null);
+  // The in-progress text of the total box. Not persisted — an
+  // abandoned half-typed number should not survive a reload.
+  const [editing, setEditing] = React.useState(null);
   /* Switching converts, so the cup is identical either side of the
      toggle. Without this the stored number would simply be reread in
      the other mode's units — 5 parts becoming 5 grams — which is the
@@ -1617,12 +1632,36 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
     parts: partsById[x] != null ? partsById[x] : defaultPartsFor(x),
   }));
 
+  /* The override only counts for the vessel it was set against. */
+  const dictatedG = (potTotal && potTotal.pour === pour && potTotal.grams > 0)
+    ? potTotal.grams : null;
+  const standardG = () => standardTotalGrams(ratioEntries(), pour, gramsPerCupFor);
+
+  /* HOW MUCH STRONGER THAN STANDARD THIS POT IS, and why the model is
+     told about it when the pour size is not.
+
+     The note above is right that a pot is not a stronger cup: choosing
+     a bigger vessel scales the water AND the leaf, so concentration is
+     unchanged and the prediction must not move. A DICTATED TOTAL is
+     the opposite case and the difference is the whole feature. The
+     vessel is fixed — same water — and the leaf changes. That is a
+     genuine concentration change, so the model has to see it, or the
+     app would show a 4g mug and a 12g mug tasting identical.
+
+     Standard is 1 and everything downstream is untouched, which keeps
+     this off the default path entirely. */
+  const strengthFactor = () => {
+    if (dictatedG === null) return 1;
+    const std = standardG();
+    return std > 0 ? dictatedG / std : 1;
+  };
+
   function gramsFor(id) {
     if (amountMode !== "parts") {
       if (partsById[id] != null) return partsById[id];
       return partsToGrams(ratioEntries(), "cup", gramsPerCupFor)[id] ?? 0;
     }
-    return partsToGrams(ratioEntries(), "cup", gramsPerCupFor)[id] ?? 0;
+    return (partsToGrams(ratioEntries(), "cup", gramsPerCupFor)[id] ?? 0) * strengthFactor();
   }
 
   /* What to actually put in the pot. The only place `pour` is read:
@@ -1635,7 +1674,9 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
      setting. The ratio is what the stepper edits; the total is what you
      measure. One of each. */
   const displayGramsFor = (id) => amountMode === "parts"
-    ? (partsToGrams(ratioEntries(), pour, gramsPerCupFor)[id] ?? 0)
+    ? (dictatedG !== null
+        ? (partsToGramsForTotal(ratioEntries(), gramsPerCupFor, dictatedG)[id] ?? 0)
+        : (partsToGrams(ratioEntries(), pour, gramsPerCupFor)[id] ?? 0))
     : gramsFor(id);
 
   // Kept under its old name because eleven call sites read it as "the
@@ -2335,11 +2376,93 @@ export const ReverseCompose = ({ reverseIngs, setReverseIngs, go, startBrew, sav
                  converting the summed grams, because a teaspoon is a
                  volume and chamomile and powdered reishi are not the
                  same mass. */
-              return `${POUR_SIZES[pour]?.name ?? "a cup"} · ${formatTotal(
-                reverseIngs.map(id => ({
-                  grams: displayGramsFor(id),
-                  category: INGREDIENTS[id]?.category,
-                })), weightUnit)} total`;
+              const items = reverseIngs.map(id => ({
+                grams: displayGramsFor(id),
+                category: INGREDIENTS[id]?.category,
+              }));
+              const shown = formatTotal(items, weightUnit);
+              const vessel = POUR_SIZES[pour]?.name ?? "a cup";
+
+              /* EDITING IT. Someone with a scale and 7g of leaf should be
+                 able to say so, and the ratio scales to meet it — see
+                 partsToGramsForTotal. The typed number is read in
+                 WHICHEVER UNIT IS SET, because handing a teaspoon user a
+                 gram box is the bug this line just had.
+                 
+                 Committing on blur and Enter, not per keystroke: a pot
+                 that rebrews itself while you are still typing "12"
+                 passes through 1 on the way. */
+              const commit = (raw) => {
+                const n = parseFloat(String(raw).replace(",", "."));
+                setEditing(null);
+                if (!isFinite(n) || n <= 0) return;
+                const totalNow = items.reduce((sum, it) => sum + it.grams, 0);
+                if (!(totalNow > 0)) return;
+                // In tsp mode the box speaks teaspoons; both scale
+                // linearly with the same factor, so one ratio converts.
+                const tspNow = items.reduce(
+                  (sum, it) => sum + gramsToTsp(it.grams, it.category), 0);
+                const wantG = weightUnit === "g"
+                  ? n
+                  : (tspNow > 0 ? n * (totalNow / tspNow) : n);
+                setPotTotal({ pour, grams: clampTotalGrams(wantG, standardG()) });
+              };
+
+              return (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span>{vessel} ·</span>
+                  {editing === null ? (
+                    <button
+                      className="tap-target"
+                      data-testid="pot-total-edit"
+                      onClick={() => setEditing(weightUnit === "g"
+                        ? String(Number(items.reduce((s, it) => s + it.grams, 0).toFixed(1)))
+                        : String(Number(items.reduce((s, it) => s + gramsToTsp(it.grams, it.category), 0).toFixed(2))))}
+                      aria-label="set the total amount for this pot"
+                      style={{
+                        background: "transparent", border: "none", padding: "2px 4px",
+                        font: "inherit", letterSpacing: "inherit", color: theme.ink,
+                        textDecoration: `underline dotted ${theme.ruleSoft}`,
+                        textUnderlineOffset: 3, cursor: "pointer",
+                      }}
+                    >{shown}</button>
+                  ) : (
+                    <input
+                      data-testid="pot-total-input"
+                      autoFocus
+                      inputMode="decimal"
+                      value={editing}
+                      aria-label={`total amount in ${weightUnit === "g" ? "grams" : "teaspoons"}`}
+                      onChange={(e) => setEditing(e.target.value)}
+                      onBlur={(e) => commit(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") commit(e.currentTarget.value);
+                        if (e.key === "Escape") setEditing(null);
+                      }}
+                      style={{
+                        width: 54, font: "inherit", letterSpacing: "inherit",
+                        color: theme.ink, background: theme.paper,
+                        border: `1px solid ${theme.rule}`, borderRadius: 6,
+                        padding: "2px 4px", textAlign: "center",
+                      }}
+                    />
+                  )}
+                  <span>total</span>
+                  {dictatedG !== null && (
+                    <button
+                      className="tap-target"
+                      data-testid="pot-total-reset"
+                      onClick={() => { setEditing(null); setPotTotal(null); }}
+                      aria-label="use the standard amount for this vessel"
+                      style={{
+                        background: "transparent", border: "none",
+                        font: "inherit", letterSpacing: "inherit",
+                        color: theme.terra, cursor: "pointer", padding: "2px 4px",
+                      }}
+                    >reset</button>
+                  )}
+                </span>
+              );
             })()}
           </div>
         )}
